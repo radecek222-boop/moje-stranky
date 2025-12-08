@@ -1976,6 +1976,7 @@ async function saveProtokolToDB() {
         problem_description: document.getElementById("problem-cz").value,
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
+        dealer: document.getElementById("dealer")?.value || "NE",
         technician: document.getElementById("technician").value,
         cena_celkem: cenaCelkem,
         csrf_token: csrfToken

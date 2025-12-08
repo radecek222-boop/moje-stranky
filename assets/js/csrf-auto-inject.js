@@ -88,7 +88,7 @@ function showCsrfError(message) {
         max-width: 400px;
         width: 90%;
         text-align: center;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Poppins', sans-serif;
         animation: slideDown 0.3s ease-out;
     `;
 
@@ -109,7 +109,7 @@ function showCsrfError(message) {
     if (button) {
         button.style.cssText = `
             background: white;
-            color: #d32f2f;
+            color: #dc3545;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;

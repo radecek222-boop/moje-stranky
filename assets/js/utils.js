@@ -373,84 +373,104 @@ window.Utils.registerAction = ActionRegistry.register.bind(ActionRegistry);
  * Vlastní potvrzovací dialog nahrazující window.confirm()
  * Vrací Promise<boolean> - true = potvrzeno, false = zrušeno
  *
- * Použití:
- *   const confirmed = await wgsConfirm('Opravdu smazat?');
- *   if (confirmed) { ... }
+ * Použití (nový formát s options):
+ *   const confirmed = await wgsConfirm('Opravdu smazat?', {
+ *     titulek: 'Smazat záznam',
+ *     btnPotvrdit: 'Smazat',
+ *     btnZrusit: 'Zrušit',
+ *     nebezpecne: true  // Červené tlačítko pro destruktivní akce
+ *   });
  *
- * S vlastními texty tlačítek:
+ * Použití (starý formát - zpětná kompatibilita):
  *   const confirmed = await wgsConfirm('Smazat položku?', 'Smazat', 'Zrušit');
  *
- * @param {string} message - Zpráva k zobrazení
- * @param {string} [okText='OK'] - Text potvrzovacího tlačítka
- * @param {string} [cancelText='Zrušit'] - Text zrušovacího tlačítka
+ * @param {string} zprava - Zpráva k zobrazení
+ * @param {Object|string} [optionsOrOkText={}] - Options objekt nebo text OK tlačítka (zpětná kompatibilita)
+ * @param {string} [cancelTextLegacy] - Text Cancel tlačítka (pouze pro zpětnou kompatibilitu)
  * @returns {Promise<boolean>} - true pokud uživatel potvrdil
  */
-function wgsConfirm(message, okText = 'OK', cancelText = 'Zrušit') {
+function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
     return new Promise((resolve) => {
+        // Zpětná kompatibilita: wgsConfirm('zprava', 'OK text', 'Cancel text')
+        let options = {};
+        if (typeof optionsOrOkText === 'string') {
+            options = {
+                btnPotvrdit: optionsOrOkText,
+                btnZrusit: cancelTextLegacy || 'Zrušit'
+            };
+        } else {
+            options = optionsOrOkText;
+        }
+
+        const {
+            titulek = 'Potvrzení',
+            btnZrusit = 'Zrušit',
+            nebezpecne = false
+        } = options;
+
+        // Výchozí text tlačítka: "Smazat" pro nebezpečné akce, jinak "Potvrdit"
+        const btnPotvrdit = options.btnPotvrdit || (nebezpecne ? 'Smazat' : 'Potvrdit');
+
+        // Odstranit existující modal
+        const existujici = document.getElementById('wgsConfirmModal');
+        if (existujici) existujici.remove();
+
         // Vytvořit overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'wgs-confirm-overlay';
-        overlay.setAttribute('role', 'dialog');
-        overlay.setAttribute('aria-modal', 'true');
-        overlay.setAttribute('aria-labelledby', 'wgs-confirm-message');
+        const modal = document.createElement('div');
+        modal.id = 'wgsConfirmModal';
+        modal.className = 'wgs-confirm-overlay';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'wgs-confirm-title');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); display: flex;
+            align-items: center; justify-content: center; z-index: 10001;
+        `;
 
-        // Vytvořit dialog box
-        const dialog = document.createElement('div');
-        dialog.className = 'wgs-confirm-dialog';
+        // Styl tlačítka potvrzení: zelená pro potvrzení, červená pro destruktivní akce
+        const btnPotvrditStyle = nebezpecne
+            ? 'background: #dc3545; color: #fff;'  // Červená pro mazání/odebírání
+            : 'background: #28a745; color: #fff;'; // Zelená pro potvrzení
 
-        // Zpráva
-        const messageEl = document.createElement('p');
-        messageEl.id = 'wgs-confirm-message';
-        messageEl.className = 'wgs-confirm-message';
-        messageEl.textContent = message;
+        // Vytvořit dialog HTML
+        modal.innerHTML = `
+            <div class="wgs-confirm-dialog" style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                        max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                        border: 1px solid #333; text-align: center; font-family: 'Poppins', sans-serif;">
+                <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">${escapeHtml(titulek)}</h3>
+                <p id="wgs-confirm-message" class="wgs-confirm-message" style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${escapeHtml(zprava)}</p>
+                <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="button" id="wgsConfirmBtnZrusit" class="wgs-confirm-btn wgs-confirm-cancel"
+                            style="padding: 10px 20px; border: 1px solid #444; border-radius: 6px;
+                                   background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem; outline: none;">${escapeHtml(btnZrusit)}</button>
+                    <button type="button" id="wgsConfirmBtnPotvrdit" class="wgs-confirm-btn wgs-confirm-ok"
+                            style="padding: 10px 20px; border: none; border-radius: 6px; ${btnPotvrditStyle}
+                                   cursor: pointer; font-size: 0.9rem; font-weight: 500; outline: none;">${escapeHtml(btnPotvrdit)}</button>
+                </div>
+            </div>
+        `;
 
-        // Tlačítka
-        const buttons = document.createElement('div');
-        buttons.className = 'wgs-confirm-buttons';
-
-        const cancelBtn = document.createElement('button');
-        cancelBtn.type = 'button';
-        cancelBtn.className = 'wgs-confirm-btn wgs-confirm-cancel';
-        cancelBtn.textContent = cancelText;
-
-        const okBtn = document.createElement('button');
-        okBtn.type = 'button';
-        okBtn.className = 'wgs-confirm-btn wgs-confirm-ok';
-        okBtn.textContent = okText;
-
-        buttons.appendChild(cancelBtn);
-        buttons.appendChild(okBtn);
-        dialog.appendChild(messageEl);
-        dialog.appendChild(buttons);
-        overlay.appendChild(dialog);
+        document.body.appendChild(modal);
 
         // Cleanup funkce
-        function cleanup(result) {
-            document.removeEventListener('keydown', handleKeydown);
-            overlay.remove();
-            resolve(result);
-        }
-
-        // Keyboard handler
-        function handleKeydown(e) {
-            if (e.key === 'Escape') {
-                cleanup(false);
-            } else if (e.key === 'Enter') {
-                cleanup(true);
-            }
-        }
+        const zavrit = (vysledek) => {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+            resolve(vysledek);
+        };
 
         // Event listenery
-        okBtn.addEventListener('click', () => cleanup(true));
-        cancelBtn.addEventListener('click', () => cleanup(false));
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) cleanup(false);
-        });
-        document.addEventListener('keydown', handleKeydown);
+        document.getElementById('wgsConfirmBtnZrusit')?.addEventListener('click', () => zavrit(false));
+        document.getElementById('wgsConfirmBtnPotvrdit')?.addEventListener('click', () => zavrit(true));
+        modal.addEventListener('click', (e) => { if (e.target === modal) zavrit(false); });
 
-        // Přidat do DOM a fokus na OK
-        document.body.appendChild(overlay);
-        okBtn.focus();
+        // Keyboard handler
+        const escHandler = (e) => { if (e.key === 'Escape') zavrit(false); };
+        document.addEventListener('keydown', escHandler);
+
+        // Focus na tlačítko zrušit (bezpečnější default)
+        document.getElementById('wgsConfirmBtnZrusit')?.focus();
     });
 }
 

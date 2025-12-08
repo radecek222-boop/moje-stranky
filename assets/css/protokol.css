@@ -1719,3 +1719,217 @@ body.pdf-export-mode #signature-pad {
   }
 }
 
+/* ============================================
+   PWA OPTIMALIZACE - Protokol
+   ============================================ */
+@media (display-mode: standalone),
+       (display-mode: fullscreen),
+       (max-width: 480px) {
+
+  /* Wrapper - kompaktní padding */
+  .wrapper {
+    padding: 0.5rem;
+    max-width: 100%;
+  }
+
+  /* Header */
+  .header {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+
+  .header div:first-child {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Zákaznické info - kompaktní */
+  .customer-info-header {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .customer-info-content {
+    padding: 0.5rem;
+  }
+
+  /* Tabulky v customer info */
+  .two-col-table {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .two-col-table .col {
+    width: 100%;
+  }
+
+  .two-col-table table {
+    font-size: 0.75rem;
+  }
+
+  .two-col-table td {
+    padding: 0.35rem 0.25rem;
+  }
+
+  .two-col-table .label {
+    font-size: 0.7rem;
+    min-width: 90px;
+  }
+
+  .two-col-table .en-label {
+    font-size: 0.6rem;
+  }
+
+  .two-col-table input,
+  .two-col-table select {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 0.4rem;
+  }
+
+  /* Section - kompaktní */
+  .section {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.35rem;
+  }
+
+  /* Popis problému textarea */
+  .section textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 0.5rem;
+  }
+
+  /* Tlačítka - 2 sloupce */
+  .btns {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  button.btn {
+    font-size: 0.65rem;
+    padding: 0.5rem 0.25rem;
+    min-height: 40px;
+    line-height: 1.2;
+  }
+
+  /* Photos grid - 3 sloupce */
+  .photos-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+  }
+
+  .photo-thumb-wrapper {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  /* Kalkulace sekce */
+  .kalkulace-container {
+    padding: 0.5rem;
+  }
+
+  .kalkulace-header {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .kalkulace-table {
+    font-size: 0.75rem;
+  }
+
+  .kalkulace-table th,
+  .kalkulace-table td {
+    padding: 0.35rem 0.25rem;
+  }
+
+  /* Signature pads */
+  #signPad,
+  #zakaznikSchvaleniPad {
+    height: 120px;
+  }
+
+  /* Footer akce tlačítka */
+  .footer-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-actions .btn {
+    width: 100%;
+    font-size: 0.8rem;
+  }
+
+  /* Modals - full width */
+  .modal-content,
+  .zakaznik-schvaleni-container {
+    width: 98% !important;
+    max-width: 98% !important;
+    padding: 0.5rem;
+    margin: 0.25rem;
+  }
+
+  .modal-header,
+  .zakaznik-schvaleni-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .modal-header h2,
+  .modal-header h3,
+  .zakaznik-schvaleni-header h2 {
+    font-size: 0.95rem;
+  }
+
+  /* PDF Preview */
+  .pdf-preview-modal {
+    padding: 0;
+  }
+
+  .pdf-preview-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+/* Extra malé displeje */
+@media (max-width: 360px) {
+  .btns {
+    grid-template-columns: 1fr;
+  }
+
+  button.btn {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header div:first-child {
+    font-size: 0.8rem;
+  }
+
+  .header {
+    font-size: 0.6rem;
+  }
+}
+
+/* Safe area pro notch */
+@supports(padding: max(0px)) {
+  @media (display-mode: standalone) {
+    .wrapper {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+  }
+}
+

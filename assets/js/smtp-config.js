@@ -11,7 +11,7 @@ function showNotification(type, message) {
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed; top: 20px; right: 20px; padding: 15px 20px;
-        border-radius: 4px; color: white; font-family: sans-serif;
+        border-radius: 4px; color: white; font-family: 'Poppins', sans-serif;
         font-size: 14px; z-index: 10000; max-width: 350px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     `;

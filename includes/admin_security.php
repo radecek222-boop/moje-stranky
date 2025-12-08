@@ -336,6 +336,229 @@ endif;
     color: #666;
     margin-top: 0.25rem;
 }
+
+/* ============================================
+   PWA OPTIMALIZACE - Security Centre
+   ============================================ */
+@media (display-mode: standalone),
+       (display-mode: fullscreen),
+       (max-width: 480px) {
+
+    /* Hlavní kontejner */
+    .security-container {
+        padding: 0.5rem;
+        min-height: auto;
+    }
+
+    /* Tabs - horizontální scroll */
+    .cc-tabs {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+        gap: 0;
+    }
+
+    .cc-tab {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Stats grid - 2 sloupce */
+    .security-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 0.6rem;
+    }
+
+    .stat-card-value {
+        font-size: 1.1rem;
+    }
+
+    .stat-card-label {
+        font-size: 0.65rem;
+    }
+
+    /* Alert - kompaktní */
+    .security-alert {
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    /* Setting groups - kompaktní */
+    .setting-group {
+        margin-bottom: 1rem;
+    }
+
+    .setting-group-title {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.35rem;
+    }
+
+    /* Setting items - vertikální stack */
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 0;
+    }
+
+    .setting-item-left,
+    .setting-item-right {
+        width: 100%;
+        min-width: 100% !important;
+    }
+
+    .setting-item-label {
+        font-size: 0.8rem;
+    }
+
+    .setting-item-description {
+        font-size: 0.7rem;
+    }
+
+    /* Input fieldy na celou šířku */
+    .setting-item-right input,
+    .setting-item-right .cc-input {
+        width: 100%;
+        font-size: 16px !important; /* Prevent iOS zoom */
+        padding: 0.5rem;
+    }
+
+    .setting-item-right > div {
+        flex-wrap: wrap;
+    }
+
+    /* Badges - menší */
+    .badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.35rem;
+    }
+
+    /* Tabulky - horizontální scroll */
+    #keys-container,
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -0.5rem;
+        padding: 0 0.5rem;
+    }
+
+    #keys-container table,
+    .user-access-table {
+        font-size: 0.75rem;
+        min-width: 600px;
+    }
+
+    #keys-container th,
+    #keys-container td,
+    .user-access-table th,
+    .user-access-table td {
+        padding: 0.4rem 0.3rem;
+    }
+
+    #keys-container th,
+    .user-access-table th {
+        font-size: 0.65rem;
+    }
+
+    /* Tlačítka - touch friendly */
+    .cc-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        min-height: 36px;
+    }
+
+    .cc-btn-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        min-height: 32px;
+    }
+
+    /* Quick actions grid */
+    .setting-group > div[style*="grid-template-columns"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.4rem !important;
+    }
+
+    /* Header flex - stack na mobilu */
+    div[style*="justify-content: space-between"] {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+
+    /* H2 titulky */
+    h2[style*="font-size: 1rem"] {
+        font-size: 0.9rem !important;
+    }
+
+    /* Modal úpravy */
+    .modal-content,
+    .cc-modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 0.75rem;
+        margin: 0.5rem;
+    }
+}
+
+/* Extra malé displeje */
+@media (max-width: 360px) {
+    .security-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card-value {
+        font-size: 1rem;
+    }
+
+    .cc-tab {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.65rem;
+    }
+
+    .setting-group > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) and (pointer: coarse) {
+    .cc-tab:active,
+    .cc-btn:active,
+    .stat-card:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+    }
+
+    .cc-tab:hover,
+    .cc-btn:hover,
+    .stat-card:hover {
+        transform: none;
+    }
+}
+
+/* Safe area pro notch */
+@supports(padding: max(0px)) {
+    @media (display-mode: standalone) {
+        .security-container {
+            padding-left: max(0.5rem, env(safe-area-inset-left));
+            padding-right: max(0.5rem, env(safe-area-inset-right));
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
+    }
+}
 </style>
 
 <div class="security-container">

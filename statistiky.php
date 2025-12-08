@@ -450,6 +450,218 @@ body {
         padding: 0.5rem;
     }
 }
+
+/* === PWA OPTIMALIZACE === */
+@media (display-mode: standalone),
+       (display-mode: fullscreen),
+       (max-width: 480px) {
+
+    .stats-container {
+        padding: 0.5rem;
+    }
+
+    /* Header kompaktní */
+    .stats-header {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .stats-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .stats-header p {
+        font-size: 0.75rem;
+        display: none;
+    }
+
+    /* Summary karty - 2 sloupce, kompaktní */
+    .stats-summary {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .summary-card {
+        padding: 0.75rem;
+        border-left-width: 3px;
+    }
+
+    .summary-card-label {
+        font-size: 0.65rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .summary-card-value {
+        font-size: 1.25rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .summary-card-sub {
+        font-size: 0.65rem;
+        display: none;
+    }
+
+    /* Filtry kompaktní */
+    .stats-filters {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .filters-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filters-grid {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .filter-label {
+        font-size: 0.65rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .filter-select,
+    .multiselect-trigger {
+        padding: 0.5rem;
+        font-size: 16px; /* Prevent iOS zoom */
+        min-height: 40px;
+    }
+
+    /* TLAČÍTKA - PWA optimalizace */
+    .filter-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    /* Tabulka */
+    .stats-table-wrapper {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        overflow-x: auto;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .table-title {
+        font-size: 0.85rem;
+    }
+
+    .table-count {
+        font-size: 0.7rem;
+    }
+
+    .stats-table {
+        font-size: 0.7rem;
+        min-width: 600px;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 0.4rem 0.3rem;
+        white-space: nowrap;
+    }
+
+    /* Paginace */
+    .pagination {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .pagination button,
+    #prev-page,
+    #next-page {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.75rem;
+        min-height: 40px;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    /* Grafy */
+    .stats-charts {
+        gap: 0.5rem;
+    }
+
+    .chart-card {
+        padding: 0.75rem;
+    }
+
+    .chart-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Loading a empty state */
+    .loading,
+    .empty-state {
+        padding: 1.5rem;
+    }
+
+    .empty-state-icon {
+        font-size: 2rem;
+    }
+}
+
+/* Extra malé displeje */
+@media (max-width: 360px) {
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-card-value {
+        font-size: 1.5rem;
+    }
+
+    .summary-card-sub {
+        display: block;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+        padding: 0.6rem;
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+        opacity: 0.85;
+    }
+
+    .summary-card:active,
+    .chart-card:active {
+        background: #f5f5f5;
+    }
+}
   </style>
 </head>
 

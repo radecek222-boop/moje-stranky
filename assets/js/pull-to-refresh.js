@@ -122,7 +122,7 @@
       #pull-refresh-indicator .pull-refresh-text {
         font-size: 0.7rem;
         color: #555;
-        font-family: 'Poppins', -apple-system, sans-serif;
+        font-family: 'Poppins', sans-serif;
         font-weight: 500;
         letter-spacing: 0.02em;
         transition: color 0.2s;
