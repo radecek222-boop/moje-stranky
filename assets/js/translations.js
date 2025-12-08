@@ -367,11 +367,6 @@ window.WGS_TRANSLATIONS = {
     en: 'Record not found',
     it: 'Record non trovato'
   },
-  'error_reopening_order': {
-    cs: 'Chyba při znovuotevření zakázky',
-    en: 'Error reopening order',
-    it: 'Errore nella riapertura dell\'ordine'
-  },
   'visit_already_completed': {
     cs: 'Tato návštěva již byla dokončena.',
     en: 'This visit has already been completed.',
@@ -544,11 +539,6 @@ window.WGS_TRANSLATIONS = {
   },
 
   // === SEZNAM.JS - Confirm dialogy ===
-  'confirm_reopen_order': {
-    cs: 'ZNOVU OTEVŘÍT ZAKÁZKU?\n\nZákazník: {customer}\nProdukt: {product}\n\nTato akce:\n- Změní stav na NOVÁ (žlutá)\n- Zruší původní termín návštěvy\n- Umožní naplánovat novou návštěvu\n\nPoužijte pouze v případě, že se objevil nový problém u této zakázky.\n\nOpravdu chcete pokračovat?',
-    en: 'REOPEN ORDER?\n\nCustomer: {customer}\nProduct: {product}\n\nThis action will:\n- Change status to NEW (yellow)\n- Cancel original appointment\n- Allow scheduling a new visit\n\nUse only if a new problem appeared with this order.\n\nDo you really want to continue?',
-    it: 'RIAPRIRE ORDINE?\n\nCliente: {customer}\nProdotto: {product}\n\nQuesta azione:\n- Cambierà lo stato in NUOVO (giallo)\n- Annullerà l\'appuntamento originale\n- Permetterà di programmare una nuova visita\n\nUtilizzare solo se si è verificato un nuovo problema con questo ordine.\n\nVuoi davvero continuare?'
-  },
   'confirm_continue_without_appointment': {
     cs: 'VAROVÁNÍ: Termín návštěvy ještě není naplánován.\n\nChcete pokračovat i bez naplánovaného termínu?',
     en: 'WARNING: Visit appointment is not yet scheduled.\n\nDo you want to continue without a scheduled appointment?',

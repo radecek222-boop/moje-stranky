@@ -80,8 +80,6 @@ function normalizujTrigger($trigger) {
         'complaint_created' => 'nova_reklamace',
         'order_completed' => 'dokonceno',
         'complaint_completed' => 'dokonceno',
-        'order_reopened' => 'znovu_otevreno',
-        'complaint_reopened' => 'znovu_otevreno',
         'appointment_confirmed' => 'potvrzeni_terminu',
         'appointment_reminder' => 'pripominka_terminu',
         'appointment_assigned' => 'prirazeni_terminu',
@@ -127,9 +125,8 @@ try {
         'waiting_dealer_customer',      // 6. Cekani na vyjadreni prodejce
         'prirazeni_terminu_technician', // 7. Prirazeni terminu technikovi
         'dokonceno_customer',           // 8. Dokonceni zakazky
-        'znovu_otevreno_admin',         // 9. Znovu otevreno
-        'pozvanka_seller',              // 10. Pozvanka pro prodejce (na konci)
-        'pozvanka_technician'           // 11. Pozvanka pro technika (na konci)
+        'pozvanka_seller',              // 9. Pozvanka pro prodejce (na konci)
+        'pozvanka_technician'           // 10. Pozvanka pro technika (na konci)
     ];
 
     // Seradit podle definovaneho poradi
@@ -360,7 +357,6 @@ try {
                     'nova_reklamace_admin' => 'Nova reklamace (admin)',
                     'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
                     'dokonceno_customer' => 'Dokonceni zakazky',
-                    'znovu_otevreno_admin' => 'Znovu otevreno',
                     'pozvanka_seller' => 'Pozvanka pro prodejce',
                     'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
@@ -377,7 +373,6 @@ try {
                     'pripominka_terminu_customer',
                     'waiting_dealer_customer',
                     'dokonceno_customer',
-                    'znovu_otevreno_admin',
                     'pozvanka_seller',
                     'pozvanka_technician'
                 ];
@@ -456,8 +451,7 @@ try {
                 'pokus_o_kontakt_customer' => 'Pokus o kontakt',
                 'nova_reklamace_admin' => 'Nova reklamace (admin)',
                 'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
-                'dokonceno_customer' => 'Dokonceni zakazky',
-                'znovu_otevreno_admin' => 'Znovu otevreno'
+                'dokonceno_customer' => 'Dokonceni zakazky'
             ];
 
             // Sablony k preskoceni (nezobrazovat)
@@ -470,8 +464,7 @@ try {
                 'pokus_o_kontakt_customer',
                 'potvrzeni_terminu_customer',
                 'pripominka_terminu_customer',
-                'dokonceno_customer',
-                'znovu_otevreno_admin'
+                'dokonceno_customer'
             ];
 
             uksort($smsSablonyAll, function($a, $b) use ($smsPoradiSablon) {
