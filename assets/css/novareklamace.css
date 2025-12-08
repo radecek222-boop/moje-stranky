@@ -28,6 +28,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins' !important;
   font-weight: 600;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* Top Bar */

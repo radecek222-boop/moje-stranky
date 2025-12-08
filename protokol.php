@@ -98,9 +98,9 @@ if ($lookupValue !== null) {
         $pdo = getDbConnection();
 
         $stmt = $pdo->prepare(
-            "SELECT r.*, u.name as created_by_name
+            "SELECT r.*, u.name as zadavatel_jmeno
              FROM wgs_reklamace r
-             LEFT JOIN wgs_users u ON r.created_by = u.id
+             LEFT JOIN wgs_users u ON r.created_by = u.user_id
              WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
              LIMIT 1"
         );
@@ -138,7 +138,7 @@ if ($lookupValue !== null) {
                 'typ_zakaznika' => $record['typ_zakaznika'] ?? '',
 
                 // Produktové údaje
-                'brand' => $record['created_by_name'] ?? $record['prodejce'] ?? '', // Zadavatel = kdo vytvořil zakázku
+                'brand' => $record['zadavatel_jmeno'] ?? '', // Zadavatel = kdo vytvořil zakázku
                 'model' => $record['model'] ?? '',
                 'typ' => $record['typ'] ?? '',
                 'provedeni' => $record['provedeni'] ?? '',
@@ -294,7 +294,7 @@ if ($initialBootstrapData) {
               </select></td></tr>
             <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
             <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-            <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" placeholder="Prodejce" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+            <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" placeholder="Jméno zadavatele" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
             <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
             <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly></td></tr>
           </table>

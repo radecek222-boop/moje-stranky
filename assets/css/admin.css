@@ -2143,24 +2143,28 @@ h1 {
     font-size: 1.25rem !important;  /* 20px */
     margin-bottom: 0.75rem !important;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 h2 {
     font-size: 1.125rem !important; /* 18px */
     margin-bottom: 0.625rem !important;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 h3 {
     font-size: 1rem !important;     /* 16px */
     margin-bottom: 0.5rem !important;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 h4 {
     font-size: 0.875rem !important; /* 14px */
     margin-bottom: 0.5rem !important;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 p,
