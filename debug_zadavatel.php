@@ -41,8 +41,8 @@ try {
             technik_user.name as technik_jmeno,
             technik_user.email as technik_email
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users zadavatel ON r.created_by = zadavatel.id
-        LEFT JOIN wgs_users technik_user ON r.assigned_to = technik_user.id
+        LEFT JOIN wgs_users zadavatel ON r.created_by = zadavatel.user_id
+        LEFT JOIN wgs_users technik_user ON r.assigned_to = technik_user.user_id
         WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
         LIMIT 1
     ");

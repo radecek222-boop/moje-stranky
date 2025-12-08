@@ -98,9 +98,9 @@ if ($lookupValue !== null) {
         $pdo = getDbConnection();
 
         $stmt = $pdo->prepare(
-            "SELECT r.*, u.name as created_by_name
+            "SELECT r.*, u.name as zadavatel_jmeno
              FROM wgs_reklamace r
-             LEFT JOIN wgs_users u ON r.created_by = u.id
+             LEFT JOIN wgs_users u ON r.created_by = u.user_id
              WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
              LIMIT 1"
         );
@@ -138,7 +138,7 @@ if ($lookupValue !== null) {
                 'typ_zakaznika' => $record['typ_zakaznika'] ?? '',
 
                 // Produktové údaje
-                'brand' => $record['created_by_name'] ?? '', // Zadavatel = kdo vytvořil zakázku
+                'brand' => $record['zadavatel_jmeno'] ?? '', // Zadavatel = kdo vytvořil zakázku
                 'model' => $record['model'] ?? '',
                 'typ' => $record['typ'] ?? '',
                 'provedeni' => $record['provedeni'] ?? '',
