@@ -460,7 +460,7 @@ async function loadReklamace(id) {
       document.getElementById("address").value = customer.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = customer.telefon || "";
       document.getElementById("email").value = customer.email || "";
-      document.getElementById("brand").value = customer.created_by_name || customer.prodejce || "";
+      document.getElementById("brand").value = customer.zadavatel_jmeno || customer.created_by_name || "";
       document.getElementById("model").value = customer.model || "";
       document.getElementById("description-cz").value = customer.popis_problemu || "";
 
@@ -531,7 +531,7 @@ async function loadReklamace(id) {
       document.getElementById("address").value = currentReklamace.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = currentReklamace.telefon || "";
       document.getElementById("email").value = currentReklamace.email || "";
-      document.getElementById("brand").value = currentReklamace.created_by_name || currentReklamace.prodejce || "";
+      document.getElementById("brand").value = currentReklamace.zadavatel_jmeno || currentReklamace.created_by_name || "";
       document.getElementById("model").value = currentReklamace.model || "";
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
       showNotif("success", "Reklamace načtena");
