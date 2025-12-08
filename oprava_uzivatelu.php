@@ -87,7 +87,7 @@ try {
     // 3. Reklamace bez zadavatele (created_by)
     echo "<h2>3. Reklamace bez zadavatele (created_by)</h2>";
     $stmt = $pdo->query("
-        SELECT id, reklamace_id, cislo, jmeno, created_by, stav, datum_vytvoreni
+        SELECT id, reklamace_id, cislo, jmeno, created_by, stav, created_at
         FROM wgs_reklamace
         WHERE created_by IS NULL OR created_by = ''
     ");
@@ -101,7 +101,7 @@ try {
             echo "<td>{$r['reklamace_id']}</td>";
             echo "<td>{$r['jmeno']}</td>";
             echo "<td>{$r['stav']}</td>";
-            echo "<td>{$r['datum_vytvoreni']}</td>";
+            echo "<td>{$r['created_at']}</td>";
             echo "</tr>";
         }
         echo "</table>";
