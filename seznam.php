@@ -1808,8 +1808,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`[EMERGENCY] Tlačítko kliknuto: ${action}`, { id, url });
 
     switch (action) {
-      // case 'reopenOrder' - REMOVED: normální handler v seznam.js funguje správně
-
       case 'showContactMenu':
         if (id && typeof showContactMenu === 'function') {
           showContactMenu(id);
@@ -1877,12 +1875,6 @@ document.addEventListener('DOMContentLoaded', () => {
           showDetail(id);
         } else if (typeof showDetail === 'function' && typeof CURRENT_RECORD !== 'undefined' && CURRENT_RECORD) {
           showDetail(CURRENT_RECORD);
-        }
-        break;
-
-      case 'reopenOrder':
-        if (id && typeof reopenOrder === 'function') {
-          reopenOrder(id);
         }
         break;
 

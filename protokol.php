@@ -170,6 +170,8 @@ if ($lookupValue !== null) {
 }
 
 if ($initialBootstrapData) {
+    // Přidat jméno přihlášeného technika pro JS fallback
+    $initialBootstrapData['prihlaseny_technik'] = $currentUserName;
     $json = json_encode($initialBootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($json !== false) {
         $initialBootstrapJson = str_replace('</', '<\/', $json);

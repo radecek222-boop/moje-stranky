@@ -460,9 +460,14 @@ async function loadReklamace(id) {
       document.getElementById("address").value = customer.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = customer.telefon || "";
       document.getElementById("email").value = customer.email || "";
-      document.getElementById("brand").value = customer.created_by_name || customer.prodejce || "";
+      document.getElementById("brand").value = customer.zadavatel_jmeno || customer.created_by_name || "";
       document.getElementById("model").value = customer.model || "";
       document.getElementById("description-cz").value = customer.popis_problemu || "";
+      // Nastavit technika v SELECT - buď uložený technik, nebo přihlášený uživatel
+      const technikValue = customer.technik || customer.prihlaseny_technik || "";
+      if (technikValue) {
+        document.getElementById("technician").value = technikValue;
+      }
 
       currentReklamace = customer;
       currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
@@ -531,9 +536,14 @@ async function loadReklamace(id) {
       document.getElementById("address").value = currentReklamace.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = currentReklamace.telefon || "";
       document.getElementById("email").value = currentReklamace.email || "";
-      document.getElementById("brand").value = currentReklamace.created_by_name || currentReklamace.prodejce || "";
+      document.getElementById("brand").value = currentReklamace.zadavatel_jmeno || currentReklamace.created_by_name || "";
       document.getElementById("model").value = currentReklamace.model || "";
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
+      // Nastavit technika v SELECT - buď uložený technik, nebo přihlášený uživatel
+      const technikValueApi = currentReklamace.technik || currentReklamace.prihlaseny_technik || "";
+      if (technikValueApi) {
+        document.getElementById("technician").value = technikValueApi;
+      }
       showNotif("success", "Reklamace načtena");
     } else {
       showNotif("error", result.message || "Reklamace nenalezena");
@@ -2170,64 +2180,6 @@ window.addEventListener('load', () => {
   });
   logger.log('Translate ready');
 });
-
-// ========================================
-// FUNKCE PRO ZNOVUOTEVŘENÍ ZAKÁZKY
-// ========================================
-async function reopenOrder(id) {
-  logger.log('[reopenOrder] Znovuotevírání zakázky ID:', id);
-
-  const confirmed = await wgsConfirm(
-    'Opravdu chcete znovu otevřít tuto dokončenou zakázku? Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.',
-    'Otevřít',
-    'Zrušit'
-  );
-
-  if (!confirmed) {
-    logger.log('[reopenOrder] Znovuotevření zrušeno uživatelem');
-    return;
-  }
-
-  try {
-    showLoadingWithMessage(true, 'Otevírám zakázku...');
-
-    // Získat CSRF token
-    const csrfToken = await fetchCsrfToken();
-
-    const formData = new FormData();
-    formData.append('action', 'update');
-    formData.append('id', id);
-    formData.append('stav', 'ČEKÁ');
-    formData.append('termin', '');
-    formData.append('cas_navstevy', '');
-    formData.append('csrf_token', csrfToken);
-
-    const response = await fetch('app/controllers/save.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    const result = await response.json();
-
-    if (result.status === 'success') {
-      logger.log('[reopenOrder] Zakázka úspěšně znovu otevřena');
-      showNotif('success', 'Zakázka byla znovu otevřena');
-
-      // Obnovit stránku po 1 sekundě
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    } else {
-      throw new Error(result.message || 'Chyba při znovuotevření zakázky');
-    }
-
-  } catch (error) {
-    logger.error('[reopenOrder] Chyba:', error);
-    showNotif('error', 'Chyba při znovuotevření: ' + error.message);
-  } finally {
-    showLoadingWithMessage(false);
-  }
-}
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {

@@ -745,7 +745,6 @@ async function showDetail(recordOrId) {
 
       <div class="detail-buttons">
         ${!jeProdejce ? `
-          <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
@@ -789,78 +788,6 @@ async function showDetail(recordOrId) {
 function closeDetail() {
   ModalManager.close();
 }
-
-// === ZNOVUOTEVŘENÍ ZAKÁZKY ===
-async function reopenOrder(id) {
-  const record = WGS_DATA_CACHE.find(x => x.id == id);
-  if (!record) {
-    wgsToast.error(t('record_not_found'));
-    return;
-  }
-
-  const customerName = Utils.getCustomerName(record);
-  const product = Utils.getProduct(record);
-  
-  const confirmed = await wgsConfirm(
-    t('confirm_reopen_order')
-      .replace('{customer}', customerName)
-      .replace('{product}', product),
-    t('confirm_yes') || 'Ano',
-    t('confirm_no') || 'Ne'
-  );
-
-  if (!confirmed) {
-    logger.log('Znovuotevření zrušeno uživatelem');
-    return;
-  }
-  
-  try {
-    // Get CSRF token
-    const csrfToken = await getCSRFToken();
-
-    const formData = new FormData();
-    formData.append('action', 'reopen');
-    formData.append('original_id', id);
-    formData.append('csrf_token', csrfToken);
-
-    const response = await fetch('/app/controllers/save.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${result.message || response.statusText}`);
-    }
-
-    if (result.status === 'success') {
-      const newId = result.new_id;
-      const newWorkflowId = result.new_workflow_id;
-
-      logger.log(`Nová zakázka vytvořena: ${newWorkflowId} (ID: ${newId})`);
-
-      wgsToast.success(`Nová zakázka ${newWorkflowId} vytvořena`, 5000);
-
-      // Reload seznamu
-      if (typeof loadAll === 'function') {
-        await loadAll(ACTIVE_FILTER);
-      }
-
-      // Zobrazit detail NOVÉ zakázky (ne původní)
-      showDetail(newId);
-
-    } else {
-      throw new Error(result.message || 'Nepodařilo se vytvořit novou zakázku');
-    }
-  } catch (e) {
-    logger.error('Chyba při znovuotevření zakázky:', e);
-    wgsToast.error(t('error_reopening_order') + ': ' + e.message);
-  }
-}
-
-// Export pro inline event handler v seznam.php
-window.reopenOrder = reopenOrder;
 
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
 async function showHistoryPDF(originalReklamaceId) {
@@ -3143,7 +3070,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
     const emergencyActions = [
-      'reopenOrder', 'openPDF', 'startVisit', 'showCalendar',
+      'openPDF', 'startVisit', 'showCalendar',
       'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace',
       'showDetailById', 'showDetail', 'showNotes', 'closeNotesModal', 'deleteNote',
       'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate',

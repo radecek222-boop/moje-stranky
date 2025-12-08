@@ -247,8 +247,6 @@ try {
         '{{address}}' => $notificationData['address'] ?? '',
         '{{product}}' => $notificationData['product'] ?? '',
         '{{description}}' => $notificationData['description'] ?? '',
-        '{{reopened_by}}' => $notificationData['reopened_by'] ?? '',
-        '{{reopened_at}}' => $notificationData['reopened_at'] ?? '',
         '{{technician_name}}' => $notificationData['technician_name'] ?? '',
         '{{technician_email}}' => $notificationData['technician_email'] ?? '',
         '{{technician_phone}}' => $notificationData['technician_phone'] ?? '',
