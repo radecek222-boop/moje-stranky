@@ -559,14 +559,14 @@ try {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f5f5f5; border: 1px solid #000; margin-bottom: 1rem;">
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
-                        <input type="checkbox" id="select-all-emails" data-action="toggleSelectAllEmails">
+                        <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()">
                         <span>Vybrat vše</span>
                     </label>
                     <span style="font-size: 0.85rem; color: #666; font-family: 'Poppins', sans-serif;">
                         Vybráno: <strong id="selected-email-count">0</strong>
                     </span>
                 </div>
-                <button id="resend-emails-btn" data-action="resendVybraneEmaily" disabled
+                <button id="resend-emails-btn" onclick="resendVybraneEmaily()" disabled
                         style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;">
                     Znovu odeslat vybrané
                 </button>
@@ -579,7 +579,7 @@ try {
                     <thead>
                         <tr>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; width: 30px;">
-                                <input type="checkbox" id="select-all-emails-header" data-action="toggleSelectAllEmails">
+                                <input type="checkbox" id="select-all-emails-header" onchange="toggleSelectAllEmails()">
                             </th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Šablona</th>
@@ -596,7 +596,7 @@ try {
                         <?php foreach ($emaily as $email): ?>
                         <tr class="email-queue-row">
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" data-action="updateSelectedEmailCount">
+                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" onchange="updateSelectedEmailCount()">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?php
@@ -1081,9 +1081,20 @@ function filterEmaily(status) {
 
 // Toggle select all emails
 function toggleSelectAllEmails() {
-    const selectAll = document.getElementById('select-all-emails');
+    // Najít který checkbox byl kliknut (toolbar nebo header)
+    const selectAllToolbar = document.getElementById('select-all-emails');
+    const selectAllHeader = document.getElementById('select-all-emails-header');
+
+    // Zjistit stav - preferovat toolbar, ale použít header pokud existuje a toolbar ne
+    const isChecked = selectAllToolbar ? selectAllToolbar.checked : (selectAllHeader ? selectAllHeader.checked : false);
+
+    // Synchronizovat oba checkboxy
+    if (selectAllToolbar) selectAllToolbar.checked = isChecked;
+    if (selectAllHeader) selectAllHeader.checked = isChecked;
+
+    // Zaškrtnout/odškrtnout všechny emaily
     const checkboxes = document.querySelectorAll('.email-checkbox-item');
-    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    checkboxes.forEach(cb => cb.checked = isChecked);
     updateSelectedEmailCount();
 }
 
@@ -1094,12 +1105,15 @@ function updateSelectedEmailCount() {
     document.getElementById('selected-email-count').textContent = count;
     document.getElementById('resend-emails-btn').disabled = count === 0;
 
-    // Sync select-all checkbox
+    // Sync select-all checkboxes (toolbar i header)
     const allCheckboxes = document.querySelectorAll('.email-checkbox-item');
-    const selectAll = document.getElementById('select-all-emails');
-    if (selectAll) {
-        selectAll.checked = count === allCheckboxes.length && count > 0;
-    }
+    const allChecked = count === allCheckboxes.length && count > 0;
+
+    const selectAllToolbar = document.getElementById('select-all-emails');
+    const selectAllHeader = document.getElementById('select-all-emails-header');
+
+    if (selectAllToolbar) selectAllToolbar.checked = allChecked;
+    if (selectAllHeader) selectAllHeader.checked = allChecked;
 }
 
 // Toggle email detail
