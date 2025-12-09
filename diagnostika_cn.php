@@ -170,6 +170,44 @@ try {
         echo "</table>";
     }
 
+    // 6. Test JavaScript API odpovědi
+    echo "<h2>6. Test API odpovědi (co vidí JavaScript)</h2>";
+
+    // Simulovat API call
+    $apiUrl = '/api/nabidka_api.php?action=emaily_s_nabidkou';
+    echo "<div class='info'>";
+    echo "API URL: <code>{$apiUrl}</code><br><br>";
+
+    // Zobrazit přesnou JSON odpověď
+    $jsonOdpoved = json_encode(['status' => 'success', 'message' => 'Emaily načteny', 'data' => ['emaily' => $emaily]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    echo "JSON odpověď kterou API vrací:<br>";
+    echo "<pre style='background: #000; padding: 10px; border-radius: 5px; overflow-x: auto;'>" . htmlspecialchars($jsonOdpoved) . "</pre>";
+    echo "</div>";
+
+    // 7. Test porovnání emailů
+    echo "<h2>7. Simulace JavaScript porovnání</h2>";
+    $stmt = $pdo->query("SELECT id, email FROM wgs_reklamace ORDER BY id DESC LIMIT 10");
+    $testReklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo "<table>
+        <tr><th>ID</th><th>Email (raw)</th><th>Email (lowercase trim)</th><th>V seznamu CN?</th><th>Výsledek</th></tr>";
+    foreach ($testReklamace as $t) {
+        $rawEmail = $t['email'] ?? '';
+        $processedEmail = strtolower(trim($rawEmail));
+        $jeVSeznamu = in_array($processedEmail, $emaily);
+        $vysledek = $jeVSeznamu ? 'ORANŽOVÁ' : 'normální';
+        $trClass = $jeVSeznamu ? "style='background: #ff9800; color: #000;'" : "";
+
+        echo "<tr {$trClass}>
+            <td>{$t['id']}</td>
+            <td><code>" . htmlspecialchars($rawEmail) . "</code></td>
+            <td><code>" . htmlspecialchars($processedEmail) . "</code></td>
+            <td>" . ($jeVSeznamu ? 'ANO' : 'NE') . "</td>
+            <td><strong>{$vysledek}</strong></td>
+        </tr>";
+    }
+    echo "</table>";
+
     echo "<br><a href='seznam.php' class='btn'>Zpět na seznam</a>";
 
 } catch (Exception $e) {
