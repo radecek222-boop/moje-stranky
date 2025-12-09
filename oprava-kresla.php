@@ -264,16 +264,21 @@ require_once __DIR__ . '/includes/seo_meta.php';
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; 2025 White Glove Service. Vsechna prava vyhrazena.
+      <p>
+        &copy; 2025 White Glove Service. Všechna práva vyhrazena.
         <span aria-hidden="true"> • </span>
-        <a href="gdpr.php" class="footer-link">Zpracovani osobnich udaju (GDPR)</a>
+        <a href="gdpr.php" class="footer-link">GDPR</a>
+        <span aria-hidden="true"> • </span>
+        <a href="cookies.php" class="footer-link">Cookies</a>
+        <span aria-hidden="true"> • </span>
+        <a href="podminky.php" class="footer-link">Obchodní podmínky</a>
       </p>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/logger.min.js" defer></script>
-
-<?php if (function_exists('renderHeatmapTracker')) renderHeatmapTracker(); ?>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
+<?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
 </body>
 </html>
