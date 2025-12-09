@@ -7,6 +7,12 @@
     RewriteEngine On
     RewriteBase /
 
+    # ======================================
+    # CRITICAL: Static assets - NO REWRITE (must be FIRST!)
+    # ======================================
+    RewriteRule ^assets/ - [L]
+    RewriteRule ^uploads/ - [L]
+
     # Force HTTPS
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -37,14 +43,6 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^(.+)$ $1.php [L,QSA]
-
-    # ======================================
-    # Static Assets - No rewrite needed
-    # ======================================
-
-    # Allow direct access to assets
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^assets/ - [L]
 
 </IfModule>
 

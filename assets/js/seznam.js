@@ -1,5 +1,4 @@
-// VERSION CHECK: 20251209-01 - CN debug logy
-console.log('[SEZNAM.JS] VERZE: 20251209-01 - CN DEBUG AKTIVNÍ');
+// VERSION: 20251209-02 - CN oranžová karta
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -100,6 +99,7 @@ let ACTIVE_FILTER = 'all';
 let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
+let EMAILS_S_CN = []; // Emaily zákazníků s cenovou nabídkou
 
 // PAGINATION FIX: Tracking pagination state
 let CURRENT_PAGE = 1;
@@ -436,7 +436,7 @@ async function renderOrders(items = null) {
 
   let filtered = items;
 
-  if (ACTIVE_FILTER !== 'all') {
+  if (ACTIVE_FILTER !== 'all' && ACTIVE_FILTER !== 'cn') {
     const statusMap = {
       'wait': ['ČEKÁ', 'wait'],
       'open': ['DOMLUVENÁ', 'open'],
@@ -480,7 +480,7 @@ async function renderOrders(items = null) {
   // Načíst unread counts pro všechny reklamace najednou
   let unreadCountsMap = {};
   try {
-    const response = await fetch('api/notes_api.php?action=get_unread_counts');
+    const response = await fetch('/api/notes_api.php?action=get_unread_counts');
     const data = await response.json();
     if (data.status === 'success') {
       unreadCountsMap = data.unread_counts || {};
@@ -490,20 +490,32 @@ async function renderOrders(items = null) {
   }
 
   // Načíst emaily zákazníků s cenovou nabídkou (CN)
-  let emailySCN = [];
   try {
-    const cnResponse = await fetch('api/nabidka_api.php?action=emaily_s_nabidkou');
+    const cnResponse = await fetch('/api/nabidka_api.php?action=emaily_s_nabidkou');
     const cnData = await cnResponse.json();
-    console.log('[CN DEBUG] API odpověď:', cnData);
     if (cnData.status === 'success') {
-      emailySCN = cnData.data?.emaily || [];
-    } else {
-      console.warn('[CN DEBUG] API vrátila chybu:', cnData.message);
+      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
     }
-    console.log('[CN DEBUG] emailySCN pole:', emailySCN);
   } catch (e) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
-    console.error('[CN DEBUG] Fetch error:', e);
+  }
+
+  // Aktualizovat počet CN
+  const countCnEl = document.getElementById('count-cn');
+  if (countCnEl) {
+    const countCn = items.filter(r => {
+      const email = (r.email || '').toLowerCase().trim();
+      return email && EMAILS_S_CN.includes(email);
+    }).length;
+    countCnEl.textContent = `(${countCn})`;
+  }
+
+  // Filtr pro CN - zobrazit pouze reklamace s odeslanou cenovou nabídkou
+  if (ACTIVE_FILTER === 'cn') {
+    filtered = filtered.filter(r => {
+      const email = (r.email || '').toLowerCase().trim();
+      return email && EMAILS_S_CN.includes(email);
+    });
   }
 
   filtered.sort((a, b) => {
@@ -542,18 +554,7 @@ async function renderOrders(items = null) {
 
     // Zkontrolovat zda zákazník má cenovou nabídku (CN)
     const zakaznikEmail = (rec.email || '').toLowerCase().trim();
-    const maCenovouNabidku = zakaznikEmail && emailySCN.includes(zakaznikEmail);
-
-    // DEBUG: Logovat prvních 5 reklamací
-    if (index < 5) {
-      console.log(`[CN DEBUG] Reklamace ${rec.id}:`, {
-        email: rec.email,
-        zakaznikEmail,
-        maCenovouNabidku,
-        appointmentText,
-        emailySCN_obsahuje: emailySCN.includes(zakaznikEmail)
-      });
-    }
+    const maCenovouNabidku = zakaznikEmail && EMAILS_S_CN.includes(zakaznikEmail);
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;

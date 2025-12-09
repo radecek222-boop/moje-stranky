@@ -1129,19 +1129,38 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
    Toto je PÁTÁ schválená barevná výjimka v projektu.
    ============================================ */
 .order-box.ma-cenovou-nabidku {
+  background: rgba(255, 152, 0, 0.08) !important; /* Lehký oranžový nádech */
   border: 2px solid #ff9800 !important; /* Oranžová */
   box-shadow: 0 0 8px rgba(255, 152, 0, 0.3) !important;
 }
 
 .order-box.ma-cenovou-nabidku:hover {
+  background: rgba(255, 152, 0, 0.12) !important; /* Trochu více na hover */
   box-shadow: 0 0 12px rgba(255, 152, 0, 0.5) !important;
 }
 
-/* Text "Poslána CN" v kartě */
+/* Text "Poslána CN" v kartě - šedé pole s černým ohraničením */
 .order-cn-text {
+  display: inline-block;
+  background: #333 !important;
+  border: 1px solid #000 !important;
+  border-radius: 4px;
+  padding: 2px 8px;
   color: #ff9800 !important;
   font-weight: 600 !important;
   font-size: 0.75rem !important;
+}
+
+/* Filtr tlačítko pro CN - oranžová barva */
+.filter-btn-cn {
+  border-color: #ff9800 !important;
+  color: #ff9800 !important;
+}
+.filter-btn-cn:hover,
+.filter-btn-cn.active {
+  background: #ff9800 !important;
+  color: #000 !important;
+  border-color: #ff9800 !important;
 }
 
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
@@ -1804,6 +1823,14 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn" data-filter="done" data-lang-cs="Vyřízené" data-lang-en="Completed" data-lang-it="Completato">
       Vyřízené <span id="count-done" style="opacity: 0.7;"></span>
     </button>
+    <?php
+    $userRole = strtolower($_SESSION['role'] ?? '');
+    $canSeeCN = $isAdmin || $userRole === 'technik' || $userRole === 'technician';
+    if ($canSeeCN): ?>
+    <button class="filter-btn filter-btn-cn" data-filter="cn" data-lang-cs="Cenové nabídky" data-lang-en="Price Quotes" data-lang-it="Preventivi">
+      CN <span id="count-cn" style="opacity: 0.7;"></span>
+    </button>
+    <?php endif; ?>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
@@ -1837,7 +1864,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251209-01" defer></script>
+<script src="/assets/js/seznam.js?v=20251209-03" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
