@@ -1507,7 +1507,12 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status !== 'success') {
-                    alert('Chyba: ' + data.message);
+                    let errorMsg = 'Chyba: ' + data.message;
+                    if (data.details) {
+                        errorMsg += '\n\nDetaily: ' + JSON.stringify(data.details);
+                    }
+                    alert(errorMsg);
+                    console.error('API Error:', data);
                     return;
                 }
 

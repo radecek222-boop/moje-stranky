@@ -375,20 +375,30 @@ try {
 
 } catch (PDOException $e) {
     $errorMsg = $e->getMessage();
-    error_log("Nabídka API PDO error: " . $errorMsg . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
+    $errorLine = $e->getLine();
+    $errorFile = basename($e->getFile());
+    error_log("Nabídka API PDO error: " . $errorMsg . " | File: " . $errorFile . " | Line: " . $errorLine);
 
     // Pokud je to UNIQUE constraint violation, poskytnout lepší zprávu
     if (strpos($errorMsg, 'Duplicate entry') !== false && strpos($errorMsg, 'cislo_nabidky') !== false) {
         sendJsonError('Konflikt při generování čísla nabídky. Zkuste znovu.', 409);
     } else {
-        // V debug módu vrátit detaily
-        $debugMode = getenv('APP_DEBUG') === 'true';
-        sendJsonError('Chyba databáze', 500, $debugMode ? $errorMsg : null);
+        // DOČASNĚ: Vždy vracet detaily pro debugging
+        sendJsonError('Chyba databáze: ' . $errorMsg, 500, [
+            'file' => $errorFile,
+            'line' => $errorLine
+        ]);
     }
 } catch (Exception $e) {
-    error_log("Nabídka API error: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
-    $debugMode = getenv('APP_DEBUG') === 'true';
-    sendJsonError('Chyba serveru', 500, $debugMode ? $e->getMessage() : null);
+    $errorMsg = $e->getMessage();
+    $errorLine = $e->getLine();
+    $errorFile = basename($e->getFile());
+    error_log("Nabídka API error: " . $errorMsg . " | File: " . $errorFile . " | Line: " . $errorLine);
+    // DOČASNĚ: Vždy vracet detaily pro debugging
+    sendJsonError('Chyba serveru: ' . $errorMsg, 500, [
+        'file' => $errorFile,
+        'line' => $errorLine
+    ]);
 }
 
 /**
