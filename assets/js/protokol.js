@@ -2184,6 +2184,8 @@ window.addEventListener('load', () => {
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
   // Handle data-action buttons
+  // POZOR: ActionRegistry v utils.js již obsluhuje data-action!
+  // Tento handler zpracovává pouze akce NEZAREGISTROVANÉ v ActionRegistry
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
@@ -2196,7 +2198,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Try to call function if it exists
+    // Přeskočit akce registrované v ActionRegistry (ty už obsluhuje utils.js)
+    if (typeof window.Utils !== 'undefined' &&
+        window.Utils.ActionRegistry &&
+        window.Utils.ActionRegistry.handlers &&
+        window.Utils.ActionRegistry.handlers[action]) {
+      return; // ActionRegistry to už zpracoval
+    }
+
+    // Try to call function if it exists (pouze pro nezaregistrované akce)
     if (typeof window[action] === 'function') {
       window[action]();
     }
