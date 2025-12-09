@@ -70,11 +70,6 @@
 
     // Zpracovat kliknutí na pole ceny
     function zpracovatKliknutiNaCenu() {
-        // DEBUG: Zobrazit hodnotu order-number
-        const orderNum = document.getElementById('order-number');
-        const hodnota = orderNum ? orderNum.value : 'ELEMENT NENALEZEN';
-        alert('DEBUG order-number: "' + hodnota + '"\nZačíná na POZ: ' + (hodnota.trim().toUpperCase().startsWith('POZ') ? 'ANO' : 'NE'));
-
         const jePoz = jePozZakazka();
 
         if (jePoz) {
