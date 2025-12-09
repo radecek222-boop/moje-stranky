@@ -1932,8 +1932,8 @@ if ($reklamaceId > 0) {
                 const jeHotovo = !!n.hotovo_at;
                 const jeUhrazeno = !!n.uhrazeno_at;
 
-                html += `<tr class="nabidka-radek">
-                    <td style="color: #666;">${n.id}</td>
+                html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
+                    <td style="color: #666;">${n.cislo_nabidky || n.id}</td>
                     <td>
                         <div class="nabidka-info">
                             <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
@@ -2037,6 +2037,205 @@ if ($reklamaceId > 0) {
                 alert('Chyba při změně stavu');
             }
         };
+
+        // ========================================
+        // PDF NÁHLED MODAL
+        // ========================================
+        const pdfModalOverlay = document.getElementById('pdf-modal-overlay');
+        const pdfModalBody = document.getElementById('pdf-modal-body');
+        const pdfModalTitle = document.getElementById('pdf-modal-title');
+        let aktuálníNabídkaData = null;
+
+        // Zavřít modal
+        document.getElementById('pdf-modal-zavrit').addEventListener('click', zavritPdfModal);
+        pdfModalOverlay.addEventListener('click', (e) => {
+            if (e.target === pdfModalOverlay) zavritPdfModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && pdfModalOverlay.classList.contains('zobrazit')) {
+                zavritPdfModal();
+            }
+        });
+
+        function zavritPdfModal() {
+            pdfModalOverlay.classList.remove('zobrazit');
+            document.body.style.overflow = '';
+        }
+
+        // Otevřít náhled nabídky
+        window.otevritNahledNabidky = async function(nabidkaId, event) {
+            // Zastavit propagaci pokud kliknutí bylo na workflow tlačítko nebo interaktivní element
+            if (event) {
+                const target = event.target;
+                if (target.closest('.workflow-btn') || target.closest('button') || target.tagName === 'BUTTON') {
+                    return;
+                }
+            }
+
+            pdfModalOverlay.classList.add('zobrazit');
+            document.body.style.overflow = 'hidden';
+            pdfModalBody.innerHTML = '<div class="pdf-modal-loading">Načítám...</div>';
+
+            try {
+                const response = await fetch(`/api/nabidka_api.php?action=detail&id=${nabidkaId}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    aktuálníNabídkaData = data.nabidka;
+                    zobrazitNahledNabidky(data.nabidka);
+                } else {
+                    pdfModalBody.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 50px;">Chyba: ${data.message}</div>`;
+                }
+            } catch (e) {
+                console.error('Chyba:', e);
+                pdfModalBody.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 50px;">Chyba při načítání nabídky</div>';
+            }
+        };
+
+        function zobrazitNahledNabidky(nabidka) {
+            const cislo = nabidka.cislo_nabidky || ('CN-' + String(nabidka.id).padStart(6, '0'));
+            const datum = nabidka.vytvoreno_at ? new Date(nabidka.vytvoreno_at).toLocaleDateString('cs-CZ') : '-';
+            const platnost = nabidka.platnost_do ? new Date(nabidka.platnost_do).toLocaleDateString('cs-CZ') : '-';
+            const polozky = nabidka.polozky || [];
+
+            pdfModalTitle.textContent = 'Nabídka č. ' + cislo;
+
+            // Seskupit položky
+            const skupinyNazvy = {
+                doprava: 'DOPRAVA',
+                calouneni: 'ČALOUNICKÉ PRÁCE',
+                mechanika: 'MECHANICKÉ PRÁCE',
+                priplatky: 'PŘÍPLATKY',
+                dily: 'NÁHRADNÍ DÍLY',
+                prace: 'PRÁCE',
+                ostatni: 'OSTATNÍ'
+            };
+
+            const skupiny = {};
+            polozky.forEach(p => {
+                const sk = p.skupina || 'ostatni';
+                if (!skupiny[sk]) skupiny[sk] = [];
+                skupiny[sk].push(p);
+            });
+
+            let polozkyHtml = '';
+            const poradiSkupin = ['doprava', 'calouneni', 'mechanika', 'priplatky', 'dily', 'prace', 'ostatni'];
+
+            poradiSkupin.forEach(skKey => {
+                if (skupiny[skKey] && skupiny[skKey].length > 0) {
+                    polozkyHtml += `<tr><td colspan="4" style="padding: 10px; background: #f5f5f5; font-weight: bold; font-size: 11px; color: #666; text-transform: uppercase;">${skupinyNazvy[skKey] || skKey}</td></tr>`;
+                    skupiny[skKey].forEach(p => {
+                        const celkem = (parseFloat(p.cena) * parseInt(p.pocet || 1)).toFixed(2);
+                        polozkyHtml += `<tr>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                        </tr>`;
+                    });
+                }
+            });
+
+            // Pokud nejsou skupiny, zobrazit položky normálně
+            if (!polozkyHtml && polozky.length > 0) {
+                polozky.forEach(p => {
+                    const celkem = (parseFloat(p.cena) * parseInt(p.pocet || 1)).toFixed(2);
+                    polozkyHtml += `<tr>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                    </tr>`;
+                });
+            }
+
+            pdfModalBody.innerHTML = `
+                <div style="font-family: 'Poppins', sans-serif;">
+                    <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1a1a1a; padding-bottom: 15px;">
+                        <h1 style="font-size: 24px; color: #1a1a1a; margin: 0;">WHITE GLOVE SERVICE</h1>
+                        <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Cenová nabídka č. ${cislo}</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+                        <div>
+                            <p style="margin: 0; font-size: 11px; color: #888; text-transform: uppercase;">Zákazník</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600;">${nabidka.zakaznik_jmeno}</p>
+                            <p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_email}</p>
+                            ${nabidka.zakaznik_telefon ? `<p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_telefon}</p>` : ''}
+                            ${nabidka.zakaznik_adresa ? `<p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_adresa}</p>` : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 13px;"><strong>Datum:</strong> ${datum}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 13px;"><strong>Platnost do:</strong> <span style="color: #d97706;">${platnost}</span></p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; padding: 5px 10px; background: ${nabidka.stav === 'potvrzena' ? '#d4edda' : nabidka.stav === 'odeslana' ? '#fff3cd' : '#f5f5f5'}; border-radius: 4px; display: inline-block;">
+                                ${nabidka.stav === 'potvrzena' ? 'POTVRZENO' : nabidka.stav === 'odeslana' ? 'ODESLÁNO' : 'NOVÁ'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd;">
+                        <thead>
+                            <tr style="background: #f0f0f0;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ccc; font-size: 12px; color: #666;">Položka</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 60px;">Počet</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 100px;">Cena/ks</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 100px;">Celkem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${polozkyHtml || '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #888;">Žádné položky</td></tr>'}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #1a1a1a;">
+                                <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; color: #fff;">CELKEM (bez DPH):</td>
+                                <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #39ff14;">${parseFloat(nabidka.celkova_cena).toFixed(2)} ${nabidka.mena}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    ${nabidka.poznamka ? `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 12px; color: #666;"><strong>Interní poznámka:</strong> ${nabidka.poznamka}</p>
+                    </div>` : ''}
+
+                    <div style="background: #fffde7; border: 1px solid #ffd600; padding: 12px; border-radius: 6px; margin: 20px 0; font-size: 12px; color: #856404;">
+                        <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
+                    </div>
+                </div>
+            `;
+        }
+
+        // Stáhnout PDF
+        document.getElementById('pdf-modal-stahnout').addEventListener('click', async () => {
+            if (!aktuálníNabídkaData) {
+                alert('Nejsou načtena data nabídky');
+                return;
+            }
+
+            const btn = document.getElementById('pdf-modal-stahnout');
+            btn.disabled = true;
+            btn.textContent = 'Generuji...';
+
+            try {
+                await generujPdfNabidky({
+                    jmeno: aktuálníNabídkaData.zakaznik_jmeno,
+                    email: aktuálníNabídkaData.zakaznik_email,
+                    telefon: aktuálníNabídkaData.zakaznik_telefon,
+                    adresa: aktuálníNabídkaData.zakaznik_adresa,
+                    polozky: aktuálníNabídkaData.polozky || [],
+                    celkem: parseFloat(aktuálníNabídkaData.celkova_cena),
+                    mena: aktuálníNabídkaData.mena,
+                    cislo: aktuálníNabídkaData.cislo_nabidky || ('CN-' + String(aktuálníNabídkaData.id).padStart(6, '0')),
+                    datum: aktuálníNabídkaData.vytvoreno_at,
+                    platnost: aktuálníNabídkaData.platnost_do
+                });
+            } catch (e) {
+                console.error('Chyba při generování PDF:', e);
+                alert('Chyba při generování PDF');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Stáhnout PDF';
+        });
 
     })();
     </script>

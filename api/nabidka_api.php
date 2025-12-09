@@ -280,6 +280,33 @@ try {
             break;
 
         // ========================================
+        // DETAIL - Detail jedné nabídky (admin only)
+        // ========================================
+        case 'detail':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            $nabidkaId = intval($_GET['id'] ?? 0);
+            if (!$nabidkaId) {
+                sendJsonError('Chybí ID nabídky');
+            }
+
+            $stmt = $pdo->prepare("SELECT * FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nebyla nalezena', 404);
+            }
+
+            // Dekódovat položky z JSON
+            $nabidka['polozky'] = json_decode($nabidka['polozky_json'], true) ?: [];
+
+            sendJsonSuccess('Detail nabídky', ['nabidka' => $nabidka]);
+            break;
+
+        // ========================================
         // ZMENIT_WORKFLOW - Manuální změna workflow stavu (admin only)
         // ========================================
         case 'zmenit_workflow':
