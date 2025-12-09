@@ -863,8 +863,7 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
 <script src="assets/js/logger.min.js" defer></script>
-<!-- DEBUG: Použití neminifikované verze pro diagnostiku -->
-<script src="assets/js/statistiky.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/statistiky.js?v=2.5" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

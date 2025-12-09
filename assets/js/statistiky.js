@@ -325,19 +325,8 @@ async function nactiZakazky() {
         container.innerHTML = '<div class="loading">Načítání zakázek...</div>';
 
         const filterParams = getFilterParams();
-        console.log('=== STATISTIKY DEBUG ===');
-        console.log('Filter params URL:', filterParams);
-        console.log('vybraneProdejci:', vybraneProdejci);
-        console.log('vybraneTechnici:', vybraneTechnici);
-        console.log('vybraneZeme:', vybraneZeme);
-
         const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&stranka=${aktualniStranka}`);
         const result = await response.json();
-
-        // DEBUG - zobrazit v konzoli
-        if (result.debug) {
-            console.log('API DEBUG:', result.debug);
-        }
 
         if (result.status === 'success') {
             renderTabulka(result.data);
