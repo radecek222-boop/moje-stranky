@@ -341,6 +341,67 @@ if ($reklamaceId > 0) {
         .stav-nova { background: #333; color: #888; }
         .stav-odeslana { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
         .stav-potvrzena { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+
+        /* Workflow kroky */
+        .workflow-container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .workflow-btn {
+            padding: 4px 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #222;
+            color: #888;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .workflow-btn:hover {
+            border-color: #666;
+            color: #ccc;
+        }
+        .workflow-btn.aktivni {
+            background: rgba(57, 255, 20, 0.15);
+            border-color: #39ff14;
+            color: #39ff14;
+        }
+        .workflow-btn.auto {
+            cursor: default;
+            opacity: 0.7;
+        }
+        .workflow-btn.auto.aktivni {
+            opacity: 1;
+        }
+
+        /* Řádek nabídky */
+        .nabidka-radek {
+            border-bottom: 1px solid #333;
+        }
+        .nabidka-radek td {
+            padding: 15px !important;
+            vertical-align: top;
+        }
+        .nabidka-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .nabidka-info-jmeno {
+            font-weight: 500;
+            color: #fff;
+        }
+        .nabidka-info-email {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .nabidka-info-telefon {
+            font-size: 0.8rem;
+            color: #666;
+        }
         .stav-expirovana { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
 
         /* Dodatečné položky */
@@ -516,17 +577,15 @@ if ($reklamaceId > 0) {
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="width: 50px;">#</th>
                             <th>Zákazník</th>
-                            <th>Email</th>
-                            <th>Cena</th>
-                            <th>Stav</th>
-                            <th>Platnost do</th>
-                            <th>Akce</th>
+                            <th style="width: 100px;">Cena</th>
+                            <th>Workflow</th>
+                            <th style="width: 100px;">Platnost</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
-                        <tr><td colspan="7" style="text-align: center; color: #666;">Načítám...</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: #666;">Načítám...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1510,30 +1569,75 @@ if ($reklamaceId > 0) {
             const tbody = document.getElementById('nabidky-tbody');
 
             if (!nabidky || nabidky.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">Žádné nabídky</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">Žádné nabídky</td></tr>';
                 return;
             }
 
             let html = '';
             nabidky.forEach(n => {
-                const stavClass = 'stav-' + n.stav;
-                const stavText = {nova: 'Nová', odeslana: 'Odesláno', potvrzena: 'Potvrzeno', expirovana: 'Vypršela'}[n.stav] || n.stav;
                 const platnost = n.platnost_do ? new Date(n.platnost_do).toLocaleDateString('cs-CZ') : '-';
 
-                html += `<tr>
-                    <td>${n.id}</td>
-                    <td>${n.zakaznik_jmeno}</td>
-                    <td>${n.zakaznik_email}</td>
-                    <td>${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
-                    <td><span class="stav-badge ${stavClass}">${stavText}</span></td>
-                    <td>${platnost}</td>
+                // Workflow stavy
+                const jePoslana = !!n.odeslano_at;
+                const jePotvrzena = !!n.potvrzeno_at;
+                const jeZalohaPrijata = !!n.zaloha_prijata_at;
+                const jeHotovo = !!n.hotovo_at;
+                const jeUhrazeno = !!n.uhrazeno_at;
+
+                html += `<tr class="nabidka-radek">
+                    <td style="color: #666;">${n.id}</td>
                     <td>
-                        ${n.stav === 'nova' ? `<button onclick="znovuOdeslat(${n.id})" style="background: #333; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Odeslat</button>` : ''}
+                        <div class="nabidka-info">
+                            <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
+                            <span class="nabidka-info-email">${n.zakaznik_email}</span>
+                            ${n.zakaznik_telefon ? `<span class="nabidka-info-telefon">${n.zakaznik_telefon}</span>` : ''}
+                        </div>
                     </td>
+                    <td style="font-weight: 600; color: #39ff14;">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
+                    <td>
+                        <div class="workflow-container">
+                            <!-- Automatické kroky -->
+                            ${n.stav === 'nova' ?
+                                `<button class="workflow-btn" onclick="znovuOdeslat(${n.id})">Odeslat CN</button>` :
+                                `<span class="workflow-btn auto aktivni" title="Odesláno: ${formatDatum(n.odeslano_at)}">Poslána CN</span>`
+                            }
+                            <span class="workflow-btn auto ${jePotvrzena ? 'aktivni' : ''}" title="${jePotvrzena ? 'Potvrzeno: ' + formatDatum(n.potvrzeno_at) : 'Čeká na potvrzení zákazníkem'}">
+                                Odsouhlasena
+                            </span>
+                            <!-- Manuální kroky -->
+                            <button class="workflow-btn ${jeZalohaPrijata ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'zaloha_prijata')"
+                                    title="${jeZalohaPrijata ? 'Přijato: ' + formatDatum(n.zaloha_prijata_at) : 'Klikněte pro potvrzení'}">
+                                Záloha
+                            </button>
+                            <button class="workflow-btn ${jeHotovo ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'hotovo')"
+                                    title="${jeHotovo ? 'Dokončeno: ' + formatDatum(n.hotovo_at) : 'Klikněte pro potvrzení'}">
+                                Hotovo
+                            </button>
+                            <button class="workflow-btn ${jeUhrazeno ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'uhrazeno')"
+                                    title="${jeUhrazeno ? 'Uhrazeno: ' + formatDatum(n.uhrazeno_at) : 'Klikněte pro potvrzení'}">
+                                Uhrazeno
+                            </button>
+                        </div>
+                    </td>
+                    <td style="color: #888; font-size: 0.85rem;">${platnost}</td>
                 </tr>`;
             });
 
             tbody.innerHTML = html;
+        }
+
+        function formatDatum(datum) {
+            if (!datum) return '-';
+            return new Date(datum).toLocaleString('cs-CZ', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         window.znovuOdeslat = async function(nabidkaId) {
@@ -1557,6 +1661,32 @@ if ($reklamaceId > 0) {
                 }
             } catch (e) {
                 alert('Chyba při odesílání');
+            }
+        };
+
+        // Změna workflow stavu (manuální kroky)
+        window.zmenitWorkflow = async function(nabidkaId, krok) {
+            const formData = new FormData();
+            formData.append('action', 'zmenit_workflow');
+            formData.append('csrf_token', csrfToken);
+            formData.append('nabidka_id', nabidkaId);
+            formData.append('krok', krok);
+
+            try {
+                const response = await fetch('/api/nabidka_api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // Aktualizovat seznam bez reloadu
+                    nacistSeznamNabidek();
+                } else {
+                    alert('Chyba: ' + data.message);
+                }
+            } catch (e) {
+                alert('Chyba při změně stavu');
             }
         };
 

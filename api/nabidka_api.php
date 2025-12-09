@@ -233,8 +233,9 @@ try {
             }
 
             $stmt = $pdo->query("
-                SELECT id, zakaznik_jmeno, zakaznik_email, celkova_cena, mena,
-                       stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at
+                SELECT id, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
+                       stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at,
+                       zaloha_prijata_at, hotovo_at, uhrazeno_at
                 FROM wgs_nabidky
                 ORDER BY vytvoreno_at DESC
                 LIMIT 100
@@ -242,6 +243,63 @@ try {
             $nabidky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             sendJsonSuccess('Seznam nabídek', ['nabidky' => $nabidky]);
+            break;
+
+        // ========================================
+        // ZMENIT_WORKFLOW - Manuální změna workflow stavu (admin only)
+        // ========================================
+        case 'zmenit_workflow':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $nabidkaId = intval($_POST['nabidka_id'] ?? 0);
+            $krok = $_POST['krok'] ?? '';
+
+            if (!$nabidkaId) {
+                sendJsonError('Chybí ID nabídky');
+            }
+
+            // Povolené kroky workflow
+            $povoleneKroky = ['zaloha_prijata', 'hotovo', 'uhrazeno'];
+            if (!in_array($krok, $povoleneKroky)) {
+                sendJsonError('Neplatný workflow krok');
+            }
+
+            // Načíst nabídku
+            $stmt = $pdo->prepare("SELECT * FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nenalezena');
+            }
+
+            // Aktualizovat příslušný sloupec
+            $sloupec = $krok . '_at';
+            $hodnotaSloupce = $nabidka[$sloupec];
+
+            if ($hodnotaSloupce) {
+                // Již nastaveno - zrušit (toggle)
+                $stmt = $pdo->prepare("UPDATE wgs_nabidky SET {$sloupec} = NULL WHERE id = ?");
+                $stmt->execute([$nabidkaId]);
+                $novaHodnota = null;
+            } else {
+                // Nastavit na aktuální čas
+                $stmt = $pdo->prepare("UPDATE wgs_nabidky SET {$sloupec} = NOW() WHERE id = ?");
+                $stmt->execute([$nabidkaId]);
+                $novaHodnota = date('Y-m-d H:i:s');
+            }
+
+            sendJsonSuccess('Workflow aktualizován', [
+                'krok' => $krok,
+                'hodnota' => $novaHodnota,
+                'nabidka_id' => $nabidkaId
+            ]);
             break;
 
         // ========================================
@@ -304,11 +362,27 @@ function vytvorTabulkuNabidky($pdo) {
             odeslano_at DATETIME NULL,
             potvrzeno_at DATETIME NULL,
             potvrzeno_ip VARCHAR(45) NULL,
+            zaloha_prijata_at DATETIME NULL,
+            hotovo_at DATETIME NULL,
+            uhrazeno_at DATETIME NULL,
             INDEX idx_token (token),
             INDEX idx_stav (stav),
             INDEX idx_email (zakaznik_email)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+
+    // Přidat chybějící sloupce pro workflow (pro existující tabulky)
+    $sloupce = ['zaloha_prijata_at', 'hotovo_at', 'uhrazeno_at'];
+    foreach ($sloupce as $sloupec) {
+        try {
+            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE '{$sloupec}'");
+            if (!$stmt->fetch()) {
+                $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} DATETIME NULL");
+            }
+        } catch (PDOException $e) {
+            // Sloupec už existuje nebo jiná chyba - ignorovat
+        }
+    }
 }
 
 /**
