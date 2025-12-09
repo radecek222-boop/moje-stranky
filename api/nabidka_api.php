@@ -763,11 +763,21 @@ function vygenerujEmailNabidky($nabidka) {
                             </div>
 
                             <!-- Upozornění platnost -->
-                            <div style='padding: 0 40px 30px 40px;'>
+                            <div style='padding: 0 40px 20px 40px;'>
                                 <div style='background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px 20px;'>
                                     <p style='margin: 0; font-size: 14px; color: #92400e;'>
                                         <strong>Platnost nabídky:</strong> Tato nabídka je platná do <strong>{$platnostDo}</strong>.
                                         Po tomto datu bude automaticky zrušena.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Informace o měně -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px;'>
+                                    <p style='margin: 0; font-size: 13px; color: #666;'>
+                                        <strong>Informace o měně:</strong> Ceny jsou uvedeny v EUR. Při platbě v CZK bude částka přepočtena
+                                        dle aktuálního kurzu ČNB platného v den vystavení faktury.
                                     </p>
                                 </div>
                             </div>
@@ -791,7 +801,8 @@ function vygenerujEmailNabidky($nabidka) {
                                 </p>
                                 {$poznamkaOZaloze}
                                 <p style='margin: 12px 0 0 0; font-size: 12px; color: #888;'>
-                                    Ceny jsou uvedeny bez DPH. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
+                                    Ceny jsou uvedeny bez DPH. Při platbě v CZK bude částka přepočtena dle kurzu ČNB v den vystavení faktury.
+                                    Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                                 </p>
                             </div>
 
@@ -959,6 +970,7 @@ function vygenerujEmailPotvrzeniZakaznik($nabidka) {
                                 <p style='margin: 0; font-size: 12px; color: #666; line-height: 1.6;'>
                                     Tímto potvrzením jste uzavřeli závaznou smlouvu o dílo dle § 2586 občanského zákoníku
                                     s White Glove Service, s.r.o. Ceny jsou uvedeny bez DPH.
+                                    Při platbě v CZK bude částka přepočtena dle kurzu ČNB v den vystavení faktury.
                                 </p>
                             </div>
 

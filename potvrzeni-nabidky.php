@@ -621,6 +621,13 @@ if (empty($token)) {
                     </p>
                 </div>
 
+                <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.5;">
+                        <strong>Informace o měně:</strong> Ceny jsou uvedeny v EUR. Při platbě v CZK bude částka přepočtena
+                        dle aktuálního kurzu ČNB platného v den vystavení faktury.
+                    </p>
+                </div>
+
                 <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
                     <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong></p>
                     <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11 | Tel: +420 725 965 826</p>
