@@ -1844,7 +1844,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script>console.log("[INLINE] seznam.php loaded", location.pathname);</script>
 <script src="/assets/js/seznam.js?v=20251209-02" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
