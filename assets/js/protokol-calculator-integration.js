@@ -70,7 +70,28 @@
         }
     }
 
-    // Započítat cenu do protokolu
+    // Zpracovat výsledek kalkulace (voláno z cenik-calculator.js)
+    function zpracovatVysledek(data) {
+        // Uložit data kalkulace do globální proměnné pro PDF export
+        window.kalkulaceData = data;
+
+        // Přenést celkovou cenu do pole
+        const priceTotalInput = document.getElementById('price-total');
+        if (priceTotalInput && data && data.celkovaCena !== undefined) {
+            priceTotalInput.value = data.celkovaCena.toFixed(2) + ' €';
+
+            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                wgsToast.success('Cena ' + data.celkovaCena.toFixed(2) + ' € byla započítána');
+            }
+        } else {
+            console.error('[Protokol-Kalkulačka] Chyba: data nebo celkovaCena chybí');
+        }
+
+        // Zavřít modal
+        zavritModal();
+    }
+
+    // Jednoduchá verze započítání (čte přímo z DOM)
     function zapocitatDoProtokolu() {
         const grandTotalElement = document.getElementById('grand-total');
 
@@ -86,6 +107,23 @@
         if (isNaN(cenaCislo)) {
             console.error('[Protokol-Kalkulačka] Neplatná cena:', textCeny);
             return;
+        }
+
+        // Vytvořit základní kalkulaceData ze stavu kalkulačky
+        if (window.stav) {
+            window.kalkulaceData = {
+                celkovaCena: cenaCislo,
+                adresa: window.stav.adresa || document.getElementById('address')?.value || '',
+                vzdalenost: window.stav.vzdalenost || 0,
+                dopravne: window.stav.dopravne || 0,
+                reklamaceBezDopravy: window.stav.reklamaceBezDopravy || false,
+                vyzvednutiSklad: window.stav.vyzvednutiSklad || false,
+                typServisu: window.stav.typServisu || 'calouneni',
+                tezkyNabytek: window.stav.tezkyNabytek || false,
+                material: window.stav.material || false,
+                dilyPrace: [],
+                sluzby: []
+            };
         }
 
         // Přenést cenu do protokolu
@@ -106,8 +144,7 @@
     window.protokolKalkulacka = {
         zavritModal: zavritModal,
         zapocitatDoProtokolu: zapocitatDoProtokolu,
-        // Alias pro kompatibilitu s cenik-calculator.js
-        zpracovatVysledek: zapocitatDoProtokolu
+        zpracovatVysledek: zpracovatVysledek
     };
 
     // Registrace akcí pro data-action atributy
