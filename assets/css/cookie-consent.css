@@ -8,11 +8,11 @@
   bottom: 20px;
   right: 20px;
   z-index: 9999;
-  max-width: 380px;
+  max-width: 400px;
   width: calc(100% - 40px);
   background: #1a1a1a;
-  border-radius: 12px;
-  padding: 20px 25px;
+  border-radius: 10px;
+  padding: 16px 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   border: 1px solid #333;
   font-family: 'Poppins', sans-serif;
@@ -46,18 +46,18 @@
 }
 
 .wgs-cookie-consent-titulek {
-  margin: 0 0 10px 0;
+  margin: 0 0 6px 0;
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .wgs-cookie-consent-text {
-  margin: 0 0 15px 0;
-  color: #ccc;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  margin: 0 0 12px 0;
+  color: #aaa;
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 
 .wgs-cookie-consent-text a {
@@ -72,19 +72,19 @@
 
 /* Sekce s checkboxy */
 .wgs-cookie-consent-volby {
-  margin: 0 0 15px 0;
-  padding: 12px;
+  margin: 0 0 12px 0;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .wgs-cookie-consent-volba {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-  color: #ccc;
-  font-size: 0.8rem;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: #bbb;
+  font-size: 0.7rem;
 }
 
 .wgs-cookie-consent-volba:last-child {
@@ -117,21 +117,21 @@
 /* Tlačítka */
 .wgs-cookie-consent-tlacitka {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .wgs-cookie-consent-btn {
-  flex: 1;
-  min-width: 100px;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  flex: 1 1 0;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 0.72rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
   outline: none;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .wgs-cookie-consent-btn:active {
