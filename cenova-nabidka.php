@@ -358,9 +358,11 @@ if ($reklamaceId > 0) {
         }
         .nabidky-tabulka th {
             background: #1a1a1a;
-            color: #888;
+            color: #ccc;
             font-weight: 500;
             font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .nabidky-tabulka td { font-size: 0.9rem; }
         .stav-badge {
@@ -383,18 +385,19 @@ if ($reklamaceId > 0) {
         }
         .workflow-btn {
             padding: 4px 8px;
-            border: 1px solid #444;
+            border: 1px solid #555;
             border-radius: 4px;
-            background: #222;
-            color: #888;
+            background: #2a2a2a;
+            color: #aaa;
             font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
         }
         .workflow-btn:hover {
-            border-color: #666;
-            color: #ccc;
+            border-color: #777;
+            color: #fff;
+            background: #333;
         }
         .workflow-btn.aktivni {
             background: rgba(57, 255, 20, 0.15);
@@ -428,11 +431,11 @@ if ($reklamaceId > 0) {
         }
         .nabidka-info-email {
             font-size: 0.85rem;
-            color: #888;
+            color: #aaa;
         }
         .nabidka-info-telefon {
             font-size: 0.8rem;
-            color: #666;
+            color: #999;
         }
         .stav-expirovana { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
 
