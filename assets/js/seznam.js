@@ -762,8 +762,14 @@ async function showDetail(recordOrId) {
       </div>
     `;
   } else {
+    // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
+    const vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.reklamace_id || record.id}">Vytvořit CN</button>
+    ` : '';
+
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        ${vytvorCNBtn}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
@@ -900,6 +906,17 @@ function startVisit(id) {
   logger.log('Normalizovaná data uložena:', normalizedData);
 
   window.location.href = 'photocustomer.php?new=true';
+}
+
+// === VYTVOŘIT CENOVOU NABÍDKU ===
+function vytvorCenovouNabidku(reklamaceId) {
+  if (!reklamaceId) {
+    wgsToast.error('Chybí ID reklamace');
+    return;
+  }
+
+  // Přesměrovat na stránku cenové nabídky s ID reklamace
+  window.location.href = 'cenova-nabidka.php?reklamace_id=' + encodeURIComponent(reklamaceId);
 }
 
 // === ULOŽENÍ ===
@@ -3080,7 +3097,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
     const emergencyActions = [
-      'openPDF', 'startVisit', 'showCalendar',
+      'openPDF', 'startVisit', 'showCalendar', 'vytvorCenovouNabidku',
       'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace',
       'showDetailById', 'showDetail', 'showNotes', 'closeNotesModal', 'deleteNote',
       'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate',

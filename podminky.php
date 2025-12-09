@@ -198,6 +198,22 @@
           Po přijetí objednávky Poskytovatel kontaktuje Zákazníka do 2 pracovních dnů
           pro upřesnění detailů a domluvení termínu servisního zásahu.
         </p>
+
+        <h3>2.4 Cenová nabídka</h3>
+        <p>
+          Poskytovatel může Zákazníkovi zaslat cenovou nabídku elektronicky na uvedenou e-mailovou adresu.
+          Cenová nabídka obsahuje specifikaci služeb, cenu bez DPH a dobu platnosti (standardně 30 dní).
+        </p>
+        <p>
+          <strong>Potvrzením cenové nabídky</strong> (kliknutím na tlačítko "Potvrdit nabídku" v zaslaném e-mailu)
+          Zákazník vyjadřuje souhlas s nabídkou a <strong>uzavírá tím závaznou smlouvu o dílo</strong>
+          s Poskytovatelem dle § 2586 a násl. občanského zákoníku.
+        </p>
+        <p>
+          Elektronické potvrzení cenové nabídky má stejné právní účinky jako písemně podepsaná smlouva
+          ve smyslu § 562 občanského zákoníku. Zákazník bere na vědomí, že po potvrzení nabídky
+          je smlouva závazná a zavazuje se k úhradě ceny uvedené v nabídce.
+        </p>
       </article>
 
       <article class="podminky-card">
