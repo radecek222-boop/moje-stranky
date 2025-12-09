@@ -32,7 +32,6 @@ if ($reklamaceId > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cenová nabídka - WGS Admin</title>
-    <link rel="stylesheet" href="/assets/css/global.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -451,7 +450,7 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    cenikPolozky = data.data.polozky;
+                    cenikPolozky = data.polozky;
                     zobrazitCenik(cenikPolozky);
                 }
             } catch (e) {
@@ -633,7 +632,7 @@ if ($reklamaceId > 0) {
                     return;
                 }
 
-                const nabidkaId = data.data.nabidka_id;
+                const nabidkaId = data.nabidka_id;
 
                 // Odeslat email
                 const odeslatData = new FormData();
@@ -675,7 +674,7 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    zobrazitSeznamNabidek(data.data.nabidky);
+                    zobrazitSeznamNabidek(data.nabidky);
                 }
             } catch (e) {
                 console.error('Chyba:', e);
