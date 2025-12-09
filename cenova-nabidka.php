@@ -1507,7 +1507,12 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status !== 'success') {
-                    alert('Chyba: ' + data.message);
+                    let errorMsg = 'Chyba: ' + data.message;
+                    if (data.details) {
+                        errorMsg += '\n\nDetaily: ' + JSON.stringify(data.details);
+                    }
+                    alert(errorMsg);
+                    console.error('API Error:', data);
                     return;
                 }
 
@@ -1718,22 +1723,22 @@ if ($reklamaceId > 0) {
                     </div>
                 </div>
 
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ccc;">
                     <thead>
-                        <tr style="background: #333; color: #fff;">
-                            <th style="padding: 12px; text-align: left;">Položka</th>
-                            <th style="padding: 12px; text-align: center; width: 80px;">Počet</th>
-                            <th style="padding: 12px; text-align: right; width: 100px;">Cena/ks</th>
-                            <th style="padding: 12px; text-align: right; width: 120px;">Celkem</th>
+                        <tr style="background: #f0f0f0; color: #333;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #999;">Položka</th>
+                            <th style="padding: 12px; text-align: center; width: 80px; border-bottom: 2px solid #999;">Počet</th>
+                            <th style="padding: 12px; text-align: right; width: 100px; border-bottom: 2px solid #999;">Cena/ks</th>
+                            <th style="padding: 12px; text-align: right; width: 120px; border-bottom: 2px solid #999;">Celkem</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${polozkyHtml}
                     </tbody>
                     <tfoot>
-                        <tr style="background: #1a1a1a; color: #fff;">
-                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px;">CELKOVÁ CENA (bez DPH):</td>
-                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px;">${data.celkem.toFixed(2)} ${data.mena}</td>
+                        <tr style="background: #f8f8f8; border-top: 2px solid #333;">
+                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; color: #333;">CELKOVÁ CENA (bez DPH):</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${data.mena}</td>
                         </tr>
                     </tfoot>
                 </table>
