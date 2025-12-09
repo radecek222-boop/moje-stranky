@@ -1952,7 +1952,6 @@ if ($reklamaceId > 0) {
                         <div class="nabidka-info">
                             <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
                             <span class="nabidka-info-email">${n.zakaznik_email}</span>
-                            ${n.zakaznik_telefon ? `<span class="nabidka-info-telefon">${n.zakaznik_telefon}</span>` : ''}
                         </div>
                     </td>
                     <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
