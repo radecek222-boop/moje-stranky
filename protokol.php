@@ -512,7 +512,7 @@ if ($initialBootstrapData) {
 
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <!-- Utils - obsahuje fetchCsrfToken a další pomocné funkce -->
-<script src="assets/js/utils.min.js" defer></script>
+<script src="assets/js/utils.js?v=<?= time() ?>" defer></script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
