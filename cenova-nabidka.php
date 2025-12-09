@@ -491,6 +491,94 @@ if ($reklamaceId > 0) {
             cursor: pointer;
             font-size: 1.2rem;
         }
+
+        /* Klikatelný řádek v tabulce */
+        .nabidka-radek {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nabidka-radek:hover {
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        /* PDF Preview Modal */
+        .pdf-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .pdf-modal-overlay.zobrazit { display: flex; }
+        .pdf-modal-container {
+            width: 95%;
+            max-width: 900px;
+            max-height: 95vh;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .pdf-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .pdf-modal-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .pdf-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .pdf-modal-btn {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .pdf-modal-btn:hover { background: #444; }
+        .pdf-modal-btn-primary {
+            background: #28a745;
+        }
+        .pdf-modal-btn-primary:hover { background: #218838; }
+        .pdf-modal-btn-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 1;
+        }
+        .pdf-modal-btn-close:hover { color: #fff; }
+        .pdf-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #fff;
+        }
+        .pdf-modal-loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -894,6 +982,22 @@ if ($reklamaceId > 0) {
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Preview Modal -->
+    <div class="pdf-modal-overlay" id="pdf-modal-overlay">
+        <div class="pdf-modal-container">
+            <div class="pdf-modal-header">
+                <h3 id="pdf-modal-title">Náhled nabídky</h3>
+                <div class="pdf-modal-actions">
+                    <button type="button" class="pdf-modal-btn" id="pdf-modal-stahnout">Stáhnout PDF</button>
+                    <button type="button" class="pdf-modal-btn-close" id="pdf-modal-zavrit">&times;</button>
+                </div>
+            </div>
+            <div class="pdf-modal-body" id="pdf-modal-body">
+                <div class="pdf-modal-loading">Načítám...</div>
             </div>
         </div>
     </div>
