@@ -70,18 +70,18 @@
 
     // Zpracovat kliknutí na pole ceny
     function zpracovatKliknutiNaCenu() {
-        console.log('[Protokol-CN] zpracovatKliknutiNaCenu() ZAVOLÁNA');
+        // DEBUG: Zobrazit hodnotu order-number
+        const orderNum = document.getElementById('order-number');
+        const hodnota = orderNum ? orderNum.value : 'ELEMENT NENALEZEN';
+        alert('DEBUG order-number: "' + hodnota + '"\nZačíná na POZ: ' + (hodnota.trim().toUpperCase().startsWith('POZ') ? 'ANO' : 'NE'));
 
         const jePoz = jePozZakazka();
-        console.log('[Protokol-CN] Je POZ zakázka?', jePoz);
 
         if (jePoz) {
             // POZ zakázka - zobrazit dialog s volbou
-            console.log('[Protokol-CN] -> Zobrazuji WGS dialog');
             zobrazitWgsDialog();
         } else {
             // Běžná zakázka - rovnou kalkulačka
-            console.log('[Protokol-CN] -> Otevírám kalkulačku');
             otevritKalkulacku();
         }
     }
