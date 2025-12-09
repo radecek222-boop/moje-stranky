@@ -34,6 +34,51 @@ document.addEventListener('DOMContentLoaded', () => {
         aktualniStranka = 1;
         aplikovatFiltry();
     });
+
+    // ========================================
+    // PŘÍMÉ EVENT LISTENERY NA TLAČÍTKA
+    // (fallback pokud Utils.registerAction nefunguje)
+    // ========================================
+    const btnReset = document.querySelector('[data-action="resetovitFiltry"]');
+    const btnAplikovat = document.querySelector('[data-action="aplikovatFiltry"]');
+    const btnExport = document.querySelector('[data-action="exportovatPDF"]');
+    const btnPrev = document.querySelector('[data-action="predchoziStranka"]');
+    const btnNext = document.querySelector('[data-action="dalsiStranka"]');
+
+    if (btnReset) {
+        btnReset.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetovitFiltry();
+        });
+    }
+
+    if (btnAplikovat) {
+        btnAplikovat.addEventListener('click', (e) => {
+            e.preventDefault();
+            aplikovatFiltry();
+        });
+    }
+
+    if (btnExport) {
+        btnExport.addEventListener('click', (e) => {
+            e.preventDefault();
+            exportovatPDF();
+        });
+    }
+
+    if (btnPrev) {
+        btnPrev.addEventListener('click', (e) => {
+            e.preventDefault();
+            predchoziStranka();
+        });
+    }
+
+    if (btnNext) {
+        btnNext.addEventListener('click', (e) => {
+            e.preventDefault();
+            dalsiStranka();
+        });
+    }
 });
 
 /**
