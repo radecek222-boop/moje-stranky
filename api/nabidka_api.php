@@ -43,6 +43,38 @@ try {
             break;
 
         // ========================================
+        // SEZNAM_PRO_EMAIL - Nabídky pro konkrétní email (pro protokol)
+        // ========================================
+        case 'seznam_pro_email':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $email = trim($_POST['email'] ?? '');
+            if (empty($email)) {
+                sendJsonError('Email je povinný');
+            }
+
+            // Načíst potvrzené nebo odeslané nabídky pro daný email
+            $stmt = $pdo->prepare("
+                SELECT id, cislo_nabidky, celkova_cena, mena, stav, vytvoreno_at, potvrzeno_at
+                FROM wgs_nabidky
+                WHERE zakaznik_email = :email
+                AND stav IN ('potvrzena', 'odeslana')
+                ORDER BY vytvoreno_at DESC
+                LIMIT 20
+            ");
+            $stmt->execute(['email' => $email]);
+            $nabidky = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            sendJsonSuccess('Nabídky načteny', $nabidky);
+            break;
+
+        // ========================================
         // VYTVORIT - Nová nabídka (admin only)
         // ========================================
         case 'vytvorit':
