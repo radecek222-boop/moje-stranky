@@ -3,6 +3,8 @@
  * Pro POZ zakázky nabízí volbu: Načíst z CN nebo Kalkulačka
  */
 
+console.log('[Protokol-CN] SOUBOR NAČTEN - v2');
+
 (function() {
     'use strict';
 
