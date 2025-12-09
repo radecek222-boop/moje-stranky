@@ -9,6 +9,18 @@
     let modalOverlay = null;
     let wgsDialogOverlay = null;
 
+    // Helper pro zobrazení notifikace (s fallbackem na alert)
+    function zobrazitZpravu(text, typ = 'info') {
+        if (typeof wgsToast !== 'undefined') {
+            if (typ === 'error') wgsToast.error(text);
+            else if (typ === 'warning') wgsToast.warning(text);
+            else if (typ === 'success') wgsToast.success(text);
+            else wgsToast.info(text);
+        } else {
+            alert(text);
+        }
+    }
+
     // Inicializace při načtení stránky
     document.addEventListener('DOMContentLoaded', () => {
         console.log('[Protokol-CN] === INICIALIZACE ZAHÁJENA ===');
@@ -202,9 +214,7 @@
         const email = emailInput ? emailInput.value.trim() : '';
 
         if (!email) {
-            if (typeof wgsToast !== 'undefined') {
-                wgsToast.error('Email zákazníka není vyplněn');
-            }
+            zobrazitZpravu('Email zákazníka není vyplněn', 'error');
             return;
         }
 
@@ -225,9 +235,7 @@
             const result = await response.json();
 
             if (result.status !== 'success' || !result.data || result.data.length === 0) {
-                if (typeof wgsToast !== 'undefined') {
-                    wgsToast.warning('Pro tento email nebyly nalezeny žádné cenové nabídky');
-                }
+                zobrazitZpravu('Pro tento email nebyly nalezeny žádné cenové nabídky', 'warning');
                 // Nabídnout kalkulačku jako alternativu
                 otevritKalkulacku();
                 return;
@@ -238,9 +246,7 @@
 
         } catch (error) {
             console.error('[Protokol-CN] Chyba při načítání nabídek:', error);
-            if (typeof wgsToast !== 'undefined') {
-                wgsToast.error('Chyba při načítání cenových nabídek');
-            }
+            zobrazitZpravu('Chyba při načítání cenových nabídek', 'error');
         }
     }
 
@@ -372,9 +378,7 @@
                 cisloNabidky: cisloNabidky
             };
 
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success(`Cena ${cena.toFixed(2)} € načtena z ${cisloNabidky}`);
-            }
+            zobrazitZpravu(`Cena ${cena.toFixed(2)} € načtena z ${cisloNabidky}`, 'success');
         }
     }
 
@@ -432,10 +436,7 @@
         const priceTotalInput = document.getElementById('price-total');
         if (priceTotalInput && data && data.celkovaCena !== undefined) {
             priceTotalInput.value = data.celkovaCena.toFixed(2) + ' €';
-
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success('Cena ' + data.celkovaCena.toFixed(2) + ' € byla započítána');
-            }
+            zobrazitZpravu('Cena ' + data.celkovaCena.toFixed(2) + ' € byla započítána', 'success');
         } else {
             console.error('[Protokol-Kalkulačka] Chyba: data nebo celkovaCena chybí');
         }
@@ -483,10 +484,7 @@
         const priceTotalInput = document.getElementById('price-total');
         if (priceTotalInput) {
             priceTotalInput.value = cenaCislo.toFixed(2) + ' €';
-
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success('Cena ' + cenaCislo.toFixed(2) + ' € byla započítána');
-            }
+            zobrazitZpravu('Cena ' + cenaCislo.toFixed(2) + ' € byla započítána', 'success');
         }
 
         // Zavřít modal
