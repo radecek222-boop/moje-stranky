@@ -38,6 +38,11 @@
         if (typeof window.nastavitKalkulackuRezim === 'function') {
             window.nastavitKalkulackuRezim('protokol');
         }
+
+        // Resetovat wizard na první krok při každém otevření
+        if (typeof window.resetovatKalkulacku === 'function') {
+            window.resetovatKalkulacku();
+        }
     }
 
     // Zavření modalu
