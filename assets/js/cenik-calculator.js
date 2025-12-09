@@ -850,7 +850,7 @@
                 max-width: 794px !important;
                 padding: 40px;
                 background: white;
-                font-family: Arial, sans-serif;
+                font-family: 'Poppins', sans-serif;
                 position: fixed;
                 left: -9999px;
                 top: 0;
