@@ -97,10 +97,10 @@ if (session_status() === PHP_SESSION_NONE) {
         $isPWA = true;
     }
 
-    // FIX PWA: Delší session lifetime pro PWA mód
-    // Důvod: PWA standalone mode v iOS/Android ruší session cookie při každém "zavření" aplikace
-    // Řešení: Pro PWA nastavit 7 dní, pro browser 0 (do zavření)
-    $sessionLifetime = $isPWA ? (7 * 24 * 60 * 60) : 0;  // 7 dní pro PWA, 0 pro browser
+    // FIX iOS PWA: Session lifetime 30 dní pro všechny
+    // Důvod: iOS PWA ruší session cookie při zavření aplikace, Safari ITP má krátké cookie limity
+    // Řešení: Jednotný 30-denní lifetime pro všechny uživatele (PWA i browser)
+    $sessionLifetime = 30 * 24 * 60 * 60;  // 30 dní = 2592000 sekund
 
     // FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
     // Safari ITP fix: domain = NULL místo prázdného stringu
@@ -123,9 +123,9 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     // Nastavení garbage collection
-    // FIX 3: Zvýšení gc_maxlifetime z 1 hodiny na 24 hodin
-    // Eliminuje předčasné vypršení session a ztrátu CSRF tokenu
-    ini_set('session.gc_maxlifetime', 86400);  // 24 hodin (24 * 60 * 60)
+    // FIX iOS PWA: gc_maxlifetime MUSÍ být sladěn s cookie lifetime
+    // Jinak cookie žije, ale session data jsou smazána serverem
+    ini_set('session.gc_maxlifetime', (string)$sessionLifetime);  // 30 dní (sladěno s cookie)
     ini_set('session.use_only_cookies', 1);
 
     session_start();
