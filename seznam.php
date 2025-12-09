@@ -1124,6 +1124,26 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   background: rgba(76, 175, 80, 0.12) !important;
 }
 
+/* ============================================
+   ORANŽOVÝ RÁMEČEK - Zákazníci s cenovou nabídkou (CN)
+   Toto je PÁTÁ schválená barevná výjimka v projektu.
+   ============================================ */
+.order-box.ma-cenovou-nabidku {
+  border: 2px solid #ff9800 !important; /* Oranžová */
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.3) !important;
+}
+
+.order-box.ma-cenovou-nabidku:hover {
+  box-shadow: 0 0 12px rgba(255, 152, 0, 0.5) !important;
+}
+
+/* Text "Poslána CN" v kartě */
+.order-cn-text {
+  color: #ff9800 !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
   /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */

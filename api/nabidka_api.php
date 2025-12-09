@@ -43,6 +43,27 @@ try {
             break;
 
         // ========================================
+        // EMAILY_S_NABIDKOU - Seznam emailů zákazníků s aktivní CN (pro seznam.php)
+        // ========================================
+        case 'emaily_s_nabidkou':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            // Načíst unikátní emaily zákazníků s potvrzenou nebo odeslanou nabídkou
+            $stmt = $pdo->query("
+                SELECT DISTINCT LOWER(zakaznik_email) as email
+                FROM wgs_nabidky
+                WHERE stav IN ('potvrzena', 'odeslana')
+                AND zakaznik_email IS NOT NULL
+                AND zakaznik_email != ''
+            ");
+            $emaily = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            sendJsonSuccess('Emaily načteny', ['emaily' => $emaily]);
+            break;
+
+        // ========================================
         // SEZNAM_PRO_EMAIL - Nabídky pro konkrétní email (pro protokol)
         // ========================================
         case 'seznam_pro_email':
