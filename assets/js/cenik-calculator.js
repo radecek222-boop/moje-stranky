@@ -156,9 +156,10 @@
     // INIT KALKULAČKY
     // ========================================
     window.addEventListener('DOMContentLoaded', () => {
-        // Inicializovat pouze pokud kalkulačka existuje v DOM (stránka cenik.php)
+        // Inicializovat pouze na stránce cenik.php (ne na protokol.php)
         // Na protokol.php je kalkulačka v modalu a initKalkulacka se volá z protokol-calculator-integration.js
-        if (document.getElementById('kalkulacka')) {
+        const jeProtokolStranka = window.location.pathname.includes('protokol');
+        if (document.getElementById('kalkulacka') && !jeProtokolStranka) {
             initKalkulacka();
         }
     });
