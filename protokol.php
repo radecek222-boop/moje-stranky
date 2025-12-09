@@ -428,7 +428,7 @@ if ($initialBootstrapData) {
           <div class="form-group" style="margin-top: 15px;">
             <label class="checkbox-container">
               <input type="checkbox" id="reklamace-bez-dopravy">
-              <span class="checkbox-label" data-lang-cs="Jedná se o reklamaci – neúčtuje se dopravné" data-lang-en="This is a claim – no transportation fee" data-lang-it="Questo è un reclamo – nessun costo di trasporto">Jedná se o reklamaci – neúčtuje se dopravné</span>
+              <span class="checkbox-label" data-lang-cs="Jedná se o reklamaci – neúčtuje se dopravné" data-lang-en="This is a claim – no transportation fee" data-lang-it="Questo è un reclamo – nessun costo di trasporto">XXX ZNAČKA XXX - Jedná se o reklamaci – neúčtuje se dopravné</span>
             </label>
           </div>
           <div class="form-group" style="margin-top: 10px;">
