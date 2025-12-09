@@ -195,88 +195,96 @@
                 const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                 const cenaMechanismu = celkemMechanismu * CENY.mechanismusPriplatek;
 
+                // Styl pro anglické překlady
+                const enStyle = 'font-size: 0.75em; color: #888; font-style: italic; display: block; margin-top: 2px;';
+
                 pdfContent.innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <h1 style="font-size: 28px; color: #4a4a4a; margin: 0 0 10px 0; font-weight: bold;">
+                        <h1 style="font-size: 28px; color: #4a4a4a; margin: 0 0 5px 0; font-weight: bold;">
                             KALKULACE CENY SERVISU
                         </h1>
-                        <p style="font-size: 14px; color: #666; margin: 0;">
-                            Datum: ${datum}
+                        <span style="${enStyle}">SERVICE PRICE CALCULATION</span>
+                        <p style="font-size: 14px; color: #666; margin: 10px 0 0 0;">
+                            Datum / Date: ${datum}
                         </p>
                     </div>
 
                     <hr style="border: none; border-top: 2px solid #4a4a4a; margin: 20px 0;">
 
                     <div style="margin: 20px 0;">
-                        <h3 style="font-size: 16px; color: #2a2a2a; margin: 0 0 8px 0; font-weight: bold;">
-                            Adresa zákazníka:
+                        <h3 style="font-size: 16px; color: #2a2a2a; margin: 0 0 3px 0; font-weight: bold;">
+                            Adresa zákazníka
                         </h3>
-                        <p style="font-size: 14px; margin: 0 0 5px 0;">${testStav.adresa}</p>
-                        <p style="font-size: 14px; margin: 0;">Vzdálenost z dílny: ${testStav.vzdalenost} km</p>
+                        <span style="${enStyle}">Customer Address</span>
+                        <p style="font-size: 14px; margin: 8px 0 5px 0;">${testStav.adresa}</p>
+                        <p style="font-size: 14px; margin: 0;">Vzdálenost z dílny / Distance from workshop: ${testStav.vzdalenost} km</p>
                     </div>
 
                     <div style="margin: 30px 0; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                        <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
-                            Specifikace zakázky:
+                        <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 3px 0; font-weight: bold;">
+                            Specifikace zakázky
                         </h3>
+                        <span style="${enStyle}">Order Specification</span>
 
-                        <p style="font-size: 14px; margin: 8px 0;">
-                            <strong>Typ servisu:</strong> Kombinace čalounění a mechaniky
+                        <p style="font-size: 14px; margin: 15px 0 8px 0;">
+                            <strong>Typ servisu / Service type:</strong><br>
+                            Kombinace čalounění a mechaniky <span style="color: #888; font-style: italic;">/ Combination of Upholstery and Mechanical</span>
                         </p>
 
-                        <p style="font-size: 14px; margin: 8px 0;"><strong>Čalounické práce:</strong></p>
+                        <p style="font-size: 14px; margin: 8px 0;"><strong>Čalounické práce</strong> <span style="color: #888; font-style: italic;">/ Upholstery Work</span></p>
                         <ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">
-                            <li>Sedáky: ${testStav.sedaky}×</li>
-                            <li>Opěrky: ${testStav.operky}×</li>
-                            <li>Područky: ${testStav.podrucky}×</li>
+                            <li>Sedáky / Seat cushions: ${testStav.sedaky}×</li>
+                            <li>Opěrky / Backrests: ${testStav.operky}×</li>
+                            <li>Područky / Armrests: ${testStav.podrucky}×</li>
                         </ul>
 
-                        <p style="font-size: 14px; margin: 8px 0;"><strong>Mechanické práce:</strong></p>
+                        <p style="font-size: 14px; margin: 8px 0;"><strong>Mechanické práce</strong> <span style="color: #888; font-style: italic;">/ Mechanical Work</span></p>
                         <ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">
-                            <li>Relax mechanismy: ${testStav.relax}×</li>
-                            <li>Elektrické díly: ${testStav.vysuv}×</li>
+                            <li>Relax mechanismy / Recliner mechanisms: ${testStav.relax}×</li>
+                            <li>Elektrické díly / Electric parts: ${testStav.vysuv}×</li>
                         </ul>
 
-                        <p style="font-size: 14px; margin: 8px 0;"><strong>Doplňkové služby:</strong></p>
+                        <p style="font-size: 14px; margin: 8px 0;"><strong>Doplňkové služby</strong> <span style="color: #888; font-style: italic;">/ Additional Services</span></p>
                         <ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">
-                            <li>Druhá osoba (těžký nábytek >50kg): Ano</li>
-                            <li>Materiál dodán od WGS: Ano</li>
+                            <li>Druhá osoba / Second person (>50kg): Ano / Yes</li>
+                            <li>Materiál od WGS / Material from WGS: Ano / Yes</li>
                         </ul>
                     </div>
 
                     <div style="margin: 30px 0; background: #f0f0f0; padding: 20px; border-radius: 8px;">
-                        <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
-                            Cenová kalkulace:
+                        <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 3px 0; font-weight: bold;">
+                            Cenová kalkulace
                         </h3>
+                        <span style="${enStyle}">Price Calculation</span>
 
-                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                            <tr>
-                                <td style="padding: 8px 0;">Dopravné (${testStav.vzdalenost} km × 2 €)</td>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 15px;">
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px 0;">Dopravné / Transport (${testStav.vzdalenost} km × 2€)</td>
                                 <td style="padding: 8px 0; text-align: right; font-weight: bold;">${testStav.dopravne.toFixed(2)} €</td>
                             </tr>
-                            <tr>
-                                <td style="padding: 8px 0;">Čalounické práce (${celkemDilu} dílů)</td>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px 0;">Čalounické práce / Upholstery (${celkemDilu} dílů / parts)</td>
                                 <td style="padding: 8px 0; text-align: right; font-weight: bold;">${cenaDilu.toFixed(2)} €</td>
                             </tr>
                             <tr>
                                 <td colspan="2" style="padding: 4px 0 8px 20px; font-size: 12px; color: #666;">
-                                    První díl: ${CENY.prvniDil} € + ${celkemDilu - 1} další díl(y) × ${CENY.dalsiDil} €
+                                    ↳ První díl / First part: ${CENY.prvniDil}€, další / additional: ${celkemDilu - 1}× ${CENY.dalsiDil}€
                                 </td>
                             </tr>
-                            <tr>
-                                <td style="padding: 8px 0;">Mechanické práce (${celkemMechanismu} mechanismů)</td>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px 0;">Mechanické části / Mechanical parts (${celkemMechanismu}× mechanism)</td>
                                 <td style="padding: 8px 0; text-align: right; font-weight: bold;">${cenaMechanismu.toFixed(2)} €</td>
                             </tr>
-                            <tr>
-                                <td style="padding: 8px 0;">Druhá osoba (těžký nábytek)</td>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px 0;">Druhá osoba / Second person (>50kg)</td>
                                 <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.druhaOsoba.toFixed(2)} €</td>
                             </tr>
-                            <tr>
-                                <td style="padding: 8px 0;">Materiál od WGS</td>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px 0;">Materiál od WGS / Material from WGS</td>
                                 <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.material.toFixed(2)} €</td>
                             </tr>
-                            <tr style="border-top: 2px solid #333;">
-                                <td style="padding: 15px 0; font-size: 18px; font-weight: bold;">CELKOVÁ CENA:</td>
+                            <tr style="border-top: 3px solid #4a4a4a;">
+                                <td style="padding: 15px 0; font-size: 18px; font-weight: bold;">CELKOVÁ CENA / TOTAL PRICE</td>
                                 <td style="padding: 15px 0; text-align: right; font-size: 18px; font-weight: bold; color: #2a2a2a;">
                                     ${celkem.toFixed(2)} €
                                 </td>
@@ -285,12 +293,13 @@
                     </div>
 
                     <div style="background: #f5f5f5; border-left: 4px solid #666; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
-                        Ceny jsou uvedeny bez DPH.
+                        Ceny jsou uvedeny bez DPH. / Prices are excluding VAT.
                     </div>
 
                     <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999;">
-                        <p style="margin: 5px 0;">White Glove Service s.r.o. | www.wgs-service.cz | info@wgs-service.cz</p>
-                        <p style="margin: 5px 0;">Vygenerováno: ${new Date().toLocaleString('cs-CZ')}</p>
+                        <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong> | www.wgs-service.cz</p>
+                        <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11 | Tel: +420 725 965 826</p>
+                        <p style="margin: 5px 0;">Vygenerováno / Generated: ${new Date().toLocaleString('cs-CZ')}</p>
                     </div>
                 `;
 
