@@ -233,11 +233,6 @@ function getZakazky($pdo) {
             'total_count' => $totalCount,
             'stranka' => $stranka,
             'celkem_stranek' => ceil($totalCount / $limit)
-        ],
-        // DEBUG
-        'debug' => [
-            'where' => $where,
-            'params' => $params
         ]
     ]);
 }
