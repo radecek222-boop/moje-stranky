@@ -718,8 +718,9 @@ function sendEmailToCustomer($data) {
     $storageKey = reklamaceStorageKey($reklamaceId);
     // Pouzit zakaznicke cislo reklamace (cislo), ne interni WGS cislo (reklamace_id)
     $cisloReklamace = $reklamace['cislo'] ?? $reklamace['reklamace_id'] ?? $reklamaceId;
-    $subject = "Servisní protokol WGS - Reklamace č. {$cisloReklamace}";
     $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
+    // Předmět vždy začíná jménem zákazníka a číslem reklamace
+    $subject = "{$customerName} - Reklamace č. {$cisloReklamace} - Servisní protokol WGS";
 
     // Sestavit sekci videodokumentace pokud existuji videa
     $videoSection = '';

@@ -125,8 +125,9 @@ function getSummaryStatistiky($pdo) {
  * Včetně "Mimozáruční servis" (created_by IS NULL)
  */
 function loadProdejci($pdo) {
+    // FIX: Vracet user_id jako id, protože created_by v reklamacích obsahuje user_id
     $stmt = $pdo->query("
-        SELECT DISTINCT u.id, u.name
+        SELECT DISTINCT u.user_id as id, u.name
         FROM wgs_users u
         WHERE u.is_active = 1
         ORDER BY u.name ASC
@@ -185,12 +186,13 @@ function getZakazky($pdo) {
     $totalCount = (int)($stmtCount->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Hlavní dotaz
+    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
-            COALESCE(technik.name, '-') as technik,
+            COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
@@ -230,6 +232,13 @@ function getZakazky($pdo) {
             'total_count' => $totalCount,
             'stranka' => $stranka,
             'celkem_stranek' => ceil($totalCount / $limit)
+        ],
+        // DEBUG INFO - odstranit po vyřešení
+        'debug' => [
+            'GET_params' => $_GET,
+            'where_clause' => $where,
+            'bound_params' => $params,
+            'sql_query' => $sql
         ]
     ]);
 }
@@ -289,16 +298,17 @@ function getCharty($pdo) {
     $prodejci = $stmtProdejci->fetchAll(PDO::FETCH_ASSOC);
 
     // 4. Statistiky techniků
+    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
     $stmtTechnici = $pdo->prepare("
         SELECT
-            COALESCE(u.name, '-') as technik,
+            COALESCE(u.name, r.technik, '-') as technik,
             COUNT(*) as pocet,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'
         $where
-        GROUP BY u.name, u.id
+        GROUP BY COALESCE(u.name, r.technik, '-')
         ORDER BY pocet DESC
         LIMIT 10
     ");
@@ -367,14 +377,17 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
+    // FIX: assigned_to může obsahovat buď numerické id nebo textové user_id
+    // Používáme subquery pro nalezení obou hodnot
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
 
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
-            $key = ":technik_$idx";
-            $techniciConditions[] = "r.assigned_to = $key";
-            $params[$key] = (int)$technik;
+            $keyId = ":technik_id_$idx";
+            // Hledáme podle numerického id nebo přes subquery user_id
+            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = (SELECT user_id FROM wgs_users WHERE id = $keyId LIMIT 1))";
+            $params[$keyId] = (int)$technik;
         }
 
         if (!empty($techniciConditions)) {

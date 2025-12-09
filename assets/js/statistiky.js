@@ -34,6 +34,42 @@ document.addEventListener('DOMContentLoaded', () => {
         aktualniStranka = 1;
         aplikovatFiltry();
     });
+
+    // ========================================
+    // PŘÍMÉ EVENT LISTENERY NA TLAČÍTKA
+    // ========================================
+    const btnReset = document.querySelector('[data-action="resetovitFiltry"]');
+    const btnExport = document.querySelector('[data-action="exportovatPDF"]');
+    const btnPrev = document.querySelector('[data-action="predchoziStranka"]');
+    const btnNext = document.querySelector('[data-action="dalsiStranka"]');
+
+    if (btnReset) {
+        btnReset.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetovitFiltry();
+        });
+    }
+
+    if (btnExport) {
+        btnExport.addEventListener('click', (e) => {
+            e.preventDefault();
+            exportovatPDF();
+        });
+    }
+
+    if (btnPrev) {
+        btnPrev.addEventListener('click', (e) => {
+            e.preventDefault();
+            predchoziStranka();
+        });
+    }
+
+    if (btnNext) {
+        btnNext.addEventListener('click', (e) => {
+            e.preventDefault();
+            dalsiStranka();
+        });
+    }
 });
 
 /**
@@ -184,6 +220,10 @@ function updateVyberProdejci() {
     } else {
         label.textContent = `Vybráno (${vybraneProdejci.length})`;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
@@ -203,6 +243,10 @@ function updateVyberTechnici() {
     } else {
         label.textContent = `Vybráno (${vybraneTechnici.length})`;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
@@ -222,6 +266,10 @@ function updateVyberZeme() {
         const labelElement = checkbox.nextElementSibling;
         label.textContent = labelElement.textContent;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
@@ -277,8 +325,19 @@ async function nactiZakazky() {
         container.innerHTML = '<div class="loading">Načítání zakázek...</div>';
 
         const filterParams = getFilterParams();
+        console.log('=== STATISTIKY DEBUG ===');
+        console.log('Filter params URL:', filterParams);
+        console.log('vybraneProdejci:', vybraneProdejci);
+        console.log('vybraneTechnici:', vybraneTechnici);
+        console.log('vybraneZeme:', vybraneZeme);
+
         const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&stranka=${aktualniStranka}`);
         const result = await response.json();
+
+        // DEBUG - zobrazit v konzoli
+        if (result.debug) {
+            console.log('API DEBUG:', result.debug);
+        }
 
         if (result.status === 'success') {
             renderTabulka(result.data);
@@ -489,9 +548,11 @@ function aplikovatFiltry() {
  * Resetovat filtry
  */
 function resetovitFiltry() {
-    // Reset year, month
-    document.getElementById('filter-year').value = '2025';
-    document.getElementById('filter-month').value = '11';
+    // Reset year, month - dynamicky aktuální rok a měsíc
+    const aktualniRok = new Date().getFullYear().toString();
+    const aktualniMesic = (new Date().getMonth() + 1).toString(); // JS měsíce jsou 0-indexed
+    document.getElementById('filter-year').value = aktualniRok;
+    document.getElementById('filter-month').value = aktualniMesic;
 
     // Reset prodejci
     document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]').forEach(cb => {
@@ -715,4 +776,38 @@ async function exportovatPDF() {
         console.error('Chyba exportu PDF:', error);
         wgsToast.error('Chyba při exportu PDF: ' + error.message);
     }
+}
+
+// ========================================
+// EXPORT FUNKCÍ NA WINDOW PRO DATA-ACTION
+// ========================================
+window.aplikovatFiltry = aplikovatFiltry;
+window.resetovitFiltry = resetovitFiltry;
+window.exportovatPDF = exportovatPDF;
+window.predchoziStranka = predchoziStranka;
+window.dalsiStranka = dalsiStranka;
+
+// ========================================
+// ACTION REGISTRY - Registrace akcí pro event delegation
+// ========================================
+if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    window.Utils.registerAction('aplikovatFiltry', () => {
+        aplikovatFiltry();
+    });
+
+    window.Utils.registerAction('resetovitFiltry', () => {
+        resetovitFiltry();
+    });
+
+    window.Utils.registerAction('exportovatPDF', () => {
+        exportovatPDF();
+    });
+
+    window.Utils.registerAction('predchoziStranka', () => {
+        predchoziStranka();
+    });
+
+    window.Utils.registerAction('dalsiStranka', () => {
+        dalsiStranka();
+    });
 }
