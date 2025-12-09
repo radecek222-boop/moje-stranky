@@ -3,6 +3,10 @@
  * @version 2.0.0
  */
 
+// DEBUG - ověření že se načítá správná verze souboru
+alert('CENIK-CALCULATOR.JS NAČTEN! (ne minifikovaná verze)');
+console.log('[DEBUG] cenik-calculator.js - zdrojová verze načtena');
+
 (function() {
     'use strict';
 
