@@ -1129,11 +1129,13 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
    Toto je PÁTÁ schválená barevná výjimka v projektu.
    ============================================ */
 .order-box.ma-cenovou-nabidku {
+  background: rgba(255, 152, 0, 0.08) !important; /* Lehký oranžový nádech */
   border: 2px solid #ff9800 !important; /* Oranžová */
   box-shadow: 0 0 8px rgba(255, 152, 0, 0.3) !important;
 }
 
 .order-box.ma-cenovou-nabidku:hover {
+  background: rgba(255, 152, 0, 0.12) !important; /* Trochu více na hover */
   box-shadow: 0 0 12px rgba(255, 152, 0, 0.5) !important;
 }
 
