@@ -966,9 +966,9 @@
 
             // CENOVÝ SOUHRN
             htmlContent += `
-                <div style="margin: 30px 0;">
+                <div style="margin: 30px 0; background: #f0f0f0; padding: 20px; border-radius: 8px;">
                     <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
-                        Cenový souhrn:
+                        Cenová kalkulace:
                     </h3>
 
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
@@ -1090,9 +1090,8 @@
                     </table>
                 </div>
 
-                <div style="background: #fff9f0; border-left: 4px solid #ff9900; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
-                    <strong>Upozornění:</strong> Ceny jsou orientační a vztahují se pouze na práci.
-                    Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.
+                <div style="background: #f5f5f5; border-left: 4px solid #666; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
+                    Ceny jsou uvedeny bez DPH.
                 </div>
 
                 <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999;">
