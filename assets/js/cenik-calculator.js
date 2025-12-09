@@ -700,6 +700,39 @@
     }
 
     // ========================================
+    // PŘEDVYPLNIT ADRESU Z TEXTU (pro protokol)
+    // ========================================
+    window.predvyplnitAdresu = async function(adresaText) {
+        if (!adresaText || !adresaText.trim()) return;
+
+        const calcAddress = document.getElementById('calc-address');
+        if (calcAddress) {
+            calcAddress.value = adresaText.trim();
+        }
+
+        // Geocoding přes WGSMap
+        try {
+            const data = await WGSMap.autocomplete(adresaText, {
+                type: 'street',
+                limit: 1,
+                country: 'CZ,SK'
+            });
+
+            if (data && data.features && data.features.length > 0) {
+                const feature = data.features[0];
+                const coords = feature.geometry.coordinates;
+                const formatted = feature.properties.formatted || adresaText;
+
+                // Zavolat vybratAdresu s koordináty
+                await vybratAdresu(formatted, coords[1], coords[0]);
+            }
+        } catch (error) {
+            console.warn('[Kalkulačka] Nepodařilo se geocodovat adresu:', error);
+            // I tak necháme adresu vyplněnou - uživatel může použít checkbox "reklamace bez dopravy"
+        }
+    };
+
+    // ========================================
     // RESETOVAT KALKULAČKU
     // ========================================
     window.resetovatKalkulacku = function() {

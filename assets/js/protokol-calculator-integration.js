@@ -43,6 +43,17 @@
         if (typeof window.resetovatKalkulacku === 'function') {
             window.resetovatKalkulacku();
         }
+
+        // Předvyplnit adresu z protokolu do kalkulačky
+        const adresaProtokol = document.getElementById('address');
+        if (adresaProtokol && adresaProtokol.value.trim()) {
+            // Počkat až se modal zobrazí, pak předvyplnit a vyhledat vzdálenost
+            setTimeout(() => {
+                if (typeof window.predvyplnitAdresu === 'function') {
+                    window.predvyplnitAdresu(adresaProtokol.value.trim());
+                }
+            }, 200);
+        }
     }
 
     // Zavření modalu
