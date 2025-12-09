@@ -91,9 +91,17 @@ try {
     // Funkce pro kontrolu existence indexu
     function indexExistuje($pdo, $tabulka, $nazevIndexu) {
         try {
-            $stmt = $pdo->prepare("SHOW INDEX FROM `$tabulka` WHERE Key_name = :nazev");
-            $stmt->execute(['nazev' => $nazevIndexu]);
-            return $stmt->rowCount() > 0;
+            // Použijeme INFORMATION_SCHEMA pro spolehlivou detekci
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as cnt
+                FROM INFORMATION_SCHEMA.STATISTICS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :tabulka
+                AND INDEX_NAME = :nazev
+            ");
+            $stmt->execute(['tabulka' => $tabulka, 'nazev' => $nazevIndexu]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['cnt'] ?? 0) > 0;
         } catch (PDOException $e) {
             return false;
         }
@@ -102,9 +110,17 @@ try {
     // Funkce pro kontrolu existence sloupce
     function sloupecExistuje($pdo, $tabulka, $sloupec) {
         try {
-            $stmt = $pdo->prepare("SHOW COLUMNS FROM `$tabulka` LIKE :sloupec");
-            $stmt->execute(['sloupec' => $sloupec]);
-            return $stmt->rowCount() > 0;
+            // SHOW COLUMNS LIKE nefunguje s prepared statements, použijeme INFORMATION_SCHEMA
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as cnt
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :tabulka
+                AND COLUMN_NAME = :sloupec
+            ");
+            $stmt->execute(['tabulka' => $tabulka, 'sloupec' => $sloupec]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['cnt'] ?? 0) > 0;
         } catch (PDOException $e) {
             return false;
         }
