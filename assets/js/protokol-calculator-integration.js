@@ -3,10 +3,6 @@
  * Pro POZ zakázky nabízí volbu: Načíst z CN nebo Kalkulačka
  */
 
-// DEBUG: Toto MUSÍ zobrazit alert pokud se soubor vykonává
-alert('PROTOKOL-CN: Skript se spouští!');
-console.log('[Protokol-CN] SOUBOR NAČTEN - v3');
-
 (function() {
     'use strict';
 
