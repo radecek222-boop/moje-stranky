@@ -1,5 +1,6 @@
 /**
- * Integrace kalkulačky do protokolu
+ * Integrace kalkulačky do protokolu - Step 116
+ * - Kalkulačka je vložena přímo v HTML (ne dynamicky načítaná)
  * - Otevírá modal s kalkulačkou
  * - Zpracovává výsledek kalkulace
  * - Ukládá data kalkulace k reklamaci
@@ -10,158 +11,119 @@
 
     let kalkulaceData = null; // Aktuální data z kalkulačky
     let modalOverlay = null;
-    let modalBody = null;
+    let kalkulackaInitialized = false;
 
     // ========================================
     // INICIALIZACE
-    // Step 40: Migrace na Alpine.js - close/overlay click handlery přesunuty do calculatorModal komponenty
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
         modalOverlay = document.getElementById('calculatorModalOverlay');
-        modalBody = document.getElementById('calculatorModalBody');
         const priceTotalInput = document.getElementById('price-total');
 
-        if (!modalOverlay || !modalBody) {
-            console.error('[Protokol-Kalkulačka] Modal elementy nenalezeny!');
+        if (!modalOverlay) {
+            console.error('[Protokol-Kalkulačka] Modal overlay nenalezen!');
             return;
         }
 
         // Event listener pro otevření kalkulačky (kliknutí na pole)
         if (priceTotalInput) {
             priceTotalInput.addEventListener('click', otevritKalkulacku);
-            // Přidat vizuální indikátor že pole je klikatelné
             priceTotalInput.style.cursor = 'pointer';
         }
-
-        // Step 40: Zavírání modalu nyní řeší Alpine.js (closeBtn, overlay click, ESC)
-        // Vanilla JS event listenery odstraněny
     });
 
     // ========================================
     // OTEVŘENÍ MODALU S KALKULAČKOU
     // ========================================
-    async function otevritKalkulacku() {
-        try {
-            // Zobrazit loading
-            modalBody.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div style="width: 50px; height: 50px; border: 4px solid #ddd;
-                                border-top: 4px solid #333333; border-radius: 50%;
-                                animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
-                    <p style="color: #666;">Načítám kalkulačku...</p>
-                </div>
-            `;
+    function otevritKalkulacku() {
+        // Zobrazit modal přes Alpine.js API
+        if (window.calculatorModal && window.calculatorModal.open) {
+            window.calculatorModal.open();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            modalOverlay.style.display = 'flex';
+        }
 
-            // Přidat CSS animaci pro spinner pokud ještě neexistuje
-            if (!document.getElementById('calc-spinner-style')) {
-                const style = document.createElement('style');
-                style.id = 'calc-spinner-style';
-                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-                document.head.appendChild(style);
-            }
-
-            // Step 40: Zobrazit modal přes Alpine.js API
-            if (window.calculatorModal && window.calculatorModal.open) {
-                window.calculatorModal.open();
-            } else {
-                // Fallback pro zpětnou kompatibilitu
-                modalOverlay.classList.remove('hidden');
-            }
-
-            // Načíst HTML kalkulačky z cenik.php (s credentials pro přihlášeného uživatele)
-            const response = await fetch('cenik.php', {
-                credentials: 'same-origin'
-            });
-            if (!response.ok) {
-                throw new Error('Nepodařilo se načíst kalkulačku');
-            }
-
-            const html = await response.text();
-
-            // Extrahovat pouze div s kalkulačkou
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const kalkulackaElement = doc.getElementById('kalkulacka');
-
-            if (!kalkulackaElement) {
-                throw new Error('Kalkulačka nebyla nalezena v HTML');
-            }
-
-            // Vložit kalkulačku do modalu
-            modalBody.innerHTML = kalkulackaElement.outerHTML;
-
-            // Reinicializovat kalkulačku - připojit event listenery k novému DOMu
+        // Inicializovat kalkulačku (pouze jednou nebo při resetu)
+        if (!kalkulackaInitialized) {
             if (typeof window.initKalkulacka === 'function') {
                 window.initKalkulacka();
+                kalkulackaInitialized = true;
             } else {
                 console.warn('[Protokol-Kalkulačka] Funkce initKalkulacka není dostupná');
             }
-
-            // Nastavit kalkulačku do protokol režimu
-            if (typeof window.nastavitKalkulackuRezim === 'function') {
-                window.nastavitKalkulackuRezim('protokol');
-            }
-
-            // Načíst data zákazníka z protokolu
-            const customerAddress = document.getElementById('address')?.value;
-            const customerName = document.getElementById('customer')?.value;
-            const claimNumber = document.getElementById('claim-number')?.value;
-
-            // Předvyplnit adresu do kalkulačky
-            if (customerAddress && customerAddress.trim() !== '') {
-                const calcAddressInput = document.getElementById('calc-address');
-                if (calcAddressInput) {
-                    calcAddressInput.value = customerAddress;
-
-                    // Automaticky spustit vyhledávání adresy po krátké prodlevě
-                    setTimeout(() => {
-                        // Simulovat input event pro spuštění autocomplete
-                        const event = new Event('input', { bubbles: true });
-                        calcAddressInput.dispatchEvent(event);
-                    }, 300);
-                }
-            }
-
-        } catch (error) {
-            console.error('[Protokol-Kalkulačka] Chyba při načítání kalkulačky:', error);
-            modalBody.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <h2>Chyba</h2>
-                    <p style="color: #d32f2f;">Nepodařilo se načíst kalkulačku.</p>
-                    <p>${error.message}</p>
-                    <button class="btn-primary" data-action="zavritProtokolModal">Zavřít</button>
-                </div>
-            `;
         }
+
+        // Nastavit kalkulačku do protokol režimu
+        if (typeof window.nastavitKalkulackuRezim === 'function') {
+            window.nastavitKalkulackuRezim('protokol');
+        }
+
+        // Resetovat wizard na první krok
+        resetovatWizardNaPrvniKrok();
+
+        // Předvyplnit adresu z protokolu
+        predvyplnitAdresu();
     }
 
     // ========================================
-    // INICIALIZACE KALKULAČKY V MODALU
+    // RESET WIZARDU NA PRVNÍ KROK
     // ========================================
-    function inicializovatKalkulackuVModalu() {
-        // Zkontrolovat jestli existuje globální funkce z cenik-calculator.js
-        // (Kalkulačka by měla být již načtená přes defer)
+    function resetovatWizardNaPrvniKrok() {
+        const kalkulackaContainer = document.getElementById('kalkulacka');
+        if (!kalkulackaContainer) return;
 
-        // TODO: Potřebujeme upravit cenik-calculator.js aby:
-        // 1. Neexportoval PDF přímo
-        // 2. Místo toho zobrazil souhrn s tlačítky Zpět/Započítat
+        // Schovat všechny kroky
+        const vsechnyKroky = kalkulackaContainer.querySelectorAll('.wizard-step');
+        vsechnyKroky.forEach(krok => {
+            krok.classList.add('hidden');
+        });
+
+        // Zobrazit první krok
+        const prvniKrok = kalkulackaContainer.querySelector('#step-address');
+        if (prvniKrok) {
+            prvniKrok.classList.remove('hidden');
+        }
+
+        // Resetovat progress indikátor
+        const progressSteps = kalkulackaContainer.querySelectorAll('.progress-step');
+        progressSteps.forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index === 0) {
+                step.classList.add('active');
+            }
+        });
+    }
+
+    // ========================================
+    // PŘEDVYPLNĚNÍ ADRESY Z PROTOKOLU
+    // ========================================
+    function predvyplnitAdresu() {
+        const customerAddress = document.getElementById('address')?.value;
+
+        if (customerAddress && customerAddress.trim() !== '') {
+            const calcAddressInput = document.getElementById('calc-address');
+            if (calcAddressInput) {
+                calcAddressInput.value = customerAddress;
+
+                // Automaticky spustit vyhledávání adresy po krátké prodlevě
+                setTimeout(() => {
+                    const event = new Event('input', { bubbles: true });
+                    calcAddressInput.dispatchEvent(event);
+                }, 300);
+            }
+        }
     }
 
     // ========================================
     // ZAVŘENÍ MODALU
-    // Step 40: Migrace na Alpine.js
     // ========================================
     function zavritModal() {
-        // Step 40: Zavřít modal přes Alpine.js API
         if (window.calculatorModal && window.calculatorModal.close) {
             window.calculatorModal.close();
         } else {
-            // Fallback pro zpětnou kompatibilitu
-            modalOverlay.classList.add('hidden');
+            modalOverlay.style.display = 'none';
         }
-
-        modalBody.innerHTML = '';
-        kalkulaceData = null;
 
         // Resetovat režim kalkulačky zpět na standalone
         if (typeof window.nastavitKalkulackuRezim === 'function') {
@@ -170,32 +132,71 @@
     }
 
     // ========================================
-    // ZPRACOVÁNÍ VÝSLEDKU KALKULACE
+    // ZAPOČÍTÁNÍ DO PROTOKOLU
     // ========================================
-    function zpracovatVysledekKalkulace(data) {
-        // Uložit data kalkulace
-        kalkulaceData = data;
+    function zapocitatDoProtokolu() {
+        // Získat celkovou cenu z kalkulačky
+        const grandTotalElement = document.getElementById('grand-total');
 
-        // Přenést celkovou cenu do pole
+        if (!grandTotalElement) {
+            console.error('[Protokol-Kalkulačka] Element grand-total nenalezen');
+            if (typeof showNotif === 'function') {
+                showNotif('error', 'Chyba: Nepodařilo se získat celkovou cenu');
+            }
+            return;
+        }
+
+        // Extrahovat číselnou hodnotu z textu (např. "350 €" -> 350)
+        const textCeny = grandTotalElement.textContent || grandTotalElement.innerText;
+        const cenaCislo = parseFloat(textCeny.replace(/[^\d.,]/g, '').replace(',', '.'));
+
+        if (isNaN(cenaCislo)) {
+            console.error('[Protokol-Kalkulačka] Nepodařilo se parsovat cenu:', textCeny);
+            if (typeof showNotif === 'function') {
+                showNotif('error', 'Chyba: Neplatná hodnota ceny');
+            }
+            return;
+        }
+
+        // Přenést cenu do pole price-total
         const priceTotalInput = document.getElementById('price-total');
-        if (priceTotalInput && data.celkovaCena) {
-            priceTotalInput.value = data.celkovaCena.toFixed(2);
+        if (priceTotalInput) {
+            priceTotalInput.value = cenaCislo.toFixed(2) + ' €';
 
             // Zobrazit notifikaci
             if (typeof showNotif === 'function') {
-                showNotif('success', `Cena ${data.celkovaCena.toFixed(2)} € byla započítána`);
-            }
-        } else {
-            console.error('[Protokol-Kalkulačka] Pole price-total nebo celková cena nenalezeny');
-            if (typeof showNotif === 'function') {
-                showNotif('error', 'Chyba při přenosu ceny');
+                showNotif('success', `Cena ${cenaCislo.toFixed(2)} € byla započítána do protokolu`);
             }
         }
 
         // Zavřít modal
         zavritModal();
 
-        // Uložit kalkulaci do databáze
+        // Uložit kalkulaci do databáze (pokud je známo ID reklamace)
+        const kalkulaceDataObjekt = {
+            celkovaCena: cenaCislo,
+            datum: new Date().toISOString()
+        };
+
+        ulozitKalkulaciDoDB(kalkulaceDataObjekt);
+    }
+
+    // ========================================
+    // ZPRACOVÁNÍ VÝSLEDKU KALKULACE (legacy)
+    // ========================================
+    function zpracovatVysledekKalkulace(data) {
+        kalkulaceData = data;
+
+        const priceTotalInput = document.getElementById('price-total');
+        if (priceTotalInput && data.celkovaCena) {
+            priceTotalInput.value = data.celkovaCena.toFixed(2) + ' €';
+
+            if (typeof showNotif === 'function') {
+                showNotif('success', `Cena ${data.celkovaCena.toFixed(2)} € byla započítána`);
+            }
+        }
+
+        zavritModal();
         ulozitKalkulaciDoDB(data);
     }
 
@@ -204,16 +205,16 @@
     // ========================================
     async function ulozitKalkulaciDoDB(data) {
         try {
-            // Získat ID reklamace
-            const reklamaceId = currentReklamaceId || new URLSearchParams(window.location.search).get('id');
+            const reklamaceId = window.currentReklamaceId || new URLSearchParams(window.location.search).get('id');
 
             if (!reklamaceId) {
                 console.warn('[Protokol-Kalkulačka] Není známo ID reklamace, kalkulace nebude uložena');
                 return;
             }
 
-            // Získat CSRF token z meta tagu nebo přes API
-            const csrfToken = await window.fetchCsrfToken();
+            const csrfToken = typeof window.fetchCsrfToken === 'function'
+                ? await window.fetchCsrfToken()
+                : document.querySelector('meta[name="csrf-token"]')?.content;
 
             if (!csrfToken) {
                 console.error('[Protokol-Kalkulačka] Nepodařilo se získat CSRF token');
@@ -236,11 +237,8 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                // KRITICKÁ OPRAVA: Aktualizovat globální proměnnou
                 if (typeof window.kalkulaceData !== 'undefined') {
                     window.kalkulaceData = data;
-                } else {
-                    console.warn('[Protokol-Kalkulačka] window.kalkulaceData není definována');
                 }
             } else {
                 console.error('[Protokol-Kalkulačka] Chyba při ukládání:', result.message);
@@ -256,18 +254,28 @@
     // ========================================
     window.protokolKalkulacka = {
         zpracovatVysledek: zpracovatVysledekKalkulace,
-        zavritModal: zavritModal
+        zavritModal: zavritModal,
+        zapocitatDoProtokolu: zapocitatDoProtokolu
     };
 
     // ========================================
-    // ACTION REGISTRY - Step 115
+    // ACTION REGISTRY - Step 116
     // ========================================
-    if (typeof Utils !== 'undefined' && Utils.registerAction) {
-        Utils.registerAction('zavritProtokolModal', () => {
-            if (window.protokolKalkulacka && typeof window.protokolKalkulacka.zavritModal === 'function') {
-                window.protokolKalkulacka.zavritModal();
-            }
-        });
+    function registrovatAkce() {
+        if (typeof Utils !== 'undefined' && Utils.registerAction) {
+            Utils.registerAction('zavritProtokolModal', zavritModal);
+            Utils.registerAction('zapocitatDoProtokolu', zapocitatDoProtokolu);
+        } else {
+            // Zkusit znovu za chvíli pokud Utils ještě není načtené
+            setTimeout(registrovatAkce, 100);
+        }
+    }
+
+    // Spustit registraci akcí
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', registrovatAkce);
+    } else {
+        registrovatAkce();
     }
 
 })();

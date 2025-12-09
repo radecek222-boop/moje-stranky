@@ -377,7 +377,273 @@ if ($initialBootstrapData) {
       <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close" aria-label="Zavřít">×</button>
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
-      <!-- Kalkulačka se vloží dynamicky -->
+      <!-- Kalkulačka vložena přímo (ne dynamicky) - Step 116 -->
+      <div class="calculator-section" id="kalkulacka">
+        <h2 class="section-title" data-lang-cs="Kalkulace ceny služby" data-lang-en="Service Price Calculation" data-lang-it="Calcolo del Prezzo del Servizio">Kalkulace ceny služby</h2>
+        <p class="section-text" data-lang-cs="Odpovězte na několik jednoduchých otázek a zjistěte orientační cenu servisu." data-lang-en="Answer a few simple questions and find out the estimated price of the service." data-lang-it="Rispondi ad alcune semplici domande e scopri il prezzo stimato del servizio.">
+          Odpovězte na několik jednoduchých otázek a zjistěte orientační cenu servisu.
+        </p>
+
+        <!-- Progress Indicator -->
+        <div class="wizard-progress" id="wizard-progress">
+          <div class="progress-step active" data-step="1">
+            <span class="step-number">1</span>
+            <span class="step-label" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</span>
+          </div>
+          <div class="progress-step" data-step="2">
+            <span class="step-number">2</span>
+            <span class="step-label" data-lang-cs="Typ servisu" data-lang-en="Service Type" data-lang-it="Tipo di Servizio">Typ servisu</span>
+          </div>
+          <div class="progress-step" data-step="3">
+            <span class="step-number">3</span>
+            <span class="step-label" data-lang-cs="Detaily" data-lang-en="Details" data-lang-it="Dettagli">Detaily</span>
+          </div>
+          <div class="progress-step" data-step="4">
+            <span class="step-number">4</span>
+            <span class="step-label" data-lang-cs="Souhrn" data-lang-en="Summary" data-lang-it="Riepilogo">Souhrn</span>
+          </div>
+        </div>
+
+        <!-- KROK 1: Zadání adresy -->
+        <div class="wizard-step" id="step-address">
+          <h3 class="step-title" data-lang-cs="1. Zadejte adresu zákazníka" data-lang-en="1. Enter Customer Address" data-lang-it="1. Inserisci l'Indirizzo del Cliente">1. Zadejte adresu zákazníka</h3>
+          <p class="step-desc" data-lang-cs="Pro výpočet dopravného potřebujeme znát vaši adresu." data-lang-en="We need your address to calculate the transportation cost." data-lang-it="Abbiamo bisogno del tuo indirizzo per calcolare il costo del trasporto.">Pro výpočet dopravného potřebujeme znát vaši adresu.</p>
+
+          <div class="form-group">
+            <label for="calc-address" data-lang-cs="Adresa:" data-lang-en="Address:" data-lang-it="Indirizzo:">Adresa:</label>
+            <input
+              type="text"
+              id="calc-address"
+              class="calc-input"
+              placeholder="Začněte psát adresu (ulice, město)..."
+              data-lang-placeholder-cs="Začněte psát adresu (ulice, město)..."
+              data-lang-placeholder-en="Start typing address (street, city)..."
+              data-lang-placeholder-it="Inizia a digitare l'indirizzo (via, città)..."
+              autocomplete="off"
+            >
+            <div id="address-suggestions" class="suggestions-dropdown hidden"></div>
+          </div>
+
+          <!-- Checkbox pro reklamace - viditelný jen pro přihlášené uživatele (protokol vždy vyžaduje přihlášení) -->
+          <div class="form-group" style="margin-top: 15px;">
+            <label class="checkbox-container">
+              <input type="checkbox" id="reklamace-bez-dopravy">
+              <span class="checkbox-label" data-lang-cs="Jedná se o reklamaci – neúčtuje se dopravné" data-lang-en="This is a claim – no transportation fee" data-lang-it="Questo è un reclamo – nessun costo di trasporto">Jedná se o reklamaci – neúčtuje se dopravné</span>
+            </label>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="checkbox-container">
+              <input type="checkbox" id="vyzvednuti-sklad">
+              <span class="checkbox-label" data-lang-cs="Vyzvednutí dílu pro reklamaci na skladě + 10 €" data-lang-en="Part pickup for claim at warehouse + 10 €" data-lang-it="Ritiro del pezzo per reclamo presso magazzino + 10 €">Vyzvednutí dílu pro reklamaci na skladě + 10 €</span>
+            </label>
+          </div>
+
+          <div id="distance-result" class="calc-result" style="display: none;">
+            <div class="result-box">
+              <p><strong data-lang-cs="Vzdálenost z dílny:" data-lang-en="Distance from workshop:" data-lang-it="Distanza dall'officina:">Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
+              <p><strong data-lang-cs="Dopravné (tam a zpět):" data-lang-en="Transportation (round trip):" data-lang-it="Trasporto (andata e ritorno):">Dopravné (tam a zpět):</strong> <span id="transport-cost" class="highlight-price">-</span> €</p>
+            </div>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          </div>
+        </div>
+
+        <!-- KROK 2: Typ servisu -->
+        <div class="wizard-step hidden" id="step-service-type">
+          <h3 class="step-title" data-lang-cs="2. Jaký typ servisu potřebujete?" data-lang-en="2. What type of service do you need?" data-lang-it="2. Che tipo di servizio ti serve?">2. Jaký typ servisu potřebujete?</h3>
+          <p class="step-desc" data-lang-cs="Vyberte, co u vás potřebujeme udělat." data-lang-en="Select what we need to do for you." data-lang-it="Seleziona cosa dobbiamo fare per te.">Vyberte, co u vás potřebujeme udělat.</p>
+
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="service-type" value="diagnostika">
+              <div class="radio-content">
+                <div class="radio-title" data-lang-cs="Pouze diagnostika / inspekce" data-lang-en="Diagnostic / Inspection Only" data-lang-it="Solo Diagnostica / Ispezione">Pouze diagnostika / inspekce</div>
+                <div class="radio-desc" data-lang-cs="Technik provede pouze zjištění rozsahu poškození a posouzení stavu." data-lang-en="Technician will only assess the extent of damage and evaluate the condition." data-lang-it="Il tecnico valuterà solo l'entità del danno e valuterà le condizioni.">Technik provede pouze zjištění rozsahu poškození a posouzení stavu.</div>
+                <div class="radio-price">110 €</div>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="service-type" value="calouneni" checked>
+              <div class="radio-content">
+                <div class="radio-title" data-lang-cs="Čalounické práce" data-lang-en="Upholstery Work" data-lang-it="Lavori di Tappezzeria">Čalounické práce</div>
+                <div class="radio-desc" data-lang-cs="Oprava včetně rozčalounění konstrukce (sedáky, opěrky, područky)." data-lang-en="Repair including disassembly of structure (seats, backrests, armrests)." data-lang-it="Riparazione compreso smontaggio della struttura (sedili, schienali, braccioli).">Oprava včetně rozčalounění konstrukce (sedáky, opěrky, područky).</div>
+                <div class="radio-price" data-lang-cs="Od 205 €" data-lang-en="From 205 €" data-lang-it="Da 205 €">Od 205 €</div>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="service-type" value="mechanika">
+              <div class="radio-content">
+                <div class="radio-title" data-lang-cs="Mechanické opravy" data-lang-en="Mechanical Repairs" data-lang-it="Riparazioni Meccaniche">Mechanické opravy</div>
+                <div class="radio-desc" data-lang-cs="Oprava mechanismů (relax, výsuv) bez rozčalounění." data-lang-en="Repair of mechanisms (relax, slide) without disassembly." data-lang-it="Riparazione di meccanismi (relax, scorrimento) senza smontaggio.">Oprava mechanismů (relax, výsuv) bez rozčalounění.</div>
+                <div class="radio-price" data-lang-cs="Od 165 €" data-lang-en="From 165 €" data-lang-it="Da 165 €">Od 165 €</div>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="service-type" value="kombinace">
+              <div class="radio-content">
+                <div class="radio-title" data-lang-cs="Kombinace čalounění + mechaniky" data-lang-en="Upholstery + Mechanics Combination" data-lang-it="Combinazione Tappezzeria + Meccanica">Kombinace čalounění + mechaniky</div>
+                <div class="radio-desc" data-lang-cs="Komplexní oprava zahrnující čalounění i mechanické části." data-lang-en="Comprehensive repair including both upholstery and mechanical parts." data-lang-it="Riparazione completa comprendente sia tappezzeria che parti meccaniche.">Komplexní oprava zahrnující čalounění i mechanické části.</div>
+                <div class="radio-price" data-lang-cs="Dle rozsahu" data-lang-en="Based on scope" data-lang-it="In base all'ambito">Dle rozsahu</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+            <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          </div>
+        </div>
+
+        <!-- KROK 3A: Čalounické práce - počet dílů -->
+        <div class="wizard-step hidden" id="step-upholstery">
+          <h3 class="step-title" data-lang-cs="3. Kolik dílů potřebuje přečalounit?" data-lang-en="3. How many parts need reupholstering?" data-lang-it="3. Quante parti necessitano di ritappezzatura?">3. Kolik dílů potřebuje přečalounit?</h3>
+          <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part costs 205€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte costa 205€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€.</p>
+
+          <div class="counter-group">
+            <div class="counter-item">
+              <label data-lang-cs="Sedáky" data-lang-en="Seats" data-lang-it="Sedili">Sedáky</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="sedaky" aria-label="Snížit počet sedáků">−</button>
+                <input type="number" id="sedaky" value="0" min="0" max="20" readonly aria-label="Počet sedáků">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="sedaky" aria-label="Zvýšit počet sedáků">+</button>
+              </div>
+            </div>
+
+            <div class="counter-item">
+              <label data-lang-cs="Opěrky" data-lang-en="Backrests" data-lang-it="Schienali">Opěrky</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="operky" aria-label="Snížit počet opěrek">−</button>
+                <input type="number" id="operky" value="0" min="0" max="20" readonly aria-label="Počet opěrek">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="operky" aria-label="Zvýšit počet opěrek">+</button>
+              </div>
+            </div>
+
+            <div class="counter-item">
+              <label data-lang-cs="Područky" data-lang-en="Armrests" data-lang-it="Braccioli">Područky</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="podrucky" aria-label="Snížit počet područek">−</button>
+                <input type="number" id="podrucky" value="0" min="0" max="20" readonly aria-label="Počet područek">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="podrucky" aria-label="Zvýšit počet područek">+</button>
+              </div>
+            </div>
+
+            <div class="counter-item">
+              <label data-lang-cs="Panely (zadní/boční)" data-lang-en="Panels (back/side)" data-lang-it="Pannelli (posteriore/laterale)">Panely (zadní/boční)</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="panely" aria-label="Snížit počet panelů">−</button>
+                <input type="number" id="panely" value="0" min="0" max="20" readonly aria-label="Počet panelů">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="panely" aria-label="Zvýšit počet panelů">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="parts-summary" id="parts-summary">
+            <strong data-lang-cs="Celkem dílů:" data-lang-en="Total parts:" data-lang-it="Totale parti:">Celkem dílů:</strong> <span id="total-parts">0</span>
+            <span class="price-breakdown" id="parts-price-breakdown"></span>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+            <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          </div>
+        </div>
+
+        <!-- KROK 3B: Mechanické práce -->
+        <div class="wizard-step hidden" id="step-mechanics">
+          <h3 class="step-title" data-lang-cs="3. Mechanické části" data-lang-en="3. Mechanical Parts" data-lang-it="3. Parti Meccaniche">3. Mechanické části</h3>
+          <p class="step-desc" data-lang-cs="Vyberte, které mechanické části potřebují opravu." data-lang-en="Select which mechanical parts need repair." data-lang-it="Seleziona quali parti meccaniche necessitano di riparazione.">Vyberte, které mechanické části potřebují opravu.</p>
+
+          <div class="counter-group">
+            <div class="counter-item">
+              <label data-lang-cs="Relax mechanismy" data-lang-en="Relax mechanisms" data-lang-it="Meccanismi relax">Relax mechanismy</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="relax" aria-label="Snížit počet relax mechanismů">−</button>
+                <input type="number" id="relax" value="0" min="0" max="10" readonly aria-label="Počet relax mechanismů">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="relax" aria-label="Zvýšit počet relax mechanismů">+</button>
+              </div>
+              <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
+            </div>
+
+            <div class="counter-item">
+              <label data-lang-cs="Elektrické díly" data-lang-en="Electrical parts" data-lang-it="Parti elettriche">Elektrické díly</label>
+              <div class="counter-controls">
+                <button class="btn-counter" data-action="decrementCounter" data-counter="vysuv" aria-label="Snížit počet elektrických dílů">−</button>
+                <input type="number" id="vysuv" value="0" min="0" max="10" readonly aria-label="Počet elektrických dílů">
+                <button class="btn-counter" data-action="incrementCounter" data-counter="vysuv" aria-label="Zvýšit počet elektrických dílů">+</button>
+              </div>
+              <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
+            </div>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+            <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          </div>
+        </div>
+
+        <!-- KROK 4: Další parametry -->
+        <div class="wizard-step hidden" id="step-extras">
+          <h3 class="step-title" data-lang-cs="4. Další parametry" data-lang-en="4. Additional Parameters" data-lang-it="4. Parametri Aggiuntivi">4. Další parametry</h3>
+          <p class="step-desc" data-lang-cs="Poslední detaily pro přesný výpočet ceny." data-lang-en="Last details for accurate price calculation." data-lang-it="Ultimi dettagli per un calcolo preciso del prezzo.">Poslední detaily pro přesný výpočet ceny.</p>
+
+          <div class="checkbox-group">
+            <label class="checkbox-card">
+              <input type="checkbox" id="tezky-nabytek">
+              <div class="checkbox-content">
+                <div class="checkbox-title" data-lang-cs="Nábytek je těžší než 50 kg" data-lang-en="Furniture weighs more than 50 kg" data-lang-it="Mobile pesa più di 50 kg">Nábytek je těžší než 50 kg</div>
+                <div class="checkbox-desc" data-lang-cs="Bude potřeba druhá osoba pro manipulaci" data-lang-en="A second person will be needed for handling" data-lang-it="Sarà necessaria una seconda persona per la manipolazione">Bude potřeba druhá osoba pro manipulaci</div>
+                <div class="checkbox-price">+ 95 €</div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input type="checkbox" id="material">
+              <div class="checkbox-content">
+                <div class="checkbox-title" data-lang-cs="Materiál dodán od WGS" data-lang-en="Material supplied by WGS" data-lang-it="Materiale fornito da WGS">Materiál dodán od WGS</div>
+                <div class="checkbox-desc" data-lang-cs="Výplně (vata, pěna) z naší zásoby" data-lang-en="Fillings (batting, foam) from our stock" data-lang-it="Imbottiture (ovatta, schiuma) dal nostro magazzino">Výplně (vata, pěna) z naší zásoby</div>
+                <div class="checkbox-price">+ 50 €</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+            <button class="btn-primary" data-action="nextStep" data-lang-cs="Zobrazit souhrn" data-lang-en="Show Summary" data-lang-it="Mostra Riepilogo">Zobrazit souhrn</button>
+          </div>
+        </div>
+
+        <!-- KROK 5: Cenový souhrn -->
+        <div class="wizard-step hidden" id="step-summary">
+          <h3 class="step-title" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h3>
+
+          <div class="price-summary-box">
+            <div id="summary-details">
+              <!-- Načteno dynamicky JavaScriptem -->
+            </div>
+
+            <div class="summary-line total">
+              <span><strong data-lang-cs="CELKOVÁ CENA:" data-lang-en="TOTAL PRICE:" data-lang-it="PREZZO TOTALE:">CELKOVÁ CENA:</strong></span>
+              <span id="grand-total" class="total-price"><strong>0 €</strong></span>
+            </div>
+
+            <div class="summary-note">
+              <strong data-lang-cs="Upozornění:" data-lang-en="Notice:" data-lang-it="Avviso:">Upozornění:</strong> <span data-lang-cs="Ceny jsou orientační a vztahují se pouze na práci. Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby." data-lang-en="Prices are indicative and apply only to labor. Original material from Natuzzi factory and replacement mechanical parts are charged separately based on actual consumption." data-lang-it="I prezzi sono indicativi e si applicano solo alla manodopera. Il materiale originale della fabbrica Natuzzi e le parti meccaniche di ricambio vengono addebitati separatamente in base al consumo effettivo.">Ceny jsou orientační a vztahují se <strong>pouze na práci</strong>.
+              Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.</span>
+            </div>
+          </div>
+
+          <div class="wizard-buttons">
+            <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+            <button class="btn-primary" data-action="zapocitatDoProtokolu" data-lang-cs="Započítat do protokolu" data-lang-en="Apply to protocol" data-lang-it="Applica al protocollo">Započítat do protokolu</button>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
