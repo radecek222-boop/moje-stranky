@@ -494,11 +494,16 @@ async function renderOrders(items = null) {
   try {
     const cnResponse = await fetch('api/nabidka_api.php?action=emaily_s_nabidkou');
     const cnData = await cnResponse.json();
+    console.log('[CN DEBUG] API odpověď:', cnData);
     if (cnData.status === 'success') {
       emailySCN = cnData.data?.emaily || [];
+    } else {
+      console.warn('[CN DEBUG] API vrátila chybu:', cnData.message);
     }
+    console.log('[CN DEBUG] emailySCN pole:', emailySCN);
   } catch (e) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
+    console.error('[CN DEBUG] Fetch error:', e);
   }
 
   filtered.sort((a, b) => {
@@ -538,6 +543,17 @@ async function renderOrders(items = null) {
     // Zkontrolovat zda zákazník má cenovou nabídku (CN)
     const zakaznikEmail = (rec.email || '').toLowerCase().trim();
     const maCenovouNabidku = zakaznikEmail && emailySCN.includes(zakaznikEmail);
+
+    // DEBUG: Logovat prvních 5 reklamací
+    if (index < 5) {
+      console.log(`[CN DEBUG] Reklamace ${rec.id}:`, {
+        email: rec.email,
+        zakaznikEmail,
+        maCenovouNabidku,
+        appointmentText,
+        emailySCN_obsahuje: emailySCN.includes(zakaznikEmail)
+      });
+    }
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
