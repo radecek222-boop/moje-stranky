@@ -470,7 +470,7 @@ function vygenerujEmailNabidky($nabidka) {
                                     Podrobnosti naleznete v našich <a href='{$baseUrl}/podminky.php' style='color: #333;'>obchodních podmínkách</a>.
                                 </p>
                                 <p style='margin: 12px 0 0 0; font-size: 12px; color: #888;'>
-                                    Ceny jsou uvedeny bez DPH. Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť dle skutečné spotřeby.
+                                    Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu ve výši jejich ceny. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                                 </p>
                             </div>
 
