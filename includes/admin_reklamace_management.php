@@ -4,30 +4,9 @@
  * Kompletní správa všech reklamací s timeline historií
  */
 
-// KRITICKÉ: Vynutit správné session nastavení PŘED načtením init.php
-// Toto obchází opcache problém - přímo nastavíme cookies parametry
-if (session_status() === PHP_SESSION_NONE) {
-    // Detekce HTTPS
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
-
-    // FORCE session parametry (obchází opcache v init.php)
-    session_set_cookie_params(
-        3600,           // lifetime
-        '/',            // path
-        '',             // domain
-        $isHttps,       // secure
-        true            // httponly
-    );
-
-    // SameSite=None MUSÍ být nastaven aby fungoval iframe
-    if (PHP_VERSION_ID >= 70300) {
-        ini_set('session.cookie_samesite', 'None');
-    }
-
-    session_start();
-}
-
+// FIX iOS PWA: Session bootstrap je POUZE v init.php
+// Odstraněn duplicitní blok se session_set_cookie_params a session_start
+// který způsoboval nekonzistentní cookie parametry (SameSite=None vs Lax)
 require_once __DIR__ . '/../init.php';
 
 // Bezpečnostní kontrola

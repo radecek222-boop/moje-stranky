@@ -1,8 +1,10 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+// FIX iOS PWA: Session se startuje POUZE v init.php po nastavení cookie params
+// Zakomentováno - duplicitní session_start způsoboval ignorování cookie parametrů
+// if (session_status() === PHP_SESSION_NONE) { session_start(); }
 /**
- * WHITE GLOVE SERVICE - CONFIG - OPRAVENÁ VERZE
- * SESSION musí být nastaven PRVNÍ, před jakýmkoli outputem!
+ * WHITE GLOVE SERVICE - CONFIG
+ * Session bootstrap je v init.php (cookie params + session_start)
  */
 
 // ========== NAČTENÍ .ENV SOUBORU ==========
