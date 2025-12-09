@@ -376,7 +376,7 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
-    // FIX: assigned_to může obsahovat buď numerické id nebo textové user_id
+    // FIX: Hledáme v assigned_to (numerické id, textové user_id) A TAKÉ v textovém sloupci technik
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
 
@@ -384,16 +384,20 @@ function buildFilterWhere() {
         foreach ($technici as $idx => $technik) {
             $keyId = ":technik_id_$idx";
             $keyUserId = ":technik_uid_$idx";
-            // Hledáme podle numerického id nebo textového user_id
-            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId)";
-            $params[$keyId] = (string)$technik; // Může být uloženo jako string
+            $keyName = ":technik_name_$idx";
 
-            // Získat user_id pro tohoto technika z DB
+            // Získat user_id A jméno pro tohoto technika z DB
             $pdoLocal = getDbConnection();
-            $stmtUid = $pdoLocal->prepare("SELECT user_id FROM wgs_users WHERE id = :id LIMIT 1");
-            $stmtUid->execute([':id' => (int)$technik]);
-            $uidRow = $stmtUid->fetch(PDO::FETCH_ASSOC);
-            $params[$keyUserId] = $uidRow['user_id'] ?? '';
+            $stmtUser = $pdoLocal->prepare("SELECT user_id, name FROM wgs_users WHERE id = :id LIMIT 1");
+            $stmtUser->execute([':id' => (int)$technik]);
+            $userRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+            $params[$keyId] = (string)$technik; // Numerické id jako string
+            $params[$keyUserId] = $userRow['user_id'] ?? '';
+            $params[$keyName] = $userRow['name'] ?? '';
+
+            // Hledáme podle: assigned_to = id NEBO assigned_to = user_id NEBO technik (text) = jméno
+            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId OR r.technik = $keyName)";
         }
 
         if (!empty($techniciConditions)) {
