@@ -1202,13 +1202,21 @@
 // ========================================
 // ACTION REGISTRY - Registrace akcí pro event delegation (Step 112)
 // ========================================
+console.log('[Kalkulačka] Pokus o registraci akcí, Utils:', typeof window.Utils, 'registerAction:', typeof window.Utils?.registerAction);
+
 if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    console.log('[Kalkulačka] Registruji akce do ActionRegistry...');
+
     // Wizard navigace
     window.Utils.registerAction('nextStep', () => {
+        console.log('[Kalkulačka] ActionRegistry: nextStep akce spuštěna');
         if (typeof window.nextStep === 'function') {
             window.nextStep();
+        } else {
+            console.error('[Kalkulačka] window.nextStep není funkce!');
         }
     });
+    console.log('[Kalkulačka] Akce nextStep zaregistrována');
 
     window.Utils.registerAction('previousStep', () => {
         if (typeof window.previousStep === 'function') {
@@ -1248,4 +1256,8 @@ if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
             window.zapocitatDoProtokolu();
         }
     });
+
+    console.log('[Kalkulačka] Všechny akce úspěšně zaregistrovány');
+} else {
+    console.error('[Kalkulačka] CHYBA: Utils nebo registerAction není dostupný!');
 }
