@@ -15,17 +15,17 @@
         const priceTotalInput = document.getElementById('price-total');
 
         if (!modalOverlay) {
-            console.error('[Protokol-Kalkulačka] Modal overlay nenalezen!');
-            return;
+            console.warn('[Protokol-Kalkulačka] Modal overlay nenalezen - kalkulačka nebude dostupná');
         }
 
-        // Vytvořit WGS dialog pro výběr
+        // Vytvořit WGS dialog pro výběr (funguje i bez kalkulačky)
         vytvorWgsDialog();
 
         // Kliknutí na pole ceny
         if (priceTotalInput) {
             priceTotalInput.addEventListener('click', zpracovatKliknutiNaCenu);
             priceTotalInput.style.cursor = 'pointer';
+            console.log('[Protokol-Kalkulačka] Event listener přidán na price-total');
         }
     });
 
