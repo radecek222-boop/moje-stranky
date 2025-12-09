@@ -714,11 +714,11 @@ if ($reklamaceId > 0) {
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th style="width: 130px; white-space: nowrap;">CN</th>
-                            <th>Zákazník</th>
-                            <th style="width: 100px;">Cena</th>
-                            <th>Workflow</th>
-                            <th style="width: 100px;">Platnost</th>
+                            <th style="width: 120px; white-space: nowrap;">CN</th>
+                            <th style="width: 200px;">Zákazník</th>
+                            <th style="width: 90px;">Cena</th>
+                            <th style="white-space: nowrap;">Workflow</th>
+                            <th style="width: 90px;">Platnost</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
