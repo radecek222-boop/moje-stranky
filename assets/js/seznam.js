@@ -1,5 +1,5 @@
-// VERSION CHECK: 20251123-03 - Odstraněny duplicitní event listenery
-console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251123-03 (event listener cleanup)');
+// VERSION CHECK: 20251209-01 - CN debug logy
+console.log('[SEZNAM.JS] VERZE: 20251209-01 - CN DEBUG AKTIVNÍ');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
