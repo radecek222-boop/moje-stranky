@@ -169,18 +169,26 @@ console.log('[DEBUG] cenik-calculator.js - zdrojová verze načtena');
     });
 
     function initKalkulacka() {
+        console.log('[DEBUG] initKalkulacka() zavolána');
+
         // Zkontrolovat že kalkulačka existuje
         const kalkulackaElement = document.getElementById('kalkulacka');
         if (!kalkulackaElement) {
+            console.log('[DEBUG] Kalkulačka element nenalezen!');
             return;
         }
 
         // Resetovat stav při každé inicializaci (důležité pro protokol modal)
+        console.log('[DEBUG] Volám resetovatStav()...');
         resetovatStav();
+        console.log('[DEBUG] stav po resetu:', JSON.stringify(stav));
+
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
         nastavitPevnouVysku();
+
+        console.log('[DEBUG] initKalkulacka() dokončena');
     }
 
     /**
@@ -356,8 +364,13 @@ console.log('[DEBUG] cenik-calculator.js - zdrojová verze načtena');
     // WIZARD NAVIGACE
     // ========================================
     window.nextStep = function() {
-        // DEBUG
-        alert('nextStep voláno! Aktuální krok: ' + stav.krok);
+        // DEBUG - detailní logování
+        const debugInfo = 'nextStep voláno!\n' +
+            'stav.krok = ' + stav.krok + '\n' +
+            'stav.typServisu = ' + stav.typServisu + '\n' +
+            'stav.adresa = ' + stav.adresa;
+        console.log('[DEBUG nextStep]', debugInfo);
+        alert(debugInfo);
 
         // Najít kontejner kalkulačky (může být na stránce nebo v modalu)
         const kalkulackaContainer = document.getElementById('kalkulacka') ||
@@ -431,14 +444,21 @@ console.log('[DEBUG] cenik-calculator.js - zdrojová verze načtena');
 
         // Kontrola že nextStepId je definován
         if (!nextStepId) {
+            console.log('[DEBUG] nextStepId je undefined! krok=' + stav.krok);
             return;
         }
+
+        // DEBUG - co se bude zobrazovat
+        console.log('[DEBUG] Zobrazuji krok: ' + nextStepId + ', stav.krok=' + stav.krok);
 
         // Zobrazit další krok
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
             nextStep.classList.remove('hidden');
             nextStep.style.display = 'flex';
+            console.log('[DEBUG] Krok ' + nextStepId + ' zobrazen');
+        } else {
+            console.error('[DEBUG] Element ' + nextStepId + ' NENALEZEN!');
         }
 
         aktualizovatProgress();
