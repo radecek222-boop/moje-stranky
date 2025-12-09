@@ -11,13 +11,9 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'index.php',
                 'header_label' => 'DOMŮ',
             ],
-            'seznam' => [
-                'href' => 'seznam.php',
-                'header_label' => 'SEZNAM REKLAMACÍ',
-            ],
-            'protokol' => [
-                'href' => 'protokol.php',
-                'header_label' => 'PROTOKOL',
+            'nabidka' => [
+                'href' => 'cenova-nabidka.php',
+                'header_label' => 'CENOVÁ NABÍDKA',
             ],
             'statistiky' => [
                 'href' => 'statistiky.php',

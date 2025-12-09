@@ -1891,6 +1891,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'vytvorCenovouNabidku':
+        if (id && typeof vytvorCenovouNabidku === 'function') {
+          console.log('[EMERGENCY] Vytvarim cenovou nabidku pro ID:', id);
+          vytvorCenovouNabidku(id);
+        }
+        break;
+
       case 'closeDetail':
         if (typeof closeDetail === 'function') {
           closeDetail();

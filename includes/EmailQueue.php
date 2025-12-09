@@ -46,6 +46,80 @@ function __construct($pdo = null) {
     }
 
     /**
+     * Přidá email s přílohou do fronty a IHNED odešle
+     *
+     * @param string $toEmail Email příjemce
+     * @param string $subject Předmět
+     * @param string $body Tělo emailu (HTML)
+     * @param array $attachments Pole příloh [['filename' => 'name.pdf', 'content' => 'base64data', 'type' => 'application/pdf']]
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function sendWithAttachment($toEmail, $subject, $body, $attachments = []) {
+        $settings = $this->getSMTPSettings();
+
+        if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+            return ['success' => false, 'message' => 'PHPMailer není dostupný'];
+        }
+
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+        try {
+            // SMTP nastavení
+            $mail->isSMTP();
+            $mail->Host = $settings['smtp_host'];
+
+            if (!empty($settings['smtp_username']) && !empty($settings['smtp_password'])) {
+                $mail->SMTPAuth = true;
+                $mail->Username = $settings['smtp_username'];
+                $mail->Password = $settings['smtp_password'];
+            } else {
+                $mail->SMTPAuth = false;
+            }
+
+            if ($settings['smtp_encryption'] === 'ssl') {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            } elseif ($settings['smtp_encryption'] === 'tls') {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            }
+
+            $mail->Port = $settings['smtp_port'];
+            $mail->CharSet = 'UTF-8';
+            $mail->Timeout = 30;
+
+            // Odesílatel a příjemce
+            $mail->setFrom($settings['smtp_from_email'], $settings['smtp_from_name']);
+            $mail->addAddress($toEmail);
+
+            // HTML obsah
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = pridatEmailFooter($body, $toEmail, true);
+            $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
+
+            // Přílohy
+            foreach ($attachments as $attachment) {
+                if (!empty($attachment['content']) && !empty($attachment['filename'])) {
+                    $content = base64_decode($attachment['content']);
+                    $mail->addStringAttachment(
+                        $content,
+                        $attachment['filename'],
+                        'base64',
+                        $attachment['type'] ?? 'application/octet-stream'
+                    );
+                }
+            }
+
+            $mail->send();
+
+            return ['success' => true, 'message' => 'Email s přílohou odeslán'];
+
+        } catch (\Exception $e) {
+            error_log("EmailQueue sendWithAttachment error: " . $mail->ErrorInfo);
+            return ['success' => false, 'message' => $mail->ErrorInfo];
+        }
+    }
+
+    /**
      * Přidá email do fronty
      *
      * @param array $data Email data
