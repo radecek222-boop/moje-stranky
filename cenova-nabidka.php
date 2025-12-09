@@ -352,19 +352,34 @@ if ($reklamaceId > 0) {
         }
         .nabidky-tabulka th,
         .nabidky-tabulka td {
-            padding: 12px 15px;
+            padding: 8px 10px;
             text-align: left;
-            border-bottom: 1px solid #333;
+            vertical-align: top;
         }
         .nabidky-tabulka th {
             background: #1a1a1a;
-            color: #ccc;
+            color: #fff;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            border-bottom: 2px solid #333;
         }
-        .nabidky-tabulka td { font-size: 0.9rem; }
+        .nabidky-tabulka td {
+            font-size: 0.75rem;
+            background: #fff;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+        .nabidky-tabulka tr:hover td {
+            background: #f8f8f8;
+        }
+        .nabidka-cena {
+            font-weight: 700;
+            color: #dc3545 !important;
+            white-space: nowrap;
+        }
         .stav-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -372,53 +387,69 @@ if ($reklamaceId > 0) {
             font-size: 0.75rem;
             font-weight: 500;
         }
-        .stav-nova { background: #333; color: #888; }
-        .stav-odeslana { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
-        .stav-potvrzena { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .stav-nova { background: #eee; color: #666; }
+        .stav-odeslana { background: #ddd; color: #555; }
+        .stav-potvrzena { background: #333; color: #fff; }
 
         /* Workflow kroky */
         .workflow-container {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: wrap;
-            margin-top: 8px;
         }
         .workflow-btn {
-            padding: 4px 8px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background: #2a2a2a;
-            color: #aaa;
-            font-size: 0.7rem;
+            padding: 3px 6px;
+            border: 1px solid #444;
+            border-radius: 3px;
+            background: #222;
+            color: #fff;
+            font-size: 0.65rem;
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
         }
         .workflow-btn:hover {
-            border-color: #777;
-            color: #fff;
+            border-color: #666;
             background: #333;
         }
         .workflow-btn.aktivni {
-            background: rgba(57, 255, 20, 0.15);
-            border-color: #39ff14;
-            color: #39ff14;
+            background: #1a1a1a;
+            border: 2px solid #39ff14;
+            color: #fff;
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
         }
         .workflow-btn.auto {
             cursor: default;
-            opacity: 0.7;
+            opacity: 0.6;
         }
         .workflow-btn.auto.aktivni {
             opacity: 1;
         }
 
+        /* Tlačítko smazat */
+        .btn-smazat {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #dc3545;
+            border-radius: 3px;
+            color: #dc3545;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-smazat:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
         /* Řádek nabídky */
         .nabidka-radek {
-            border-bottom: 1px solid #333;
+            cursor: pointer;
         }
         .nabidka-radek td {
-            padding: 15px !important;
-            vertical-align: top;
+            padding: 10px 8px !important;
+            vertical-align: middle;
         }
         .nabidka-info {
             display: flex;
@@ -426,16 +457,16 @@ if ($reklamaceId > 0) {
             gap: 4px;
         }
         .nabidka-info-jmeno {
-            font-weight: 500;
-            color: #fff;
+            font-weight: 600;
+            color: #222;
         }
         .nabidka-info-email {
-            font-size: 0.85rem;
-            color: #aaa;
+            font-size: 0.75rem;
+            color: #555;
         }
         .nabidka-info-telefon {
-            font-size: 0.8rem;
-            color: #999;
+            font-size: 0.7rem;
+            color: #666;
         }
         .stav-expirovana { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
 
@@ -490,6 +521,94 @@ if ($reklamaceId > 0) {
             color: #dc3545;
             cursor: pointer;
             font-size: 1.2rem;
+        }
+
+        /* Klikatelný řádek v tabulce */
+        .nabidka-radek {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nabidka-radek:hover {
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        /* PDF Preview Modal */
+        .pdf-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .pdf-modal-overlay.zobrazit { display: flex; }
+        .pdf-modal-container {
+            width: 95%;
+            max-width: 900px;
+            max-height: 95vh;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .pdf-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .pdf-modal-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .pdf-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .pdf-modal-btn {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .pdf-modal-btn:hover { background: #444; }
+        .pdf-modal-btn-primary {
+            background: #28a745;
+        }
+        .pdf-modal-btn-primary:hover { background: #218838; }
+        .pdf-modal-btn-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 1;
+        }
+        .pdf-modal-btn-close:hover { color: #fff; }
+        .pdf-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #fff;
+        }
+        .pdf-modal-loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
         }
     </style>
 </head>
@@ -612,15 +731,16 @@ if ($reklamaceId > 0) {
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">#</th>
-                            <th>Zákazník</th>
-                            <th style="width: 100px;">Cena</th>
-                            <th>Workflow</th>
-                            <th style="width: 100px;">Platnost</th>
+                            <th style="width: 120px; white-space: nowrap;">CN</th>
+                            <th style="width: 200px;">Zákazník</th>
+                            <th style="width: 90px;">Cena</th>
+                            <th style="white-space: nowrap;">Workflow</th>
+                            <th style="width: 90px;">Platnost</th>
+                            <th style="width: 60px;">Akce</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
-                        <tr><td colspan="5" style="text-align: center; color: #666;">Načítám...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: #666;">Načítám...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -894,6 +1014,22 @@ if ($reklamaceId > 0) {
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Preview Modal -->
+    <div class="pdf-modal-overlay" id="pdf-modal-overlay">
+        <div class="pdf-modal-container">
+            <div class="pdf-modal-header">
+                <h3 id="pdf-modal-title">Náhled nabídky</h3>
+                <div class="pdf-modal-actions">
+                    <button type="button" class="pdf-modal-btn" id="pdf-modal-stahnout">Stáhnout PDF</button>
+                    <button type="button" class="pdf-modal-btn-close" id="pdf-modal-zavrit">&times;</button>
+                </div>
+            </div>
+            <div class="pdf-modal-body" id="pdf-modal-body">
+                <div class="pdf-modal-loading">Načítám...</div>
             </div>
         </div>
     </div>
@@ -1446,7 +1582,11 @@ if ($reklamaceId > 0) {
             const mena = document.getElementById('mena').value;
 
             if (!jmeno || !email) {
-                alert('Vyplňte jméno a email zákazníka');
+                wgsConfirm('Vyplňte jméno a email zákazníka', {
+                    titulek: 'Chybějící údaje',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1486,7 +1626,11 @@ if ($reklamaceId > 0) {
             });
 
             if (vsechnyPolozky.length === 0) {
-                alert('Nejsou vybrány žádné položky. Použijte kalkulaci nebo přidejte položky ručně.');
+                wgsConfirm('Nejsou vybrány žádné položky. Použijte kalkulaci nebo přidejte položky ručně.', {
+                    titulek: 'Chybějící položky',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1514,7 +1658,12 @@ if ($reklamaceId > 0) {
                     if (data.details) {
                         errorMsg += '\n\nDetaily: ' + JSON.stringify(data.details);
                     }
-                    alert(errorMsg);
+                    await wgsConfirm(errorMsg, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                     console.error('API Error:', data);
                     return;
                 }
@@ -1534,15 +1683,28 @@ if ($reklamaceId > 0) {
                 const odeslatResult = await odeslatResponse.json();
 
                 if (odeslatResult.status === 'success') {
-                    alert('Nabídka byla vytvořena a odeslána na ' + email);
+                    await wgsConfirm('Nabídka byla vytvořena a odeslána na ' + email, {
+                        titulek: 'Cenová nabídka',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                     resetFormular();
                 } else {
-                    alert('Nabídka vytvořena, ale odeslání selhalo: ' + odeslatResult.message);
+                    await wgsConfirm('Nabídka vytvořena, ale odeslání selhalo: ' + odeslatResult.message, {
+                        titulek: 'Upozornění',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                 }
 
             } catch (e) {
                 console.error('Chyba:', e);
-                alert('Chyba při vytváření nabídky');
+                await wgsConfirm('Chyba při vytváření nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         });
 
@@ -1579,7 +1741,11 @@ if ($reklamaceId > 0) {
             const mena = document.getElementById('mena').value;
 
             if (!jmeno) {
-                alert('Vyplňte alespoň jméno zákazníka');
+                wgsConfirm('Vyplňte alespoň jméno zákazníka', {
+                    titulek: 'Chybějící údaje',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1641,7 +1807,11 @@ if ($reklamaceId > 0) {
 
         async function generujPdfNabidky(data) {
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                alert('Načítám knihovny pro PDF...');
+                wgsConfirm('Načítám knihovny pro PDF, zkuste to znovu za chvíli...', {
+                    titulek: 'PDF',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1789,7 +1959,12 @@ if ($reklamaceId > 0) {
             } catch (error) {
                 console.error('Chyba při generování PDF:', error);
                 document.body.removeChild(pdfContent);
-                alert('Chyba při generování PDF');
+                wgsConfirm('Chyba při generování PDF', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         }
 
@@ -1824,20 +1999,15 @@ if ($reklamaceId > 0) {
                 // Workflow stavy
                 const jePoslana = !!n.odeslano_at;
                 const jePotvrzena = !!n.potvrzeno_at;
-                const jeZalohaPrijata = !!n.zaloha_prijata_at;
-                const jeHotovo = !!n.hotovo_at;
-                const jeUhrazeno = !!n.uhrazeno_at;
+                const jeZfOdeslana = !!n.zf_odeslana_at;
+                const jeZfUhrazena = !!n.zf_uhrazena_at;
+                const jeDokonceno = !!n.dokonceno_at;
+                const jeFaUhrazena = !!n.fa_uhrazena_at;
 
-                html += `<tr class="nabidka-radek">
-                    <td style="color: #666;">${n.id}</td>
-                    <td>
-                        <div class="nabidka-info">
-                            <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
-                            <span class="nabidka-info-email">${n.zakaznik_email}</span>
-                            ${n.zakaznik_telefon ? `<span class="nabidka-info-telefon">${n.zakaznik_telefon}</span>` : ''}
-                        </div>
-                    </td>
-                    <td style="font-weight: 600; color: #39ff14;">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
+                html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
+                    <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
+                    <td>${n.zakaznik_jmeno}</td>
+                    <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
                     <td>
                         <div class="workflow-container">
                             <!-- Automatické kroky -->
@@ -1849,24 +2019,34 @@ if ($reklamaceId > 0) {
                                 Odsouhlasena
                             </span>
                             <!-- Manuální kroky -->
-                            <button class="workflow-btn ${jeZalohaPrijata ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'zaloha_prijata')"
-                                    title="${jeZalohaPrijata ? 'Přijato: ' + formatDatum(n.zaloha_prijata_at) : 'Klikněte pro potvrzení'}">
-                                Záloha
+                            <button class="workflow-btn ${jeZfOdeslana ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'zf_odeslana')"
+                                    title="${jeZfOdeslana ? 'Odesláno: ' + formatDatum(n.zf_odeslana_at) : 'Klikněte pro potvrzení'}">
+                                Odeslána ZF
                             </button>
-                            <button class="workflow-btn ${jeHotovo ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'hotovo')"
-                                    title="${jeHotovo ? 'Dokončeno: ' + formatDatum(n.hotovo_at) : 'Klikněte pro potvrzení'}">
-                                Hotovo
+                            <button class="workflow-btn ${jeZfUhrazena ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'zf_uhrazena')"
+                                    title="${jeZfUhrazena ? 'Uhrazeno: ' + formatDatum(n.zf_uhrazena_at) : 'Klikněte pro potvrzení'}">
+                                Uhrazena ZF
                             </button>
-                            <button class="workflow-btn ${jeUhrazeno ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'uhrazeno')"
-                                    title="${jeUhrazeno ? 'Uhrazeno: ' + formatDatum(n.uhrazeno_at) : 'Klikněte pro potvrzení'}">
-                                Uhrazeno
+                            <button class="workflow-btn ${jeDokonceno ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'dokonceno')"
+                                    title="${jeDokonceno ? 'Dokončeno: ' + formatDatum(n.dokonceno_at) : 'Klikněte pro potvrzení'}">
+                                Dokončeno
+                            </button>
+                            <button class="workflow-btn ${jeFaUhrazena ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'fa_uhrazena')"
+                                    title="${jeFaUhrazena ? 'Uhrazeno: ' + formatDatum(n.fa_uhrazena_at) : 'Klikněte pro potvrzení'}">
+                                Uhrazena FA
                             </button>
                         </div>
                     </td>
                     <td style="color: #888; font-size: 0.85rem;">${platnost}</td>
+                    <td>
+                        <button class="btn-smazat" onclick="smazatNabidku(${n.id}, '${n.cislo_nabidky || n.id}', event)" title="Smazat nabídku">
+                            X
+                        </button>
+                    </td>
                 </tr>`;
             });
 
@@ -1898,13 +2078,27 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    alert('Nabídka odeslána');
+                    await wgsConfirm('Nabídka byla znovu odeslána', {
+                        titulek: 'Cenová nabídka',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                     nacistSeznamNabidek();
                 } else {
-                    alert('Chyba: ' + data.message);
+                    await wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                 }
             } catch (e) {
-                alert('Chyba při odesílání');
+                await wgsConfirm('Chyba při odesílání', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         };
 
@@ -1927,12 +2121,280 @@ if ($reklamaceId > 0) {
                     // Aktualizovat seznam bez reloadu
                     nacistSeznamNabidek();
                 } else {
-                    alert('Chyba: ' + data.message);
+                    wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                 }
             } catch (e) {
-                alert('Chyba při změně stavu');
+                wgsConfirm('Chyba při změně stavu', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         };
+
+        // Smazat nabídku
+        window.smazatNabidku = async function(nabidkaId, cisloNabidky, event) {
+            if (event) event.stopPropagation();
+
+            const potvrdit = await wgsConfirm('Opravdu chcete smazat nabídku ' + cisloNabidky + '?', {
+                titulek: 'Smazat cenovou nabídku',
+                btnPotvrdit: 'Smazat',
+                btnZrusit: 'Zrušit',
+                nebezpecne: true
+            });
+
+            if (!potvrdit) return;
+
+            const formData = new FormData();
+            formData.append('action', 'smazat');
+            formData.append('csrf_token', csrfToken);
+            formData.append('nabidka_id', nabidkaId);
+
+            try {
+                const response = await fetch('/api/nabidka_api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    await wgsConfirm(data.message, {
+                        titulek: 'Smazáno',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
+                    nacistSeznamNabidek();
+                } else {
+                    wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
+                }
+            } catch (e) {
+                wgsConfirm('Chyba při mazání nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
+            }
+        };
+
+        // ========================================
+        // PDF NÁHLED MODAL
+        // ========================================
+        const pdfModalOverlay = document.getElementById('pdf-modal-overlay');
+        const pdfModalBody = document.getElementById('pdf-modal-body');
+        const pdfModalTitle = document.getElementById('pdf-modal-title');
+        let aktuálníNabídkaData = null;
+
+        // Zavřít modal
+        document.getElementById('pdf-modal-zavrit').addEventListener('click', zavritPdfModal);
+        pdfModalOverlay.addEventListener('click', (e) => {
+            if (e.target === pdfModalOverlay) zavritPdfModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && pdfModalOverlay.classList.contains('zobrazit')) {
+                zavritPdfModal();
+            }
+        });
+
+        function zavritPdfModal() {
+            pdfModalOverlay.classList.remove('zobrazit');
+            document.body.style.overflow = '';
+        }
+
+        // Otevřít náhled nabídky
+        window.otevritNahledNabidky = async function(nabidkaId, event) {
+            // Zastavit propagaci pokud kliknutí bylo na workflow tlačítko nebo interaktivní element
+            if (event) {
+                const target = event.target;
+                if (target.closest('.workflow-btn') || target.closest('button') || target.tagName === 'BUTTON') {
+                    return;
+                }
+            }
+
+            pdfModalOverlay.classList.add('zobrazit');
+            document.body.style.overflow = 'hidden';
+            pdfModalBody.innerHTML = '<div class="pdf-modal-loading">Načítám...</div>';
+
+            try {
+                const response = await fetch(`/api/nabidka_api.php?action=detail&id=${nabidkaId}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    aktuálníNabídkaData = data.nabidka;
+                    zobrazitNahledNabidky(data.nabidka);
+                } else {
+                    pdfModalBody.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 50px;">Chyba: ${data.message}</div>`;
+                }
+            } catch (e) {
+                console.error('Chyba:', e);
+                pdfModalBody.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 50px;">Chyba při načítání nabídky</div>';
+            }
+        };
+
+        function zobrazitNahledNabidky(nabidka) {
+            const cislo = nabidka.cislo_nabidky || ('CN-' + String(nabidka.id).padStart(6, '0'));
+            const datum = nabidka.vytvoreno_at ? new Date(nabidka.vytvoreno_at).toLocaleDateString('cs-CZ') : '-';
+            const platnost = nabidka.platnost_do ? new Date(nabidka.platnost_do).toLocaleDateString('cs-CZ') : '-';
+            const polozky = nabidka.polozky || [];
+
+            pdfModalTitle.textContent = 'Nabídka č. ' + cislo;
+
+            // Seskupit položky
+            const skupinyNazvy = {
+                doprava: 'DOPRAVA',
+                calouneni: 'ČALOUNICKÉ PRÁCE',
+                mechanika: 'MECHANICKÉ PRÁCE',
+                priplatky: 'PŘÍPLATKY',
+                dily: 'NÁHRADNÍ DÍLY',
+                prace: 'PRÁCE',
+                ostatni: 'OSTATNÍ'
+            };
+
+            const skupiny = {};
+            polozky.forEach(p => {
+                const sk = p.skupina || 'ostatni';
+                if (!skupiny[sk]) skupiny[sk] = [];
+                skupiny[sk].push(p);
+            });
+
+            let polozkyHtml = '';
+            const poradiSkupin = ['doprava', 'calouneni', 'mechanika', 'priplatky', 'dily', 'prace', 'ostatni'];
+
+            poradiSkupin.forEach(skKey => {
+                if (skupiny[skKey] && skupiny[skKey].length > 0) {
+                    polozkyHtml += `<tr><td colspan="4" style="padding: 10px; background: #f5f5f5; font-weight: bold; font-size: 11px; color: #666; text-transform: uppercase;">${skupinyNazvy[skKey] || skKey}</td></tr>`;
+                    skupiny[skKey].forEach(p => {
+                        const celkem = (parseFloat(p.cena) * parseInt(p.pocet || 1)).toFixed(2);
+                        polozkyHtml += `<tr>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                        </tr>`;
+                    });
+                }
+            });
+
+            // Pokud nejsou skupiny, zobrazit položky normálně
+            if (!polozkyHtml && polozky.length > 0) {
+                polozky.forEach(p => {
+                    const celkem = (parseFloat(p.cena) * parseInt(p.pocet || 1)).toFixed(2);
+                    polozkyHtml += `<tr>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                    </tr>`;
+                });
+            }
+
+            pdfModalBody.innerHTML = `
+                <div style="font-family: 'Poppins', sans-serif;">
+                    <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1a1a1a; padding-bottom: 15px;">
+                        <h1 style="font-size: 24px; color: #1a1a1a; margin: 0;">WHITE GLOVE SERVICE</h1>
+                        <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Cenová nabídka č. ${cislo}</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+                        <div>
+                            <p style="margin: 0; font-size: 11px; color: #888; text-transform: uppercase;">Zákazník</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600;">${nabidka.zakaznik_jmeno}</p>
+                            <p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_email}</p>
+                            ${nabidka.zakaznik_telefon ? `<p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_telefon}</p>` : ''}
+                            ${nabidka.zakaznik_adresa ? `<p style="margin: 3px 0 0 0; font-size: 13px; color: #666;">${nabidka.zakaznik_adresa}</p>` : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 13px;"><strong>Datum:</strong> ${datum}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 13px;"><strong>Platnost do:</strong> <span style="color: #d97706;">${platnost}</span></p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; padding: 5px 10px; background: ${nabidka.stav === 'potvrzena' ? '#d4edda' : nabidka.stav === 'odeslana' ? '#fff3cd' : '#f5f5f5'}; border-radius: 4px; display: inline-block;">
+                                ${nabidka.stav === 'potvrzena' ? 'POTVRZENO' : nabidka.stav === 'odeslana' ? 'ODESLÁNO' : 'NOVÁ'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd;">
+                        <thead>
+                            <tr style="background: #f0f0f0;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ccc; font-size: 12px; color: #666;">Položka</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 60px;">Počet</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 100px;">Cena/ks</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ccc; font-size: 12px; color: #666; width: 100px;">Celkem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${polozkyHtml || '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #888;">Žádné položky</td></tr>'}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #1a1a1a;">
+                                <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; color: #fff;">CELKEM (bez DPH):</td>
+                                <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #39ff14;">${parseFloat(nabidka.celkova_cena).toFixed(2)} ${nabidka.mena}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    ${nabidka.poznamka ? `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 12px; color: #666;"><strong>Interní poznámka:</strong> ${nabidka.poznamka}</p>
+                    </div>` : ''}
+
+                    <div style="background: #fffde7; border: 1px solid #ffd600; padding: 12px; border-radius: 6px; margin: 20px 0; font-size: 12px; color: #856404;">
+                        <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
+                    </div>
+                </div>
+            `;
+        }
+
+        // Stáhnout PDF
+        document.getElementById('pdf-modal-stahnout').addEventListener('click', async () => {
+            if (!aktuálníNabídkaData) {
+                wgsConfirm('Nejsou načtena data nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
+                return;
+            }
+
+            const btn = document.getElementById('pdf-modal-stahnout');
+            btn.disabled = true;
+            btn.textContent = 'Generuji...';
+
+            try {
+                await generujPdfNabidky({
+                    jmeno: aktuálníNabídkaData.zakaznik_jmeno,
+                    email: aktuálníNabídkaData.zakaznik_email,
+                    telefon: aktuálníNabídkaData.zakaznik_telefon,
+                    adresa: aktuálníNabídkaData.zakaznik_adresa,
+                    polozky: aktuálníNabídkaData.polozky || [],
+                    celkem: parseFloat(aktuálníNabídkaData.celkova_cena),
+                    mena: aktuálníNabídkaData.mena,
+                    cislo: aktuálníNabídkaData.cislo_nabidky || ('CN-' + String(aktuálníNabídkaData.id).padStart(6, '0')),
+                    datum: aktuálníNabídkaData.vytvoreno_at,
+                    platnost: aktuálníNabídkaData.platnost_do
+                });
+            } catch (e) {
+                console.error('Chyba při generování PDF:', e);
+                wgsConfirm('Chyba při generování PDF', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Stáhnout PDF';
+        });
 
     })();
     </script>

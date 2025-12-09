@@ -346,11 +346,14 @@ if (empty($token)) {
                 </div>
             </div>
 
-            <!-- Tlačítko pro stažení PDF -->
-            <div style="text-align: center; margin-top: 20px;">
+            <!-- Tlačítka pro stažení PDF a zavření -->
+            <div style="text-align: center; margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                 <button type="button" id="btn-stahnout-pdf" style="background: #333; color: #fff; border: none; padding: 15px 40px; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; font-family: inherit;">
                     Stáhnout PDF potvrzení
                 </button>
+                <a href="https://www.wgs-service.cz/" style="display: inline-block; background: #f5f5f5; color: #333; border: 1px solid #ddd; padding: 15px 40px; border-radius: 8px; font-size: 1rem; font-weight: 500; text-decoration: none; font-family: inherit; cursor: pointer;">
+                    Zavřít
+                </a>
             </div>
         <?php else: ?>
             <div class="card">

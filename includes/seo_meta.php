@@ -157,9 +157,9 @@ $seoStranky = [
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     'neuznana-reklamace' => [
-        'title' => 'Neuznana reklamace sedacky? | Co delat kdyz vam neuznali reklamaci | WGS',
-        'description' => 'Neuznali vam reklamaci sedacky nebo kresla? Poradime co delat dal. Nabizime nezavisle posouzeni, odborny posudek a moznost opravy za fer cenu. Nezoufejte, reseni existuje.',
-        'keywords' => 'neuznana reklamace, zamitnuta reklamace, reklamace sedacky neuznana, co delat kdyz neuznali reklamaci, odvolani reklamace, posudek sedacky, nezavisly posudek nabytku, oprava po neuznane reklamaci',
+        'title' => 'Zamítnuta reklamace? | Cenově výhodná oprava nábytku | WGS',
+        'description' => 'Reklamace nebyla uznána? Nabízíme profesionální opravu nábytku za férovou cenu. Originální díly Natuzzi, 12měsíční záruka. Diagnostika zdarma.',
+        'keywords' => 'oprava nabytku, placena oprava sedacky, oprava po zaruce, oprava Natuzzi, oprava sedacky bez zaruky, servis nabytku',
         'canonical' => 'https://wgs-service.cz/neuznana-reklamace.php',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
@@ -620,20 +620,20 @@ function renderFaqSchema($stranka = 'index') {
         ],
         'neuznana-reklamace' => [
             [
-                'otazka' => 'Co delat kdyz mi neuznali reklamaci sedacky?',
-                'odpoved' => 'Pokud vam byla reklamace zamitnuta, mate vice moznosti: 1) Pozadat o prezkum ci nezavisle posouzeni, 2) Obratit se na Ceskou obchodni inspekci, 3) Nechat si nabytek opravit u nas za fer cenu. Poradime vam s dalsim postupem.'
+                'otazka' => 'Opravíte i nábytek po záruce?',
+                'odpoved' => 'Ano, opravujeme nábytek bez ohledu na stav záruky. Ať už jde o mechanické poškození, opotřebení nebo závadu po záruce - dokážeme pomoci. Kontaktujte nás s popisem problému.'
             ],
             [
-                'otazka' => 'Muzete posoudit oprávnenost zamitnuté reklamace?',
-                'odpoved' => 'Ano, nabizime odborne posouzeni stavu nabytku. Na zaklade prohlídky vam sdelíme, zda bylo zamitnutí reklamace opravnene a jake mate moznosti. Posouzení stoji 110 EUR.'
+                'otazka' => 'Používáte originální díly?',
+                'odpoved' => 'Ano, jako autorizovaný servis Natuzzi máme přístup k originálním náhradním dílům přímo od výrobce. Díky tomu je oprava stejně kvalitní jako záruční.'
             ],
             [
-                'otazka' => 'Kolik stoji oprava po neuznane reklamaci?',
-                'odpoved' => 'Ceny oprav zacinaji od 205 EUR za praci. Nabizime fer ceny a kvalitni provedení. Pred opravou vzdy obdrzite presnou kalkulaci, aby vás cena nepřekvapila.'
+                'otazka' => 'Kolik stojí placená oprava?',
+                'odpoved' => 'Ceny oprav začínají od 205 EUR za práci. Před opravou vždy obdržíte přesnou kalkulaci, aby vás cena nepřekvapila. Diagnostika při návštěvě je zdarma.'
             ],
             [
-                'otazka' => 'Jak postupovat pri odvolani proti zamitnute reklamaci?',
-                'odpoved' => 'Doporucujeme: 1) Zdokumentovat stav nabytku fotografiemi, 2) Piscemne pozadat prodejce o prezkum, 3) Pripadne se obratit na COI nebo soudniho znalce. Muzeme vam pripravit odborny posudek.'
+                'otazka' => 'Jak dlouho trvá oprava?',
+                'odpoved' => 'Většinu oprav provádíme přímo u vás doma během jedné návštěvy. Pokud je potřeba objednat náhradní díly z Itálie, dodací lhůta je obvykle 4-8 týdnů.'
             ]
         ],
         'oprava-sedacky' => [

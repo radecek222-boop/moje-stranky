@@ -381,12 +381,26 @@ function sendWithPHPMail($queueItem, $settings) {
         $subject = $queueItem['subject'];
         $message = $queueItem['body'];
 
-        // GDPR: Přidat footer s odhlašovacím odkazem (plain text)
-        $message = pridatEmailFooter($message, $to, false);
+        // Auto-detect HTML content
+        $isHtml = isset($queueItem['is_html']) ? $queueItem['is_html'] : (
+            stripos($message, '<html') !== false ||
+            stripos($message, '<body') !== false ||
+            stripos($message, '<div') !== false ||
+            stripos($message, '<table') !== false ||
+            stripos($message, '<p>') !== false
+        );
+
+        // GDPR: Přidat footer s odhlašovacím odkazem
+        $message = pridatEmailFooter($message, $to, $isHtml);
 
         $headers = "From: {$settings['smtp_from_name']} <{$settings['smtp_from_email']}>\r\n";
         $headers .= "Reply-To: {$settings['smtp_from_email']}\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        if ($isHtml) {
+            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        } else {
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        }
         $headers .= "X-Mailer: WGS Email Queue (PHP mail fallback)\r\n";
 
         // CC

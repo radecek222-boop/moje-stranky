@@ -269,7 +269,7 @@ try {
             $stmt = $pdo->query("
                 SELECT id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
                        stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at,
-                       zaloha_prijata_at, hotovo_at, uhrazeno_at
+                       zf_odeslana_at, zf_uhrazena_at, dokonceno_at, fa_uhrazena_at
                 FROM wgs_nabidky
                 ORDER BY vytvoreno_at DESC
                 LIMIT 100
@@ -277,6 +277,66 @@ try {
             $nabidky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             sendJsonSuccess('Seznam nabídek', ['nabidky' => $nabidky]);
+            break;
+
+        // ========================================
+        // DETAIL - Detail jedné nabídky (admin only)
+        // ========================================
+        case 'detail':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            $nabidkaId = intval($_GET['id'] ?? 0);
+            if (!$nabidkaId) {
+                sendJsonError('Chybí ID nabídky');
+            }
+
+            $stmt = $pdo->prepare("SELECT * FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nebyla nalezena', 404);
+            }
+
+            // Dekódovat položky z JSON
+            $nabidka['polozky'] = json_decode($nabidka['polozky_json'], true) ?: [];
+
+            sendJsonSuccess('Detail nabídky', ['nabidka' => $nabidka]);
+            break;
+
+        // ========================================
+        // SMAZAT - Smazání cenové nabídky (admin only)
+        // ========================================
+        case 'smazat':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $nabidkaId = intval($_POST['nabidka_id'] ?? 0);
+            if (!$nabidkaId) {
+                sendJsonError('Chybí ID nabídky');
+            }
+
+            // Ověřit že nabídka existuje
+            $stmt = $pdo->prepare("SELECT id, cislo_nabidky FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nebyla nalezena', 404);
+            }
+
+            // Smazat nabídku
+            $stmt = $pdo->prepare("DELETE FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+
+            sendJsonSuccess('Nabídka ' . ($nabidka['cislo_nabidky'] ?? $nabidkaId) . ' byla smazána');
             break;
 
         // ========================================
@@ -299,7 +359,7 @@ try {
             }
 
             // Povolené kroky workflow
-            $povoleneKroky = ['zaloha_prijata', 'hotovo', 'uhrazeno'];
+            $povoleneKroky = ['zf_odeslana', 'zf_uhrazena', 'dokonceno', 'fa_uhrazena'];
             if (!in_array($krok, $povoleneKroky)) {
                 sendJsonError('Neplatný workflow krok');
             }
@@ -327,6 +387,37 @@ try {
                 $stmt = $pdo->prepare("UPDATE wgs_nabidky SET {$sloupec} = NOW() WHERE id = ?");
                 $stmt->execute([$nabidkaId]);
                 $novaHodnota = date('Y-m-d H:i:s');
+
+                // Automatické emaily při aktivaci kroků
+                require_once __DIR__ . '/../includes/EmailQueue.php';
+                $emailQueue = new EmailQueue($pdo);
+                $cisloNabidky = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
+
+                // Uhrazena ZF - potvrzení o přijaté záloze
+                if ($krok === 'zf_uhrazena') {
+                    $nabidka['zf_uhrazena_at'] = $novaHodnota;
+                    $emailBody = vygenerujEmailPotvrzeniZalohy($nabidka);
+                    $emailQueue->add(
+                        $nabidka['zakaznik_email'],
+                        'Potvrzení o přijaté záloze - ' . $cisloNabidky . ' - White Glove Service',
+                        $emailBody,
+                        'zaloha_potvrzeni_' . $nabidka['id']
+                    );
+                    error_log("nabidka_api: Odeslán email potvrzení zálohy pro CN {$cisloNabidky}");
+                }
+
+                // Uhrazena FA - poděkování za úhradu a využití služeb
+                if ($krok === 'fa_uhrazena') {
+                    $nabidka['fa_uhrazena_at'] = $novaHodnota;
+                    $emailBody = vygenerujEmailPodekovaniZaUhradu($nabidka);
+                    $emailQueue->add(
+                        $nabidka['zakaznik_email'],
+                        'Děkujeme za úhradu - ' . $cisloNabidky . ' - White Glove Service',
+                        $emailBody,
+                        'fa_dekujeme_' . $nabidka['id']
+                    );
+                    error_log("nabidka_api: Odeslán email poděkování za úhradu pro CN {$cisloNabidky}");
+                }
             }
 
             sendJsonSuccess('Workflow aktualizován', [
@@ -420,9 +511,10 @@ function vytvorTabulkuNabidky($pdo) {
             odeslano_at DATETIME NULL,
             potvrzeno_at DATETIME NULL,
             potvrzeno_ip VARCHAR(45) NULL,
-            zaloha_prijata_at DATETIME NULL,
-            hotovo_at DATETIME NULL,
-            uhrazeno_at DATETIME NULL,
+            zf_odeslana_at DATETIME NULL,
+            zf_uhrazena_at DATETIME NULL,
+            dokonceno_at DATETIME NULL,
+            fa_uhrazena_at DATETIME NULL,
             INDEX idx_token (token),
             INDEX idx_stav (stav),
             INDEX idx_email (zakaznik_email),
@@ -432,9 +524,10 @@ function vytvorTabulkuNabidky($pdo) {
 
     // Přidat chybějící sloupce (pro existující tabulky)
     $sloupce = [
-        'zaloha_prijata_at' => 'DATETIME NULL',
-        'hotovo_at' => 'DATETIME NULL',
-        'uhrazeno_at' => 'DATETIME NULL',
+        'zf_odeslana_at' => 'DATETIME NULL',
+        'zf_uhrazena_at' => 'DATETIME NULL',
+        'dokonceno_at' => 'DATETIME NULL',
+        'fa_uhrazena_at' => 'DATETIME NULL',
         'cislo_nabidky' => 'VARCHAR(30) NULL UNIQUE AFTER id'
     ];
 
@@ -883,6 +976,265 @@ function vygenerujEmailPotvrzeniZakaznik($nabidka) {
                             </p>
                             <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
                                 <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>";
+}
+
+/**
+ * Vygeneruje HTML email s potvrzením o přijaté záloze
+ */
+function vygenerujEmailPotvrzeniZalohy($nabidka) {
+    $baseUrl = 'https://www.wgs-service.cz';
+    $potvrzeniUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']);
+
+    $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
+    $datumZalohy = isset($nabidka['zf_uhrazena_at']) ? date('d.m.Y', strtotime($nabidka['zf_uhrazena_at'])) : date('d.m.Y');
+
+    return "
+<!DOCTYPE html>
+<html lang='cs'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Potvrzení o přijaté záloze - {$nabidkaCislo}</title>
+</head>
+<body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
+
+    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='background-color: #f4f4f4;'>
+        <tr>
+            <td style='padding: 30px 20px;'>
+                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
+
+                    <!-- HEADER -->
+                    <tr>
+                        <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
+                            <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
+                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;'>Potvrzení o přijaté záloze</p>
+                        </td>
+                    </tr>
+
+                    <!-- HLAVNÍ OBSAH -->
+                    <tr>
+                        <td style='background: #ffffff; padding: 0;'>
+
+                            <!-- Potvrzení přijetí zálohy -->
+                            <div style='background: #d4edda; padding: 25px 40px; border-bottom: 1px solid #c3e6cb;'>
+                                <h2 style='margin: 0; font-size: 20px; font-weight: 600; color: #155724;'>Záloha byla úspěšně přijata</h2>
+                                <p style='margin: 8px 0 0 0; font-size: 14px; color: #155724;'>Děkujeme za uhrazení zálohové faktury k objednávce č. {$nabidkaCislo}.</p>
+                            </div>
+
+                            <!-- Oslovení -->
+                            <div style='padding: 30px 40px 20px 40px;'>
+                                <p style='margin: 0; font-size: 15px; color: #333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+                                <p style='margin: 15px 0 0 0; font-size: 14px; color: #555; line-height: 1.6;'>
+                                    potvrzujeme přijetí Vaší zálohové platby dne <strong>{$datumZalohy}</strong>.
+                                </p>
+                            </div>
+
+                            <!-- Číslo objednávky -->
+                            <div style='padding: 0 40px 25px 40px;'>
+                                <div style='background: #f8f9fa; border-radius: 8px; padding: 20px;'>
+                                    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%'>
+                                        <tr>
+                                            <td>
+                                                <p style='margin: 0; font-size: 12px; color: #888; text-transform: uppercase;'>Číslo objednávky</p>
+                                                <p style='margin: 5px 0 0 0; font-size: 22px; font-weight: 700; color: #333;'>{$nabidkaCislo}</p>
+                                            </td>
+                                            <td style='text-align: right;'>
+                                                <p style='margin: 0; font-size: 12px; color: #888;'>Celková hodnota zakázky</p>
+                                                <p style='margin: 5px 0 0 0; font-size: 18px; font-weight: 600; color: #333;'>{$celkovaCena} {$nabidka['mena']}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Co bude následovat -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <h3 style='margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #333;'>Co bude následovat?</h3>
+                                <div style='background: #fff8e1; border: 1px solid #ffc107; border-radius: 8px; padding: 18px 20px;'>
+                                    <ol style='margin: 0; padding: 0 0 0 20px; font-size: 14px; color: #555; line-height: 1.8;'>
+                                        <li>Objednáme náhradní díly přímo u výrobce Natuzzi</li>
+                                        <li>Doba dodání dílů je obvykle 4–8 týdnů</li>
+                                        <li>Po přijetí dílů Vás budeme kontaktovat k domluvě termínu servisu</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- Tlačítko -->
+                            <div style='padding: 0 40px 35px 40px; text-align: center;'>
+                                <a href='{$potvrzeniUrl}' style='display: inline-block; background: #333; color: #fff; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;'>
+                                    Zobrazit detail objednávky
+                                </a>
+                            </div>
+
+                            <!-- Kontakt -->
+                            <div style='padding: 20px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                                <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.6;'>
+                                    V případě dotazů nás neváhejte kontaktovat na emailu
+                                    <a href='mailto:reklamace@wgs-service.cz' style='color: #333;'>reklamace@wgs-service.cz</a>
+                                    nebo na telefonu <a href='tel:+420725965826' style='color: #333;'>+420 725 965 826</a>.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
+                            <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>
+                                Tel: <a href='tel:+420725965826' style='color: #888; text-decoration: none;'>+420 725 965 826</a> |
+                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #888; text-decoration: none;'>reklamace@wgs-service.cz</a>
+                            </p>
+                            <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
+                                <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>";
+}
+
+/**
+ * Vygeneruje HTML email s poděkováním za úhradu finální faktury
+ */
+function vygenerujEmailPodekovaniZaUhradu($nabidka) {
+    $baseUrl = 'https://www.wgs-service.cz';
+
+    $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
+    $datumUhrady = isset($nabidka['fa_uhrazena_at']) ? date('d.m.Y', strtotime($nabidka['fa_uhrazena_at'])) : date('d.m.Y');
+
+    return "
+<!DOCTYPE html>
+<html lang='cs'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Děkujeme za úhradu - {$nabidkaCislo}</title>
+</head>
+<body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
+
+    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='background-color: #f4f4f4;'>
+        <tr>
+            <td style='padding: 30px 20px;'>
+                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
+
+                    <!-- HEADER -->
+                    <tr>
+                        <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
+                            <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
+                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #39ff14; text-transform: uppercase; letter-spacing: 1px;'>Děkujeme za Vaši důvěru</p>
+                        </td>
+                    </tr>
+
+                    <!-- HLAVNÍ OBSAH -->
+                    <tr>
+                        <td style='background: #ffffff; padding: 0;'>
+
+                            <!-- Poděkování -->
+                            <div style='background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 30px 40px; text-align: center;'>
+                                <h2 style='margin: 0; font-size: 24px; font-weight: 600; color: #155724;'>Zakázka úspěšně dokončena</h2>
+                                <p style='margin: 10px 0 0 0; font-size: 15px; color: #155724;'>Děkujeme za úhradu a za využití našich služeb!</p>
+                            </div>
+
+                            <!-- Oslovení -->
+                            <div style='padding: 35px 40px 20px 40px;'>
+                                <p style='margin: 0; font-size: 16px; color: #333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+                                <p style='margin: 20px 0 0 0; font-size: 15px; color: #555; line-height: 1.7;'>
+                                    rádi bychom Vám touto cestou poděkovali za úhradu faktury k zakázce č. <strong>{$nabidkaCislo}</strong>
+                                    ze dne <strong>{$datumUhrady}</strong>.
+                                </p>
+                                <p style='margin: 15px 0 0 0; font-size: 15px; color: #555; line-height: 1.7;'>
+                                    Velice si vážíme Vaší důvěry v naše služby a těšíme se na případnou další spolupráci.
+                                </p>
+                            </div>
+
+                            <!-- Shrnutí zakázky -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <div style='background: #f8f9fa; border-radius: 8px; padding: 20px; border: 1px solid #e5e5e5;'>
+                                    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%'>
+                                        <tr>
+                                            <td>
+                                                <p style='margin: 0; font-size: 12px; color: #888; text-transform: uppercase;'>Číslo zakázky</p>
+                                                <p style='margin: 5px 0 0 0; font-size: 18px; font-weight: 700; color: #333;'>{$nabidkaCislo}</p>
+                                            </td>
+                                            <td style='text-align: right;'>
+                                                <p style='margin: 0; font-size: 12px; color: #888;'>Uhrazená částka</p>
+                                                <p style='margin: 5px 0 0 0; font-size: 18px; font-weight: 700; color: #28a745;'>{$celkovaCena} {$nabidka['mena']}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Doporučení -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <div style='background: #e8f4f8; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px;'>
+                                    <h3 style='margin: 0 0 12px 0; font-size: 15px; font-weight: 600; color: #0c5460;'>Péče o Váš nábytek Natuzzi</h3>
+                                    <p style='margin: 0; font-size: 14px; color: #0c5460; line-height: 1.6;'>
+                                        Pokud budete mít v budoucnu jakékoliv dotazy ohledně údržby Vašeho nábytku
+                                        nebo budete potřebovat další servis, neváhejte nás kontaktovat.
+                                        Jsme tu pro Vás.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Zpětná vazba -->
+                            <div style='padding: 0 40px 35px 40px; text-align: center;'>
+                                <p style='margin: 0 0 15px 0; font-size: 14px; color: #666;'>
+                                    Byli jste spokojeni s našimi službami? Budeme rádi za Vaši zpětnou vazbu!
+                                </p>
+                                <a href='mailto:reklamace@wgs-service.cz?subject=Zpětná vazba k zakázce {$nabidkaCislo}' style='display: inline-block; background: #333; color: #fff; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;'>
+                                    Napsat zpětnou vazbu
+                                </a>
+                            </div>
+
+                            <!-- Kontakt -->
+                            <div style='padding: 25px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                                <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.6; text-align: center;'>
+                                    <strong>White Glove Service</strong> - profesionální servis prémiového nábytku<br>
+                                    <a href='mailto:reklamace@wgs-service.cz' style='color: #333;'>reklamace@wgs-service.cz</a> |
+                                    <a href='tel:+420725965826' style='color: #333;'>+420 725 965 826</a>
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
+                            <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>
+                                Tel: <a href='tel:+420725965826' style='color: #888; text-decoration: none;'>+420 725 965 826</a> |
+                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #888; text-decoration: none;'>reklamace@wgs-service.cz</a>
+                            </p>
+                            <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
+                                <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
+                            </p>
+                            <p style='margin: 15px 0 0 0; font-size: 11px; color: #444;'>
+                                Děkujeme, že jste si vybrali White Glove Service
                             </p>
                         </td>
                     </tr>
