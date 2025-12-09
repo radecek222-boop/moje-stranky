@@ -88,23 +88,18 @@ try {
             // Platnost 30 dní
             $platnostDo = date('Y-m-d H:i:s', strtotime('+30 days'));
 
-            // Generovat unikátní číslo nabídky: CN-RRRR-DD-M-XX
-            $cisloNabidky = generujCisloNabidky($pdo);
-            error_log("nabidka_api vytvorit: Vygenerováno číslo {$cisloNabidky}");
-
-            // Zkontrolovat strukturu tabulky
+            // DŮLEŽITÉ: Nejprve zkontrolovat a přidat sloupec cislo_nabidky (PŘED generováním čísla!)
             $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'cislo_nabidky'");
             $maSloupec = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$maSloupec) {
-                error_log("nabidka_api vytvorit: CHYBA - sloupec cislo_nabidky neexistuje!");
-                // Zkusit přidat sloupec
-                try {
-                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN cislo_nabidky VARCHAR(30) NULL UNIQUE AFTER id");
-                    error_log("nabidka_api vytvorit: Sloupec cislo_nabidky byl přidán");
-                } catch (PDOException $e) {
-                    error_log("nabidka_api vytvorit: Nepodařilo se přidat sloupec: " . $e->getMessage());
-                }
+                error_log("nabidka_api vytvorit: Sloupec cislo_nabidky neexistuje - přidávám");
+                $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN cislo_nabidky VARCHAR(30) NULL UNIQUE AFTER id");
+                error_log("nabidka_api vytvorit: Sloupec cislo_nabidky byl přidán");
             }
+
+            // Generovat unikátní číslo nabídky: CN-RRRR-DD-M-XX (AŽ PO kontrole sloupce!)
+            $cisloNabidky = generujCisloNabidky($pdo);
+            error_log("nabidka_api vytvorit: Vygenerováno číslo {$cisloNabidky}");
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_nabidky (
@@ -420,7 +415,7 @@ function vytvorTabulkuNabidky($pdo) {
             token VARCHAR(64) NOT NULL UNIQUE,
             stav ENUM('nova', 'odeslana', 'potvrzena', 'expirovana', 'zrusena') DEFAULT 'nova',
             poznamka TEXT NULL,
-            vytvoril_user_id INT NULL,
+            vytvoril_user_id VARCHAR(50) NULL,
             vytvoreno_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             odeslano_at DATETIME NULL,
             potvrzeno_at DATETIME NULL,
@@ -465,6 +460,18 @@ function vytvorTabulkuNabidky($pdo) {
         }
     } catch (PDOException $e) {
         // Index už existuje - OK
+    }
+
+    // Migrace: Změnit vytvoril_user_id z INT na VARCHAR(50) pokud je INT
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'vytvoril_user_id'");
+        $sloupec = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($sloupec && stripos($sloupec['Type'], 'int') !== false) {
+            $pdo->exec("ALTER TABLE wgs_nabidky MODIFY COLUMN vytvoril_user_id VARCHAR(50) NULL");
+            error_log("nabidka_api: Změněn typ vytvoril_user_id z INT na VARCHAR(50)");
+        }
+    } catch (PDOException $e) {
+        error_log("nabidka_api: Chyba při změně typu vytvoril_user_id: " . $e->getMessage());
     }
 }
 
