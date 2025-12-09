@@ -113,9 +113,16 @@ try {
     // Funkce pro kontrolu existence tabulky
     function tabulkaExistuje($pdo, $tabulka) {
         try {
-            $stmt = $pdo->prepare("SHOW TABLES LIKE :tabulka");
+            // SHOW TABLES LIKE nefunguje s prepared statements, použijeme INFORMATION_SCHEMA
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as cnt
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = :tabulka
+            ");
             $stmt->execute(['tabulka' => $tabulka]);
-            return $stmt->rowCount() > 0;
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['cnt'] ?? 0) > 0;
         } catch (PDOException $e) {
             return false;
         }
