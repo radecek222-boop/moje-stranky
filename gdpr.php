@@ -309,6 +309,7 @@
           <li>
             <strong>Přístup k údajům</strong>
             Požadovat přístup k osobním údajům a získat kopii ve strojově čitelné podobě.
+            <a href="gdpr-zadost.php" class="gdpr-link">Požádat o export dat</a>
           </li>
           <li>
             <strong>Oprava údajů</strong>
@@ -321,6 +322,7 @@
           <li>
             <strong>Výmaz údajů</strong>
             Požádat o výmaz údajů, jakmile pominou důvody jejich zpracování.
+            <a href="gdpr-zadost.php" class="gdpr-link">Podat žádost online</a>
           </li>
           <li>
             <strong>Odvolání souhlasu</strong>
@@ -366,7 +368,11 @@
       <p>
         &copy; 2025 White Glove Service. Všechna práva vyhrazena.
         <span aria-hidden="true"> • </span>
-        <a href="gdpr.php" class="footer-link">Zpracování osobních údajů (GDPR)</a>
+        <a href="gdpr.php" class="footer-link">GDPR</a>
+        <span aria-hidden="true"> • </span>
+        <a href="cookies.php" class="footer-link">Cookies</a>
+        <span aria-hidden="true"> • </span>
+        <a href="podminky.php" class="footer-link">Obchodní podmínky</a>
       </p>
     </div>
   </div>
@@ -374,5 +380,6 @@
 
 <script src="assets/js/logger.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
+<?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
 </body>
 </html>
