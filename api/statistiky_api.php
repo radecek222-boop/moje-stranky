@@ -377,14 +377,17 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
+    // FIX: assigned_to může obsahovat buď numerické id nebo textové user_id
+    // Používáme subquery pro nalezení obou hodnot
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
 
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
-            $key = ":technik_$idx";
-            $techniciConditions[] = "r.assigned_to = $key";
-            $params[$key] = (int)$technik;
+            $keyId = ":technik_id_$idx";
+            // Hledáme podle numerického id nebo přes subquery user_id
+            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = (SELECT user_id FROM wgs_users WHERE id = $keyId LIMIT 1))";
+            $params[$keyId] = (int)$technik;
         }
 
         if (!empty($techniciConditions)) {

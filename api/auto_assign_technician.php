@@ -73,8 +73,23 @@ try {
         exit;
     }
 
-    $userId = $_SESSION['user_id'];
+    $userIdSession = $_SESSION['user_id'];
     $pdo = getDbConnection();
+
+    // FIX: Potřebujeme numerické id, ne textové user_id
+    // assigned_to očekává wgs_users.id (auto-increment), ne user_id (textový)
+    $stmtGetId = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtGetId->execute([':user_id' => $userIdSession]);
+    $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
+    $userId = $userRow['id'] ?? null;
+
+    if (!$userId) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Nepodařilo se najít numerické ID uživatele'
+        ]);
+        exit;
+    }
 
     // Najít zakázku
     $stmt = $pdo->prepare("
