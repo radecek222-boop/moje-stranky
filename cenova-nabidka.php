@@ -206,8 +206,40 @@ if ($reklamaceId > 0) {
             font-size: 0.9rem;
         }
         .kalkulace-polozka:last-child { border-bottom: none; }
-        .kalkulace-polozka-nazev { color: #ccc; }
+        .kalkulace-polozka-nazev { color: #ccc; display: flex; flex-direction: column; gap: 2px; }
         .kalkulace-polozka-cena { color: #39ff14; font-weight: 500; }
+        .kalkulace-pocet { font-size: 0.75rem; color: #666; }
+
+        /* Skupiny kalkulace */
+        .kalkulace-skupina {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .kalkulace-skupina:last-child { border-bottom: none; margin-bottom: 0; }
+        .kalkulace-skupina-nadpis {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #333;
+        }
+        .kalkulace-skupina-celkem {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0 0 0;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #888;
+            border-top: 1px dotted #333;
+        }
+        .kalkulace-skupina-celkem span:last-child {
+            color: #39ff14;
+            font-weight: 500;
+        }
 
         /* Celková cena */
         .celkova-cena {
@@ -975,7 +1007,7 @@ if ($reklamaceId > 0) {
         };
 
         // ========================================
-        // SESTAVENÍ POLOŽEK Z KALKULACE
+        // SESTAVENÍ POLOŽEK Z KALKULACE - DETAILNÍ ROZPIS
         // ========================================
         function sestavitPolozkyZKalkulace(data) {
             const polozky = [];
@@ -990,53 +1022,156 @@ if ($reklamaceId > 0) {
                 vyzvednutiSklad: 10
             };
 
-            // Dopravné
+            // === DOPRAVA ===
             if (data.dopravne > 0) {
                 polozky.push({
-                    nazev: `Dopravné (${data.vzdalenost} km × 2)`,
+                    nazev: `Dopravné (${data.vzdalenost} km × 2 cesty × 1 EUR/km)`,
                     cena: data.dopravne,
-                    pocet: 1
+                    pocet: 1,
+                    skupina: 'doprava'
                 });
             }
 
-            // Diagnostika
+            // === DIAGNOSTIKA ===
             if (data.typServisu === 'diagnostika') {
                 polozky.push({
                     nazev: 'Inspekce / diagnostika',
                     cena: CENY.diagnostika,
-                    pocet: 1
+                    pocet: 1,
+                    skupina: 'prace'
                 });
             }
 
-            // Čalounické práce
+            // === ČALOUNICKÉ PRÁCE - DETAILNÍ ROZPIS ===
             if (data.typServisu === 'calouneni' || data.typServisu === 'kombinace') {
                 const celkemDilu = data.sedaky + data.operky + data.podrucky + data.panely;
+
                 if (celkemDilu > 0) {
-                    const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
-
-                    let popis = 'Čalounické práce (';
-                    const dily = [];
-                    if (data.sedaky > 0) dily.push(`${data.sedaky}× sedák`);
-                    if (data.operky > 0) dily.push(`${data.operky}× opěrka`);
-                    if (data.podrucky > 0) dily.push(`${data.podrucky}× područka`);
-                    if (data.panely > 0) dily.push(`${data.panely}× panel`);
-                    popis += dily.join(', ') + ')';
-
+                    // Základní sazba (první díl)
                     polozky.push({
-                        nazev: popis,
-                        cena: cenaDilu,
-                        pocet: 1
+                        nazev: 'Čalounění - základní sazba (první díl)',
+                        cena: CENY.prvniDil,
+                        pocet: 1,
+                        skupina: 'calouneni'
                     });
+
+                    // Jednotlivé díly (každý další = 70 EUR)
+                    let zbyvaDilu = celkemDilu - 1; // První díl je v základní sazbě
+
+                    if (data.sedaky > 0) {
+                        const pocetZaplaceno = Math.min(data.sedaky, zbyvaDilu + (zbyvaDilu < 0 ? 1 : 0));
+                        if (data.sedaky === 1 && zbyvaDilu < 0) {
+                            // První díl je sedák - už započítán v základní sazbě
+                        } else if (data.sedaky > 0) {
+                            const dalsichSedaku = zbyvaDilu >= data.sedaky ? data.sedaky : Math.max(0, data.sedaky - 1);
+                            if (dalsichSedaku > 0 || data.sedaky === celkemDilu) {
+                                polozky.push({
+                                    nazev: 'Sedáky (další díly)',
+                                    cena: CENY.dalsiDil,
+                                    pocet: data.sedaky > 1 ? data.sedaky - (celkemDilu === data.sedaky ? 1 : 0) : 0,
+                                    skupina: 'calouneni',
+                                    detail: `${data.sedaky} ks celkem`
+                                });
+                            }
+                        }
+                    }
+
+                    // Zjednodušený přístup - zobrazit všechny typy dílů
+                    const typyDilu = [
+                        { nazev: 'Sedáky', pocet: data.sedaky },
+                        { nazev: 'Opěrky', pocet: data.operky },
+                        { nazev: 'Područky', pocet: data.podrucky },
+                        { nazev: 'Panely', pocet: data.panely }
+                    ].filter(d => d.pocet > 0);
+
+                    // Odebrat základní sazbu a přepočítat
+                    polozky.pop(); // Odstranit předchozí pokus
+
+                    // Správný výpočet: první díl 205, každý další 70
+                    let prvniDilPouzit = false;
+                    typyDilu.forEach(typ => {
+                        for (let i = 0; i < typ.pocet; i++) {
+                            if (!prvniDilPouzit) {
+                                polozky.push({
+                                    nazev: `${typ.nazev.slice(0, -1)} (první díl)`,
+                                    cena: CENY.prvniDil,
+                                    pocet: 1,
+                                    skupina: 'calouneni'
+                                });
+                                prvniDilPouzit = true;
+                            } else {
+                                // Přidat jako další díl - seskupíme stejné typy
+                            }
+                        }
+                    });
+
+                    // Resetovat a udělat to správně
+                    // Odstraníme všechny položky skupiny calouneni
+                    while (polozky.length > 0 && polozky[polozky.length - 1].skupina === 'calouneni') {
+                        polozky.pop();
+                    }
+
+                    // SPRÁVNÝ DETAILNÍ ROZPIS
+                    let poradiDilu = 0;
+
+                    if (data.sedaky > 0) {
+                        const cenaZaSedaky = vypoctiCenuZaDily(data.sedaky, poradiDilu, CENY);
+                        polozky.push({
+                            nazev: `Sedáky`,
+                            cena: cenaZaSedaky,
+                            pocet: data.sedaky,
+                            jednotkovaCena: (cenaZaSedaky / data.sedaky).toFixed(2),
+                            skupina: 'calouneni'
+                        });
+                        poradiDilu += data.sedaky;
+                    }
+
+                    if (data.operky > 0) {
+                        const cenaZaOperky = vypoctiCenuZaDily(data.operky, poradiDilu, CENY);
+                        polozky.push({
+                            nazev: `Opěrky`,
+                            cena: cenaZaOperky,
+                            pocet: data.operky,
+                            jednotkovaCena: (cenaZaOperky / data.operky).toFixed(2),
+                            skupina: 'calouneni'
+                        });
+                        poradiDilu += data.operky;
+                    }
+
+                    if (data.podrucky > 0) {
+                        const cenaZaPodrucky = vypoctiCenuZaDily(data.podrucky, poradiDilu, CENY);
+                        polozky.push({
+                            nazev: `Područky`,
+                            cena: cenaZaPodrucky,
+                            pocet: data.podrucky,
+                            jednotkovaCena: (cenaZaPodrucky / data.podrucky).toFixed(2),
+                            skupina: 'calouneni'
+                        });
+                        poradiDilu += data.podrucky;
+                    }
+
+                    if (data.panely > 0) {
+                        const cenaZaPanely = vypoctiCenuZaDily(data.panely, poradiDilu, CENY);
+                        polozky.push({
+                            nazev: `Panely`,
+                            cena: cenaZaPanely,
+                            pocet: data.panely,
+                            jednotkovaCena: (cenaZaPanely / data.panely).toFixed(2),
+                            skupina: 'calouneni'
+                        });
+                        poradiDilu += data.panely;
+                    }
                 }
             }
 
-            // Mechanické práce
+            // === MECHANICKÉ PRÁCE ===
             if (data.typServisu === 'mechanika' || data.typServisu === 'kombinace') {
                 if (data.typServisu === 'mechanika') {
                     polozky.push({
-                        nazev: 'Základní servisní sazba',
+                        nazev: 'Mechanika - základní servisní sazba',
                         cena: CENY.zakladniSazba,
-                        pocet: 1
+                        pocet: 1,
+                        skupina: 'mechanika'
                     });
                 }
 
@@ -1044,7 +1179,8 @@ if ($reklamaceId > 0) {
                     polozky.push({
                         nazev: 'Relax mechanismus',
                         cena: CENY.mechanismusPriplatek,
-                        pocet: data.relax
+                        pocet: data.relax,
+                        skupina: 'mechanika'
                     });
                 }
 
@@ -1052,43 +1188,58 @@ if ($reklamaceId > 0) {
                     polozky.push({
                         nazev: 'Elektrický díl',
                         cena: CENY.mechanismusPriplatek,
-                        pocet: data.vysuv
+                        pocet: data.vysuv,
+                        skupina: 'mechanika'
                     });
                 }
             }
 
-            // Druhá osoba
+            // === PŘÍPLATKY ===
             if (data.tezkyNabytek) {
                 polozky.push({
                     nazev: 'Druhá osoba (těžký nábytek >50kg)',
                     cena: CENY.druhaOsoba,
-                    pocet: 1
+                    pocet: 1,
+                    skupina: 'priplatky'
                 });
             }
 
-            // Materiál
             if (data.material) {
                 polozky.push({
-                    nazev: 'Materiál od WGS',
+                    nazev: 'Materiál od WGS (výplně)',
                     cena: CENY.material,
-                    pocet: 1
+                    pocet: 1,
+                    skupina: 'priplatky'
                 });
             }
 
-            // Vyzvednutí na skladě
             if (data.vyzvednutiSklad) {
                 polozky.push({
                     nazev: 'Vyzvednutí dílu na skladě',
                     cena: CENY.vyzvednutiSklad,
-                    pocet: 1
+                    pocet: 1,
+                    skupina: 'priplatky'
                 });
             }
 
             return polozky;
         }
 
+        // Pomocná funkce pro výpočet ceny za díly
+        function vypoctiCenuZaDily(pocetDilu, startIndex, CENY) {
+            let cena = 0;
+            for (let i = 0; i < pocetDilu; i++) {
+                if (startIndex + i === 0) {
+                    cena += CENY.prvniDil; // První díl celkem = 205 EUR
+                } else {
+                    cena += CENY.dalsiDil; // Každý další = 70 EUR
+                }
+            }
+            return cena;
+        }
+
         // ========================================
-        // ZOBRAZENÍ VÝSLEDKU KALKULACE
+        // ZOBRAZENÍ VÝSLEDKU KALKULACE - SE SKUPINAMI
         // ========================================
         function zobrazitKalkulaciVysledek(polozky) {
             if (!polozky || polozky.length === 0) {
@@ -1096,13 +1247,51 @@ if ($reklamaceId > 0) {
                 return;
             }
 
-            let html = '';
+            // Seskupit položky
+            const skupiny = {
+                doprava: { nazev: 'DOPRAVA', polozky: [], celkem: 0 },
+                calouneni: { nazev: 'ČALOUNICKÉ PRÁCE', polozky: [], celkem: 0 },
+                mechanika: { nazev: 'MECHANICKÉ PRÁCE', polozky: [], celkem: 0 },
+                priplatky: { nazev: 'PŘÍPLATKY', polozky: [], celkem: 0 },
+                prace: { nazev: 'PRÁCE', polozky: [], celkem: 0 }
+            };
+
             polozky.forEach(p => {
-                const celkem = (p.cena * p.pocet).toFixed(2);
-                html += `<div class="kalkulace-polozka">
-                    <span class="kalkulace-polozka-nazev">${p.nazev} ${p.pocet > 1 ? `(${p.pocet}×)` : ''}</span>
-                    <span class="kalkulace-polozka-cena">${celkem} EUR</span>
-                </div>`;
+                const skupina = p.skupina || 'prace';
+                if (skupiny[skupina]) {
+                    skupiny[skupina].polozky.push(p);
+                    skupiny[skupina].celkem += p.cena * (p.pocet || 1);
+                }
+            });
+
+            let html = '';
+            let celkovaCena = 0;
+
+            // Renderovat každou skupinu
+            Object.keys(skupiny).forEach(key => {
+                const skupina = skupiny[key];
+                if (skupina.polozky.length > 0) {
+                    html += `<div class="kalkulace-skupina">
+                        <div class="kalkulace-skupina-nadpis">${skupina.nazev}</div>`;
+
+                    skupina.polozky.forEach(p => {
+                        const cenaCelkem = p.cena * (p.pocet || 1);
+                        html += `<div class="kalkulace-polozka">
+                            <span class="kalkulace-polozka-nazev">
+                                ${p.nazev}
+                                ${p.pocet > 1 ? `<span class="kalkulace-pocet">${p.pocet} ks</span>` : ''}
+                            </span>
+                            <span class="kalkulace-polozka-cena">${cenaCelkem.toFixed(2)} EUR</span>
+                        </div>`;
+                    });
+
+                    html += `<div class="kalkulace-skupina-celkem">
+                        <span>Mezisoučet:</span>
+                        <span>${skupina.celkem.toFixed(2)} EUR</span>
+                    </div></div>`;
+
+                    celkovaCena += skupina.celkem;
+                }
             });
 
             kalkulacePolozkyEl.innerHTML = html;
@@ -1386,7 +1575,7 @@ if ($reklamaceId > 0) {
                 return;
             }
 
-            // Sestavit položky
+            // Sestavit položky se skupinami
             const vsechnyPolozky = [];
 
             if (window.kalkulacePolozky) {
@@ -1394,7 +1583,8 @@ if ($reklamaceId > 0) {
                     vsechnyPolozky.push({
                         nazev: p.nazev,
                         cena: p.cena,
-                        pocet: p.pocet
+                        pocet: p.pocet,
+                        skupina: p.skupina || 'prace'
                     });
                 });
             }
@@ -1403,9 +1593,10 @@ if ($reklamaceId > 0) {
             nahradniDily.forEach(d => {
                 if (d.nazev && d.cena > 0) {
                     vsechnyPolozky.push({
-                        nazev: 'Náhradní díl: ' + d.nazev,
+                        nazev: d.nazev,
                         cena: d.cena,
-                        pocet: d.pocet
+                        pocet: d.pocet,
+                        skupina: 'dily'
                     });
                 }
             });
@@ -1416,7 +1607,8 @@ if ($reklamaceId > 0) {
                     vsechnyPolozky.push({
                         nazev: p.nazev,
                         cena: p.cena,
-                        pocet: p.pocet
+                        pocet: p.pocet,
+                        skupina: 'ostatni'
                     });
                 }
             });
@@ -1448,16 +1640,60 @@ if ($reklamaceId > 0) {
             const datum = new Date().toLocaleDateString('cs-CZ');
             const platnostDo = new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('cs-CZ');
 
-            // Vytvořit HTML pro PDF
-            let polozkyHtml = '';
+            // Seskupit položky pro PDF
+            const skupinyNazvy = {
+                doprava: 'DOPRAVA',
+                calouneni: 'ČALOUNICKÉ PRÁCE',
+                mechanika: 'MECHANICKÉ PRÁCE',
+                priplatky: 'PŘÍPLATKY',
+                dily: 'NÁHRADNÍ DÍLY',
+                prace: 'PRÁCE',
+                ostatni: 'OSTATNÍ'
+            };
+
+            const skupiny = {};
             data.polozky.forEach(p => {
-                const celkemPol = (p.cena * p.pocet).toFixed(2);
-                polozkyHtml += `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${p.nazev}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${p.pocet}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${p.cena.toFixed(2)} ${data.mena}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${celkemPol} ${data.mena}</td>
-                </tr>`;
+                const sk = p.skupina || 'ostatni';
+                if (!skupiny[sk]) {
+                    skupiny[sk] = { nazev: skupinyNazvy[sk] || sk.toUpperCase(), polozky: [], celkem: 0 };
+                }
+                skupiny[sk].polozky.push(p);
+                skupiny[sk].celkem += p.cena * p.pocet;
+            });
+
+            // Vytvořit HTML tabulky se skupinami
+            let polozkyHtml = '';
+            const poradiSkupin = ['doprava', 'calouneni', 'mechanika', 'priplatky', 'dily', 'prace', 'ostatni'];
+
+            poradiSkupin.forEach(skKey => {
+                if (skupiny[skKey] && skupiny[skKey].polozky.length > 0) {
+                    const sk = skupiny[skKey];
+
+                    // Záhlaví skupiny
+                    polozkyHtml += `<tr>
+                        <td colspan="4" style="padding: 12px 10px 8px 10px; background: #e9e9e9; font-weight: bold; font-size: 11px; color: #333; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ${sk.nazev}
+                        </td>
+                    </tr>`;
+
+                    // Položky ve skupině
+                    sk.polozky.forEach(p => {
+                        const celkemPol = (p.cena * p.pocet).toFixed(2);
+                        const jednotkovaCena = p.pocet > 1 ? (p.cena / p.pocet).toFixed(2) : p.cena.toFixed(2);
+                        polozkyHtml += `<tr>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${p.nazev}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 13px;">${p.pocet} ks</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; color: #666;">-</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${data.mena}</td>
+                        </tr>`;
+                    });
+
+                    // Mezisoučet skupiny
+                    polozkyHtml += `<tr>
+                        <td colspan="3" style="padding: 8px 10px; text-align: right; font-size: 12px; color: #666; border-bottom: 2px solid #ddd;">Mezisoučet ${sk.nazev.toLowerCase()}:</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${data.mena}</td>
+                    </tr>`;
+                }
             });
 
             const pdfContent = document.createElement('div');
@@ -1484,25 +1720,25 @@ if ($reklamaceId > 0) {
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <thead>
-                        <tr style="background: #f5f5f5;">
-                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Služba</th>
-                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Počet</th>
-                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd;">Cena/ks</th>
-                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd;">Celkem</th>
+                        <tr style="background: #333; color: #fff;">
+                            <th style="padding: 12px; text-align: left;">Položka</th>
+                            <th style="padding: 12px; text-align: center; width: 80px;">Počet</th>
+                            <th style="padding: 12px; text-align: right; width: 100px;">Cena/ks</th>
+                            <th style="padding: 12px; text-align: right; width: 120px;">Celkem</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${polozkyHtml}
                     </tbody>
                     <tfoot>
-                        <tr style="background: #f9f9f9;">
-                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; border-top: 2px solid #333;">Celková cena (bez DPH):</td>
-                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; border-top: 2px solid #333;">${data.celkem.toFixed(2)} ${data.mena}</td>
+                        <tr style="background: #1a1a1a; color: #fff;">
+                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px;">CELKOVÁ CENA (bez DPH):</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px;">${data.celkem.toFixed(2)} ${data.mena}</td>
                         </tr>
                     </tfoot>
                 </table>
 
-                <div style="background: #f5f5f5; border-left: 4px solid #666; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
+                <div style="background: #f5f5f5; border-left: 4px solid #333; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
                     <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu ve výši jejich ceny. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                 </div>
 
