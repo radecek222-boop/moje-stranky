@@ -802,6 +802,18 @@
                 return;
             }
 
+            // Počkat na načtení fontu Poppins (důležité pro české znaky)
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+                // Explicitně načíst Poppins pokud není
+                try {
+                    await document.fonts.load('400 16px Poppins');
+                    await document.fonts.load('700 16px Poppins');
+                } catch (e) {
+                    console.warn('[Kalkulačka] Font Poppins nelze načíst, použije se fallback');
+                }
+            }
+
             // Vypočítat celkovou cenu
             let celkem = stav.dopravne;
 
