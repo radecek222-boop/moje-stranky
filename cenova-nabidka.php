@@ -399,9 +399,9 @@ if ($reklamaceId > 0) {
         }
         .workflow-btn {
             padding: 3px 6px;
-            border: 1px solid #444;
+            border: 1px solid #666;
             border-radius: 3px;
-            background: #222;
+            background: #888;
             color: #fff;
             font-size: 0.65rem;
             cursor: pointer;
@@ -409,8 +409,8 @@ if ($reklamaceId > 0) {
             white-space: nowrap;
         }
         .workflow-btn:hover {
-            border-color: #666;
-            background: #333;
+            border-color: #999;
+            background: #777;
         }
         .workflow-btn.aktivni {
             background: #1a1a1a;
@@ -420,7 +420,7 @@ if ($reklamaceId > 0) {
         }
         .workflow-btn.auto {
             cursor: default;
-            opacity: 0.6;
+            opacity: 0.7;
         }
         .workflow-btn.auto.aktivni {
             opacity: 1;
