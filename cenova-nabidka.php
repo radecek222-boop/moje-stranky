@@ -795,9 +795,8 @@ if ($reklamaceId > 0) {
                     </div>
 
                     <div class="wizard-buttons">
-                        <button class="btn-secondary" data-action="previousStep">Zpět</button>
-                        <button class="btn-primary" data-action="pouzitKalkulaci">Použít v nabídce</button>
-                        <button class="btn-secondary" data-action="resetovatKalkulacku">Nová kalkulace</button>
+                        <!-- Tlačítka se generují automaticky funkcí upravitTlacitkaProRezim() -->
+                        <!-- V režimu 'protokol' se zobrazí: Zpět + Započítat -->
                     </div>
                 </div>
 
@@ -856,6 +855,11 @@ if ($reklamaceId > 0) {
             modal.classList.add('zobrazit');
             document.body.style.overflow = 'hidden';
 
+            // Nastavit režim kalkulačky na 'protokol' - zobrazí tlačítko "Započítat"
+            if (typeof window.nastavitKalkulackuRezim === 'function') {
+                window.nastavitKalkulackuRezim('protokol');
+            }
+
             // Předvyplnit adresu z formuláře
             const adresa = document.getElementById('zakaznik_adresa').value.trim();
             if (adresa && typeof window.predvyplnitAdresu === 'function') {
@@ -882,30 +886,28 @@ if ($reklamaceId > 0) {
         });
 
         // ========================================
-        // REGISTRACE AKCE PRO KALKULAČKU
+        // CALLBACK PRO KALKULAČKU (režim 'protokol')
         // ========================================
-        window.pouzitKalkulaci = function() {
-            // Získat data z kalkulačky
-            if (typeof window.stav !== 'undefined') {
-                kalkulaceData = { ...window.stav };
+        // Kalkulačka v režimu 'protokol' volá tuto funkci při kliknutí na "Započítat"
+        window.protokolKalkulacka = {
+            zpracovatVysledek: function(kalkulaceDataZ) {
+                // Získat data z kalkulačky
+                if (typeof window.stav !== 'undefined') {
+                    kalkulaceData = { ...window.stav };
 
-                // Vypočítat položky a ceny
-                const polozky = sestavitPolozkyZKalkulace(kalkulaceData);
-                zobrazitKalkulaciVysledek(polozky);
+                    // Vypočítat položky a ceny
+                    const polozky = sestavitPolozkyZKalkulace(kalkulaceData);
+                    zobrazitKalkulaciVysledek(polozky);
 
-                // Zavřít modal
-                modal.classList.remove('zobrazit');
-                document.body.style.overflow = '';
+                    // Zavřít modal
+                    modal.classList.remove('zobrazit');
+                    document.body.style.overflow = '';
 
-                // Aktualizovat celkovou cenu
-                aktualizovatCelkovouCenu();
+                    // Aktualizovat celkovou cenu
+                    aktualizovatCelkovouCenu();
+                }
             }
         };
-
-        // Registrace do Utils
-        if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
-            window.Utils.registerAction('pouzitKalkulaci', window.pouzitKalkulaci);
-        }
 
         // ========================================
         // SESTAVENÍ POLOŽEK Z KALKULACE
