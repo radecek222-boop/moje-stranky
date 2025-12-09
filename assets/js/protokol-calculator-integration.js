@@ -9,6 +9,18 @@
     let modalOverlay = null;
     let wgsDialogOverlay = null;
 
+    // Helper pro zobrazení notifikace (s fallbackem na alert)
+    function zobrazitZpravu(text, typ = 'info') {
+        if (typeof wgsToast !== 'undefined') {
+            if (typ === 'error') wgsToast.error(text);
+            else if (typ === 'warning') wgsToast.warning(text);
+            else if (typ === 'success') wgsToast.success(text);
+            else wgsToast.info(text);
+        } else {
+            alert(text);
+        }
+    }
+
     // Inicializace při načtení stránky
     document.addEventListener('DOMContentLoaded', () => {
         console.log('[Protokol-CN] === INICIALIZACE ZAHÁJENA ===');
@@ -38,10 +50,10 @@
             priceTotalInput.style.cursor = 'pointer';
             console.log('[Protokol-CN] Event listener přidán na price-total (capture phase)');
 
-            // Debug: vypsat hodnotu order-number
-            const orderNum = document.getElementById('order-number');
-            console.log('[Protokol-CN] Order number element:', orderNum);
-            console.log('[Protokol-CN] Order number value:', orderNum?.value);
+            // Debug: vypsat hodnotu claim-number (číslo reklamace - POZ zakázky začínají na POZ)
+            const claimNum = document.getElementById('claim-number');
+            console.log('[Protokol-CN] Claim number element:', claimNum);
+            console.log('[Protokol-CN] Claim number value:', claimNum?.value);
         } else {
             console.error('[Protokol-CN] price-total element NENALEZEN!');
         }
@@ -49,39 +61,35 @@
         console.log('[Protokol-CN] === INICIALIZACE DOKONČENA ===');
     });
 
-    // Zkontrolovat zda jde o POZ zakázku
+    // Zkontrolovat zda jde o POZ zakázku (kontroluje claim-number = Číslo reklamace)
     function jePozZakazka() {
-        const orderNumber = document.getElementById('order-number');
-        console.log('[Protokol-CN] jePozZakazka() - element:', orderNumber);
+        // claim-number obsahuje číslo reklamace (např. POZ/2025/08-12/01 pro mimozáruční)
+        const claimNumber = document.getElementById('claim-number');
+        console.log('[Protokol-CN] jePozZakazka() - claim-number element:', claimNumber);
 
-        if (!orderNumber) {
-            console.log('[Protokol-CN] jePozZakazka() - element NENALEZEN -> false');
+        if (!claimNumber) {
+            console.log('[Protokol-CN] jePozZakazka() - claim-number NENALEZEN -> false');
             return false;
         }
 
-        const hodnota = orderNumber.value.trim().toUpperCase();
-        console.log('[Protokol-CN] jePozZakazka() - hodnota:', hodnota);
+        const hodnota = claimNumber.value.trim().toUpperCase();
+        console.log('[Protokol-CN] jePozZakazka() - claim-number hodnota:', hodnota);
 
         const jePoz = hodnota.startsWith('POZ');
-        console.log('[Protokol-CN] jePozZakazka() - výsledek:', jePoz);
+        console.log('[Protokol-CN] jePozZakazka() - je POZ zakázka:', jePoz);
 
         return jePoz;
     }
 
     // Zpracovat kliknutí na pole ceny
     function zpracovatKliknutiNaCenu() {
-        console.log('[Protokol-CN] zpracovatKliknutiNaCenu() ZAVOLÁNA');
-
         const jePoz = jePozZakazka();
-        console.log('[Protokol-CN] Je POZ zakázka?', jePoz);
 
         if (jePoz) {
             // POZ zakázka - zobrazit dialog s volbou
-            console.log('[Protokol-CN] -> Zobrazuji WGS dialog');
             zobrazitWgsDialog();
         } else {
             // Běžná zakázka - rovnou kalkulačka
-            console.log('[Protokol-CN] -> Otevírám kalkulačku');
             otevritKalkulacku();
         }
     }
@@ -206,9 +214,7 @@
         const email = emailInput ? emailInput.value.trim() : '';
 
         if (!email) {
-            if (typeof wgsToast !== 'undefined') {
-                wgsToast.error('Email zákazníka není vyplněn');
-            }
+            zobrazitZpravu('Email zákazníka není vyplněn', 'error');
             return;
         }
 
@@ -229,9 +235,7 @@
             const result = await response.json();
 
             if (result.status !== 'success' || !result.data || result.data.length === 0) {
-                if (typeof wgsToast !== 'undefined') {
-                    wgsToast.warning('Pro tento email nebyly nalezeny žádné cenové nabídky');
-                }
+                zobrazitZpravu('Pro tento email nebyly nalezeny žádné cenové nabídky', 'warning');
                 // Nabídnout kalkulačku jako alternativu
                 otevritKalkulacku();
                 return;
@@ -242,9 +246,7 @@
 
         } catch (error) {
             console.error('[Protokol-CN] Chyba při načítání nabídek:', error);
-            if (typeof wgsToast !== 'undefined') {
-                wgsToast.error('Chyba při načítání cenových nabídek');
-            }
+            zobrazitZpravu('Chyba při načítání cenových nabídek', 'error');
         }
     }
 
@@ -376,9 +378,7 @@
                 cisloNabidky: cisloNabidky
             };
 
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success(`Cena ${cena.toFixed(2)} € načtena z ${cisloNabidky}`);
-            }
+            zobrazitZpravu(`Cena ${cena.toFixed(2)} € načtena z ${cisloNabidky}`, 'success');
         }
     }
 
@@ -436,10 +436,7 @@
         const priceTotalInput = document.getElementById('price-total');
         if (priceTotalInput && data && data.celkovaCena !== undefined) {
             priceTotalInput.value = data.celkovaCena.toFixed(2) + ' €';
-
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success('Cena ' + data.celkovaCena.toFixed(2) + ' € byla započítána');
-            }
+            zobrazitZpravu('Cena ' + data.celkovaCena.toFixed(2) + ' € byla započítána', 'success');
         } else {
             console.error('[Protokol-Kalkulačka] Chyba: data nebo celkovaCena chybí');
         }
@@ -487,10 +484,7 @@
         const priceTotalInput = document.getElementById('price-total');
         if (priceTotalInput) {
             priceTotalInput.value = cenaCislo.toFixed(2) + ' €';
-
-            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                wgsToast.success('Cena ' + cenaCislo.toFixed(2) + ' € byla započítána');
-            }
+            zobrazitZpravu('Cena ' + cenaCislo.toFixed(2) + ' € byla započítána', 'success');
         }
 
         // Zavřít modal
