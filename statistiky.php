@@ -796,7 +796,6 @@ body {
         <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
-      <button class="btn btn-primary" data-action="aplikovatFiltry">Aplikovat filtry</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
     </div>
   </div>

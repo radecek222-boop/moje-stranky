@@ -37,10 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ========================================
     // PŘÍMÉ EVENT LISTENERY NA TLAČÍTKA
-    // (fallback pokud Utils.registerAction nefunguje)
     // ========================================
     const btnReset = document.querySelector('[data-action="resetovitFiltry"]');
-    const btnAplikovat = document.querySelector('[data-action="aplikovatFiltry"]');
     const btnExport = document.querySelector('[data-action="exportovatPDF"]');
     const btnPrev = document.querySelector('[data-action="predchoziStranka"]');
     const btnNext = document.querySelector('[data-action="dalsiStranka"]');
@@ -49,13 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnReset.addEventListener('click', (e) => {
             e.preventDefault();
             resetovitFiltry();
-        });
-    }
-
-    if (btnAplikovat) {
-        btnAplikovat.addEventListener('click', (e) => {
-            e.preventDefault();
-            aplikovatFiltry();
         });
     }
 
@@ -229,6 +220,10 @@ function updateVyberProdejci() {
     } else {
         label.textContent = `Vybráno (${vybraneProdejci.length})`;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
@@ -248,6 +243,10 @@ function updateVyberTechnici() {
     } else {
         label.textContent = `Vybráno (${vybraneTechnici.length})`;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
@@ -267,6 +266,10 @@ function updateVyberZeme() {
         const labelElement = checkbox.nextElementSibling;
         label.textContent = labelElement.textContent;
     }
+
+    // Automaticky načíst data při změně filtru
+    aktualniStranka = 1;
+    aplikovatFiltry();
 }
 
 /**
