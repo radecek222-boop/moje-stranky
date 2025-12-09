@@ -138,4 +138,56 @@ foreach ($posledni as $p) {
 }
 echo "</table>";
 
+// 5. NOVÉ: Kontrola textového sloupce 'technik'
+echo "<h2>5. Unikátní hodnoty v textovém sloupci 'technik'</h2>";
+$stmtTechnikText = $pdo->query("
+    SELECT
+        r.technik,
+        COUNT(*) as pocet
+    FROM wgs_reklamace r
+    WHERE r.technik IS NOT NULL AND r.technik != ''
+    GROUP BY r.technik
+    ORDER BY pocet DESC
+    LIMIT 20
+");
+$technikTextValues = $stmtTechnikText->fetchAll(PDO::FETCH_ASSOC);
+
+if (empty($technikTextValues)) {
+    echo "<div class='warning'>Žádné reklamace nemají vyplněný textový sloupec 'technik'</div>";
+} else {
+    echo "<table>";
+    echo "<tr><th>Hodnota sloupce 'technik'</th><th>Počet záznamů</th></tr>";
+    foreach ($technikTextValues as $tv) {
+        echo "<tr><td><code>" . htmlspecialchars($tv['technik']) . "</code></td><td>{$tv['pocet']}</td></tr>";
+    }
+    echo "</table>";
+}
+
+// 6. Posledních 10 reklamací celkem (bez filtru)
+echo "<h2>6. Posledních 10 reklamací (libovolných)</h2>";
+$stmtAll = $pdo->query("
+    SELECT
+        r.cislo,
+        r.assigned_to,
+        r.technik as technik_text,
+        r.created_by,
+        u.name as prodejce_name,
+        r.created_at
+    FROM wgs_reklamace r
+    LEFT JOIN wgs_users u ON r.created_by = u.user_id
+    ORDER BY r.created_at DESC
+    LIMIT 10
+");
+$posledniVsechny = $stmtAll->fetchAll(PDO::FETCH_ASSOC);
+
+echo "<table>";
+echo "<tr><th>Číslo</th><th>assigned_to</th><th>technik (text)</th><th>created_by</th><th>Prodejce</th><th>Datum</th></tr>";
+foreach ($posledniVsechny as $p) {
+    $assignedTo = $p['assigned_to'] ?? '<em>NULL</em>';
+    $technikText = $p['technik_text'] ?? '<em>NULL</em>';
+    $prodejce = $p['prodejce_name'] ?? '<em>NULL</em>';
+    echo "<tr><td>{$p['cislo']}</td><td><code>{$assignedTo}</code></td><td>{$technikText}</td><td><code>{$p['created_by']}</code></td><td>{$prodejce}</td><td>{$p['created_at']}</td></tr>";
+}
+echo "</table>";
+
 echo "</div></body></html>";
