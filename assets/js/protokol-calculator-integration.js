@@ -1,32 +1,391 @@
 /**
- * Integrace kalkulačky do protokolu - ZJEDNODUŠENÁ VERZE
- * Kalkulačka funguje STEJNĚ jako v ceníku, jen je v modalu
+ * Integrace kalkulačky do protokolu - ROZŠÍŘENÁ VERZE
+ * Pro POZ zakázky nabízí volbu: Načíst z CN nebo Kalkulačka
  */
+
+console.log('[Protokol-CN] SOUBOR NAČTEN - v2');
 
 (function() {
     'use strict';
 
     let modalOverlay = null;
+    let wgsDialogOverlay = null;
 
     // Inicializace při načtení stránky
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('[Protokol-CN] === INICIALIZACE ZAHÁJENA ===');
+
         modalOverlay = document.getElementById('calculatorModalOverlay');
         const priceTotalInput = document.getElementById('price-total');
 
         if (!modalOverlay) {
-            console.error('[Protokol-Kalkulačka] Modal overlay nenalezen!');
+            console.warn('[Protokol-CN] Modal overlay nenalezen - kalkulačka nebude dostupná');
+        }
+
+        // Vytvořit WGS dialog pro výběr (funguje i bez kalkulačky)
+        vytvorWgsDialog();
+        console.log('[Protokol-CN] WGS dialog vytvořen');
+
+        // Kliknutí na pole ceny - MUSÍ být první handler!
+        if (priceTotalInput) {
+            // Odstranit případné existující handlery přidáním nového elementu
+            priceTotalInput.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('[Protokol-CN] Kliknuto na price-total');
+                zpracovatKliknutiNaCenu();
+            }, true); // capture phase - spustí se jako první
+
+            priceTotalInput.style.cursor = 'pointer';
+            console.log('[Protokol-CN] Event listener přidán na price-total (capture phase)');
+
+            // Debug: vypsat hodnotu order-number
+            const orderNum = document.getElementById('order-number');
+            console.log('[Protokol-CN] Order number element:', orderNum);
+            console.log('[Protokol-CN] Order number value:', orderNum?.value);
+        } else {
+            console.error('[Protokol-CN] price-total element NENALEZEN!');
+        }
+
+        console.log('[Protokol-CN] === INICIALIZACE DOKONČENA ===');
+    });
+
+    // Zkontrolovat zda jde o POZ zakázku
+    function jePozZakazka() {
+        const orderNumber = document.getElementById('order-number');
+        console.log('[Protokol-CN] jePozZakazka() - element:', orderNumber);
+
+        if (!orderNumber) {
+            console.log('[Protokol-CN] jePozZakazka() - element NENALEZEN -> false');
+            return false;
+        }
+
+        const hodnota = orderNumber.value.trim().toUpperCase();
+        console.log('[Protokol-CN] jePozZakazka() - hodnota:', hodnota);
+
+        const jePoz = hodnota.startsWith('POZ');
+        console.log('[Protokol-CN] jePozZakazka() - výsledek:', jePoz);
+
+        return jePoz;
+    }
+
+    // Zpracovat kliknutí na pole ceny
+    function zpracovatKliknutiNaCenu() {
+        console.log('[Protokol-CN] zpracovatKliknutiNaCenu() ZAVOLÁNA');
+
+        const jePoz = jePozZakazka();
+        console.log('[Protokol-CN] Je POZ zakázka?', jePoz);
+
+        if (jePoz) {
+            // POZ zakázka - zobrazit dialog s volbou
+            console.log('[Protokol-CN] -> Zobrazuji WGS dialog');
+            zobrazitWgsDialog();
+        } else {
+            // Běžná zakázka - rovnou kalkulačka
+            console.log('[Protokol-CN] -> Otevírám kalkulačku');
+            otevritKalkulacku();
+        }
+    }
+
+    // Vytvořit WGS dialog
+    function vytvorWgsDialog() {
+        // Overlay
+        wgsDialogOverlay = document.createElement('div');
+        wgsDialogOverlay.id = 'wgsDialogOverlay';
+        wgsDialogOverlay.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        `;
+
+        // Dialog box
+        const dialogBox = document.createElement('div');
+        dialogBox.style.cssText = `
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        `;
+
+        dialogBox.innerHTML = `
+            <h2 style="margin: 0 0 10px 0; font-size: 20px; color: #333; font-weight: 600;">WGS</h2>
+            <p style="margin: 0 0 25px 0; font-size: 14px; color: #666;">Mimozáruční oprava - vyberte způsob zadání ceny</p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button id="btnNacistZCn" style="
+                    background: #333;
+                    color: #fff;
+                    border: none;
+                    padding: 15px 30px;
+                    border-radius: 8px;
+                    font-size: 15px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                ">Načíst z CN</button>
+
+                <button id="btnKalkulacka" style="
+                    background: #f5f5f5;
+                    color: #333;
+                    border: 1px solid #ddd;
+                    padding: 15px 30px;
+                    border-radius: 8px;
+                    font-size: 15px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                ">Kalkulačka</button>
+
+                <button id="btnZrusitDialog" style="
+                    background: transparent;
+                    color: #999;
+                    border: none;
+                    padding: 10px;
+                    font-size: 13px;
+                    cursor: pointer;
+                    margin-top: 5px;
+                ">Zrušit</button>
+            </div>
+        `;
+
+        wgsDialogOverlay.appendChild(dialogBox);
+        document.body.appendChild(wgsDialogOverlay);
+
+        // Event listenery
+        document.getElementById('btnNacistZCn').addEventListener('click', () => {
+            zavritWgsDialog();
+            zobrazitVyberCenovychNabidek();
+        });
+
+        document.getElementById('btnKalkulacka').addEventListener('click', () => {
+            zavritWgsDialog();
+            otevritKalkulacku();
+        });
+
+        document.getElementById('btnZrusitDialog').addEventListener('click', zavritWgsDialog);
+
+        // Zavřít kliknutím mimo
+        wgsDialogOverlay.addEventListener('click', (e) => {
+            if (e.target === wgsDialogOverlay) {
+                zavritWgsDialog();
+            }
+        });
+    }
+
+    // Zobrazit WGS dialog
+    function zobrazitWgsDialog() {
+        console.log('[Protokol-CN] zobrazitWgsDialog() - overlay:', wgsDialogOverlay);
+
+        if (wgsDialogOverlay) {
+            wgsDialogOverlay.style.display = 'flex';
+            console.log('[Protokol-CN] WGS dialog ZOBRAZEN');
+        } else {
+            console.error('[Protokol-CN] WGS dialog overlay NENALEZEN!');
+        }
+    }
+
+    // Zavřít WGS dialog
+    function zavritWgsDialog() {
+        if (wgsDialogOverlay) {
+            wgsDialogOverlay.style.display = 'none';
+        }
+    }
+
+    // Zobrazit výběr cenových nabídek
+    async function zobrazitVyberCenovychNabidek() {
+        const emailInput = document.getElementById('email');
+        const email = emailInput ? emailInput.value.trim() : '';
+
+        if (!email) {
+            if (typeof wgsToast !== 'undefined') {
+                wgsToast.error('Email zákazníka není vyplněn');
+            }
             return;
         }
 
-        // Kliknutí na pole ceny otevře kalkulačku
-        if (priceTotalInput) {
-            priceTotalInput.addEventListener('click', otevritModal);
-            priceTotalInput.style.cursor = 'pointer';
-        }
-    });
+        // Načíst cenové nabídky pro email
+        try {
+            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
 
-    // Otevření modalu
-    function otevritModal() {
+            const formData = new FormData();
+            formData.append('action', 'seznam_pro_email');
+            formData.append('email', email);
+            formData.append('csrf_token', csrfToken);
+
+            const response = await fetch('/api/nabidka_api.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status !== 'success' || !result.data || result.data.length === 0) {
+                if (typeof wgsToast !== 'undefined') {
+                    wgsToast.warning('Pro tento email nebyly nalezeny žádné cenové nabídky');
+                }
+                // Nabídnout kalkulačku jako alternativu
+                otevritKalkulacku();
+                return;
+            }
+
+            // Zobrazit dialog s výběrem nabídek
+            zobrazitSeznamNabidek(result.data);
+
+        } catch (error) {
+            console.error('[Protokol-CN] Chyba při načítání nabídek:', error);
+            if (typeof wgsToast !== 'undefined') {
+                wgsToast.error('Chyba při načítání cenových nabídek');
+            }
+        }
+    }
+
+    // Zobrazit seznam nabídek pro výběr
+    function zobrazitSeznamNabidek(nabidky) {
+        // Vytvořit overlay pro seznam
+        const overlay = document.createElement('div');
+        overlay.id = 'cnSeznamOverlay';
+        overlay.style.cssText = `
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        `;
+
+        // Sestavit HTML seznam
+        let seznamHtml = nabidky.map(n => {
+            const stav = n.stav === 'potvrzena' ? 'Potvrzena' : (n.stav === 'odeslana' ? 'Odeslána' : n.stav);
+            const datum = n.vytvoreno_at ? new Date(n.vytvoreno_at).toLocaleDateString('cs-CZ') : '';
+            const cena = parseFloat(n.celkova_cena).toFixed(2);
+
+            return `
+                <div class="cn-polozka" data-id="${n.id}" data-cena="${n.celkova_cena}" data-cislo="${n.cislo_nabidky || 'CN-' + n.id}" style="
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    background: #fff;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 15px; color: #333;">${n.cislo_nabidky || 'CN-' + n.id}</strong>
+                            <span style="font-size: 12px; color: #888; margin-left: 10px;">${datum}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 18px; font-weight: 600; color: #333;">${cena} €</span>
+                            <div style="font-size: 11px; color: ${n.stav === 'potvrzena' ? '#28a745' : '#666'};">${stav}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const dialogBox = document.createElement('div');
+        dialogBox.style.cssText = `
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        `;
+
+        dialogBox.innerHTML = `
+            <h2 style="margin: 0 0 5px 0; font-size: 18px; color: #333; font-weight: 600;">Cenové nabídky</h2>
+            <p style="margin: 0 0 20px 0; font-size: 13px; color: #666;">Vyberte nabídku pro načtení ceny</p>
+
+            <div id="cnSeznam" style="margin-bottom: 15px;">
+                ${seznamHtml}
+            </div>
+
+            <button id="btnZavritCnSeznam" style="
+                width: 100%;
+                background: #f5f5f5;
+                color: #666;
+                border: 1px solid #ddd;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 14px;
+                cursor: pointer;
+            ">Zrušit</button>
+        `;
+
+        overlay.appendChild(dialogBox);
+        document.body.appendChild(overlay);
+
+        // Event listenery pro položky
+        dialogBox.querySelectorAll('.cn-polozka').forEach(polozka => {
+            polozka.addEventListener('mouseenter', () => {
+                polozka.style.borderColor = '#333';
+                polozka.style.background = '#f9f9f9';
+            });
+            polozka.addEventListener('mouseleave', () => {
+                polozka.style.borderColor = '#ddd';
+                polozka.style.background = '#fff';
+            });
+            polozka.addEventListener('click', () => {
+                const cena = parseFloat(polozka.dataset.cena);
+                const cislo = polozka.dataset.cislo;
+                aplikovatCenuZCn(cena, cislo);
+                document.body.removeChild(overlay);
+            });
+        });
+
+        // Zavřít tlačítko
+        document.getElementById('btnZavritCnSeznam').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+
+        // Zavřít kliknutím mimo
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+            }
+        });
+    }
+
+    // Aplikovat cenu z cenové nabídky
+    function aplikovatCenuZCn(cena, cisloNabidky) {
+        const priceTotalInput = document.getElementById('price-total');
+
+        if (priceTotalInput) {
+            priceTotalInput.value = cena.toFixed(2) + ' €';
+
+            // Uložit data pro PDF
+            window.kalkulaceData = {
+                celkovaCena: cena,
+                zdrojCeny: 'cn',
+                cisloNabidky: cisloNabidky
+            };
+
+            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                wgsToast.success(`Cena ${cena.toFixed(2)} € načtena z ${cisloNabidky}`);
+            }
+        }
+    }
+
+    // Otevření kalkulačky (původní funkce)
+    function otevritKalkulacku() {
         // Otevřít modal
         if (window.calculatorModal && window.calculatorModal.open) {
             window.calculatorModal.open();
@@ -144,7 +503,9 @@
     window.protokolKalkulacka = {
         zavritModal: zavritModal,
         zapocitatDoProtokolu: zapocitatDoProtokolu,
-        zpracovatVysledek: zpracovatVysledek
+        zpracovatVysledek: zpracovatVysledek,
+        otevritKalkulacku: otevritKalkulacku,
+        zobrazitVyberCenovychNabidek: zobrazitVyberCenovychNabidek
     };
 
     // Registrace akcí pro data-action atributy
