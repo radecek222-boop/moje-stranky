@@ -23,7 +23,7 @@ $reklamaceId = isset($_GET['reklamace_id']) ? intval($_GET['reklamace_id']) : 0;
 if ($reklamaceId > 0) {
     try {
         $pdo = getDbConnection();
-        $stmt = $pdo->prepare("SELECT jmeno, email, telefon, adresa, mesto, psc FROM wgs_reklamace WHERE reklamace_id = ?");
+        $stmt = $pdo->prepare("SELECT jmeno, email, telefon, adresa, mesto, psc FROM wgs_reklamace WHERE id = ?");
         $stmt->execute([$reklamaceId]);
         $predvyplneno = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
