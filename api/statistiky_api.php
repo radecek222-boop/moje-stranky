@@ -192,6 +192,7 @@ function getZakazky($pdo) {
             r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
+            r.assigned_to as assigned_to_raw,
             COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
@@ -232,6 +233,11 @@ function getZakazky($pdo) {
             'total_count' => $totalCount,
             'stranka' => $stranka,
             'celkem_stranek' => ceil($totalCount / $limit)
+        ],
+        // DEBUG
+        'debug' => [
+            'where' => $where,
+            'params' => $params
         ]
     ]);
 }

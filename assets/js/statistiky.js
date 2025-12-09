@@ -325,8 +325,16 @@ async function nactiZakazky() {
         container.innerHTML = '<div class="loading">Načítání zakázek...</div>';
 
         const filterParams = getFilterParams();
+        console.log('=== DEBUG ===');
+        console.log('filterParams:', filterParams);
+        console.log('vybraneTechnici:', vybraneTechnici);
+
         const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&stranka=${aktualniStranka}`);
         const result = await response.json();
+
+        if (result.debug) {
+            console.log('API DEBUG:', result.debug);
+        }
 
         if (result.status === 'success') {
             renderTabulka(result.data);
