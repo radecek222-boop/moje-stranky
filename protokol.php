@@ -378,7 +378,7 @@ if ($initialBootstrapData) {
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
       <!-- Kalkulačka vložena přímo (ne dynamicky) - Step 116 -->
-      <div class="calculator-section" id="kalkulacka">
+      <div class="calculator-section" id="kalkulacka" style="background: pink !important;">
         <h2 class="section-title" data-lang-cs="Kalkulace ceny služby" data-lang-en="Service Price Calculation" data-lang-it="Calcolo del Prezzo del Servizio">Kalkulace ceny služby</h2>
         <p class="section-text" data-lang-cs="Odpovězte na několik jednoduchých otázek a zjistěte orientační cenu servisu." data-lang-en="Answer a few simple questions and find out the estimated price of the service." data-lang-it="Rispondi ad alcune semplici domande e scopri il prezzo stimato del servizio.">
           Odpovězte na několik jednoduchých otázek a zjistěte orientační cenu servisu.
