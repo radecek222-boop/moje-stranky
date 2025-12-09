@@ -1948,12 +1948,7 @@ if ($reklamaceId > 0) {
 
                 html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
                     <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
-                    <td>
-                        <div class="nabidka-info">
-                            <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
-                            <span class="nabidka-info-email">${n.zakaznik_email}</span>
-                        </div>
-                    </td>
+                    <td>${n.zakaznik_jmeno}</td>
                     <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
                     <td>
                         <div class="workflow-container">
