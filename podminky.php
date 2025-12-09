@@ -228,7 +228,7 @@
         <ul>
           <li>Hotově při převzetí opravy</li>
           <li>Bankovním převodem na základě vystavené faktury</li>
-          <li>Platební kartou (u servisních techniků v terénu)</li>
+          <li>QR kódem</li>
         </ul>
       </article>
 
