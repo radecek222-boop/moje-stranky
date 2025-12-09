@@ -118,26 +118,32 @@ try {
     }
     echo "</table>";
 
-    // 4. Konkrétní kontrola - Bohumila Zikmundová
-    echo "<h2>4. Hledám konkrétně: Bohumila Zikmundová</h2>";
-    $stmt = $pdo->prepare("SELECT id, reklamace_id, jmeno, email FROM wgs_reklamace WHERE jmeno LIKE ?");
+    // 4. Konkrétní kontrola - Bohumila Zikmundová (VŠECHNY reklamace)
+    echo "<h2>4. VŠECHNY reklamace pro Zikmundovou</h2>";
+    $stmt = $pdo->prepare("SELECT id, reklamace_id, jmeno, email, stav FROM wgs_reklamace WHERE jmeno LIKE ? ORDER BY id DESC");
     $stmt->execute(['%Zikmundová%']);
     $bohumila = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($bohumila)) {
         echo "<div class='info'>Reklamace pro 'Zikmundová' nenalezena</div>";
     } else {
-        echo "<div class='info'>";
+        echo "<table>
+            <tr><th>ID</th><th>Číslo reklamace</th><th>Jméno</th><th>Email</th><th>Stav</th><th>Má CN?</th></tr>";
         foreach ($bohumila as $b) {
             $emailLower = strtolower(trim($b['email'] ?? ''));
             $maCN = in_array($emailLower, $emaily);
-            echo "Reklamace ID: <strong>{$b['id']}</strong><br>";
-            echo "Číslo: <strong>{$b['reklamace_id']}</strong><br>";
-            echo "Jméno: <strong>" . htmlspecialchars($b['jmeno']) . "</strong><br>";
-            echo "Email v reklamaci: <strong>" . htmlspecialchars($b['email'] ?? '(prázdný)') . "</strong><br>";
-            echo "Email v API seznamu: <strong>" . ($maCN ? 'ANO' : 'NE - PROBLÉM!') . "</strong><br><br>";
+            $cnClass = $maCN ? 'match' : 'no-match';
+            $cnText = $maCN ? 'ANO' : 'NE';
+            echo "<tr>
+                <td>{$b['id']}</td>
+                <td><strong>" . htmlspecialchars($b['reklamace_id'] ?? '-') . "</strong></td>
+                <td>" . htmlspecialchars($b['jmeno']) . "</td>
+                <td>" . htmlspecialchars($b['email'] ?? '(prázdný)') . "</td>
+                <td>{$b['stav']}</td>
+                <td class='{$cnClass}'>{$cnText}</td>
+            </tr>";
         }
-        echo "</div>";
+        echo "</table>";
     }
 
     // 5. Kontrola nabídky pro Zikmundovou
