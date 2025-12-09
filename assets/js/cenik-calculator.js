@@ -156,22 +156,21 @@
     // INIT KALKULAČKY
     // ========================================
     window.addEventListener('DOMContentLoaded', () => {
-        // Inicializovat pouze pokud kalkulačka existuje v DOM (stránka cenik.php)
-        // Na protokol.php je kalkulačka v modalu a initKalkulacka se volá z protokol-calculator-integration.js
+        // Inicializovat kalkulačku pokud existuje na stránce
         if (document.getElementById('kalkulacka')) {
             initKalkulacka();
         }
     });
 
     function initKalkulacka() {
-        // Zkontrolovat že kalkulačka existuje
         const kalkulackaElement = document.getElementById('kalkulacka');
         if (!kalkulackaElement) {
             return;
         }
 
-        // Resetovat stav při každé inicializaci (důležité pro protokol modal)
+        // Resetovat stav při každé inicializaci
         resetovatStav();
+
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
