@@ -104,9 +104,13 @@
     // Stav kalkulačky (kopie výchozího stavu)
     let stav = { ...VYCHOZI_STAV };
 
+    // DEBUG: Export stavu pro diagnostiku
+    window.stav = stav;
+
     // Reset stavu na výchozí hodnoty
     function resetovatStav() {
         stav = { ...VYCHOZI_STAV };
+        window.stav = stav; // DEBUG: Aktualizovat referenci
 
         // Resetovat DOM elementy
         document.querySelectorAll('input[type="number"]').forEach(input => {
@@ -717,6 +721,7 @@
             tezkyNabytek: false,
             material: false
         };
+        window.stav = stav; // DEBUG: Aktualizovat referenci
 
         // Reset formuláře
         document.getElementById('calc-address').value = '';
