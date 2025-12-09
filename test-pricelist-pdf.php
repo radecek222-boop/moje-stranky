@@ -284,8 +284,8 @@
                         </table>
                     </div>
 
-                    <div style="background: #fff9f0; border-left: 4px solid #ff9900; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
-                        <strong>Upozornění:</strong> Tato kalkulace je orientační. Konečná cena může být upravena po prohlídce nábytku technikem. Ceny jsou uvedeny bez DPH.
+                    <div style="background: #f5f5f5; border-left: 4px solid #666; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
+                        Ceny jsou uvedeny bez DPH.
                     </div>
 
                     <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999;">

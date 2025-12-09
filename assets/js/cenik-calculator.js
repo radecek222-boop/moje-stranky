@@ -1095,9 +1095,9 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999;">
-                    <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong></p>
-                    <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11</p>
-                    <p style="margin: 5px 0;">Tel: +420 725 965 826 | Email: reklamace@wgs-service.cz</p>
+                    <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong> | www.wgs-service.cz</p>
+                    <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11 | Tel: +420 725 965 826</p>
+                    <p style="margin: 5px 0;">Vygenerováno: ${new Date().toLocaleString('cs-CZ')}</p>
                 </div>
             `;
 
