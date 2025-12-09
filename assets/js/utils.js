@@ -325,11 +325,8 @@ function initEventDelegation() {
     document.addEventListener('click', function(event) {
         const target = event.target.closest('[data-action]');
 
-        // DEBUG: Sledování kliků na data-action elementy
         if (target) {
             const action = target.dataset.action;
-            console.log('[Utils] Event delegation: klik na data-action="' + action + '"', target);
-            console.log('[Utils] Registrované akce:', Object.keys(ActionRegistry.handlers));
 
             // Podpora pro zastavení propagace
             if (target.dataset.stopPropagation === 'true') {
@@ -337,7 +334,6 @@ function initEventDelegation() {
             }
 
             const executed = ActionRegistry.execute(action, target);
-            console.log('[Utils] Akce "' + action + '" provedena:', executed);
 
             if (executed) {
                 event.preventDefault();
