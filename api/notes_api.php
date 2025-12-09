@@ -93,7 +93,7 @@ try {
                     u.name as user_name
                 FROM wgs_notes n
                 LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
-                LEFT JOIN wgs_users u ON n.created_by = u.email
+                LEFT JOIN wgs_users u ON n.created_by = u.email COLLATE utf8mb4_unicode_ci
                 WHERE n.claim_id = :claim_id
                 ORDER BY n.created_at DESC
             ");
@@ -246,12 +246,14 @@ try {
 
                 if ($webPush->jeInicializovano()) {
                     // Načíst info o reklamaci včetně vlastníka (created_by + email vlastníka)
+                    // POZOR: Pouzivame CAST kvuli moznym collation rozdilum mezi tabulkami
                     $stmtInfo = $pdo->prepare("
                         SELECT r.reklamace_id, r.jmeno, r.cislo, r.created_by,
                                u.email as vlastnik_email
                         FROM wgs_reklamace r
                         LEFT JOIN wgs_users u ON (
-                            u.user_id = r.created_by OR u.id = r.created_by
+                            CAST(u.user_id AS CHAR) = CAST(r.created_by AS CHAR) COLLATE utf8mb4_unicode_ci
+                            OR CAST(u.id AS CHAR) = CAST(r.created_by AS CHAR) COLLATE utf8mb4_unicode_ci
                         )
                         WHERE r.id = :id
                     ");

@@ -137,6 +137,41 @@ try {
         echo "<div class='success'>Tabulka <strong>wgs_push_log</strong> existuje</div>";
     }
 
+    // Kontrola COLLATION tabulek
+    echo "<h3>Collation Tabulek</h3>";
+    $stmt = $pdo->query("
+        SELECT TABLE_NAME, TABLE_COLLATION
+        FROM information_schema.TABLES
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME IN ('wgs_push_subscriptions', 'wgs_users', 'wgs_reklamace', 'wgs_push_log')
+    ");
+    $collations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $collationMap = [];
+    foreach ($collations as $row) {
+        $collationMap[$row['TABLE_NAME']] = $row['TABLE_COLLATION'];
+    }
+
+    echo "<table><tr><th>Tabulka</th><th>Collation</th><th>Status</th></tr>";
+    $expectedCollation = 'utf8mb4_czech_ci';
+    $mismatch = false;
+
+    foreach ($collationMap as $table => $collation) {
+        $status = ($collation === $expectedCollation)
+            ? '<span style=\"color:green;\">OK</span>'
+            : '<span style=\"color:orange;\">Rozdilna!</span>';
+        if ($collation !== $expectedCollation) $mismatch = true;
+        echo "<tr><td>{$table}</td><td><code>{$collation}</code></td><td>{$status}</td></tr>";
+    }
+    echo "</table>";
+
+    if ($mismatch) {
+        echo "<div class='warning'>
+            <strong>COLLATION MISMATCH!</strong> Tabulky maji ruzne collation, coz muze zpusobit chyby pri JOIN operacich.<br>
+            Doporuceni: Spustte migracni skript <code>sjednotit_collation.php</code> pro sjednoceni na <code>{$expectedCollation}</code>
+        </div>";
+    }
+
     // =====================================================
     // 4. STATISTIKY SUBSCRIPTIONS
     // =====================================================
@@ -187,6 +222,7 @@ try {
     // =====================================================
     echo "<h2>5. Detail Aktivnich Subscriptions</h2>";
 
+    // POZOR: Pouzivame COLLATE pro reseni problemu s ruznymi collation mezi tabulkami
     $stmt = $pdo->query("
         SELECT
             ps.id,
@@ -201,7 +237,7 @@ try {
             u.name as uzivatel_jmeno,
             u.role as uzivatel_role
         FROM wgs_push_subscriptions ps
-        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
+        LEFT JOIN wgs_users u ON CAST(ps.user_id AS CHAR) = CAST(u.user_id AS CHAR) COLLATE utf8mb4_unicode_ci
         WHERE ps.aktivni = 1
         ORDER BY ps.datum_vytvoreni DESC
         LIMIT 20
@@ -264,6 +300,7 @@ try {
     // =====================================================
     echo "<h2>6. Technici a Admini - Push Status</h2>";
 
+    // POZOR: CAST kvuli collation mismatch
     $stmt = $pdo->query("
         SELECT
             u.user_id,
@@ -272,7 +309,7 @@ try {
             u.role,
             COUNT(ps.id) as pocet_subscriptions
         FROM wgs_users u
-        LEFT JOIN wgs_push_subscriptions ps ON u.user_id = ps.user_id AND ps.aktivni = 1
+        LEFT JOIN wgs_push_subscriptions ps ON CAST(u.user_id AS CHAR) = CAST(ps.user_id AS CHAR) COLLATE utf8mb4_unicode_ci AND ps.aktivni = 1
         WHERE u.role IN ('admin', 'technik') AND u.is_active = 1
         GROUP BY u.user_id
         ORDER BY u.role, u.name
