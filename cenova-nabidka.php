@@ -895,6 +895,12 @@ if ($reklamaceId > 0) {
                 if (typeof window.stav !== 'undefined') {
                     kalkulaceData = { ...window.stav };
 
+                    // Přenést adresu z kalkulačky do formuláře (pokud není již vyplněna)
+                    const adresaPole = document.getElementById('zakaznik_adresa');
+                    if (adresaPole && kalkulaceData.adresa && !adresaPole.value.trim()) {
+                        adresaPole.value = kalkulaceData.adresa;
+                    }
+
                     // Vypočítat položky a ceny
                     const polozky = sestavitPolozkyZKalkulace(kalkulaceData);
                     zobrazitKalkulaciVysledek(polozky);
