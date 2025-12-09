@@ -489,6 +489,18 @@ async function renderOrders(items = null) {
     logger.warn('Nepodařilo se načíst unread counts:', e);
   }
 
+  // Načíst emaily zákazníků s cenovou nabídkou (CN)
+  let emailySCN = [];
+  try {
+    const cnResponse = await fetch('api/nabidka_api.php?action=emaily_s_nabidkou');
+    const cnData = await cnResponse.json();
+    if (cnData.status === 'success') {
+      emailySCN = cnData.data?.emaily || [];
+    }
+  } catch (e) {
+    logger.warn('Nepodařilo se načíst emaily s CN:', e);
+  }
+
   filtered.sort((a, b) => {
     const dateA = new Date(a.created_at || a.datum_reklamace || a.timestamp || 0);
     const dateB = new Date(b.created_at || b.datum_reklamace || b.timestamp || 0);
@@ -523,6 +535,10 @@ async function renderOrders(items = null) {
     const unreadCount = unreadCountsMap[claimId] || 0;
     const hasUnread = unreadCount > 0;
 
+    // Zkontrolovat zda zákazník má cenovou nabídku (CN)
+    const zakaznikEmail = (rec.email || '').toLowerCase().trim();
+    const maCenovouNabidku = zakaznikEmail && emailySCN.includes(zakaznikEmail);
+
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
     const highlightedProduct = SEARCH_QUERY ? highlightText(product, SEARCH_QUERY) : product;
@@ -531,9 +547,12 @@ async function renderOrders(items = null) {
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
     // Přidat barevný nádech podle stavu
     const statusBgClass = `status-bg-${status.class}`;
+    // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
+    // Když se domluví termín → modrá (DOMLUVENÁ), když se pošle nová CN → zase oranžová
+    const cnClass = (maCenovouNabidku && !appointmentText) ? 'ma-cenovou-nabidku' : '';
 
     return `
-      <div class="order-box ${searchMatchClass} ${statusBgClass}" data-action="showDetailById" data-id="${rec.id}">
+      <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
@@ -554,7 +573,9 @@ async function renderOrders(items = null) {
             <div class="order-detail-right">
               ${appointmentText
                 ? `<span class="order-appointment">${appointmentText}</span>`
-                : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
+                : (maCenovouNabidku
+                    ? `<span class="order-cn-text">Poslána CN</span>`
+                    : `<span class="order-status-text status-${status.class}">${status.text}</span>`)}
             </div>
           </div>
         </div>
