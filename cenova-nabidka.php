@@ -789,8 +789,8 @@ if ($reklamaceId > 0) {
                         </div>
 
                         <div class="summary-note">
-                            <strong>Upozornění:</strong> Ceny jsou orientační a vztahují se <strong>pouze na práci</strong>.
-                            Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.
+                            <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH.
+                            U náhradních dílů můžeme požadovat zálohu ve výši jejich ceny. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                         </div>
                     </div>
 
@@ -1438,7 +1438,7 @@ if ($reklamaceId > 0) {
                 </table>
 
                 <div style="background: #f5f5f5; border-left: 4px solid #666; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
-                    <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH. Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť.
+                    <strong>Upozornění:</strong> Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu ve výši jejich ceny. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                 </div>
 
                 <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
