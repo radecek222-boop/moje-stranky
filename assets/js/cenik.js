@@ -488,7 +488,7 @@
                 width: 800px;
                 background: white;
                 padding: 20px;
-                font-family: 'Poppins', sans-serif;
+                font-family: Arial, sans-serif;
             `;
 
             // Hlavička (stejná jako v protokolu)

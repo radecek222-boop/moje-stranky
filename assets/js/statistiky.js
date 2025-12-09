@@ -716,3 +716,37 @@ async function exportovatPDF() {
         wgsToast.error('Chyba při exportu PDF: ' + error.message);
     }
 }
+
+// ========================================
+// EXPORT FUNKCÍ NA WINDOW PRO DATA-ACTION
+// ========================================
+window.aplikovatFiltry = aplikovatFiltry;
+window.resetovitFiltry = resetovitFiltry;
+window.exportovatPDF = exportovatPDF;
+window.predchoziStranka = predchoziStranka;
+window.dalsiStranka = dalsiStranka;
+
+// ========================================
+// ACTION REGISTRY - Registrace akcí pro event delegation
+// ========================================
+if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    window.Utils.registerAction('aplikovatFiltry', () => {
+        aplikovatFiltry();
+    });
+
+    window.Utils.registerAction('resetovitFiltry', () => {
+        resetovitFiltry();
+    });
+
+    window.Utils.registerAction('exportovatPDF', () => {
+        exportovatPDF();
+    });
+
+    window.Utils.registerAction('predchoziStranka', () => {
+        predchoziStranka();
+    });
+
+    window.Utils.registerAction('dalsiStranka', () => {
+        dalsiStranka();
+    });
+}

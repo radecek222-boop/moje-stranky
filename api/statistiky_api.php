@@ -185,12 +185,13 @@ function getZakazky($pdo) {
     $totalCount = (int)($stmtCount->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Hlavní dotaz
+    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
-            COALESCE(technik.name, '-') as technik,
+            COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
@@ -289,16 +290,17 @@ function getCharty($pdo) {
     $prodejci = $stmtProdejci->fetchAll(PDO::FETCH_ASSOC);
 
     // 4. Statistiky techniků
+    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
     $stmtTechnici = $pdo->prepare("
         SELECT
-            COALESCE(u.name, '-') as technik,
+            COALESCE(u.name, r.technik, '-') as technik,
             COUNT(*) as pocet,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'
         $where
-        GROUP BY u.name, u.id
+        GROUP BY COALESCE(u.name, r.technik, '-')
         ORDER BY pocet DESC
         LIMIT 10
     ");
