@@ -351,6 +351,9 @@
     // WIZARD NAVIGACE
     // ========================================
     window.nextStep = function() {
+        // DEBUG
+        alert('nextStep voláno! Aktuální krok: ' + stav.krok);
+
         // Najít kontejner kalkulačky (může být na stránce nebo v modalu)
         const kalkulackaContainer = document.getElementById('kalkulacka') ||
                                     document.getElementById('calculatorModalBody');
