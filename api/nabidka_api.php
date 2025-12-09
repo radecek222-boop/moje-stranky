@@ -78,15 +78,19 @@ try {
             // Platnost 30 dní
             $platnostDo = date('Y-m-d H:i:s', strtotime('+30 days'));
 
+            // Generovat unikátní číslo nabídky: CN-RRRR-DD-M-XX
+            $cisloNabidky = generujCisloNabidky($pdo);
+
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_nabidky (
-                    zakaznik_jmeno, zakaznik_email, zakaznik_telefon, zakaznik_adresa,
+                    cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, zakaznik_adresa,
                     polozky_json, celkova_cena, mena, platnost_do, token,
                     poznamka, vytvoril_user_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $stmt->execute([
+                $cisloNabidky,
                 $_POST['zakaznik_jmeno'],
                 $_POST['zakaznik_email'],
                 $_POST['zakaznik_telefon'] ?? null,
@@ -104,6 +108,7 @@ try {
 
             sendJsonSuccess('Nabídka vytvořena', [
                 'nabidka_id' => $nabidkaId,
+                'cislo_nabidky' => $cisloNabidky,
                 'token' => $token,
                 'platnost_do' => $platnostDo
             ]);
@@ -142,11 +147,14 @@ try {
             require_once __DIR__ . '/../includes/EmailQueue.php';
             $emailQueue = new EmailQueue($pdo);
 
+            // Použít číslo nabídky nebo fallback na ID
+            $cisloPro = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
+
             $emailQueue->add(
                 $nabidka['zakaznik_email'],
-                'Cenová nabídka č. ' . $nabidkaId . ' - White Glove Service',
+                'Cenová nabídka č. ' . $cisloPro . ' - White Glove Service',
                 $emailBody,
-                'nabidka_' . $nabidkaId
+                'nabidka_' . $nabidka['id']
             );
 
             // Aktualizovat stav
@@ -197,12 +205,15 @@ try {
             require_once __DIR__ . '/../includes/EmailQueue.php';
             $emailQueue = new EmailQueue($pdo);
 
+            // Použít číslo nabídky nebo fallback na ID
+            $cisloNabidky = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
+
             // 1. Odeslat potvrzovací email adminovi
             $adminEmail = getenv('ADMIN_EMAIL') ?: 'reklamace@wgs-service.cz';
             $emailQueue->add(
                 $adminEmail,
-                'Nabídka č. ' . $nabidka['id'] . ' byla potvrzena zákazníkem',
-                "Zákazník {$nabidka['zakaznik_jmeno']} ({$nabidka['zakaznik_email']}) potvrdil cenovou nabídku č. {$nabidka['id']}.\n\nCelková cena: {$nabidka['celkova_cena']} {$nabidka['mena']}\n\nIP adresa: {$potvrzenoIp}\nČas: " . date('d.m.Y H:i:s', strtotime($potvrzenoCas)),
+                'Nabídka č. ' . $cisloNabidky . ' byla potvrzena zákazníkem',
+                "Zákazník {$nabidka['zakaznik_jmeno']} ({$nabidka['zakaznik_email']}) potvrdil cenovou nabídku č. {$cisloNabidky}.\n\nCelková cena: {$nabidka['celkova_cena']} {$nabidka['mena']}\n\nIP adresa: {$potvrzenoIp}\nČas: " . date('d.m.Y H:i:s', strtotime($potvrzenoCas)),
                 'nabidka_potvrzeni_admin_' . $nabidka['id']
             );
 
@@ -213,7 +224,7 @@ try {
 
             $emailQueue->add(
                 $nabidka['zakaznik_email'],
-                'Potvrzení objednávky č. ' . $nabidka['id'] . ' - White Glove Service',
+                'Potvrzení objednávky č. ' . $cisloNabidky . ' - White Glove Service',
                 $emailZakaznikBody,
                 'nabidka_potvrzeni_zakaznik_' . $nabidka['id']
             );
@@ -233,7 +244,7 @@ try {
             }
 
             $stmt = $pdo->query("
-                SELECT id, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
+                SELECT id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
                        stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at,
                        zaloha_prijata_at, hotovo_at, uhrazeno_at
                 FROM wgs_nabidky
@@ -346,6 +357,7 @@ function vytvorTabulkuNabidky($pdo) {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS wgs_nabidky (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            cislo_nabidky VARCHAR(30) NULL UNIQUE,
             zakaznik_jmeno VARCHAR(255) NOT NULL,
             zakaznik_email VARCHAR(255) NOT NULL,
             zakaznik_telefon VARCHAR(50) NULL,
@@ -367,22 +379,55 @@ function vytvorTabulkuNabidky($pdo) {
             uhrazeno_at DATETIME NULL,
             INDEX idx_token (token),
             INDEX idx_stav (stav),
-            INDEX idx_email (zakaznik_email)
+            INDEX idx_email (zakaznik_email),
+            INDEX idx_cislo (cislo_nabidky)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
-    // Přidat chybějící sloupce pro workflow (pro existující tabulky)
-    $sloupce = ['zaloha_prijata_at', 'hotovo_at', 'uhrazeno_at'];
+    // Přidat chybějící sloupce (pro existující tabulky)
+    $sloupce = ['zaloha_prijata_at', 'hotovo_at', 'uhrazeno_at', 'cislo_nabidky'];
     foreach ($sloupce as $sloupec) {
         try {
             $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE '{$sloupec}'");
             if (!$stmt->fetch()) {
-                $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} DATETIME NULL");
+                if ($sloupec === 'cislo_nabidky') {
+                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN cislo_nabidky VARCHAR(30) NULL UNIQUE AFTER id");
+                } else {
+                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} DATETIME NULL");
+                }
             }
         } catch (PDOException $e) {
             // Sloupec už existuje nebo jiná chyba - ignorovat
         }
     }
+}
+
+/**
+ * Generuje unikátní číslo nabídky ve formátu CN-RRRR-DD-M-XX
+ * Příklad: CN-2026-23-1-01 (první nabídka 23. ledna 2026)
+ */
+function generujCisloNabidky($pdo) {
+    $rok = date('Y');
+    $den = date('j');    // Den bez úvodní nuly (1-31)
+    $mesic = date('n');  // Měsíc bez úvodní nuly (1-12)
+
+    // Zjistit kolik nabídek již dnes existuje
+    $dnesZacatek = date('Y-m-d 00:00:00');
+    $dnesKonec = date('Y-m-d 23:59:59');
+
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as pocet
+        FROM wgs_nabidky
+        WHERE vytvoreno_at BETWEEN ? AND ?
+    ");
+    $stmt->execute([$dnesZacatek, $dnesKonec]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $poradiDnes = intval($result['pocet']) + 1;
+    $poradiFormatovane = str_pad($poradiDnes, 2, '0', STR_PAD_LEFT);
+
+    // Formát: CN-RRRR-DD-M-XX
+    return "CN-{$rok}-{$den}-{$mesic}-{$poradiFormatovane}";
 }
 
 /**
@@ -416,7 +461,8 @@ function vygenerujEmailNabidky($nabidka) {
     $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
     $datumVytvoreni = date('d.m.Y', strtotime($nabidka['vytvoreno_at'] ?? 'now'));
     $platnostDo = date('d.m.Y', strtotime($nabidka['platnost_do']));
-    $nabidkaCislo = str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT);
+    // Použít číslo nabídky nebo fallback na padované ID
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
 
     // Adresa zákazníka (pokud existuje)
     $adresaHtml = '';
@@ -603,7 +649,8 @@ function vygenerujEmailPotvrzeniZakaznik($nabidka) {
     }
 
     $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
-    $nabidkaCislo = str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT);
+    // Použít číslo nabídky nebo fallback na padované ID
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
 
     // Datum a čas potvrzení
     $potvrzenoAt = isset($nabidka['potvrzeno_at']) ? date('d.m.Y H:i:s', strtotime($nabidka['potvrzeno_at'])) : date('d.m.Y H:i:s');
@@ -690,21 +737,10 @@ function vygenerujEmailPotvrzeniZakaznik($nabidka) {
 
                             <!-- Technické údaje potvrzení -->
                             <div style='padding: 20px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
-                                <p style='margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase;'>Technické údaje potvrzení</p>
-                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='font-size: 12px; color: #666;'>
-                                    <tr>
-                                        <td style='padding: 4px 0;'><strong>Datum a čas:</strong></td>
-                                        <td style='padding: 4px 0; text-align: right;'>{$potvrzenoAt}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style='padding: 4px 0;'><strong>IP adresa:</strong></td>
-                                        <td style='padding: 4px 0; text-align: right;'>{$potvrzenoIp}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style='padding: 4px 0;'><strong>Email:</strong></td>
-                                        <td style='padding: 4px 0; text-align: right;'>{$nabidka['zakaznik_email']}</td>
-                                    </tr>
-                                </table>
+                                <p style='margin: 0; font-size: 12px; color: #666; line-height: 1.5;'>
+                                    Toto elektronické potvrzení bylo zaznamenáno dne <strong>{$potvrzenoAt}</strong>
+                                    a má právní platnost dle § 2586 občanského zákoníku (smlouva o dílo).
+                                </p>
                             </div>
 
                             <!-- Tlačítko pro stažení PDF -->
