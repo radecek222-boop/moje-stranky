@@ -232,6 +232,13 @@ function getZakazky($pdo) {
             'total_count' => $totalCount,
             'stranka' => $stranka,
             'celkem_stranek' => ceil($totalCount / $limit)
+        ],
+        // DEBUG INFO - odstranit po vyřešení
+        'debug' => [
+            'GET_params' => $_GET,
+            'where_clause' => $where,
+            'bound_params' => $params,
+            'sql_query' => $sql
         ]
     ]);
 }
