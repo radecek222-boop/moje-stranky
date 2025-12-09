@@ -426,6 +426,23 @@ if ($reklamaceId > 0) {
             opacity: 1;
         }
 
+        /* Tlačítko smazat */
+        .btn-smazat {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #dc3545;
+            border-radius: 3px;
+            color: #dc3545;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-smazat:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
         /* Řádek nabídky */
         .nabidka-radek {
             cursor: pointer;
@@ -719,10 +736,11 @@ if ($reklamaceId > 0) {
                             <th style="width: 90px;">Cena</th>
                             <th style="white-space: nowrap;">Workflow</th>
                             <th style="width: 90px;">Platnost</th>
+                            <th style="width: 60px;">Akce</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
-                        <tr><td colspan="5" style="text-align: center; color: #666;">Načítám...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: #666;">Načítám...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1564,7 +1582,11 @@ if ($reklamaceId > 0) {
             const mena = document.getElementById('mena').value;
 
             if (!jmeno || !email) {
-                alert('Vyplňte jméno a email zákazníka');
+                wgsConfirm('Vyplňte jméno a email zákazníka', {
+                    titulek: 'Chybějící údaje',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1604,7 +1626,11 @@ if ($reklamaceId > 0) {
             });
 
             if (vsechnyPolozky.length === 0) {
-                alert('Nejsou vybrány žádné položky. Použijte kalkulaci nebo přidejte položky ručně.');
+                wgsConfirm('Nejsou vybrány žádné položky. Použijte kalkulaci nebo přidejte položky ručně.', {
+                    titulek: 'Chybějící položky',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1632,7 +1658,12 @@ if ($reklamaceId > 0) {
                     if (data.details) {
                         errorMsg += '\n\nDetaily: ' + JSON.stringify(data.details);
                     }
-                    alert(errorMsg);
+                    await wgsConfirm(errorMsg, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                     console.error('API Error:', data);
                     return;
                 }
@@ -1652,15 +1683,28 @@ if ($reklamaceId > 0) {
                 const odeslatResult = await odeslatResponse.json();
 
                 if (odeslatResult.status === 'success') {
-                    alert('Nabídka byla vytvořena a odeslána na ' + email);
+                    await wgsConfirm('Nabídka byla vytvořena a odeslána na ' + email, {
+                        titulek: 'Cenová nabídka',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                     resetFormular();
                 } else {
-                    alert('Nabídka vytvořena, ale odeslání selhalo: ' + odeslatResult.message);
+                    await wgsConfirm('Nabídka vytvořena, ale odeslání selhalo: ' + odeslatResult.message, {
+                        titulek: 'Upozornění',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                 }
 
             } catch (e) {
                 console.error('Chyba:', e);
-                alert('Chyba při vytváření nabídky');
+                await wgsConfirm('Chyba při vytváření nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         });
 
@@ -1697,7 +1741,11 @@ if ($reklamaceId > 0) {
             const mena = document.getElementById('mena').value;
 
             if (!jmeno) {
-                alert('Vyplňte alespoň jméno zákazníka');
+                wgsConfirm('Vyplňte alespoň jméno zákazníka', {
+                    titulek: 'Chybějící údaje',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1759,7 +1807,11 @@ if ($reklamaceId > 0) {
 
         async function generujPdfNabidky(data) {
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                alert('Načítám knihovny pro PDF...');
+                wgsConfirm('Načítám knihovny pro PDF, zkuste to znovu za chvíli...', {
+                    titulek: 'PDF',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -1907,7 +1959,12 @@ if ($reklamaceId > 0) {
             } catch (error) {
                 console.error('Chyba při generování PDF:', error);
                 document.body.removeChild(pdfContent);
-                alert('Chyba při generování PDF');
+                wgsConfirm('Chyba při generování PDF', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         }
 
@@ -1979,6 +2036,11 @@ if ($reklamaceId > 0) {
                         </div>
                     </td>
                     <td style="color: #888; font-size: 0.85rem;">${platnost}</td>
+                    <td>
+                        <button class="btn-smazat" onclick="smazatNabidku(${n.id}, '${n.cislo_nabidky || n.id}', event)" title="Smazat nabídku">
+                            X
+                        </button>
+                    </td>
                 </tr>`;
             });
 
@@ -2010,13 +2072,27 @@ if ($reklamaceId > 0) {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    alert('Nabídka odeslána');
+                    await wgsConfirm('Nabídka byla znovu odeslána', {
+                        titulek: 'Cenová nabídka',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
                     nacistSeznamNabidek();
                 } else {
-                    alert('Chyba: ' + data.message);
+                    await wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                 }
             } catch (e) {
-                alert('Chyba při odesílání');
+                await wgsConfirm('Chyba při odesílání', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         };
 
@@ -2039,10 +2115,70 @@ if ($reklamaceId > 0) {
                     // Aktualizovat seznam bez reloadu
                     nacistSeznamNabidek();
                 } else {
-                    alert('Chyba: ' + data.message);
+                    wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
                 }
             } catch (e) {
-                alert('Chyba při změně stavu');
+                wgsConfirm('Chyba při změně stavu', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
+            }
+        };
+
+        // Smazat nabídku
+        window.smazatNabidku = async function(nabidkaId, cisloNabidky, event) {
+            if (event) event.stopPropagation();
+
+            const potvrdit = await wgsConfirm('Opravdu chcete smazat nabídku ' + cisloNabidky + '?', {
+                titulek: 'Smazat cenovou nabídku',
+                btnPotvrdit: 'Smazat',
+                btnZrusit: 'Zrušit',
+                nebezpecne: true
+            });
+
+            if (!potvrdit) return;
+
+            const formData = new FormData();
+            formData.append('action', 'smazat');
+            formData.append('csrf_token', csrfToken);
+            formData.append('nabidka_id', nabidkaId);
+
+            try {
+                const response = await fetch('/api/nabidka_api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    await wgsConfirm(data.message, {
+                        titulek: 'Smazáno',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null
+                    });
+                    nacistSeznamNabidek();
+                } else {
+                    wgsConfirm('Chyba: ' + data.message, {
+                        titulek: 'Chyba',
+                        btnPotvrdit: 'OK',
+                        btnZrusit: null,
+                        nebezpecne: true
+                    });
+                }
+            } catch (e) {
+                wgsConfirm('Chyba při mazání nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
         };
 
@@ -2215,7 +2351,11 @@ if ($reklamaceId > 0) {
         // Stáhnout PDF
         document.getElementById('pdf-modal-stahnout').addEventListener('click', async () => {
             if (!aktuálníNabídkaData) {
-                alert('Nejsou načtena data nabídky');
+                wgsConfirm('Nejsou načtena data nabídky', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null
+                });
                 return;
             }
 
@@ -2238,7 +2378,12 @@ if ($reklamaceId > 0) {
                 });
             } catch (e) {
                 console.error('Chyba při generování PDF:', e);
-                alert('Chyba při generování PDF');
+                wgsConfirm('Chyba při generování PDF', {
+                    titulek: 'Chyba',
+                    btnPotvrdit: 'OK',
+                    btnZrusit: null,
+                    nebezpecne: true
+                });
             }
 
             btn.disabled = false;

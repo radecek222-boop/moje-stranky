@@ -307,6 +307,39 @@ try {
             break;
 
         // ========================================
+        // SMAZAT - Smazání cenové nabídky (admin only)
+        // ========================================
+        case 'smazat':
+            if (!$isAdmin) {
+                sendJsonError('Přístup odepřen', 403);
+            }
+
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $nabidkaId = intval($_POST['nabidka_id'] ?? 0);
+            if (!$nabidkaId) {
+                sendJsonError('Chybí ID nabídky');
+            }
+
+            // Ověřit že nabídka existuje
+            $stmt = $pdo->prepare("SELECT id, cislo_nabidky FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nebyla nalezena', 404);
+            }
+
+            // Smazat nabídku
+            $stmt = $pdo->prepare("DELETE FROM wgs_nabidky WHERE id = ?");
+            $stmt->execute([$nabidkaId]);
+
+            sendJsonSuccess('Nabídka ' . ($nabidka['cislo_nabidky'] ?? $nabidkaId) . ' byla smazána');
+            break;
+
+        // ========================================
         // ZMENIT_WORKFLOW - Manuální změna workflow stavu (admin only)
         // ========================================
         case 'zmenit_workflow':
