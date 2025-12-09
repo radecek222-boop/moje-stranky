@@ -125,12 +125,12 @@ require_once __DIR__ . '/includes/seo_meta.php';
         </a>
 
         <a href="neuznana-reklamace.php" class="service-link-card">
-          <h3 data-lang-cs="Neuznana reklamace?"
-              data-lang-en="Rejected Claim?"
-              data-lang-it="Reclamo Rifiutato?">Neuznana reklamace?</h3>
-          <p data-lang-cs="Poradime co delat, kdyz vam neuznali reklamaci."
-             data-lang-en="We advise what to do if your warranty claim was rejected."
-             data-lang-it="Ti consigliamo cosa fare se il tuo reclamo è stato rifiutato.">Poradime co delat, kdyz vam neuznali reklamaci.</p>
+          <h3 data-lang-cs="Zamítnuta reklamace?"
+              data-lang-en="Claim Not Covered?"
+              data-lang-it="Reclamo Non Coperto?">Zamítnuta reklamace?</h3>
+          <p data-lang-cs="Nabízíme cenově výhodnou opravu jako alternativu. Pomůžeme vám."
+             data-lang-en="We offer affordable repair as an alternative. We can help."
+             data-lang-it="Offriamo riparazione conveniente come alternativa. Possiamo aiutarti.">Nabízíme cenově výhodnou opravu jako alternativu. Pomůžeme vám.</p>
         </a>
 
         <a href="cenik.php" class="service-link-card">
