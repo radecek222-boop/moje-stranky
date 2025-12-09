@@ -9,6 +9,9 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
 }
 
+// Email footer helper - GDPR odhlašovací odkaz
+require_once __DIR__ . '/email_footer.php';
+
 class EmailQueue {
     private $pdo;
 
@@ -262,6 +265,10 @@ function sendWithPHPMailer($queueItem, $settings) {
                 stripos($body, '<p>') !== false
             );
 
+            // GDPR: Přidat footer s odhlašovacím odkazem
+            $recipientEmail = $queueItem['recipient_email'] ?? '';
+            $body = pridatEmailFooter($body, $recipientEmail, $isHtml);
+
             $mail->isHTML($isHtml);
             $mail->Subject = $queueItem['subject'];
             $mail->Body = $body;
@@ -299,6 +306,9 @@ function sendWithPHPMail($queueItem, $settings) {
         $to = $queueItem['recipient_email'];
         $subject = $queueItem['subject'];
         $message = $queueItem['body'];
+
+        // GDPR: Přidat footer s odhlašovacím odkazem (plain text)
+        $message = pridatEmailFooter($message, $to, false);
 
         $headers = "From: {$settings['smtp_from_name']} <{$settings['smtp_from_email']}>\r\n";
         $headers .= "Reply-To: {$settings['smtp_from_email']}\r\n";

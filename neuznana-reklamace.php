@@ -284,22 +284,22 @@ require_once __DIR__ . '/includes/seo_meta.php';
     </div>
 
     <div class="footer-bottom">
-      <p data-lang-cs="© 2025 White Glove Service. Vsechna prava vyhrazena."
-         data-lang-en="© 2025 White Glove Service. All rights reserved."
-         data-lang-it="© 2025 White Glove Service. Tutti i diritti riservati.">
-        &copy; 2025 White Glove Service. Vsechna prava vyhrazena.
+      <p>
+        &copy; 2025 White Glove Service.
+        <span data-lang-cs="Všechna práva vyhrazena." data-lang-en="All rights reserved." data-lang-it="Tutti i diritti riservati.">Všechna práva vyhrazena.</span>
         <span aria-hidden="true"> • </span>
-        <a href="gdpr.php" class="footer-link"
-           data-lang-cs="Zpracovani osobnich udaju (GDPR)"
-           data-lang-en="Personal data processing (GDPR)"
-           data-lang-it="Trattamento dei dati personali (GDPR)">Zpracovani osobnich udaju (GDPR)</a>
+        <a href="gdpr.php" class="footer-link">GDPR</a>
+        <span aria-hidden="true"> • </span>
+        <a href="cookies.php" class="footer-link">Cookies</a>
+        <span aria-hidden="true"> • </span>
+        <a href="podminky.php" class="footer-link" data-lang-cs="Obchodní podmínky" data-lang-en="Terms of Service" data-lang-it="Termini di servizio">Obchodní podmínky</a>
       </p>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/logger.min.js" defer></script>
-
-<?php if (function_exists('renderHeatmapTracker')) renderHeatmapTracker(); ?>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
+<?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
 </body>
 </html>

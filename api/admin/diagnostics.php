@@ -216,7 +216,7 @@ switch ($action) {
             }
 
             // Spočítat JS soubory
-            $jsFiles = glob(__DIR__ . '/../assets/js/*.js');
+            $jsFiles = glob(__DIR__ . '/../../assets/js/*.js');
 
             echo json_encode([
                 'status' => 'success',
@@ -604,11 +604,11 @@ switch ($action) {
 
     // ==================== CHECK ASSETS ====================
         case 'check_assets':
-            $assetsDir = __DIR__ . '/../assets';
+            $assetsDir = __DIR__ . '/../../assets';
             $cssFiles = glob($assetsDir . '/css/*.css');
             $imagesDirs = [
                 $assetsDir . '/images',
-                __DIR__ . '/../uploads'
+                __DIR__ . '/../../uploads'
             ];
 
             $imageCount = 0;
