@@ -496,7 +496,8 @@ async function renderOrders(items = null) {
     const cnData = await cnResponse.json();
     console.log('[CN DEBUG] API odpověď:', cnData);
     if (cnData.status === 'success') {
-      emailySCN = cnData.data?.emaily || [];
+      // API vrací emaily na root úrovni (ne pod data)
+      emailySCN = cnData.data?.emaily || cnData.emaily || [];
     } else {
       console.warn('[CN DEBUG] API vrátila chybu:', cnData.message);
     }
