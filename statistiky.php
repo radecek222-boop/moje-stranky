@@ -864,7 +864,7 @@ body {
 
 <script src="assets/js/logger.min.js" defer></script>
 <!-- DEBUG: Použití neminifikované verze pro diagnostiku -->
-<script src="assets/js/statistiky.js?v=2.4-debug" defer></script>
+<script src="assets/js/statistiky.js?v=<?= time() ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
