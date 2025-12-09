@@ -11,6 +11,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -21,27 +22,35 @@ $pdo = getDbConnection();
 $zprava = '';
 $chyba = '';
 
+// CSRF token pro formuláře
+$csrfToken = generateCSRFToken();
+
 // ========================================
 // AKCE: Přidat IP do blacklistu
 // ========================================
 if (isset($_POST['action']) && $_POST['action'] === 'add_to_blacklist') {
-    $ip = trim($_POST['ip_address'] ?? '');
-    $popis = trim($_POST['description'] ?? '');
-
-    if (empty($ip)) {
-        $chyba = 'IP adresa je povinná.';
-    } elseif (!filter_var($ip, FILTER_VALIDATE_IP)) {
-        $chyba = 'Neplatná IP adresa.';
+    // Validace CSRF tokenu
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $chyba = 'Neplatný bezpečnostní token. Obnovte stránku a zkuste znovu.';
     } else {
-        try {
-            $stmt = $pdo->prepare("
-                INSERT IGNORE INTO wgs_analytics_ignored_ips (ip_address, description)
-                VALUES (:ip, :popis)
-            ");
-            $stmt->execute(['ip' => $ip, 'popis' => $popis ?: 'Manuálně přidáno']);
-            $zprava = "IP adresa {$ip} byla přidána do blacklistu.";
-        } catch (PDOException $e) {
-            $chyba = 'Chyba při přidávání: ' . $e->getMessage();
+        $ip = trim($_POST['ip_address'] ?? '');
+        $popis = trim($_POST['description'] ?? '');
+
+        if (empty($ip)) {
+            $chyba = 'IP adresa je povinná.';
+        } elseif (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            $chyba = 'Neplatná IP adresa.';
+        } else {
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT IGNORE INTO wgs_analytics_ignored_ips (ip_address, description)
+                    VALUES (:ip, :popis)
+                ");
+                $stmt->execute(['ip' => $ip, 'popis' => $popis ?: 'Manuálně přidáno']);
+                $zprava = "IP adresa {$ip} byla přidána do blacklistu.";
+            } catch (PDOException $e) {
+                $chyba = 'Chyba při přidávání: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -50,15 +59,20 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_to_blacklist') {
 // AKCE: Odebrat IP z blacklistu
 // ========================================
 if (isset($_POST['action']) && $_POST['action'] === 'remove_from_blacklist') {
-    $id = (int)($_POST['id'] ?? 0);
+    // Validace CSRF tokenu
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $chyba = 'Neplatný bezpečnostní token. Obnovte stránku a zkuste znovu.';
+    } else {
+        $id = (int)($_POST['id'] ?? 0);
 
-    if ($id > 0) {
-        try {
-            $stmt = $pdo->prepare("DELETE FROM wgs_analytics_ignored_ips WHERE id = :id");
-            $stmt->execute(['id' => $id]);
-            $zprava = "IP adresa byla odebrána z blacklistu.";
-        } catch (PDOException $e) {
-            $chyba = 'Chyba při odebírání: ' . $e->getMessage();
+        if ($id > 0) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM wgs_analytics_ignored_ips WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+                $zprava = "IP adresa byla odebrána z blacklistu.";
+            } catch (PDOException $e) {
+                $chyba = 'Chyba při odebírání: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -268,6 +282,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
             <?php else: ?>
                 - <strong style="color: #721c24;">NENÍ v blacklistu!</strong>
                 <form method="POST" style="display: inline; margin-left: 10px;">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                     <input type="hidden" name="action" value="add_to_blacklist">
                     <input type="hidden" name="ip_address" value="<?= htmlspecialchars($mojeIP) ?>">
                     <input type="hidden" name="description" value="Admin IP - automaticky">
@@ -285,6 +300,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
 
             <!-- Formulář pro přidání -->
             <form method="POST" class="form-inline" style="margin-bottom: 15px;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" name="action" value="add_to_blacklist">
                 <input type="text" name="ip_address" placeholder="IP adresa" required>
                 <input type="text" name="description" placeholder="Popis (volitelné)">
@@ -308,6 +324,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
                             <td><?= date('d.m.Y H:i', strtotime($row['created_at'])) ?></td>
                             <td>
                                 <form method="POST" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                                     <input type="hidden" name="action" value="remove_from_blacklist">
                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                     <button type="submit" class="btn btn-danger btn-small" data-action="confirmRemove" data-confirm="Opravdu odebrat?">Odebrat</button>
@@ -350,6 +367,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
                                     <span class="ignored">Ignorována</span>
                                 <?php else: ?>
                                     <form method="POST" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                                         <input type="hidden" name="action" value="add_to_blacklist">
                                         <input type="hidden" name="ip_address" value="<?= htmlspecialchars($row['ip_address']) ?>">
                                         <input type="hidden" name="description" value="Z návštěv">

@@ -250,6 +250,7 @@
         const dropdown = document.getElementById('address-suggestions');
 
         if (!input) return;
+        if (!dropdown) return;
 
         let debounceTimer;
 

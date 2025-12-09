@@ -497,6 +497,14 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
     });
   }
 
+  // Handler pro tlačítko Zrušit (navigateToAdmin)
+  const btnZrusit = document.querySelector('[data-action="navigateToAdmin"]');
+  if (btnZrusit) {
+    btnZrusit.addEventListener('click', () => {
+      window.location.href = 'admin.php';
+    });
+  }
+
   // Odeslání formuláře
   const form = document.getElementById('novaAktualitaForm');
   form.addEventListener('submit', async function(e) {

@@ -25,15 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
     nactiCharty();
 
     // Aplikovat filtry při změně roku nebo měsíce
-    document.getElementById('filter-year').addEventListener('change', () => {
-        aktualniStranka = 1;
-        aplikovatFiltry();
-    });
+    const filterYear = document.getElementById('filter-year');
+    const filterMonth = document.getElementById('filter-month');
 
-    document.getElementById('filter-month').addEventListener('change', () => {
-        aktualniStranka = 1;
-        aplikovatFiltry();
-    });
+    if (filterYear) {
+        filterYear.addEventListener('change', () => {
+            aktualniStranka = 1;
+            aplikovatFiltry();
+        });
+    }
+
+    if (filterMonth) {
+        filterMonth.addEventListener('change', () => {
+            aktualniStranka = 1;
+            aplikovatFiltry();
+        });
+    }
 
     // ========================================
     // PŘÍMÉ EVENT LISTENERY NA TLAČÍTKA
@@ -77,22 +84,31 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function inicializujMultiselect() {
     // Prodejci
-    document.getElementById('prodejci-trigger').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown('prodejci');
-    });
+    const prodejciTrigger = document.getElementById('prodejci-trigger');
+    if (prodejciTrigger) {
+        prodejciTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown('prodejci');
+        });
+    }
 
     // Technici
-    document.getElementById('technici-trigger').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown('technici');
-    });
+    const techniciTrigger = document.getElementById('technici-trigger');
+    if (techniciTrigger) {
+        techniciTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown('technici');
+        });
+    }
 
     // Země
-    document.getElementById('zeme-trigger').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown('zeme');
-    });
+    const zemeTrigger = document.getElementById('zeme-trigger');
+    if (zemeTrigger) {
+        zemeTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown('zeme');
+        });
+    }
 
     // Zavřít dropdowny při kliknutí mimo
     document.addEventListener('click', (e) => {
