@@ -157,11 +157,7 @@ CO BUDE NÁSLEDOVAT:
 
 ---
 
-TECHNICKÉ ÚDAJE POTVRZENÍ:
-IP adresa: {{ip_address}}
-E-mail: {{customer_email}}
-
-Toto elektronické potvrzení má právní platnost dle § 2586 občanského zákoníku.
+Toto elektronické potvrzení bylo zaznamenáno a má právní platnost dle § 2586 občanského zákoníku (smlouva o dílo).
 
 V případě dotazů nás neváhejte kontaktovat.
 
@@ -177,9 +173,7 @@ www.wgs-service.cz',
             '{{confirmed_time}}',
             '{{items_list}}',
             '{{total_price}}',
-            '{{currency}}',
-            '{{ip_address}}',
-            '{{customer_email}}'
+            '{{currency}}'
         ]),
         'active' => 1
     ];
