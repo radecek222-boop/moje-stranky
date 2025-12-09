@@ -269,7 +269,7 @@ try {
             $stmt = $pdo->query("
                 SELECT id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
                        stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at,
-                       zaloha_prijata_at, hotovo_at, uhrazeno_at
+                       zf_odeslana_at, zf_uhrazena_at, dokonceno_at, fa_uhrazena_at
                 FROM wgs_nabidky
                 ORDER BY vytvoreno_at DESC
                 LIMIT 100
@@ -359,7 +359,7 @@ try {
             }
 
             // Povolené kroky workflow
-            $povoleneKroky = ['zaloha_prijata', 'hotovo', 'uhrazeno'];
+            $povoleneKroky = ['zf_odeslana', 'zf_uhrazena', 'dokonceno', 'fa_uhrazena'];
             if (!in_array($krok, $povoleneKroky)) {
                 sendJsonError('Neplatný workflow krok');
             }
@@ -480,9 +480,10 @@ function vytvorTabulkuNabidky($pdo) {
             odeslano_at DATETIME NULL,
             potvrzeno_at DATETIME NULL,
             potvrzeno_ip VARCHAR(45) NULL,
-            zaloha_prijata_at DATETIME NULL,
-            hotovo_at DATETIME NULL,
-            uhrazeno_at DATETIME NULL,
+            zf_odeslana_at DATETIME NULL,
+            zf_uhrazena_at DATETIME NULL,
+            dokonceno_at DATETIME NULL,
+            fa_uhrazena_at DATETIME NULL,
             INDEX idx_token (token),
             INDEX idx_stav (stav),
             INDEX idx_email (zakaznik_email),
@@ -492,9 +493,10 @@ function vytvorTabulkuNabidky($pdo) {
 
     // Přidat chybějící sloupce (pro existující tabulky)
     $sloupce = [
-        'zaloha_prijata_at' => 'DATETIME NULL',
-        'hotovo_at' => 'DATETIME NULL',
-        'uhrazeno_at' => 'DATETIME NULL',
+        'zf_odeslana_at' => 'DATETIME NULL',
+        'zf_uhrazena_at' => 'DATETIME NULL',
+        'dokonceno_at' => 'DATETIME NULL',
+        'fa_uhrazena_at' => 'DATETIME NULL',
         'cislo_nabidky' => 'VARCHAR(30) NULL UNIQUE AFTER id'
     ];
 

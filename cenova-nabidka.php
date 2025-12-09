@@ -399,29 +399,28 @@ if ($reklamaceId > 0) {
         }
         .workflow-btn {
             padding: 3px 6px;
-            border: 1px solid #ccc;
+            border: 1px solid #444;
             border-radius: 3px;
-            background: #f5f5f5;
-            color: #666;
+            background: #222;
+            color: #fff;
             font-size: 0.65rem;
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
         }
         .workflow-btn:hover {
-            border-color: #999;
-            color: #333;
-            background: #eee;
+            border-color: #666;
+            background: #333;
         }
         .workflow-btn.aktivni {
-            background: rgba(57, 255, 20, 0.1);
+            background: #1a1a1a;
             border: 2px solid #39ff14;
-            color: #39ff14;
+            color: #fff;
             box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
         }
         .workflow-btn.auto {
             cursor: default;
-            opacity: 0.7;
+            opacity: 0.6;
         }
         .workflow-btn.auto.aktivni {
             opacity: 1;
@@ -2000,9 +1999,10 @@ if ($reklamaceId > 0) {
                 // Workflow stavy
                 const jePoslana = !!n.odeslano_at;
                 const jePotvrzena = !!n.potvrzeno_at;
-                const jeZalohaPrijata = !!n.zaloha_prijata_at;
-                const jeHotovo = !!n.hotovo_at;
-                const jeUhrazeno = !!n.uhrazeno_at;
+                const jeZfOdeslana = !!n.zf_odeslana_at;
+                const jeZfUhrazena = !!n.zf_uhrazena_at;
+                const jeDokonceno = !!n.dokonceno_at;
+                const jeFaUhrazena = !!n.fa_uhrazena_at;
 
                 html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
                     <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
@@ -2019,20 +2019,25 @@ if ($reklamaceId > 0) {
                                 Odsouhlasena
                             </span>
                             <!-- Manuální kroky -->
-                            <button class="workflow-btn ${jeZalohaPrijata ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'zaloha_prijata')"
-                                    title="${jeZalohaPrijata ? 'Přijato: ' + formatDatum(n.zaloha_prijata_at) : 'Klikněte pro potvrzení'}">
-                                Záloha
+                            <button class="workflow-btn ${jeZfOdeslana ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'zf_odeslana')"
+                                    title="${jeZfOdeslana ? 'Odesláno: ' + formatDatum(n.zf_odeslana_at) : 'Klikněte pro potvrzení'}">
+                                Odeslána ZF
                             </button>
-                            <button class="workflow-btn ${jeHotovo ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'hotovo')"
-                                    title="${jeHotovo ? 'Dokončeno: ' + formatDatum(n.hotovo_at) : 'Klikněte pro potvrzení'}">
-                                Hotovo
+                            <button class="workflow-btn ${jeZfUhrazena ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'zf_uhrazena')"
+                                    title="${jeZfUhrazena ? 'Uhrazeno: ' + formatDatum(n.zf_uhrazena_at) : 'Klikněte pro potvrzení'}">
+                                Uhrazena ZF
                             </button>
-                            <button class="workflow-btn ${jeUhrazeno ? 'aktivni' : ''}"
-                                    onclick="zmenitWorkflow(${n.id}, 'uhrazeno')"
-                                    title="${jeUhrazeno ? 'Uhrazeno: ' + formatDatum(n.uhrazeno_at) : 'Klikněte pro potvrzení'}">
-                                Uhrazeno
+                            <button class="workflow-btn ${jeDokonceno ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'dokonceno')"
+                                    title="${jeDokonceno ? 'Dokončeno: ' + formatDatum(n.dokonceno_at) : 'Klikněte pro potvrzení'}">
+                                Dokončeno
+                            </button>
+                            <button class="workflow-btn ${jeFaUhrazena ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'fa_uhrazena')"
+                                    title="${jeFaUhrazena ? 'Uhrazeno: ' + formatDatum(n.fa_uhrazena_at) : 'Klikněte pro potvrzení'}">
+                                Uhrazena FA
                             </button>
                         </div>
                     </td>
