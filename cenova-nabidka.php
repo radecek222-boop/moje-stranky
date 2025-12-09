@@ -714,7 +714,7 @@ if ($reklamaceId > 0) {
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">#</th>
+                            <th style="width: 130px; white-space: nowrap;">CN</th>
                             <th>Zákazník</th>
                             <th style="width: 100px;">Cena</th>
                             <th>Workflow</th>
@@ -1947,7 +1947,7 @@ if ($reklamaceId > 0) {
                 const jeUhrazeno = !!n.uhrazeno_at;
 
                 html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
-                    <td>${n.cislo_nabidky || n.id}</td>
+                    <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
                     <td>
                         <div class="nabidka-info">
                             <span class="nabidka-info-jmeno">${n.zakaznik_jmeno}</span>
