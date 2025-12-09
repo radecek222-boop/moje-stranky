@@ -547,8 +547,9 @@ async function renderOrders(items = null) {
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
     // Přidat barevný nádech podle stavu
     const statusBgClass = `status-bg-${status.class}`;
-    // Oranžový rámeček pro zákazníky s CN
-    const cnClass = maCenovouNabidku ? 'ma-cenovou-nabidku' : '';
+    // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
+    // Když se domluví termín → modrá (DOMLUVENÁ), když se pošle nová CN → zase oranžová
+    const cnClass = (maCenovouNabidku && !appointmentText) ? 'ma-cenovou-nabidku' : '';
 
     return `
       <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
