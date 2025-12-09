@@ -106,7 +106,9 @@
 
     // Reset stavu na výchozí hodnoty
     function resetovatStav() {
+        console.log('[Kalkulačka] resetovatStav voláno, předchozí stav:', JSON.stringify(stav));
         stav = { ...VYCHOZI_STAV };
+        console.log('[Kalkulačka] resetovatStav dokončeno, nový stav:', JSON.stringify(stav));
 
         // Resetovat DOM elementy
         document.querySelectorAll('input[type="number"]').forEach(input => {
@@ -349,6 +351,14 @@
     // WIZARD NAVIGACE
     // ========================================
     window.nextStep = function() {
+        console.log('[Kalkulačka] nextStep voláno, aktuální krok:', stav.krok, 'typServisu:', stav.typServisu);
+
+        // Najít kontejner kalkulačky (může být na stránce nebo v modalu)
+        const kalkulackaContainer = document.getElementById('kalkulacka') ||
+                                    document.getElementById('calculatorModalBody');
+
+        console.log('[Kalkulačka] Kontejner kalkulačky:', kalkulackaContainer?.id || 'nenalezen');
+
         // Validace před pokračováním
         if (stav.krok === 1 && !stav.adresa) {
             // Zkontrolovat jestli je zaškrtnutý checkbox "reklamace bez dopravy"
@@ -368,14 +378,19 @@
             }
         }
 
-        // Skrýt aktuální krok
-        const currentStep = document.querySelector('.wizard-step:not(.hidden)');
+        // Skrýt aktuální krok - hledat pouze v kontejneru kalkulačky
+        const currentStep = kalkulackaContainer ?
+            kalkulackaContainer.querySelector('.wizard-step:not(.hidden)') :
+            document.querySelector('.wizard-step:not(.hidden)');
+
+        console.log('[Kalkulačka] Aktuální krok:', currentStep?.id || 'nenalezen');
         if (currentStep) {
             currentStep.classList.add('hidden');
             currentStep.style.display = 'none';
         }
 
         stav.krok++;
+        console.log('[Kalkulačka] Nový krok:', stav.krok);
 
         // Určit, který krok zobrazit
         let nextStepId;
@@ -384,6 +399,7 @@
             nextStepId = 'step-service-type';
         } else if (stav.krok === 3) {
             // Podle typu servisu
+            console.log('[Kalkulačka] Krok 3, typServisu:', stav.typServisu);
             if (stav.typServisu === 'diagnostika') {
                 // Přeskočit na krok 4 (extras)
                 stav.krok = 4;
@@ -394,9 +410,14 @@
                 nextStepId = 'step-mechanics';
             } else if (stav.typServisu === 'kombinace') {
                 nextStepId = 'step-upholstery'; // Nejdřív čalounění
+            } else {
+                // Fallback - neznámý typ servisu, jdi na čalounění
+                console.warn('[Kalkulačka] Neznámý typ servisu:', stav.typServisu, '- použit fallback na čalounění');
+                nextStepId = 'step-upholstery';
             }
         } else if (stav.krok === 4) {
             // Pokud je kombinace a právě jsme byli na čalounění, jdi na mechaniku
+            console.log('[Kalkulačka] Krok 4, currentStep:', currentStep?.id);
             if (stav.typServisu === 'kombinace' && currentStep && currentStep.id === 'step-upholstery') {
                 nextStepId = 'step-mechanics';
                 stav.krok = 3; // Zůstat na kroku 3
@@ -407,13 +428,25 @@
             // Souhrn
             zobrazitSouhrn();
             nextStepId = 'step-summary';
+        } else {
+            console.error('[Kalkulačka] Neočekávaný krok:', stav.krok);
+        }
+
+        // Kontrola že nextStepId je definován
+        if (!nextStepId) {
+            console.error('[Kalkulačka] nextStepId není definován! krok:', stav.krok, 'typServisu:', stav.typServisu);
+            return;
         }
 
         // Zobrazit další krok
+        console.log('[Kalkulačka] Přechod na krok:', stav.krok, '→', nextStepId);
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
             nextStep.classList.remove('hidden');
             nextStep.style.display = 'flex';
+            console.log('[Kalkulačka] Krok', nextStepId, 'zobrazen');
+        } else {
+            console.error('[Kalkulačka] Krok', nextStepId, 'NENALEZEN!');
         }
 
         aktualizovatProgress();
@@ -1196,13 +1229,21 @@
 // ========================================
 // ACTION REGISTRY - Registrace akcí pro event delegation (Step 112)
 // ========================================
+console.log('[Kalkulačka] Pokus o registraci akcí, Utils:', typeof window.Utils, 'registerAction:', typeof window.Utils?.registerAction);
+
 if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    console.log('[Kalkulačka] Registruji akce do ActionRegistry...');
+
     // Wizard navigace
     window.Utils.registerAction('nextStep', () => {
+        console.log('[Kalkulačka] ActionRegistry: nextStep akce spuštěna');
         if (typeof window.nextStep === 'function') {
             window.nextStep();
+        } else {
+            console.error('[Kalkulačka] window.nextStep není funkce!');
         }
     });
+    console.log('[Kalkulačka] Akce nextStep zaregistrována');
 
     window.Utils.registerAction('previousStep', () => {
         if (typeof window.previousStep === 'function') {
@@ -1242,4 +1283,8 @@ if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
             window.zapocitatDoProtokolu();
         }
     });
+
+    console.log('[Kalkulačka] Všechny akce úspěšně zaregistrovány');
+} else {
+    console.error('[Kalkulačka] CHYBA: Utils nebo registerAction není dostupný!');
 }

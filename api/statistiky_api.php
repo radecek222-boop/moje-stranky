@@ -192,6 +192,7 @@ function getZakazky($pdo) {
             r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
+            r.assigned_to as assigned_to_raw,
             COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
@@ -232,13 +233,6 @@ function getZakazky($pdo) {
             'total_count' => $totalCount,
             'stranka' => $stranka,
             'celkem_stranek' => ceil($totalCount / $limit)
-        ],
-        // DEBUG INFO - odstranit po vyřešení
-        'debug' => [
-            'GET_params' => $_GET,
-            'where_clause' => $where,
-            'bound_params' => $params,
-            'sql_query' => $sql
         ]
     ]);
 }
@@ -377,17 +371,28 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
-    // FIX: assigned_to může obsahovat buď numerické id nebo textové user_id
-    // Používáme subquery pro nalezení obou hodnot
+    // FIX: Hledáme v assigned_to (numerické id, textové user_id) A TAKÉ v textovém sloupci technik
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
 
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
             $keyId = ":technik_id_$idx";
-            // Hledáme podle numerického id nebo přes subquery user_id
-            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = (SELECT user_id FROM wgs_users WHERE id = $keyId LIMIT 1))";
-            $params[$keyId] = (int)$technik;
+            $keyUserId = ":technik_uid_$idx";
+            $keyName = ":technik_name_$idx";
+
+            // Získat user_id A jméno pro tohoto technika z DB
+            $pdoLocal = getDbConnection();
+            $stmtUser = $pdoLocal->prepare("SELECT user_id, name FROM wgs_users WHERE id = :id LIMIT 1");
+            $stmtUser->execute([':id' => (int)$technik]);
+            $userRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+            $params[$keyId] = (string)$technik; // Numerické id jako string
+            $params[$keyUserId] = $userRow['user_id'] ?? '';
+            $params[$keyName] = $userRow['name'] ?? '';
+
+            // Hledáme podle: assigned_to = id NEBO assigned_to = user_id NEBO technik (text) = jméno
+            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId OR r.technik = $keyName)";
         }
 
         if (!empty($techniciConditions)) {
