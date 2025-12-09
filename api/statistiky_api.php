@@ -125,8 +125,9 @@ function getSummaryStatistiky($pdo) {
  * Včetně "Mimozáruční servis" (created_by IS NULL)
  */
 function loadProdejci($pdo) {
+    // FIX: Vracet user_id jako id, protože created_by v reklamacích obsahuje user_id
     $stmt = $pdo->query("
-        SELECT DISTINCT u.id, u.name
+        SELECT DISTINCT u.user_id as id, u.name
         FROM wgs_users u
         WHERE u.is_active = 1
         ORDER BY u.name ASC
