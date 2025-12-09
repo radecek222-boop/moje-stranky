@@ -1040,6 +1040,10 @@ if ($reklamaceId > 0) {
     <script src="assets/js/wgs-map.min.js"></script>
     <script src="assets/js/cenik-calculator.min.js"></script>
 
+    <!-- WGS Toast pro notifikace -->
+    <link rel="stylesheet" href="assets/css/wgs-toast.css">
+    <script src="assets/js/wgs-toast.js"></script>
+
     <!-- PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1683,18 +1687,23 @@ if ($reklamaceId > 0) {
                 const odeslatResult = await odeslatResponse.json();
 
                 if (odeslatResult.status === 'success') {
-                    await wgsConfirm('Nabídka byla vytvořena a odeslána na ' + email, {
-                        titulek: 'Cenová nabídka',
-                        btnPotvrdit: 'OK',
-                        btnZrusit: null
-                    });
-                    resetFormular();
+                    // Zobrazit WGS toast a přesměrovat na seznam
+                    if (typeof WGSToast !== 'undefined') {
+                        WGSToast.zobrazit('Cenová nabídka odeslána', { titulek: 'WGS', trvani: 3000 });
+                    }
+                    // Přesměrovat na seznam.php po krátké pauze
+                    setTimeout(() => {
+                        window.location.href = 'seznam.php';
+                    }, 1500);
                 } else {
-                    await wgsConfirm('Nabídka vytvořena, ale odeslání selhalo: ' + odeslatResult.message, {
-                        titulek: 'Upozornění',
-                        btnPotvrdit: 'OK',
-                        btnZrusit: null
-                    });
+                    // Email selhal, ale nabídka je vytvořena - cron to vyřídí
+                    if (typeof WGSToast !== 'undefined') {
+                        WGSToast.zobrazit('Cenová nabídka vytvořena (email se odešle později)', { titulek: 'WGS', trvani: 3000 });
+                    }
+                    // Přesměrovat na seznam.php
+                    setTimeout(() => {
+                        window.location.href = 'seznam.php';
+                    }, 1500);
                 }
 
             } catch (e) {

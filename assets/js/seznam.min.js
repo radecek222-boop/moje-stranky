@@ -785,7 +785,7 @@ async function showDetail(recordOrId) {
   } else {
     // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
     const vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.reklamace_id || record.id}">Vytvořit CN</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
     ` : '';
 
     buttonsHtml = `
