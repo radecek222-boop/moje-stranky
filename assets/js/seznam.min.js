@@ -99,6 +99,7 @@ let ACTIVE_FILTER = 'all';
 let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
+let EMAILS_S_CN = []; // Emaily zákazníků s cenovou nabídkou
 
 // PAGINATION FIX: Tracking pagination state
 let CURRENT_PAGE = 1;
@@ -435,7 +436,7 @@ async function renderOrders(items = null) {
 
   let filtered = items;
 
-  if (ACTIVE_FILTER !== 'all') {
+  if (ACTIVE_FILTER !== 'all' && ACTIVE_FILTER !== 'cn') {
     const statusMap = {
       'wait': ['ČEKÁ', 'wait'],
       'open': ['DOMLUVENÁ', 'open'],
@@ -489,15 +490,32 @@ async function renderOrders(items = null) {
   }
 
   // Načíst emaily zákazníků s cenovou nabídkou (CN)
-  let emailySCN = [];
   try {
     const cnResponse = await fetch('/api/nabidka_api.php?action=emaily_s_nabidkou');
     const cnData = await cnResponse.json();
     if (cnData.status === 'success') {
-      emailySCN = cnData.data?.emaily || cnData.emaily || [];
+      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
     }
   } catch (e) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
+  }
+
+  // Aktualizovat počet CN
+  const countCnEl = document.getElementById('count-cn');
+  if (countCnEl) {
+    const countCn = items.filter(r => {
+      const email = (r.email || '').toLowerCase().trim();
+      return email && EMAILS_S_CN.includes(email);
+    }).length;
+    countCnEl.textContent = `(${countCn})`;
+  }
+
+  // Filtr pro CN - zobrazit pouze reklamace s odeslanou cenovou nabídkou
+  if (ACTIVE_FILTER === 'cn') {
+    filtered = filtered.filter(r => {
+      const email = (r.email || '').toLowerCase().trim();
+      return email && EMAILS_S_CN.includes(email);
+    });
   }
 
   filtered.sort((a, b) => {
@@ -536,7 +554,7 @@ async function renderOrders(items = null) {
 
     // Zkontrolovat zda zákazník má cenovou nabídku (CN)
     const zakaznikEmail = (rec.email || '').toLowerCase().trim();
-    const maCenovouNabidku = zakaznikEmail && emailySCN.includes(zakaznikEmail);
+    const maCenovouNabidku = zakaznikEmail && EMAILS_S_CN.includes(zakaznikEmail);
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;

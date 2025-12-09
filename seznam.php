@@ -1151,6 +1151,18 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   font-size: 0.75rem !important;
 }
 
+/* Filtr tlačítko pro CN - oranžová barva */
+.filter-btn-cn {
+  border-color: #ff9800 !important;
+  color: #ff9800 !important;
+}
+.filter-btn-cn:hover,
+.filter-btn-cn.active {
+  background: #ff9800 !important;
+  color: #000 !important;
+  border-color: #ff9800 !important;
+}
+
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
   /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */
@@ -1811,6 +1823,14 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn" data-filter="done" data-lang-cs="Vyřízené" data-lang-en="Completed" data-lang-it="Completato">
       Vyřízené <span id="count-done" style="opacity: 0.7;"></span>
     </button>
+    <?php
+    $userRole = strtolower($_SESSION['role'] ?? '');
+    $canSeeCN = $isAdmin || $userRole === 'technik' || $userRole === 'technician';
+    if ($canSeeCN): ?>
+    <button class="filter-btn filter-btn-cn" data-filter="cn" data-lang-cs="Cenové nabídky" data-lang-en="Price Quotes" data-lang-it="Preventivi">
+      CN <span id="count-cn" style="opacity: 0.7;"></span>
+    </button>
+    <?php endif; ?>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
@@ -1844,7 +1864,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/seznam.js?v=20251209-02" defer></script>
+<script src="/assets/js/seznam.js?v=20251209-03" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
