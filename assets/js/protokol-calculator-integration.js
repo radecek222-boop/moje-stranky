@@ -38,10 +38,10 @@
             priceTotalInput.style.cursor = 'pointer';
             console.log('[Protokol-CN] Event listener přidán na price-total (capture phase)');
 
-            // Debug: vypsat hodnotu order-number
-            const orderNum = document.getElementById('order-number');
-            console.log('[Protokol-CN] Order number element:', orderNum);
-            console.log('[Protokol-CN] Order number value:', orderNum?.value);
+            // Debug: vypsat hodnotu claim-number (číslo reklamace - POZ zakázky začínají na POZ)
+            const claimNum = document.getElementById('claim-number');
+            console.log('[Protokol-CN] Claim number element:', claimNum);
+            console.log('[Protokol-CN] Claim number value:', claimNum?.value);
         } else {
             console.error('[Protokol-CN] price-total element NENALEZEN!');
         }
@@ -49,21 +49,22 @@
         console.log('[Protokol-CN] === INICIALIZACE DOKONČENA ===');
     });
 
-    // Zkontrolovat zda jde o POZ zakázku
+    // Zkontrolovat zda jde o POZ zakázku (kontroluje claim-number = Číslo reklamace)
     function jePozZakazka() {
-        const orderNumber = document.getElementById('order-number');
-        console.log('[Protokol-CN] jePozZakazka() - element:', orderNumber);
+        // claim-number obsahuje číslo reklamace (např. POZ/2025/08-12/01 pro mimozáruční)
+        const claimNumber = document.getElementById('claim-number');
+        console.log('[Protokol-CN] jePozZakazka() - claim-number element:', claimNumber);
 
-        if (!orderNumber) {
-            console.log('[Protokol-CN] jePozZakazka() - element NENALEZEN -> false');
+        if (!claimNumber) {
+            console.log('[Protokol-CN] jePozZakazka() - claim-number NENALEZEN -> false');
             return false;
         }
 
-        const hodnota = orderNumber.value.trim().toUpperCase();
-        console.log('[Protokol-CN] jePozZakazka() - hodnota:', hodnota);
+        const hodnota = claimNumber.value.trim().toUpperCase();
+        console.log('[Protokol-CN] jePozZakazka() - claim-number hodnota:', hodnota);
 
         const jePoz = hodnota.startsWith('POZ');
-        console.log('[Protokol-CN] jePozZakazka() - výsledek:', jePoz);
+        console.log('[Protokol-CN] jePozZakazka() - je POZ zakázka:', jePoz);
 
         return jePoz;
     }
