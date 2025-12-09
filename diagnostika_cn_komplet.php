@@ -77,9 +77,9 @@ echo "<h2>KROK 2: Všechny nabídky v databázi</h2>";
 echo "<div class='box'>";
 
 $stmt = $pdo->query("
-    SELECT id, zakaznik_email, stav, created_at
+    SELECT id, zakaznik_email, stav, vytvoreno_at
     FROM wgs_nabidky
-    ORDER BY created_at DESC
+    ORDER BY vytvoreno_at DESC
     LIMIT 20
 ");
 $nabidky = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -93,7 +93,7 @@ foreach ($nabidky as $n) {
     echo "<td>{$n['id']}</td>";
     echo "<td>" . htmlspecialchars($n['zakaznik_email']) . "</td>";
     echo "<td>{$n['stav']}</td>";
-    echo "<td>{$n['created_at']}</td>";
+    echo "<td>{$n['vytvoreno_at']}</td>";
     echo "<td>{$jeVPoli}</td>";
     echo "</tr>";
 }
