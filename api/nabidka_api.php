@@ -182,29 +182,45 @@ try {
                 sendJsonError('Platnost nabídky vypršela');
             }
 
+            // Získat čas potvrzení a IP
+            $potvrzenoCas = date('Y-m-d H:i:s');
+            $potvrzenoIp = $_SERVER['REMOTE_ADDR'];
+
             // Aktualizovat stav na potvrzeno
             $stmt = $pdo->prepare("
                 UPDATE wgs_nabidky
-                SET stav = 'potvrzena', potvrzeno_at = NOW(), potvrzeno_ip = ?
+                SET stav = 'potvrzena', potvrzeno_at = ?, potvrzeno_ip = ?
                 WHERE id = ?
             ");
-            $stmt->execute([$_SERVER['REMOTE_ADDR'], $nabidka['id']]);
+            $stmt->execute([$potvrzenoCas, $potvrzenoIp, $nabidka['id']]);
 
-            // Odeslat potvrzovací email adminovi
             require_once __DIR__ . '/../includes/EmailQueue.php';
             $emailQueue = new EmailQueue($pdo);
 
+            // 1. Odeslat potvrzovací email adminovi
             $adminEmail = getenv('ADMIN_EMAIL') ?: 'reklamace@wgs-service.cz';
             $emailQueue->add(
                 $adminEmail,
                 'Nabídka č. ' . $nabidka['id'] . ' byla potvrzena zákazníkem',
-                "Zákazník {$nabidka['zakaznik_jmeno']} ({$nabidka['zakaznik_email']}) potvrdil cenovou nabídku č. {$nabidka['id']}.\n\nCelková cena: {$nabidka['celkova_cena']} {$nabidka['mena']}\n\nIP adresa: {$_SERVER['REMOTE_ADDR']}\nČas: " . date('d.m.Y H:i:s'),
-                'nabidka_potvrzeni_' . $nabidka['id']
+                "Zákazník {$nabidka['zakaznik_jmeno']} ({$nabidka['zakaznik_email']}) potvrdil cenovou nabídku č. {$nabidka['id']}.\n\nCelková cena: {$nabidka['celkova_cena']} {$nabidka['mena']}\n\nIP adresa: {$potvrzenoIp}\nČas: " . date('d.m.Y H:i:s', strtotime($potvrzenoCas)),
+                'nabidka_potvrzeni_admin_' . $nabidka['id']
+            );
+
+            // 2. Odeslat potvrzovací email zákazníkovi
+            $nabidka['potvrzeno_at'] = $potvrzenoCas;
+            $nabidka['potvrzeno_ip'] = $potvrzenoIp;
+            $emailZakaznikBody = vygenerujEmailPotvrzeniZakaznik($nabidka);
+
+            $emailQueue->add(
+                $nabidka['zakaznik_email'],
+                'Potvrzení objednávky č. ' . $nabidka['id'] . ' - White Glove Service',
+                $emailZakaznikBody,
+                'nabidka_potvrzeni_zakaznik_' . $nabidka['id']
             );
 
             sendJsonSuccess('Nabídka úspěšně potvrzena', [
                 'nabidka_id' => $nabidka['id'],
-                'potvrzeno_at' => date('Y-m-d H:i:s')
+                'potvrzeno_at' => $potvrzenoCas
             ]);
             break;
 
@@ -296,90 +312,368 @@ function vytvorTabulkuNabidky($pdo) {
 }
 
 /**
- * Vygeneruje HTML email s nabídkou
+ * Vygeneruje HTML email s nabídkou - profesionální design
  */
 function vygenerujEmailNabidky($nabidka) {
     $polozky = json_decode($nabidka['polozky_json'], true);
     $baseUrl = 'https://www.wgs-service.cz';
     $potvrzeniUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']);
 
+    // Sestavení tabulky položek
     $polozkyHtml = '';
     foreach ($polozky as $p) {
         $nazev = htmlspecialchars($p['nazev'] ?? '');
         $pocet = intval($p['pocet'] ?? 1);
-        $cena = number_format(floatval($p['cena'] ?? 0), 2, ',', ' ');
-        $celkem = number_format(floatval($p['cena'] ?? 0) * $pocet, 2, ',', ' ');
-        $polozkyHtml .= "<tr>
-            <td style='padding: 10px; border-bottom: 1px solid #eee;'>{$nazev}</td>
-            <td style='padding: 10px; border-bottom: 1px solid #eee; text-align: center;'>{$pocet}</td>
-            <td style='padding: 10px; border-bottom: 1px solid #eee; text-align: right;'>{$cena} {$nabidka['mena']}</td>
-            <td style='padding: 10px; border-bottom: 1px solid #eee; text-align: right;'>{$celkem} {$nabidka['mena']}</td>
+        $cenaJednotka = floatval($p['cena'] ?? 0);
+        $cenaCelkem = $cenaJednotka * $pocet;
+
+        $cenaFormatovana = number_format($cenaJednotka, 2, ',', ' ');
+        $celkemFormatovane = number_format($cenaCelkem, 2, ',', ' ');
+
+        $polozkyHtml .= "
+        <tr>
+            <td style='padding: 14px 16px; border-bottom: 1px solid #e5e5e5; font-size: 14px; color: #333;'>{$nazev}</td>
+            <td style='padding: 14px 16px; border-bottom: 1px solid #e5e5e5; text-align: center; font-size: 14px; color: #666;'>{$pocet}</td>
+            <td style='padding: 14px 16px; border-bottom: 1px solid #e5e5e5; text-align: right; font-size: 14px; color: #666;'>{$cenaFormatovana} {$nabidka['mena']}</td>
+            <td style='padding: 14px 16px; border-bottom: 1px solid #e5e5e5; text-align: right; font-size: 14px; font-weight: 600; color: #333;'>{$celkemFormatovane} {$nabidka['mena']}</td>
         </tr>";
     }
 
     $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+    $datumVytvoreni = date('d.m.Y', strtotime($nabidka['vytvoreno_at'] ?? 'now'));
     $platnostDo = date('d.m.Y', strtotime($nabidka['platnost_do']));
+    $nabidkaCislo = str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT);
+
+    // Adresa zákazníka (pokud existuje)
+    $adresaHtml = '';
+    if (!empty($nabidka['zakaznik_adresa'])) {
+        $adresaHtml = "<p style='margin: 4px 0 0 0; font-size: 13px; color: #666;'>" . nl2br(htmlspecialchars($nabidka['zakaznik_adresa'])) . "</p>";
+    }
+
+    // Telefon zákazníka
+    $telefonHtml = '';
+    if (!empty($nabidka['zakaznik_telefon'])) {
+        $telefonHtml = "<p style='margin: 4px 0 0 0; font-size: 13px; color: #666;'>Tel: {$nabidka['zakaznik_telefon']}</p>";
+    }
 
     return "
 <!DOCTYPE html>
 <html lang='cs'>
 <head>
     <meta charset='UTF-8'>
-    <title>Cenová nabídka č. {$nabidka['id']}</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Cenová nabídka č. {$nabidkaCislo} - White Glove Service</title>
 </head>
-<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
-    <div style='background: #1a1a1a; padding: 20px; text-align: center;'>
-        <h1 style='color: #fff; margin: 0; font-size: 24px;'>WHITE GLOVE SERVICE</h1>
-        <p style='color: #888; margin: 5px 0 0 0; font-size: 12px;'>Cenová nabídka č. {$nabidka['id']}</p>
-    </div>
+<body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
 
-    <div style='padding: 30px 20px;'>
-        <p>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+    <!-- Hlavní kontejner -->
+    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='background-color: #f4f4f4;'>
+        <tr>
+            <td style='padding: 30px 20px;'>
+                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
 
-        <p>děkujeme za Váš zájem o naše služby. Níže naleznete cenovou nabídku na požadované práce:</p>
+                    <!-- HEADER -->
+                    <tr>
+                        <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
+                            <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
+                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;'>Premium Furniture Care</p>
+                        </td>
+                    </tr>
 
-        <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
-            <thead>
-                <tr style='background: #f5f5f5;'>
-                    <th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Služba</th>
-                    <th style='padding: 10px; text-align: center; border-bottom: 2px solid #ddd;'>Počet</th>
-                    <th style='padding: 10px; text-align: right; border-bottom: 2px solid #ddd;'>Cena/ks</th>
-                    <th style='padding: 10px; text-align: right; border-bottom: 2px solid #ddd;'>Celkem</th>
-                </tr>
-            </thead>
-            <tbody>
-                {$polozkyHtml}
-            </tbody>
-            <tfoot>
-                <tr style='background: #f9f9f9;'>
-                    <td colspan='3' style='padding: 15px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;'>Celková cena (bez DPH):</td>
-                    <td style='padding: 15px; text-align: right; font-weight: bold; font-size: 18px; border-top: 2px solid #ddd;'>{$celkovaCena} {$nabidka['mena']}</td>
-                </tr>
-            </tfoot>
-        </table>
+                    <!-- HLAVNÍ OBSAH -->
+                    <tr>
+                        <td style='background: #ffffff; padding: 0;'>
 
-        <div style='background: #fffde7; border: 1px solid #ffd600; padding: 15px; border-radius: 5px; margin: 20px 0;'>
-            <strong>Platnost nabídky:</strong> do {$platnostDo}
-        </div>
+                            <!-- Nadpis nabídky -->
+                            <div style='background: #f8f9fa; padding: 25px 40px; border-bottom: 1px solid #e5e5e5;'>
+                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%'>
+                                    <tr>
+                                        <td>
+                                            <h2 style='margin: 0; font-size: 20px; font-weight: 600; color: #333;'>Cenová nabídka</h2>
+                                            <p style='margin: 5px 0 0 0; font-size: 13px; color: #888;'>č. {$nabidkaCislo}</p>
+                                        </td>
+                                        <td style='text-align: right;'>
+                                            <p style='margin: 0; font-size: 13px; color: #666;'>Datum: <strong>{$datumVytvoreni}</strong></p>
+                                            <p style='margin: 5px 0 0 0; font-size: 13px; color: #666;'>Platnost: <strong style='color: #d97706;'>{$platnostDo}</strong></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
-        <div style='text-align: center; margin: 30px 0;'>
-            <a href='{$potvrzeniUrl}' style='display: inline-block; background: #28a745; color: #fff; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;'>
-                POTVRDIT NABÍDKU
-            </a>
-        </div>
+                            <!-- Oslovení -->
+                            <div style='padding: 30px 40px 20px 40px;'>
+                                <p style='margin: 0; font-size: 15px; color: #333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+                                <p style='margin: 15px 0 0 0; font-size: 14px; color: #555; line-height: 1.6;'>
+                                    děkujeme za Váš zájem o naše služby. Na základě Vašeho požadavku jsme pro Vás připravili následující cenovou nabídku:
+                                </p>
+                            </div>
 
-        <p style='font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;'>
-            Kliknutím na tlačítko \"POTVRDIT NABÍDKU\" potvrzujete, že souhlasíte s touto cenovou nabídkou a
-            uzavíráte tím smlouvu o dílo s White Glove Service, s.r.o. dle
-            <a href='{$baseUrl}/podminky.php' style='color: #666;'>obchodních podmínek</a>.
-        </p>
-    </div>
+                            <!-- Údaje zákazníka -->
+                            <div style='padding: 0 40px 25px 40px;'>
+                                <div style='background: #f8f9fa; border-radius: 8px; padding: 18px 20px;'>
+                                    <p style='margin: 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Zákazník</p>
+                                    <p style='margin: 8px 0 0 0; font-size: 15px; font-weight: 600; color: #333;'>{$nabidka['zakaznik_jmeno']}</p>
+                                    <p style='margin: 4px 0 0 0; font-size: 13px; color: #666;'>{$nabidka['zakaznik_email']}</p>
+                                    {$telefonHtml}
+                                    {$adresaHtml}
+                                </div>
+                            </div>
 
-    <div style='background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;'>
-        <p style='margin: 0;'><strong>White Glove Service, s.r.o.</strong></p>
-        <p style='margin: 5px 0;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
-        <p style='margin: 5px 0;'>Tel: +420 725 965 826 | Email: reklamace@wgs-service.cz</p>
-    </div>
+                            <!-- Tabulka položek -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;'>
+                                    <thead>
+                                        <tr style='background: #f8f9fa;'>
+                                            <th style='padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e5e5;'>Služba</th>
+                                            <th style='padding: 14px 16px; text-align: center; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e5e5;'>Počet</th>
+                                            <th style='padding: 14px 16px; text-align: right; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e5e5;'>Cena/ks</th>
+                                            <th style='padding: 14px 16px; text-align: right; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e5e5;'>Celkem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {$polozkyHtml}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style='background: #1a1a1a;'>
+                                            <td colspan='3' style='padding: 18px 16px; text-align: right; font-size: 14px; font-weight: 600; color: #fff;'>Celková cena (bez DPH):</td>
+                                            <td style='padding: 18px 16px; text-align: right; font-size: 20px; font-weight: 700; color: #39ff14;'>{$celkovaCena} {$nabidka['mena']}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- Upozornění platnost -->
+                            <div style='padding: 0 40px 30px 40px;'>
+                                <div style='background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px 20px;'>
+                                    <p style='margin: 0; font-size: 14px; color: #92400e;'>
+                                        <strong>Platnost nabídky:</strong> Tato nabídka je platná do <strong>{$platnostDo}</strong>.
+                                        Po tomto datu bude automaticky zrušena.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- CTA Tlačítko -->
+                            <div style='padding: 0 40px 35px 40px; text-align: center;'>
+                                <p style='margin: 0 0 20px 0; font-size: 14px; color: #555;'>
+                                    Pokud s nabídkou souhlasíte, potvrďte ji kliknutím na tlačítko níže:
+                                </p>
+                                <a href='{$potvrzeniUrl}' style='display: inline-block; background: linear-gradient(135deg, #28a745 0%, #218838 100%); color: #ffffff; padding: 18px 50px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);'>
+                                    Potvrdit nabídku
+                                </a>
+                            </div>
+
+                            <!-- Právní upozornění -->
+                            <div style='padding: 25px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                                <p style='margin: 0; font-size: 12px; color: #666; line-height: 1.6;'>
+                                    <strong>Důležité upozornění:</strong> Kliknutím na tlačítko \"Potvrdit nabídku\" potvrzujete, že souhlasíte s touto cenovou nabídkou
+                                    a uzavíráte tím závaznou smlouvu o dílo dle § 2586 občanského zákoníku s White Glove Service, s.r.o.
+                                    Podrobnosti naleznete v našich <a href='{$baseUrl}/podminky.php' style='color: #333;'>obchodních podmínkách</a>.
+                                </p>
+                                <p style='margin: 12px 0 0 0; font-size: 12px; color: #888;'>
+                                    Ceny jsou uvedeny bez DPH. Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť dle skutečné spotřeby.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
+                            <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>
+                                Tel: <a href='tel:+420725965826' style='color: #888; text-decoration: none;'>+420 725 965 826</a> |
+                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #888; text-decoration: none;'>reklamace@wgs-service.cz</a>
+                            </p>
+                            <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
+                                <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>";
+}
+
+/**
+ * Vygeneruje HTML email s potvrzením objednávky pro zákazníka
+ */
+function vygenerujEmailPotvrzeniZakaznik($nabidka) {
+    $polozky = json_decode($nabidka['polozky_json'], true);
+    $baseUrl = 'https://www.wgs-service.cz';
+    $potvrzeniUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']);
+
+    // Sestavení tabulky položek
+    $polozkyHtml = '';
+    foreach ($polozky as $p) {
+        $nazev = htmlspecialchars($p['nazev'] ?? '');
+        $pocet = intval($p['pocet'] ?? 1);
+        $cenaJednotka = floatval($p['cena'] ?? 0);
+        $cenaCelkem = $cenaJednotka * $pocet;
+
+        $cenaFormatovana = number_format($cenaJednotka, 2, ',', ' ');
+        $celkemFormatovane = number_format($cenaCelkem, 2, ',', ' ');
+
+        $polozkyHtml .= "
+        <tr>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; font-size: 14px; color: #333;'>{$nazev}</td>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; text-align: center; font-size: 14px; color: #666;'>{$pocet}</td>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; text-align: right; font-size: 14px; font-weight: 600; color: #333;'>{$celkemFormatovane} {$nabidka['mena']}</td>
+        </tr>";
+    }
+
+    $celkovaCena = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+    $nabidkaCislo = str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT);
+
+    // Datum a čas potvrzení
+    $potvrzenoAt = isset($nabidka['potvrzeno_at']) ? date('d.m.Y H:i:s', strtotime($nabidka['potvrzeno_at'])) : date('d.m.Y H:i:s');
+    $potvrzenoIp = $nabidka['potvrzeno_ip'] ?? $_SERVER['REMOTE_ADDR'] ?? 'N/A';
+
+    return "
+<!DOCTYPE html>
+<html lang='cs'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Potvrzení objednávky č. {$nabidkaCislo}</title>
+</head>
+<body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
+
+    <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='background-color: #f4f4f4;'>
+        <tr>
+            <td style='padding: 30px 20px;'>
+                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
+
+                    <!-- HEADER -->
+                    <tr>
+                        <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
+                            <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
+                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;'>Potvrzení objednávky</p>
+                        </td>
+                    </tr>
+
+                    <!-- HLAVNÍ OBSAH -->
+                    <tr>
+                        <td style='background: #ffffff; padding: 0;'>
+
+                            <!-- Úspěšné potvrzení -->
+                            <div style='background: #d4edda; padding: 25px 40px; border-bottom: 1px solid #c3e6cb;'>
+                                <h2 style='margin: 0; font-size: 20px; font-weight: 600; color: #155724;'>Vaše objednávka byla úspěšně potvrzena</h2>
+                                <p style='margin: 8px 0 0 0; font-size: 14px; color: #155724;'>Děkujeme za Vaši důvěru. Níže naleznete shrnutí Vaší objednávky.</p>
+                            </div>
+
+                            <!-- Číslo objednávky -->
+                            <div style='padding: 25px 40px; border-bottom: 1px solid #e5e5e5;'>
+                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%'>
+                                    <tr>
+                                        <td>
+                                            <p style='margin: 0; font-size: 12px; color: #888; text-transform: uppercase;'>Číslo objednávky</p>
+                                            <p style='margin: 5px 0 0 0; font-size: 24px; font-weight: 700; color: #333;'>{$nabidkaCislo}</p>
+                                        </td>
+                                        <td style='text-align: right;'>
+                                            <p style='margin: 0; font-size: 12px; color: #888;'>Potvrzeno:</p>
+                                            <p style='margin: 5px 0 0 0; font-size: 14px; color: #333;'>{$potvrzenoAt}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Údaje zákazníka -->
+                            <div style='padding: 25px 40px; border-bottom: 1px solid #e5e5e5;'>
+                                <p style='margin: 0; font-size: 12px; color: #888; text-transform: uppercase;'>Zákazník</p>
+                                <p style='margin: 8px 0 0 0; font-size: 15px; font-weight: 600; color: #333;'>{$nabidka['zakaznik_jmeno']}</p>
+                                <p style='margin: 4px 0 0 0; font-size: 13px; color: #666;'>{$nabidka['zakaznik_email']}</p>
+                            </div>
+
+                            <!-- Tabulka položek -->
+                            <div style='padding: 25px 40px;'>
+                                <p style='margin: 0 0 15px 0; font-size: 12px; color: #888; text-transform: uppercase;'>Objednané služby</p>
+                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;'>
+                                    <thead>
+                                        <tr style='background: #f8f9fa;'>
+                                            <th style='padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 2px solid #e5e5e5;'>Služba</th>
+                                            <th style='padding: 12px 14px; text-align: center; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 2px solid #e5e5e5;'>Ks</th>
+                                            <th style='padding: 12px 14px; text-align: right; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 2px solid #e5e5e5;'>Cena</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {$polozkyHtml}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style='background: #1a1a1a;'>
+                                            <td colspan='2' style='padding: 15px 14px; text-align: right; font-size: 14px; font-weight: 600; color: #fff;'>Celková cena (bez DPH):</td>
+                                            <td style='padding: 15px 14px; text-align: right; font-size: 18px; font-weight: 700; color: #39ff14;'>{$celkovaCena} {$nabidka['mena']}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- Technické údaje potvrzení -->
+                            <div style='padding: 20px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                                <p style='margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase;'>Technické údaje potvrzení</p>
+                                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='font-size: 12px; color: #666;'>
+                                    <tr>
+                                        <td style='padding: 4px 0;'><strong>Datum a čas:</strong></td>
+                                        <td style='padding: 4px 0; text-align: right;'>{$potvrzenoAt}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 4px 0;'><strong>IP adresa:</strong></td>
+                                        <td style='padding: 4px 0; text-align: right;'>{$potvrzenoIp}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 4px 0;'><strong>Email:</strong></td>
+                                        <td style='padding: 4px 0; text-align: right;'>{$nabidka['zakaznik_email']}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Tlačítko pro stažení PDF -->
+                            <div style='padding: 25px 40px; text-align: center;'>
+                                <p style='margin: 0 0 15px 0; font-size: 14px; color: #555;'>
+                                    PDF potvrzení si můžete stáhnout na stránce objednávky:
+                                </p>
+                                <a href='{$potvrzeniUrl}' style='display: inline-block; background: #333; color: #fff; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;'>
+                                    Zobrazit objednávku a stáhnout PDF
+                                </a>
+                            </div>
+
+                            <!-- Právní upozornění -->
+                            <div style='padding: 20px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                                <p style='margin: 0; font-size: 12px; color: #666; line-height: 1.6;'>
+                                    Tímto potvrzením jste uzavřeli závaznou smlouvu o dílo dle § 2586 občanského zákoníku
+                                    s White Glove Service, s.r.o. Ceny jsou uvedeny bez DPH.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
+                            <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>
+                                Tel: <a href='tel:+420725965826' style='color: #888; text-decoration: none;'>+420 725 965 826</a> |
+                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #888; text-decoration: none;'>reklamace@wgs-service.cz</a>
+                            </p>
+                            <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
+                                <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>";
 }

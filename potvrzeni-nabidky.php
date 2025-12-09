@@ -287,12 +287,70 @@ if (empty($token)) {
                 <p><?php echo htmlspecialchars($chyba); ?></p>
             </div>
         <?php elseif ($potvrzeno): ?>
-            <div class="uspech-card">
-                <h2>Nabídka byla potvrzena</h2>
-                <p>Děkujeme za potvrzení nabídky. Budeme Vás brzy kontaktovat ohledně realizace.</p>
-                <p style="margin-top: 15px; font-size: 0.85rem;">
-                    Datum potvrzení: <?php echo date('d.m.Y H:i', strtotime($nabidka['potvrzeno_at'])); ?>
-                </p>
+            <div class="uspech-card" style="margin-bottom: 20px;">
+                <h2>Objednávka byla potvrzena</h2>
+                <p>Děkujeme za Vaši objednávku. Budeme Vás brzy kontaktovat ohledně realizace.</p>
+            </div>
+
+            <!-- Shrnutí potvrzené objednávky -->
+            <div class="card" id="potvrzeni-obsah">
+                <h2>Potvrzení objednávky č. <?php echo str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT); ?></h2>
+
+                <div class="info-row">
+                    <span class="info-label">Zákazník:</span>
+                    <span class="info-value"><?php echo htmlspecialchars($nabidka['zakaznik_jmeno']); ?></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value"><?php echo htmlspecialchars($nabidka['zakaznik_email']); ?></span>
+                </div>
+
+                <table class="polozky-tabulka" style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Služba</th>
+                            <th>Počet</th>
+                            <th>Cena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($nabidka['polozky'] as $polozka): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($polozka['nazev']); ?></td>
+                            <td><?php echo intval($polozka['pocet']); ?>x</td>
+                            <td><?php echo number_format(floatval($polozka['cena']) * intval($polozka['pocet']), 2, ',', ' '); ?> <?php echo $nabidka['mena']; ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <tr class="celkova-cena-row">
+                            <td colspan="2">Celkem (bez DPH):</td>
+                            <td><?php echo number_format(floatval($nabidka['celkova_cena']), 2, ',', ' '); ?> <?php echo $nabidka['mena']; ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Technické údaje potvrzení -->
+                <div style="margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Technické údaje potvrzení</h3>
+                    <div class="info-row">
+                        <span class="info-label">Datum a čas:</span>
+                        <span class="info-value"><?php echo date('d.m.Y H:i:s', strtotime($nabidka['potvrzeno_at'])); ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">IP adresa:</span>
+                        <span class="info-value"><?php echo htmlspecialchars($nabidka['potvrzeno_ip'] ?? 'N/A'); ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email potvrzení:</span>
+                        <span class="info-value"><?php echo htmlspecialchars($nabidka['zakaznik_email']); ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tlačítko pro stažení PDF -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" id="btn-stahnout-pdf" style="background: #333; color: #fff; border: none; padding: 15px 40px; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; font-family: inherit;">
+                    Stáhnout PDF potvrzení
+                </button>
             </div>
         <?php else: ?>
             <div class="card">
@@ -384,6 +442,10 @@ if (empty($token)) {
         </p>
     </div>
 
+    <!-- PDF knihovny -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <script>
     (function() {
         'use strict';
@@ -392,58 +454,212 @@ if (empty($token)) {
         const modalOverlay = document.getElementById('modal-overlay');
         const btnZrusit = document.getElementById('btn-zrusit');
         const btnSouhlasim = document.getElementById('btn-souhlasim');
+        const btnStahnoutPdf = document.getElementById('btn-stahnout-pdf');
 
-        if (!btnPotvrdit) return;
+        // MODAL PRO POTVRZENÍ
+        if (btnPotvrdit) {
+            btnPotvrdit.addEventListener('click', () => {
+                modalOverlay.classList.add('active');
+            });
 
-        // Otevřít modal
-        btnPotvrdit.addEventListener('click', () => {
-            modalOverlay.classList.add('active');
-        });
-
-        // Zavřít modal
-        btnZrusit.addEventListener('click', () => {
-            modalOverlay.classList.remove('active');
-        });
-
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
+            btnZrusit.addEventListener('click', () => {
                 modalOverlay.classList.remove('active');
-            }
-        });
+            });
 
-        // Potvrdit nabídku
-        btnSouhlasim.addEventListener('click', async () => {
-            btnSouhlasim.disabled = true;
-            btnSouhlasim.textContent = 'Odesílám...';
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.classList.remove('active');
+                }
+            });
 
-            try {
-                const token = '<?php echo htmlspecialchars($token); ?>';
-                const formData = new FormData();
-                formData.append('action', 'potvrdit');
-                formData.append('token', token);
+            btnSouhlasim.addEventListener('click', async () => {
+                btnSouhlasim.disabled = true;
+                btnSouhlasim.textContent = 'Odesílám...';
 
-                const response = await fetch('/api/nabidka_api.php', {
-                    method: 'POST',
-                    body: formData
-                });
+                try {
+                    const token = '<?php echo htmlspecialchars($token); ?>';
+                    const formData = new FormData();
+                    formData.append('action', 'potvrdit');
+                    formData.append('token', token);
 
-                const data = await response.json();
+                    const response = await fetch('/api/nabidka_api.php', {
+                        method: 'POST',
+                        body: formData
+                    });
 
-                if (data.status === 'success') {
-                    // Přesměrovat na úspěšnou stránku (reload)
-                    window.location.reload();
-                } else {
-                    alert('Chyba: ' + data.message);
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    } else {
+                        alert('Chyba: ' + data.message);
+                        btnSouhlasim.disabled = false;
+                        btnSouhlasim.textContent = 'Souhlasím a objednávám';
+                    }
+                } catch (e) {
+                    console.error('Chyba:', e);
+                    alert('Chyba při potvrzování nabídky');
                     btnSouhlasim.disabled = false;
                     btnSouhlasim.textContent = 'Souhlasím a objednávám';
                 }
-            } catch (e) {
-                console.error('Chyba:', e);
-                alert('Chyba při potvrzování nabídky');
-                btnSouhlasim.disabled = false;
-                btnSouhlasim.textContent = 'Souhlasím a objednávám';
+            });
+        }
+
+        // STAŽENÍ PDF POTVRZENÍ
+        if (btnStahnoutPdf) {
+            btnStahnoutPdf.addEventListener('click', async () => {
+                btnStahnoutPdf.disabled = true;
+                btnStahnoutPdf.textContent = 'Generuji PDF...';
+
+                try {
+                    await generujPdfPotvrzeni();
+                } catch (e) {
+                    console.error('Chyba při generování PDF:', e);
+                    alert('Chyba při generování PDF');
+                }
+
+                btnStahnoutPdf.disabled = false;
+                btnStahnoutPdf.textContent = 'Stáhnout PDF potvrzení';
+            });
+        }
+
+        async function generujPdfPotvrzeni() {
+            // Získat data z PHP
+            const nabidkaData = <?php echo json_encode([
+                'id' => $nabidka['id'] ?? 0,
+                'zakaznik_jmeno' => $nabidka['zakaznik_jmeno'] ?? '',
+                'zakaznik_email' => $nabidka['zakaznik_email'] ?? '',
+                'zakaznik_telefon' => $nabidka['zakaznik_telefon'] ?? '',
+                'polozky' => $nabidka['polozky'] ?? [],
+                'celkova_cena' => $nabidka['celkova_cena'] ?? 0,
+                'mena' => $nabidka['mena'] ?? 'EUR',
+                'potvrzeno_at' => $nabidka['potvrzeno_at'] ?? '',
+                'potvrzeno_ip' => $nabidka['potvrzeno_ip'] ?? ''
+            ], JSON_UNESCAPED_UNICODE); ?>;
+
+            const nabidkaCislo = String(nabidkaData.id).padStart(6, '0');
+            const potvrzenoAt = nabidkaData.potvrzeno_at ? new Date(nabidkaData.potvrzeno_at).toLocaleString('cs-CZ') : '';
+
+            // Sestavit HTML pro položky
+            let polozkyHtml = '';
+            nabidkaData.polozky.forEach(p => {
+                const celkem = (parseFloat(p.cena) * parseInt(p.pocet)).toFixed(2);
+                polozkyHtml += `<tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${p.nazev}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${p.pocet}x</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">${celkem} ${nabidkaData.mena}</td>
+                </tr>`;
+            });
+
+            // Vytvořit HTML pro PDF
+            const pdfContent = document.createElement('div');
+            pdfContent.style.cssText = 'width: 794px; padding: 40px; background: white; font-family: Arial, sans-serif; position: fixed; left: -9999px; top: 0;';
+            pdfContent.innerHTML = `
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1a1a1a; padding-bottom: 20px;">
+                    <h1 style="font-size: 28px; color: #1a1a1a; margin: 0;">WHITE GLOVE SERVICE</h1>
+                    <p style="color: #666; margin: 10px 0 0 0; font-size: 16px; font-weight: bold;">POTVRZENÍ OBJEDNÁVKY</p>
+                    <p style="color: #888; margin: 5px 0 0 0; font-size: 14px;">č. ${nabidkaCislo}</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                    <div>
+                        <p style="margin: 0; font-size: 12px; color: #888; text-transform: uppercase;">Zákazník</p>
+                        <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: bold;">${nabidkaData.zakaznik_jmeno}</p>
+                        <p style="margin: 4px 0 0 0; font-size: 14px; color: #666;">${nabidkaData.zakaznik_email}</p>
+                        ${nabidkaData.zakaznik_telefon ? `<p style="margin: 4px 0 0 0; font-size: 14px; color: #666;">${nabidkaData.zakaznik_telefon}</p>` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; font-size: 12px; color: #888; text-transform: uppercase;">Potvrzeno</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px; color: #28a745; font-weight: bold;">${potvrzenoAt}</p>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; font-size: 12px; text-transform: uppercase; color: #666;">Služba</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd; font-size: 12px; text-transform: uppercase; color: #666;">Počet</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd; font-size: 12px; text-transform: uppercase; color: #666;">Cena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${polozkyHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #1a1a1a;">
+                            <td colspan="2" style="padding: 15px; text-align: right; font-weight: bold; color: #fff;">Celková cena (bez DPH):</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #39ff14;">${parseFloat(nabidkaData.celkova_cena).toFixed(2)} ${nabidkaData.mena}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 30px 0;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #666; text-transform: uppercase;">Technické údaje potvrzení</h3>
+                    <table style="width: 100%; font-size: 13px; color: #555;">
+                        <tr>
+                            <td style="padding: 5px 0;"><strong>Datum a čas potvrzení:</strong></td>
+                            <td style="padding: 5px 0; text-align: right;">${potvrzenoAt}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0;"><strong>IP adresa:</strong></td>
+                            <td style="padding: 5px 0; text-align: right;">${nabidkaData.potvrzeno_ip || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0;"><strong>Email potvrzení:</strong></td>
+                            <td style="padding: 5px 0; text-align: right;">${nabidkaData.zakaznik_email}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; font-size: 13px; color: #155724;">
+                        <strong>Tímto potvrzením byla uzavřena závazná smlouva o dílo</strong> dle § 2586 občanského zákoníku
+                        s White Glove Service, s.r.o. Ceny jsou uvedeny bez DPH.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
+                    <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong></p>
+                    <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11 | Tel: +420 725 965 826</p>
+                    <p style="margin: 5px 0;">www.wgs-service.cz | reklamace@wgs-service.cz</p>
+                </div>
+            `;
+
+            document.body.appendChild(pdfContent);
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            try {
+                const canvas = await html2canvas(pdfContent, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 10;
+                const availableWidth = pageWidth - (margin * 2);
+                const canvasRatio = canvas.height / canvas.width;
+                const imgWidth = availableWidth;
+                const imgHeight = imgWidth * canvasRatio;
+
+                doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, Math.min(imgHeight, pageHeight - margin * 2));
+
+                document.body.removeChild(pdfContent);
+
+                const nazevSouboru = `potvrzeni_objednavky_${nabidkaCislo}.pdf`;
+                doc.save(nazevSouboru);
+            } catch (error) {
+                console.error('Chyba při generování PDF:', error);
+                document.body.removeChild(pdfContent);
+                throw error;
             }
-        });
+        }
     })();
     </script>
 </body>
