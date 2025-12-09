@@ -63,6 +63,16 @@ logMessage("======================================");
 
 // Načíst potřebné soubory
 require_once __DIR__ . '/../init.php';
+
+// Načíst PHPMailer autoloader
+$autoloadPath = __DIR__ . '/../lib/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+    logMessage("PHPMailer autoloader načten");
+} else {
+    logMessage("VAROVÁNÍ: PHPMailer autoloader nenalezen - použije se fallback");
+}
+
 require_once __DIR__ . '/../includes/EmailQueue.php';
 
 try {
