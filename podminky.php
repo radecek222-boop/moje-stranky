@@ -207,7 +207,7 @@
         <p>
           Aktuální ceník servisních služeb je dostupný na stránce
           <a href="cenik.php" class="podminky-link">Ceník</a>.
-          Ceny jsou uvedeny včetně DPH, není-li uvedeno jinak.
+          Ceny jsou uvedeny bez DPH.
         </p>
 
         <h3>3.2 Záruční opravy</h3>
