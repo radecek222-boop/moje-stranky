@@ -527,7 +527,7 @@ if ($initialBootstrapData) {
 <!-- Mapa pro autocomplete adres v kalkulačce -->
 <script src="assets/js/wgs-map.min.js" defer></script>
 <!-- Kalkulačka integrace -->
-<script src="assets/js/cenik-calculator.min.js" defer></script>
+<script src="assets/js/cenik-calculator.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/protokol-calculator-integration.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
