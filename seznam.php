@@ -1139,8 +1139,13 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   box-shadow: 0 0 12px rgba(255, 152, 0, 0.5) !important;
 }
 
-/* Text "Poslána CN" v kartě */
+/* Text "Poslána CN" v kartě - šedé pole s černým ohraničením */
 .order-cn-text {
+  display: inline-block;
+  background: #333 !important;
+  border: 1px solid #000 !important;
+  border-radius: 4px;
+  padding: 2px 8px;
   color: #ff9800 !important;
   font-weight: 600 !important;
   font-size: 0.75rem !important;
