@@ -158,10 +158,26 @@
     // INIT KALKULAČKY
     // ========================================
     window.addEventListener('DOMContentLoaded', () => {
-        initKalkulacka();
+        // Inicializovat pouze pokud kalkulačka existuje v DOM (stránka cenik.php)
+        // Na protokol.php se kalkulačka načítá dynamicky, initKalkulacka se volá z protokol-calculator-integration.js
+        if (document.getElementById('kalkulacka')) {
+            console.log('[Kalkulačka] DOMContentLoaded - kalkulačka nalezena, inicializuji');
+            initKalkulacka();
+        } else {
+            console.log('[Kalkulačka] DOMContentLoaded - kalkulačka nenalezena (pravděpodobně protokol.php), čekám na dynamické načtení');
+        }
     });
 
     function initKalkulacka() {
+        console.log('[Kalkulačka] initKalkulacka voláno');
+
+        // Zkontrolovat že kalkulačka existuje
+        const kalkulackaElement = document.getElementById('kalkulacka');
+        if (!kalkulackaElement) {
+            console.error('[Kalkulačka] Element #kalkulacka nenalezen!');
+            return;
+        }
+
         // Resetovat stav při každé inicializaci (důležité pro protokol modal)
         resetovatStav();
         initAddressAutocomplete();
@@ -171,11 +187,17 @@
 
         // Ověřit že všechny kroky existují
         const kroky = ['step-address', 'step-service-type', 'step-upholstery', 'step-mechanics', 'step-extras', 'step-summary'];
+        let vsechnyKrokyExistuji = true;
         kroky.forEach(krokId => {
             if (!document.getElementById(krokId)) {
                 console.warn('[Kalkulačka] Chybí krok:', krokId);
+                vsechnyKrokyExistuji = false;
             }
         });
+
+        if (vsechnyKrokyExistuji) {
+            console.log('[Kalkulačka] Všechny kroky nalezeny, kalkulačka připravena');
+        }
     }
 
     /**
