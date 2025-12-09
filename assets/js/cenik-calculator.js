@@ -349,6 +349,8 @@
     // WIZARD NAVIGACE
     // ========================================
     window.nextStep = function() {
+        console.log('[Kalkulačka] nextStep voláno, aktuální krok:', stav.krok, 'typServisu:', stav.typServisu);
+
         // Validace před pokračováním
         if (stav.krok === 1 && !stav.adresa) {
             // Zkontrolovat jestli je zaškrtnutý checkbox "reklamace bez dopravy"
@@ -410,10 +412,14 @@
         }
 
         // Zobrazit další krok
+        console.log('[Kalkulačka] Přechod na krok:', stav.krok, '→', nextStepId);
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
             nextStep.classList.remove('hidden');
             nextStep.style.display = 'flex';
+            console.log('[Kalkulačka] Krok', nextStepId, 'zobrazen');
+        } else {
+            console.error('[Kalkulačka] Krok', nextStepId, 'NENALEZEN!');
         }
 
         aktualizovatProgress();
