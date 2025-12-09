@@ -94,7 +94,9 @@
     // Export pro globální použití
     window.protokolKalkulacka = {
         zavritModal: zavritModal,
-        zapocitatDoProtokolu: zapocitatDoProtokolu
+        zapocitatDoProtokolu: zapocitatDoProtokolu,
+        // Alias pro kompatibilitu s cenik-calculator.js
+        zpracovatVysledek: zapocitatDoProtokolu
     };
 
     // Registrace akcí pro data-action atributy
