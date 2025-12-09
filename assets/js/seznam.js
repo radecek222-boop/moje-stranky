@@ -480,7 +480,7 @@ async function renderOrders(items = null) {
   // Načíst unread counts pro všechny reklamace najednou
   let unreadCountsMap = {};
   try {
-    const response = await fetch('api/notes_api.php?action=get_unread_counts');
+    const response = await fetch('/api/notes_api.php?action=get_unread_counts');
     const data = await response.json();
     if (data.status === 'success') {
       unreadCountsMap = data.unread_counts || {};
@@ -492,7 +492,7 @@ async function renderOrders(items = null) {
   // Načíst emaily zákazníků s cenovou nabídkou (CN)
   let emailySCN = [];
   try {
-    const cnResponse = await fetch('api/nabidka_api.php?action=emaily_s_nabidkou');
+    const cnResponse = await fetch('/api/nabidka_api.php?action=emaily_s_nabidkou');
     const cnData = await cnResponse.json();
     console.log('[CN DEBUG] API odpověď:', cnData);
     if (cnData.status === 'success') {
