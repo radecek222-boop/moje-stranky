@@ -46,23 +46,33 @@ try {
         // VYTVORIT - Nová nabídka (admin only)
         // ========================================
         case 'vytvorit':
+            error_log("nabidka_api vytvorit: Začátek zpracování");
+
             if (!$isAdmin) {
+                error_log("nabidka_api vytvorit: Přístup odepřen - není admin");
                 sendJsonError('Přístup odepřen', 403);
             }
 
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                error_log("nabidka_api vytvorit: Neplatný CSRF token");
                 sendJsonError('Neplatný CSRF token', 403);
             }
 
             $povinne = ['zakaznik_jmeno', 'zakaznik_email', 'polozky'];
             foreach ($povinne as $pole) {
                 if (empty($_POST[$pole])) {
+                    error_log("nabidka_api vytvorit: Chybí pole {$pole}");
                     sendJsonError("Chybí povinné pole: {$pole}");
                 }
             }
 
             $polozky = json_decode($_POST['polozky'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("nabidka_api vytvorit: JSON error: " . json_last_error_msg());
+                sendJsonError('Chyba při parsování položek: ' . json_last_error_msg());
+            }
             if (!is_array($polozky) || empty($polozky)) {
+                error_log("nabidka_api vytvorit: Prázdné nebo neplatné položky");
                 sendJsonError('Musíte vybrat alespoň jednu položku');
             }
 
@@ -80,6 +90,21 @@ try {
 
             // Generovat unikátní číslo nabídky: CN-RRRR-DD-M-XX
             $cisloNabidky = generujCisloNabidky($pdo);
+            error_log("nabidka_api vytvorit: Vygenerováno číslo {$cisloNabidky}");
+
+            // Zkontrolovat strukturu tabulky
+            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'cislo_nabidky'");
+            $maSloupec = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$maSloupec) {
+                error_log("nabidka_api vytvorit: CHYBA - sloupec cislo_nabidky neexistuje!");
+                // Zkusit přidat sloupec
+                try {
+                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN cislo_nabidky VARCHAR(30) NULL UNIQUE AFTER id");
+                    error_log("nabidka_api vytvorit: Sloupec cislo_nabidky byl přidán");
+                } catch (PDOException $e) {
+                    error_log("nabidka_api vytvorit: Nepodařilo se přidat sloupec: " . $e->getMessage());
+                }
+            }
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_nabidky (
@@ -88,6 +113,8 @@ try {
                     poznamka, vytvoril_user_id
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
+
+            error_log("nabidka_api vytvorit: Provádím INSERT");
 
             $stmt->execute([
                 $cisloNabidky,
@@ -105,6 +132,7 @@ try {
             ]);
 
             $nabidkaId = $pdo->lastInsertId();
+            error_log("nabidka_api vytvorit: Úspěch, ID={$nabidkaId}, číslo={$cisloNabidky}");
 
             sendJsonSuccess('Nabídka vytvořena', [
                 'nabidka_id' => $nabidkaId,
@@ -345,9 +373,22 @@ try {
             sendJsonError('Neznámá akce: ' . $action);
     }
 
+} catch (PDOException $e) {
+    $errorMsg = $e->getMessage();
+    error_log("Nabídka API PDO error: " . $errorMsg . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
+
+    // Pokud je to UNIQUE constraint violation, poskytnout lepší zprávu
+    if (strpos($errorMsg, 'Duplicate entry') !== false && strpos($errorMsg, 'cislo_nabidky') !== false) {
+        sendJsonError('Konflikt při generování čísla nabídky. Zkuste znovu.', 409);
+    } else {
+        // V debug módu vrátit detaily
+        $debugMode = getenv('APP_DEBUG') === 'true';
+        sendJsonError('Chyba databáze', 500, $debugMode ? $errorMsg : null);
+    }
 } catch (Exception $e) {
-    error_log("Nabídka API error: " . $e->getMessage());
-    sendJsonError('Chyba serveru');
+    error_log("Nabídka API error: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
+    $debugMode = getenv('APP_DEBUG') === 'true';
+    sendJsonError('Chyba serveru', 500, $debugMode ? $e->getMessage() : null);
 }
 
 /**
@@ -385,49 +426,76 @@ function vytvorTabulkuNabidky($pdo) {
     ");
 
     // Přidat chybějící sloupce (pro existující tabulky)
-    $sloupce = ['zaloha_prijata_at', 'hotovo_at', 'uhrazeno_at', 'cislo_nabidky'];
-    foreach ($sloupce as $sloupec) {
+    $sloupce = [
+        'zaloha_prijata_at' => 'DATETIME NULL',
+        'hotovo_at' => 'DATETIME NULL',
+        'uhrazeno_at' => 'DATETIME NULL',
+        'cislo_nabidky' => 'VARCHAR(30) NULL UNIQUE AFTER id'
+    ];
+
+    foreach ($sloupce as $sloupec => $definice) {
         try {
             $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE '{$sloupec}'");
             if (!$stmt->fetch()) {
-                if ($sloupec === 'cislo_nabidky') {
-                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN cislo_nabidky VARCHAR(30) NULL UNIQUE AFTER id");
-                } else {
-                    $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} DATETIME NULL");
-                }
+                $sql = "ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} {$definice}";
+                $pdo->exec($sql);
+                error_log("nabidka_api: Přidán sloupec {$sloupec} do wgs_nabidky");
             }
         } catch (PDOException $e) {
-            // Sloupec už existuje nebo jiná chyba - ignorovat
+            error_log("nabidka_api: Chyba při přidávání sloupce {$sloupec}: " . $e->getMessage());
         }
+    }
+
+    // Přidat index na cislo_nabidky pokud neexistuje
+    try {
+        $stmt = $pdo->query("SHOW INDEX FROM wgs_nabidky WHERE Key_name = 'idx_cislo'");
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE wgs_nabidky ADD INDEX idx_cislo (cislo_nabidky)");
+            error_log("nabidka_api: Přidán index idx_cislo na wgs_nabidky");
+        }
+    } catch (PDOException $e) {
+        // Index už existuje - OK
     }
 }
 
 /**
  * Generuje unikátní číslo nabídky ve formátu CN-RRRR-DD-M-XX
  * Příklad: CN-2026-23-1-01 (první nabídka 23. ledna 2026)
+ *
+ * Používá MAX(cislo_nabidky) pro bezpečnější generování při race conditions
  */
 function generujCisloNabidky($pdo) {
     $rok = date('Y');
     $den = date('j');    // Den bez úvodní nuly (1-31)
     $mesic = date('n');  // Měsíc bez úvodní nuly (1-12)
 
-    // Zjistit kolik nabídek již dnes existuje
-    $dnesZacatek = date('Y-m-d 00:00:00');
-    $dnesKonec = date('Y-m-d 23:59:59');
+    // Prefix pro dnešní den
+    $prefix = "CN-{$rok}-{$den}-{$mesic}-";
 
+    // Najít nejvyšší číslo nabídky s tímto prefixem
     $stmt = $pdo->prepare("
-        SELECT COUNT(*) as pocet
+        SELECT cislo_nabidky
         FROM wgs_nabidky
-        WHERE vytvoreno_at BETWEEN ? AND ?
+        WHERE cislo_nabidky LIKE ?
+        ORDER BY cislo_nabidky DESC
+        LIMIT 1
     ");
-    $stmt->execute([$dnesZacatek, $dnesKonec]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute([$prefix . '%']);
+    $posledni = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $poradiDnes = intval($result['pocet']) + 1;
+    if ($posledni && !empty($posledni['cislo_nabidky'])) {
+        // Extrahovat poslední 2 číslice
+        $cislo = $posledni['cislo_nabidky'];
+        $posledniCislo = intval(substr($cislo, -2));
+        $poradiDnes = $posledniCislo + 1;
+    } else {
+        $poradiDnes = 1;
+    }
+
     $poradiFormatovane = str_pad($poradiDnes, 2, '0', STR_PAD_LEFT);
 
     // Formát: CN-RRRR-DD-M-XX
-    return "CN-{$rok}-{$den}-{$mesic}-{$poradiFormatovane}";
+    return $prefix . $poradiFormatovane;
 }
 
 /**
@@ -437,6 +505,28 @@ function vygenerujEmailNabidky($nabidka) {
     $polozky = json_decode($nabidka['polozky_json'], true);
     $baseUrl = 'https://www.wgs-service.cz';
     $potvrzeniUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']);
+
+    // Zjistit zda nabídka obsahuje náhradní díly
+    $obsahujeDily = false;
+    if (is_array($polozky)) {
+        foreach ($polozky as $p) {
+            $nazev = $p['nazev'] ?? '';
+            // Detekce náhradních dílů - prefix "Náhradní díl:" nebo skupina "dily"
+            if (stripos($nazev, 'Náhradní díl') !== false || ($p['skupina'] ?? '') === 'dily') {
+                $obsahujeDily = true;
+                break;
+            }
+        }
+    }
+
+    // Poznámka o zálohové faktuře - zobrazí se pouze pokud jsou náhradní díly
+    $poznamkaOZaloze = '';
+    if ($obsahujeDily) {
+        $poznamkaOZaloze = "<p style='margin: 12px 0 0 0; font-size: 12px; color: #d97706; line-height: 1.6;'>
+            <strong>Záloha na náhradní díly:</strong> Po odsouhlasení této nabídky Vám zašleme zálohovou fakturu na náhradní díly.
+            Po přijetí zálohy objednáme díly u výrobce.
+        </p>";
+    }
 
     // Sestavení tabulky položek
     $polozkyHtml = '';
@@ -589,8 +679,9 @@ function vygenerujEmailNabidky($nabidka) {
                                     a uzavíráte tím závaznou smlouvu o dílo dle § 2586 občanského zákoníku s White Glove Service, s.r.o.
                                     Podrobnosti naleznete v našich <a href='{$baseUrl}/podminky.php' style='color: #333;'>obchodních podmínkách</a>.
                                 </p>
+                                {$poznamkaOZaloze}
                                 <p style='margin: 12px 0 0 0; font-size: 12px; color: #888;'>
-                                    Ceny jsou uvedeny bez DPH. U náhradních dílů můžeme požadovat zálohu ve výši jejich ceny. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
+                                    Ceny jsou uvedeny bez DPH. Doba dodání originálních dílů z továrny Natuzzi je 4–8 týdnů.
                                 </p>
                             </div>
 
