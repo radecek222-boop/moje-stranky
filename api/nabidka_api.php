@@ -1071,6 +1071,16 @@ function vygenerujEmailPotvrzeniZalohy($nabidka) {
                                 </div>
                             </div>
 
+                            <!-- Informace o měně -->
+                            <div style='padding: 0 40px 20px 40px;'>
+                                <div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px;'>
+                                    <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.5;'>
+                                        <strong>Informace o měně:</strong> Ceny jsou uvedeny v EUR. Při platbě v CZK bude částka přepočtena
+                                        dle aktuálního kurzu ČNB platného v den vystavení faktury.
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Co bude následovat -->
                             <div style='padding: 0 40px 30px 40px;'>
                                 <h3 style='margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #333;'>Co bude následovat?</h3>
@@ -1196,6 +1206,16 @@ function vygenerujEmailPodekovaniZaUhradu($nabidka) {
                                             </td>
                                         </tr>
                                     </table>
+                                </div>
+                            </div>
+
+                            <!-- Informace o měně -->
+                            <div style='padding: 0 40px 20px 40px;'>
+                                <div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 14px 20px;'>
+                                    <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.5;'>
+                                        <strong>Informace o měně:</strong> Ceny jsou uvedeny v EUR. Při platbě v CZK byla částka přepočtena
+                                        dle aktuálního kurzu ČNB platného v den vystavení faktury.
+                                    </p>
                                 </div>
                             </div>
 
