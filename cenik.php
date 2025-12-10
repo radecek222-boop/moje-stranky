@@ -452,10 +452,10 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
     <!-- Info: Upravuješ v aktuálním jazyce stránky -->
     <div class="language-info">
-      <span data-lang-cs="Upravuješ 🇨🇿 českou verzi. Přepni jazyk stránky pro editaci jiných verzí."
-            data-lang-en="Editing 🇬🇧 English version. Switch page language to edit other versions."
-            data-lang-it="Modifichi 🇮🇹 versione italiana. Cambia lingua della pagina per modificare altre versioni.">
-        Upravuješ 🇨🇿 českou verzi. Přepni jazyk stránky pro editaci jiných verzí.
+      <span data-lang-cs="Upravuješ ČESKOU (CZ) verzi. Přepni jazyk stránky pro editaci jiných verzí."
+            data-lang-en="Editing ENGLISH (EN) version. Switch page language to edit other versions."
+            data-lang-it="Modifichi versione ITALIANA (IT). Cambia lingua della pagina per modificare altre versioni.">
+        Upravuješ ČESKOU (CZ) verzi. Přepni jazyk stránky pro editaci jiných verzí.
       </span>
     </div>
 

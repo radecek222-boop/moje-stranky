@@ -312,9 +312,9 @@ $csrfToken = generateCSRFToken();
       </div>
 
       <div class="language-tabs" role="tablist" aria-label="Jazykové verze obsahu">
-        <button type="button" class="tab-btn active" data-tab="cz" role="tab" id="tab-btn-cz" aria-selected="true" aria-controls="tab-cz">🇨🇿 Čeština</button>
-        <button type="button" class="tab-btn" data-tab="en" role="tab" id="tab-btn-en" aria-selected="false" aria-controls="tab-en">🇬🇧 English</button>
-        <button type="button" class="tab-btn" data-tab="it" role="tab" id="tab-btn-it" aria-selected="false" aria-controls="tab-it">🇮🇹 Italiano</button>
+        <button type="button" class="tab-btn active" data-tab="cz" role="tab" id="tab-btn-cz" aria-selected="true" aria-controls="tab-cz"><img src="/assets/img/flags/cz.svg" alt="CZ" width="20" height="13" style="vertical-align: middle; margin-right: 6px;">Čeština</button>
+        <button type="button" class="tab-btn" data-tab="en" role="tab" id="tab-btn-en" aria-selected="false" aria-controls="tab-en"><img src="/assets/img/flags/gb.svg" alt="EN" width="20" height="13" style="vertical-align: middle; margin-right: 6px;">English</button>
+        <button type="button" class="tab-btn" data-tab="it" role="tab" id="tab-btn-it" aria-selected="false" aria-controls="tab-it"><img src="/assets/img/flags/it.svg" alt="IT" width="20" height="13" style="vertical-align: middle; margin-right: 6px;">Italiano</button>
       </div>
 
       <!-- Česká verze -->

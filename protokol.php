@@ -46,9 +46,9 @@ function wgs_format_fakturace_label(?string $value): string
 
     switch ($code) {
         case 'CZ':
-            return '🇨🇿 Česká republika (CZ)';
+            return 'Česká republika (CZ)';
         case 'SK':
-            return '🇸🇰 Slovensko (SK)';
+            return 'Slovensko (SK)';
         default:
             return '';
     }
