@@ -254,7 +254,8 @@ function handleUpdate(PDO $pdo, array $input): array
 
     $markAsCompleted = isset($input['mark_as_completed']) && in_array(strtolower((string) $input['mark_as_completed']), ['1', 'true', 'yes'], true);
     if ($markAsCompleted && in_array('stav', $columns, true)) {
-        $updateData['stav'] = 'HOTOVO';
+        // BUGFIX: DB používá 'done' ne 'HOTOVO' - ENUM je anglicky
+        $updateData['stav'] = 'done';
         if (db_table_has_column($pdo, 'wgs_reklamace', 'completed_at')) {
             $updateData['completed_at'] = date('Y-m-d H:i:s');
         }
