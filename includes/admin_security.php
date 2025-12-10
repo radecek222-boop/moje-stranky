@@ -1768,8 +1768,8 @@ async function loadUzivateleProSecurity() {
                     '<span style="color: #999;">Nikdy</span>';
 
                 html += `
-                    <tr>
-                        <td>${user.id}</td>
+                    <tr style="cursor: pointer;" data-action="zobrazDetailUzivatele" data-id="${user.id}" title="Klikněte pro zobrazení detailu">
+                        <td>#${user.id}</td>
                         <td>${htmlEscape(user.name || 'N/A')}</td>
                         <td>${htmlEscape(user.email)}</td>
                         <td>${htmlEscape(user.role || 'N/A')}</td>
