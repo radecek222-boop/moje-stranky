@@ -98,8 +98,68 @@ try {
         echo "<div class='info'>Tabulka wgs_pageviews neexistuje - bude vytvořena automaticky při dalším pageview</div>";
     }
 
-    // 2. Kontrola wgs_supervisor_assignments
-    echo "<h2>2. Kontrola wgs_supervisor_assignments</h2>";
+    // 2. Kontrola wgs_system_config (NOVÁ - github webhooks)
+    echo "<h2>2. Kontrola wgs_system_config</h2>";
+
+    $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_system_config'");
+    $systemConfigExists = $stmt->rowCount() > 0;
+
+    if ($systemConfigExists) {
+        echo "<div class='success'>Tabulka wgs_system_config již existuje - OK</div>";
+
+        // Zobrazit počet záznamů
+        $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM wgs_system_config");
+        $cnt = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
+        echo "<div class='info'>Počet konfiguračních záznamů: {$cnt}</div>";
+    } else {
+        echo "<div class='warning'>Tabulka wgs_system_config neexistuje - způsobuje chyby v github webhooks</div>";
+
+        if (isset($_GET['execute']) && $_GET['execute'] === '1') {
+            try {
+                // Vytvořit tabulku
+                $pdo->exec("
+                    CREATE TABLE IF NOT EXISTS wgs_system_config (
+                        id INT PRIMARY KEY AUTO_INCREMENT,
+                        config_key VARCHAR(100) UNIQUE NOT NULL,
+                        config_value TEXT,
+                        config_group VARCHAR(50) DEFAULT 'general',
+                        is_sensitive BOOLEAN DEFAULT FALSE,
+                        requires_restart BOOLEAN DEFAULT FALSE,
+                        is_editable BOOLEAN DEFAULT TRUE,
+                        description TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                        updated_by INT DEFAULT NULL,
+                        INDEX idx_group (config_group)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                ");
+                echo "<div class='success'>Tabulka wgs_system_config vytvořena</div>";
+
+                // Vložit výchozí konfiguraci
+                $pdo->exec("
+                    INSERT INTO wgs_system_config (config_key, config_value, config_group, is_sensitive, requires_restart, description) VALUES
+                    ('smtp_host', '', 'email', TRUE, TRUE, 'SMTP server hostname'),
+                    ('smtp_port', '587', 'email', FALSE, TRUE, 'SMTP port (usually 587 or 465)'),
+                    ('smtp_username', '', 'email', TRUE, TRUE, 'SMTP authentication username'),
+                    ('smtp_from', 'reklamace@wgs-service.cz', 'email', FALSE, TRUE, 'Default FROM email address'),
+                    ('smtp_from_name', 'White Glove Service', 'email', FALSE, FALSE, 'FROM name for emails'),
+                    ('geoapify_api_key', '', 'api_keys', TRUE, FALSE, 'Geoapify API key for maps'),
+                    ('github_webhook_secret', '', 'api_keys', TRUE, FALSE, 'GitHub webhook secret for signature validation'),
+                    ('rate_limit_login', '5', 'security', FALSE, TRUE, 'Max login attempts per 15 minutes'),
+                    ('rate_limit_upload', '20', 'security', FALSE, TRUE, 'Max photo uploads per hour'),
+                    ('session_timeout', '86400', 'security', FALSE, TRUE, 'Session timeout in seconds (24 hours)'),
+                    ('maintenance_mode', '0', 'system', FALSE, FALSE, 'Enable maintenance mode (0=off, 1=on)')
+                    ON DUPLICATE KEY UPDATE config_value=VALUES(config_value)
+                ");
+                echo "<div class='success'>Výchozí konfigurace vložena (11 záznamů)</div>";
+
+            } catch (PDOException $e) {
+                echo "<div class='error'>Chyba: " . htmlspecialchars($e->getMessage()) . "</div>";
+            }
+        }
+    }
+
+    // 3. Kontrola wgs_supervisor_assignments
+    echo "<h2>3. Kontrola wgs_supervisor_assignments</h2>";
 
     $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_supervisor_assignments'");
     $supervisorExists = $stmt->rowCount() > 0;
@@ -141,8 +201,8 @@ try {
         }
     }
 
-    // 3. Shrnutí oprav v kódu
-    echo "<h2>3. Opravy v kódu (již provedeny)</h2>";
+    // 4. Shrnutí oprav v kódu
+    echo "<h2>4. Opravy v kódu (aplikují se po deployi)</h2>";
     echo "<table>";
     echo "<tr><th>Soubor</th><th>Problém</th><th>Oprava</th></tr>";
     echo "<tr><td><code>app/controllers/save.php</code></td><td>stav = 'HOTOVO' (Data truncated)</td><td>stav = 'done'</td></tr>";
@@ -150,6 +210,8 @@ try {
     echo "<tr><td><code>api/admin_api.php</code></td><td>r.prodejce neexistuje</td><td>COALESCE(u.name, 'Neznámý')</td></tr>";
     echo "<tr><td><code>api/track_pageview.php</code></td><td>user_id INT (CREATE TABLE)</td><td>user_id VARCHAR(50)</td></tr>";
     echo "</table>";
+
+    echo "<div class='warning'><strong>POZOR:</strong> Opravy kódu se aplikují až po deployi z větve <code>claude/fix-seller-visibility-016j3sJNjL5W2vQ56LTSfMHA</code></div>";
 
     // Tlačítko pro spuštění
     if (!isset($_GET['execute']) || $_GET['execute'] !== '1') {
