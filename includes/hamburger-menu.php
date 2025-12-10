@@ -47,9 +47,9 @@ if ($isAdmin) {
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
       </div>
     <?php
     elseif ($isLoggedIn):
@@ -74,9 +74,9 @@ if ($isAdmin) {
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
       </div>
     <?php
     else:
@@ -89,9 +89,9 @@ if ($isAdmin) {
       <a href="aktuality.php" <?php if($current == "aktuality.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="AKTUALITY" data-lang-en="NEWS" data-lang-it="NOTIZIE">AKTUALITY</a>
       <a href="login.php" <?php if($current == "login.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
       </div>
     <?php endif; ?>
   </nav>
@@ -257,12 +257,25 @@ if ($isAdmin) {
 
 .lang-flag {
   cursor: pointer;
-  font-size: 1.5rem;
   opacity: 0.6;
   transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lang-flag img {
+  width: 24px;
+  height: 16px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .lang-flag.active {
+  opacity: 1;
+}
+
+.lang-flag:hover {
   opacity: 1;
 }
 
@@ -340,7 +353,7 @@ if ($isAdmin) {
     gap: 1rem;
   }
 
-  .lang-flag { font-size: 1.3rem; }
+  .lang-flag img { width: 28px; height: 18px; }
   .hamburger-logo { font-size: 1.3rem; }
   .hamburger-logo span { font-size: 0.5rem; }
   body.hamburger-menu-open { overflow: hidden; }
