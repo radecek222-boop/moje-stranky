@@ -1,1 +1,1939 @@
-:root{--c-bg:#f5f5f5;--c-white:#ffffff;--c-black:#1a1a1a;--c-grey:#666666;--c-border:#e0e0e0}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Poppins';background:var(--c-bg);color:var(--c-black);padding:0;display:flex;flex-direction:column;min-height:100vh;font-size:13px}/* === ČERNÁ HORNÍ PANEL === */.top-bar{background:#000000;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:var(--z-topbar, 100);box-shadow:0 2px 10px rgba(0,0,0,0.1)}.logo{color:var(--c-white);font-family:'Poppins';font-size:1.8rem;font-weight:600;letter-spacing:0.1em;text-decoration:none}.logo span{font-size:0.9rem;display:block;font-weight:300;letter-spacing:0.2em;margin-top:-0.3rem}.nav{display:flex;gap:2.5rem;align-items:center}.nav a{color:var(--c-white);text-decoration:none;font-size:0.9rem;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;transition:opacity 0.3s ease}.nav a:hover{opacity:0.7}/* === HAMBURGER MENU === */.hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:8px}.hamburger span{width:25px;height:3px;background:var(--c-white);transition:all 0.3s}/* === WRAPPER === */.wrapper{width:100%;max-width:900px;background:var(--c-white);border:2px solid var(--c-black);padding:30px 35px;margin:20px auto}.header{text-align:center;margin-bottom:25px;padding-bottom:15px;border-bottom:3px solid var(--c-black)}.header div:first-child{font-family:'Poppins';font-size:28px;font-weight:700;letter-spacing:2px;margin-bottom:8px}.header div:last-child{font-family:'Poppins';font-size:10px;color:#333}/* === Rozbalovací sekce zákaznických dat (DESKTOP - skrytá) === */.customer-info-collapsible{/* Na desktopu je to normální sekce bez collapsingu */}.customer-info-header{/* Na desktopu skrytý - zobrazí se jen na mobilu */ display:none}.customer-info-content{/* Na desktopu vždy viditelný */ max-height:none;overflow:visible}.section-title{font-family:'Poppins';font-weight:700;font-size:10px;margin-top:13px;margin-bottom:5px;border-left:3px solid var(--c-black);padding:5px 7px;background:var(--c-bg);text-transform:uppercase;letter-spacing:0.1em}.en-label{font-size:0.7em;color:var(--c-grey);font-style:italic;display:block;margin-top:1px;line-height:1.2}table{width:100%;border-collapse:collapse;margin-bottom:8px}td{padding:2px 6px;vertical-align:top;border-bottom:1px solid var(--c-border)}.label{font-family:'Poppins';font-weight:600;width:35%;font-size:11px;line-height:1.3}input, select, textarea{width:100%;padding:4px 8px;border:1px solid #999;border-radius:0;background:var(--c-white);color:var(--c-black);font-family:'Poppins';font-size:12px;line-height:1.4}/* Explicitní nastavení pro všechny typy inputů */input[type="text"],input[type="email"],input[type="tel"],input[type="number"],input[type="date"],select,textarea{padding:4px 8px;font-size:12px}/* Sjednocení placeholderů */input::placeholder,select::placeholder,textarea::placeholder{font-family:'Poppins';font-size:12px;color:#999;opacity:1}input::-webkit-input-placeholder,select::-webkit-input-placeholder,textarea::-webkit-input-placeholder{font-family:'Poppins';font-size:12px;color:#999}input::-moz-placeholder,select::-moz-placeholder,textarea::-moz-placeholder{font-family:'Poppins';font-size:12px;color:#999}input:-ms-input-placeholder,select:-ms-input-placeholder,textarea:-ms-input-placeholder{font-family:'Poppins';font-size:12px;color:#999}input:focus, select:focus, textarea:focus{outline:none;border-color:var(--c-black);border-width:2px;box-shadow:0 0 0 2px rgba(0, 0, 0, 0.1)}textarea{min-height:80px;resize:vertical}input[readonly], textarea[readonly]{background:var(--c-bg);color:var(--c-grey);border-style:dashed}.two-col-table{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px}.col{flex:1;min-width:300px}.split-section{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;position:relative}.translate-btn{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#000;color:#fff;border:none;border-radius:50%;width:44px;height:44px;min-width:44px;min-height:44px;font-size:18px;cursor:pointer;z-index:var(--z-sticky, 10);box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;touch-action:manipulation}.translate-btn:hover{transform:translate(-50%, -50%) scale(1.1);background:#333}.translate-btn:active{transform:translate(-50%, -50%) scale(0.95)}.translate-btn.loading{animation:spin 1s linear infinite}@keyframes spin{from{transform:translate(-50%, -50%) rotate(0deg)}to{transform:translate(-50%, -50%) rotate(360deg)}}@keyframes spinLoader{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}#signature-pad{border:2px solid #000;width:100%;height:180px;background:#fff;touch-action:none;cursor:crosshair;margin-top:10px}.signature-actions{display:flex;justify-content:space-between;align-items:center;margin:8px 0 15px}.signature-label{color:#666;font-size:0.9em;font-style:italic;margin:0}.btns{margin-top:25px;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:20px;border-top:2px solid #e0e0e0}button.btn{border:2px solid #000;border-radius:6px;padding:12px 24px;color:#000;font-weight:700;cursor:pointer;background:#fff;transition:all 0.2s;text-transform:uppercase;font-size:12px;font-family:inherit;text-align:center}button.btn:hover{background:#000;color:#fff}.btn-primary{background:#000;color:#fff}.btn-clear{background:#e5e5e5;color:#444;border:1px solid #999;padding:4px 10px;font-size:0.75em;cursor:pointer;border-radius:4px;transition:all 0.2s;white-space:nowrap}.btn-clear:hover{background:#d5d5d5;color:#333}.notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid #000;color:#000;padding:12px 24px;border-radius:6px;font-weight:600;opacity:0;transition:opacity 0.3s;z-index:var(--z-toast, 1500);box-shadow:0 4px 12px rgba(0,0,0,0.2)}.notif.show{opacity:1;transform:translate(-50%, 10px)}.notif.success{background:#000;color:#fff}.notif.error{border-color:#666;color:#333}.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:var(--z-top-layer, 10003)}.loading-overlay.show{display:flex;animation:fadeIn 0.2s ease-in}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.loading-spinner{border:6px solid #f3f3f3;border-top:6px solid #333333;border-radius:50%;width:70px;height:70px;animation:spinLoader 0.8s linear infinite}.loading-text{color:#fff;font-size:20px;font-weight:700;margin-top:25px;text-align:center;background:rgba(51, 51, 51, 0.9);padding:15px 30px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-family:'Poppins', sans-serif}#photoPreviewContainer{margin-top:25px;padding-top:20px;border-top:2px solid #e0e0e0}#photoPreviewContainer h3{font-size:16px;font-weight:700;color:#000;margin-bottom:15px}#photoGrid{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:12px}#photoGrid img{width:100%;height:120px;object-fit:cover;border:2px solid #000;cursor:pointer}/* === PDF PREVIEW MODAL === */.pdf-preview-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0, 0, 0, 0.9);display:none;z-index:var(--z-menu-overlay, 9999);animation:fadeIn 0.3s ease}.pdf-preview-overlay.active{display:flex;align-items:center;justify-content:center}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.pdf-preview-container{width:95%;height:95%;max-width:1200px;max-height:90vh;background:white;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0, 0, 0, 0.3)}.pdf-preview-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#000;color:white;border-bottom:2px solid #333333}.pdf-preview-title{font-size:18px;font-weight:600;margin:0;letter-spacing:0.05em}.pdf-preview-actions{display:flex;gap:12px}.pdf-action-btn{background:transparent;border:2px solid white;color:white;width:44px;height:44px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0}.pdf-action-btn:hover{background:white;color:#000;transform:scale(1.05)}.pdf-action-btn:active{transform:scale(0.95)}.pdf-share-btn{border-color:#333333;background:#333333}.pdf-share-btn:hover{background:#555;border-color:#555;color:white}.pdf-send-btn{border-color:#333;background:#333}.pdf-send-btn:hover{background:#555;border-color:#555;color:white}.pdf-close-btn{border-color:#666}.pdf-close-btn:hover{background:#666;border-color:#666;color:white}.pdf-preview-body{flex:1;overflow:hidden;position:relative;background:#333}.pdf-preview-frame{width:100%;height:100%;border:none;background:white}@media print{.btns, .btn-clear, .notif, .translate-btn, .pdf-preview-overlay{display:none !important}}/* === MOBILNÍ RESPONSIVITA (PWA) === */@media (max-width:768px){/* Jednotný font na mobilu */ body{font-size:14px}/* Kompaktní top bar */ .top-bar{padding:0.75rem 1rem}/* Logo menší na mobilu */ .logo{font-size:1.3rem}.logo span{font-size:0.7rem}/* Hamburger menu */ .hamburger{display:flex}.nav{position:fixed;top:70px;right:-100%;background:#000000;flex-direction:column;padding:2rem;transition:right 0.3s;box-shadow:-2px 0 10px rgba(0,0,0,0.3);gap:1.5rem;z-index:var(--z-topbar, 100)}.nav.active{right:0}/* Kompaktní wrapper na mobilu */ .wrapper{margin:10px auto;padding:12px;border-width:1px;box-sizing:border-box;max-width:100%;overflow-x:hidden}/* Header text menší na mobilu - kompaktní na jeden řádek */ .header{margin-bottom:12px;padding-bottom:10px}/* === ROZBALOVACÍ SEKCE ZÁKAZNICKÝCH DAT (POUZE MOBIL) === */ .customer-info-collapsible{margin-bottom:15px}.customer-info-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f5f5f5;border:2px solid #000;border-radius:8px;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.customer-info-header:active{transform:scale(0.98)}.customer-info-name{color:#000;font-weight:600;font-size:15px;letter-spacing:0.02em}.customer-info-arrow{stroke:#000;transition:transform 0.3s;flex-shrink:0}.customer-info-collapsible.expanded .customer-info-arrow{transform:rotate(180deg)}.customer-info-content{max-height:0;overflow:hidden;transition:max-height 0.4s ease-out}.customer-info-collapsible.expanded .customer-info-content{max-height:2000px;transition:max-height 0.6s ease-in}.header > div:first-child{font-size:15px;font-weight:700;letter-spacing:1px;white-space:normal;overflow:visible}.header > div:last-child{font-size:9px;line-height:1.3;white-space:normal}/* Jednotné labels na mobilu */ .label{font-size:11px;font-weight:600;white-space:nowrap}/* Skrýt anglické labely v tabulkách na mobilu pro úsporu místa */ .label .en-label{display:none}/* Jednotné inputy pro touch-friendly UX */ input, select{font-size:13px !important;padding:10px 6px !important;min-height:44px;width:100% !important;max-width:100% !important;box-sizing:border-box !important}input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], select{font-size:13px !important;padding:10px 6px !important;width:100% !important;max-width:100% !important;box-sizing:border-box !important}/* Jednotné placeholdery - čitelné */ input::placeholder, select::placeholder, input::-webkit-input-placeholder, select::-webkit-input-placeholder{font-size:11px !important;color:#999 !important;padding-left:0 !important;text-indent:0 !important}/* Textarea - menší font pro více textu (4-7 vět) */ textarea{min-height:80px;height:auto;font-size:10px !important;padding:8px 6px !important;width:100% !important;max-width:100% !important;box-sizing:border-box !important;line-height:1.35;overflow:hidden;/* Pro auto-resize */ resize:none;/* Zakázat manuální resize na mobilu */}textarea::placeholder{font-size:10px !important;padding-left:0 !important;text-indent:0 !important}/* Split-section textareas - auto-výška podle obsahu */ .split-section textarea{min-height:60px;height:auto}/* Table cells větší padding pro lepší čitelnost */ td{padding:6px 8px}/* Tlačítka jednotně */ button.btn{font-size:11px;padding:10px 6px;min-height:44px;width:100%;box-sizing:border-box;white-space:normal;overflow:visible;word-wrap:break-word;overflow-wrap:break-word;line-height:1.2;height:auto}.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}/* Clear button větší na mobilu */ .btn-clear{padding:10px 16px;font-size:14px;min-height:44px}/* Signature pad větší na mobilu */ #signature-pad{height:220px;margin-bottom:10px}.signature-actions{flex-direction:column;gap:10px;align-items:stretch}.signature-label{font-size:13px;text-align:center}/* Tabulky responzivní */ .two-col-table{flex-direction:column}.col{min-width:100%}/* SECTION TITLE - 2x vyšší rámečky */ .section-title{font-size:13px !important;padding:16px 10px;margin-top:15px;margin-bottom:8px}.section-title .en-label{font-size:11px !important;display:block;margin-top:2px}/* SPLIT SECTION - Plná šířka textareas */ .split-section{display:block;margin-bottom:15px}/* Skrýt anglické překladové pole na mobilu (druhé textarea) */ .split-section textarea:nth-child(2){display:none}/* České pole na plnou šířku */ .split-section textarea:nth-child(1){width:100% !important;max-width:100% !important;min-width:100%;box-sizing:border-box !important}/* Skrýt translate tlačítko na mobilu */ .translate-btn{display:none}/* H2 nadpisy menší */ h2{font-size:16px;margin-top:15px;margin-bottom:10px}/* Notification větší text */ .notif{font-size:14px;padding:12px}/* Loading overlay optimalizace */ .loading-overlay{font-size:16px}.loading-text{font-size:14px}/* PDF Preview Modal na mobilu */ .pdf-preview-container{width:100%;height:100%;max-width:100%;max-height:100vh;border-radius:0}.pdf-preview-header{padding:12px 16px}.pdf-preview-title{font-size:16px}.pdf-action-btn{width:48px;height:48px}/* Větší touch targety na mobilu */ .pdf-action-btn svg{width:28px;height:28px}}/* ========================================================================== *//* === PDF EXPORT MODE:FULL DESKTOP FORCE (MUST BE LAST IN CSS FILE) ====== *//* === Přebíjí VŠECHNY mobilní styly výše - platí pro desktop i mobil ====== *//* ========================================================================== */body.pdf-export-mode{font-size:13px !important}body.pdf-export-mode .wrapper{padding:30px 35px !important;margin:20px auto !important;max-width:900px !important;border-width:2px !important;width:100% !important}body.pdf-export-mode input,body.pdf-export-mode select,body.pdf-export-mode textarea{font-size:12px !important;padding:4px 8px !important;min-height:auto !important;height:auto !important;overflow:visible !important}body.pdf-export-mode .label{font-size:11px !important}body.pdf-export-mode .header{margin-bottom:25px !important;padding-bottom:15px !important}body.pdf-export-mode .header > div:first-child{font-size:28px !important;font-weight:700 !important;letter-spacing:2px !important}body.pdf-export-mode .header > div:last-child{font-size:10px !important}/* PDF export:Zobrazit OBA pole (CZ + EN) vedle sebe */body.pdf-export-mode .split-section{display:grid !important;grid-template-columns:1fr 1fr !important;gap:15px !important}body.pdf-export-mode .split-section textarea:nth-child(2){display:block !important}body.pdf-export-mode .split-section textarea:nth-child(1){width:auto !important}body.pdf-export-mode .translate-btn{display:block !important}/* PDF export:Customer info vždy rozbaleno, header skrytý */body.pdf-export-mode .customer-info-header{display:none !important}body.pdf-export-mode .customer-info-content{max-height:none !important;overflow:visible !important}/* PDF export:Tabulky vedle sebe (desktop layout) */body.pdf-export-mode .two-col-table{display:flex !important;flex-direction:row !important;gap:20px !important}body.pdf-export-mode .col{min-width:auto !important;flex:1 !important}/* PDF export:Section titles desktop velikost */body.pdf-export-mode .section-title{font-size:10px !important;padding:5px 7px !important;margin-top:13px !important;margin-bottom:5px !important}body.pdf-export-mode .section-title .en-label{font-size:0.7em !important;display:block !important}/* PDF export:Skrýt tlačítka */body.pdf-export-mode .btns{display:none !important}/* PDF export:Table styling */body.pdf-export-mode td{padding:2px 6px !important}body.pdf-export-mode button.btn{font-size:12px !important;padding:12px 24px !important}body.pdf-export-mode .top-bar{padding:1rem 2rem !important}body.pdf-export-mode .logo{font-size:1.8rem !important}body.pdf-export-mode #signature-pad{height:180px !important}/* ========================================================================== *//* === PDF CLONE DESKTOP:Skrytý wrapper pro PDF generování na mobilu ====== *//* === Vytvoří se jako clone, renderuje se mimo viewport, pak se smaže ===== *//* ========================================================================== */.pdf-clone-desktop{position:absolute !important;left:-9999px !important;top:0 !important;width:900px !important;max-width:900px !important;padding:30px 35px !important;margin:20px auto !important;background:#fff !important;border:2px solid #000 !important;box-sizing:border-box !important;font-size:13px !important;visibility:visible !important;overflow:visible !important}.pdf-clone-desktop input,.pdf-clone-desktop select,.pdf-clone-desktop textarea{font-size:12px !important;padding:4px 8px !important;min-height:auto !important;height:auto !important;overflow:visible !important}.pdf-clone-desktop .label{font-size:11px !important}.pdf-clone-desktop .header{margin-bottom:25px !important;padding-bottom:15px !important}.pdf-clone-desktop .header > div:first-child{font-size:28px !important;font-weight:700 !important;letter-spacing:2px !important}.pdf-clone-desktop .header > div:last-child{font-size:10px !important}.pdf-clone-desktop .split-section{display:grid !important;grid-template-columns:1fr 1fr !important;gap:15px !important}.pdf-clone-desktop .split-section textarea:nth-child(2){display:block !important}.pdf-clone-desktop .split-section textarea:nth-child(1){width:auto !important}.pdf-clone-desktop .translate-btn{display:block !important}.pdf-clone-desktop .customer-info-header{display:none !important}.pdf-clone-desktop .customer-info-content{max-height:none !important;overflow:visible !important;display:block !important}.pdf-clone-desktop .two-col-table{display:flex !important;flex-direction:row !important;gap:20px !important}.pdf-clone-desktop .col{min-width:auto !important;flex:1 !important}.pdf-clone-desktop .section-title{font-size:10px !important;padding:5px 7px !important;margin-top:13px !important;margin-bottom:5px !important}.pdf-clone-desktop .section-title .en-label{font-size:0.7em !important;display:block !important}.pdf-clone-desktop .btns{display:none !important}.pdf-clone-desktop td{padding:2px 6px !important}.pdf-clone-desktop button.btn{font-size:12px !important;padding:12px 24px !important}.pdf-clone-desktop .top-bar{padding:1rem 2rem !important}.pdf-clone-desktop .logo{font-size:1.8rem !important}.pdf-clone-desktop #signature-pad{height:180px !important}/* IČO upozornění - malý text pod typem zákazníka */.ico-upozorneni{font-size:10px !important;color:#c00 !important;white-space:nowrap}.pdf-clone-desktop .ico-upozorneni{font-size:10px !important}/* ======================================================================== VELMI MALÉ OBRAZOVKY - Oprava tlačítek pro malé telefony ======================================================================== */@media (max-width:480px){/* Tlačítka - menší font, ale text se vejde */ button.btn{font-size:10px;padding:8px 4px;min-height:44px;height:auto;white-space:normal;word-wrap:break-word;line-height:1.15}/* Grid tlačítek - 2 sloupce zůstávají, ale s menší mezerou */ .btns{gap:6px}/* Clear button */ .btn-clear{font-size:12px;padding:8px 12px}}/* Extrémně malé obrazovky - tlačítka pod sebou */@media (max-width:360px){button.btn{font-size:9px;padding:8px 3px;line-height:1.1}/* Pokud jsou tlačítka moc úzká, dej je pod sebe */ .btns{grid-template-columns:1fr;gap:8px}}/* ======================================================================== MODAL PRO SCHVÁLENÍ ZÁKAZNÍKEM ======================================================================== */.zakaznik-schvaleni-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0, 0, 0, 0.9);z-index:var(--z-menu-overlay, 9999);display:flex;align-items:center;justify-content:center;padding:1rem}.zakaznik-schvaleni-container{background:#1a1a1a;border-radius:12px;width:100%;max-width:600px;max-height:95vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0, 0, 0, 0.5);border:1px solid #333}.zakaznik-schvaleni-header{background:#333;color:#ffffff;padding:1rem 1.5rem;display:flex;justify-content:center;align-items:center;border-bottom:1px solid #444;position:relative}.zakaznik-schvaleni-header h2{margin:0;font-size:1.3rem;font-weight:600;color:#fff;text-align:center}.zakaznik-schvaleni-close{background:none;border:none;color:#ffffff;font-size:2rem;cursor:pointer;padding:0;line-height:1;opacity:0.7;transition:opacity 0.2s;position:absolute;right:1.5rem;top:50%;transform:translateY(-50%)}.zakaznik-schvaleni-close:hover{opacity:1}.zakaznik-schvaleni-body{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;color:#ccc}.zakaznik-schvaleni-text-sekce label,.zakaznik-schvaleni-podpis-sekce label{display:block;font-weight:600;color:#aaa;margin-bottom:0.5rem;font-size:0.9rem}.zakaznik-schvaleni-text{background:#fff;border:1px solid #333;border-radius:8px;padding:1rem;min-height:120px;max-height:200px;overflow-y:auto;font-size:1rem;line-height:1.5;color:#000;white-space:pre-wrap}.zakaznik-schvaleni-podpis-sekce{flex:1;display:flex;flex-direction:column}#zakaznikSchvaleniPad{width:100%;height:150px;border:2px solid #1a1a1a;border-radius:8px;background:#ffffff;touch-action:none;cursor:crosshair}.zakaznik-schvaleni-podpis-akce{display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem}.zakaznik-schvaleni-hint{font-size:0.8rem;color:#888}.btn-vymazat-podpis{background:transparent;color:#dc3545;border:1px solid #dc3545;padding:0.5rem 1rem;border-radius:6px;font-size:0.85rem;cursor:pointer;transition:all 0.2s}.btn-vymazat-podpis:hover{background:#dc3545;color:#fff}.zakaznik-schvaleni-footer{background:#222;padding:1rem 1.5rem;display:flex;gap:1rem;justify-content:flex-end;border-top:1px solid #333}.btn-zrusit{background:transparent;color:#ccc;border:1px solid #444;padding:0.75rem 1.5rem;border-radius:8px;font-size:1rem;font-weight:500;cursor:pointer;transition:background 0.2s}.btn-zrusit:hover{background:#333}.btn-pouzit{background:#333;color:#ffffff;border:1px solid #444;padding:0.75rem 2rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s}.btn-pouzit:hover{background:#444}/* Tlačítko Podepsat protokol */.btn-podepsat-protokol{display:block;width:100%;padding:1rem 1.5rem;margin-bottom:1rem;background:#1a1a1a;color:#ffffff;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:background 0.2s}.btn-podepsat-protokol:hover{background:#333333}/* Sekce v modalu */.zakaznik-schvaleni-sekce{margin-bottom:1rem}.zakaznik-schvaleni-sekce label{display:block;font-weight:600;color:#fff;margin-bottom:0.5rem;font-size:0.9rem}/* Tabulka souhrnu - DARK THEME */.zakaznik-schvaleni-tabulka{width:100%;border-collapse:collapse;background:#222;border:1px solid #444;border-radius:8px;overflow:hidden}.zakaznik-schvaleni-tabulka tr{border-bottom:none}.zakaznik-schvaleni-tabulka tr:last-child{border-bottom:none}.zakaznik-schvaleni-tabulka td{padding:0.75rem 1rem;font-size:0.95rem;border-bottom:none}.zakaznik-schvaleni-tabulka .tabulka-label{background:#2a2a2a;color:#aaa;font-weight:500;width:55%}.zakaznik-schvaleni-tabulka .tabulka-hodnota{background:#222;color:#fff;font-weight:600;text-align:center}/* Checkbox prodloužení lhůty */.zakaznik-schvaleni-tabulka .tabulka-checkbox-row{padding:0.75rem 1rem;background:#2a2a2a}.checkbox-prodlouzeni-lhuty{display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;font-size:0.9rem;line-height:1.4}.checkbox-prodlouzeni-lhuty input[type="checkbox"]{width:18px;height:18px;margin-top:2px;cursor:pointer;accent-color:#333;flex-shrink:0}.checkbox-prodlouzeni-lhuty span{color:#fff}/* Text prodloužení lhůty v modalu */.prodlouzeni-lhuty-text{margin-top:0.75rem;padding:0.75rem;background:#fff5f5;border:1px solid #cc0000;border-radius:4px;color:#cc0000;font-size:0.85rem;line-height:1.5;text-align:justify}/* Text prodloužení lhůty v hlavním formuláři */.prodlouzeni-lhuty-hlavni{font-size:8px;line-height:1.4;text-align:justify}/* Mobile optimalizace pro modal schválení */@media (max-width:600px){.zakaznik-schvaleni-overlay{padding:0}.zakaznik-schvaleni-container{border-radius:0;max-height:100vh;height:100vh}.zakaznik-schvaleni-header h2{font-size:1.1rem}.zakaznik-schvaleni-text{min-height:100px;max-height:150px;font-size:0.95rem}#zakaznikSchvaleniPad{height:180px}.zakaznik-schvaleni-footer{flex-direction:row}.btn-zrusit, .btn-pouzit{flex:1;padding:1rem}.zakaznik-schvaleni-tabulka td{padding:0.6rem 0.75rem;font-size:0.9rem}.btn-podepsat-protokol{font-size:1rem;padding:0.85rem 1rem}.checkbox-prodlouzeni-lhuty{font-size:0.85rem}.checkbox-prodlouzeni-lhuty input[type="checkbox"]{width:20px;height:20px}.prodlouzeni-lhuty-text{font-size:0.8rem}}/* Podpis - pouze zobrazení (read-only) */.signature-display{pointer-events:none;cursor:default}/* ============================================================================ MOBILE FIXES - Sloučeno z protokol-mobile-fixes.css (Step 48) PWA Responsive opravy pro protokol.php ============================================================================ */@media (max-width:768px){/* Customer Info Header - Touch target 44px */ .customer-info-header{padding:16px 15px !important;min-height:44px;display:flex;align-items:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}/* Input Font-Size - Prevent iOS Auto-Zoom */ input, select, textarea{font-size:16px !important;padding:10px 6px !important;min-height:44px;line-height:1.4}/* Výjimka pro readonly pole */ input[readonly], select[disabled]{font-size:13px !important}/* Section Title - Zvýšit padding */ .section-title{padding:18px 10px !important;min-height:48px}/* Photo Preview Grid Touch Feedback */ #photoGrid{display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;margin-top:10px}.photo-thumb-wrapper{min-height:80px;min-width:80px;border-radius:8px;overflow:hidden;transition:transform 0.2s, box-shadow 0.2s;border:1px solid rgba(255,255,255,0.15);cursor:pointer}.photo-thumb-wrapper:active{transform:scale(0.95);box-shadow:0 2px 8px rgba(0, 0, 0, 0.2)}.photo-thumb-wrapper img{width:100%;height:100%;object-fit:cover}/* Touch Optimization pro všechny buttons */ .btn, button, .translate-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-height:44px;display:inline-flex;align-items:center;justify-content:center}/* Notification - Touch to Dismiss */ .notif, #notif{cursor:pointer;transition:opacity 0.3s ease;-webkit-tap-highlight-color:transparent}/* PDF Preview Modal - Touch Optimization */ .pdf-preview-container{width:100%;height:100%;max-width:100%;max-height:100vh;border-radius:0}.pdf-action-btn{width:48px;height:48px;min-width:48px;min-height:48px;touch-action:manipulation}}
+:root {
+  --c-bg: #f5f5f5;
+  --c-white: #ffffff;
+  --c-black: #1a1a1a;
+  --c-grey: #666666;
+  --c-border: #e0e0e0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins';
+  background: var(--c-bg);
+  color: var(--c-black);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+/* === ČERNÁ HORNÍ PANEL === */
+.top-bar {
+  background: #000000;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar, 100);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+  color: var(--c-white);
+  font-family: 'Poppins';
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+
+.logo span {
+  font-size: 0.9rem;
+  display: block;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  margin-top: -0.3rem;
+}
+
+.nav {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav a {
+  color: var(--c-white);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.nav a:hover {
+  opacity: 0.7;
+}
+
+/* === HAMBURGER MENU === */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: var(--c-white);
+  transition: all 0.3s;
+}
+
+/* === WRAPPER === */
+.wrapper {
+  width: 100%;
+  max-width: 900px;
+  background: var(--c-white);
+  border: 2px solid var(--c-black);
+  padding: 30px 35px;
+  margin: 20px auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid var(--c-black);
+}
+
+.header div:first-child {
+  font-family: 'Poppins';
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.header div:last-child {
+  font-family: 'Poppins';
+  font-size: 10px;
+  color: #333;
+}
+/* === Rozbalovací sekce zákaznických dat (DESKTOP - skrytá) === */
+.customer-info-collapsible {
+  /* Na desktopu je to normální sekce bez collapsingu */
+}
+
+.customer-info-header {
+  /* Na desktopu skrytý - zobrazí se jen na mobilu */
+  display: none;
+}
+
+.customer-info-content {
+  /* Na desktopu vždy viditelný */
+  max-height: none;
+  overflow: visible;
+}
+
+.section-title {
+  font-family: 'Poppins';
+  font-weight: 700;
+  font-size: 10px;
+  margin-top: 13px;
+  margin-bottom: 5px;
+  border-left: 3px solid var(--c-black);
+  padding: 5px 7px;
+  background: var(--c-bg);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.en-label {
+  font-size: 0.7em;
+  color: var(--c-grey);
+  font-style: italic;
+  display: block;
+  margin-top: 1px;
+  line-height: 1.2;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+td {
+  padding: 2px 6px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.label {
+  font-family: 'Poppins';
+  font-weight: 600;
+  width: 35%;
+  font-size: 11px;
+  line-height: 1.3;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #999;
+  border-radius: 0;
+  background: var(--c-white);
+  color: var(--c-black);
+  font-family: 'Poppins';
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Explicitní nastavení pro všechny typy inputů */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Sjednocení placeholderů */
+input::placeholder,
+select::placeholder,
+textarea::placeholder {
+  font-family: 'Poppins';
+  font-size: 12px;
+  color: #999;
+  opacity: 1;
+}
+
+input::-webkit-input-placeholder,
+select::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  font-family: 'Poppins';
+  font-size: 12px;
+  color: #999;
+}
+
+input::-moz-placeholder,
+select::-moz-placeholder,
+textarea::-moz-placeholder {
+  font-family: 'Poppins';
+  font-size: 12px;
+  color: #999;
+}
+
+input:-ms-input-placeholder,
+select:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  font-family: 'Poppins';
+  font-size: 12px;
+  color: #999;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--c-black);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+input[readonly], textarea[readonly] {
+  background: var(--c-bg);
+  color: var(--c-grey);
+  border-style: dashed;
+}
+.two-col-table {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.col {
+  flex: 1;
+  min-width: 300px;
+}
+.split-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+  position: relative;
+}
+.translate-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: var(--z-sticky, 10);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+  touch-action: manipulation;
+}
+.translate-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: #333;
+}
+.translate-btn:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+.translate-btn.loading {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes spinLoader {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+#signature-pad {
+  border: 2px solid #000;
+  width: 100%;
+  height: 180px;
+  background: #fff;
+  touch-action: none;
+  cursor: crosshair;
+  margin-top: 10px;
+}
+.signature-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 15px;
+}
+.signature-label {
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+  margin: 0;
+}
+.btns {
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+button.btn {
+  border: 2px solid #000;
+  border-radius: 6px;
+  padding: 12px 24px;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-family: inherit;
+  text-align: center;
+}
+button.btn:hover {
+  background: #000;
+  color: #fff;
+}
+.btn-primary {
+  background: #000;
+  color: #fff;
+}
+.btn-clear {
+  background: #e5e5e5;
+  color: #444;
+  border: 1px solid #999;
+  padding: 4px 10px;
+  font-size: 0.75em;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-clear:hover {
+  background: #d5d5d5;
+  color: #333;
+}
+.notif {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 2px solid #000;
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: var(--z-toast, 1500);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.notif.show {
+  opacity: 1;
+  transform: translate(-50%, 10px);
+}
+.notif.success {
+  background: #000;
+  color: #fff;
+}
+.notif.error {
+  border-color: #666;
+  color: #333;
+}
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-top-layer, 10003);
+}
+.loading-overlay.show {
+  display: flex;
+  animation: fadeIn 0.2s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.loading-spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #333333;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  animation: spinLoader 0.8s linear infinite;
+}
+.loading-text {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 25px;
+  text-align: center;
+  background: rgba(51, 51, 51, 0.9);
+  padding: 15px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  font-family: 'Poppins', sans-serif;
+}
+#photoPreviewContainer {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+#photoPreviewContainer h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 15px;
+}
+#photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+#photoGrid img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border: 2px solid #000;
+  cursor: pointer;
+}
+
+/* === PDF PREVIEW MODAL === */
+.pdf-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  z-index: var(--z-menu-overlay, 9999);
+  animation: fadeIn 0.3s ease;
+}
+
+.pdf-preview-overlay.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pdf-preview-container {
+  width: 95%;
+  height: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pdf-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #000;
+  color: white;
+  border-bottom: 2px solid #333333;
+}
+
+.pdf-preview-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.pdf-preview-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.pdf-action-btn {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.pdf-action-btn:hover {
+  background: white;
+  color: #000;
+  transform: scale(1.05);
+}
+
+.pdf-action-btn:active {
+  transform: scale(0.95);
+}
+
+.pdf-share-btn {
+  border-color: #333333;
+  background: #333333;
+}
+
+.pdf-share-btn:hover {
+  background: #555;
+  border-color: #555;
+  color: white;
+}
+
+.pdf-send-btn {
+  border-color: #333;
+  background: #333;
+}
+
+.pdf-send-btn:hover {
+  background: #555;
+  border-color: #555;
+  color: white;
+}
+
+.pdf-close-btn {
+  border-color: #666;
+}
+
+.pdf-close-btn:hover {
+  background: #666;
+  border-color: #666;
+  color: white;
+}
+
+.pdf-preview-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #333;
+}
+
+.pdf-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+@media print {
+  .btns, .btn-clear, .notif, .translate-btn, .pdf-preview-overlay { display: none !important; }
+}
+/* === MOBILNÍ RESPONSIVITA (PWA) === */
+@media (max-width: 768px) {
+  /* Jednotný font na mobilu */
+  body {
+    font-size: 14px;
+  }
+
+  /* Kompaktní top bar */
+  .top-bar {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Logo menší na mobilu */
+  .logo {
+    font-size: 1.3rem;
+  }
+
+  .logo span {
+    font-size: 0.7rem;
+  }
+
+  /* Hamburger menu */
+  .hamburger {
+    display: flex;
+  }
+
+  .nav {
+    position: fixed;
+    top: 70px;
+    right: -100%;
+    background: #000000;
+    flex-direction: column;
+    padding: 2rem;
+    transition: right 0.3s;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+    gap: 1.5rem;
+    z-index: var(--z-topbar, 100);
+  }
+
+  .nav.active {
+    right: 0;
+  }
+
+  /* Kompaktní wrapper na mobilu */
+  .wrapper {
+    margin: 10px auto;
+    padding: 12px;
+    border-width: 1px;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Header text menší na mobilu - kompaktní na jeden řádek */
+  .header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  /* === ROZBALOVACÍ SEKCE ZÁKAZNICKÝCH DAT (POUZE MOBIL) === */
+  .customer-info-collapsible {
+    margin-bottom: 15px;
+  }
+
+  .customer-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f5f5f5;
+    border: 2px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .customer-info-header:active {
+    transform: scale(0.98);
+  }
+
+  .customer-info-name {
+    color: #000;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+
+  .customer-info-arrow {
+    stroke: #000;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-arrow {
+    transform: rotate(180deg);
+  }
+
+  .customer-info-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-content {
+    max-height: 2000px;
+    transition: max-height 0.6s ease-in;
+  }
+
+  .header > div:first-child {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .header > div:last-child {
+    font-size: 9px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  /* Jednotné labels na mobilu */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Skrýt anglické labely v tabulkách na mobilu pro úsporu místa */
+  .label .en-label {
+    display: none;
+  }
+
+  /* Jednotné inputy pro touch-friendly UX */
+  input, select {
+    font-size: 13px !important;
+    padding: 10px 6px !important;
+    min-height: 44px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    font-size: 13px !important;
+    padding: 10px 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Jednotné placeholdery - čitelné */
+  input::placeholder,
+  select::placeholder,
+  input::-webkit-input-placeholder,
+  select::-webkit-input-placeholder {
+    font-size: 11px !important;
+    color: #999 !important;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
+  }
+
+  /* Textarea - menší font pro více textu (4-7 vět) */
+  textarea {
+    min-height: 80px;
+    height: auto;
+    font-size: 10px !important;
+    padding: 8px 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    line-height: 1.35;
+    overflow: hidden; /* Pro auto-resize */
+    resize: none; /* Zakázat manuální resize na mobilu */
+  }
+
+  textarea::placeholder {
+    font-size: 10px !important;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
+  }
+
+  /* Split-section textareas - auto-výška podle obsahu */
+  .split-section textarea {
+    min-height: 60px;
+    height: auto;
+  }
+
+  /* Table cells větší padding pro lepší čitelnost */
+  td {
+    padding: 6px 8px;
+  }
+
+  /* Tlačítka jednotně */
+  button.btn {
+    font-size: 11px;
+    padding: 10px 6px;
+    min-height: 44px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow: visible;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.2;
+    height: auto;
+  }
+
+  .btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* Clear button větší na mobilu */
+  .btn-clear {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  /* Signature pad větší na mobilu */
+  #signature-pad {
+    height: 220px;
+    margin-bottom: 10px;
+  }
+
+  .signature-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .signature-label {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* Tabulky responzivní */
+  .two-col-table {
+    flex-direction: column;
+  }
+
+  .col {
+    min-width: 100%;
+  }
+
+  /* SECTION TITLE - 2x vyšší rámečky */
+  .section-title {
+    font-size: 13px !important;
+    padding: 16px 10px;
+    margin-top: 15px;
+    margin-bottom: 8px;
+  }
+
+  .section-title .en-label {
+    font-size: 11px !important;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* SPLIT SECTION - Plná šířka textareas */
+  .split-section {
+    display: block;
+    margin-bottom: 15px;
+  }
+
+  /* Skrýt anglické překladové pole na mobilu (druhé textarea) */
+  .split-section textarea:nth-child(2) {
+    display: none;
+  }
+
+  /* České pole na plnou šířku */
+  .split-section textarea:nth-child(1) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100%;
+    box-sizing: border-box !important;
+  }
+
+  /* Skrýt translate tlačítko na mobilu */
+  .translate-btn {
+    display: none;
+  }
+
+  /* H2 nadpisy menší */
+  h2 {
+    font-size: 16px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+
+  /* Notification větší text */
+  .notif {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  /* Loading overlay optimalizace */
+  .loading-overlay {
+    font-size: 16px;
+  }
+
+  .loading-text {
+    font-size: 14px;
+  }
+
+  /* PDF Preview Modal na mobilu */
+  .pdf-preview-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .pdf-preview-header {
+    padding: 12px 16px;
+  }
+
+  .pdf-preview-title {
+    font-size: 16px;
+  }
+
+  .pdf-action-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Větší touch targety na mobilu */
+  .pdf-action-btn svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ========================================================================== */
+/* === PDF EXPORT MODE: FULL DESKTOP FORCE (MUST BE LAST IN CSS FILE) ====== */
+/* === Přebíjí VŠECHNY mobilní styly výše - platí pro desktop i mobil ====== */
+/* ========================================================================== */
+
+body.pdf-export-mode {
+  font-size: 13px !important;
+}
+
+body.pdf-export-mode .wrapper {
+  padding: 30px 35px !important;
+  margin: 20px auto !important;
+  max-width: 900px !important;
+  border-width: 2px !important;
+  width: 100% !important;
+}
+
+body.pdf-export-mode input,
+body.pdf-export-mode select,
+body.pdf-export-mode textarea {
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.pdf-export-mode .label {
+  font-size: 11px !important;
+}
+
+body.pdf-export-mode .header {
+  margin-bottom: 25px !important;
+  padding-bottom: 15px !important;
+}
+
+body.pdf-export-mode .header > div:first-child {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+}
+
+body.pdf-export-mode .header > div:last-child {
+  font-size: 10px !important;
+}
+
+/* PDF export: Zobrazit OBA pole (CZ + EN) vedle sebe */
+body.pdf-export-mode .split-section {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 15px !important;
+}
+
+body.pdf-export-mode .split-section textarea:nth-child(2) {
+  display: block !important;
+}
+
+body.pdf-export-mode .split-section textarea:nth-child(1) {
+  width: auto !important;
+}
+
+body.pdf-export-mode .translate-btn {
+  display: block !important;
+}
+
+/* PDF export: Customer info vždy rozbaleno, header skrytý */
+body.pdf-export-mode .customer-info-header {
+  display: none !important;
+}
+
+body.pdf-export-mode .customer-info-content {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* PDF export: Tabulky vedle sebe (desktop layout) */
+body.pdf-export-mode .two-col-table {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+}
+
+body.pdf-export-mode .col {
+  min-width: auto !important;
+  flex: 1 !important;
+}
+
+/* PDF export: Section titles desktop velikost */
+body.pdf-export-mode .section-title {
+  font-size: 10px !important;
+  padding: 5px 7px !important;
+  margin-top: 13px !important;
+  margin-bottom: 5px !important;
+}
+
+body.pdf-export-mode .section-title .en-label {
+  font-size: 0.7em !important;
+  display: block !important;
+}
+
+/* PDF export: Skrýt tlačítka */
+body.pdf-export-mode .btns {
+  display: none !important;
+}
+
+/* PDF export: Table styling */
+body.pdf-export-mode td {
+  padding: 2px 6px !important;
+}
+
+body.pdf-export-mode button.btn {
+  font-size: 12px !important;
+  padding: 12px 24px !important;
+}
+
+body.pdf-export-mode .top-bar {
+  padding: 1rem 2rem !important;
+}
+
+body.pdf-export-mode .logo {
+  font-size: 1.8rem !important;
+}
+
+body.pdf-export-mode #signature-pad {
+  height: 180px !important;
+}
+
+/* ========================================================================== */
+/* === PDF CLONE DESKTOP: Skrytý wrapper pro PDF generování na mobilu ====== */
+/* === Vytvoří se jako clone, renderuje se mimo viewport, pak se smaže ===== */
+/* ========================================================================== */
+
+.pdf-clone-desktop {
+  position: absolute !important;
+  left: -9999px !important;
+  top: 0 !important;
+  width: 900px !important;
+  max-width: 900px !important;
+  padding: 30px 35px !important;
+  margin: 20px auto !important;
+  background: #fff !important;
+  border: 2px solid #000 !important;
+  box-sizing: border-box !important;
+  font-size: 13px !important;
+  visibility: visible !important;
+  overflow: visible !important;
+}
+
+.pdf-clone-desktop input,
+.pdf-clone-desktop select,
+.pdf-clone-desktop textarea {
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.pdf-clone-desktop .label {
+  font-size: 11px !important;
+}
+
+.pdf-clone-desktop .header {
+  margin-bottom: 25px !important;
+  padding-bottom: 15px !important;
+}
+
+.pdf-clone-desktop .header > div:first-child {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+}
+
+.pdf-clone-desktop .header > div:last-child {
+  font-size: 10px !important;
+}
+
+.pdf-clone-desktop .split-section {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 15px !important;
+}
+
+.pdf-clone-desktop .split-section textarea:nth-child(2) {
+  display: block !important;
+}
+
+.pdf-clone-desktop .split-section textarea:nth-child(1) {
+  width: auto !important;
+}
+
+.pdf-clone-desktop .translate-btn {
+  display: block !important;
+}
+
+.pdf-clone-desktop .customer-info-header {
+  display: none !important;
+}
+
+.pdf-clone-desktop .customer-info-content {
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+.pdf-clone-desktop .two-col-table {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+}
+
+.pdf-clone-desktop .col {
+  min-width: auto !important;
+  flex: 1 !important;
+}
+
+.pdf-clone-desktop .section-title {
+  font-size: 10px !important;
+  padding: 5px 7px !important;
+  margin-top: 13px !important;
+  margin-bottom: 5px !important;
+}
+
+.pdf-clone-desktop .section-title .en-label {
+  font-size: 0.7em !important;
+  display: block !important;
+}
+
+.pdf-clone-desktop .btns {
+  display: none !important;
+}
+
+.pdf-clone-desktop td {
+  padding: 2px 6px !important;
+}
+
+.pdf-clone-desktop button.btn {
+  font-size: 12px !important;
+  padding: 12px 24px !important;
+}
+
+.pdf-clone-desktop .top-bar {
+  padding: 1rem 2rem !important;
+}
+
+.pdf-clone-desktop .logo {
+  font-size: 1.8rem !important;
+}
+
+.pdf-clone-desktop #signature-pad {
+  height: 180px !important;
+}
+
+/* IČO upozornění - malý text pod typem zákazníka */
+.ico-upozorneni {
+  font-size: 7.5px !important;  /* Zmenšeno o 25% z 10px */
+  color: #c00 !important;
+  display: block;
+  margin-top: 4px;
+  line-height: 1.3;
+  white-space: normal;  /* Povolit zalamování textu */
+}
+
+.pdf-clone-desktop .ico-upozorneni {
+  font-size: 7.5px !important;  /* Zmenšeno o 25% z 10px */
+  margin-top: 2px;
+}
+
+/* ========================================================================
+   VELMI MALÉ OBRAZOVKY - Oprava tlačítek pro malé telefony
+   ======================================================================== */
+@media (max-width: 480px) {
+  /* Tlačítka - menší font, ale text se vejde */
+  button.btn {
+    font-size: 10px;
+    padding: 8px 4px;
+    min-height: 44px;
+    height: auto;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.15;
+  }
+
+  /* Grid tlačítek - 2 sloupce zůstávají, ale s menší mezerou */
+  .btns {
+    gap: 6px;
+  }
+
+  /* Clear button */
+  .btn-clear {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Extrémně malé obrazovky - tlačítka pod sebou */
+@media (max-width: 360px) {
+  button.btn {
+    font-size: 9px;
+    padding: 8px 3px;
+    line-height: 1.1;
+  }
+
+  /* Pokud jsou tlačítka moc úzká, dej je pod sebe */
+  .btns {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* ========================================================================
+   MODAL PRO SCHVÁLENÍ ZÁKAZNÍKEM
+   ======================================================================== */
+.zakaznik-schvaleni-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: var(--z-menu-overlay, 9999);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.zakaznik-schvaleni-container {
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+}
+
+.zakaznik-schvaleni-header {
+  background: #333;
+  color: #ffffff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  position: relative;
+}
+
+.zakaznik-schvaleni-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+}
+
+.zakaznik-schvaleni-close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.zakaznik-schvaleni-close:hover {
+  opacity: 1;
+}
+
+.zakaznik-schvaleni-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: #ccc;
+}
+
+.zakaznik-schvaleni-text-sekce label,
+.zakaznik-schvaleni-podpis-sekce label {
+  display: block;
+  font-weight: 600;
+  color: #aaa;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.zakaznik-schvaleni-text {
+  background: #fff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #000;
+  white-space: pre-wrap;
+}
+
+.zakaznik-schvaleni-podpis-sekce {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#zakaznikSchvaleniPad {
+  width: 100%;
+  height: 150px;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  background: #ffffff;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.zakaznik-schvaleni-podpis-akce {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.zakaznik-schvaleni-hint {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.btn-vymazat-podpis {
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-vymazat-podpis:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.zakaznik-schvaleni-footer {
+  background: #222;
+  padding: 1rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  border-top: 1px solid #333;
+}
+
+.btn-zrusit {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-zrusit:hover {
+  background: #333;
+}
+
+.btn-pouzit {
+  background: #333;
+  color: #ffffff;
+  border: 1px solid #444;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-pouzit:hover {
+  background: #444;
+}
+
+/* Tlačítko Podepsat protokol */
+.btn-podepsat-protokol {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  background: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-podepsat-protokol:hover {
+  background: #333333;
+}
+
+/* Sekce v modalu */
+.zakaznik-schvaleni-sekce {
+  margin-bottom: 1rem;
+}
+
+.zakaznik-schvaleni-sekce label {
+  display: block;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Tabulka souhrnu - DARK THEME */
+.zakaznik-schvaleni-tabulka {
+  width: 100%;
+  border-collapse: collapse;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.zakaznik-schvaleni-tabulka tr {
+  border-bottom: none;
+}
+
+.zakaznik-schvaleni-tabulka tr:last-child {
+  border-bottom: none;
+}
+
+.zakaznik-schvaleni-tabulka td {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border-bottom: none;
+}
+
+.zakaznik-schvaleni-tabulka .tabulka-label {
+  background: #2a2a2a;
+  color: #aaa;
+  font-weight: 500;
+  width: 55%;
+}
+
+.zakaznik-schvaleni-tabulka .tabulka-hodnota {
+  background: #222;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Checkbox prodloužení lhůty */
+.zakaznik-schvaleni-tabulka .tabulka-checkbox-row {
+  padding: 0.75rem 1rem;
+  background: #2a2a2a;
+}
+
+.checkbox-prodlouzeni-lhuty {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.checkbox-prodlouzeni-lhuty input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #333;
+  flex-shrink: 0;
+}
+
+.checkbox-prodlouzeni-lhuty span {
+  color: #fff;
+}
+
+/* Text prodloužení lhůty v modalu */
+.prodlouzeni-lhuty-text {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #fff5f5;
+  border: 1px solid #cc0000;
+  border-radius: 4px;
+  color: #cc0000;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+/* Text prodloužení lhůty v hlavním formuláři */
+.prodlouzeni-lhuty-hlavni {
+  font-size: 8px;
+  line-height: 1.4;
+  text-align: justify;
+}
+
+/* Mobile optimalizace pro modal schválení */
+@media (max-width: 600px) {
+  .zakaznik-schvaleni-overlay {
+    padding: 0;
+  }
+
+  .zakaznik-schvaleni-container {
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+
+  .zakaznik-schvaleni-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .zakaznik-schvaleni-text {
+    min-height: 100px;
+    max-height: 150px;
+    font-size: 0.95rem;
+  }
+
+  #zakaznikSchvaleniPad {
+    height: 180px;
+  }
+
+  .zakaznik-schvaleni-footer {
+    flex-direction: row;
+  }
+
+  .btn-zrusit,
+  .btn-pouzit {
+    flex: 1;
+    padding: 1rem;
+  }
+
+  .zakaznik-schvaleni-tabulka td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-podepsat-protokol {
+    font-size: 1rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .checkbox-prodlouzeni-lhuty {
+    font-size: 0.85rem;
+  }
+
+  .checkbox-prodlouzeni-lhuty input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .prodlouzeni-lhuty-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Podpis - pouze zobrazení (read-only) */
+.signature-display {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ============================================================================
+   MOBILE FIXES - Sloučeno z protokol-mobile-fixes.css (Step 48)
+   PWA Responsive opravy pro protokol.php
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  /* Customer Info Header - Touch target 44px */
+  .customer-info-header {
+    padding: 16px 15px !important;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Input Font-Size - Prevent iOS Auto-Zoom */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    padding: 10px 6px !important;
+    min-height: 44px;
+    line-height: 1.4;
+  }
+
+  /* Výjimka pro readonly pole */
+  input[readonly],
+  select[disabled] {
+    font-size: 13px !important;
+  }
+
+  /* Section Title - Zvýšit padding */
+  .section-title {
+    padding: 18px 10px !important;
+    min-height: 48px;
+  }
+
+  /* Photo Preview Grid Touch Feedback */
+  #photoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .photo-thumb-wrapper {
+    min-height: 80px;
+    min-width: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.15);
+    cursor: pointer;
+  }
+
+  .photo-thumb-wrapper:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .photo-thumb-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Touch Optimization pro všechny buttons */
+  .btn,
+  button,
+  .translate-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Notification - Touch to Dismiss */
+  .notif,
+  #notif {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* PDF Preview Modal - Touch Optimization */
+  .pdf-preview-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .pdf-action-btn {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+}
+
+/* ============================================
+   PWA OPTIMALIZACE - Protokol
+   ============================================ */
+@media (display-mode: standalone),
+       (display-mode: fullscreen),
+       (max-width: 480px) {
+
+  /* Wrapper - kompaktní padding */
+  .wrapper {
+    padding: 0.5rem;
+    max-width: 100%;
+  }
+
+  /* Header */
+  .header {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+
+  .header div:first-child {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Zákaznické info - kompaktní */
+  .customer-info-header {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .customer-info-content {
+    padding: 0.5rem;
+  }
+
+  /* Tabulky v customer info */
+  .two-col-table {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .two-col-table .col {
+    width: 100%;
+  }
+
+  .two-col-table table {
+    font-size: 0.75rem;
+  }
+
+  .two-col-table td {
+    padding: 0.35rem 0.25rem;
+  }
+
+  .two-col-table .label {
+    font-size: 0.7rem;
+    min-width: 90px;
+  }
+
+  .two-col-table .en-label {
+    font-size: 0.6rem;
+  }
+
+  .two-col-table input,
+  .two-col-table select {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 0.4rem;
+  }
+
+  /* Section - kompaktní */
+  .section {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.35rem;
+  }
+
+  /* Popis problému textarea */
+  .section textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 0.5rem;
+  }
+
+  /* Tlačítka - 2 sloupce */
+  .btns {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  button.btn {
+    font-size: 0.65rem;
+    padding: 0.5rem 0.25rem;
+    min-height: 40px;
+    line-height: 1.2;
+  }
+
+  /* Photos grid - 3 sloupce */
+  .photos-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+  }
+
+  .photo-thumb-wrapper {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  /* Kalkulace sekce */
+  .kalkulace-container {
+    padding: 0.5rem;
+  }
+
+  .kalkulace-header {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .kalkulace-table {
+    font-size: 0.75rem;
+  }
+
+  .kalkulace-table th,
+  .kalkulace-table td {
+    padding: 0.35rem 0.25rem;
+  }
+
+  /* Signature pads */
+  #signPad,
+  #zakaznikSchvaleniPad {
+    height: 120px;
+  }
+
+  /* Footer akce tlačítka */
+  .footer-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-actions .btn {
+    width: 100%;
+    font-size: 0.8rem;
+  }
+
+  /* Modals - full width */
+  .modal-content,
+  .zakaznik-schvaleni-container {
+    width: 98% !important;
+    max-width: 98% !important;
+    padding: 0.5rem;
+    margin: 0.25rem;
+  }
+
+  .modal-header,
+  .zakaznik-schvaleni-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .modal-header h2,
+  .modal-header h3,
+  .zakaznik-schvaleni-header h2 {
+    font-size: 0.95rem;
+  }
+
+  /* PDF Preview */
+  .pdf-preview-modal {
+    padding: 0;
+  }
+
+  .pdf-preview-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+/* Extra malé displeje */
+@media (max-width: 360px) {
+  .btns {
+    grid-template-columns: 1fr;
+  }
+
+  button.btn {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header div:first-child {
+    font-size: 0.8rem;
+  }
+
+  .header {
+    font-size: 0.6rem;
+  }
+}
+
+/* Safe area pro notch */
+@supports(padding: max(0px)) {
+  @media (display-mode: standalone) {
+    .wrapper {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+  }
+}
+
