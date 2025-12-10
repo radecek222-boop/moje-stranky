@@ -543,8 +543,9 @@ function saveProtokolData($data) {
     if ($dealer === 'ANO' && $maSloupecDealer) {
         try {
             // Načíst data reklamace pro šablonu
+            // BUGFIX: Sloupec r.prodejce neexistuje - použít pouze u.name
             $stmtRekl = $pdo->prepare("
-                SELECT r.jmeno, r.email, r.telefon, COALESCE(u.name, r.prodejce) as prodejce, r.reklamace_id
+                SELECT r.jmeno, r.email, r.telefon, COALESCE(u.name, 'Neznámý') as prodejce, r.reklamace_id
                 FROM wgs_reklamace r
                 LEFT JOIN wgs_users u ON r.created_by = u.user_id
                 WHERE r.id = :id

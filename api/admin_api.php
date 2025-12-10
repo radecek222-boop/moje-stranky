@@ -727,7 +727,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
             r.ulice, r.mesto, r.psc, r.adresa, r.model, r.provedeni, r.barva,
             r.popis_problemu, r.doplnujici_info, r.termin, r.cas_navstevy,
             r.stav, r.created_at as datum_vytvoreni, r.datum_dokonceni,
-            COALESCE(u.name, r.prodejce) as jmeno_prodejce,
+            COALESCE(u.name, 'Neznámý') as jmeno_prodejce,
             r.typ, r.technik, r.castka, r.fakturace_firma,
             r.pocet_dilu, r.cena_prace, r.cena_material, r.cena_druhy_technik, r.cena_doprava, r.cena_celkem
         FROM wgs_reklamace r

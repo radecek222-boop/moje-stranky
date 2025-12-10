@@ -210,11 +210,12 @@ try {
         $tableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
         if ($tableCheck->rowCount() === 0) {
             // Tabulka neexistuje - vytvořit ji
+            // BUGFIX: user_id je VARCHAR (PRO20250001, TCH20250002, ADMIN001), ne INT
             $pdo->exec("
                 CREATE TABLE IF NOT EXISTS wgs_pageviews (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     session_id VARCHAR(100),
-                    user_id INT NULL,
+                    user_id VARCHAR(50) NULL,
                     ip_address VARCHAR(45),
                     user_agent VARCHAR(500),
                     page_url VARCHAR(500),
