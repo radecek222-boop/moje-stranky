@@ -49,7 +49,7 @@ try {
         $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
         // Rozlišení podle role:
-        // - 'prodejce' → vidí POUZE SVÉ reklamace (created_by = user_id)
+        // - 'prodejce' → vidí SVÉ reklamace + reklamace SUPERVIZOVANÝCH prodejců
         // - 'technik' → vidí VŠECHNY reklamace (žádný filtr)
         // - 'guest' → vidí pouze své (email match)
 
@@ -57,11 +57,58 @@ try {
         $isTechnik = in_array($userRole, ['technik', 'technician'], true);
 
         if ($isProdejce) {
-            // PRODEJCE: Vidí pouze SVÉ reklamace
-            // Filtrace podle created_by (ID prodejce který vytvořil reklamaci)
+            // PRODEJCE: Vidí SVÉ reklamace + reklamace SUPERVIZOVANÝCH prodejců
             if ($userId !== null && in_array('created_by', $columns, true)) {
-                $whereParts[] = 'r.created_by = :created_by';
-                $params[':created_by'] = $userId;
+                // Načíst supervizované uživatele
+                $supervisedUserIds = [];
+                try {
+                    // Zjistit strukturu tabulky wgs_users
+                    $stmtCols = $pdo->query("SHOW COLUMNS FROM wgs_users");
+                    $userColumns = $stmtCols->fetchAll(PDO::FETCH_COLUMN);
+                    $idCol = in_array('user_id', $userColumns) ? 'user_id' : 'id';
+                    $numericIdCol = 'id';
+
+                    // Získat numerické ID aktuálního uživatele
+                    $currentNumericId = $userId;
+                    if (!is_numeric($userId)) {
+                        $stmtNum = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+                        $stmtNum->execute([':user_id' => $userId]);
+                        $numericId = $stmtNum->fetchColumn();
+                        if ($numericId) {
+                            $currentNumericId = $numericId;
+                        }
+                    }
+
+                    // Načíst user_id supervizovaných prodejců
+                    $stmtSup = $pdo->prepare("
+                        SELECT u.{$idCol}
+                        FROM wgs_supervisor_assignments sa
+                        JOIN wgs_users u ON u.{$numericIdCol} = sa.salesperson_user_id
+                        WHERE sa.supervisor_user_id = :user_id
+                    ");
+                    $stmtSup->execute([':user_id' => $currentNumericId]);
+                    $supervisedUserIds = $stmtSup->fetchAll(PDO::FETCH_COLUMN);
+                } catch (Exception $e) {
+                    // Tabulka možná neexistuje - pokračovat bez supervizorů
+                    error_log("Supervisor assignments check: " . $e->getMessage());
+                }
+
+                // Vytvořit WHERE podmínku - vlastní NEBO supervizované
+                if (!empty($supervisedUserIds)) {
+                    // Prodejce má přiřazené supervizované prodejce
+                    $allUserIds = array_merge([$userId], $supervisedUserIds);
+                    $placeholders = [];
+                    foreach ($allUserIds as $idx => $supUserId) {
+                        $paramName = ':user_id_' . $idx;
+                        $placeholders[] = $paramName;
+                        $params[$paramName] = $supUserId;
+                    }
+                    $whereParts[] = 'r.created_by IN (' . implode(', ', $placeholders) . ')';
+                } else {
+                    // Prodejce nemá supervizované - vidí jen své
+                    $whereParts[] = 'r.created_by = :created_by';
+                    $params[':created_by'] = $userId;
+                }
             } else {
                 // Pokud nemá user_id nebo neexistuje sloupec created_by, nevidí nic
                 $whereParts[] = '1 = 0';
