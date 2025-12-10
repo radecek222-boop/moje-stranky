@@ -11,6 +11,10 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'index.php',
                 'header_label' => 'DOMŮ',
             ],
+            'seznam' => [
+                'href' => 'seznam.php',
+                'header_label' => 'SEZNAM',
+            ],
             'nabidka' => [
                 'href' => 'cenova-nabidka.php',
                 'header_label' => 'CENOVÁ NABÍDKA',
@@ -26,10 +30,6 @@ if (!function_exists('loadAdminNavigation')) {
             'aktuality' => [
                 'href' => 'aktuality.php',
                 'header_label' => 'AKTUALITY',
-            ],
-            'psa_kalkulator' => [
-                'href' => 'psa-kalkulator.php',
-                'header_label' => 'PSA MZDY',
             ],
             'dashboard' => [
                 'href' => 'admin.php',

@@ -201,6 +201,50 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof zavritDetailModal === 'function') zavritDetailModal();
     });
 
+    // Users Management - Supervizor (admin.js)
+    Utils.registerAction('zobrazDetailUzivatele', (el, data) => {
+        if (data.id && typeof zobrazDetailUzivatele === 'function') {
+            zobrazDetailUzivatele(data.id);
+        }
+    });
+    Utils.registerAction('zavritDetailUzivatele', () => {
+        if (typeof zavritDetailUzivatele === 'function') zavritDetailUzivatele();
+    });
+    Utils.registerAction('ulozitZmenyUzivatele', (el, data) => {
+        if (data.id && typeof ulozitZmenyUzivatele === 'function') {
+            ulozitZmenyUzivatele(data.id);
+        }
+    });
+    Utils.registerAction('zmenitHesloUzivatele', (el, data) => {
+        if (data.id && typeof zmenitHesloUzivatele === 'function') {
+            zmenitHesloUzivatele(data.id);
+        }
+    });
+    Utils.registerAction('prepnoutStatusUzivatele', (el, data) => {
+        if (data.id && data.status && typeof prepnoutStatusUzivatele === 'function') {
+            prepnoutStatusUzivatele(data.id, data.status);
+        }
+    });
+    Utils.registerAction('otevritSpravuSupervize', (el, data) => {
+        if (data.id && typeof otevritSpravuSupervize === 'function') {
+            otevritSpravuSupervize(data.id);
+        }
+    });
+    Utils.registerAction('zavritSupervizorOverlay', () => {
+        if (typeof zavritSupervizorOverlay === 'function') zavritSupervizorOverlay();
+    });
+    Utils.registerAction('ulozitSupervizorPrirazeni', (el, data) => {
+        if (data.id && typeof ulozitSupervizorPrirazeni === 'function') {
+            ulozitSupervizorPrirazeni(data.id);
+        }
+    });
+    Utils.registerAction('deleteUser', (el, data) => {
+        if (data.id && typeof deleteUser === 'function') {
+            el.closest('[data-action="stopPropagation"]')?.dispatchEvent(new Event('click', { bubbles: false }));
+            deleteUser(data.id);
+        }
+    });
+
     // Testing (admin_testing.php)
     Utils.registerAction('cleanupTestData', () => {
         if (typeof cleanupTestData === 'function') cleanupTestData();

@@ -292,7 +292,7 @@ if ($isAdmin) {
   .hamburger-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
   .hamburger-toggle.active span:nth-child(2) { opacity: 0; }
   .hamburger-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
-  
+
   .hamburger-nav {
     position: fixed;
     top: 0;
@@ -300,19 +300,22 @@ if ($isAdmin) {
     width: 90%;
     max-width: 85vw; min-width: 200px;
     height: 100vh;
+    height: 100dvh; /* PWA fix: dynamic viewport height */
     background: var(--c-bg-dark, #000);
     flex-direction: column;
     padding: 80px 0 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0); /* PWA fix: iPhone home indicator */
     gap: 0;
     margin: 0;
     z-index: var(--z-hamburger-nav, 10000);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transition: right 0.3s ease;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
   }
-  
+
   .hamburger-nav.active { right: 0; }
-  
+
   .hamburger-nav a {
     display: block;
     padding: 1rem 1.5rem;
@@ -323,23 +326,34 @@ if ($isAdmin) {
     gap: 0;
     word-wrap: break-word; overflow-wrap: break-word;
   }
-  
+
   .hamburger-nav a:hover { background: rgba(255, 255, 255, 0.05); }
   .hamburger-nav a.active { background: rgba(255, 255, 255, 0.1); }
   .hamburger-nav a.active::after { display: none; }
-  
+
   .hamburger-lang-switcher {
     padding: 1rem 1.5rem;
-    
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0)); /* PWA fix */
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 0;
+    margin-top: auto; /* Posunout na spodek */
     gap: 1rem;
   }
-  
+
   .lang-flag { font-size: 1.3rem; }
   .hamburger-logo { font-size: 1.3rem; }
   .hamburger-logo span { font-size: 0.5rem; }
   body.hamburger-menu-open { overflow: hidden; }
+}
+
+/* PWA standalone mode - extra safe area handling */
+@media (display-mode: standalone) {
+  .hamburger-nav {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 20px));
+  }
+  .hamburger-lang-switcher {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 20px));
+  }
 }
 
 @media (max-width: 1024px) {
