@@ -1864,7 +1864,43 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/seznam.js?v=20251209-03" defer></script>
+<script src="/assets/js/seznam.js?v=20251210-01" defer></script>
+
+<!-- DIAGNOSTIKA: Debug log pro prodejce -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('=== DIAGNOSTIKA PRODEJCE ===');
+  console.log('CURRENT_USER:', JSON.stringify(CURRENT_USER, null, 2));
+  console.log('Je prodejce?', CURRENT_USER?.role === 'prodejce');
+
+  // Sledovat loadAll výsledky
+  const originalFetch = window.fetch;
+  window.fetch = async function(...args) {
+    const url = args[0];
+    if (url && url.includes('load.php')) {
+      console.log('[DIAGNOSTIKA] Voláno load.php:', url);
+      const response = await originalFetch.apply(this, args);
+      const clonedResponse = response.clone();
+      try {
+        const data = await clonedResponse.json();
+        console.log('[DIAGNOSTIKA] load.php odpověď:', {
+          status: data.status,
+          pocetZaznamu: data.data?.length || 0,
+          prvniZaznam: data.data?.[0] ? {
+            id: data.data[0].id,
+            reklamace_id: data.data[0].reklamace_id,
+            created_by: data.data[0].created_by
+          } : null
+        });
+      } catch (e) {
+        console.log('[DIAGNOSTIKA] Nelze parsovat odpověď');
+      }
+      return response;
+    }
+    return originalFetch.apply(this, args);
+  };
+});
+</script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
