@@ -3,9 +3,9 @@
  * Migrace: Oprava created_by sloupce pro reklamace prodejců
  *
  * Tento skript:
- * 1. Najde reklamace kde 'prodejce' je vyplněný ale 'created_by' je NULL
- * 2. Propojí textové jméno prodejce s user_id z wgs_users
- * 3. Aktualizuje created_by na správné hodnoty
+ * 1. Zobrazí strukturu tabulky wgs_reklamace
+ * 2. Najde reklamace bez created_by
+ * 3. Umožní propojit záznamy s uživateli
  *
  * BEZPEČNÝ: Můžete spustit vícekrát - aktualizuje jen NULL hodnoty
  */
@@ -56,6 +56,7 @@ echo "<!DOCTYPE html>
         tr:nth-child(even) { background: #f9f9f9; }
         .count { font-size: 24px; font-weight: bold; color: #333; }
         code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+        .scroll { max-height: 400px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -66,268 +67,263 @@ try {
 
     echo "<h1>Migrace: Oprava created_by prodejců</h1>";
 
+    // 1. STRUKTURA TABULKY wgs_reklamace
+    echo "<h2>1. Struktura tabulky wgs_reklamace</h2>";
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace");
+    $reklamaceColumns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $columnNames = array_column($reklamaceColumns, 'Field');
+    $hasCreatedBy = in_array('created_by', $columnNames);
+    $hasZpracovalId = in_array('zpracoval_id', $columnNames);
+    $hasProdejce = in_array('prodejce', $columnNames);
+    $hasZpracoval = in_array('zpracoval', $columnNames);
+    $hasEmailZadavatele = in_array('email_zadavatele', $columnNames);
+
+    echo "<div class='info'>";
+    echo "<strong>Relevantní sloupce:</strong><br>";
+    echo "created_by: " . ($hasCreatedBy ? '<span style="color:green">EXISTUJE</span>' : '<span style="color:red">NEEXISTUJE</span>') . "<br>";
+    echo "zpracoval_id: " . ($hasZpracovalId ? '<span style="color:green">EXISTUJE</span>' : '<span style="color:red">NEEXISTUJE</span>') . "<br>";
+    echo "prodejce: " . ($hasProdejce ? '<span style="color:green">EXISTUJE</span>' : '<span style="color:red">NEEXISTUJE</span>') . "<br>";
+    echo "zpracoval: " . ($hasZpracoval ? '<span style="color:green">EXISTUJE</span>' : '<span style="color:red">NEEXISTUJE</span>') . "<br>";
+    echo "email_zadavatele: " . ($hasEmailZadavatele ? '<span style="color:green">EXISTUJE</span>' : '<span style="color:red">NEEXISTUJE</span>') . "<br>";
+    echo "</div>";
+
     // Zjistit strukturu tabulky wgs_users
     $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
     $userColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $hasUserId = in_array('user_id', $userColumns);
     $idCol = $hasUserId ? 'user_id' : 'id';
 
-    // 1. STATISTIKY
-    echo "<h2>1. Statistiky reklamací</h2>";
+    // 2. STATISTIKY
+    echo "<h2>2. Statistiky reklamací</h2>";
 
     // Celkový počet reklamací
     $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace");
     $celkem = $stmt->fetchColumn();
 
     // Reklamace s vyplněným created_by
-    $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by IS NOT NULL AND created_by != ''");
-    $sCreatedBy = $stmt->fetchColumn();
+    $sCreatedBy = 0;
+    if ($hasCreatedBy) {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by IS NOT NULL AND created_by != ''");
+        $sCreatedBy = $stmt->fetchColumn();
+    }
 
-    // Reklamace s vyplněným prodejce ale BEZ created_by
-    $stmt = $pdo->query("
-        SELECT COUNT(*) FROM wgs_reklamace
-        WHERE (created_by IS NULL OR created_by = '')
-        AND prodejce IS NOT NULL AND prodejce != ''
-    ");
-    $kOprave = $stmt->fetchColumn();
+    // Reklamace BEZ created_by
+    $bezCreatedBy = $celkem - $sCreatedBy;
 
     echo "<table>";
     echo "<tr><th>Metrika</th><th>Počet</th></tr>";
     echo "<tr><td>Celkem reklamací</td><td class='count'>{$celkem}</td></tr>";
     echo "<tr><td>S vyplněným created_by</td><td class='count'>{$sCreatedBy}</td></tr>";
-    echo "<tr><td style='color:#dc3545;font-weight:bold'>K OPRAVĚ (prodejce vyplněn, created_by prázdný)</td><td class='count' style='color:#dc3545'>{$kOprave}</td></tr>";
+    echo "<tr><td style='color:#dc3545;font-weight:bold'>BEZ created_by (potenciální problém)</td><td class='count' style='color:#dc3545'>{$bezCreatedBy}</td></tr>";
     echo "</table>";
 
-    // 2. SEZNAM UNIKÁTNÍCH PRODEJCŮ BEZ CREATED_BY
-    echo "<h2>2. Prodejci bez propojeného created_by</h2>";
-
-    $stmt = $pdo->query("
-        SELECT
-            r.prodejce,
-            COUNT(*) as pocet_reklamaci,
-            GROUP_CONCAT(DISTINCT r.reklamace_id ORDER BY r.reklamace_id SEPARATOR ', ') as reklamace_ids
-        FROM wgs_reklamace r
-        WHERE (r.created_by IS NULL OR r.created_by = '')
-        AND r.prodejce IS NOT NULL AND r.prodejce != ''
-        GROUP BY r.prodejce
-        ORDER BY pocet_reklamaci DESC
-    ");
-    $prodejciBezCreatedBy = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (empty($prodejciBezCreatedBy)) {
-        echo "<div class='success'>Všechny reklamace mají správně vyplněný created_by!</div>";
-    } else {
-        echo "<table>";
-        echo "<tr><th>Prodejce (text)</th><th>Počet reklamací</th><th>Reklamace IDs</th><th>Nalezené user_id</th></tr>";
-
-        foreach ($prodejciBezCreatedBy as $prodejce) {
-            $jmeno = $prodejce['prodejce'];
-            $pocet = $prodejce['pocet_reklamaci'];
-            $ids = strlen($prodejce['reklamace_ids']) > 50
-                ? substr($prodejce['reklamace_ids'], 0, 50) . '...'
-                : $prodejce['reklamace_ids'];
-
-            // Zkusit najít odpovídající uživatele v wgs_users
-            $stmtUser = $pdo->prepare("
-                SELECT {$idCol}, name, email
-                FROM wgs_users
-                WHERE name LIKE :jmeno
-                OR CONCAT(name, ' ', email) LIKE :jmeno2
-                LIMIT 3
-            ");
-            $stmtUser->execute([
-                ':jmeno' => '%' . $jmeno . '%',
-                ':jmeno2' => '%' . $jmeno . '%'
-            ]);
-            $nalezenUsers = $stmtUser->fetchAll(PDO::FETCH_ASSOC);
-
-            $userInfo = '';
-            if (!empty($nalezenUsers)) {
-                $userInfo = '<span style="color:green">';
-                foreach ($nalezenUsers as $u) {
-                    $userInfo .= htmlspecialchars($u[$idCol]) . ' (' . htmlspecialchars($u['name']) . ')';
-                    if ($u !== end($nalezenUsers)) $userInfo .= ', ';
-                }
-                $userInfo .= '</span>';
-            } else {
-                $userInfo = '<span style="color:#dc3545">NENALEZEN</span>';
-            }
-
-            echo "<tr>";
-            echo "<td><strong>" . htmlspecialchars($jmeno) . "</strong></td>";
-            echo "<td>{$pocet}</td>";
-            echo "<td><code>{$ids}</code></td>";
-            echo "<td>{$userInfo}</td>";
-            echo "</tr>";
-        }
-        echo "</table>";
-    }
-
-    // 3. SEZNAM VŠECH UŽIVATELŮ V SYSTÉMU
+    // 3. VŠICHNI UŽIVATELÉ V SYSTÉMU
     echo "<h2>3. Všichni uživatelé v systému (wgs_users)</h2>";
 
-    $stmt = $pdo->query("SELECT {$idCol} as user_id, name, email, role FROM wgs_users ORDER BY name");
+    $stmt = $pdo->query("SELECT {$idCol} as user_id, id, name, email, role FROM wgs_users ORDER BY name");
     $vsichniUzivatele = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<table>";
-    echo "<tr><th>user_id</th><th>Jméno</th><th>Email</th><th>Role</th></tr>";
+    echo "<tr><th>user_id (VARCHAR)</th><th>id (INT)</th><th>Jméno</th><th>Email</th><th>Role</th></tr>";
     foreach ($vsichniUzivatele as $u) {
         echo "<tr>";
-        echo "<td><code>" . htmlspecialchars($u['user_id']) . "</code></td>";
-        echo "<td>" . htmlspecialchars($u['name']) . "</td>";
-        echo "<td>" . htmlspecialchars($u['email']) . "</td>";
+        echo "<td><code>" . htmlspecialchars($u['user_id'] ?? '-') . "</code></td>";
+        echo "<td><code>" . htmlspecialchars($u['id'] ?? '-') . "</code></td>";
+        echo "<td>" . htmlspecialchars($u['name'] ?? '-') . "</td>";
+        echo "<td>" . htmlspecialchars($u['email'] ?? '-') . "</td>";
         echo "<td>" . htmlspecialchars($u['role'] ?? '-') . "</td>";
         echo "</tr>";
     }
     echo "</table>";
 
-    // 4. KONKRÉTNÍ INFO O SIMONU STREJCKOVI
+    // 4. HLEDÁNÍ SIMON STREJCEK
     echo "<h2>4. Hledání: Simon Strejcek</h2>";
 
     $stmt = $pdo->prepare("SELECT * FROM wgs_users WHERE name LIKE :jmeno OR email LIKE :email");
-    $stmt->execute([':jmeno' => '%Simon%Strejcek%', ':email' => '%strejcek%']);
+    $stmt->execute([':jmeno' => '%Simon%', ':email' => '%strejcek%']);
     $simonUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($simonUser) {
         echo "<div class='success'>";
         echo "<strong>Nalezen uživatel:</strong><br>";
-        echo "user_id: <code>" . htmlspecialchars($simonUser[$idCol] ?? $simonUser['id'] ?? 'N/A') . "</code><br>";
+        echo "user_id (VARCHAR): <code>" . htmlspecialchars($simonUser['user_id'] ?? 'N/A') . "</code><br>";
+        echo "id (INT): <code>" . htmlspecialchars($simonUser['id'] ?? 'N/A') . "</code><br>";
         echo "Jméno: " . htmlspecialchars($simonUser['name'] ?? 'N/A') . "<br>";
         echo "Email: " . htmlspecialchars($simonUser['email'] ?? 'N/A') . "<br>";
         echo "Role: " . htmlspecialchars($simonUser['role'] ?? 'N/A');
         echo "</div>";
 
-        $simonId = $simonUser[$idCol] ?? $simonUser['id'] ?? null;
+        $simonUserId = $simonUser['user_id'] ?? null;
+        $simonIntId = $simonUser['id'] ?? null;
 
         // Kolik reklamací má tento uživatel
-        if ($simonId) {
+        if ($hasCreatedBy && $simonUserId) {
+            // Test s VARCHAR user_id
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by = :id");
-            $stmt->execute([':id' => $simonId]);
-            $simonReklamace = $stmt->fetchColumn();
+            $stmt->execute([':id' => $simonUserId]);
+            $simonReklamaceVarchar = $stmt->fetchColumn();
 
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM wgs_reklamace WHERE prodejce LIKE :jmeno");
-            $stmt->execute([':jmeno' => '%' . ($simonUser['name'] ?? 'Simon') . '%']);
-            $simonProdejceText = $stmt->fetchColumn();
+            // Test s INT id
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by = :id");
+            $stmt->execute([':id' => $simonIntId]);
+            $simonReklamaceInt = $stmt->fetchColumn();
 
             echo "<div class='info'>";
-            echo "Reklamace s <code>created_by = '{$simonId}'</code>: <strong>{$simonReklamace}</strong><br>";
-            echo "Reklamace s <code>prodejce LIKE '{$simonUser['name']}'</code>: <strong>{$simonProdejceText}</strong>";
+            echo "Reklamace s <code>created_by = '{$simonUserId}'</code> (VARCHAR): <strong>{$simonReklamaceVarchar}</strong><br>";
+            echo "Reklamace s <code>created_by = '{$simonIntId}'</code> (INT): <strong>{$simonReklamaceInt}</strong>";
             echo "</div>";
 
-            if ($simonProdejceText > $simonReklamace) {
-                echo "<div class='warning'>";
+            if ($simonReklamaceVarchar == 0 && $simonReklamaceInt == 0) {
+                echo "<div class='error'>";
                 echo "<strong>PROBLÉM NALEZEN!</strong><br>";
-                echo "Simon má " . ($simonProdejceText - $simonReklamace) . " reklamací kde je uveden jako prodejce (text), ";
-                echo "ale created_by není správně nastaveno!";
+                echo "Simon Strejcek nemá žádné reklamace s vyplněným created_by!";
                 echo "</div>";
             }
         }
     } else {
         echo "<div class='error'>Uživatel 'Simon Strejcek' nebyl nalezen v tabulce wgs_users!</div>";
 
-        // Zkusit najít v reklamacích
-        $stmt = $pdo->query("SELECT DISTINCT prodejce FROM wgs_reklamace WHERE prodejce LIKE '%Simon%' OR prodejce LIKE '%Strejcek%'");
-        $simonProdejce = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // Hledat podobná jména
+        $stmt = $pdo->query("SELECT name FROM wgs_users WHERE name LIKE '%Simon%' OR name LIKE '%Strejcek%'");
+        $podobni = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (!empty($simonProdejce)) {
-            echo "<div class='info'>V reklamacích nalezeny tyto hodnoty prodejce:<br>";
-            foreach ($simonProdejce as $p) {
-                echo "- <code>" . htmlspecialchars($p) . "</code><br>";
+        if (!empty($podobni)) {
+            echo "<div class='info'>Podobná jména v systému:<br>";
+            foreach ($podobni as $jmeno) {
+                echo "- " . htmlspecialchars($jmeno) . "<br>";
             }
             echo "</div>";
         }
     }
 
-    // 5. AKCE - OPRAVA
-    echo "<h2>5. Opravit created_by</h2>";
+    // 5. UKÁZKA REKLAMACÍ BEZ CREATED_BY
+    echo "<h2>5. Reklamace bez created_by (ukázka)</h2>";
 
-    if (isset($_GET['execute']) && $_GET['execute'] === '1') {
-        echo "<div class='info'><strong>SPOUŠTÍM OPRAVU...</strong></div>";
+    if ($hasCreatedBy) {
+        $stmt = $pdo->query("
+            SELECT id, reklamace_id, cislo, jmeno, email, stav, created_at
+            FROM wgs_reklamace
+            WHERE created_by IS NULL OR created_by = ''
+            ORDER BY created_at DESC
+            LIMIT 20
+        ");
+        $bezCreatedByUkazka = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $pdo->beginTransaction();
+        if (empty($bezCreatedByUkazka)) {
+            echo "<div class='success'>Všechny reklamace mají vyplněný created_by!</div>";
+        } else {
+            echo "<div class='scroll'>";
+            echo "<table>";
+            echo "<tr><th>ID</th><th>Reklamace ID</th><th>Číslo</th><th>Zákazník</th><th>Email</th><th>Stav</th><th>Vytvořeno</th></tr>";
+            foreach ($bezCreatedByUkazka as $r) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($r['id'] ?? '-') . "</td>";
+                echo "<td><code>" . htmlspecialchars($r['reklamace_id'] ?? '-') . "</code></td>";
+                echo "<td><code>" . htmlspecialchars($r['cislo'] ?? '-') . "</code></td>";
+                echo "<td>" . htmlspecialchars($r['jmeno'] ?? '-') . "</td>";
+                echo "<td>" . htmlspecialchars($r['email'] ?? '-') . "</td>";
+                echo "<td>" . htmlspecialchars($r['stav'] ?? '-') . "</td>";
+                echo "<td>" . htmlspecialchars($r['created_at'] ?? '-') . "</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            echo "</div>";
+        }
+    }
 
-        try {
-            $opraveno = 0;
+    // 6. RUČNÍ OPRAVA PRO SIMONA
+    echo "<h2>6. Opravit reklamace pro Simona Strejcka</h2>";
 
-            // Pro každého prodejce bez created_by zkusit najít odpovídající user_id
-            foreach ($prodejciBezCreatedBy as $prodejce) {
-                $jmenoProdejce = $prodejce['prodejce'];
+    if ($simonUser && $hasCreatedBy) {
+        $simonUserId = $simonUser['user_id'] ?? null;
 
-                // Hledat přesnou shodu jména
-                $stmtUser = $pdo->prepare("SELECT {$idCol} FROM wgs_users WHERE name = :jmeno LIMIT 1");
-                $stmtUser->execute([':jmeno' => $jmenoProdejce]);
-                $userId = $stmtUser->fetchColumn();
+        if (isset($_GET['fix_simon']) && $_GET['fix_simon'] === '1' && $simonUserId) {
+            // Aktualizovat vybrané reklamace
+            $ids = $_GET['ids'] ?? '';
+            $idList = array_filter(array_map('intval', explode(',', $ids)));
 
-                // Pokud nenalezeno, zkusit částečnou shodu
-                if (!$userId) {
-                    $stmtUser = $pdo->prepare("SELECT {$idCol} FROM wgs_users WHERE name LIKE :jmeno LIMIT 1");
-                    $stmtUser->execute([':jmeno' => '%' . $jmenoProdejce . '%']);
-                    $userId = $stmtUser->fetchColumn();
-                }
-
-                if ($userId) {
-                    // Aktualizovat všechny reklamace tohoto prodejce
-                    $stmtUpdate = $pdo->prepare("
+            if (!empty($idList)) {
+                $pdo->beginTransaction();
+                try {
+                    $placeholders = implode(',', array_fill(0, count($idList), '?'));
+                    $stmt = $pdo->prepare("
                         UPDATE wgs_reklamace
-                        SET created_by = :user_id,
-                            created_by_role = 'prodejce',
-                            zpracoval_id = :user_id2
-                        WHERE prodejce = :prodejce
+                        SET created_by = ?,
+                            created_by_role = 'prodejce'
+                        WHERE id IN ({$placeholders})
                         AND (created_by IS NULL OR created_by = '')
                     ");
-                    $stmtUpdate->execute([
-                        ':user_id' => $userId,
-                        ':user_id2' => $userId,
-                        ':prodejce' => $jmenoProdejce
-                    ]);
 
-                    $pocetAktualizovanych = $stmtUpdate->rowCount();
-                    $opraveno += $pocetAktualizovanych;
+                    $params = array_merge([$simonUserId], $idList);
+                    $stmt->execute($params);
+
+                    $aktualizovano = $stmt->rowCount();
+                    $pdo->commit();
 
                     echo "<div class='success'>";
-                    echo "Prodejce '<strong>" . htmlspecialchars($jmenoProdejce) . "</strong>' -> ";
-                    echo "user_id '<code>{$userId}</code>': ";
-                    echo "<strong>{$pocetAktualizovanych}</strong> reklamací opraveno";
+                    echo "<strong>OPRAVENO!</strong><br>";
+                    echo "Aktualizováno <strong>{$aktualizovano}</strong> reklamací pro Simona Strejcka.";
                     echo "</div>";
-                } else {
-                    echo "<div class='warning'>";
-                    echo "Prodejce '<strong>" . htmlspecialchars($jmenoProdejce) . "</strong>': ";
-                    echo "Nenalezen odpovídající uživatel v wgs_users - PŘESKOČENO";
-                    echo "</div>";
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    echo "<div class='error'>Chyba: " . htmlspecialchars($e->getMessage()) . "</div>";
                 }
+            } else {
+                echo "<div class='warning'>Nebyla vybrána žádná ID reklamací k opravě.</div>";
             }
-
-            $pdo->commit();
-
-            echo "<div class='success' style='font-size: 18px; margin-top: 20px;'>";
-            echo "<strong>MIGRACE DOKONČENA!</strong><br>";
-            echo "Celkem opraveno: <strong>{$opraveno}</strong> reklamací";
+        } else {
+            echo "<div class='info'>";
+            echo "Pro opravu reklamací pro Simona Strejcka:<br><br>";
+            echo "1. Zjistěte ID reklamací, které patří Simonovi<br>";
+            echo "2. Zadejte je do URL parametru: <code>?fix_simon=1&ids=1,2,3,4,5</code><br><br>";
+            echo "Simon's user_id: <code>" . htmlspecialchars($simonUserId) . "</code>";
             echo "</div>";
 
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            echo "<div class='error'>";
-            echo "<strong>CHYBA:</strong><br>";
-            echo htmlspecialchars($e->getMessage());
-            echo "</div>";
+            // Nabídnout rychlou opravu všech reklamací bez created_by
+            if ($bezCreatedBy > 0) {
+                echo "<div class='warning'>";
+                echo "<strong>Rychlá oprava:</strong><br>";
+                echo "Máte <strong>{$bezCreatedBy}</strong> reklamací bez created_by.<br><br>";
+                echo "Pokud VŠECHNY tyto reklamace patří Simonovi, můžete je opravit hromadně:<br>";
+                echo "<a href='?fix_all_simon=1' class='btn' onclick=\"return confirm('Opravdu přiřadit VŠECHNY reklamace bez created_by Simonovi?')\">Přiřadit všechny Simonovi</a>";
+                echo "</div>";
+            }
+        }
+
+        // Hromadná oprava všech
+        if (isset($_GET['fix_all_simon']) && $_GET['fix_all_simon'] === '1' && $simonUserId) {
+            $pdo->beginTransaction();
+            try {
+                $stmt = $pdo->prepare("
+                    UPDATE wgs_reklamace
+                    SET created_by = :user_id,
+                        created_by_role = 'prodejce'
+                    WHERE created_by IS NULL OR created_by = ''
+                ");
+                $stmt->execute([':user_id' => $simonUserId]);
+
+                $aktualizovano = $stmt->rowCount();
+                $pdo->commit();
+
+                echo "<div class='success' style='font-size: 18px;'>";
+                echo "<strong>HROMADNÁ OPRAVA DOKONČENA!</strong><br>";
+                echo "Aktualizováno <strong>{$aktualizovano}</strong> reklamací - created_by nastaveno na '{$simonUserId}'.";
+                echo "</div>";
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                echo "<div class='error'>Chyba: " . htmlspecialchars($e->getMessage()) . "</div>";
+            }
         }
     } else {
-        if ($kOprave > 0) {
-            echo "<div class='warning'>";
-            echo "<strong>Nalezeno {$kOprave} reklamací k opravě!</strong><br><br>";
-            echo "Kliknutím na tlačítko níže se aktualizuje sloupec <code>created_by</code> ";
-            echo "na základě textového jména v sloupci <code>prodejce</code>.";
-            echo "</div>";
-
-            echo "<a href='?execute=1' class='btn' onclick=\"return confirm('Opravdu spustit opravu {$kOprave} reklamací?')\">SPUSTIT OPRAVU</a>";
-        } else {
-            echo "<div class='success'>Není co opravovat - všechny reklamace mají správně vyplněný created_by!</div>";
-        }
+        echo "<div class='warning'>Simon Strejcek nebyl nalezen nebo sloupec created_by neexistuje.</div>";
     }
 
     echo "<br><br>";
     echo "<a href='/admin.php' class='btn'>Zpět do Admin</a>";
     echo "<a href='/seznam.php' class='btn'>Seznam reklamací</a>";
+    echo "<a href='?' class='btn'>Obnovit stránku</a>";
 
 } catch (Exception $e) {
     echo "<div class='error'>" . htmlspecialchars($e->getMessage()) . "</div>";
