@@ -164,11 +164,12 @@ const Utils = {
     const supervisedIds = (CURRENT_USER.supervised_user_ids || []).map(String);
 
     return items.filter(x => {
-      const zpracovalId = String(x.zpracoval_id);
+      // OPRAVA: Použít created_by místo zpracoval_id (ten sloupec neexistuje)
+      const createdBy = String(x.created_by || '');
       // Moje zakázky
-      if (zpracovalId === myId) return true;
+      if (createdBy === myId) return true;
       // Zakázky supervizovaných prodejců
-      if (supervisedIds.includes(zpracovalId)) return true;
+      if (supervisedIds.includes(createdBy)) return true;
       return false;
     });
   }
