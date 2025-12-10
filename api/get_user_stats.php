@@ -42,8 +42,9 @@ try {
 
         if ($isProdejce) {
             // PRODEJCE: Vidí pouze SVÉ reklamace
+            // Použijeme 'r.' prefix pro kompatibilitu s JOIN dotazy
             if ($userId !== null) {
-                $whereParts[] = 'created_by = :created_by';
+                $whereParts[] = 'r.created_by = :created_by';
                 $params[':created_by'] = $userId;
             } else {
                 // Bez user_id nevidí nic
@@ -55,7 +56,7 @@ try {
         } else {
             // GUEST: Vidí zakázky se svým emailem
             if ($userEmail) {
-                $whereParts[] = 'LOWER(TRIM(email)) = LOWER(TRIM(:email))';
+                $whereParts[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:email))';
                 $params[':email'] = $userEmail;
             } else {
                 $whereParts[] = '1 = 0';
@@ -64,20 +65,25 @@ try {
     }
     // Admin vidí VŠE (žádný filtr)
 
-    // Sestavit WHERE klauzuli
+    // Sestavit WHERE klauzule - dvě verze
+    // $whereClause = pro hlavní dotaz s WHERE na začátku
+    // $whereClauseAnd = pro dotazy které už mají WHERE (přidá se jako AND)
     $whereClause = '';
+    $whereClauseAnd = '';
     if (!empty($whereParts)) {
         $whereClause = 'WHERE ' . implode(' AND ', $whereParts);
+        $whereClauseAnd = 'AND ' . implode(' AND ', $whereParts);
     }
 
     // Získat počty podle stavů
+    // FIX: Přidán alias 'r' pro konzistenci s ostatními dotazy (WHERE používá r.created_by)
     $sql = "
         SELECT
             COUNT(*) as total,
-            SUM(CASE WHEN stav = 'wait' THEN 1 ELSE 0 END) as ceka,
-            SUM(CASE WHEN stav = 'open' THEN 1 ELSE 0 END) as domluvena,
-            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotovo
-        FROM wgs_reklamace
+            SUM(CASE WHEN r.stav = 'wait' THEN 1 ELSE 0 END) as ceka,
+            SUM(CASE WHEN r.stav = 'open' THEN 1 ELSE 0 END) as domluvena,
+            SUM(CASE WHEN r.stav = 'done' THEN 1 ELSE 0 END) as hotovo
+        FROM wgs_reklamace r
         $whereClause
     ";
 
@@ -91,6 +97,7 @@ try {
     $notifParams[':user_email'] = $userEmail;
     $notifParams[':user_email_author'] = $userEmail;
 
+    // FIX: Použít $whereClauseAnd místo $whereClause (už máme WHERE výše)
     $sqlNotifications = "
         SELECT COUNT(*) as unread_count
         FROM wgs_notes n
@@ -98,7 +105,7 @@ try {
         LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
         WHERE nr.id IS NULL
           AND n.created_by != :user_email_author
-          $whereClause
+          $whereClauseAnd
     ";
 
     $stmtNotif = $pdo->prepare($sqlNotifications);
