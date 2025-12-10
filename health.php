@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Health Check Endpoint
  * Rychlá kontrola stavu aplikace pro monitoring nástroje
