@@ -194,32 +194,22 @@ Options -Indexes +FollowSymLinks
 </IfModule>
 
 # ======================================
-# PHP Session Settings
+# PHP Session Settings - KRITICKÁ OPRAVA
 # ======================================
-# FIX iOS PWA: Session parametry jsou nastaveny v init.php
-# Zakomentováno - tento blok přepisoval hodnoty z PHP na 3600s (1 hodina)
-# což způsobovalo konflikt s 30-denním lifetime nastaveným v init.php
-#
-# <IfModule mod_php.c>
-#     php_value session.cookie_lifetime 3600
-#     php_value session.gc_maxlifetime 3600
-#     php_flag session.cookie_httponly On
-#     php_flag session.cookie_secure On
-#     php_value session.cookie_samesite Lax
-#     php_flag session.use_only_cookies On
-#     php_value session.cookie_path /
-# </IfModule>
 
-# ======================================
-# Block internal/utility scripts
-# ======================================
-# Tyto skripty jsou určeny pouze pro CLI/localhost, ne pro webový přístup
-<FilesMatch "^(api_test|video_api_raw_debug|oprav_vse_najednou|install_admin_control_center|_diag_session)\.php$">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        Order deny,allow
-        Deny from all
-    </IfModule>
-</FilesMatch>
+<IfModule mod_php.c>
+    # Session cookie parametry - VYNUCENO na úrovni Apache
+    php_value session.cookie_lifetime 3600
+    php_value session.gc_maxlifetime 3600
+    php_flag session.cookie_httponly On
+    php_flag session.cookie_secure On
+    php_value session.cookie_samesite Lax
+    php_flag session.use_only_cookies On
+    php_value session.cookie_path /
+</IfModule>
+
+# Pro PHP-FPM (pokud mod_php není dostupný)
+<IfModule !mod_php.c>
+    # Session nastavení přes .user.ini nebo php-fpm config
+    # Tyto hodnoty budou použity pokud mod_php není aktivní
+</IfModule>
