@@ -444,8 +444,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <?php endif; ?>
             <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
             <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
-              <option value="CZ" selected>🇨🇿 CZ</option>
-              <option value="SK">🇸🇰 SK</option>
+              <option value="CZ" selected>CZ</option>
+              <option value="SK">SK</option>
             </select>
             <p id="faktura_hint" style="margin-top:0.3rem; font-size:0.8rem; color:#047857; font-style:italic;">Tato objednávka se bude fakturovat na CZ firmu</p>
           </div>
@@ -499,14 +499,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <label class="form-label" for="telefon" data-lang-cs="Telefon *" data-lang-en="Phone *" data-lang-it="Telefono *">Telefon *</label>
             <div class="phone-input-wrapper">
               <select class="form-control phone-prefix" id="phone-prefix" name="phone_prefix" aria-label="Telefonní předvolba">
-                <option value="+420" selected>🇨🇿 +420</option>
-                <option value="+421">🇸🇰 +421</option>
-                <option value="+39">🇮🇹 +39</option>
-                <option value="+43">🇦🇹 +43</option>
-                <option value="+49">🇩🇪 +49</option>
-                <option value="+33">🇫🇷 +33</option>
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+48">🇵🇱 +48</option>
+                <option value="+420" selected>CZ +420</option>
+                <option value="+421">SK +421</option>
+                <option value="+39">IT +39</option>
+                <option value="+43">AT +43</option>
+                <option value="+49">DE +49</option>
+                <option value="+33">FR +33</option>
+                <option value="+44">GB +44</option>
+                <option value="+48">PL +48</option>
               </select>
               <input type="tel" class="form-control phone-number" id="telefon" name="telefon" autocomplete="tel-national" placeholder="123 456 789" required>
             </div>

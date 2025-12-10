@@ -779,11 +779,11 @@ body {
           <div class="multiselect-dropdown" id="zeme-dropdown" role="listbox" aria-labelledby="label-zeme">
             <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-cz" value="cz" checked>
-              <label for="zeme-cz">🇨🇿 Česko</label>
+              <label for="zeme-cz"><img src="/assets/img/flags/cz.svg" alt="CZ" width="18" height="12" style="vertical-align: middle; margin-right: 4px;">Česko</label>
             </div>
             <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-sk" value="sk" checked>
-              <label for="zeme-sk">🇸🇰 Slovensko</label>
+              <label for="zeme-sk">SK Slovensko</label>
             </div>
           </div>
         </div>
