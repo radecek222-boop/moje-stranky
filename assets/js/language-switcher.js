@@ -13,15 +13,32 @@
    * Přepne jazyk na celé stránce
    * @param {string} jazyk - Kód jazyka: 'cs', 'en', 'it'
    */
-  window.prepniJazyk = function(jazyk) {
+  window.prepniJazyk = async function(jazyk) {
     if (!['cs', 'en', 'it'].includes(jazyk)) {
       console.warn('Nepodporovaný jazyk:', jazyk);
       return;
     }
 
+    // ADMIN: Na stránce aktualit - automatický překlad při přepnutí na EN/IT
+    const jeNaAktualitach = window.location.pathname.includes('aktuality');
+    const jeAdmin = document.body.classList.contains('admin-mode') ||
+                    document.querySelector('.hamburger-nav.admin-nav-active') !== null;
+
+    if (jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
+      await spustitPrekladAktualit(jazyk);
+    }
+
     aktualniJazyk = jazyk;
     localStorage.setItem('wgs-lang', jazyk);
     document.documentElement.lang = jazyk;
+
+    // Na stránce aktualit přesměrovat s parametrem ?lang=
+    if (jeNaAktualitach) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', jazyk === 'cs' ? 'cz' : jazyk);
+      window.location.href = url.toString();
+      return;
+    }
 
     // Aktualizovat všechny elementy s data-lang atributy
     aktualizujTexty(jazyk);
@@ -38,6 +55,61 @@
     // Aktualizovat title stránky (pokud existuje)
     aktualizujTitle(jazyk);
   };
+
+  /**
+   * Spustí automatický překlad všech aktualit do cílového jazyka (pouze admin)
+   * @param {string} cilovyJazyk - 'en' nebo 'it'
+   */
+  async function spustitPrekladAktualit(cilovyJazyk) {
+    try {
+      // Zobrazit indikátor načítání
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'preklad-loading';
+      loadingDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.9);
+        color: #39ff14;
+        padding: 30px 50px;
+        border-radius: 10px;
+        z-index: 99999;
+        font-size: 1.2em;
+        text-align: center;
+        border: 2px solid #39ff14;
+        box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+      `;
+      loadingDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">Překládám aktuality do ${cilovyJazyk.toUpperCase()}...</div>
+        <div style="font-size: 0.8em; opacity: 0.7;">Prosím čekejte</div>
+      `;
+      document.body.appendChild(loadingDiv);
+
+      // Zavolat API pro překlad
+      const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`);
+      const data = await response.json();
+
+      // Odstranit indikátor
+      loadingDiv.remove();
+
+      if (data.status === 'success') {
+        console.log('Překlad dokončen:', data);
+        // Pokud byly přeloženy nějaké aktuality, zobrazit info
+        if (data.data && data.data.prelozeno > 0) {
+          console.log(`Přeloženo ${data.data.prelozeno} aktualit do ${cilovyJazyk.toUpperCase()}`);
+        }
+      } else {
+        console.error('Chyba překladu:', data.message);
+      }
+
+    } catch (error) {
+      console.error('Chyba při překladu aktualit:', error);
+      // Odstranit loading pokud existuje
+      const loading = document.getElementById('preklad-loading');
+      if (loading) loading.remove();
+    }
+  }
 
   /**
    * Aktualizuje textový obsah elementů podle data-lang atributů
