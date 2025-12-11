@@ -67,12 +67,13 @@ try {
     require_once $rateLimiterPath;
 
     // Získat IP adresu návštěvníka
-    $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    if (strpos($ipAddress, ',') !== false) {
-        $ipAddress = trim(explode(',', $ipAddress)[0]);
+    $originalIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    if (strpos($originalIp, ',') !== false) {
+        $originalIp = trim(explode(',', $originalIp)[0]);
     }
 
-    // GDPR: Anonymizovat IP adresu (poslední oktet = 0)
+    // GDPR: Anonymizovat IP adresu pro uložení (poslední oktet = 0)
+    $ipAddress = $originalIp;
     if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
         $parts = explode('.', $ipAddress);
         $parts[3] = '0';
@@ -81,6 +82,7 @@ try {
         // IPv6 - anonymizovat posledních 64 bitů
         $ipAddress = preg_replace('/:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}$/', ':0:0:0:0', $ipAddress);
     }
+    // POZN: $originalIp se použije pouze pro GeoIP lookup, nikdy se neukládá
 
     // Pokusit se získat DB spojení BEZPEČNĚ (bez die())
     // Standardní getDbConnection() volá die() při selhání, což nelze zachytit
@@ -201,9 +203,18 @@ try {
     $screenResolution = $data['screen_resolution'] ?? null;
     $language = $data['language'] ?? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'cs', 0, 2);
 
-    // Geo data (zatím základní, můžete integrovat GeoIP službu)
+    // Geo data - GeoIP lookup pomocí ip-api.com (45 req/min free)
     $countryCode = $data['country_code'] ?? 'CZ';
     $city = $data['city'] ?? null;
+
+    // Pokud město není posláno, zkusit GeoIP lookup s originální IP (ne anonymizovanou)
+    if (empty($city) && !empty($originalIp)) {
+        $geoData = getGeoIP($originalIp);
+        if ($geoData) {
+            $countryCode = $geoData['countryCode'] ?? $countryCode;
+            $city = $geoData['city'] ?? null;
+        }
+    }
 
     // Zkontrolovat jestli tabulka wgs_pageviews existuje
     try {
@@ -365,5 +376,68 @@ function detectOS(string $userAgent): string
     }
 
     return 'Other';
+}
+
+/**
+ * GeoIP lookup pomocí ip-api.com (bezplatná služba, 45 req/min)
+ * Vrací: ['countryCode' => 'CZ', 'city' => 'Praha'] nebo null při chybě
+ */
+function getGeoIP(string $ipAddress): ?array
+{
+    // Cache v session pro opakované požadavky ze stejné IP
+    static $cache = [];
+
+    if (isset($cache[$ipAddress])) {
+        return $cache[$ipAddress];
+    }
+
+    // Nevalidní IP = nevyhledávat
+    if (!filter_var($ipAddress, FILTER_VALIDATE_IP)) {
+        return null;
+    }
+
+    // Lokální/privátní IP = neposílat na API
+    if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        return null;
+    }
+
+    try {
+        // ip-api.com - bezplatný, rychlý, bez registrace
+        // Limit: 45 requests/min (mělo by stačit pro normální provoz)
+        $url = "http://ip-api.com/json/{$ipAddress}?fields=status,countryCode,city&lang=cs";
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 2, // Max 2 sekundy čekání
+                'ignore_errors' => true
+            ]
+        ]);
+
+        $response = @file_get_contents($url, false, $context);
+
+        if ($response === false) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+
+        if (!$data || ($data['status'] ?? '') !== 'success') {
+            return null;
+        }
+
+        $result = [
+            'countryCode' => $data['countryCode'] ?? null,
+            'city' => $data['city'] ?? null
+        ];
+
+        // Uložit do cache
+        $cache[$ipAddress] = $result;
+
+        return $result;
+
+    } catch (Throwable $e) {
+        error_log("GeoIP lookup failed for {$ipAddress}: " . $e->getMessage());
+        return null;
+    }
 }
 ?>
