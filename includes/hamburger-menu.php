@@ -220,6 +220,7 @@ if ($isAdmin) {
 .hamburger-notif-btn {
   color: #ccc !important;
   font-weight: 600 !important;
+  font-size: 0.75rem !important;
   border: none !important;
   background: transparent !important;
   transition: all 0.2s ease;
@@ -230,16 +231,17 @@ if ($isAdmin) {
   background: transparent !important;
 }
 
-/* VYJIMKA: Neonove zelene tlacitko NOTIFY ME OFF - schvaleno */
+/* VYJIMKA: Modre tlacitko NOTIFY ME OFF - schvaleno 2025-12-11 */
 .hamburger-notif-btn.notif-active {
-  color: #39ff14 !important;
-  text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3);
-  animation: notif-pulse 2s ease-in-out infinite;
+  color: #0099ff !important;
+  font-size: 0.75rem !important;
+  text-shadow: 0 0 8px rgba(0, 153, 255, 0.5);
+  animation: notif-pulse-blue 2s ease-in-out infinite;
 }
 
-@keyframes notif-pulse {
-  0%, 100% { text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3); }
-  50% { text-shadow: 0 0 15px rgba(57, 255, 20, 0.8), 0 0 30px rgba(57, 255, 20, 0.5); }
+@keyframes notif-pulse-blue {
+  0%, 100% { text-shadow: 0 0 8px rgba(0, 153, 255, 0.5); }
+  50% { text-shadow: 0 0 12px rgba(0, 153, 255, 0.7); }
 }
 
 /* Provize technika - šedá barva konzistentní s UI */
