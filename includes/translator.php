@@ -245,34 +245,36 @@ class WGSTranslator
     }
 
     /**
-     * Zavola MyMemory Translate API
+     * Zavola MyMemory Translate API (POST pro delsi texty)
      */
     private function zavolatMyMemoryAPI(string $text, string $cilovyJazyk): ?string
     {
         $url = 'https://api.mymemory.translated.net/get';
 
-        $params = [
+        $postData = http_build_query([
             'q' => $text,
             'langpair' => $this->jazykoveKody[$this->zdrojovyJazyk] . '|' . $this->jazykoveKody[$cilovyJazyk],
             'de' => 'info@wgs-service.cz'
-        ];
-
-        $fullUrl = $url . '?' . http_build_query($params);
+        ]);
 
         try {
+            // Pouzit POST pro delsi texty (GET ma limit URL)
             $context = stream_context_create([
                 'http' => [
                     'timeout' => 30,
-                    'method' => 'GET',
+                    'method' => 'POST',
                     'header' => [
                         'User-Agent: WGS-Service/1.0',
-                        'Accept: application/json'
+                        'Accept: application/json',
+                        'Content-Type: application/x-www-form-urlencoded',
+                        'Content-Length: ' . strlen($postData)
                     ],
+                    'content' => $postData,
                     'ignore_errors' => true
                 ]
             ]);
 
-            $response = @file_get_contents($fullUrl, false, $context);
+            $response = @file_get_contents($url, false, $context);
 
             if ($response === false) {
                 error_log("WGSTranslator: MyMemory request failed");
