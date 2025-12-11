@@ -45,7 +45,13 @@ if ($isAdmin) {
         </a>
       <?php endforeach; ?>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
+      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
+        <svg class="notif-bell" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          <line class="notif-slash" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
+        </svg>
+      </a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
         <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
@@ -72,7 +78,13 @@ if ($isAdmin) {
         <a href="cenik.php#kalkulacka" <?php if($current == "cenik.php" && strpos($_SERVER['REQUEST_URI'], '#kalkulacka') !== false) echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY SLUŽBY" data-lang-en="SERVICE PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO SERVIZIO">KALKULACE CENY SLUŽBY</a>
       <?php endif; ?>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
+      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
+        <svg class="notif-bell" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          <line class="notif-slash" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
+        </svg>
+      </a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
         <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
@@ -217,12 +229,16 @@ if ($isAdmin) {
   color: #777 !important;
 }
 
+/* VYJIMKA: Modry zvonecek notifikaci - schvaleno 2025-12-11 */
 .hamburger-notif-btn {
-  color: #ccc !important;
-  font-weight: 600 !important;
+  color: #888 !important;
   border: none !important;
   background: transparent !important;
   transition: all 0.2s ease;
+  padding: 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .hamburger-notif-btn:hover {
@@ -230,16 +246,24 @@ if ($isAdmin) {
   background: transparent !important;
 }
 
-/* VYJIMKA: Neonove zelene tlacitko NOTIFY ME OFF - schvaleno */
-.hamburger-notif-btn.notif-active {
-  color: #39ff14 !important;
-  text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3);
-  animation: notif-pulse 2s ease-in-out infinite;
+.hamburger-notif-btn .notif-bell {
+  stroke: currentColor;
 }
 
-@keyframes notif-pulse {
-  0%, 100% { text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3); }
-  50% { text-shadow: 0 0 15px rgba(57, 255, 20, 0.8), 0 0 30px rgba(57, 255, 20, 0.5); }
+/* Notifikace zapnute - modry zvonecek bez skrtnuti */
+.hamburger-notif-btn.notif-active {
+  color: #0099ff !important;
+  filter: drop-shadow(0 0 4px rgba(0, 153, 255, 0.5));
+}
+
+.hamburger-notif-btn.notif-active .notif-slash {
+  display: none !important;
+}
+
+/* Notifikace vypnute - sedy skrtnuty zvonecek */
+.hamburger-notif-btn.notif-off .notif-slash {
+  display: inline !important;
+  stroke: currentColor;
 }
 
 /* Provize technika - šedá barva konzistentní s UI */
@@ -1174,19 +1198,24 @@ document.addEventListener('alpine:init', () => {
     // Zobrazit tlačítko - vždy (ON/OFF toggle)
     btn.style.display = '';
 
+    // Nastavit stav zvonecku podle permission
     if (Notification.permission === 'granted') {
-      btn.textContent = 'NOTIFY ME OFF';
       btn.classList.add('notif-active');
-      console.log('Notifikace: Tlačítko zobrazeno (permission = granted)');
+      btn.classList.remove('notif-off');
+      btn.title = 'Notifikace zapnuty';
+      console.log('Notifikace: Zvonecek zobrazen (permission = granted)');
     } else if (Notification.permission === 'denied') {
-      btn.textContent = 'NOTIFY ME OFF';
+      btn.classList.add('notif-off');
+      btn.classList.remove('notif-active');
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
-      btn.title = 'Notifikace jsou zablokovány v nastavení prohlížeče';
-      console.log('Notifikace: Tlačítko zobrazeno (permission = denied)');
+      btn.title = 'Notifikace zablokovany';
+      console.log('Notifikace: Zvonecek zobrazen (permission = denied)');
     } else {
-      btn.textContent = 'NOTIFY ME ON';
-      console.log('Notifikace: Tlačítko zobrazeno (permission = default)');
+      btn.classList.add('notif-off');
+      btn.classList.remove('notif-active');
+      btn.title = 'Kliknete pro povoleni notifikaci';
+      console.log('Notifikace: Zvonecek zobrazen (permission = default)');
     }
 
     // Handler pro kliknutí
@@ -1212,16 +1241,18 @@ document.addEventListener('alpine:init', () => {
         if (window.WGSNotifikace && typeof window.WGSNotifikace.pozadatOPovoleni === 'function') {
           const vysledek = await window.WGSNotifikace.pozadatOPovoleni();
           if (vysledek) {
-            btn.textContent = 'NOTIFY ME OFF';
+            btn.classList.remove('notif-off');
             btn.classList.add('notif-active');
+            btn.title = 'Notifikace zapnuty';
             console.log('Notifikace: Úspěšně povoleny přes WGSNotifikace');
           }
         } else {
           // Fallback - přímé povolení
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
-            btn.textContent = 'NOTIFY ME OFF';
+            btn.classList.remove('notif-off');
             btn.classList.add('notif-active');
+            btn.title = 'Notifikace zapnuty';
             console.log('Notifikace: Úspěšně povoleny');
 
             // Registrovat subscription pokud je k dispozici service worker
@@ -1283,9 +1314,11 @@ document.addEventListener('alpine:init', () => {
               }
             }
           } else if (permission === 'denied') {
-            btn.textContent = 'NOTIFY ME OFF';
+            btn.classList.remove('notif-active');
+            btn.classList.add('notif-off');
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
+            btn.title = 'Notifikace zablokovany';
           }
         }
       } catch (error) {
