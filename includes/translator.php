@@ -259,19 +259,18 @@ class WGSTranslator
     }
 
     /**
-     * Zavola Google Translate API (neoficialni bezplatna verze)
+     * Zavola MyMemory Translate API (bezplatna verze - 10000 slov/den)
+     * Dokumentace: https://mymemory.translated.net/doc/spec.php
      */
     private function zavolatGoogleTranslate(string $text, string $cilovyJazyk): ?string
     {
-        // Google Translate neoficialni API
-        $url = 'https://translate.googleapis.com/translate_a/single';
+        // MyMemory API - bezplatne, limit 10000 slov/den
+        $url = 'https://api.mymemory.translated.net/get';
 
         $params = [
-            'client' => 'gtx',
-            'sl' => $this->jazykoveKody[$this->zdrojovyJazyk],
-            'tl' => $this->jazykoveKody[$cilovyJazyk],
-            'dt' => 't',
-            'q' => $text
+            'q' => $text,
+            'langpair' => $this->jazykoveKody[$this->zdrojovyJazyk] . '|' . $this->jazykoveKody[$cilovyJazyk],
+            'de' => 'info@wgs-service.cz' // Email pro vyssi limit (volitelne)
         ];
 
         $fullUrl = $url . '?' . http_build_query($params);
@@ -279,10 +278,10 @@ class WGSTranslator
         try {
             $context = stream_context_create([
                 'http' => [
-                    'timeout' => 10,
+                    'timeout' => 15,
                     'method' => 'GET',
                     'header' => [
-                        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'User-Agent: WGS-Service/1.0',
                         'Accept: application/json'
                     ],
                     'ignore_errors' => true
@@ -292,25 +291,27 @@ class WGSTranslator
             $response = @file_get_contents($fullUrl, false, $context);
 
             if ($response === false) {
-                error_log("WGSTranslator: Google Translate request failed");
+                error_log("WGSTranslator: MyMemory request failed");
                 return null;
             }
 
-            // Parsovat odpoved (format je nested array)
             $data = json_decode($response, true);
 
-            if (!$data || !isset($data[0])) {
-                error_log("WGSTranslator: Invalid response from Google Translate");
+            if (!$data || !isset($data['responseData']['translatedText'])) {
+                error_log("WGSTranslator: Invalid response from MyMemory: " . substr($response, 0, 500));
                 return null;
             }
 
-            // Sestavit prelozeny text z jednotlivych segmentu
-            $prelozenyText = '';
-            foreach ($data[0] as $segment) {
-                if (isset($segment[0])) {
-                    $prelozenyText .= $segment[0];
-                }
+            // Zkontrolovat status
+            if (isset($data['responseStatus']) && $data['responseStatus'] != 200) {
+                error_log("WGSTranslator: MyMemory error status: " . $data['responseStatus']);
+                return null;
             }
+
+            $prelozenyText = $data['responseData']['translatedText'];
+
+            // MyMemory vraci HTML entity - dekodovat
+            $prelozenyText = html_entity_decode($prelozenyText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
             return $prelozenyText ?: null;
 

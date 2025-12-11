@@ -1,6 +1,6 @@
 <?php
 /**
- * Test Google Translate API
+ * Test MyMemory Translate API
  */
 
 require_once __DIR__ . '/init.php';
@@ -11,18 +11,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 echo "<pre style='background:#1a1a1a;color:#fff;padding:20px;font-family:monospace;'>";
-echo "=== TEST GOOGLE TRANSLATE API ===\n\n";
+echo "=== TEST MYMEMORY TRANSLATE API ===\n\n";
 
 $testText = "Dobrý den, jak se máte?";
 $targetLang = 'en';
 
-$url = 'https://translate.googleapis.com/translate_a/single';
+$url = 'https://api.mymemory.translated.net/get';
 $params = [
-    'client' => 'gtx',
-    'sl' => 'cs',
-    'tl' => $targetLang,
-    'dt' => 't',
-    'q' => $testText
+    'q' => $testText,
+    'langpair' => 'cs|' . $targetLang,
+    'de' => 'info@wgs-service.cz'
 ];
 
 $fullUrl = $url . '?' . http_build_query($params);
@@ -33,10 +31,10 @@ echo "URL: {$fullUrl}\n\n";
 
 $context = stream_context_create([
     'http' => [
-        'timeout' => 10,
+        'timeout' => 15,
         'method' => 'GET',
         'header' => [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'User-Agent: WGS-Service/1.0',
             'Accept: application/json'
         ],
         'ignore_errors' => true
@@ -57,7 +55,7 @@ if ($response === false) {
     print_r($http_response_header ?? 'N/A');
 } else {
     echo "=== RAW RESPONSE ===\n";
-    echo htmlspecialchars(substr($response, 0, 1000)) . "\n\n";
+    echo htmlspecialchars(substr($response, 0, 2000)) . "\n\n";
 
     $data = json_decode($response, true);
 
@@ -66,22 +64,33 @@ if ($response === false) {
         echo "JSON error: " . json_last_error_msg() . "\n";
     } else {
         echo "=== PARSED DATA ===\n";
-        print_r($data);
+        echo "responseStatus: " . ($data['responseStatus'] ?? 'N/A') . "\n";
+        echo "translatedText: " . ($data['responseData']['translatedText'] ?? 'N/A') . "\n";
+        echo "match: " . ($data['responseData']['match'] ?? 'N/A') . "\n\n";
 
-        echo "\n=== EXTRAHOVANY PREKLAD ===\n";
-        if (isset($data[0])) {
-            $preklad = '';
-            foreach ($data[0] as $segment) {
-                if (isset($segment[0])) {
-                    $preklad .= $segment[0];
-                }
-            }
+        if (isset($data['responseData']['translatedText'])) {
+            $preklad = html_entity_decode($data['responseData']['translatedText'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            echo "=== VYSLEDEK ===\n";
+            echo "Puvodni: {$testText}\n";
             echo "Preklad: {$preklad}\n";
-            echo "Puvodne: {$testText}\n";
-            echo "Stejne: " . ($preklad === $testText ? 'ANO (PROBLEM!)' : 'NE (OK)') . "\n";
-        } else {
-            echo "CHYBA: Chybi data[0]!\n";
+            echo "Stejne: " . ($preklad === $testText ? 'ANO (PROBLEM!)' : 'NE (OK - preklad funguje!)') . "\n";
         }
+    }
+}
+
+echo "\n=== TEST IT ===\n";
+$paramsIt = [
+    'q' => $testText,
+    'langpair' => 'cs|it',
+    'de' => 'info@wgs-service.cz'
+];
+$urlIt = $url . '?' . http_build_query($paramsIt);
+$responseIt = @file_get_contents($urlIt, false, $context);
+if ($responseIt) {
+    $dataIt = json_decode($responseIt, true);
+    if (isset($dataIt['responseData']['translatedText'])) {
+        $prekladIt = html_entity_decode($dataIt['responseData']['translatedText'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        echo "Preklad do IT: {$prekladIt}\n";
     }
 }
 
