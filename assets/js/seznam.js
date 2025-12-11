@@ -3565,17 +3565,20 @@ async function zpracujVybraneFotky(event) {
         continue;
       }
 
-      // Kontrola velikosti (max 10MB)
-      if (soubor.size > 10 * 1024 * 1024) {
-        wgsToast.error('Soubor ' + soubor.name + ' je prilis velky (max 10MB)');
+      // Kontrola velikosti (max 15MB pred kompresi)
+      if (soubor.size > 15 * 1024 * 1024) {
+        wgsToast.error('Soubor ' + soubor.name + ' je prilis velky (max 15MB)');
         continue;
       }
 
-      const base64 = await souborNaBase64(soubor);
+      // Komprimovat obrazek pred nahranim
+      const komprimovany = await komprimujObrazek(soubor, 1200, 0.3);
+      const base64 = await souborNaBase64(komprimovany);
+
       fotkyBase64.push({
         type: 'image',
         data: base64,
-        size: soubor.size
+        size: komprimovany.size
       });
 
       // Aktualizovat progress
@@ -3634,7 +3637,7 @@ async function zpracujVybraneFotky(event) {
 
 /**
  * Prevede soubor na base64
- * @param {File} soubor - Soubor k prevodu
+ * @param {File|Blob} soubor - Soubor k prevodu
  * @returns {Promise<string>} - Base64 string
  */
 function souborNaBase64(soubor) {
@@ -3642,6 +3645,62 @@ function souborNaBase64(soubor) {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(soubor);
+  });
+}
+
+/**
+ * Komprimuje obrazek na max velikost a kvalitu
+ * @param {File} soubor - Obrazkovy soubor
+ * @param {number} maxSirka - Maximalni sirka (default 1200px)
+ * @param {number} maxMB - Maximalni velikost v MB (default 0.3)
+ * @returns {Promise<Blob>} - Komprimovany blob
+ */
+function komprimujObrazek(soubor, maxSirka = 1200, maxMB = 0.3) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const img = new Image();
+
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Zachovat pomer stran
+        const scale = Math.min(1, maxSirka / Math.max(img.width, img.height));
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        // Nakreslit obrazek
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Komprimovat s postupne snizovanou kvalitou
+        let kvalita = 0.7;
+        let blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', kvalita));
+
+        while (blob.size > maxMB * 1024 * 1024 && kvalita > 0.3) {
+          kvalita -= 0.05;
+          blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', kvalita));
+        }
+
+        const puvodniKB = Math.round(soubor.size / 1024);
+        const novaKB = Math.round(blob.size / 1024);
+        logger.log(`[Fototeka] Komprese: ${puvodniKB} KB -> ${novaKB} KB (kvalita ${Math.round(kvalita * 100)}%)`);
+
+        resolve(blob);
+      };
+
+      img.onerror = () => {
+        // Fallback - vratit original
+        logger.warn('[Fototeka] Nelze nacist obrazek pro kompresi, vracim original');
+        resolve(soubor);
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.onerror = () => resolve(soubor);
     reader.readAsDataURL(soubor);
   });
 }
