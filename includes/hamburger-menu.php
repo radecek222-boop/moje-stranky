@@ -1223,15 +1223,36 @@ document.addEventListener('alpine:init', () => {
       e.preventDefault();
       e.stopPropagation();
 
+      // Preklady alert textu
+      const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
+      const texty = {
+        cs: {
+          aktivni: 'Notifikace jsou aktivní.\n\nPro vypnutí:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku',
+          blokovany: 'Notifikace jsou zablokovány.\n\nPro povolení:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku',
+          chyba: 'Nepodařilo se povolit notifikace. Zkuste to znovu.'
+        },
+        en: {
+          aktivni: 'Notifications are active.\n\nTo disable:\n• iOS: Settings > Notifications > WGS\n• Android: Settings > Apps > WGS > Notifications\n• Desktop: Click the lock icon in the address bar',
+          blokovany: 'Notifications are blocked.\n\nTo enable:\n• iOS: Settings > Notifications > WGS\n• Android: Settings > Apps > WGS > Notifications\n• Desktop: Click the lock icon in the address bar',
+          chyba: 'Failed to enable notifications. Please try again.'
+        },
+        it: {
+          aktivni: 'Le notifiche sono attive.\n\nPer disattivare:\n• iOS: Impostazioni > Notifiche > WGS\n• Android: Impostazioni > App > WGS > Notifiche\n• Desktop: Clicca sull\'icona del lucchetto nella barra degli indirizzi',
+          blokovany: 'Le notifiche sono bloccate.\n\nPer abilitare:\n• iOS: Impostazioni > Notifiche > WGS\n• Android: Impostazioni > App > WGS > Notifiche\n• Desktop: Clicca sull\'icona del lucchetto nella barra degli indirizzi',
+          chyba: 'Impossibile abilitare le notifiche. Riprova.'
+        }
+      };
+      const t = texty[jazyk] || texty.cs;
+
       // Pokud jsou notifikace povoleny - vysvětlit jak vypnout
       if (Notification.permission === 'granted') {
-        alert('Notifikace jsou aktivní.\n\nPro vypnutí:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku');
+        alert(t.aktivni);
         return;
       }
 
       // Pokud jsou zablokovány - vysvětlit jak povolit
       if (Notification.permission === 'denied') {
-        alert('Notifikace jsou zablokovány.\n\nPro povolení:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku');
+        alert(t.blokovany);
         return;
       }
 
@@ -1323,7 +1344,7 @@ document.addEventListener('alpine:init', () => {
         }
       } catch (error) {
         console.error('Chyba při povolování notifikací:', error);
-        alert('Nepodařilo se povolit notifikace. Zkuste to znovu.');
+        alert(t.chyba);
       }
     });
   }
