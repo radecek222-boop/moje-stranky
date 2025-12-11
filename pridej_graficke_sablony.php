@@ -100,15 +100,6 @@ try {
 
     echo "</table>";
 
-    // DEBUG: Zobrazit přesné ID z databáze
-    echo "<h2>DEBUG: Přesné ID z databáze</h2>";
-    echo "<pre>";
-    foreach ($sablony as $s) {
-        $idHex = bin2hex($s['id']);
-        echo "ID: '{$s['id']}' (hex: {$idHex}, délka: " . strlen($s['id']) . ")\n";
-    }
-    echo "</pre>";
-
     // 3. Definice grafických šablon
     // KLÍČ = hodnota sloupce 'name' v DB (např. 'appointment_confirmed')
     $grafickeSablony = [
