@@ -67,11 +67,19 @@ $dostupneHry = [
         'hotovo' => true
     ],
     [
-        'id' => 'mariasek',
-        'nazev' => 'Mariáš',
-        'popis' => 'Tradiční česká karetní hra pro 3 hráče.',
-        'hracu' => '3',
-        'ikona' => '♠♥',
+        'id' => 'lode',
+        'nazev' => 'Lodě',
+        'popis' => 'Námořní bitva! Najdi a potop všechny soupeřovy lodě.',
+        'hracu' => '1-2',
+        'ikona' => '~~~',
+        'hotovo' => false
+    ],
+    [
+        'id' => 'pong',
+        'nazev' => 'Pong',
+        'popis' => 'Klasická arkádová hra. Odraž míček a poraz soupeře!',
+        'hracu' => '1-2',
+        'ikona' => '| o |',
         'hotovo' => false
     ],
     [
