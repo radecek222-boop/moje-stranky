@@ -228,9 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('modalPrijemcu');
         if (modal) modal.style.display = 'none';
     });
-    Utils.registerAction('ulozitPrijemce', (el, data) => {
-        if (data.id && typeof ulozitPrijemce === 'function') {
-            ulozitPrijemce(data.id);
+    Utils.registerAction('ulozitPrijemce', () => {
+        if (typeof ulozitPrijemce === 'function') {
+            ulozitPrijemce();
         }
     });
     Utils.registerAction('ulozitSablonu', (el, data) => {
