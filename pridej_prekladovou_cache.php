@@ -77,12 +77,11 @@ try {
         if (isset($_GET['execute']) && $_GET['execute'] === '1') {
             echo "<div class='info'><strong>SPOUSTIM MIGRACI...</strong></div>";
 
-            $pdo->beginTransaction();
-
             try {
                 // Vytvoreni tabulky pro cache prekladu
+                // POZN: DDL prikazy v MySQL automaticky commitují, transakce zde nefunguje
                 $pdo->exec("
-                    CREATE TABLE `wgs_translation_cache` (
+                    CREATE TABLE IF NOT EXISTS `wgs_translation_cache` (
                         `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                         `source_hash` VARCHAR(32) NOT NULL COMMENT 'MD5 hash zdrojoveho textu',
                         `source_lang` VARCHAR(5) NOT NULL DEFAULT 'cs' COMMENT 'Zdrojovy jazyk',
@@ -100,8 +99,6 @@ try {
                     COMMENT='Cache pro preklady textu (Google Translate)'
                 ");
 
-                $pdo->commit();
-
                 echo "<div class='success'>";
                 echo "<strong>MIGRACE USPESNE DOKONCENA</strong><br><br>";
                 echo "Tabulka <code>wgs_translation_cache</code> byla vytvorena.<br><br>";
@@ -116,7 +113,6 @@ try {
                 echo "</div>";
 
             } catch (PDOException $e) {
-                $pdo->rollBack();
                 echo "<div class='error'>";
                 echo "<strong>CHYBA:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
