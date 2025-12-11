@@ -1458,11 +1458,19 @@ async function obnovitNahled() {
             const iframe = document.getElementById('preview-iframe');
             iframe.srcdoc = result.data.html;
         } else {
-            previewPanel.innerHTML = '<div style="text-align: center; padding: 4rem; color: #dc3545;">Chyba generování náhledu</div>';
+            const errMsg = result.message || result.error || 'Neznámá chyba';
+            previewPanel.innerHTML = `<div style="text-align: center; padding: 4rem; color: #dc3545;">
+                <strong>Chyba generování náhledu</strong><br>
+                <span style="font-size: 0.9rem; color: #999;">${errMsg}</span>
+            </div>`;
+            console.error('Preview error:', result);
         }
     } catch (error) {
         console.error('Chyba náhledu:', error);
-        previewPanel.innerHTML = '<div style="text-align: center; padding: 4rem; color: #dc3545;">Chyba spojení se serverem</div>';
+        previewPanel.innerHTML = `<div style="text-align: center; padding: 4rem; color: #dc3545;">
+            <strong>Chyba spojení se serverem</strong><br>
+            <span style="font-size: 0.9rem; color: #999;">${error.message || error}</span>
+        </div>`;
     }
 }
 
