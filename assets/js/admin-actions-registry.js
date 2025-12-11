@@ -181,7 +181,83 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof aktualizovatVyber === 'function') aktualizovatVyber();
     });
 
+    // Online uživatelé (admin_security.php)
+    Utils.registerAction('refreshOnlineUzivatele', () => {
+        if (typeof nactiOnlineUzivatele === 'function') nactiOnlineUzivatele();
+    });
+
+    // Email management (admin_email_sms.php)
+    Utils.registerAction('filterEmaily', (el, data) => {
+        if (data.filter && typeof filterEmaily === 'function') {
+            filterEmaily(data.filter);
+        }
+    });
+    Utils.registerAction('openEmailDetailModal', (el, data) => {
+        if (data.id && typeof openEmailDetailModal === 'function') {
+            openEmailDetailModal(data.id);
+        }
+    });
+    Utils.registerAction('closeEmailDetailModal', () => {
+        const modal = document.getElementById('emailDetailModal');
+        if (modal) modal.style.display = 'none';
+    });
+    Utils.registerAction('zavritSablonaModal', () => {
+        const modal = document.getElementById('sablonaModal');
+        if (modal) modal.style.display = 'none';
+    });
+    Utils.registerAction('editSmsTemplate', (el, data) => {
+        if (data.id && typeof editSmsTemplate === 'function') {
+            editSmsTemplate(data.id);
+        }
+    });
+    Utils.registerAction('closeSmsModal', () => {
+        const modal = document.getElementById('smsModal');
+        if (modal) modal.style.display = 'none';
+    });
+    Utils.registerAction('saveSmsTemplate', (el, data) => {
+        if (data.id && typeof saveSmsTemplate === 'function') {
+            saveSmsTemplate(data.id);
+        }
+    });
+    Utils.registerAction('otevritModalPrijemcu', (el, data) => {
+        if (data.id && typeof otevritModalPrijemcu === 'function') {
+            otevritModalPrijemcu(data.id);
+        }
+    });
+    Utils.registerAction('zavritModalPrijemcu', () => {
+        const modal = document.getElementById('modalPrijemcu');
+        if (modal) modal.style.display = 'none';
+    });
+    Utils.registerAction('ulozitPrijemce', (el, data) => {
+        if (data.id && typeof ulozitPrijemce === 'function') {
+            ulozitPrijemce(data.id);
+        }
+    });
+    Utils.registerAction('ulozitSablonu', (el, data) => {
+        if (data.id && typeof ulozitSablonu === 'function') {
+            ulozitSablonu(data.id);
+        }
+    });
+    Utils.registerAction('upravitEmailKlice', (el, data) => {
+        if (data.code && typeof upravitEmailKlice === 'function') {
+            upravitEmailKlice(data.code, data.email || '');
+        }
+    });
+    Utils.registerAction('openNewWindow', (el, data) => {
+        if (data.url) window.open(data.url, '_blank');
+    });
+    Utils.registerAction('openSection', (el, data) => {
+        if (data.section && typeof openSection === 'function') {
+            openSection(data.section);
+        }
+    });
+
     // Reklamace Management (admin_reklamace_management.php)
+    Utils.registerAction('zmenitStavReklamace', (el, data) => {
+        if (data.id && typeof zmenitStavReklamace === 'function') {
+            zmenitStavReklamace(data.id, el.value);
+        }
+    });
     Utils.registerAction('filterReklamace', (el, data) => {
         if (data.filter && typeof filterReklamace === 'function') {
             filterReklamace(data.filter);

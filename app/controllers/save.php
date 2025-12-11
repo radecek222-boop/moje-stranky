@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/email_domain_validator.php';
 require_once __DIR__ . '/../../includes/rate_limiter.php';
+require_once __DIR__ . '/../../includes/audit_logger.php';
 
 // Helper pro timing logy - pouze v development rezimu
 function logTiming(string $message): void {
@@ -380,6 +381,14 @@ function handleUpdate(PDO $pdo, array $input): array
         $tTotal = microtime(true);
         logTiming(sprintf("[TIMING] handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
 
+        // AUDIT LOG: Zaznamenat aktualizaci reklamace
+        auditLog('reklamace_updated', [
+            'reklamace_id' => $identifier,
+            'identifier_column' => $identifierColumn,
+            'updated_fields' => array_keys($updateData),
+            'is_admin' => $isAdmin
+        ]);
+
         return [
             'status' => 'success',
             'message' => 'Reklamace byla aktualizována.',
@@ -660,6 +669,18 @@ try {
 
         $primaryId = $pdo->lastInsertId();
         $identifierForClient = $workflowId ?? $primaryId;
+
+        // AUDIT LOG: Zaznamenat vytvoření reklamace
+        auditLog('reklamace_created', [
+            'reklamace_id' => $identifierForClient,
+            'primary_id' => $primaryId,
+            'cislo' => $cislo,
+            'typ' => $typ,
+            'jmeno' => $jmeno,
+            'email' => $email ? substr($email, 0, 3) . '***' : null, // Částečně maskovaný email
+            'is_logged_in' => $isLoggedIn,
+            'created_by_role' => $_SESSION['role'] ?? 'guest'
+        ]);
 
         // ========================================
         // AUTOMATICKA NOTIFIKACE: Odeslat email zakaznikovi a adminovi

@@ -1046,13 +1046,17 @@ endif;
                         <option value="admin_login">Přihlášení admina</option>
                         <option value="user_login">Přihlášení uživatele</option>
                         <option value="user_logout">Odhlášení</option>
+                        <option value="failed_login">Neúspěšné přihlášení</option>
+                        <option value="user_registration">Registrace uživatele</option>
                         <option value="key_created">Vytvoření klíče</option>
                         <option value="key_deleted">Smazání klíče</option>
-                        <option value="key_rotated">Rotace klíče</option>
-                        <option value="failed_login">Neúspěšné přihlášení</option>
+                        <option value="admin_key_rotated">Rotace admin klíče</option>
+                        <option value="high_key_verified">Ověření high key</option>
                         <option value="reklamace_created">Vytvoření reklamace</option>
                         <option value="reklamace_updated">Úprava reklamace</option>
                         <option value="reklamace_deleted">Smazání reklamace</option>
+                        <option value="remember_token_created">Remember Me token</option>
+                        <option value="auto_login_remember_me">Auto přihlášení</option>
                     </select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">

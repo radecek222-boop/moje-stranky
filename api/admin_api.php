@@ -12,6 +12,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/audit_logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -311,6 +312,14 @@ function handleCreateKey(PDO $pdo, array $payload): void
 
     $stmt->execute();
 
+    // AUDIT LOG: Zaznamenat vytvoření klíče
+    auditLog('key_created', [
+        'key_code' => $keyCode,
+        'key_type' => $keyType,
+        'max_usage' => $maxUsage,
+        'assigned_email' => $email
+    ]);
+
     respondSuccess([
         'key_code' => $keyCode,
         'key_type' => $keyType,
@@ -338,6 +347,11 @@ function handleDeleteKey(PDO $pdo, array $payload): void
     if ($stmt->rowCount() === 0) {
         throw new InvalidArgumentException('Klíč nebyl nalezen v databázi.');
     }
+
+    // AUDIT LOG: Zaznamenat smazání klíče
+    auditLog('key_deleted', [
+        'key_code' => $keyCode
+    ]);
 
     respondSuccess(['key_code' => $keyCode, 'message' => 'Klíč byl úspěšně smazán']);
 }
