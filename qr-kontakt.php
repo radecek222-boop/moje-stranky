@@ -1,8 +1,8 @@
 <?php
 /**
- * QR Kontakt - Rychle kontaktni centrum
- * Pristupne pouze pres primou URL (QR kod)
- * Neni odkazovano z navigace ani menu
+ * QR Kontakt - Rychlé kontaktní centrum
+ * Přístupné pouze přes přímou URL (QR kód)
+ * Není odkazováno z navigace ani menu
  */
 require_once "init.php";
 ?>
@@ -16,7 +16,7 @@ require_once "init.php";
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS Kontakt">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Rychly kontakt na White Glove Service - telefon, email, web.">
+  <meta name="description" content="Rychlý kontakt na White Glove Service - telefon, email, web.">
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
@@ -24,19 +24,19 @@ require_once "init.php";
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-  <title>WGS - Rychly kontakt</title>
+  <title>WGS - Rychlý kontakt</title>
 
   <!-- Google Fonts - Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Externi CSS -->
+  <!-- Externí CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <style>
-    /* QR Kontakt - specificke styly */
+    /* QR Kontakt - specifické styly */
     .qr-kontakt-page {
       min-height: 100vh;
       display: flex;
@@ -110,7 +110,7 @@ require_once "init.php";
     .qr-kontakt-btn {
       display: block;
       width: 100%;
-      padding: 1.25rem 1.5rem;
+      padding: 0.9rem 1.5rem;
       background: #000;
       color: #fff;
       font-family: 'Poppins', sans-serif;
@@ -121,11 +121,11 @@ require_once "init.php";
       text-decoration: none;
       text-align: center;
       border: 2px solid #000;
-      border-radius: 0;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-height: 70px;
-      line-height: calc(70px - 2.5rem);
+      min-height: 54px;
+      line-height: 1.4;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -162,30 +162,28 @@ require_once "init.php";
       color: #999;
     }
 
-    /* Responzivni upravy */
+    /* Responzivní úpravy */
     @media (min-width: 768px) {
       .qr-kontakt-main {
         padding: 3rem 2rem;
       }
 
       .qr-kontakt-btn {
-        padding: 1.5rem 2rem;
+        padding: 1rem 2rem;
         font-size: 1.15rem;
-        min-height: 80px;
-        line-height: calc(80px - 3rem);
+        min-height: 58px;
       }
     }
 
     @media (max-width: 380px) {
       .qr-kontakt-btn {
-        padding: 1rem 1.25rem;
+        padding: 0.75rem 1.25rem;
         font-size: 1rem;
-        min-height: 60px;
-        line-height: calc(60px - 2rem);
+        min-height: 48px;
       }
     }
 
-    /* Pristupnost - focus stavy */
+    /* Přístupnost - focus stavy */
     .qr-kontakt-btn:focus {
       outline: 3px solid #666;
       outline-offset: 2px;
@@ -212,22 +210,22 @@ require_once "init.php";
 
   <main class="qr-kontakt-main" id="main-content">
     <h1 class="qr-kontakt-title">White Glove Servis</h1>
-    <p class="qr-kontakt-subtitle">specializovany autorizovany servis Natuzzi</p>
+    <p class="qr-kontakt-subtitle">specializovaný autorizovaný servis Natuzzi</p>
 
     <div class="qr-kontakt-buttons">
-      <!-- Tlacitko 1: Zavolat -->
-      <a href="tel:+420725965826" class="qr-kontakt-btn" aria-label="Zavolat na cislo +420 725 965 826">
+      <!-- Tlačítko 1: Zavolat -->
+      <a href="tel:+420725965826" class="qr-kontakt-btn" aria-label="Zavolat na číslo +420 725 965 826">
         Zavolat
       </a>
 
-      <!-- Tlacitko 2: Napsat e-mail -->
+      <!-- Tlačítko 2: Napsat e-mail -->
       <a href="mailto:info@wgs-service.cz?subject=Kontakt%20z%20QR" class="qr-kontakt-btn" aria-label="Napsat e-mail na info@wgs-service.cz">
         Napsat e-mail
       </a>
 
-      <!-- Tlacitko 3: Navstivit web -->
-      <a href="https://www.wgs-service.cz" class="qr-kontakt-btn qr-kontakt-btn-secondary" aria-label="Navstivit hlavni webove stranky WGS">
-        Navstivit web
+      <!-- Tlačítko 3: Navštívit web -->
+      <a href="https://www.wgs-service.cz" class="qr-kontakt-btn qr-kontakt-btn-secondary" aria-label="Navštívit hlavní webové stránky WGS">
+        Navštívit web
       </a>
     </div>
   </main>
