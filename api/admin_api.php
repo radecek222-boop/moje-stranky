@@ -163,6 +163,14 @@ try {
             handleUpdateKeyEmail($pdo, $payload);
             break;
 
+        case 'preview_email_template':
+            handlePreviewEmailTemplate($pdo, $payload);
+            break;
+
+        case 'get_email_template':
+            handleGetEmailTemplate($pdo);
+            break;
+
         // Pozvanky nyni pouzivaji sablony z wgs_notifications
         // (invitation_prodejce, invitation_technik)
         // Editace sablon je v karce "Email sablony"
@@ -902,13 +910,14 @@ function handleGetReklamaceDetail(PDO $pdo): void
 }
 
 /**
- * Aktualizovat email šablonu
+ * Aktualizovat email šablonu - podpora grafických šablon
  */
 function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
 {
     $templateId = $payload['template_id'] ?? null;
     $subject = trim($payload['subject'] ?? '');
     $template = trim($payload['template'] ?? '');
+    $templateData = $payload['template_data'] ?? null;
     $active = isset($payload['active']) ? (bool)$payload['active'] : false;
 
     if (!$templateId) {
@@ -919,26 +928,55 @@ function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Předmět emailu nesmí být prázdný');
     }
 
-    if (empty($template)) {
-        throw new InvalidArgumentException('Obsah šablony nesmí být prázdný');
+    // Pokud máme grafická data, aktualizovat je
+    if ($templateData !== null && is_array($templateData)) {
+        // Validace struktury grafické šablony
+        if (empty($templateData['obsah'])) {
+            throw new InvalidArgumentException('Obsah emailu nesmí být prázdný');
+        }
+
+        $templateDataJson = json_encode($templateData, JSON_UNESCAPED_UNICODE);
+
+        // Aktualizovat šablonu včetně template_data
+        $stmt = $pdo->prepare("
+            UPDATE wgs_notifications
+            SET subject = :subject,
+                template = :template,
+                template_data = :template_data,
+                active = :active,
+                updated_at = NOW()
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            'subject' => $subject,
+            'template' => $template,
+            'template_data' => $templateDataJson,
+            'active' => $active ? 1 : 0,
+            'id' => $templateId
+        ]);
+    } else {
+        // Starý formát - jen text
+        if (empty($template)) {
+            throw new InvalidArgumentException('Obsah šablony nesmí být prázdný');
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE wgs_notifications
+            SET subject = :subject,
+                template = :template,
+                active = :active,
+                updated_at = NOW()
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            'subject' => $subject,
+            'template' => $template,
+            'active' => $active ? 1 : 0,
+            'id' => $templateId
+        ]);
     }
-
-    // Aktualizovat šablonu v databázi
-    $stmt = $pdo->prepare("
-        UPDATE wgs_notifications
-        SET subject = :subject,
-            template = :template,
-            active = :active,
-            updated_at = NOW()
-        WHERE id = :id
-    ");
-
-    $stmt->execute([
-        'subject' => $subject,
-        'template' => $template,
-        'active' => $active ? 1 : 0,
-        'id' => $templateId
-    ]);
 
     if ($stmt->rowCount() === 0) {
         throw new InvalidArgumentException('Šablona nebyla nalezena nebo nebyla změněna');
@@ -947,6 +985,58 @@ function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
     respondSuccess([
         'message' => 'Šablona byla úspěšně aktualizována',
         'template_id' => $templateId
+    ]);
+}
+
+/**
+ * Získat detail emailové šablony
+ */
+function handleGetEmailTemplate(PDO $pdo): void
+{
+    $templateId = $_GET['template_id'] ?? null;
+
+    if (!$templateId) {
+        throw new InvalidArgumentException('Chybí ID šablony');
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT id, name, description, subject, template, template_data, active, variables
+        FROM wgs_notifications
+        WHERE id = :id
+    ");
+    $stmt->execute(['id' => $templateId]);
+    $sablona = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$sablona) {
+        throw new InvalidArgumentException('Šablona nebyla nalezena');
+    }
+
+    // Dekódovat JSON pole
+    $sablona['template_data'] = $sablona['template_data'] ? json_decode($sablona['template_data'], true) : null;
+    $sablona['variables'] = $sablona['variables'] ? json_decode($sablona['variables'], true) : [];
+    $sablona['active'] = (bool)$sablona['active'];
+
+    respondSuccess(['template' => $sablona]);
+}
+
+/**
+ * Náhled grafické emailové šablony
+ */
+function handlePreviewEmailTemplate(PDO $pdo, array $payload): void
+{
+    require_once __DIR__ . '/../includes/email_template_base.php';
+
+    $templateData = $payload['template_data'] ?? null;
+
+    if (!$templateData || !is_array($templateData)) {
+        throw new InvalidArgumentException('Chybí data šablony');
+    }
+
+    // Vygenerovat náhled s ukázkovými daty
+    $html = nahledSablony($templateData);
+
+    respondSuccess([
+        'html' => $html
     ]);
 }
 

@@ -238,6 +238,11 @@ document.addEventListener('DOMContentLoaded', function() {
             ulozitSablonu(data.id);
         }
     });
+    Utils.registerAction('ulozitGrafickouSablonu', (el, data) => {
+        if (data.id && typeof ulozitGrafickouSablonu === 'function') {
+            ulozitGrafickouSablonu(data.id);
+        }
+    });
     Utils.registerAction('upravitEmailKlice', (el, data) => {
         if (data.code && typeof upravitEmailKlice === 'function') {
             upravitEmailKlice(data.code, data.email || '');

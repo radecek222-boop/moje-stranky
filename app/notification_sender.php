@@ -234,34 +234,60 @@ try {
     // NÁHRADA PROMĚNNÝCH V ŠABLONĚ
     // ============================================
     $subject = $notification['subject'] ?? 'Notifikace z WGS';
-    $message = $notification['template'];
 
     // Mapování klíčů dat na template proměnné
     $variableMap = [
-        '{{customer_name}}' => $notificationData['customer_name'] ?? 'Zákazník',
-        '{{customer_email}}' => $notificationData['customer_email'] ?? '',
-        '{{customer_phone}}' => $notificationData['customer_phone'] ?? '',
-        '{{date}}' => $notificationData['appointment_date'] ?? $notificationData['date'] ?? '',
-        '{{time}}' => $notificationData['appointment_time'] ?? $notificationData['time'] ?? '',
-        '{{order_id}}' => $notificationData['order_id'] ?? '',
-        '{{address}}' => $notificationData['address'] ?? '',
-        '{{product}}' => $notificationData['product'] ?? '',
-        '{{description}}' => $notificationData['description'] ?? '',
-        '{{technician_name}}' => $notificationData['technician_name'] ?? '',
-        '{{technician_email}}' => $notificationData['technician_email'] ?? '',
-        '{{technician_phone}}' => $notificationData['technician_phone'] ?? '',
-        '{{seller_name}}' => $notificationData['seller_name'] ?? '',
-        '{{seller_email}}' => $notificationData['seller_email'] ?? '',
-        '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
-        '{{completed_at}}' => $notificationData['completed_at'] ?? '',
-        '{{company_email}}' => 'reklamace@wgs-service.cz',
-        '{{company_phone}}' => '+420 725 965 826',
+        'customer_name' => $notificationData['customer_name'] ?? 'Zákazník',
+        'customer_email' => $notificationData['customer_email'] ?? '',
+        'customer_phone' => $notificationData['customer_phone'] ?? '',
+        'date' => $notificationData['appointment_date'] ?? $notificationData['date'] ?? '',
+        'time' => $notificationData['appointment_time'] ?? $notificationData['time'] ?? '',
+        'order_id' => $notificationData['order_id'] ?? '',
+        'address' => $notificationData['address'] ?? '',
+        'product' => $notificationData['product'] ?? '',
+        'description' => $notificationData['description'] ?? '',
+        'technician_name' => $notificationData['technician_name'] ?? '',
+        'technician_email' => $notificationData['technician_email'] ?? '',
+        'technician_phone' => $notificationData['technician_phone'] ?? '',
+        'seller_name' => $notificationData['seller_name'] ?? '',
+        'seller_email' => $notificationData['seller_email'] ?? '',
+        'created_at' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
+        'completed_at' => $notificationData['completed_at'] ?? '',
+        'company_email' => 'reklamace@wgs-service.cz',
+        'company_phone' => '+420 725 965 826',
     ];
 
-    // Replace variables in subject and message
-    foreach ($variableMap as $variable => $value) {
+    // Mapování pro zpětnou kompatibilitu ({{var}} formát)
+    $variableMapWithBrackets = [];
+    foreach ($variableMap as $key => $value) {
+        $variableMapWithBrackets['{{' . $key . '}}'] = $value;
+    }
+
+    // Nahradit proměnné v předmětu
+    foreach ($variableMapWithBrackets as $variable => $value) {
         $subject = str_replace($variable, $value, $subject);
-        $message = str_replace($variable, $value, $message);
+    }
+
+    // Rozhodnout zda použít grafickou šablonu nebo textovou
+    $message = '';
+    if (!empty($notification['template_data'])) {
+        // NOVÝ GRAFICKÝ FORMÁT
+        require_once __DIR__ . '/../includes/email_template_base.php';
+        $message = renderujEmailZeSablony($notification, $variableMap);
+    } else {
+        // STARÝ TEXTOVÝ FORMÁT - převést na základní HTML
+        $message = $notification['template'];
+        foreach ($variableMapWithBrackets as $variable => $value) {
+            $message = str_replace($variable, $value, $message);
+        }
+
+        // Pokud text neobsahuje HTML, zabalit do grafické šablony
+        if (strip_tags($message) === $message) {
+            require_once __DIR__ . '/../includes/email_template_base.php';
+            $message = renderujGrafickyEmail([
+                'obsah' => '<p>' . nl2br(htmlspecialchars($message)) . '</p>'
+            ]);
+        }
     }
 
     // ============================================
@@ -270,8 +296,8 @@ try {
 
     // Explicitní CC emaily (z cc_emails) - s podporou proměnných
     if (!empty($ccEmails) && is_array($ccEmails)) {
-        $ccEmails = array_map(function($email) use ($variableMap) {
-            foreach ($variableMap as $variable => $value) {
+        $ccEmails = array_map(function($email) use ($variableMapWithBrackets) {
+            foreach ($variableMapWithBrackets as $variable => $value) {
                 $email = str_replace($variable, $value, $email);
             }
             return trim($email);
@@ -282,8 +308,8 @@ try {
 
     // Explicitní BCC emaily (z bcc_emails) - s podporou proměnných
     if (!empty($bccEmails) && is_array($bccEmails)) {
-        $bccEmails = array_map(function($email) use ($variableMap) {
-            foreach ($variableMap as $variable => $value) {
+        $bccEmails = array_map(function($email) use ($variableMapWithBrackets) {
+            foreach ($variableMapWithBrackets as $variable => $value) {
                 $email = str_replace($variable, $value, $email);
             }
             return trim($email);
