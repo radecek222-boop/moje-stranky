@@ -16,6 +16,10 @@ class WGSTranslator
     private PDO $pdo;
     private string $zdrojovyJazyk = 'cs';
 
+    // Maximalni delka textu pro jeden API pozadavek (MyMemory limit je 500 znaku pro free, 10000 s emailem)
+    // Pouzijeme 4500 pro jistotu
+    private const MAX_CHUNK_SIZE = 4500;
+
     // Mapovani jazyku pro Google Translate
     private array $jazykoveKody = [
         'cs' => 'cs',
@@ -254,15 +258,129 @@ class WGSTranslator
      */
     private function zavolatGoogleTranslateSimple(string $text, string $cilovyJazyk): string
     {
-        $result = $this->zavolatGoogleTranslate($text, $cilovyJazyk);
+        $result = $this->zavolatJedenChunk($text, $cilovyJazyk);
         return $result ?: $text;
     }
 
     /**
-     * Zavola MyMemory Translate API (bezplatna verze - 10000 slov/den)
-     * Dokumentace: https://mymemory.translated.net/doc/spec.php
+     * Zavola MyMemory Translate API s podporou dlouhych textu (chunking)
+     * Dlouhe texty rozdeli na casti a prelozi postupne
      */
     private function zavolatGoogleTranslate(string $text, string $cilovyJazyk): ?string
+    {
+        // Pokud je text kratky, prelozit primo
+        if (mb_strlen($text) <= self::MAX_CHUNK_SIZE) {
+            return $this->zavolatJedenChunk($text, $cilovyJazyk);
+        }
+
+        // Rozdelit text na casti
+        $chunky = $this->rozdelNaChunky($text);
+        error_log("WGSTranslator: Text rozdelen na " . count($chunky) . " casti");
+
+        $prelozeneChunky = [];
+        foreach ($chunky as $i => $chunk) {
+            error_log("WGSTranslator: Prekladam cast " . ($i + 1) . "/" . count($chunky) . " (" . mb_strlen($chunk) . " znaku)");
+
+            $prelozeny = $this->zavolatJedenChunk($chunk, $cilovyJazyk);
+            if ($prelozeny === null) {
+                error_log("WGSTranslator: Cast " . ($i + 1) . " selhala - vracim original");
+                return null; // Pokud selze jedna cast, vratit null
+            }
+            $prelozeneChunky[] = $prelozeny;
+
+            // Pauza mezi pozadavky (rate limiting)
+            if ($i < count($chunky) - 1) {
+                usleep(500000); // 0.5 sekundy mezi pozadavky
+            }
+        }
+
+        // Spojit prelozene casti
+        return implode("\n\n", $prelozeneChunky);
+    }
+
+    /**
+     * Rozdeli dlouhy text na mensi casti (chunky) na hranicich odstavcu
+     */
+    private function rozdelNaChunky(string $text): array
+    {
+        $chunky = [];
+        $aktualniChunk = '';
+
+        // Rozdelit na odstavce (dvojity newline nebo ## nadpisy)
+        $odstavce = preg_split('/(\n\n+|(?=^## ))/m', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($odstavce as $odstavec) {
+            $odstavec = trim($odstavec);
+            if (empty($odstavec)) continue;
+
+            // Pokud by pridani odstavce prekrocilo limit
+            if (mb_strlen($aktualniChunk) + mb_strlen($odstavec) + 2 > self::MAX_CHUNK_SIZE) {
+                // Ulozit aktualni chunk (pokud neni prazdny)
+                if (!empty(trim($aktualniChunk))) {
+                    $chunky[] = trim($aktualniChunk);
+                }
+
+                // Pokud je samotny odstavec moc dlouhy, rozdelit na vety
+                if (mb_strlen($odstavec) > self::MAX_CHUNK_SIZE) {
+                    $vetyChunky = $this->rozdelOdstavecNaVety($odstavec);
+                    foreach ($vetyChunky as $vetaChunk) {
+                        $chunky[] = $vetaChunk;
+                    }
+                    $aktualniChunk = '';
+                } else {
+                    $aktualniChunk = $odstavec;
+                }
+            } else {
+                // Pridat odstavec k aktualnimu chunku
+                $aktualniChunk .= ($aktualniChunk ? "\n\n" : '') . $odstavec;
+            }
+        }
+
+        // Nezapomenout na posledni chunk
+        if (!empty(trim($aktualniChunk))) {
+            $chunky[] = trim($aktualniChunk);
+        }
+
+        return $chunky;
+    }
+
+    /**
+     * Rozdeli prilis dlouhy odstavec na vety
+     */
+    private function rozdelOdstavecNaVety(string $odstavec): array
+    {
+        $chunky = [];
+        $aktualniChunk = '';
+
+        // Rozdelit na vety (tecka, vykricnik, otaznik + mezera nebo konec)
+        $vety = preg_split('/(?<=[.!?])\s+/', $odstavec);
+
+        foreach ($vety as $veta) {
+            $veta = trim($veta);
+            if (empty($veta)) continue;
+
+            if (mb_strlen($aktualniChunk) + mb_strlen($veta) + 1 > self::MAX_CHUNK_SIZE) {
+                if (!empty(trim($aktualniChunk))) {
+                    $chunky[] = trim($aktualniChunk);
+                }
+                $aktualniChunk = $veta;
+            } else {
+                $aktualniChunk .= ($aktualniChunk ? ' ' : '') . $veta;
+            }
+        }
+
+        if (!empty(trim($aktualniChunk))) {
+            $chunky[] = trim($aktualniChunk);
+        }
+
+        return $chunky;
+    }
+
+    /**
+     * Zavola MyMemory API pro jeden chunk textu
+     * Dokumentace: https://mymemory.translated.net/doc/spec.php
+     */
+    private function zavolatJedenChunk(string $text, string $cilovyJazyk): ?string
     {
         // MyMemory API - bezplatne, limit 10000 slov/den
         $url = 'https://api.mymemory.translated.net/get';
@@ -278,7 +396,7 @@ class WGSTranslator
         try {
             $context = stream_context_create([
                 'http' => [
-                    'timeout' => 15,
+                    'timeout' => 30,
                     'method' => 'GET',
                     'header' => [
                         'User-Agent: WGS-Service/1.0',
