@@ -1452,11 +1452,13 @@ async function obnovitNahled() {
 
         const result = await response.json();
 
-        if (result.status === 'success' && result.data?.html) {
+        // API může vracet html v result.data.html nebo result.html
+        const htmlContent = result.data?.html || result.html;
+        if (result.status === 'success' && htmlContent) {
             // Zobrazit náhled v iframe
             previewPanel.innerHTML = `<iframe id="preview-iframe" style="width: 100%; height: 100%; border: none; min-height: 80vh;" sandbox="allow-same-origin"></iframe>`;
             const iframe = document.getElementById('preview-iframe');
-            iframe.srcdoc = result.data.html;
+            iframe.srcdoc = htmlContent;
         } else {
             const errMsg = result.message || result.error || 'Neznámá chyba';
             previewPanel.innerHTML = `<div style="text-align: center; padding: 4rem; color: #dc3545;">
