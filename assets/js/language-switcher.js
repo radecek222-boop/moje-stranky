@@ -82,26 +82,36 @@
       `;
       loadingDiv.innerHTML = `
         <div style="margin-bottom: 15px;">Překládám aktuality do ${cilovyJazyk.toUpperCase()}...</div>
-        <div style="font-size: 0.8em; opacity: 0.7;">Prosím čekejte</div>
+        <div style="font-size: 0.8em; opacity: 0.7;">Max 30 sekund</div>
       `;
       document.body.appendChild(loadingDiv);
 
-      // Zavolat API pro překlad
-      const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`);
-      const data = await response.json();
+      // Zavolat API pro překlad s timeoutem 30s
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          console.log('Překlad dokončen:', data);
+        } else {
+          console.error('Chyba překladu:', data.message);
+        }
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError') {
+          console.log('Překlad timeout - pokračuji bez čekání');
+        } else {
+          throw fetchError;
+        }
+      }
 
       // Odstranit indikátor
       loadingDiv.remove();
-
-      if (data.status === 'success') {
-        console.log('Překlad dokončen:', data);
-        // Pokud byly přeloženy nějaké aktuality, zobrazit info
-        if (data.data && data.data.prelozeno > 0) {
-          console.log(`Přeloženo ${data.data.prelozeno} aktualit do ${cilovyJazyk.toUpperCase()}`);
-        }
-      } else {
-        console.error('Chyba překladu:', data.message);
-      }
 
     } catch (error) {
       console.error('Chyba při překladu aktualit:', error);

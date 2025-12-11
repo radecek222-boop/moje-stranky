@@ -62,8 +62,14 @@ try {
     $prelozenoCount = 0;
     $preskoceno = 0;
     $chyby = [];
+    $maxPrekladu = 5; // Omezit počet překladů na jedno volání (Google rate limit)
 
     foreach ($aktuality as $aktualita) {
+        // Limit počtu překladů
+        if ($prelozenoCount >= $maxPrekladu) {
+            break;
+        }
+
         $id = $aktualita['id'];
         $obsahCz = $aktualita['obsah_cz'] ?? '';
         $obsahSloupec = 'obsah_' . $cilovyJazyk;
@@ -75,13 +81,8 @@ try {
             continue;
         }
 
-        // Přeskočit pokud už překlad existuje a je jiný než CZ (už je přeloženo)
-        // Hash-based check - pokud se CZ nezměnil, nemusíme překládat
-        $hashCz = md5(preg_replace('/\s+/', ' ', trim($obsahCz)));
-        $hashPreklad = !empty($stavajiciPreklad) ? md5(preg_replace('/\s+/', ' ', trim($stavajiciPreklad))) : '';
-
-        // Pokud překlad existuje a není stejný jako CZ, pravděpodobně už je přeloženo
-        if (!empty($stavajiciPreklad) && $hashPreklad !== $hashCz) {
+        // Přeskočit pokud překlad už existuje a není prázdný
+        if (!empty(trim($stavajiciPreklad))) {
             $preskoceno++;
             continue;
         }
