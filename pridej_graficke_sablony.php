@@ -100,6 +100,15 @@ try {
 
     echo "</table>";
 
+    // DEBUG: Zobrazit přesné ID z databáze
+    echo "<h2>DEBUG: Přesné ID z databáze</h2>";
+    echo "<pre>";
+    foreach ($sablony as $s) {
+        $idHex = bin2hex($s['id']);
+        echo "ID: '{$s['id']}' (hex: {$idHex}, délka: " . strlen($s['id']) . ")\n";
+    }
+    echo "</pre>";
+
     // 3. Definice grafických šablon
     // KLÍČ = hodnota sloupce 'name' v DB (např. 'appointment_confirmed')
     $grafickeSablony = [
@@ -239,23 +248,30 @@ V současné době čekáme na vyjádření prodejce. Jakmile obdržíme odpově
         $pdo->beginTransaction();
 
         try {
-            // Aktualizovat šablony podle id (textový identifikátor)
-            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
+            // Nejdřív zjistit strukturu - jaký je datový typ id?
+            $checkStmt = $pdo->prepare("SELECT id, name FROM wgs_notifications WHERE id = :id LIMIT 1");
+            $updateStmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
 
             $uspesne = 0;
             $neuspesne = 0;
 
             foreach ($grafickeSablony as $id => $data) {
-                $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                $stmt->execute(['data' => $jsonData, 'id' => $id]);
+                // Kontrola existence
+                $checkStmt->execute(['id' => $id]);
+                $existuje = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($stmt->rowCount() > 0) {
-                    echo "<div class='success'>Aktualizována šablona: <code>{$id}</code></div>";
-                    $uspesne++;
-                } else {
-                    echo "<div class='warning'>Šablona <code>{$id}</code> nebyla nalezena v DB.</div>";
+                if (!$existuje) {
+                    echo "<div class='warning'>Šablona <code>{$id}</code> nebyla nalezena v DB (SELECT vrátil prázdný výsledek).</div>";
                     $neuspesne++;
+                    continue;
                 }
+
+                // UPDATE
+                $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                $updateStmt->execute(['data' => $jsonData, 'id' => $id]);
+
+                echo "<div class='success'>Aktualizována šablona: <code>{$id}</code> (name: {$existuje['name']})</div>";
+                $uspesne++;
             }
 
             $pdo->commit();
