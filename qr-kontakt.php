@@ -106,10 +106,7 @@ require_once "init.php";
     }
 
     .qr-kontakt-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
+      display: block;
       width: 100%;
       padding: 1.25rem 1.5rem;
       background: #000;
@@ -120,11 +117,13 @@ require_once "init.php";
       letter-spacing: 0.08em;
       text-transform: uppercase;
       text-decoration: none;
+      text-align: center;
       border: 2px solid #000;
       border-radius: 0;
       cursor: pointer;
       transition: all 0.3s ease;
       min-height: 70px;
+      line-height: calc(70px - 2.5rem);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -153,11 +152,6 @@ require_once "init.php";
       border-color: #000;
     }
 
-    .qr-kontakt-btn-icon {
-      font-size: 1.5rem;
-      line-height: 1;
-    }
-
     .qr-kontakt-footer {
       padding: 1rem;
       text-align: center;
@@ -180,10 +174,7 @@ require_once "init.php";
         padding: 1.5rem 2rem;
         font-size: 1.15rem;
         min-height: 80px;
-      }
-
-      .qr-kontakt-btn-icon {
-        font-size: 1.75rem;
+        line-height: calc(80px - 3rem);
       }
     }
 
@@ -196,10 +187,7 @@ require_once "init.php";
         padding: 1rem 1.25rem;
         font-size: 1rem;
         min-height: 60px;
-      }
-
-      .qr-kontakt-btn-icon {
-        font-size: 1.25rem;
+        line-height: calc(60px - 2rem);
       }
     }
 
@@ -235,20 +223,17 @@ require_once "init.php";
     <div class="qr-kontakt-buttons">
       <!-- Tlacitko 1: Zavolat -->
       <a href="tel:+420725965826" class="qr-kontakt-btn" aria-label="Zavolat na cislo +420 725 965 826">
-        <span class="qr-kontakt-btn-icon" aria-hidden="true">&#128222;</span>
-        <span>Zavolat</span>
+        Zavolat
       </a>
 
       <!-- Tlacitko 2: Napsat e-mail -->
       <a href="mailto:info@wgs-service.cz?subject=Kontakt%20z%20QR" class="qr-kontakt-btn" aria-label="Napsat e-mail na info@wgs-service.cz">
-        <span class="qr-kontakt-btn-icon" aria-hidden="true">&#9993;</span>
-        <span>Napsat e-mail</span>
+        Napsat e-mail
       </a>
 
       <!-- Tlacitko 3: Navstivit web -->
       <a href="https://www.wgs-service.cz" class="qr-kontakt-btn qr-kontakt-btn-secondary" aria-label="Navstivit hlavni webove stranky WGS">
-        <span class="qr-kontakt-btn-icon" aria-hidden="true">&#127760;</span>
-        <span>Navstivit web</span>
+        Navstivit web
       </a>
     </div>
   </main>
