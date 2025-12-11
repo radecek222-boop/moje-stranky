@@ -26,13 +26,14 @@
 function renderujGrafickyEmail(array $data): string {
     $baseUrl = 'https://www.wgs-service.cz';
 
-    // Výchozí hodnoty + nl2br pro zachování zalomení řádků
+    // Výchozí hodnoty + Markdown + nl2br pro zachování zalomení řádků
+    // Markdown se převádí na HTML, pak nl2br pro řádky
     $nadpis = $data['nadpis'] ?? '';
-    $osloveni = nl2br(htmlspecialchars($data['osloveni'] ?? 'Vážený zákazníku,'));
-    $obsah = nl2br($data['obsah'] ?? ''); // Obsah může obsahovat HTML
+    $osloveni = nl2br(markdownNaHtml($data['osloveni'] ?? 'Vážený zákazníku,'));
+    $obsah = nl2br(markdownNaHtml($data['obsah'] ?? ''));
     $tlacitko = $data['tlacitko'] ?? null;
-    $infobox = nl2br(htmlspecialchars($data['infobox'] ?? ''));
-    $upozorneni = nl2br(htmlspecialchars($data['upozorneni'] ?? ''));
+    $infobox = nl2br(markdownNaHtml($data['infobox'] ?? ''));
+    $upozorneni = nl2br(markdownNaHtml($data['upozorneni'] ?? ''));
 
     // Sestavení sekcí
     $nadpisHtml = '';
@@ -195,6 +196,25 @@ function renderujEmailZeSablony(array $sablona, array $promenne = []): string {
     return renderujGrafickyEmail([
         'obsah' => $obsah
     ]);
+}
+
+/**
+ * Převede základní Markdown syntaxi na HTML
+ * Podporuje: **tučné**, *kurzíva*, __tučné__, _kurzíva_
+ *
+ * @param string $text Text s Markdown
+ * @return string Text s HTML
+ */
+function markdownNaHtml(string $text): string {
+    // **tučné** nebo __tučné__
+    $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
+    $text = preg_replace('/__(.+?)__/', '<strong>$1</strong>', $text);
+
+    // *kurzíva* nebo _kurzíva_ (ale ne uprostřed slova)
+    $text = preg_replace('/(?<!\w)\*([^*]+?)\*(?!\w)/', '<em>$1</em>', $text);
+    $text = preg_replace('/(?<!\w)_([^_]+?)_(?!\w)/', '<em>$1</em>', $text);
+
+    return $text;
 }
 
 /**
