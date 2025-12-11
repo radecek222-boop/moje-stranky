@@ -21,8 +21,9 @@ class WGSTranslator
     private string $zdrojovyJazyk = 'cs';
 
     // Maximalni delka textu pro jeden API pozadavek
-    // MyMemory pouziva GET - URL ma limit, proto male chunky
-    private const MAX_CHUNK_SIZE = 1000;
+    // MyMemory pouziva GET - cestina se URL-enkoduje 3-6x delsi
+    // 300 znaku * 6 = 1800 znaku URL (bezpecne pod 2000 limit)
+    private const MAX_CHUNK_SIZE = 300;
 
     // Mapovani jazyku
     private array $jazykoveKody = [
