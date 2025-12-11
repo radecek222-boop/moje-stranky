@@ -81,16 +81,14 @@ require_once "init.php";
 
     .qr-kontakt-title {
       font-family: 'Poppins', sans-serif;
-      font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+      font-size: clamp(1.6rem, 6.5vw, 2.2rem);
       font-weight: 600;
       color: #000;
-      text-align: justify;
-      text-align-last: justify;
-      letter-spacing: 0.15em;
+      text-align: center;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       margin-bottom: 0.5rem;
       white-space: nowrap;
-      width: 100%;
     }
 
     .qr-kontakt-subtitle {
