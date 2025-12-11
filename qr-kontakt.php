@@ -81,22 +81,24 @@ require_once "init.php";
 
     .qr-kontakt-title {
       font-family: 'Poppins', sans-serif;
-      font-size: 1.75rem;
+      font-size: clamp(1.2rem, 5vw, 1.75rem);
       font-weight: 600;
       color: #000;
       text-align: center;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       margin-bottom: 0.5rem;
+      white-space: nowrap;
     }
 
     .qr-kontakt-subtitle {
       font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
+      font-size: clamp(0.65rem, 2.5vw, 0.95rem);
       font-weight: 300;
       color: #555;
       text-align: center;
       margin-bottom: 2.5rem;
+      white-space: nowrap;
     }
 
     .qr-kontakt-buttons {
@@ -166,10 +168,6 @@ require_once "init.php";
         padding: 3rem 2rem;
       }
 
-      .qr-kontakt-title {
-        font-size: 2rem;
-      }
-
       .qr-kontakt-btn {
         padding: 1.5rem 2rem;
         font-size: 1.15rem;
@@ -179,10 +177,6 @@ require_once "init.php";
     }
 
     @media (max-width: 380px) {
-      .qr-kontakt-title {
-        font-size: 1.5rem;
-      }
-
       .qr-kontakt-btn {
         padding: 1rem 1.25rem;
         font-size: 1rem;
@@ -217,8 +211,8 @@ require_once "init.php";
   </header>
 
   <main class="qr-kontakt-main" id="main-content">
-    <h1 class="qr-kontakt-title">Rychly kontakt</h1>
-    <p class="qr-kontakt-subtitle">Vyberte, jak nas chcete kontaktovat.</p>
+    <h1 class="qr-kontakt-title">White Glove Servis</h1>
+    <p class="qr-kontakt-subtitle">specializovany autorizovany servis Natuzzi</p>
 
     <div class="qr-kontakt-buttons">
       <!-- Tlacitko 1: Zavolat -->
