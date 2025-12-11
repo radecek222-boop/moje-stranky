@@ -59,18 +59,32 @@ try {
     if ($templateDataExists) {
         echo "<div class='success'>Sloupec template_data již existuje.</div>";
     } else {
-        echo "<div class='warning'>Sloupec template_data NEEXISTUJE - bude přidán.</div>";
+        echo "<div class='warning'>Sloupec template_data NEEXISTUJE - přidávám...</div>";
+        ob_flush();
+        flush();
 
         // Přidat sloupec HNED, aby další dotazy fungovaly
-        $pdo->exec("ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template");
-        echo "<div class='success'>Sloupec template_data byl přidán.</div>";
-        $templateDataExists = true;
+        try {
+            $pdo->exec("ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template");
+            echo "<div class='success'>Sloupec template_data byl úspěšně přidán.</div>";
+            $templateDataExists = true;
+        } catch (PDOException $e) {
+            echo "<div class='error'>Chyba při přidávání sloupce: " . htmlspecialchars($e->getMessage()) . "</div>";
+            echo "<div class='info'>Zkuste spustit ručně v phpMyAdmin:<br><code>ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template;</code></div>";
+        }
+        ob_flush();
+        flush();
     }
 
     // 2. Načíst stávající šablony
     echo "<h2>2. Stávající šablony</h2>";
 
-    $sablony = $pdo->query("SELECT id, name, subject, template, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+    // Dynamický SELECT - bez template_data pokud sloupec neexistuje
+    if ($templateDataExists) {
+        $sablony = $pdo->query("SELECT id, name, subject, template, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $sablony = $pdo->query("SELECT id, name, subject, template, NULL as template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     echo "<table>
         <tr>
