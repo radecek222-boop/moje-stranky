@@ -26,13 +26,13 @@
 function renderujGrafickyEmail(array $data): string {
     $baseUrl = 'https://www.wgs-service.cz';
 
-    // Výchozí hodnoty
+    // Výchozí hodnoty + nl2br pro zachování zalomení řádků
     $nadpis = $data['nadpis'] ?? '';
-    $osloveni = $data['osloveni'] ?? 'Vážený zákazníku,';
-    $obsah = $data['obsah'] ?? '';
+    $osloveni = nl2br(htmlspecialchars($data['osloveni'] ?? 'Vážený zákazníku,'));
+    $obsah = nl2br($data['obsah'] ?? ''); // Obsah může obsahovat HTML
     $tlacitko = $data['tlacitko'] ?? null;
-    $infobox = $data['infobox'] ?? null;
-    $upozorneni = $data['upozorneni'] ?? null;
+    $infobox = nl2br(htmlspecialchars($data['infobox'] ?? ''));
+    $upozorneni = nl2br(htmlspecialchars($data['upozorneni'] ?? ''));
 
     // Sestavení sekcí
     $nadpisHtml = '';
