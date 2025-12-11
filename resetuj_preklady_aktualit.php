@@ -58,8 +58,8 @@ try {
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='warning'><strong>SPOUSTIM RESET...</strong></div>";
 
-        // Vymazat EN a IT preklady
-        $stmt = $pdo->exec("UPDATE wgs_natuzzi_aktuality SET obsah_en = NULL, obsah_it = NULL");
+        // Vymazat EN a IT preklady (pouzit prazdny retezec misto NULL)
+        $stmt = $pdo->exec("UPDATE wgs_natuzzi_aktuality SET obsah_en = '', obsah_it = ''");
         echo "<div class='success'>Vymazano {$stmt} EN/IT prekladu z aktualit</div>";
 
         // Vymazat translation cache
