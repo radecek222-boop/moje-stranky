@@ -60,6 +60,11 @@ try {
         echo "<div class='success'>Sloupec template_data již existuje.</div>";
     } else {
         echo "<div class='warning'>Sloupec template_data NEEXISTUJE - bude přidán.</div>";
+
+        // Přidat sloupec HNED, aby další dotazy fungovaly
+        $pdo->exec("ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template");
+        echo "<div class='success'>Sloupec template_data byl přidán.</div>";
+        $templateDataExists = true;
     }
 
     // 2. Načíst stávající šablony
