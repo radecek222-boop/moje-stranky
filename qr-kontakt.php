@@ -104,17 +104,17 @@ require_once "init.php";
     .qr-kontakt-buttons {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .qr-kontakt-btn {
       display: block;
       width: 100%;
-      padding: 0.9rem 1.5rem;
+      padding: 0.65rem 1.25rem;
       background: #000;
       color: #fff;
       font-family: 'Poppins', sans-serif;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -124,7 +124,7 @@ require_once "init.php";
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-height: 54px;
+      min-height: 44px;
       line-height: 1.4;
       -webkit-tap-highlight-color: transparent;
     }
@@ -169,17 +169,17 @@ require_once "init.php";
       }
 
       .qr-kontakt-btn {
-        padding: 1rem 2rem;
-        font-size: 1.15rem;
-        min-height: 58px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        min-height: 48px;
       }
     }
 
     @media (max-width: 380px) {
       .qr-kontakt-btn {
-        padding: 0.75rem 1.25rem;
-        font-size: 1rem;
-        min-height: 48px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        min-height: 40px;
       }
     }
 
