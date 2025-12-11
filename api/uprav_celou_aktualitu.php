@@ -2,11 +2,13 @@
 /**
  * API endpoint pro úpravu celého obsahu aktuality
  * Umožňuje adminovi upravit celý markdown obsah článku
+ * Automaticky překládá do EN a IT pomocí Google Translate s cache
  */
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/translator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -184,47 +186,71 @@ try {
         ));
     }
 
-    // Aktualizovat obsah v databázi
+    // Automaticky přeložit do EN a IT
+    $translator = new WGSTranslator($pdo);
+
+    // Přeložit celý obsah do angličtiny a italštiny
+    $obsahEn = $translator->preloz($novyObsahCely, 'en', 'aktualita', $aktualitaId);
+    $obsahIt = $translator->preloz($novyObsahCely, 'it', 'aktualita', $aktualitaId);
+
+    // Aktualizovat všechny jazykové verze v databázi
     $stmtUpdate = $pdo->prepare("
         UPDATE wgs_natuzzi_aktuality
-        SET obsah_cz = :obsah
+        SET obsah_cz = :obsah_cz,
+            obsah_en = :obsah_en,
+            obsah_it = :obsah_it,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = :id
     ");
 
     $stmtUpdate->execute([
-        'obsah' => $novyObsahCely,
+        'obsah_cz' => $novyObsahCely,
+        'obsah_en' => $obsahEn,
+        'obsah_it' => $obsahIt,
         'id' => $aktualitaId
     ]);
 
     // Audit log
+    $prelozenoInfo = ($obsahEn !== $novyObsahCely || $obsahIt !== $novyObsahCely)
+        ? ' | Translations: EN=' . strlen($obsahEn) . ', IT=' . strlen($obsahIt)
+        : ' | Translations: cached';
+
     if ($jeNovyClanek) {
         error_log(sprintf(
-            "ADMIN ADD AKTUALITA: User %d added new article to aktualita #%d on %s | Length: %d -> %d chars",
+            "ADMIN ADD AKTUALITA: User %d added new article to aktualita #%d on %s | Length: %d -> %d chars%s",
             $_SESSION['user_id'] ?? 0,
             $aktualitaId,
             $aktualita['datum'],
             strlen($staryObsahCely),
-            strlen($novyObsahCely)
+            strlen($novyObsahCely),
+            $prelozenoInfo
         ));
     } else {
         error_log(sprintf(
-            "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (článek index %d) on %s | Length: %d -> %d chars",
+            "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (článek index %d) on %s | Length: %d -> %d chars%s",
             $_SESSION['user_id'] ?? 0,
             $aktualitaId,
             $index,
             $aktualita['datum'],
             strlen($staryObsahCely),
-            strlen($novyObsahCely)
+            strlen($novyObsahCely),
+            $prelozenoInfo
         ));
     }
 
-    $successMessage = $jeNovyClanek ? 'Nový článek byl úspěšně přidán' : 'Článek byl úspěšně upraven';
+    $successMessage = $jeNovyClanek
+        ? 'Nový článek byl úspěšně přidán a automaticky přeložen'
+        : 'Článek byl úspěšně upraven a automaticky přeložen';
 
     sendJsonSuccess($successMessage, [
         'aktualita_id' => $aktualitaId,
         'index' => $index,
         'delka_noveho_obsahu' => strlen($novyObsahCely),
-        'je_novy' => $jeNovyClanek
+        'je_novy' => $jeNovyClanek,
+        'preklady' => [
+            'en' => strlen($obsahEn),
+            'it' => strlen($obsahIt)
+        ]
     ]);
 
 } catch (PDOException $e) {
