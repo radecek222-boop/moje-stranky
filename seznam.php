@@ -2152,12 +2152,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'otevritVyberFotek':
+        if (id && typeof otevritVyberFotek === 'function') {
+          console.log('[EMERGENCY] Otviram vyber fotek pro ID:', id);
+          otevritVyberFotek(id);
+        } else {
+          console.error('[EMERGENCY] otevritVyberFotek funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }
   });
 
-  console.log('[EMERGENCY] Event delegation V7 nacten [2025-12-04] - vsechny handlery aktivni');
+  // Change event listener pro fototeka file input
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    if (target && target.id && target.id.startsWith('fototeka-input-')) {
+      console.log('[EMERGENCY] Fototeka input change detected');
+      if (typeof zpracujVybraneFotky === 'function') {
+        zpracujVybraneFotky(e);
+      } else {
+        console.error('[EMERGENCY] zpracujVybraneFotky funkce neni dostupna');
+      }
+    }
+  });
+
+  console.log('[EMERGENCY] Event delegation V8 nacten [2025-12-11] - fototeka handlery pridany');
 });
 
 // DVA-KLIKOVE POTVRZENI - obchazi vsechny problemy s modaly/overlay

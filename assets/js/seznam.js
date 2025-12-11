@@ -1974,38 +1974,58 @@ async function showCustomerDetail(id) {
                   placeholder="Zadejte popis problému od zákazníka">${Utils.escapeHtml(description)}</textarea>
       </div>
 
-      <!-- FOTOGRAFIE -->
-      ${fotky.length > 0 ? `
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            ${fotky.map((f, i) => {
-              const photoPath = typeof f === 'object' ? f.photo_path : f;
-              const photoId = typeof f === 'object' ? f.id : null;
-              const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+      <!-- FOTOTÉKA -->
+      <div style="margin-bottom: 1rem; background: #1a1a1a; border-radius: 6px; padding: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <label style="color: #aaa; font-weight: 600; font-size: 0.85rem;" id="fototeka-nadpis">Fototeka (${fotky.length})</label>
+          <button type="button"
+                  data-action="otevritVyberFotek"
+                  data-id="${reklamaceId}"
+                  style="background: #333; color: #fff; border: 1px solid #555; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+            Pridat fotky
+          </button>
+        </div>
+        <input type="file"
+               id="fototeka-input-${reklamaceId}"
+               accept="image/*"
+               multiple
+               style="display: none;"
+               data-reklamace-id="${reklamaceId}">
+        <div id="fototeka-grid" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;">
+          ${fotky.length > 0 ? fotky.map((f, i) => {
+            const photoPath = typeof f === 'object' ? f.photo_path : f;
+            const photoId = typeof f === 'object' ? f.id : null;
+            const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
-              return `
-                <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
-                  <img src='${photoPath}'
-                       style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
-                       alt='Fotka ${i+1}'
-                       data-action="showPhotoFullscreen"
-                       data-url="${escapedUrl}">
-                  ${photoId ? `
-                    <button class="foto-delete-btn"
-                            data-action="smazatFotku"
-                            data-photo-id="${photoId}"
-                            data-url="${escapedUrl}"
-                            title="Smazat fotku">
-                      ×
-                    </button>
-                  ` : ''}
-                </div>
-              `;
-            }).join('')}
+            return `
+              <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
+                <img src='${photoPath}'
+                     style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
+                     alt='Fotka ${i+1}'
+                     data-action="showPhotoFullscreen"
+                     data-url="${escapedUrl}">
+                ${photoId ? `
+                  <button class="foto-delete-btn"
+                          data-action="smazatFotku"
+                          data-photo-id="${photoId}"
+                          data-url="${escapedUrl}"
+                          title="Smazat fotku">
+                    x
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          }).join('') : `
+            <p style="color: #666; font-size: 0.85rem; margin: 0; padding: 0.5rem 0;">Zadne fotografie</p>
+          `}
+        </div>
+        <div id="fototeka-nahravani" style="display: none; margin-top: 0.75rem; padding: 0.5rem; background: #222; border-radius: 4px;">
+          <p style="color: #aaa; font-size: 0.8rem; margin: 0;">Nahravani fotek...</p>
+          <div style="background: #333; height: 4px; border-radius: 2px; margin-top: 0.5rem; overflow: hidden;">
+            <div id="fototeka-progress" style="background: #fff; height: 100%; width: 0%; transition: width 0.3s;"></div>
           </div>
         </div>
-      ` : ''}
+      </div>
 
       <!-- PDF DOKUMENTY -->
       ${(() => {
@@ -3151,7 +3171,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'previousMonth', 'nextMonth', 'showBookingDetail', 'showCalendarBack',
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
-      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes'
+      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek'
     ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
@@ -3494,6 +3514,193 @@ async function loadPhotosFromDB(reklamaceId) {
     return [];
   }
 }
+
+// === FOTOTEKA - NAHRANI FOTEK Z DETAILU ZAKAZNIKA ===
+
+/**
+ * Otevre dialog pro vyber fotek
+ * @param {string} reklamaceId - ID reklamace
+ */
+function otevritVyberFotek(reklamaceId) {
+  logger.log('[Fototeka] Otviram vyber fotek pro reklamaci:', reklamaceId);
+  const input = document.getElementById('fototeka-input-' + reklamaceId);
+  if (input) {
+    input.click();
+  } else {
+    logger.error('[Fototeka] Input element nenalezen');
+  }
+}
+
+/**
+ * Zpracuje vybrane fotky a nahraje je na server
+ * @param {Event} event - Change event z input file
+ */
+async function zpracujVybraneFotky(event) {
+  const input = event.target;
+  const reklamaceId = input.getAttribute('data-reklamace-id');
+  const soubory = input.files;
+
+  if (!soubory || soubory.length === 0) {
+    logger.log('[Fototeka] Zadne soubory vybrane');
+    return;
+  }
+
+  logger.log('[Fototeka] Vybrano souboru:', soubory.length, 'pro reklamaci:', reklamaceId);
+
+  // Zobrazit progress bar
+  const nahravaniDiv = document.getElementById('fototeka-nahravani');
+  const progressBar = document.getElementById('fototeka-progress');
+  if (nahravaniDiv) nahravaniDiv.style.display = 'block';
+  if (progressBar) progressBar.style.width = '0%';
+
+  try {
+    // Konvertovat soubory na base64
+    const fotkyBase64 = [];
+    for (let i = 0; i < soubory.length; i++) {
+      const soubor = soubory[i];
+
+      // Kontrola typu souboru
+      if (!soubor.type.startsWith('image/')) {
+        logger.warn('[Fototeka] Preskakuji neobrazovy soubor:', soubor.name);
+        continue;
+      }
+
+      // Kontrola velikosti (max 10MB)
+      if (soubor.size > 10 * 1024 * 1024) {
+        wgsToast.error('Soubor ' + soubor.name + ' je prilis velky (max 10MB)');
+        continue;
+      }
+
+      const base64 = await souborNaBase64(soubor);
+      fotkyBase64.push({
+        type: 'image',
+        data: base64,
+        size: soubor.size
+      });
+
+      // Aktualizovat progress
+      if (progressBar) {
+        const progress = Math.round(((i + 1) / soubory.length) * 50);
+        progressBar.style.width = progress + '%';
+      }
+    }
+
+    if (fotkyBase64.length === 0) {
+      throw new Error('Zadne platne fotky k nahrani');
+    }
+
+    // Odeslat na server
+    const csrfToken = await getCSRFToken();
+    const response = await fetch('/app/save_photos.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        sections: { customer_detail: fotkyBase64 },
+        csrf_token: csrfToken
+      })
+    });
+
+    if (progressBar) progressBar.style.width = '80%';
+
+    const vysledek = await response.json();
+
+    if (!response.ok || !vysledek.success) {
+      throw new Error(vysledek.error || 'Chyba pri nahravani');
+    }
+
+    if (progressBar) progressBar.style.width = '100%';
+
+    logger.log('[Fototeka] Nahrano fotek:', vysledek.count);
+    wgsToast.success('Nahrano ' + vysledek.count + ' fotek');
+
+    // Aktualizovat grid s fotkami
+    await aktualizujFototekaGrid(reklamaceId);
+
+    // Reset inputu
+    input.value = '';
+
+  } catch (error) {
+    logger.error('[Fototeka] Chyba pri nahravani:', error);
+    wgsToast.error('Chyba: ' + error.message);
+  } finally {
+    // Skryt progress bar po chvili
+    setTimeout(() => {
+      if (nahravaniDiv) nahravaniDiv.style.display = 'none';
+      if (progressBar) progressBar.style.width = '0%';
+    }, 1000);
+  }
+}
+
+/**
+ * Prevede soubor na base64
+ * @param {File} soubor - Soubor k prevodu
+ * @returns {Promise<string>} - Base64 string
+ */
+function souborNaBase64(soubor) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(soubor);
+  });
+}
+
+/**
+ * Aktualizuje grid fotek v fototece
+ * @param {string} reklamaceId - ID reklamace
+ */
+async function aktualizujFototekaGrid(reklamaceId) {
+  try {
+    const fotky = await loadPhotosFromDB(reklamaceId);
+    const grid = document.getElementById('fototeka-grid');
+    const nadpis = document.getElementById('fototeka-nadpis');
+
+    if (!grid) return;
+
+    // Aktualizovat nadpis
+    if (nadpis) {
+      nadpis.textContent = 'Fototeka (' + fotky.length + ')';
+    }
+
+    // Aktualizovat grid
+    if (fotky.length > 0) {
+      grid.innerHTML = fotky.map((f, i) => {
+        const photoPath = typeof f === 'object' ? f.photo_path : f;
+        const photoId = typeof f === 'object' ? f.id : null;
+        const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+
+        return `
+          <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
+            <img src='${photoPath}'
+                 style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
+                 alt='Fotka ${i+1}'
+                 data-action="showPhotoFullscreen"
+                 data-url="${escapedUrl}">
+            ${photoId ? `
+              <button class="foto-delete-btn"
+                      data-action="smazatFotku"
+                      data-photo-id="${photoId}"
+                      data-url="${escapedUrl}"
+                      title="Smazat fotku">
+                x
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    } else {
+      grid.innerHTML = '<p style="color: #666; font-size: 0.85rem; margin: 0; padding: 0.5rem 0;">Zadne fotografie</p>';
+    }
+
+  } catch (error) {
+    logger.error('[Fototeka] Chyba pri aktualizaci gridu:', error);
+  }
+}
+
+// Globalni pristup k funkcim fototéky
+window.otevritVyberFotek = otevritVyberFotek;
+window.zpracujVybraneFotky = zpracujVybraneFotky;
 
 // PAGINATION: Load more handler
 async function loadMoreOrders() {
