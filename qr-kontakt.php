@@ -73,7 +73,7 @@ require_once "init.php";
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 2rem 1.5rem;
+      padding: 1rem 1.5rem 2rem;
       max-width: 500px;
       margin: 0 auto;
       width: 100%;
@@ -81,14 +81,16 @@ require_once "init.php";
 
     .qr-kontakt-title {
       font-family: 'Poppins', sans-serif;
-      font-size: clamp(1.2rem, 5vw, 1.75rem);
+      font-size: clamp(1.1rem, 4.5vw, 1.5rem);
       font-weight: 600;
       color: #000;
-      text-align: center;
-      letter-spacing: 0.05em;
+      text-align: justify;
+      text-align-last: justify;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       margin-bottom: 0.5rem;
       white-space: nowrap;
+      width: 100%;
     }
 
     .qr-kontakt-subtitle {
@@ -97,7 +99,7 @@ require_once "init.php";
       font-weight: 300;
       color: #555;
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 3.5rem;
       white-space: nowrap;
     }
 
