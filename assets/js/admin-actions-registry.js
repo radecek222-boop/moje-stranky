@@ -198,11 +198,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     Utils.registerAction('closeEmailDetailModal', () => {
-        const modal = document.getElementById('emailDetailModal');
+        const modal = document.getElementById('email-detail-modal');
         if (modal) modal.style.display = 'none';
     });
     Utils.registerAction('zavritSablonaModal', () => {
-        const modal = document.getElementById('sablonaModal');
+        const modal = document.getElementById('sablona-modal');
         if (modal) modal.style.display = 'none';
     });
     Utils.registerAction('editSmsTemplate', (el, data) => {
@@ -211,12 +211,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     Utils.registerAction('closeSmsModal', () => {
-        const modal = document.getElementById('smsModal');
+        const modal = document.getElementById('editSmsModal');
         if (modal) modal.style.display = 'none';
     });
-    Utils.registerAction('saveSmsTemplate', (el, data) => {
-        if (data.id && typeof saveSmsTemplate === 'function') {
-            saveSmsTemplate(data.id);
+    Utils.registerAction('saveSmsTemplate', () => {
+        if (typeof saveSmsTemplate === 'function') {
+            saveSmsTemplate();
         }
     });
     Utils.registerAction('otevritModalPrijemcu', (el, data) => {
@@ -225,17 +225,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     Utils.registerAction('zavritModalPrijemcu', () => {
-        const modal = document.getElementById('modalPrijemcu');
-        if (modal) modal.style.display = 'none';
+        const modal = document.getElementById('recipients-modal');
+        if (modal) modal.remove();
     });
-    Utils.registerAction('ulozitPrijemce', (el, data) => {
-        if (data.id && typeof ulozitPrijemce === 'function') {
-            ulozitPrijemce(data.id);
+    Utils.registerAction('ulozitPrijemce', () => {
+        if (typeof ulozitPrijemce === 'function') {
+            ulozitPrijemce();
         }
     });
     Utils.registerAction('ulozitSablonu', (el, data) => {
         if (data.id && typeof ulozitSablonu === 'function') {
             ulozitSablonu(data.id);
+        }
+    });
+    Utils.registerAction('ulozitGrafickouSablonu', (el, data) => {
+        if (data.id && typeof ulozitGrafickouSablonu === 'function') {
+            ulozitGrafickouSablonu(data.id);
         }
     });
     Utils.registerAction('upravitEmailKlice', (el, data) => {
