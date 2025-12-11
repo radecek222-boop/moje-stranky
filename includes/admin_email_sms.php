@@ -1217,7 +1217,10 @@ async function otevritNotifikace(sablonaId) {
         const response = await fetch(`/api/admin_api.php?action=get_email_template&template_id=${sablonaId}&csrf_token=${csrfToken}`);
         const result = await response.json();
 
-        if (result.status !== 'success' || !result.data?.template) {
+        // API vrací result.template (ne result.data.template)
+        const apiTemplate = result.data?.template || result.template;
+
+        if (result.status !== 'success' || !apiTemplate) {
             // Fallback na lokální data
             const sablona = Object.values(<?= json_encode($emailSablony) ?>).find(s => s.id == sablonaId);
             if (!sablona) {
@@ -1227,7 +1230,7 @@ async function otevritNotifikace(sablonaId) {
             aktualniSablona = sablona;
             aktualniSablona.template_data = null;
         } else {
-            aktualniSablona = result.data.template;
+            aktualniSablona = apiTemplate;
         }
 
         // Aktualizovat title
