@@ -37,8 +37,7 @@ echo "<!DOCTYPE html>
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { padding: 10px; border: 1px solid #444; text-align: left; }
         th { background: #333; }
-        .preview { background: #fff; padding: 20px; border-radius: 5px; margin: 10px 0; }
-        .preview iframe { width: 100%; height: 400px; border: none; }
+        code { background: #333; padding: 2px 6px; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -63,36 +62,30 @@ try {
         ob_flush();
         flush();
 
-        // Přidat sloupec HNED, aby další dotazy fungovaly
         try {
             $pdo->exec("ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template");
             echo "<div class='success'>Sloupec template_data byl úspěšně přidán.</div>";
             $templateDataExists = true;
         } catch (PDOException $e) {
             echo "<div class='error'>Chyba při přidávání sloupce: " . htmlspecialchars($e->getMessage()) . "</div>";
-            echo "<div class='info'>Zkuste spustit ručně v phpMyAdmin:<br><code>ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template;</code></div>";
         }
-        ob_flush();
-        flush();
     }
 
     // 2. Načíst stávající šablony
     echo "<h2>2. Stávající šablony</h2>";
 
-    // Dynamický SELECT - bez template_data pokud sloupec neexistuje
     if ($templateDataExists) {
-        $sablony = $pdo->query("SELECT id, name, trigger_event, recipient_type, subject, template, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+        $sablony = $pdo->query("SELECT id, name, subject, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        $sablony = $pdo->query("SELECT id, name, trigger_event, recipient_type, subject, template, NULL as template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+        $sablony = $pdo->query("SELECT id, name, subject, NULL as template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     echo "<table>
         <tr>
-            <th>ID</th>
-            <th>Name (DB)</th>
-            <th>Trigger Event</th>
-            <th>Recipient</th>
-            <th>Typ šablony</th>
+            <th>ID (číslo)</th>
+            <th>Name (klíč pro migraci)</th>
+            <th>Předmět</th>
+            <th>Stav</th>
         </tr>";
 
     foreach ($sablony as $s) {
@@ -100,176 +93,177 @@ try {
         echo "<tr>
             <td>{$s['id']}</td>
             <td><code>{$s['name']}</code></td>
-            <td><code>{$s['trigger_event']}</code></td>
-            <td>{$s['recipient_type']}</td>
+            <td>" . htmlspecialchars(mb_substr($s['subject'] ?? '-', 0, 50)) . "</td>
             <td>{$typ}</td>
         </tr>";
     }
 
     echo "</table>";
 
-    // Vytvořit mapu ID podle trigger_event + recipient_type
-    $idMapa = [];
-    foreach ($sablony as $s) {
-        $klic = $s['trigger_event'] . '_' . $s['recipient_type'];
-        $idMapa[$klic] = $s['id'];
-    }
-
-    // 3. Definice nových grafických šablon
-    // Klíč = trigger_event_recipient_type (např. appointment_confirmed_customer)
+    // 3. Definice grafických šablon
+    // KLÍČ = hodnota sloupce 'name' v DB (např. 'appointment_confirmed')
     $grafickeSablony = [
-        'appointment_confirmed_customer' => [
+        'appointment_confirmed' => [
             'nadpis' => 'Potvrzení termínu',
             'osloveni' => 'Vážený/á {{customer_name}},',
-            'obsah' => '<p>potvrzujeme termín návštěvy našeho technika.</p>
+            'obsah' => 'potvrzujeme termín návštěvy našeho technika.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Detaily návštěvy</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Datum:</strong> {{date}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Čas:</strong> {{time}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-</div>
+**Datum:** {{date}}
+**Čas:** {{time}}
+**Číslo zakázky:** {{order_id}}
 
-<p>V případě jakýchkoli dotazů nás prosím kontaktujte na telefonu <strong>+420 725 965 826</strong> nebo emailem na <strong>reklamace@wgs-service.cz</strong>.</p>',
-            'infobox' => 'Prosíme, zajistěte přístup k nábytku a pokud možno buďte přítomni při návštěvě technika.'
+V případě jakýchkoli dotazů nás prosím kontaktujte na telefonu **+420 725 965 826** nebo emailem na **reklamace@wgs-service.cz**.',
+            'infobox' => 'Prosíme, zajistěte přístup k nábytku a pokud možno buďte přítomni při návštěvě technika.',
+            'upozorneni' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
         ],
 
         'appointment_reminder_customer' => [
             'nadpis' => 'Připomenutí termínu',
             'osloveni' => 'Vážený/á {{customer_name}},',
-            'obsah' => '<p>připomínáme termín <strong>zítřejší</strong> návštěvy našeho technika.</p>
+            'obsah' => 'připomínáme termín **zítřejší** návštěvy našeho technika.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Detaily návštěvy</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Datum:</strong> {{date}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Čas:</strong> {{time}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Adresa:</strong> {{address}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-</div>
+**Datum:** {{date}}
+**Čas:** {{time}}
+**Adresa:** {{address}}
+**Číslo zakázky:** {{order_id}}
 
-<p>Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve.</p>',
-            'upozorneni' => '<strong>Důležité:</strong> Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve na telefonu +420 725 965 826.'
+Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve.',
+            'upozorneni' => 'Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve na telefonu +420 725 965 826.',
+            'infobox' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
         ],
 
-        'order_created_customer' => [
+        'order_created' => [
             'nadpis' => 'Nová reklamace přijata',
             'osloveni' => 'Vážený/á {{customer_name}},',
-            'obsah' => '<p>děkujeme za odeslání reklamace. Vaši žádost jsme přijali a budeme ji řešit.</p>
+            'obsah' => 'děkujeme za odeslání reklamace. Vaši žádost jsme přijali a budeme ji řešit.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Detaily reklamace</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Produkt:</strong> {{product}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Adresa:</strong> {{address}}</p>
-</div>
+**Číslo zakázky:** {{order_id}}
+**Produkt:** {{product}}
+**Adresa:** {{address}}
 
-<p>Brzy vás budeme kontaktovat ohledně termínu návštěvy technika.</p>',
-            'infobox' => 'Přibližná doba vyřízení reklamace je 5-10 pracovních dní. O průběhu vás budeme informovat emailem nebo telefonicky.'
+Brzy vás budeme kontaktovat ohledně termínu návštěvy technika.',
+            'infobox' => 'Přibližná doba vyřízení reklamace je 5-10 pracovních dní. O průběhu vás budeme informovat emailem nebo telefonicky.',
+            'upozorneni' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
         ],
 
-        'order_completed_customer' => [
+        'order_completed' => [
             'nadpis' => 'Zakázka dokončena',
             'osloveni' => 'Vážený/á {{customer_name}},',
-            'obsah' => '<p>děkujeme, že jste využili služeb <strong>White Glove Service</strong>.</p>
+            'obsah' => 'děkujeme, že jste využili služeb **White Glove Service**.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Dokončená zakázka</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Datum dokončení:</strong> {{completed_at}}</p>
-</div>
+**Číslo zakázky:** {{order_id}}
+**Datum dokončení:** {{completed_at}}
 
-<p>Pokud byste měli jakékoli dotazy nebo připomínky k provedené opravě, neváhejte nás kontaktovat.</p>
+Pokud byste měli jakékoli dotazy nebo připomínky k provedené opravě, neváhejte nás kontaktovat.
 
-<p>Budeme rádi, když nás doporučíte svým známým.</p>',
+Budeme rádi, když nás doporučíte svým známým.',
             'tlacitko' => [
                 'text' => 'Navštívit naše stránky',
                 'url' => 'https://www.wgs-service.cz'
-            ]
+            ],
+            'infobox' => '',
+            'upozorneni' => ''
         ],
 
-        'order_reopened_admin' => [
+        'order_reopened' => [
             'nadpis' => 'Zakázka znovu otevřena',
             'osloveni' => 'Dobrý den,',
-            'obsah' => '<p>zakázka byla znovu otevřena pro další zpracování.</p>
+            'obsah' => 'zakázka byla znovu otevřena pro další zpracování.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Detaily</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Zákazník:</strong> {{customer_name}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Znovu otevřeno:</strong> {{reopened_by}} ({{reopened_at}})</p>
-</div>
+**Zákazník:** {{customer_name}}
+**Číslo zakázky:** {{order_id}}
+**Znovu otevřeno:** {{reopened_by}} ({{reopened_at}})
 
-<p>Stav byl změněn na <strong>NOVÁ</strong>. Termín byl vymazán.</p>',
-            'upozorneni' => 'Tato zakázka vyžaduje další pozornost. Prosím zkontrolujte ji v admin systému.'
+Stav byl změněn na **NOVÁ**. Termín byl vymazán.',
+            'upozorneni' => 'Tato zakázka vyžaduje další pozornost. Prosím zkontrolujte ji v admin systému.',
+            'infobox' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
         ],
 
         'appointment_assigned_technician' => [
             'nadpis' => 'Nový termín přiřazen',
             'osloveni' => 'Dobrý den {{technician_name}},',
-            'obsah' => '<p>byl vám přiřazen nový servisní termín.</p>
+            'obsah' => 'byl vám přiřazen nový servisní termín.
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Detaily termínu</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Datum:</strong> {{date}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Čas:</strong> {{time}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Číslo zakázky:</strong> {{order_id}}</p>
-</div>
+**Datum:** {{date}}
+**Čas:** {{time}}
+**Číslo zakázky:** {{order_id}}
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Zákazník</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Jméno:</strong> {{customer_name}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Telefon:</strong> {{customer_phone}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Adresa:</strong> {{address}}</p>
-</div>
+**Zákazník:**
+Jméno: {{customer_name}}
+Telefon: {{customer_phone}}
+Adresa: {{address}}
 
-<div style="background: #f8f9fa; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
-    <p style="margin: 0 0 10px 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Produkt</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Typ:</strong> {{product}}</p>
-    <p style="margin: 5px 0; font-size: 14px;"><strong>Popis problému:</strong> {{description}}</p>
-</div>',
-            'infobox' => 'Prosím potvrďte přijetí termínu v admin systému.'
+**Produkt:**
+Typ: {{product}}
+Popis problému: {{description}}',
+            'infobox' => 'Prosím potvrďte přijetí termínu v admin systému.',
+            'upozorneni' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
+        ],
+
+        'contact_attempt' => [
+            'nadpis' => 'Pokus o kontakt',
+            'osloveni' => 'Vážený/á {{customer_name}},',
+            'obsah' => 'pokusili jsme se Vás kontaktovat ohledně Vaší servisní žádosti, ale nepodařilo se nám Vás zastihnout.
+
+**Číslo zakázky:** {{order_id}}
+
+Prosíme, kontaktujte nás zpět na telefonu **+420 725 965 826** nebo odpovědí na tento email.',
+            'upozorneni' => 'Pokud se nám nepodaří Vás kontaktovat do 3 pracovních dnů, bude zakázka dočasně pozastavena.',
+            'infobox' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
+        ],
+
+        'waiting_dealer_response' => [
+            'nadpis' => 'Čekání na vyjádření prodejce',
+            'osloveni' => 'Vážený/á {{customer_name}},',
+            'obsah' => 'informujeme Vás o průběhu Vaší reklamace.
+
+**Číslo zakázky:** {{order_id}}
+
+V současné době čekáme na vyjádření prodejce. Jakmile obdržíme odpověď, budeme Vás informovat o dalším postupu.',
+            'infobox' => 'Průběžně sledujeme stav a v případě prodlení prodejce urgujeme.',
+            'upozorneni' => '',
+            'tlacitko' => ['text' => '', 'url' => '']
         ]
     ];
 
-    // 4. Pokud je nastaveno execute=1, provést migraci
+    // 4. Provést migraci
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<h2>3. Provádím migraci...</h2>";
 
         $pdo->beginTransaction();
 
         try {
-            // 4.1 Přidat sloupec template_data pokud neexistuje
-            if (!$templateDataExists) {
-                $pdo->exec("ALTER TABLE wgs_notifications ADD COLUMN template_data JSON DEFAULT NULL AFTER template");
-                echo "<div class='success'>Sloupec template_data byl přidán.</div>";
-            }
+            // Aktualizovat šablony podle name
+            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE name = :name");
 
-            // 4.2 Aktualizovat šablony podle ID (z mapy trigger_event + recipient_type)
-            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
+            $uspesne = 0;
+            $neuspesne = 0;
 
-            foreach ($grafickeSablony as $klic => $data) {
-                // Najít ID podle klíče
-                if (!isset($idMapa[$klic])) {
-                    echo "<div class='warning'>Šablona <code>{$klic}</code> nebyla nalezena v DB (žádný záznam s trigger_event_recipient_type = {$klic}).</div>";
-                    continue;
-                }
-
-                $id = $idMapa[$klic];
+            foreach ($grafickeSablony as $name => $data) {
                 $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                $stmt->execute(['data' => $jsonData, 'id' => $id]);
+                $stmt->execute(['data' => $jsonData, 'name' => $name]);
 
                 if ($stmt->rowCount() > 0) {
-                    echo "<div class='success'>Aktualizována šablona ID {$id}: <strong>{$klic}</strong></div>";
+                    echo "<div class='success'>Aktualizována šablona: <code>{$name}</code></div>";
+                    $uspesne++;
                 } else {
-                    echo "<div class='warning'>Šablona ID {$id} ({$klic}) nebyla aktualizována.</div>";
+                    echo "<div class='warning'>Šablona <code>{$name}</code> nebyla nalezena v DB.</div>";
+                    $neuspesne++;
                 }
             }
 
             $pdo->commit();
 
             echo "<div class='success' style='font-size: 1.2rem; padding: 20px; margin-top: 20px;'>
-                <strong>MIGRACE ÚSPĚŠNĚ DOKONČENA!</strong><br>
-                Všechny emailové šablony byly převedeny na grafické verze.
+                <strong>MIGRACE DOKONČENA!</strong><br>
+                Úspěšně aktualizováno: {$uspesne} šablon<br>
+                Nenalezeno: {$neuspesne} šablon
             </div>";
 
             echo "<a href='/admin.php' class='btn'>Zpět do administrace</a>";
@@ -282,20 +276,14 @@ try {
             </div>";
         }
     } else {
-        // Zobrazit náhled
-        echo "<h2>3. Náhled grafických šablon</h2>";
+        echo "<h2>3. Připraveno k migraci</h2>";
+        echo "<p>Následující šablony budou aktualizovány na grafické verze:</p>";
 
-        echo "<p>Kliknutím na 'Spustit migraci' budou všechny šablony převedeny na grafické verze.</p>";
-
-        // Ukázka jedné šablony
-        echo "<h3>Ukázka: Potvrzení termínu</h3>";
-
-        require_once __DIR__ . '/includes/email_template_base.php';
-        $ukazka = nahledSablony($grafickeSablony['appointment_confirmed']);
-
-        echo "<div class='preview'>
-            <iframe srcdoc='" . htmlspecialchars($ukazka) . "'></iframe>
-        </div>";
+        echo "<ul>";
+        foreach (array_keys($grafickeSablony) as $name) {
+            echo "<li><code>{$name}</code></li>";
+        }
+        echo "</ul>";
 
         echo "<div style='margin-top: 30px;'>
             <a href='?execute=1' class='btn'>Spustit migraci</a>
