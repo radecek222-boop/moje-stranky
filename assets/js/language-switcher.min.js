@@ -9,6 +9,9 @@
   // Aktuální jazyk - načíst z localStorage nebo defaultně čeština
   let aktualniJazyk = localStorage.getItem('wgs-lang') || 'cs';
 
+  // Flag pro rozlišení kliknutí vs. inicializace
+  let jeKliknuti = false;
+
   /**
    * Přepne jazyk na celé stránce
    * @param {string} jazyk - Kód jazyka: 'cs', 'en', 'it'
@@ -19,12 +22,12 @@
       return;
     }
 
-    // ADMIN: Na stránce aktualit - automatický překlad při přepnutí na EN/IT
     const jeNaAktualitach = window.location.pathname.includes('aktuality');
     const jeAdmin = document.body.classList.contains('admin-mode') ||
                     document.querySelector('.hamburger-nav.admin-nav-active') !== null;
 
-    if (jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
+    // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku (ne při inicializaci)
+    if (jeKliknuti && jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
       await spustitPrekladAktualit(jazyk);
     }
 
@@ -32,8 +35,8 @@
     localStorage.setItem('wgs-lang', jazyk);
     document.documentElement.lang = jazyk;
 
-    // Na stránce aktualit přesměrovat s parametrem ?lang=
-    if (jeNaAktualitach) {
+    // Na stránce aktualit přesměrovat s parametrem ?lang= (pouze při kliknutí)
+    if (jeKliknuti && jeNaAktualitach) {
       const url = new URL(window.location.href);
       url.searchParams.set('lang', jazyk === 'cs' ? 'cz' : jazyk);
       window.location.href = url.toString();
@@ -318,12 +321,14 @@
     // Přidat event listenery na vlajky - kliknutí i klávesnice
     document.querySelectorAll('.lang-flag').forEach(vlajka => {
       vlajka.addEventListener('click', () => {
+        jeKliknuti = true; // Označit jako skutečné kliknutí
         prepniJazyk(vlajka.dataset.lang);
       });
       // Podpora klávesnice (Enter/Space) pro přístupnost
       vlajka.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          jeKliknuti = true; // Označit jako skutečné kliknutí
           prepniJazyk(vlajka.dataset.lang);
         }
       });
