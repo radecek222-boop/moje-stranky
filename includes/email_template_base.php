@@ -83,6 +83,7 @@ function renderujGrafickyEmail(array $data): string {
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>White Glove Service</title>
+    <link rel='icon' href='data:,'>
 </head>
 <body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
 
