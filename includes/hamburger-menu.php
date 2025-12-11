@@ -44,6 +44,7 @@ if ($isAdmin) {
           <?php echo htmlspecialchars($item['header_label'], ENT_QUOTES, 'UTF-8'); ?>
         </a>
       <?php endforeach; ?>
+      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link">PLAY<span class="play-badge" id="playBadgeAdmin" style="display:none;">0</span></a>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
         <svg class="notif-bell" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1405,7 +1406,8 @@ document.addEventListener('alpine:init', () => {
    */
   function initPlayBadge() {
     const badge = document.getElementById('playBadge');
-    if (!badge) return;
+    const badgeAdmin = document.getElementById('playBadgeAdmin');
+    if (!badge && !badgeAdmin) return;
 
     async function nactiOnline() {
       try {
@@ -1414,12 +1416,15 @@ document.addEventListener('alpine:init', () => {
 
         if (result.status === 'success' && result.data.online) {
           const pocet = result.data.online.length;
-          if (pocet > 0) {
-            badge.textContent = pocet;
-            badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
+          [badge, badgeAdmin].forEach(b => {
+            if (!b) return;
+            if (pocet > 0) {
+              b.textContent = pocet;
+              b.style.display = 'inline-block';
+            } else {
+              b.style.display = 'none';
+            }
+          });
         }
       } catch (e) {
         // Tiše selhat - nezobrazit badge
