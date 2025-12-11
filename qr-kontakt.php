@@ -209,7 +209,7 @@ require_once "init.php";
   </header>
 
   <main class="qr-kontakt-main" id="main-content">
-    <h1 class="qr-kontakt-title">White Glove Servis</h1>
+    <h1 class="qr-kontakt-title">White Glove Service</h1>
     <p class="qr-kontakt-subtitle">specializovaný autorizovaný servis Natuzzi</p>
 
     <div class="qr-kontakt-buttons">
