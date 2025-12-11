@@ -234,17 +234,17 @@ try {
                 echo "<div class='success'>Sloupec template_data byl přidán.</div>";
             }
 
-            // 4.2 Aktualizovat šablony
-            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
+            // 4.2 Aktualizovat šablony podle name (ne ID!)
+            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE name = :name");
 
-            foreach ($grafickeSablony as $id => $data) {
+            foreach ($grafickeSablony as $name => $data) {
                 $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                $stmt->execute(['data' => $jsonData, 'id' => $id]);
+                $stmt->execute(['data' => $jsonData, 'name' => $name]);
 
                 if ($stmt->rowCount() > 0) {
-                    echo "<div class='success'>Aktualizována šablona: <strong>{$id}</strong></div>";
+                    echo "<div class='success'>Aktualizována šablona: <strong>{$name}</strong></div>";
                 } else {
-                    echo "<div class='warning'>Šablona {$id} nebyla nalezena v DB.</div>";
+                    echo "<div class='warning'>Šablona {$name} nebyla nalezena v DB.</div>";
                 }
             }
 
