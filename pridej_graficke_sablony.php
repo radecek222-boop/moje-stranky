@@ -81,16 +81,17 @@ try {
 
     // Dynamický SELECT - bez template_data pokud sloupec neexistuje
     if ($templateDataExists) {
-        $sablony = $pdo->query("SELECT id, name, subject, template, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+        $sablony = $pdo->query("SELECT id, name, trigger_event, recipient_type, subject, template, template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        $sablony = $pdo->query("SELECT id, name, subject, template, NULL as template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+        $sablony = $pdo->query("SELECT id, name, trigger_event, recipient_type, subject, template, NULL as template_data FROM wgs_notifications WHERE type IN ('email', 'both') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     echo "<table>
         <tr>
             <th>ID</th>
-            <th>Název</th>
-            <th>Předmět</th>
+            <th>Name (DB)</th>
+            <th>Trigger Event</th>
+            <th>Recipient</th>
             <th>Typ šablony</th>
         </tr>";
 
@@ -98,17 +99,26 @@ try {
         $typ = !empty($s['template_data']) ? '<span style="color: #39ff14;">GRAFICKÁ</span>' : '<span style="color: #f59e0b;">TEXTOVÁ</span>';
         echo "<tr>
             <td>{$s['id']}</td>
-            <td>{$s['name']}</td>
-            <td>" . htmlspecialchars($s['subject'] ?? '-') . "</td>
+            <td><code>{$s['name']}</code></td>
+            <td><code>{$s['trigger_event']}</code></td>
+            <td>{$s['recipient_type']}</td>
             <td>{$typ}</td>
         </tr>";
     }
 
     echo "</table>";
 
+    // Vytvořit mapu ID podle trigger_event + recipient_type
+    $idMapa = [];
+    foreach ($sablony as $s) {
+        $klic = $s['trigger_event'] . '_' . $s['recipient_type'];
+        $idMapa[$klic] = $s['id'];
+    }
+
     // 3. Definice nových grafických šablon
+    // Klíč = trigger_event_recipient_type (např. appointment_confirmed_customer)
     $grafickeSablony = [
-        'appointment_confirmed' => [
+        'appointment_confirmed_customer' => [
             'nadpis' => 'Potvrzení termínu',
             'osloveni' => 'Vážený/á {{customer_name}},',
             'obsah' => '<p>potvrzujeme termín návštěvy našeho technika.</p>
@@ -141,7 +151,7 @@ try {
             'upozorneni' => '<strong>Důležité:</strong> Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve na telefonu +420 725 965 826.'
         ],
 
-        'order_created' => [
+        'order_created_customer' => [
             'nadpis' => 'Nová reklamace přijata',
             'osloveni' => 'Vážený/á {{customer_name}},',
             'obsah' => '<p>děkujeme za odeslání reklamace. Vaši žádost jsme přijali a budeme ji řešit.</p>
@@ -157,7 +167,7 @@ try {
             'infobox' => 'Přibližná doba vyřízení reklamace je 5-10 pracovních dní. O průběhu vás budeme informovat emailem nebo telefonicky.'
         ],
 
-        'order_completed' => [
+        'order_completed_customer' => [
             'nadpis' => 'Zakázka dokončena',
             'osloveni' => 'Vážený/á {{customer_name}},',
             'obsah' => '<p>děkujeme, že jste využili služeb <strong>White Glove Service</strong>.</p>
@@ -177,7 +187,7 @@ try {
             ]
         ],
 
-        'order_reopened' => [
+        'order_reopened_admin' => [
             'nadpis' => 'Zakázka znovu otevřena',
             'osloveni' => 'Dobrý den,',
             'obsah' => '<p>zakázka byla znovu otevřena pro další zpracování.</p>
@@ -234,17 +244,24 @@ try {
                 echo "<div class='success'>Sloupec template_data byl přidán.</div>";
             }
 
-            // 4.2 Aktualizovat šablony podle name (ne ID!)
-            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE name = :name");
+            // 4.2 Aktualizovat šablony podle ID (z mapy trigger_event + recipient_type)
+            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
 
-            foreach ($grafickeSablony as $name => $data) {
+            foreach ($grafickeSablony as $klic => $data) {
+                // Najít ID podle klíče
+                if (!isset($idMapa[$klic])) {
+                    echo "<div class='warning'>Šablona <code>{$klic}</code> nebyla nalezena v DB (žádný záznam s trigger_event_recipient_type = {$klic}).</div>";
+                    continue;
+                }
+
+                $id = $idMapa[$klic];
                 $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                $stmt->execute(['data' => $jsonData, 'name' => $name]);
+                $stmt->execute(['data' => $jsonData, 'id' => $id]);
 
                 if ($stmt->rowCount() > 0) {
-                    echo "<div class='success'>Aktualizována šablona: <strong>{$name}</strong></div>";
+                    echo "<div class='success'>Aktualizována šablona ID {$id}: <strong>{$klic}</strong></div>";
                 } else {
-                    echo "<div class='warning'>Šablona {$name} nebyla nalezena v DB.</div>";
+                    echo "<div class='warning'>Šablona ID {$id} ({$klic}) nebyla aktualizována.</div>";
                 }
             }
 
