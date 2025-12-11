@@ -239,21 +239,21 @@ V současné době čekáme na vyjádření prodejce. Jakmile obdržíme odpově
         $pdo->beginTransaction();
 
         try {
-            // Aktualizovat šablony podle name
-            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE name = :name");
+            // Aktualizovat šablony podle id (textový identifikátor)
+            $stmt = $pdo->prepare("UPDATE wgs_notifications SET template_data = :data WHERE id = :id");
 
             $uspesne = 0;
             $neuspesne = 0;
 
-            foreach ($grafickeSablony as $name => $data) {
+            foreach ($grafickeSablony as $id => $data) {
                 $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                $stmt->execute(['data' => $jsonData, 'name' => $name]);
+                $stmt->execute(['data' => $jsonData, 'id' => $id]);
 
                 if ($stmt->rowCount() > 0) {
-                    echo "<div class='success'>Aktualizována šablona: <code>{$name}</code></div>";
+                    echo "<div class='success'>Aktualizována šablona: <code>{$id}</code></div>";
                     $uspesne++;
                 } else {
-                    echo "<div class='warning'>Šablona <code>{$name}</code> nebyla nalezena v DB.</div>";
+                    echo "<div class='warning'>Šablona <code>{$id}</code> nebyla nalezena v DB.</div>";
                     $neuspesne++;
                 }
             }
