@@ -1963,16 +1963,18 @@ async function showCustomerDetail(id) {
       <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
         <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
-                  placeholder="Zadejte doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  placeholder="Zadejte doplňující informace od prodejce"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
 
       <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
       <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
         <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
-                  placeholder="Zadejte popis problému od zákazníka">${Utils.escapeHtml(description)}</textarea>
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  placeholder="Zadejte popis problému od zákazníka"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
       </div>
 
       <!-- FOTOTÉKA -->
@@ -2074,6 +2076,17 @@ async function showCustomerDetail(id) {
   `;
 
   ModalManager.show(content);
+
+  // Auto-resize textarea pri prvnim zobrazeni
+  setTimeout(() => {
+    const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
+    textareas.forEach(ta => {
+      if (ta) {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+      }
+    });
+  }, 50);
 }
 
 /**
