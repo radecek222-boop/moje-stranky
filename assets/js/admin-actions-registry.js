@@ -214,9 +214,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('smsModal');
         if (modal) modal.style.display = 'none';
     });
-    Utils.registerAction('saveSmsTemplate', (el, data) => {
-        if (data.id && typeof saveSmsTemplate === 'function') {
-            saveSmsTemplate(data.id);
+    Utils.registerAction('saveSmsTemplate', () => {
+        if (typeof saveSmsTemplate === 'function') {
+            saveSmsTemplate();
         }
     });
     Utils.registerAction('otevritModalPrijemcu', (el, data) => {
