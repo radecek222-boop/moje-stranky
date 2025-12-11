@@ -74,6 +74,7 @@ if ($isAdmin) {
       <?php endif; ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
+      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link" data-lang-cs="PLAY" data-lang-en="PLAY" data-lang-it="PLAY">PLAY<span class="play-badge" id="playBadge" style="display:none;">0</span></a>
       <?php if ($isTechnik): ?>
         <a href="cenik.php#kalkulacka" <?php if($current == "cenik.php" && strpos($_SERVER['REQUEST_URI'], '#kalkulacka') !== false) echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY SLUŽBY" data-lang-en="SERVICE PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO SERVIZIO">KALKULACE CENY SLUŽBY</a>
       <?php endif; ?>
@@ -271,6 +272,48 @@ if ($isAdmin) {
   color: #999 !important;
   font-weight: 600 !important;
   opacity: 1 !important;
+}
+
+/* VYJIMKA: Modre tlacitko PLAY - schvaleno 2025-12-11 */
+.hamburger-nav a.play-link {
+  color: #0099ff !important;
+  font-weight: 700 !important;
+  position: relative;
+  text-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
+}
+
+.hamburger-nav a.play-link:hover {
+  color: #33bbff !important;
+  text-shadow: 0 0 15px rgba(0, 153, 255, 0.7);
+}
+
+.hamburger-nav a.play-link.active::after {
+  background: #0099ff;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+}
+
+.play-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: #0099ff;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .play-badge {
+    position: static;
+    margin-left: 8px;
+    display: inline-block !important;
+  }
 }
 
 .hamburger-lang-switcher {
@@ -1355,6 +1398,43 @@ document.addEventListener('alpine:init', () => {
     document.addEventListener('DOMContentLoaded', initNotifButton);
   } else {
     initNotifButton();
+  }
+
+  /**
+   * InitPlayBadge - Načíst počet online hráčů v herní zóně
+   */
+  function initPlayBadge() {
+    const badge = document.getElementById('playBadge');
+    if (!badge) return;
+
+    async function nactiOnline() {
+      try {
+        const response = await fetch('/api/hry_api.php?action=stav');
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data.online) {
+          const pocet = result.data.online.length;
+          if (pocet > 0) {
+            badge.textContent = pocet;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      } catch (e) {
+        // Tiše selhat - nezobrazit badge
+      }
+    }
+
+    // Načíst hned a pak každých 30s
+    nactiOnline();
+    setInterval(nactiOnline, 30000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPlayBadge);
+  } else {
+    initPlayBadge();
   }
 })();
 </script>
