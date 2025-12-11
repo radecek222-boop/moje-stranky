@@ -22,11 +22,15 @@
       return;
     }
 
-    const jeNaAktualitach = window.location.pathname.includes('aktuality');
-    const jeAdmin = document.body.classList.contains('admin-mode') ||
-                    document.querySelector('.hamburger-nav.admin-nav-active') !== null;
+    // Přeskočit pokud jazyk je stejný a nejde o kliknutí
+    if (!jeKliknuti && jazyk === aktualniJazyk) {
+      return;
+    }
 
-    // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku (ne při inicializaci)
+    const jeNaAktualitach = window.location.pathname.includes('aktuality');
+    const jeAdmin = document.querySelector('.hamburger-nav.admin-nav-active') !== null;
+
+    // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku na stránce aktualit
     if (jeKliknuti && jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
       await spustitPrekladAktualit(jazyk);
     }
@@ -37,11 +41,14 @@
 
     // Na stránce aktualit přesměrovat s parametrem ?lang= (pouze při kliknutí)
     if (jeKliknuti && jeNaAktualitach) {
+      jeKliknuti = false; // Reset flagu
       const url = new URL(window.location.href);
       url.searchParams.set('lang', jazyk === 'cs' ? 'cz' : jazyk);
       window.location.href = url.toString();
       return;
     }
+
+    jeKliknuti = false; // Reset flagu
 
     // Aktualizovat všechny elementy s data-lang atributy
     aktualizujTexty(jazyk);
