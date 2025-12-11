@@ -62,10 +62,18 @@ class WGSTranslator
             return $cachovanyPreklad;
         }
 
-        // Neni v cache - zavolat Google Translate
-        $prelozenyText = $this->zavolatGoogleTranslate($text, $cilovyJazyk);
+        // Ochranit markdown (obrazky, odkazy) pred prekladem
+        $chranene = $this->ochraniMarkdown($text);
+        $textBezMarkdown = $chranene['text'];
+        $placeholdery = $chranene['placeholdery'];
 
-        if ($prelozenyText !== null && $prelozenyText !== $text) {
+        // Prelozit text bez markdown
+        $prelozenyText = $this->zavolatGoogleTranslate($textBezMarkdown, $cilovyJazyk);
+
+        if ($prelozenyText !== null) {
+            // Obnovit markdown elementy
+            $prelozenyText = $this->obnovMarkdown($prelozenyText, $placeholdery, $cilovyJazyk);
+
             // Ulozit do cache
             $this->ulozDoCache($hash, $text, $prelozenyText, $cilovyJazyk, $entityType, $entityId);
             return $prelozenyText;
@@ -182,12 +190,80 @@ class WGSTranslator
     }
 
     /**
+     * Ochrani markdown elementy pred prekladem (obrazky, odkazy, nadpisy)
+     */
+    private function ochraniMarkdown(string $text): array
+    {
+        $placeholdery = [];
+        $index = 0;
+
+        // Ochranit obrazky ![alt](url)
+        $text = preg_replace_callback('/!\[([^\]]*)\]\(([^)]+)\)/', function($match) use (&$placeholdery, &$index) {
+            $placeholder = "{{IMG_{$index}}}";
+            $placeholdery[$placeholder] = $match[0];
+            $index++;
+            return $placeholder;
+        }, $text);
+
+        // Ochranit odkazy [text](url) - zachovat text pro preklad, ochranit URL
+        $text = preg_replace_callback('/\[([^\]]+)\]\(([^)]+)\)/', function($match) use (&$placeholdery, &$index) {
+            $placeholder = "{{LINK_{$index}}}";
+            // Ulozit URL a text zvlast
+            $placeholdery[$placeholder] = ['type' => 'link', 'text' => $match[1], 'url' => $match[2]];
+            $index++;
+            return $placeholder;
+        }, $text);
+
+        // Ochranit nadpisy ## a ###
+        $text = preg_replace_callback('/^(#{1,3})\s+(.+)$/m', function($match) use (&$placeholdery, &$index) {
+            $placeholder = "{{HEADING_{$index}}}";
+            $placeholdery[$placeholder] = ['type' => 'heading', 'level' => $match[1], 'text' => $match[2]];
+            $index++;
+            return $placeholder;
+        }, $text);
+
+        return ['text' => $text, 'placeholdery' => $placeholdery];
+    }
+
+    /**
+     * Obnovi markdown elementy po prekladu
+     */
+    private function obnovMarkdown(string $text, array $placeholdery, string $cilovyJazyk): string
+    {
+        foreach ($placeholdery as $placeholder => $hodnota) {
+            if (is_string($hodnota)) {
+                // Obrazek - vratit beze zmeny
+                $text = str_replace($placeholder, $hodnota, $text);
+            } elseif (is_array($hodnota)) {
+                if ($hodnota['type'] === 'link') {
+                    // Odkaz - prelozit text, zachovat URL
+                    $prelozenyText = $this->zavolatGoogleTranslateSimple($hodnota['text'], $cilovyJazyk);
+                    $text = str_replace($placeholder, "[{$prelozenyText}]({$hodnota['url']})", $text);
+                } elseif ($hodnota['type'] === 'heading') {
+                    // Nadpis - prelozit text
+                    $prelozenyText = $this->zavolatGoogleTranslateSimple($hodnota['text'], $cilovyJazyk);
+                    $text = str_replace($placeholder, "{$hodnota['level']} {$prelozenyText}", $text);
+                }
+            }
+        }
+        return $text;
+    }
+
+    /**
+     * Jednoduchy preklad kratkeho textu (pro nadpisy a odkazy)
+     */
+    private function zavolatGoogleTranslateSimple(string $text, string $cilovyJazyk): string
+    {
+        $result = $this->zavolatGoogleTranslate($text, $cilovyJazyk);
+        return $result ?: $text;
+    }
+
+    /**
      * Zavola Google Translate API (neoficialni bezplatna verze)
      */
     private function zavolatGoogleTranslate(string $text, string $cilovyJazyk): ?string
     {
         // Google Translate neoficialni API
-        // Limit: neni oficialnejeden, ale pri velkem pouziti muze blokovat
         $url = 'https://translate.googleapis.com/translate_a/single';
 
         $params = [
