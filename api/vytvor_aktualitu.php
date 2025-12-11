@@ -2,11 +2,13 @@
 /**
  * API endpoint pro vytvoření nové vlastní aktuality
  * Přijímá: datum, svátek, komentář, obsah ve 3 jazycích, fotografie
+ * Automaticky překládá do EN a IT pokud nejsou vyplněny
  */
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/translator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -51,17 +53,24 @@ try {
         sendJsonError('Neplatné datum');
     }
 
-    // Validace obsahů
+    // Validace obsahů - pouze CZ je povinný
     if (empty($obsahCz)) {
         sendJsonError('Chybí český obsah');
     }
 
-    if (empty($obsahEn)) {
-        sendJsonError('Chybí anglický obsah');
-    }
+    // Automaticky přeložit pokud EN nebo IT nejsou vyplněny
+    $autoPreklad = false;
+    if (empty($obsahEn) || empty($obsahIt)) {
+        $translator = new WGSTranslator($pdo);
+        $autoPreklad = true;
 
-    if (empty($obsahIt)) {
-        sendJsonError('Chybí italský obsah');
+        if (empty($obsahEn)) {
+            $obsahEn = $translator->preloz($obsahCz, 'en', 'aktualita', null);
+        }
+
+        if (empty($obsahIt)) {
+            $obsahIt = $translator->preloz($obsahCz, 'it', 'aktualita', null);
+        }
     }
 
     // Kontrola zda už pro toto datum existuje aktualita
@@ -168,11 +177,16 @@ try {
         count($uploadedPhotos)
     ));
 
-    sendJsonSuccess('Aktualita byla úspěšně vytvořena', [
+    $zprava = $autoPreklad
+        ? 'Aktualita byla úspěšně vytvořena a automaticky přeložena'
+        : 'Aktualita byla úspěšně vytvořena';
+
+    sendJsonSuccess($zprava, [
         'id' => $newId,
         'datum' => $datum,
         'pocet_fotek' => count($uploadedPhotos),
-        'fotky' => $uploadedPhotos
+        'fotky' => $uploadedPhotos,
+        'auto_preklad' => $autoPreklad
     ]);
 
 } catch (PDOException $e) {
