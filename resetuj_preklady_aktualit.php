@@ -62,9 +62,9 @@ try {
         $stmt = $pdo->exec("UPDATE wgs_natuzzi_aktuality SET obsah_en = '', obsah_it = ''");
         echo "<div class='success'>Vymazano {$stmt} EN/IT prekladu z aktualit</div>";
 
-        // Vymazat translation cache
-        $stmt = $pdo->exec("DELETE FROM wgs_translation_cache WHERE entity_type = 'aktualita'");
-        echo "<div class='success'>Vymazano {$stmt} zaznamu z translation cache</div>";
+        // Vymazat CELOU translation cache (vcetne vsech typu entit)
+        $stmt = $pdo->exec("DELETE FROM wgs_translation_cache");
+        echo "<div class='success'>Vymazano {$stmt} zaznamu z translation cache (cela cache)</div>";
 
         echo "<div class='success'>";
         echo "<strong>RESET DOKONCEN</strong><br><br>";
