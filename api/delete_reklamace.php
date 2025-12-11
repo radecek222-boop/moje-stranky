@@ -3,6 +3,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/db_metadata.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/audit_logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -217,6 +218,15 @@ try {
     }
 
     $pdo->commit();
+
+    // AUDIT LOG: Zaznamenat smazání reklamace (file-based)
+    auditLog('reklamace_deleted', [
+        'reklamace_id' => $workflowId,
+        'primary_id' => $primaryId,
+        'reference' => $customerRef,
+        'deleted_records' => $deletedCounters,
+        'files_to_delete' => count($filesToDelete)
+    ], $currentUserId);
 
     $deletedFiles = cleanupUploadedFiles($workflowId, $filesToDelete);
 

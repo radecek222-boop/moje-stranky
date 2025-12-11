@@ -76,6 +76,12 @@ function handleAdminLogin(string $adminKey): void
 
     $providedHash = hash('sha256', $adminKey);
     if (!defined('ADMIN_KEY_HASH') || !hash_equals(ADMIN_KEY_HASH, $providedHash)) {
+        // AUDIT LOG: Zaznamenat neúspěšné přihlášení admina
+        auditLog('failed_login', [
+            'type' => 'admin_key',
+            'ip' => $identifier,
+            'reason' => 'invalid_admin_key'
+        ]);
         // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatný administrátorský klíč.', 401);
     }
@@ -151,6 +157,13 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
+        // AUDIT LOG: Zaznamenat neúspěšné přihlášení - uživatel nenalezen
+        auditLog('failed_login', [
+            'type' => 'user_login',
+            'email' => $email,
+            'ip' => $identifier,
+            'reason' => 'user_not_found'
+        ]);
         // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Uživatel nenalezen.', 401);
     }
@@ -164,6 +177,13 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     }
 
     if ($hashField === null || !password_verify($password, $user[$hashField])) {
+        // AUDIT LOG: Zaznamenat neúspěšné přihlášení - špatné heslo
+        auditLog('failed_login', [
+            'type' => 'user_login',
+            'email' => $email,
+            'ip' => $identifier,
+            'reason' => 'invalid_password'
+        ]);
         // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatné přihlašovací údaje.', 401);
     }
