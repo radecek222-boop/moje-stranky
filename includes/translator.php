@@ -195,32 +195,33 @@ class WGSTranslator
 
     /**
      * Ochrani markdown elementy pred prekladem (obrazky, odkazy, nadpisy)
+     * Pouziva alfanumericke placeholdery ktere API nemodifikuje
      */
     private function ochraniMarkdown(string $text): array
     {
         $placeholdery = [];
         $index = 0;
 
-        // Ochranit obrazky ![alt](url)
+        // Ochranit obrazky ![alt](url) - NEPŘEKLÁDAT, zachovat celé
         $text = preg_replace_callback('/!\[([^\]]*)\]\(([^)]+)\)/', function($match) use (&$placeholdery, &$index) {
-            $placeholder = "{{IMG_{$index}}}";
+            // Alfanumericky placeholder - API ho nezmeni
+            $placeholder = "WGSIMAGE" . str_pad($index, 4, '0', STR_PAD_LEFT) . "END";
             $placeholdery[$placeholder] = $match[0];
             $index++;
             return $placeholder;
         }, $text);
 
-        // Ochranit odkazy [text](url) - zachovat text pro preklad, ochranit URL
+        // Ochranit odkazy [text](url) - text prelozit, URL zachovat
         $text = preg_replace_callback('/\[([^\]]+)\]\(([^)]+)\)/', function($match) use (&$placeholdery, &$index) {
-            $placeholder = "{{LINK_{$index}}}";
-            // Ulozit URL a text zvlast
+            $placeholder = "WGSLINK" . str_pad($index, 4, '0', STR_PAD_LEFT) . "END";
             $placeholdery[$placeholder] = ['type' => 'link', 'text' => $match[1], 'url' => $match[2]];
             $index++;
             return $placeholder;
         }, $text);
 
-        // Ochranit nadpisy ## a ###
+        // Ochranit nadpisy ## a ### - text prelozit, znacky zachovat
         $text = preg_replace_callback('/^(#{1,3})\s+(.+)$/m', function($match) use (&$placeholdery, &$index) {
-            $placeholder = "{{HEADING_{$index}}}";
+            $placeholder = "WGSHEAD" . str_pad($index, 4, '0', STR_PAD_LEFT) . "END";
             $placeholdery[$placeholder] = ['type' => 'heading', 'level' => $match[1], 'text' => $match[2]];
             $index++;
             return $placeholder;
@@ -231,25 +232,44 @@ class WGSTranslator
 
     /**
      * Obnovi markdown elementy po prekladu
+     * Hleda alfanumericke placeholdery a nahradi je puvodnim obsahem
      */
     private function obnovMarkdown(string $text, array $placeholdery, string $cilovyJazyk): string
     {
         foreach ($placeholdery as $placeholder => $hodnota) {
+            // Zkusit najit placeholder (muze byt s mezerami kolem od API)
+            $pattern = '/' . preg_quote($placeholder, '/') . '/i';
+
+            // Taky zkusit variantu s mezerami (nektera API pridavaji mezery)
+            $placeholderSMezerami = preg_replace('/([A-Z]+)(\d+)([A-Z]+)/', '$1 $2 $3', $placeholder);
+
             if (is_string($hodnota)) {
                 // Obrazek - vratit beze zmeny
-                $text = str_replace($placeholder, $hodnota, $text);
+                $text = preg_replace($pattern, $hodnota, $text);
+                // Zkusit i verzi s mezerami
+                $text = str_ireplace($placeholderSMezerami, $hodnota, $text);
             } elseif (is_array($hodnota)) {
                 if ($hodnota['type'] === 'link') {
                     // Odkaz - prelozit text, zachovat URL
                     $prelozenyText = $this->zavolatGoogleTranslateSimple($hodnota['text'], $cilovyJazyk);
-                    $text = str_replace($placeholder, "[{$prelozenyText}]({$hodnota['url']})", $text);
+                    $nahrada = "[{$prelozenyText}]({$hodnota['url']})";
+                    $text = preg_replace($pattern, $nahrada, $text);
+                    $text = str_ireplace($placeholderSMezerami, $nahrada, $text);
                 } elseif ($hodnota['type'] === 'heading') {
                     // Nadpis - prelozit text
                     $prelozenyText = $this->zavolatGoogleTranslateSimple($hodnota['text'], $cilovyJazyk);
-                    $text = str_replace($placeholder, "{$hodnota['level']} {$prelozenyText}", $text);
+                    $nahrada = "{$hodnota['level']} {$prelozenyText}";
+                    $text = preg_replace($pattern, $nahrada, $text);
+                    $text = str_ireplace($placeholderSMezerami, $nahrada, $text);
                 }
             }
         }
+
+        // Vycistit pripadne zbyle placeholdery (logovat jako warning)
+        if (preg_match('/WGS(IMAGE|LINK|HEAD)\d{4}END/i', $text)) {
+            error_log("WGSTranslator WARNING: Nektere placeholdery nebyly nahrazeny v textu");
+        }
+
         return $text;
     }
 
