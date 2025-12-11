@@ -21,7 +21,8 @@ class WGSTranslator
     private string $zdrojovyJazyk = 'cs';
 
     // Maximalni delka textu pro jeden API pozadavek
-    private const MAX_CHUNK_SIZE = 4500;
+    // MyMemory pouziva GET - URL ma limit, proto male chunky
+    private const MAX_CHUNK_SIZE = 1000;
 
     // Mapovani jazyku
     private array $jazykoveKody = [
@@ -245,31 +246,28 @@ class WGSTranslator
     }
 
     /**
-     * Zavola MyMemory Translate API (POST pro delsi texty)
+     * Zavola MyMemory Translate API (GET - jedina podporovana metoda)
      */
     private function zavolatMyMemoryAPI(string $text, string $cilovyJazyk): ?string
     {
-        $url = 'https://api.mymemory.translated.net/get';
-
-        $postData = http_build_query([
+        $params = http_build_query([
             'q' => $text,
             'langpair' => $this->jazykoveKody[$this->zdrojovyJazyk] . '|' . $this->jazykoveKody[$cilovyJazyk],
             'de' => 'info@wgs-service.cz'
         ]);
 
+        $url = 'https://api.mymemory.translated.net/get?' . $params;
+
         try {
-            // Pouzit POST pro delsi texty (GET ma limit URL)
+            // MyMemory podporuje POUZE GET
             $context = stream_context_create([
                 'http' => [
                     'timeout' => 30,
-                    'method' => 'POST',
+                    'method' => 'GET',
                     'header' => [
                         'User-Agent: WGS-Service/1.0',
-                        'Accept: application/json',
-                        'Content-Type: application/x-www-form-urlencoded',
-                        'Content-Length: ' . strlen($postData)
+                        'Accept: application/json'
                     ],
-                    'content' => $postData,
                     'ignore_errors' => true
                 ]
             ]);
