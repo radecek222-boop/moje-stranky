@@ -3,12 +3,17 @@
   "short_name": "Techmission",
   "icons": [
     {
-      "src": "/assets/img/front_logo_tech.png",
-      "sizes": "192x192",
+      "src": "/assets/img/favicon_tech_32.png",
+      "sizes": "32x32",
       "type": "image/png"
     },
     {
-      "src": "/assets/img/front_logo_tech.png",
+      "src": "/assets/img/favicon_tech_180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/img/favicon_tech.png",
       "sizes": "512x512",
       "type": "image/png"
     }
