@@ -287,9 +287,11 @@
         }
 
         .stav-cas {
-            font-size: 10px;
+            font-size: 11px;
             color: #666;
             margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Modal */
