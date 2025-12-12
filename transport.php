@@ -11,8 +11,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transport - Techmission</title>
-    <link rel="icon" type="image/png" href="assets/img/front_logo_tech.png">
-    <link rel="apple-touch-icon" href="assets/img/front_logo_tech.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/front_logo_tech.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/front_logo_tech.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/front_logo_tech.png">
+    <link rel="shortcut icon" href="assets/img/front_logo_tech.png">
     <style>
         * {
             margin: 0;
