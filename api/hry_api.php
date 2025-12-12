@@ -22,7 +22,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
-$username = $_SESSION['username'] ?? $_SESSION['email'] ?? 'Hráč';
+$username = $_SESSION['user_name'] ?? $_SESSION['user_email'] ?? 'Hráč';
 
 try {
     $pdo = getDbConnection();
