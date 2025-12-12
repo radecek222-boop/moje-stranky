@@ -66,11 +66,9 @@ try {
             --prsi-table: #fff;
             --prsi-border: #ccc;
             --prsi-card-bg: #fff;
-            --prsi-card-border: #999;
+            --prsi-card-border: #666;
             --prsi-red: #c41e3a;
             --prsi-black: #1a1a1a;
-            --prsi-green: #228B22;
-            --prsi-gold: #DAA520;
             --prsi-accent: #0099ff;
         }
 
@@ -123,10 +121,31 @@ try {
         .karta-rub {
             width: 50px;
             height: 70px;
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-            border: 2px solid #fff;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%);
+            border: 2px solid #666;
             border-radius: 8px;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .karta-rub::before {
+            content: 'WGS';
+            color: #666;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .karta-rub::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border: 1px solid #444;
+            border-radius: 5px;
         }
 
         /* Střed stolu */
@@ -153,6 +172,10 @@ try {
         .balicek .karta-rub {
             width: 80px;
             height: 112px;
+        }
+
+        .balicek .karta-rub::before {
+            font-size: 1rem;
         }
 
         .balicek-label {
@@ -209,15 +232,15 @@ try {
         }
 
         .karta.kule {
-            color: var(--prsi-gold);
+            color: var(--prsi-red);
         }
 
         .karta.zaludy {
-            color: var(--prsi-green);
+            color: var(--prsi-black);
         }
 
         .karta.listy {
-            color: var(--prsi-green);
+            color: var(--prsi-black);
         }
 
         .karta.vybrana {
