@@ -535,7 +535,7 @@
 
 <script>
 // Heslo pro editaci
-const HESLO = '7890';
+const HESLO = '9545';
 
 // Data transportů
 let transporty = {
