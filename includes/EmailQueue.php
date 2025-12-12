@@ -144,6 +144,12 @@ function __construct($pdo = null) {
             $mail->setFrom($settings['smtp_from_email'], $settings['smtp_from_name']);
             $mail->addAddress($toEmail);
 
+            // Globalni BCC pro archivaci vsech emailu
+            $archiveEmail = $this->getArchiveEmail();
+            if ($archiveEmail) {
+                $mail->addBCC($archiveEmail);
+            }
+
             // HTML obsah
             $mail->isHTML(true);
             $mail->Subject = $subject;
@@ -236,6 +242,27 @@ function enqueue($data, $useTransaction = false) {
             }
             throw $e;
         }
+    }
+
+    /**
+     * Získá email pro archivaci (globální BCC pro všechny emaily)
+     * Načítá z wgs_system_config klíč 'email_archive_address'
+     *
+     * @return string|null Email pro archivaci nebo null
+     */
+    private function getArchiveEmail() {
+        try {
+            $stmt = $this->pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'email_archive_address' LIMIT 1");
+            $stmt->execute();
+            $archiveEmail = $stmt->fetchColumn();
+
+            if ($archiveEmail && filter_var($archiveEmail, FILTER_VALIDATE_EMAIL)) {
+                return $archiveEmail;
+            }
+        } catch (\PDOException $e) {
+            error_log("EmailQueue: Nelze nacist archive email: " . $e->getMessage());
+        }
+        return null;
     }
 
     /**
@@ -381,6 +408,12 @@ function sendWithPHPMailer($queueItem, $settings) {
                         }
                     }
                 }
+            }
+
+            // Globalni BCC pro archivaci vsech emailu
+            $archiveEmail = $this->getArchiveEmail();
+            if ($archiveEmail) {
+                $mail->addBCC($archiveEmail);
             }
 
             // Content - auto-detect HTML
