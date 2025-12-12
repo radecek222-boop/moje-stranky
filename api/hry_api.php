@@ -952,10 +952,10 @@ try {
     }
 
 } catch (PDOException $e) {
-    error_log("Hry API error: " . $e->getMessage());
-    sendJsonError('Chyba databáze');
+    error_log("Hry API PDO error: " . $e->getMessage());
+    sendJsonError('Chyba databaze: ' . $e->getMessage());
 } catch (Exception $e) {
     error_log("Hry API error: " . $e->getMessage());
-    sendJsonError('Chyba serveru');
+    sendJsonError('Chyba serveru: ' . $e->getMessage());
 }
 ?>
