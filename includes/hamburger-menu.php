@@ -44,6 +44,7 @@ if ($isAdmin) {
           <?php echo htmlspecialchars($item['header_label'], ENT_QUOTES, 'UTF-8'); ?>
         </a>
       <?php endforeach; ?>
+      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link">PLAY<span class="play-badge" id="playBadgeAdmin" style="display:none;">0</span></a>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
         <svg class="notif-bell" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,6 +75,7 @@ if ($isAdmin) {
       <?php endif; ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
+      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link" data-lang-cs="PLAY" data-lang-en="PLAY" data-lang-it="PLAY">PLAY<span class="play-badge" id="playBadge" style="display:none;">0</span></a>
       <?php if ($isTechnik): ?>
         <a href="cenik.php#kalkulacka" <?php if($current == "cenik.php" && strpos($_SERVER['REQUEST_URI'], '#kalkulacka') !== false) echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY SLUŽBY" data-lang-en="SERVICE PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO SERVIZIO">KALKULACE CENY SLUŽBY</a>
       <?php endif; ?>
@@ -112,6 +114,27 @@ if ($isAdmin) {
 </div><!-- /Hamburger Menu Wrapper -->
 
 <style>
+/* Skip link - skrytý, viditelný při focusu */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  color: #fff;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 10002;
+  border-radius: 0 0 8px 8px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .hamburger-header {
   display: flex;
   justify-content: space-between;
@@ -271,6 +294,48 @@ if ($isAdmin) {
   color: #999 !important;
   font-weight: 600 !important;
   opacity: 1 !important;
+}
+
+/* VYJIMKA: Modre tlacitko PLAY - schvaleno 2025-12-11 */
+.hamburger-nav a.play-link {
+  color: #0099ff !important;
+  font-weight: 700 !important;
+  position: relative;
+  text-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
+}
+
+.hamburger-nav a.play-link:hover {
+  color: #33bbff !important;
+  text-shadow: 0 0 15px rgba(0, 153, 255, 0.7);
+}
+
+.hamburger-nav a.play-link.active::after {
+  background: #0099ff;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+}
+
+.play-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: #0099ff;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .play-badge {
+    position: static;
+    margin-left: 8px;
+    display: inline-block !important;
+  }
 }
 
 .hamburger-lang-switcher {
@@ -1355,6 +1420,47 @@ document.addEventListener('alpine:init', () => {
     document.addEventListener('DOMContentLoaded', initNotifButton);
   } else {
     initNotifButton();
+  }
+
+  /**
+   * InitPlayBadge - Načíst počet online hráčů v herní zóně
+   */
+  function initPlayBadge() {
+    const badge = document.getElementById('playBadge');
+    const badgeAdmin = document.getElementById('playBadgeAdmin');
+    if (!badge && !badgeAdmin) return;
+
+    async function nactiOnline() {
+      try {
+        const response = await fetch('/api/hry_api.php?action=stav');
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data.online) {
+          const pocet = result.data.online.length;
+          [badge, badgeAdmin].forEach(b => {
+            if (!b) return;
+            if (pocet > 0) {
+              b.textContent = pocet;
+              b.style.display = 'inline-block';
+            } else {
+              b.style.display = 'none';
+            }
+          });
+        }
+      } catch (e) {
+        // Tiše selhat - nezobrazit badge
+      }
+    }
+
+    // Načíst hned a pak každých 30s
+    nactiOnline();
+    setInterval(nactiOnline, 30000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPlayBadge);
+  } else {
+    initPlayBadge();
   }
 })();
 </script>

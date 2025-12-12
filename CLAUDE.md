@@ -411,6 +411,55 @@ const smazat = await wgsConfirm('Opravdu smazat?', {
 
 **TOTO JE ČTVRTÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
 
+---
+
+## ✅ OFFICIAL EXCEPTION: PLAY Button (Blue)
+
+**IMPORTANT:** Modré tlačítko "PLAY" v hamburger menu je PÁTÁ schválená výjimka z černobílého designu.
+
+### Kdy se použije modrá (`#0099ff`):
+
+| Místo | Popis |
+|-------|-------|
+| Hamburger menu | Odkaz "PLAY" pro vstup do herní zóny |
+| Badge online hráčů | Počet hráčů online v herní zóně |
+
+### Soubor:
+
+| Soubor | Účel |
+|--------|------|
+| `includes/hamburger-menu.php` | CSS třídy `.play-link` a `.play-badge` |
+
+### CSS specifikace:
+
+```css
+/* Modrá barva pro herní zónu */
+--wgs-play-blue: #0099ff;
+
+/* Tlačítko PLAY */
+.hamburger-nav a.play-link {
+  color: #0099ff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
+}
+
+/* Badge s počtem online hráčů */
+.play-badge {
+  background: #0099ff;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+}
+```
+
+### Proč modrá pro herní zónu?
+
+1. **Odlišení** - Jasné vizuální oddělení od pracovních funkcí
+2. **Gaming konvence** - Modrá je běžně spojována s herním a zábavním obsahem
+3. **Konzistence** - Jednotná barva pro celou herní sekci
+4. **Viditelnost** - Badge upozorňuje na aktivní hráče
+
+**TOTO JE PÁTÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
+
 ### Shrnutí barevných výjimek:
 
 | Barva | Hex kód | Použití |
@@ -418,6 +467,7 @@ const smazat = await wgsConfirm('Opravdu smazat?', {
 | Neonově zelená | `#39ff14` | WGS Toast notifikace, NOTIFY ME tlačítko |
 | Zelená | `#28a745` | Potvrzovací tlačítka (wgsConfirm bez nebezpecne) |
 | Červená | `#dc3545` | Destruktivní tlačítka (wgsConfirm s nebezpecne: true) |
+| Modrá | `#0099ff` | PLAY tlačítko a herní zóna |
 
 ---
 

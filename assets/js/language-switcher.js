@@ -9,19 +9,46 @@
   // Aktuální jazyk - načíst z localStorage nebo defaultně čeština
   let aktualniJazyk = localStorage.getItem('wgs-lang') || 'cs';
 
+  // Flag pro rozlišení kliknutí vs. inicializace
+  let jeKliknuti = false;
+
   /**
    * Přepne jazyk na celé stránce
    * @param {string} jazyk - Kód jazyka: 'cs', 'en', 'it'
    */
-  window.prepniJazyk = function(jazyk) {
+  window.prepniJazyk = async function(jazyk) {
     if (!['cs', 'en', 'it'].includes(jazyk)) {
       console.warn('Nepodporovaný jazyk:', jazyk);
       return;
     }
 
+    // Přeskočit pokud jazyk je stejný a nejde o kliknutí
+    if (!jeKliknuti && jazyk === aktualniJazyk) {
+      return;
+    }
+
+    const jeNaAktualitach = window.location.pathname.includes('aktuality');
+    const jeAdmin = document.querySelector('.hamburger-nav.admin-nav-active') !== null;
+
+    // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku na stránce aktualit
+    if (jeKliknuti && jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
+      await spustitPrekladAktualit(jazyk);
+    }
+
     aktualniJazyk = jazyk;
     localStorage.setItem('wgs-lang', jazyk);
     document.documentElement.lang = jazyk;
+
+    // Na stránce aktualit přesměrovat s parametrem ?lang= (pouze při kliknutí)
+    if (jeKliknuti && jeNaAktualitach) {
+      jeKliknuti = false; // Reset flagu
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', jazyk === 'cs' ? 'cz' : jazyk);
+      window.location.href = url.toString();
+      return;
+    }
+
+    jeKliknuti = false; // Reset flagu
 
     // Aktualizovat všechny elementy s data-lang atributy
     aktualizujTexty(jazyk);
@@ -38,6 +65,71 @@
     // Aktualizovat title stránky (pokud existuje)
     aktualizujTitle(jazyk);
   };
+
+  /**
+   * Spustí automatický překlad všech aktualit do cílového jazyka (pouze admin)
+   * @param {string} cilovyJazyk - 'en' nebo 'it'
+   */
+  async function spustitPrekladAktualit(cilovyJazyk) {
+    try {
+      // Zobrazit indikátor načítání
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'preklad-loading';
+      loadingDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.9);
+        color: #39ff14;
+        padding: 30px 50px;
+        border-radius: 10px;
+        z-index: 99999;
+        font-size: 1.2em;
+        text-align: center;
+        border: 2px solid #39ff14;
+        box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+      `;
+      loadingDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">Překládám aktuality do ${cilovyJazyk.toUpperCase()}...</div>
+        <div style="font-size: 0.8em; opacity: 0.7;">Max 30 sekund</div>
+      `;
+      document.body.appendChild(loadingDiv);
+
+      // Zavolat API pro překlad s timeoutem 30s
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          console.log('Překlad dokončen:', data);
+        } else {
+          console.error('Chyba překladu:', data.message);
+        }
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError') {
+          console.log('Překlad timeout - pokračuji bez čekání');
+        } else {
+          throw fetchError;
+        }
+      }
+
+      // Odstranit indikátor
+      loadingDiv.remove();
+
+    } catch (error) {
+      console.error('Chyba při překladu aktualit:', error);
+      // Odstranit loading pokud existuje
+      const loading = document.getElementById('preklad-loading');
+      if (loading) loading.remove();
+    }
+  }
 
   /**
    * Aktualizuje textový obsah elementů podle data-lang atributů
@@ -236,12 +328,14 @@
     // Přidat event listenery na vlajky - kliknutí i klávesnice
     document.querySelectorAll('.lang-flag').forEach(vlajka => {
       vlajka.addEventListener('click', () => {
+        jeKliknuti = true; // Označit jako skutečné kliknutí
         prepniJazyk(vlajka.dataset.lang);
       });
       // Podpora klávesnice (Enter/Space) pro přístupnost
       vlajka.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          jeKliknuti = true; // Označit jako skutečné kliknutí
           prepniJazyk(vlajka.dataset.lang);
         }
       });

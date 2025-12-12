@@ -2,8 +2,12 @@
 /**
  * WGS Translator - Automaticky preklad s cache
  *
- * Pouziva bezplatne Google Translate API (neoficialni)
+ * Pouziva MyMemory Translate API (bezplatne, 10000 slov/den)
  * Preklady se cachuji v databazi podle MD5 hashe zdrojoveho textu
+ *
+ * DULEZITE: Preklad probiha po sekcich (## nadpisy), obrazky a odkazy
+ * jsou extrahovany pred prekladem a vlozeny zpet po prekladu.
+ * Tim se zabrani ztrate obrazku a poskozeni odkazu.
  *
  * Pouziti:
  *   $translator = new WGSTranslator($pdo);
@@ -16,7 +20,12 @@ class WGSTranslator
     private PDO $pdo;
     private string $zdrojovyJazyk = 'cs';
 
-    // Mapovani jazyku pro Google Translate
+    // Maximalni delka textu pro jeden API pozadavek
+    // MyMemory pouziva GET - cestina se URL-enkoduje 3-6x delsi
+    // 300 znaku * 6 = 1800 znaku URL (bezpecne pod 2000 limit)
+    private const MAX_CHUNK_SIZE = 300;
+
+    // Mapovani jazyku
     private array $jazykoveKody = [
         'cs' => 'cs',
         'cz' => 'cs',
@@ -32,13 +41,6 @@ class WGSTranslator
 
     /**
      * Prelozi text do ciloveho jazyka
-     * Pouziva cache - pokud preklad existuje a hash sedi, vrati z cache
-     *
-     * @param string $text Zdrojovy text v cestine
-     * @param string $cilovyJazyk 'en' nebo 'it'
-     * @param string|null $entityType Typ entity pro organizaci cache
-     * @param int|null $entityId ID entity
-     * @return string Prelozeny text
      */
     public function preloz(string $text, string $cilovyJazyk, ?string $entityType = null, ?int $entityId = null): string
     {
@@ -46,41 +48,263 @@ class WGSTranslator
             return $text;
         }
 
-        // Normalizovat cilovy jazyk
         $cilovyJazyk = strtolower($cilovyJazyk);
         if (!isset($this->jazykoveKody[$cilovyJazyk])) {
             error_log("WGSTranslator: Neznamy cilovy jazyk: {$cilovyJazyk}");
             return $text;
         }
 
-        // Vypocitat hash zdrojoveho textu
         $hash = $this->vypoctiHash($text);
 
-        // Zkusit najit v cache
+        // Cache lookup
         $cachovanyPreklad = $this->najdiVCache($hash, $cilovyJazyk);
         if ($cachovanyPreklad !== null) {
             return $cachovanyPreklad;
         }
 
-        // Neni v cache - zavolat Google Translate
-        $prelozenyText = $this->zavolatGoogleTranslate($text, $cilovyJazyk);
+        // Prelozit po sekcich - zachova obrazky a odkazy
+        $prelozenyText = $this->prelozPoSekcich($text, $cilovyJazyk);
 
         if ($prelozenyText !== null && $prelozenyText !== $text) {
-            // Ulozit do cache
             $this->ulozDoCache($hash, $text, $prelozenyText, $cilovyJazyk, $entityType, $entityId);
             return $prelozenyText;
         }
 
-        // Preklad selhal - vratit original
         return $text;
     }
 
     /**
-     * Prelozi text do vice jazyku najednou
-     *
-     * @param string $text Zdrojovy text
-     * @param array $jazyky Pole cilovych jazyku ['en', 'it']
-     * @return array ['en' => '...', 'it' => '...']
+     * Prelozi text po sekcich - extrahuje obrazky/odkazy, prelozi text, slozi zpet
+     */
+    private function prelozPoSekcich(string $text, string $cilovyJazyk): ?string
+    {
+        // Rozdelit na sekce podle ## nadpisu
+        $sekce = preg_split('/(?=^## )/m', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (empty($sekce)) {
+            return $this->prelozCistyText($text, $cilovyJazyk);
+        }
+
+        error_log("WGSTranslator: Prekladam " . count($sekce) . " sekci do {$cilovyJazyk}");
+        $prelozeneSekce = [];
+
+        foreach ($sekce as $i => $sekceText) {
+            $sekceText = trim($sekceText);
+            if (empty($sekceText)) continue;
+
+            $prelozenaSekce = $this->prelozSekci($sekceText, $cilovyJazyk);
+            $prelozeneSekce[] = $prelozenaSekce;
+
+            // Pauza mezi sekcemi
+            if ($i < count($sekce) - 1) {
+                usleep(400000); // 0.4s
+            }
+        }
+
+        return implode("\n\n", $prelozeneSekce);
+    }
+
+    /**
+     * Prelozi jednu sekci - extrahuje obrazky a odkazy, prelozi zbytek
+     */
+    private function prelozSekci(string $sekceText, string $cilovyJazyk): string
+    {
+        // 1. Extrahovat obrazky (ulozit, odstranit z textu)
+        $obrazky = [];
+        preg_match_all('/!\[([^\]]*)\]\(([^)]+)\)/', $sekceText, $matchesImg, PREG_SET_ORDER);
+        foreach ($matchesImg as $m) {
+            $obrazky[] = $m[0];
+        }
+        $textBezObrazku = preg_replace('/\n*!\[([^\]]*)\]\(([^)]+)\)\n*/', "\n", $sekceText);
+
+        // 2. Extrahovat a prelozit odkazy
+        $odkazy = [];
+        $textBezOdkazu = preg_replace_callback('/\[([^\]]+)\]\(([^)]+)\)/', function($match) use (&$odkazy, $cilovyJazyk) {
+            $odkazText = trim($match[1]);
+            $odkazUrl = $match[2];
+
+            // Prelozit text odkazu (kratky text)
+            $prelozenyOdkaz = $this->prelozKratkyText($odkazText, $cilovyJazyk);
+
+            $odkazy[] = "[{$prelozenyOdkaz}]({$odkazUrl})";
+            return ""; // Odstranit z textu
+        }, $textBezObrazku);
+
+        // 3. Extrahovat a prelozit nadpis
+        $nadpis = '';
+        $textBezNadpisu = preg_replace_callback('/^(#{1,3})\s+(.+)$/m', function($match) use (&$nadpis, $cilovyJazyk) {
+            $uroven = $match[1];
+            $nadpisText = trim($match[2]);
+
+            $prelozenyNadpis = $this->prelozKratkyText($nadpisText, $cilovyJazyk);
+            $nadpis = "{$uroven} {$prelozenyNadpis}";
+            return "";
+        }, $textBezOdkazu);
+
+        // 4. Vycistit zbyvajici text
+        $cistyText = trim(preg_replace('/\n{3,}/', "\n\n", $textBezNadpisu));
+
+        // 5. Prelozit hlavni text (pokud neni prazdny)
+        $prelozenyText = '';
+        if (!empty($cistyText)) {
+            $prelozenyText = $this->prelozCistyText($cistyText, $cilovyJazyk);
+        }
+
+        // 6. Sestavit vysledek: nadpis + text + odkazy + obrazky
+        $vysledek = '';
+
+        if (!empty($nadpis)) {
+            $vysledek .= $nadpis . "\n\n";
+        }
+
+        if (!empty($prelozenyText)) {
+            $vysledek .= $prelozenyText . "\n\n";
+        }
+
+        if (!empty($odkazy)) {
+            $vysledek .= implode(' | ', $odkazy) . "\n\n";
+        }
+
+        if (!empty($obrazky)) {
+            $vysledek .= implode("\n\n", $obrazky);
+        }
+
+        return trim($vysledek);
+    }
+
+    /**
+     * Prelozi kratky text (nadpisy, odkazy) - primo bez chunking
+     */
+    private function prelozKratkyText(string $text, string $cilovyJazyk): string
+    {
+        $text = trim($text);
+        if (empty($text)) return $text;
+
+        $preklad = $this->zavolatMyMemoryAPI($text, $cilovyJazyk);
+        return $preklad ?: $text;
+    }
+
+    /**
+     * Prelozi delsi cisty text - s podporou chunking
+     */
+    private function prelozCistyText(string $text, string $cilovyJazyk): string
+    {
+        $text = trim($text);
+        if (empty($text)) return $text;
+
+        // Kratky text - prelozit primo
+        if (mb_strlen($text) <= self::MAX_CHUNK_SIZE) {
+            $preklad = $this->zavolatMyMemoryAPI($text, $cilovyJazyk);
+            return $preklad ?: $text;
+        }
+
+        // Dlouhy text - rozdelit na chunky
+        $chunky = $this->rozdelNaChunky($text);
+        $prelozeneChunky = [];
+
+        foreach ($chunky as $i => $chunk) {
+            $prelozeny = $this->zavolatMyMemoryAPI($chunk, $cilovyJazyk);
+            $prelozeneChunky[] = $prelozeny ?: $chunk;
+
+            if ($i < count($chunky) - 1) {
+                usleep(500000); // 0.5s mezi chunky
+            }
+        }
+
+        return implode("\n\n", $prelozeneChunky);
+    }
+
+    /**
+     * Rozdeli dlouhy text na mensi casti
+     */
+    private function rozdelNaChunky(string $text): array
+    {
+        $chunky = [];
+        $aktualniChunk = '';
+
+        // Rozdelit na odstavce
+        $odstavce = preg_split('/\n\n+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($odstavce as $odstavec) {
+            $odstavec = trim($odstavec);
+            if (empty($odstavec)) continue;
+
+            if (mb_strlen($aktualniChunk) + mb_strlen($odstavec) + 2 > self::MAX_CHUNK_SIZE) {
+                if (!empty(trim($aktualniChunk))) {
+                    $chunky[] = trim($aktualniChunk);
+                }
+                $aktualniChunk = $odstavec;
+            } else {
+                $aktualniChunk .= ($aktualniChunk ? "\n\n" : '') . $odstavec;
+            }
+        }
+
+        if (!empty(trim($aktualniChunk))) {
+            $chunky[] = trim($aktualniChunk);
+        }
+
+        return $chunky ?: [$text];
+    }
+
+    /**
+     * Zavola MyMemory Translate API (GET - jedina podporovana metoda)
+     */
+    private function zavolatMyMemoryAPI(string $text, string $cilovyJazyk): ?string
+    {
+        $params = http_build_query([
+            'q' => $text,
+            'langpair' => $this->jazykoveKody[$this->zdrojovyJazyk] . '|' . $this->jazykoveKody[$cilovyJazyk],
+            'de' => 'info@wgs-service.cz'
+        ]);
+
+        $url = 'https://api.mymemory.translated.net/get?' . $params;
+
+        try {
+            // MyMemory podporuje POUZE GET
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 30,
+                    'method' => 'GET',
+                    'header' => [
+                        'User-Agent: WGS-Service/1.0',
+                        'Accept: application/json'
+                    ],
+                    'ignore_errors' => true
+                ]
+            ]);
+
+            $response = @file_get_contents($url, false, $context);
+
+            if ($response === false) {
+                error_log("WGSTranslator: MyMemory request failed");
+                return null;
+            }
+
+            $data = json_decode($response, true);
+
+            if (!$data || !isset($data['responseData']['translatedText'])) {
+                error_log("WGSTranslator: Invalid response: " . substr($response, 0, 200));
+                return null;
+            }
+
+            if (isset($data['responseStatus']) && $data['responseStatus'] != 200) {
+                error_log("WGSTranslator: API error: " . $data['responseStatus']);
+                return null;
+            }
+
+            $prelozenyText = $data['responseData']['translatedText'];
+            $prelozenyText = html_entity_decode($prelozenyText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            return $prelozenyText ?: null;
+
+        } catch (Throwable $e) {
+            error_log("WGSTranslator error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Prelozi do vice jazyku
      */
     public function prelozDoViceJazyku(string $text, array $jazyky = ['en', 'it']): array
     {
@@ -92,38 +316,16 @@ class WGSTranslator
     }
 
     /**
-     * Zkontroluje zda se text zmenil (jiny hash)
-     */
-    public function textSeZmenil(string $text, string $cilovyJazyk): bool
-    {
-        $hash = $this->vypoctiHash($text);
-        return $this->najdiVCache($hash, $cilovyJazyk) === null;
-    }
-
-    /**
-     * Smaze cache pro danou entitu
-     */
-    public function smazCacheProEntitu(string $entityType, int $entityId): void
-    {
-        $stmt = $this->pdo->prepare("
-            DELETE FROM wgs_translation_cache
-            WHERE entity_type = :type AND entity_id = :id
-        ");
-        $stmt->execute([':type' => $entityType, ':id' => $entityId]);
-    }
-
-    /**
-     * Vypocita MD5 hash textu (normalizovany)
+     * Hash pro cache
      */
     private function vypoctiHash(string $text): string
     {
-        // Normalizovat text pro konzistentni hash
         $normalized = preg_replace('/\s+/', ' ', trim($text));
         return md5($normalized);
     }
 
     /**
-     * Najde preklad v cache podle hashe
+     * Najde v cache
      */
     private function najdiVCache(string $hash, string $cilovyJazyk): ?string
     {
@@ -135,118 +337,46 @@ class WGSTranslator
             ");
             $stmt->execute([':hash' => $hash, ':lang' => $cilovyJazyk]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
             return $row ? $row['translated_text'] : null;
         } catch (PDOException $e) {
-            error_log("WGSTranslator cache lookup error: " . $e->getMessage());
             return null;
         }
     }
 
     /**
-     * Ulozi preklad do cache
+     * Ulozi do cache
      */
-    private function ulozDoCache(
-        string $hash,
-        string $zdrojovyText,
-        string $prelozenyText,
-        string $cilovyJazyk,
-        ?string $entityType,
-        ?int $entityId
-    ): void {
+    private function ulozDoCache(string $hash, string $src, string $tgt, string $lang, ?string $type, ?int $id): void
+    {
         try {
             $stmt = $this->pdo->prepare("
                 INSERT INTO wgs_translation_cache
                 (source_hash, source_lang, target_lang, source_text, translated_text, entity_type, entity_id)
-                VALUES (:hash, :src_lang, :tgt_lang, :src_text, :tgt_text, :entity_type, :entity_id)
+                VALUES (:hash, :src_lang, :tgt_lang, :src_text, :tgt_text, :type, :id)
                 ON DUPLICATE KEY UPDATE
-                    source_text = VALUES(source_text),
                     translated_text = VALUES(translated_text),
-                    entity_type = VALUES(entity_type),
-                    entity_id = VALUES(entity_id),
                     updated_at = CURRENT_TIMESTAMP
             ");
-
             $stmt->execute([
-                ':hash' => $hash,
-                ':src_lang' => $this->zdrojovyJazyk,
-                ':tgt_lang' => $cilovyJazyk,
-                ':src_text' => $zdrojovyText,
-                ':tgt_text' => $prelozenyText,
-                ':entity_type' => $entityType,
-                ':entity_id' => $entityId
+                ':hash' => $hash, ':src_lang' => $this->zdrojovyJazyk, ':tgt_lang' => $lang,
+                ':src_text' => $src, ':tgt_text' => $tgt, ':type' => $type, ':id' => $id
             ]);
         } catch (PDOException $e) {
-            error_log("WGSTranslator cache save error: " . $e->getMessage());
+            error_log("WGSTranslator cache error: " . $e->getMessage());
         }
     }
 
-    /**
-     * Zavola Google Translate API (neoficialni bezplatna verze)
-     */
-    private function zavolatGoogleTranslate(string $text, string $cilovyJazyk): ?string
+    public function smazCacheProEntitu(string $entityType, int $entityId): void
     {
-        // Google Translate neoficialni API
-        // Limit: neni oficialnejeden, ale pri velkem pouziti muze blokovat
-        $url = 'https://translate.googleapis.com/translate_a/single';
-
-        $params = [
-            'client' => 'gtx',
-            'sl' => $this->jazykoveKody[$this->zdrojovyJazyk],
-            'tl' => $this->jazykoveKody[$cilovyJazyk],
-            'dt' => 't',
-            'q' => $text
-        ];
-
-        $fullUrl = $url . '?' . http_build_query($params);
-
-        try {
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 10,
-                    'method' => 'GET',
-                    'header' => [
-                        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Accept: application/json'
-                    ],
-                    'ignore_errors' => true
-                ]
-            ]);
-
-            $response = @file_get_contents($fullUrl, false, $context);
-
-            if ($response === false) {
-                error_log("WGSTranslator: Google Translate request failed");
-                return null;
-            }
-
-            // Parsovat odpoved (format je nested array)
-            $data = json_decode($response, true);
-
-            if (!$data || !isset($data[0])) {
-                error_log("WGSTranslator: Invalid response from Google Translate");
-                return null;
-            }
-
-            // Sestavit prelozeny text z jednotlivych segmentu
-            $prelozenyText = '';
-            foreach ($data[0] as $segment) {
-                if (isset($segment[0])) {
-                    $prelozenyText .= $segment[0];
-                }
-            }
-
-            return $prelozenyText ?: null;
-
-        } catch (Throwable $e) {
-            error_log("WGSTranslator error: " . $e->getMessage());
-            return null;
-        }
+        $stmt = $this->pdo->prepare("DELETE FROM wgs_translation_cache WHERE entity_type = :type AND entity_id = :id");
+        $stmt->execute([':type' => $entityType, ':id' => $entityId]);
     }
 
-    /**
-     * Zajisti existenci tabulky pro cache
-     */
+    public function textSeZmenil(string $text, string $cilovyJazyk): bool
+    {
+        return $this->najdiVCache($this->vypoctiHash($text), $cilovyJazyk) === null;
+    }
+
     private function zajistiTabulku(): void
     {
         try {
@@ -266,15 +396,10 @@ class WGSTranslator
                     INDEX `idx_entity` (`entity_type`, `entity_id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
-        } catch (PDOException $e) {
-            // Tabulka uz existuje - OK
-        }
+        } catch (PDOException $e) {}
     }
 }
 
-/**
- * Helper funkce pro rychly preklad
- */
 function wgsTranslate(PDO $pdo, string $text, string $cilovyJazyk): string
 {
     static $translator = null;
