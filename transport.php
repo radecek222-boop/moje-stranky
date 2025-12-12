@@ -180,6 +180,12 @@
             align-items: center;
             gap: 15px;
             position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .transport:hover {
+            background: #1a1a1a;
         }
 
         .den-nedele .transport {
@@ -192,11 +198,6 @@
             font-weight: 700;
             min-width: 70px;
             font-variant-numeric: tabular-nums;
-            cursor: pointer;
-        }
-
-        .transport-cas:hover {
-            color: #888;
         }
 
         .transport-info {
@@ -207,21 +208,11 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 3px;
-            cursor: pointer;
-        }
-
-        .transport-jmena:hover {
-            color: #888;
         }
 
         .transport-trasa {
             font-size: 12px;
             color: #666;
-            cursor: pointer;
-        }
-
-        .transport-trasa:hover {
-            color: #888;
         }
 
         /* Tlačítko smazat */
@@ -568,17 +559,19 @@ function vykresli() {
             div.className = 'transport';
             div.dataset.id = t.id;
             div.innerHTML = `
-                <button class="btn-smazat" onclick="otevriModalSmazat('${t.id}', '${den}')">&times;</button>
-                <div class="transport-cas" onclick="editujPole('${t.id}', '${den}', 'cas')">${t.cas}</div>
+                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${t.id}', '${den}')">&times;</button>
+                <div class="transport-cas">${t.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena" onclick="editujPole('${t.id}', '${den}', 'jmeno')">${t.jmeno}</div>
-                    <div class="transport-trasa" onclick="editujPole('${t.id}', '${den}', 'trasa')">${t.odkud} → ${t.kam}</div>
+                    <div class="transport-jmena">${t.jmeno}</div>
+                    <div class="transport-trasa">${t.odkud} → ${t.kam}</div>
                 </div>
                 <div class="transport-stav">
-                    <button class="stav-btn ${stavClass}" onclick="zmenStav('${t.id}')">${stavText}</button>
+                    <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${t.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
                 </div>
             `;
+            // Klik na celý transport otevře editaci všeho
+            div.addEventListener('click', () => editujVse('${t.id}', '${den}'));
             kontejner.appendChild(div);
         });
     });
@@ -604,19 +597,19 @@ function otevriModalPridat(den) {
     document.getElementById('modal-edit').classList.add('aktivni');
 }
 
-// Editovat pole
-function editujPole(id, den, pole) {
+// Editovat všechna pole najednou
+function editujVse(id, den) {
     const transport = transporty[den].find(t => t.id === id);
     if (!transport) return;
 
-    editAkce = { typ: 'editovat', den: den, id: id, pole: pole };
-    document.getElementById('modal-titulek').textContent = 'Upravit ' + (pole === 'cas' ? 'cas' : pole === 'jmeno' ? 'jmeno' : 'trasu');
+    editAkce = { typ: 'editovat', den: den, id: id, pole: 'vse' };
+    document.getElementById('modal-titulek').textContent = 'Upravit transport';
 
-    // Skrýt/zobrazit inputy podle editovaného pole
-    document.getElementById('input-cas').style.display = pole === 'cas' ? 'block' : 'none';
-    document.getElementById('input-jmeno').style.display = pole === 'jmeno' ? 'block' : 'none';
-    document.getElementById('input-odkud').style.display = pole === 'trasa' ? 'block' : 'none';
-    document.getElementById('input-kam').style.display = pole === 'trasa' ? 'block' : 'none';
+    // Zobrazit všechny inputy
+    document.getElementById('input-cas').style.display = 'block';
+    document.getElementById('input-jmeno').style.display = 'block';
+    document.getElementById('input-odkud').style.display = 'block';
+    document.getElementById('input-kam').style.display = 'block';
 
     // Vyplnit aktuální hodnoty
     document.getElementById('input-cas').value = transport.cas;
@@ -649,7 +642,13 @@ function potvrdEdit() {
     } else if (editAkce.typ === 'editovat') {
         const transport = transporty[editAkce.den].find(t => t.id === editAkce.id);
         if (transport) {
-            if (editAkce.pole === 'cas') {
+            if (editAkce.pole === 'vse') {
+                // Editace všech polí najednou
+                transport.cas = document.getElementById('input-cas').value;
+                transport.jmeno = document.getElementById('input-jmeno').value;
+                transport.odkud = document.getElementById('input-odkud').value;
+                transport.kam = document.getElementById('input-kam').value;
+            } else if (editAkce.pole === 'cas') {
                 transport.cas = document.getElementById('input-cas').value;
             } else if (editAkce.pole === 'jmeno') {
                 transport.jmeno = document.getElementById('input-jmeno').value;
