@@ -1,7 +1,7 @@
 <?php
 /**
- * Hra Lodě (Battleship)
- * Námořní bitva proti počítači
+ * Hra Lodě (Battleship) - Multiplayer
+ * Námořní bitva pro 2 hráče online
  */
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
@@ -14,8 +14,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 $username = $_SESSION['username'] ?? $_SESSION['email'] ?? 'Hráč';
+$csrfToken = generateCSRFToken();
 
-// Aktualizovat online status - hraje Lodě
+// Aktualizovat online status
 try {
     $pdo = getDbConnection();
     $stmt = $pdo->prepare("
@@ -28,7 +29,7 @@ try {
     ");
     $stmt->execute(['user_id' => $userId, 'username' => $username]);
 } catch (PDOException $e) {
-    error_log("Lode error: " . $e->getMessage());
+    error_log("Lodě error: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -54,9 +55,7 @@ try {
             --lode-ship: #0099ff;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -83,10 +82,69 @@ try {
             color: var(--lode-accent);
         }
 
-        .lode-header p {
-            color: var(--lode-muted);
+        .lode-header p { color: var(--lode-muted); }
+
+        /* Lobby */
+        .lode-lobby {
+            background: var(--lode-card);
+            border: 1px solid var(--lode-border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
+        .lode-lobby h2 {
+            margin-bottom: 1.5rem;
+            color: var(--lode-accent);
+        }
+
+        .lode-loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--lode-border);
+            border-top-color: var(--lode-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Hráči panel */
+        .lode-hraci {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .lode-hrac {
+            background: var(--lode-card);
+            border: 2px solid var(--lode-border);
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .lode-hrac.aktivni {
+            border-color: var(--lode-accent);
+            box-shadow: 0 0 15px rgba(0, 153, 255, 0.3);
+        }
+
+        .lode-hrac.ja { background: rgba(0, 153, 255, 0.1); }
+
+        .lode-hrac-stav {
+            font-size: 0.8rem;
+            color: var(--lode-muted);
+            margin-top: 0.5rem;
+        }
+
+        .lode-hrac-stav.pripraveny { color: #4CAF50; }
+
+        /* Status */
         .lode-status {
             text-align: center;
             padding: 1rem;
@@ -107,6 +165,7 @@ try {
             color: var(--lode-hit);
         }
 
+        /* Boards */
         .lode-boards {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -114,9 +173,7 @@ try {
             justify-items: center;
         }
 
-        .lode-board-wrapper {
-            text-align: center;
-        }
+        .lode-board-wrapper { text-align: center; }
 
         .lode-board-title {
             font-size: 1.2rem;
@@ -148,31 +205,64 @@ try {
             transition: all 0.2s;
         }
 
-        .lode-board.souper .lode-cell:not(.hit):not(.miss) {
+        .lode-board.aktivni .lode-cell:not(.hit):not(.miss) {
             cursor: crosshair;
         }
 
-        .lode-board.souper .lode-cell:not(.hit):not(.miss):hover {
+        .lode-board.aktivni .lode-cell:not(.hit):not(.miss):hover {
             background: rgba(0, 153, 255, 0.3);
         }
 
-        .lode-cell.ship {
-            background: var(--lode-ship);
+        .lode-cell.ship { background: var(--lode-ship); }
+        .lode-cell.hit { background: var(--lode-hit); color: #fff; }
+        .lode-cell.miss { background: var(--lode-miss); }
+        .lode-cell.preview { background: rgba(0, 153, 255, 0.4); }
+
+        /* Placement */
+        .lode-placement {
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
 
-        .lode-cell.hit {
-            background: var(--lode-hit);
-            color: #fff;
+        .lode-placement-info {
+            background: var(--lode-card);
+            border: 1px solid var(--lode-border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .lode-cell.miss {
-            background: var(--lode-miss);
+        .lode-placement-ship {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--lode-accent);
         }
 
-        .lode-cell.sunk {
-            background: #991111;
+        /* Buttons */
+        .lode-btn {
+            background: var(--lode-accent);
+            color: #000;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+            font-family: 'Poppins', sans-serif;
         }
 
+        .lode-btn:hover { background: #33bbff; }
+        .lode-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .lode-btn.secondary { background: var(--lode-border); color: var(--lode-text); }
+        .lode-btn.secondary:hover { background: #444; }
+        .lode-btn.velke { padding: 1rem 3rem; font-size: 1.2rem; }
+
+        .lode-actions { text-align: center; margin-top: 2rem; }
+
+        /* Legend */
         .lode-legend {
             display: flex;
             gap: 1.5rem;
@@ -195,39 +285,7 @@ try {
             border-radius: 3px;
         }
 
-        .lode-actions {
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        .lode-btn {
-            background: var(--lode-accent);
-            color: #000;
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin: 0.5rem;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .lode-btn:hover {
-            background: #33bbff;
-        }
-
-        .lode-btn.secondary {
-            background: var(--lode-border);
-            color: var(--lode-text);
-        }
-
-        .lode-btn.secondary:hover {
-            background: #444;
-        }
-
+        /* Ships list */
         .lode-ships-remaining {
             display: flex;
             gap: 2rem;
@@ -235,75 +293,19 @@ try {
             margin-top: 1rem;
         }
 
-        .lode-ships-col {
-            text-align: center;
-        }
-
-        .lode-ships-col h4 {
-            font-size: 0.9rem;
-            color: var(--lode-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .lode-ships-list {
-            font-size: 0.85rem;
-        }
-
-        .lode-ships-list span {
-            display: block;
-            margin: 0.25rem 0;
-        }
-
-        .lode-ships-list span.sunk {
-            text-decoration: line-through;
-            color: var(--lode-hit);
-        }
-
-        /* Placement phase */
-        .lode-placement {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .lode-placement-info {
-            background: var(--lode-card);
-            border: 1px solid var(--lode-border);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .lode-placement-ship {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--lode-accent);
-        }
-
-        .lode-rotate-btn {
-            background: var(--lode-border);
-            color: var(--lode-text);
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            font-family: 'Poppins', sans-serif;
-        }
+        .lode-ships-col { text-align: center; }
+        .lode-ships-col h4 { font-size: 0.9rem; color: var(--lode-muted); margin-bottom: 0.5rem; }
+        .lode-ships-list { font-size: 0.85rem; }
+        .lode-ships-list span { display: block; margin: 0.25rem 0; }
+        .lode-ships-list span.sunk { text-decoration: line-through; color: var(--lode-hit); }
 
         @media (max-width: 800px) {
-            .lode-boards {
-                grid-template-columns: 1fr;
-            }
-
+            .lode-boards { grid-template-columns: 1fr; }
             .lode-board {
                 grid-template-columns: repeat(10, 28px);
                 grid-template-rows: repeat(10, 28px);
             }
-
-            .lode-cell {
-                width: 28px;
-                height: 28px;
-            }
+            .lode-cell { width: 28px; height: 28px; }
         }
     </style>
 </head>
@@ -312,60 +314,66 @@ try {
 
     <main id="main-content" class="lode-container">
         <div class="lode-header">
-            <h1>LODE</h1>
-            <p>Najdi a potop vsechny souper ovy lode!</p>
+            <h1>LODĚ</h1>
+            <p>Multiplayer - najdi a potop všechny soupeřovy lodě!</p>
         </div>
 
-        <div class="lode-status" id="status">Umisti sve lode kliknutim na svou hraci plochu</div>
-
-        <!-- Placement phase info -->
-        <div class="lode-placement" id="placementInfo">
-            <div class="lode-placement-info">
-                <div class="lode-placement-ship" id="currentShip">Letadlova lod (5 poli)</div>
-                <button class="lode-rotate-btn" id="rotateBtn">Otocit (R)</button>
-            </div>
+        <!-- Lobby -->
+        <div class="lode-lobby" id="lobby">
+            <h2>Najdi soupeře</h2>
+            <p style="color: var(--lode-muted); margin-bottom: 1.5rem;">
+                Klikni na tlačítko a systém tě automaticky spáruje s dalším hráčem.
+            </p>
+            <button class="lode-btn velke" id="hledatBtn">HRÁT ONLINE</button>
         </div>
 
-        <div class="lode-boards">
-            <div class="lode-board-wrapper">
-                <div class="lode-board-title">Tvoje pole</div>
-                <div class="lode-board moje" id="mojeBoard"></div>
-            </div>
-            <div class="lode-board-wrapper">
-                <div class="lode-board-title">Souper</div>
-                <div class="lode-board souper" id="souperBoard"></div>
-            </div>
+        <!-- Čekání -->
+        <div id="cekani" style="display: none; text-align: center;">
+            <div class="lode-loader"></div>
+            <p>Hledám soupeře...</p>
+            <button class="lode-btn secondary" id="zrusitBtn">Zrušit</button>
         </div>
 
-        <div class="lode-ships-remaining">
-            <div class="lode-ships-col">
-                <h4>Tvoje lode</h4>
-                <div class="lode-ships-list" id="mojeLode"></div>
-            </div>
-            <div class="lode-ships-col">
-                <h4>Souper ovy lode</h4>
-                <div class="lode-ships-list" id="souperLode"></div>
-            </div>
-        </div>
+        <!-- Hra -->
+        <div id="hra" style="display: none;">
+            <div class="lode-hraci" id="hraciPanel"></div>
+            <div class="lode-status" id="status">Umísti své lodě kliknutím na plochu</div>
 
-        <div class="lode-legend">
-            <div class="lode-legend-item">
-                <div class="lode-legend-color" style="background: var(--lode-ship);"></div>
-                Lod
+            <!-- Placement phase -->
+            <div class="lode-placement" id="placementInfo">
+                <div class="lode-placement-info">
+                    <div class="lode-placement-ship" id="currentShip">Letadlová loď (5 polí)</div>
+                    <button class="lode-btn secondary" id="rotateBtn">Otočit (R)</button>
+                </div>
             </div>
-            <div class="lode-legend-item">
-                <div class="lode-legend-color" style="background: var(--lode-hit);"></div>
-                Zasah
+
+            <div class="lode-boards">
+                <div class="lode-board-wrapper">
+                    <div class="lode-board-title">Tvoje pole</div>
+                    <div class="lode-board" id="mojeBoard"></div>
+                </div>
+                <div class="lode-board-wrapper">
+                    <div class="lode-board-title">Soupeř</div>
+                    <div class="lode-board" id="souperBoard"></div>
+                </div>
             </div>
-            <div class="lode-legend-item">
-                <div class="lode-legend-color" style="background: var(--lode-miss);"></div>
-                Mimo
+
+            <div class="lode-legend">
+                <div class="lode-legend-item">
+                    <div class="lode-legend-color" style="background: var(--lode-ship);"></div>Loď
+                </div>
+                <div class="lode-legend-item">
+                    <div class="lode-legend-color" style="background: var(--lode-hit);"></div>Zásah
+                </div>
+                <div class="lode-legend-item">
+                    <div class="lode-legend-color" style="background: var(--lode-miss);"></div>Mimo
+                </div>
             </div>
         </div>
 
         <div class="lode-actions">
-            <button class="lode-btn" id="novaHraBtn" style="display:none;">Nova hra</button>
-            <a href="/hry.php" class="lode-btn secondary">Zpet do herni zony</a>
+            <button class="lode-btn" id="novaHraBtn" style="display: none;">Nová hra</button>
+            <a href="/hry.php" class="lode-btn secondary">Zpět do herní zóny</a>
         </div>
     </main>
 
@@ -373,60 +381,203 @@ try {
     (function() {
         'use strict';
 
-        // Velikost hraci plochy
         const VELIKOST = 10;
+        const CSRF_TOKEN = '<?php echo $csrfToken; ?>';
+        const USER_ID = <?php echo $userId; ?>;
 
-        // Lode - nazev a delka
         const LODE = [
-            { nazev: 'Letadlova lod', delka: 5 },
-            { nazev: 'Kriznik', delka: 4 },
-            { nazev: 'Torpedovka', delka: 3 },
+            { nazev: 'Letadlová loď', delka: 5 },
+            { nazev: 'Křižník', delka: 4 },
+            { nazev: 'Torpédovka', delka: 3 },
             { nazev: 'Ponorka', delka: 3 },
-            { nazev: 'Clun', delka: 2 }
+            { nazev: 'Člun', delka: 2 }
         ];
 
-        // Stav hry
-        let faze = 'umistovani'; // 'umistovani', 'hra', 'konec'
+        // Stav
+        let mistnostId = null;
+        let faze = 'lobby'; // lobby, cekani, umistovani, cekaniNaSoupere, hra, konec
+        let jsemHrac1 = false;
+        let jsemNaTahu = false;
+        let pollingInterval = null;
+
+        // Placement
         let aktualniLodIndex = 0;
-        let orientace = 'horizontal'; // 'horizontal' nebo 'vertical'
-
-        // Hraci plochy
+        let orientace = 'horizontal';
         let mojePole = vytvoritPrazdnePole();
-        let souperPole = vytvoritPrazdnePole();
-        let mojeStrely = vytvoritPrazdnePole();
-        let souperStrely = vytvoritPrazdnePole();
-
-        // Lode hracu
         let mojeLode = [];
-        let souperLode = [];
 
-        // DOM elementy
-        const mojeBoard = document.getElementById('mojeBoard');
-        const souperBoard = document.getElementById('souperBoard');
+        // Zobrazení
+        let mojeZasahy = [];
+        let souperZasahy = [];
+
+        // DOM
+        const lobbyEl = document.getElementById('lobby');
+        const cekaniEl = document.getElementById('cekani');
+        const hraEl = document.getElementById('hra');
         const statusEl = document.getElementById('status');
+        const hraciPanelEl = document.getElementById('hraciPanel');
         const placementInfo = document.getElementById('placementInfo');
         const currentShipEl = document.getElementById('currentShip');
+        const mojeBoard = document.getElementById('mojeBoard');
+        const souperBoard = document.getElementById('souperBoard');
+        const hledatBtn = document.getElementById('hledatBtn');
+        const zrusitBtn = document.getElementById('zrusitBtn');
         const rotateBtn = document.getElementById('rotateBtn');
         const novaHraBtn = document.getElementById('novaHraBtn');
-        const mojeLodeEl = document.getElementById('mojeLode');
-        const souperLodeEl = document.getElementById('souperLode');
 
-        // Inicializace
-        function init() {
-            vykresliPlochu(mojeBoard, mojePole, true);
-            vykresliPlochu(souperBoard, souperPole, false);
-            aktualizovatSeznamLodi();
-            umistiSouperovyLode();
-        }
-
-        // Vytvorit prazdne pole
         function vytvoritPrazdnePole() {
             return Array(VELIKOST).fill(null).map(() => Array(VELIKOST).fill(0));
         }
 
-        // Vykreslit hraci plochu
-        function vykresliPlochu(boardEl, pole, jeMoje) {
-            boardEl.innerHTML = '';
+        // Hledat soupeře
+        async function hledatSoupere() {
+            lobbyEl.style.display = 'none';
+            cekaniEl.style.display = 'block';
+            faze = 'cekani';
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'quick_match');
+                formData.append('hra', 'lode');
+                formData.append('csrf_token', CSRF_TOKEN);
+
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    mistnostId = result.data.mistnost_id;
+                    spustitPolling();
+                } else {
+                    alert('Chyba: ' + result.message);
+                    zobrazLobby();
+                }
+            } catch (error) {
+                console.error('Chyba:', error);
+                zobrazLobby();
+            }
+        }
+
+        function zobrazLobby() {
+            lobbyEl.style.display = 'block';
+            cekaniEl.style.display = 'none';
+            hraEl.style.display = 'none';
+            faze = 'lobby';
+        }
+
+        function spustitPolling() {
+            nacistStav();
+            pollingInterval = setInterval(nacistStav, 1500);
+        }
+
+        function zastavitPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        async function nacistStav() {
+            if (!mistnostId) return;
+
+            try {
+                const response = await fetch(`/api/hry_api.php?action=lode_stav&mistnost_id=${mistnostId}`);
+                const result = await response.json();
+
+                if (result.status !== 'success') return;
+
+                const data = result.data;
+                jsemHrac1 = data.jsem_hrac1;
+                mojeZasahy = data.moje_zasahy || [];
+                souperZasahy = data.souper_zasahy || [];
+
+                // Čekám na soupeře?
+                if (data.hraci.length < 2) {
+                    cekaniEl.style.display = 'block';
+                    hraEl.style.display = 'none';
+                    return;
+                }
+
+                // Zobrazit hru
+                cekaniEl.style.display = 'none';
+                hraEl.style.display = 'block';
+
+                aktualizujHrace(data.hraci, data);
+
+                // Fáze umisťování
+                if (!data.moje_lode && faze !== 'umistovani') {
+                    faze = 'umistovani';
+                    placementInfo.style.display = 'block';
+                    statusEl.textContent = 'Umísti své lodě kliknutím na plochu';
+                    vykresliMojePole();
+                    vykresliSouperPole();
+                    return;
+                }
+
+                // Čekání na soupeře
+                if (data.moje_lode && !data.souper_pripraveny) {
+                    faze = 'cekaniNaSoupere';
+                    placementInfo.style.display = 'none';
+                    statusEl.textContent = 'Čekám až soupeř rozmístí lodě...';
+                    vykresliMojePole();
+                    vykresliSouperPole();
+                    return;
+                }
+
+                // Hra probíhá
+                if (data.stav === 'hra') {
+                    faze = 'hra';
+                    placementInfo.style.display = 'none';
+                    jsemNaTahu = (jsemHrac1 && data.na_tahu === 1) || (!jsemHrac1 && data.na_tahu === 2);
+
+                    if (jsemNaTahu) {
+                        statusEl.textContent = 'Tvůj tah - klikni na soupeřovo pole';
+                        souperBoard.classList.add('aktivni');
+                    } else {
+                        statusEl.textContent = 'Soupeř střílí...';
+                        souperBoard.classList.remove('aktivni');
+                    }
+
+                    vykresliMojePole();
+                    vykresliSouperPole();
+                }
+
+                // Konec hry
+                if (data.vitez) {
+                    faze = 'konec';
+                    zastavitPolling();
+                    novaHraBtn.style.display = 'inline-block';
+                    souperBoard.classList.remove('aktivni');
+
+                    const vyhral = (jsemHrac1 && data.vitez === 1) || (!jsemHrac1 && data.vitez === 2);
+                    statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
+                    statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
+                }
+
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }
+
+        function aktualizujHrace(hraci, data) {
+            hraciPanelEl.innerHTML = hraci.map((hrac, index) => {
+                const jsemJa = hrac.user_id == USER_ID;
+                const jeNaTahu = (index === 0 && data.na_tahu === 1) || (index === 1 && data.na_tahu === 2);
+                const pripraveny = (index === 0 && jsemHrac1 && data.moje_lode) ||
+                                   (index === 1 && !jsemHrac1 && data.moje_lode) ||
+                                   (index === 0 && !jsemHrac1 && data.souper_pripraveny) ||
+                                   (index === 1 && jsemHrac1 && data.souper_pripraveny);
+
+                return `
+                    <div class="lode-hrac ${jeNaTahu && data.stav === 'hra' ? 'aktivni' : ''} ${jsemJa ? 'ja' : ''}">
+                        <div>${escapeHtml(hrac.username)}${jsemJa ? ' (ty)' : ''}</div>
+                        <div class="lode-hrac-stav ${pripraveny ? 'pripraveny' : ''}">${pripraveny ? 'Připraven' : 'Rozmisťuje...'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function vykresliMojePole() {
+            mojeBoard.innerHTML = '';
             for (let y = 0; y < VELIKOST; y++) {
                 for (let x = 0; x < VELIKOST; x++) {
                     const cell = document.createElement('div');
@@ -434,82 +585,93 @@ try {
                     cell.dataset.x = x;
                     cell.dataset.y = y;
 
-                    if (jeMoje) {
-                        if (pole[y][x] > 0) {
-                            cell.classList.add('ship');
-                        }
-                        if (souperStrely[y][x] === 1) {
-                            cell.classList.add(pole[y][x] > 0 ? 'hit' : 'miss');
-                            cell.textContent = pole[y][x] > 0 ? 'X' : 'o';
-                        }
-                        cell.addEventListener('click', () => klikMojePole(x, y));
-                        cell.addEventListener('mouseover', () => previewLod(x, y, boardEl));
-                        cell.addEventListener('mouseout', () => clearPreview(boardEl));
-                    } else {
-                        if (mojeStrely[y][x] === 1) {
-                            cell.classList.add(souperPole[y][x] > 0 ? 'hit' : 'miss');
-                            cell.textContent = souperPole[y][x] > 0 ? 'X' : 'o';
-                        }
-                        cell.addEventListener('click', () => strelitNaSoupere(x, y));
+                    if (mojePole[y][x] > 0) {
+                        cell.classList.add('ship');
                     }
 
-                    boardEl.appendChild(cell);
+                    // Zobrazit zásahy soupeře
+                    const zasahKlic = `${y}_${x}`;
+                    if (souperZasahy.includes(zasahKlic)) {
+                        cell.classList.add(mojePole[y][x] > 0 ? 'hit' : 'miss');
+                        cell.textContent = mojePole[y][x] > 0 ? 'X' : 'o';
+                    }
+
+                    if (faze === 'umistovani') {
+                        cell.addEventListener('click', () => klikMojePole(x, y));
+                        cell.addEventListener('mouseover', () => previewLod(x, y));
+                        cell.addEventListener('mouseout', clearPreview);
+                    }
+
+                    mojeBoard.appendChild(cell);
                 }
             }
         }
 
-        // Preview lode pred umistenim
-        function previewLod(x, y, boardEl) {
+        function vykresliSouperPole() {
+            souperBoard.innerHTML = '';
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'lode-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    const zasahKlic = `${y}_${x}`;
+                    if (mojeZasahy.includes(zasahKlic)) {
+                        // Nemůžeme vědět, jestli je zásah, dokud server nepotvrdí
+                        // Ale pro vizuální feedback zobrazíme jako miss (server pošle správnou info)
+                        cell.classList.add('miss');
+                        cell.textContent = 'o';
+                    }
+
+                    if (faze === 'hra' && jsemNaTahu) {
+                        cell.addEventListener('click', () => strelit(x, y));
+                    }
+
+                    souperBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function previewLod(x, y) {
             if (faze !== 'umistovani') return;
-            clearPreview(boardEl);
+            clearPreview();
 
             const lod = LODE[aktualniLodIndex];
             const pozice = getPoziceLode(x, y, lod.delka, orientace);
-
             if (!pozice) return;
 
             pozice.forEach(([px, py]) => {
-                const cell = boardEl.querySelector(`[data-x="${px}"][data-y="${py}"]`);
+                const cell = mojeBoard.querySelector(`[data-x="${px}"][data-y="${py}"]`);
                 if (cell && !cell.classList.contains('ship')) {
-                    cell.style.background = 'rgba(0, 153, 255, 0.4)';
+                    cell.classList.add('preview');
                 }
             });
         }
 
-        function clearPreview(boardEl) {
-            boardEl.querySelectorAll('.lode-cell').forEach(cell => {
-                if (!cell.classList.contains('ship') && !cell.classList.contains('hit') && !cell.classList.contains('miss')) {
-                    cell.style.background = '';
-                }
-            });
+        function clearPreview() {
+            mojeBoard.querySelectorAll('.preview').forEach(c => c.classList.remove('preview'));
         }
 
-        // Ziskat pozice lode
-        function getPoziceLode(x, y, delka, orientace) {
+        function getPoziceLode(x, y, delka, ori) {
             const pozice = [];
             for (let i = 0; i < delka; i++) {
-                const px = orientace === 'horizontal' ? x + i : x;
-                const py = orientace === 'vertical' ? y + i : y;
-
+                const px = ori === 'horizontal' ? x + i : x;
+                const py = ori === 'vertical' ? y + i : y;
                 if (px >= VELIKOST || py >= VELIKOST) return null;
                 pozice.push([px, py]);
             }
             return pozice;
         }
 
-        // Zkontrolovat zda lze umistit lod
-        function lzUmistitLod(pole, pozice) {
+        function lzeUmistitLod(pozice) {
             for (const [px, py] of pozice) {
-                // Kontrola samotneho pole
-                if (pole[py][px] !== 0) return false;
-
-                // Kontrola okolnich poli (lode se nesmi dotykat)
+                if (mojePole[py][px] !== 0) return false;
                 for (let dy = -1; dy <= 1; dy++) {
                     for (let dx = -1; dx <= 1; dx++) {
-                        const nx = px + dx;
-                        const ny = py + dy;
+                        const nx = px + dx, ny = py + dy;
                         if (nx >= 0 && nx < VELIKOST && ny >= 0 && ny < VELIKOST) {
-                            if (pole[ny][nx] !== 0) return false;
+                            if (mojePole[ny][nx] !== 0) return false;
                         }
                     }
                 }
@@ -517,189 +679,185 @@ try {
             return true;
         }
 
-        // Umistit lod
-        function umistitLod(pole, pozice, lodId) {
-            pozice.forEach(([px, py]) => {
-                pole[py][px] = lodId;
-            });
-        }
-
-        // Klik na moje pole (umistovani lodi)
         function klikMojePole(x, y) {
             if (faze !== 'umistovani') return;
 
             const lod = LODE[aktualniLodIndex];
             const pozice = getPoziceLode(x, y, lod.delka, orientace);
 
-            if (!pozice || !lzUmistitLod(mojePole, pozice)) {
-                statusEl.textContent = 'Sem lod umistit nelze!';
+            if (!pozice || !lzeUmistitLod(pozice)) {
+                statusEl.textContent = 'Sem loď umístit nelze!';
                 return;
             }
 
             const lodId = aktualniLodIndex + 1;
-            umistitLod(mojePole, pozice, lodId);
-            mojeLode.push({ id: lodId, nazev: lod.nazev, pozice: pozice, zasahy: 0 });
+            pozice.forEach(([px, py]) => mojePole[py][px] = lodId);
+            mojeLode.push({ nazev: lod.nazev, pozice: pozice.map(p => [p[1], p[0]]) }); // [row, col]
 
-            vykresliPlochu(mojeBoard, mojePole, true);
             aktualniLodIndex++;
 
             if (aktualniLodIndex >= LODE.length) {
-                // Vsechny lode umisteny - zaciname hru
-                faze = 'hra';
-                placementInfo.style.display = 'none';
-                statusEl.textContent = 'Klikni na souper ovo pole a strilej!';
-                souperBoard.classList.add('aktivni');
+                // Odeslat rozmístění na server
+                odeslatRozmisteni();
             } else {
-                currentShipEl.textContent = `${LODE[aktualniLodIndex].nazev} (${LODE[aktualniLodIndex].delka} poli)`;
+                currentShipEl.textContent = `${LODE[aktualniLodIndex].nazev} (${LODE[aktualniLodIndex].delka} polí)`;
+                vykresliMojePole();
             }
-
-            aktualizovatSeznamLodi();
         }
 
-        // Umistit souper ovy lode nahodne
-        function umistiSouperovyLode() {
-            LODE.forEach((lod, index) => {
-                let umisteno = false;
-                let pokusy = 0;
+        async function odeslatRozmisteni() {
+            statusEl.textContent = 'Odesílám rozmístění...';
+            placementInfo.style.display = 'none';
 
-                while (!umisteno && pokusy < 1000) {
-                    const x = Math.floor(Math.random() * VELIKOST);
-                    const y = Math.floor(Math.random() * VELIKOST);
-                    const ori = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-                    const pozice = getPoziceLode(x, y, lod.delka, ori);
+            try {
+                const formData = new FormData();
+                formData.append('action', 'lode_rozmisteni');
+                formData.append('mistnost_id', mistnostId);
+                formData.append('lode', JSON.stringify(mojeLode));
+                formData.append('csrf_token', CSRF_TOKEN);
 
-                    if (pozice && lzUmistitLod(souperPole, pozice)) {
-                        const lodId = index + 1;
-                        umistitLod(souperPole, pozice, lodId);
-                        souperLode.push({ id: lodId, nazev: lod.nazev, pozice: pozice, zasahy: 0 });
-                        umisteno = true;
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    faze = 'cekaniNaSoupere';
+                    statusEl.textContent = 'Čekám až soupeř rozmístí lodě...';
+                    vykresliMojePole();
+                } else {
+                    alert('Chyba: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Chyba:', error);
+            }
+        }
+
+        async function strelit(x, y) {
+            if (faze !== 'hra' || !jsemNaTahu) return;
+
+            const zasahKlic = `${y}_${x}`;
+            if (mojeZasahy.includes(zasahKlic)) return;
+
+            jsemNaTahu = false;
+            statusEl.textContent = 'Střílím...';
+            souperBoard.classList.remove('aktivni');
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'lode_strela');
+                formData.append('mistnost_id', mistnostId);
+                formData.append('radek', y);
+                formData.append('sloupec', x);
+                formData.append('csrf_token', CSRF_TOKEN);
+
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const cell = souperBoard.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                    if (result.data.zasah) {
+                        cell.classList.add('hit');
+                        cell.textContent = 'X';
+                        if (result.data.potopena) {
+                            statusEl.textContent = `Potopil jsi ${result.data.potopena}!`;
+                        } else {
+                            statusEl.textContent = 'Zásah! Střílej znovu.';
+                        }
+                        jsemNaTahu = true;
+                        souperBoard.classList.add('aktivni');
+                    } else {
+                        cell.classList.add('miss');
+                        cell.textContent = 'o';
+                        statusEl.textContent = 'Mimo. Soupeř střílí...';
                     }
-                    pokusy++;
+
+                    mojeZasahy.push(zasahKlic);
+
+                    if (result.data.vitez) {
+                        faze = 'konec';
+                        zastavitPolling();
+                        novaHraBtn.style.display = 'inline-block';
+                        const vyhral = (jsemHrac1 && result.data.vitez === 1) || (!jsemHrac1 && result.data.vitez === 2);
+                        statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
+                        statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
+                    }
+                } else {
+                    alert('Chyba: ' + result.message);
+                    jsemNaTahu = true;
+                    souperBoard.classList.add('aktivni');
                 }
-            });
+            } catch (error) {
+                console.error('Střela error:', error);
+                jsemNaTahu = true;
+            }
         }
 
-        // Strelit na soupere
-        function strelitNaSoupere(x, y) {
-            if (faze !== 'hra') return;
-            if (mojeStrely[y][x] !== 0) return; // Uz jsme sem strileli
-
-            mojeStrely[y][x] = 1;
-
-            if (souperPole[y][x] > 0) {
-                // Zasah!
-                const lodId = souperPole[y][x];
-                const lod = souperLode.find(l => l.id === lodId);
-                lod.zasahy++;
-
-                if (lod.zasahy >= lod.pozice.length) {
-                    statusEl.textContent = `Potopil jsi ${lod.nazev}!`;
-                } else {
-                    statusEl.textContent = 'Zasah!';
-                }
-
-                // Kontrola vyhry
-                if (souperLode.every(l => l.zasahy >= l.pozice.length)) {
-                    faze = 'konec';
-                    statusEl.textContent = 'VYHRAL JSI!';
-                    statusEl.classList.add('vyhral');
-                    novaHraBtn.style.display = 'inline-block';
-                    aktualizovatSeznamLodi();
-                    vykresliPlochu(souperBoard, souperPole, false);
-                    return;
-                }
-            } else {
-                statusEl.textContent = 'Mimo...';
+        async function novaHra() {
+            if (mistnostId) {
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'opustit');
+                    formData.append('mistnost_id', mistnostId);
+                    formData.append('csrf_token', CSRF_TOKEN);
+                    await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                } catch (e) {}
             }
 
-            vykresliPlochu(souperBoard, souperPole, false);
-            aktualizovatSeznamLodi();
-
-            // Souper stri li
-            setTimeout(souperStrelba, 500);
+            // Reset
+            mistnostId = null;
+            faze = 'lobby';
+            aktualniLodIndex = 0;
+            mojePole = vytvoritPrazdnePole();
+            mojeLode = [];
+            mojeZasahy = [];
+            souperZasahy = [];
+            currentShipEl.textContent = `${LODE[0].nazev} (${LODE[0].delka} polí)`;
+            statusEl.className = 'lode-status';
+            novaHraBtn.style.display = 'none';
+            hledatSoupere();
         }
 
-        // Souper ova strelba (jednoducha AI)
-        function souperStrelba() {
-            if (faze !== 'hra') return;
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-            let x, y;
-            let pokusy = 0;
-
-            // Najdi pole kde jeste nebylo strileno
-            do {
-                x = Math.floor(Math.random() * VELIKOST);
-                y = Math.floor(Math.random() * VELIKOST);
-                pokusy++;
-            } while (souperStrely[y][x] !== 0 && pokusy < 1000);
-
-            souperStrely[y][x] = 1;
-
-            if (mojePole[y][x] > 0) {
-                const lodId = mojePole[y][x];
-                const lod = mojeLode.find(l => l.id === lodId);
-                lod.zasahy++;
-
-                if (lod.zasahy >= lod.pozice.length) {
-                    statusEl.textContent = `Souper potopil tvou ${lod.nazev}! Tvuj tah.`;
-                } else {
-                    statusEl.textContent = 'Souper trefil! Tvuj tah.';
-                }
-
-                // Kontrola prohry
-                if (mojeLode.every(l => l.zasahy >= l.pozice.length)) {
-                    faze = 'konec';
-                    statusEl.textContent = 'PROHRAL JSI!';
-                    statusEl.classList.add('prohral');
-                    novaHraBtn.style.display = 'inline-block';
-                }
-            } else {
-                statusEl.textContent = 'Souper minul. Tvuj tah.';
+        // Event listenery
+        hledatBtn.addEventListener('click', hledatSoupere);
+        zrusitBtn.addEventListener('click', () => {
+            zastavitPolling();
+            if (mistnostId) {
+                const formData = new FormData();
+                formData.append('action', 'opustit');
+                formData.append('mistnost_id', mistnostId);
+                formData.append('csrf_token', CSRF_TOKEN);
+                fetch('/api/hry_api.php', { method: 'POST', body: formData });
             }
-
-            vykresliPlochu(mojeBoard, mojePole, true);
-            aktualizovatSeznamLodi();
-        }
-
-        // Aktualizovat seznam lodi
-        function aktualizovatSeznamLodi() {
-            mojeLodeEl.innerHTML = mojeLode.map(l => {
-                const potopena = l.zasahy >= l.pozice.length;
-                return `<span class="${potopena ? 'sunk' : ''}">${l.nazev}</span>`;
-            }).join('') || '<span style="color: var(--lode-muted);">-</span>';
-
-            souperLodeEl.innerHTML = souperLode.map(l => {
-                const potopena = l.zasahy >= l.pozice.length;
-                return `<span class="${potopena ? 'sunk' : ''}">${l.nazev}</span>`;
-            }).join('') || '<span style="color: var(--lode-muted);">-</span>';
-        }
-
-        // Otocit lod
+            mistnostId = null;
+            zobrazLobby();
+        });
         rotateBtn.addEventListener('click', () => {
             orientace = orientace === 'horizontal' ? 'vertical' : 'horizontal';
         });
-
-        // Klavesova zkratka pro otoceni
         document.addEventListener('keydown', (e) => {
             if (e.key === 'r' || e.key === 'R') {
                 orientace = orientace === 'horizontal' ? 'vertical' : 'horizontal';
             }
         });
-
-        // Nova hra
-        novaHraBtn.addEventListener('click', () => {
-            location.reload();
-        });
+        novaHraBtn.addEventListener('click', novaHra);
 
         // Heartbeat
         setInterval(async () => {
-            try {
-                await fetch('/api/hry_api.php?action=heartbeat');
-            } catch (e) {}
+            try { await fetch('/api/hry_api.php?action=heartbeat'); } catch (e) {}
         }, 30000);
 
-        // Start
-        init();
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (mistnostId) {
+                navigator.sendBeacon('/api/hry_api.php?action=opustit&mistnost_id=' + mistnostId);
+            }
+        });
+
     })();
     </script>
 </body>
