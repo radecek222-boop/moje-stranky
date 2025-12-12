@@ -31,6 +31,25 @@ if (!isset($chatZpravy)) {
     }
 }
 
+// Nacist cekajici mistnosti (hry cekajici na hrace)
+if (!isset($cekajiciMistnosti)) {
+    try {
+        $pdo = getDbConnection();
+        $stmtMistnosti = $pdo->query("
+            SELECT m.id, m.nazev, m.hra, m.max_hracu,
+                   (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
+                   (SELECT username FROM wgs_users WHERE user_id = m.vytvoril_user_id) as vytvoril
+            FROM wgs_hry_mistnosti m
+            WHERE m.stav = 'ceka'
+            ORDER BY m.vytvoreno DESC
+            LIMIT 5
+        ");
+        $cekajiciMistnosti = $stmtMistnosti->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $cekajiciMistnosti = [];
+    }
+}
+
 $currentUserId = $_SESSION['user_id'] ?? '';
 ?>
 
@@ -67,6 +86,29 @@ $currentUserId = $_SESSION['user_id'] ?? '';
                         <?php if ($hrac['aktualni_hra']): ?>
                         <span class="sidebar-hra"><?php echo htmlspecialchars($hrac['aktualni_hra']); ?></span>
                         <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Cekajici hry -->
+        <div class="sidebar-section sidebar-lobby" id="sidebarLobby">
+            <div class="sidebar-header">
+                POZVANKY
+                <span class="sidebar-pocet" id="lobbyPocet"><?php echo count($cekajiciMistnosti); ?></span>
+            </div>
+            <div class="sidebar-lobby-list" id="sidebarLobbyList">
+                <?php if (empty($cekajiciMistnosti)): ?>
+                <div class="sidebar-lobby-empty">Zadne cekajici hry</div>
+                <?php else: ?>
+                    <?php foreach ($cekajiciMistnosti as $m): ?>
+                    <div class="sidebar-lobby-item" data-id="<?php echo (int)$m['id']; ?>" data-hra="<?php echo htmlspecialchars($m['hra']); ?>">
+                        <div class="lobby-info">
+                            <span class="lobby-hra"><?php echo htmlspecialchars(ucfirst($m['hra'])); ?></span>
+                            <span class="lobby-hrac"><?php echo htmlspecialchars($m['vytvoril'] ?? 'Hrac'); ?> ceka</span>
+                        </div>
+                        <button class="lobby-pripojit" onclick="pripojitSeKeHre(<?php echo (int)$m['id']; ?>, '<?php echo htmlspecialchars($m['hra']); ?>')">Hrat</button>
                     </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -308,6 +350,68 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     font-size: 0.8rem;
 }
 
+/* Lobby - pozvanky do her */
+.sidebar-lobby-list {
+    padding: 0.5rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.sidebar-lobby-empty {
+    color: #666;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.sidebar-lobby-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-lobby-item:last-child {
+    margin-bottom: 0;
+}
+
+.lobby-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.lobby-hra {
+    color: #0099ff;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.lobby-hrac {
+    color: #888;
+    font-size: 0.7rem;
+}
+
+.lobby-pripojit {
+    background: #39ff14;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lobby-pripojit:hover {
+    background: #fff;
+}
+
 @media (max-width: 600px) {
     .sidebar-content {
         width: 200px;
@@ -514,5 +618,63 @@ $currentUserId = $_SESSION['user_id'] ?? '';
         } catch (e) {}
     }, 1000);
 
+    // Polling - lobby/cekajici hry (3s)
+    const lobbyList = document.getElementById('sidebarLobbyList');
+    const lobbyPocet = document.getElementById('lobbyPocet');
+
+    async function aktualizovatLobby() {
+        try {
+            const response = await fetch('/api/hry_api.php?action=mistnosti');
+            const result = await response.json();
+            if (result.status === 'success' && result.mistnosti) {
+                const cekajici = result.mistnosti.filter(m => m.stav === 'ceka');
+                if (lobbyPocet) lobbyPocet.textContent = cekajici.length;
+
+                if (cekajici.length === 0) {
+                    lobbyList.innerHTML = '<div class="sidebar-lobby-empty">Zadne cekajici hry</div>';
+                } else {
+                    lobbyList.innerHTML = cekajici.map(m => `
+                        <div class="sidebar-lobby-item" data-id="${m.id}" data-hra="${escapeHtml(m.hra)}">
+                            <div class="lobby-info">
+                                <span class="lobby-hra">${escapeHtml(m.hra.charAt(0).toUpperCase() + m.hra.slice(1))}</span>
+                                <span class="lobby-hrac">${m.pocet_hracu}/${m.max_hracu} hracu ceka</span>
+                            </div>
+                            <button class="lobby-pripojit" onclick="pripojitSeKeHre(${m.id}, '${escapeHtml(m.hra)}')">Hrat</button>
+                        </div>
+                    `).join('');
+                }
+            }
+        } catch (e) {}
+    }
+
+    setInterval(aktualizovatLobby, 3000);
+
 })();
+
+// Globalni funkce pro pripojeni ke hre
+async function pripojitSeKeHre(mistnostId, hra) {
+    try {
+        const csrfToken = document.getElementById('sidebarCsrfToken').value;
+        const formData = new FormData();
+        formData.append('action', 'pripojit');
+        formData.append('csrf_token', csrfToken);
+        formData.append('mistnost_id', mistnostId);
+
+        const response = await fetch('/api/hry_api.php', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            // Presmerovat na hru
+            window.location.href = '/hry/' + hra + '.php?mistnost=' + mistnostId;
+        } else {
+            alert(result.message || 'Nelze se pripojit');
+        }
+    } catch (e) {
+        console.error('Pripojeni error:', e);
+        alert('Chyba pri pripojovani');
+    }
+}
 </script>

@@ -14,7 +14,18 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 
+// CORS hlavicky pro herni zonu
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: https://www.wgs-service.cz');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // Kontrola přihlášení
 if (!isset($_SESSION['user_id'])) {
@@ -131,7 +142,7 @@ try {
                        u.username as vytvoril
                 FROM wgs_hry_mistnosti m
                 LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
-                WHERE m.hra = :hra AND m.stav IN ('cekani', 'hra')
+                WHERE m.hra = :hra AND m.stav IN ('ceka', 'hra')
                 ORDER BY m.vytvoreno DESC
                 LIMIT 20
             ");
@@ -216,7 +227,7 @@ try {
                 sendJsonError('Místnost neexistuje');
             }
 
-            if ($mistnost['stav'] !== 'cekani') {
+            if ($mistnost['stav'] !== 'ceka') {
                 sendJsonError('Hra již probíhá nebo je dokončena');
             }
 
@@ -344,7 +355,7 @@ try {
                 sendJsonError('Pouze tvůrce může spustit hru');
             }
 
-            if ($mistnost['stav'] !== 'cekani') {
+            if ($mistnost['stav'] !== 'ceka') {
                 sendJsonError('Hra již probíhá');
             }
 
@@ -818,11 +829,11 @@ try {
 
             // Najít volnou místnost čekající na hráče
             $stmt = $pdo->prepare("
-                SELECT m.id, m.nazev,
+                SELECT m.id, m.nazev, m.max_hracu,
                        (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet
                 FROM wgs_hry_mistnosti m
-                WHERE m.hra = :hra AND m.stav = 'cekani'
-                HAVING pocet < m.max_hracu
+                WHERE m.hra = :hra AND m.stav = 'ceka'
+                HAVING pocet < max_hracu
                 ORDER BY m.vytvoreno ASC
                 LIMIT 1
             ");
@@ -941,10 +952,10 @@ try {
     }
 
 } catch (PDOException $e) {
-    error_log("Hry API error: " . $e->getMessage());
-    sendJsonError('Chyba databáze');
+    error_log("Hry API PDO error: " . $e->getMessage());
+    sendJsonError('Chyba databaze: ' . $e->getMessage());
 } catch (Exception $e) {
     error_log("Hry API error: " . $e->getMessage());
-    sendJsonError('Chyba serveru');
+    sendJsonError('Chyba serveru: ' . $e->getMessage());
 }
 ?>
