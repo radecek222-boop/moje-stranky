@@ -142,7 +142,7 @@ try {
                 $stmt = $pdo->query("
                     SELECT m.id, m.nazev, m.hra, m.stav, m.max_hracu,
                            (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
-                           u.username as vytvoril
+                           u.name as vytvoril
                     FROM wgs_hry_mistnosti m
                     LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
                     WHERE m.stav IN ('ceka', 'hra')
@@ -153,7 +153,7 @@ try {
                 $stmt = $pdo->prepare("
                     SELECT m.id, m.nazev, m.hra, m.stav, m.max_hracu,
                            (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
-                           u.username as vytvoril
+                           u.name as vytvoril
                     FROM wgs_hry_mistnosti m
                     LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
                     WHERE m.hra = :hra AND m.stav IN ('ceka', 'hra')
