@@ -14,7 +14,18 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 
+// CORS hlavicky pro herni zonu
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: https://www.wgs-service.cz');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // Kontrola přihlášení
 if (!isset($_SESSION['user_id'])) {
