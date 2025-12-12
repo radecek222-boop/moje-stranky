@@ -27,18 +27,27 @@
         }
 
         .header {
+            position: relative;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 30px;
             padding: 15px 0 25px;
             border-bottom: 1px solid #333;
             margin-bottom: 20px;
         }
 
-        .header img {
-            height: 50px;
+        .logo-um {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            height: 25px;
             object-fit: contain;
+        }
+
+        .logo-tech {
+            height: 100px;
+            object-fit: contain;
+            margin-top: 10px;
         }
 
         /* Řidiči */
@@ -71,6 +80,20 @@
             font-size: 11px;
             color: #888;
             margin-top: 2px;
+        }
+
+        .ridic-standby {
+            font-size: 9px;
+            color: #666;
+            margin-top: 2px;
+            text-transform: lowercase;
+        }
+
+        .ridic-auto-svg {
+            width: 24px;
+            height: 24px;
+            fill: #666;
+            margin-right: 8px;
         }
 
         .ridic-tel {
@@ -248,9 +271,17 @@
         }
 
         .stav-drop {
-            background: #222;
-            color: #666;
+            background: #111;
+            color: #39ff14;
             cursor: default;
+            border: 1px solid #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2);
+            animation: drop-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes drop-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(57, 255, 20, 0.6), 0 0 30px rgba(57, 255, 20, 0.3); }
         }
 
         .stav-cas {
@@ -402,25 +433,28 @@
 
 <!-- Header s logy -->
 <div class="header">
-    <img src="assets/img/um_white.png.webp" alt="United Music">
-    <img src="assets/img/front_logo_tech.png" alt="Techmission">
+    <img src="assets/img/um_white.png.webp" alt="United Music" class="logo-um">
+    <img src="assets/img/front_logo_tech.png" alt="Techmission" class="logo-tech">
 </div>
 
 <!-- Řidiči -->
 <div class="ridici">
     <div class="ridic">
+        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
         <div class="ridic-info">
             <div class="ridic-jmeno">MIREK</div>
             <div class="ridic-auto">MB S CLASS</div>
+            <div class="ridic-standby">stand by 21:00 - 06:00</div>
         </div>
         <a href="tel:+420736611777" class="ridic-tel">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </a>
     </div>
     <div class="ridic">
+        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
         <div class="ridic-info">
             <div class="ridic-jmeno">MILAN</div>
-            <div class="ridic-auto">MB V CLASS</div>
+            <div class="ridic-auto">TRANSPORT VAN</div>
         </div>
         <a href="tel:+420735084519" class="ridic-tel">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
