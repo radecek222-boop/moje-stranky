@@ -11,6 +11,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transport - Techmission</title>
+    <link rel="icon" type="image/png" href="assets/img/front_logo_tech.png">
+    <link rel="apple-touch-icon" href="assets/img/front_logo_tech.png">
     <style>
         * {
             margin: 0;
@@ -27,38 +29,51 @@
         }
 
         .header {
+            position: relative;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 30px;
             padding: 15px 0 25px;
             border-bottom: 1px solid #333;
             margin-bottom: 20px;
         }
 
-        .header img {
-            height: 50px;
+        .logo-um {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            height: 25px;
             object-fit: contain;
+        }
+
+        .logo-tech {
+            height: 200px;
+            object-fit: contain;
+            margin-top: 80px;
         }
 
         /* Řidiči */
         .ridici {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
             margin-bottom: 25px;
             padding-bottom: 20px;
             border-bottom: 1px solid #333;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .ridic {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: grid;
+            justify-items: center;
+            text-align: center;
+            gap: 8px;
         }
 
         .ridic-info {
-            text-align: left;
+            text-align: center;
         }
 
         .ridic-jmeno {
@@ -71,6 +86,25 @@
             font-size: 11px;
             color: #888;
             margin-top: 2px;
+            text-transform: uppercase;
+        }
+
+        .ridic-standby {
+            font-size: 9px;
+            color: #666;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+
+        .ridic-auto-svg {
+            width: 28px;
+            height: 28px;
+            fill: #888;
+        }
+
+        .ridic-auto-icon {
+            font-size: 32px;
+            color: #888;
         }
 
         .ridic-tel {
@@ -83,16 +117,13 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
+            text-decoration: none;
+            color: #fff;
+            font-size: 16px;
         }
 
         .ridic-tel:hover {
             background: #444;
-        }
-
-        .ridic-tel svg {
-            width: 18px;
-            height: 18px;
-            fill: #fff;
         }
 
         /* Sekce dne */
@@ -147,6 +178,12 @@
             align-items: center;
             gap: 15px;
             position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .transport:hover {
+            background: #1a1a1a;
         }
 
         .den-nedele .transport {
@@ -159,11 +196,6 @@
             font-weight: 700;
             min-width: 70px;
             font-variant-numeric: tabular-nums;
-            cursor: pointer;
-        }
-
-        .transport-cas:hover {
-            color: #888;
         }
 
         .transport-info {
@@ -174,21 +206,11 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 3px;
-            cursor: pointer;
-        }
-
-        .transport-jmena:hover {
-            color: #888;
         }
 
         .transport-trasa {
             font-size: 12px;
             color: #666;
-            cursor: pointer;
-        }
-
-        .transport-trasa:hover {
-            color: #888;
         }
 
         /* Tlačítko smazat */
@@ -219,10 +241,15 @@
         .transport-stav {
             min-width: 110px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .stav-btn {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
@@ -231,6 +258,10 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
         }
 
         .stav-wait {
@@ -248,28 +279,25 @@
         }
 
         .stav-drop {
-            background: #222;
-            color: #666;
-            cursor: default;
+            background: #111;
+            color: #39ff14;
+            cursor: pointer;
+            border: 1px solid #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2);
+            animation: drop-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes drop-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(57, 255, 20, 0.6), 0 0 30px rgba(57, 255, 20, 0.3); }
         }
 
         .stav-cas {
-            font-size: 10px;
+            font-size: 11px;
             color: #666;
-            margin-top: 4px;
-        }
-
-        /* Poznámka */
-        .poznamka {
-            text-align: center;
-            padding: 15px;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #888;
-            letter-spacing: 1px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 14px;
         }
 
         /* Modal */
@@ -374,9 +402,8 @@
 
         @media (max-width: 500px) {
             .ridici {
-                flex-direction: column;
-                gap: 15px;
-                align-items: center;
+                gap: 20px;
+                max-width: 100%;
             }
 
             .transport {
@@ -402,28 +429,32 @@
 
 <!-- Header s logy -->
 <div class="header">
-    <img src="assets/img/um_white.png.webp" alt="United Music">
-    <img src="assets/img/front_logo_tech.png" alt="Techmission">
+    <img src="assets/img/um_white.png.webp" alt="United Music" class="logo-um">
+    <img src="assets/img/front_logo_tech.png" alt="Techmission" class="logo-tech">
 </div>
 
 <!-- Řidiči -->
 <div class="ridici">
     <div class="ridic">
-        <div class="ridic-info">
-            <div class="ridic-jmeno">MIREK</div>
-            <div class="ridic-auto">MB S CLASS</div>
-        </div>
-        <a href="tel:+420736611777" class="ridic-tel">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </a>
-    </div>
-    <div class="ridic">
+        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
         <div class="ridic-info">
             <div class="ridic-jmeno">MILAN</div>
             <div class="ridic-auto">MB V CLASS</div>
+            <div class="ridic-standby">transport van</div>
         </div>
         <a href="tel:+420735084519" class="ridic-tel">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        </a>
+    </div>
+    <div class="ridic">
+        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        <div class="ridic-info">
+            <div class="ridic-jmeno">MIREK</div>
+            <div class="ridic-auto">MB S CLASS</div>
+            <div class="ridic-standby standby-caps">STAND BY 21:00 - 06:00</div>
+        </div>
+        <a href="tel:+420736611777" class="ridic-tel">
+            <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </a>
     </div>
 </div>
@@ -446,9 +477,6 @@
     <div class="transporty" id="transporty-nedele"></div>
 </div>
 
-<div class="poznamka">
-    SHOW 21:00 - 06:00 — CAR ON STAND BY
-</div>
 
 <!-- Modal pro přidání/editaci -->
 <div class="modal" id="modal-edit">
@@ -458,7 +486,7 @@
         <input type="text" class="modal-input" id="input-jmeno" placeholder="Jmeno pasazera">
         <input type="text" class="modal-input" id="input-odkud" placeholder="Odkud">
         <input type="text" class="modal-input" id="input-kam" placeholder="Kam">
-        <input type="password" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni">
+        <input type="tel" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModal()">Zrusit</button>
@@ -472,11 +500,25 @@
     <div class="modal-obsah">
         <div class="modal-titulek">Smazat transport?</div>
         <p style="color: #888; margin-bottom: 15px;" id="smazat-info"></p>
-        <input type="password" class="modal-input" id="input-heslo-smazat" placeholder="Heslo pro potvrzeni">
+        <input type="tel" class="modal-input" id="input-heslo-smazat" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba-smazat">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalSmazat()">Zrusit</button>
             <button class="modal-btn modal-btn-smazat" onclick="potvrdSmazat()">Smazat</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pro reset stavu -->
+<div class="modal" id="modal-reset">
+    <div class="modal-obsah">
+        <div class="modal-titulek">Resetovat stav na WAIT?</div>
+        <p style="color: #888; margin-bottom: 15px;" id="reset-info"></p>
+        <input type="tel" class="modal-input" id="input-heslo-reset" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="modal-chyba" id="modal-chyba-reset">Spatne heslo</div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalReset()">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdReset()">Resetovat</button>
         </div>
     </div>
 </div>
@@ -505,6 +547,7 @@ let stavy = {};
 // Aktuální editace
 let editAkce = null; // { typ: 'pridat'/'editovat', den: 'sobota'/'nedele', id: null/string, pole: null/'cas'/'jmeno'/'trasa' }
 let smazatId = null;
+let resetId = null;
 
 // Generovat unikátní ID
 function generujId() {
@@ -540,17 +583,19 @@ function vykresli() {
             div.className = 'transport';
             div.dataset.id = t.id;
             div.innerHTML = `
-                <button class="btn-smazat" onclick="otevriModalSmazat('${t.id}', '${den}')">&times;</button>
-                <div class="transport-cas" onclick="editujPole('${t.id}', '${den}', 'cas')">${t.cas}</div>
+                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${t.id}', '${den}')">&times;</button>
+                <div class="transport-cas">${t.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena" onclick="editujPole('${t.id}', '${den}', 'jmeno')">${t.jmeno}</div>
-                    <div class="transport-trasa" onclick="editujPole('${t.id}', '${den}', 'trasa')">${t.odkud} → ${t.kam}</div>
+                    <div class="transport-jmena">${t.jmeno}</div>
+                    <div class="transport-trasa">${t.odkud} → ${t.kam}</div>
                 </div>
                 <div class="transport-stav">
-                    <button class="stav-btn ${stavClass}" onclick="zmenStav('${t.id}')">${stavText}</button>
+                    <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${t.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
                 </div>
             `;
+            // Klik na celý transport otevře editaci všeho
+            div.addEventListener('click', () => editujVse('${t.id}', '${den}'));
             kontejner.appendChild(div);
         });
     });
@@ -576,19 +621,19 @@ function otevriModalPridat(den) {
     document.getElementById('modal-edit').classList.add('aktivni');
 }
 
-// Editovat pole
-function editujPole(id, den, pole) {
+// Editovat všechna pole najednou
+function editujVse(id, den) {
     const transport = transporty[den].find(t => t.id === id);
     if (!transport) return;
 
-    editAkce = { typ: 'editovat', den: den, id: id, pole: pole };
-    document.getElementById('modal-titulek').textContent = 'Upravit ' + (pole === 'cas' ? 'cas' : pole === 'jmeno' ? 'jmeno' : 'trasu');
+    editAkce = { typ: 'editovat', den: den, id: id, pole: 'vse' };
+    document.getElementById('modal-titulek').textContent = 'Upravit transport';
 
-    // Skrýt/zobrazit inputy podle editovaného pole
-    document.getElementById('input-cas').style.display = pole === 'cas' ? 'block' : 'none';
-    document.getElementById('input-jmeno').style.display = pole === 'jmeno' ? 'block' : 'none';
-    document.getElementById('input-odkud').style.display = pole === 'trasa' ? 'block' : 'none';
-    document.getElementById('input-kam').style.display = pole === 'trasa' ? 'block' : 'none';
+    // Zobrazit všechny inputy
+    document.getElementById('input-cas').style.display = 'block';
+    document.getElementById('input-jmeno').style.display = 'block';
+    document.getElementById('input-odkud').style.display = 'block';
+    document.getElementById('input-kam').style.display = 'block';
 
     // Vyplnit aktuální hodnoty
     document.getElementById('input-cas').value = transport.cas;
@@ -621,7 +666,13 @@ function potvrdEdit() {
     } else if (editAkce.typ === 'editovat') {
         const transport = transporty[editAkce.den].find(t => t.id === editAkce.id);
         if (transport) {
-            if (editAkce.pole === 'cas') {
+            if (editAkce.pole === 'vse') {
+                // Editace všech polí najednou
+                transport.cas = document.getElementById('input-cas').value;
+                transport.jmeno = document.getElementById('input-jmeno').value;
+                transport.odkud = document.getElementById('input-odkud').value;
+                transport.kam = document.getElementById('input-kam').value;
+            } else if (editAkce.pole === 'cas') {
                 transport.cas = document.getElementById('input-cas').value;
             } else if (editAkce.pole === 'jmeno') {
                 transport.jmeno = document.getElementById('input-jmeno').value;
@@ -684,17 +735,63 @@ function zmenStav(id) {
 
     if (aktualniStav === 'wait') {
         stavy[id] = { stav: 'onway', cas: cas };
+        vykresli();
+        ulozData();
     } else if (aktualniStav === 'onway') {
         stavy[id] = { stav: 'drop', casDrop: cas, cas: stavy[id].cas };
+        vykresli();
+        ulozData();
+    } else if (aktualniStav === 'drop') {
+        // DROP OFF - otevřít modal pro reset
+        otevriModalReset(id);
     }
-    // drop je finální stav
+}
 
+// Otevřít modal pro reset stavu
+function otevriModalReset(id) {
+    resetId = id;
+    // Najít transport info
+    let info = 'Transport';
+    ['sobota', 'nedele'].forEach(den => {
+        const transport = transporty[den].find(t => t.id === id);
+        if (transport) {
+            info = transport.cas + ' - ' + transport.jmeno;
+        }
+    });
+    document.getElementById('reset-info').textContent = info;
+    document.getElementById('input-heslo-reset').value = '';
+    document.getElementById('modal-chyba-reset').style.display = 'none';
+    document.getElementById('modal-reset').classList.add('aktivni');
+}
+
+// Potvrdit reset stavu
+function potvrdReset() {
+    const heslo = document.getElementById('input-heslo-reset').value;
+    if (heslo !== HESLO) {
+        document.getElementById('modal-chyba-reset').style.display = 'block';
+        return;
+    }
+
+    // Resetovat stav na wait
+    delete stavy[resetId];
+
+    zavriModalReset();
     vykresli();
     ulozData();
 }
 
+// Zavřít modal reset
+function zavriModalReset() {
+    document.getElementById('modal-reset').classList.remove('aktivni');
+    resetId = null;
+}
+
+// Flag pro zamezení přepsání během ukládání
+let ukladaSe = false;
+
 // Uložit data na server
 async function ulozData() {
+    ukladaSe = true;
     try {
         const formData = new FormData();
         formData.append('stavy', JSON.stringify(stavy));
@@ -706,16 +803,26 @@ async function ulozData() {
     } catch (e) {
         console.log('Chyba pri ukladani');
     }
+    ukladaSe = false;
 }
 
 // Načíst data ze serveru
 async function nactiData() {
+    // Nepřepisovat lokální data pokud právě ukládáme
+    if (ukladaSe) return;
+
     try {
         const odpoved = await fetch('api/transport_sync.php');
         const data = await odpoved.json();
         if (data.status === 'success') {
-            if (data.stavy) stavy = data.stavy;
-            if (data.transporty) transporty = data.transporty;
+            // Pouze přepsat pokud server má skutečná data (ne prázdný objekt)
+            if (data.stavy && Object.keys(data.stavy).length > 0) {
+                // Sloučit server stavy s lokálními - server má přednost
+                stavy = { ...stavy, ...data.stavy };
+            }
+            if (data.transporty && (data.transporty.sobota || data.transporty.nedele)) {
+                transporty = data.transporty;
+            }
             vykresli();
         }
     } catch (e) {
@@ -729,6 +836,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         zavriModal();
         zavriModalSmazat();
+        zavriModalReset();
     }
 });
 
