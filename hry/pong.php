@@ -40,7 +40,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/wgs-base.min.css">
+    
     <style>
         :root {
             --pong-bg: #0a0a0a;
@@ -535,5 +535,7 @@ try {
         gameLoop();
     })();
     </script>
+
+<?php include __DIR__ . '/../includes/hry-sidebar.php'; ?>
 </body>
 </html>

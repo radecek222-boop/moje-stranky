@@ -40,13 +40,13 @@ try {
     $stmtOnline = $pdo->query("SELECT user_id, username, aktualni_hra FROM wgs_hry_online ORDER BY posledni_aktivita DESC");
     $onlineHraci = $stmtOnline->fetchAll(PDO::FETCH_ASSOC);
 
-    // Načíst posledních 20 chat zpráv (globální chat)
+    // Načíst posledních 10 chat zpráv (globální chat)
     $stmtChat = $pdo->query("
-        SELECT username, zprava, cas
+        SELECT id, username, zprava, cas
         FROM wgs_hry_chat
         WHERE mistnost_id IS NULL
         ORDER BY cas DESC
-        LIMIT 20
+        LIMIT 10
     ");
     $chatZpravy = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
@@ -89,6 +89,22 @@ $dostupneHry = [
         'hracu' => '1',
         'ikona' => '✕○',
         'hotovo' => true
+    ],
+    [
+        'id' => 'dama',
+        'nazev' => 'Dáma',
+        'popis' => 'Klasická desková hra. Seber všechny soupeřovy kameny!',
+        'hracu' => '1-2',
+        'ikona' => '◉○',
+        'hotovo' => true
+    ],
+    [
+        'id' => 'breakout',
+        'nazev' => 'Breakout',
+        'popis' => 'Arkádová hra. Rozbi všechny cihly míčkem!',
+        'hracu' => '1',
+        'ikona' => '▬ ●',
+        'hotovo' => true
     ]
 ];
 ?>
@@ -101,7 +117,6 @@ $dostupneHry = [
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/wgs-base.min.css">
     <style>
         :root {
             --hry-bg: #0a0a0a;
@@ -400,18 +415,6 @@ $dostupneHry = [
     <?php include __DIR__ . '/includes/hamburger-menu.php'; ?>
 
     <main id="main-content" class="hry-container">
-        <div class="hry-header">
-            <h1>HERNÍ ZÓNA</h1>
-            <p>
-                Proč se chvilku neodreagovat, ne?
-                <svg class="smajlik" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 8px;">
-                    <circle cx="12" cy="12" r="10" stroke="#0099ff" stroke-width="2" fill="none"/>
-                    <circle cx="8" cy="10" r="1.5" fill="#0099ff"/>
-                    <circle cx="16" cy="10" r="1.5" fill="#0099ff"/>
-                    <path d="M8 15c1.5 2 6.5 2 8 0" stroke="#0099ff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </p>
-        </div>
 
         <div class="hry-layout">
             <!-- Hlavní obsah - karty her -->
@@ -504,6 +507,7 @@ $dostupneHry = [
 
         // Sledovat poslední ID zprávy pro polling
         let posledniChatId = 0;
+        const zobrazeneZpravyIds = new Set(); // Sledování již zobrazených zpráv
 
         // Scroll chat dolů
         function scrollChatDolu() {
@@ -550,20 +554,43 @@ $dostupneHry = [
 
         // Přidat zprávu do UI
         function pridatZpravu(data) {
+            if (!data || !data.username || !data.zprava) {
+                return; // Neplatná data
+            }
+
+            // Kontrola duplicity - pokud už zprávu máme, přeskočit
+            const zpravaId = parseInt(data.id) || 0;
+            if (zpravaId > 0 && zobrazeneZpravyIds.has(zpravaId)) {
+                return; // Zpráva už existuje, nepřidávat
+            }
+
             const div = document.createElement('div');
             div.className = 'chat-zprava';
+            div.setAttribute('data-id', zpravaId);
             div.innerHTML = `
                 <span class="chat-autor">${escapeHtml(data.username)}</span>
-                <span class="chat-cas">${data.cas}</span>
+                <span class="chat-cas">${data.cas || ''}</span>
                 <div class="chat-text">${escapeHtml(data.zprava)}</div>
             `;
             chatMessages.appendChild(div);
-            scrollChatDolu();
 
-            // Aktualizovat poslední ID pro polling
-            if (data.id) {
-                posledniChatId = Math.max(posledniChatId, data.id);
+            // Zapamatovat si ID
+            if (zpravaId > 0) {
+                zobrazeneZpravyIds.add(zpravaId);
+                posledniChatId = Math.max(posledniChatId, zpravaId);
             }
+
+            // Odstranit staré zprávy (max 10)
+            while (chatMessages.children.length > 10) {
+                const stara = chatMessages.firstChild;
+                const stareId = parseInt(stara.getAttribute('data-id')) || 0;
+                if (stareId > 0) {
+                    zobrazeneZpravyIds.delete(stareId);
+                }
+                chatMessages.removeChild(stara);
+            }
+
+            scrollChatDolu();
         }
 
         // Escape HTML
