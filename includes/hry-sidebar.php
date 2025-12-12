@@ -34,12 +34,20 @@ if (!isset($chatZpravy)) {
 $currentUserId = $_SESSION['user_id'] ?? '';
 ?>
 
+<!-- Zvuky script -->
+<script src="/assets/js/hry-zvuky.js"></script>
+
 <!-- Herní sidebar - online hráči a chat -->
 <aside class="hry-sidebar-panel" id="hrySidebar">
-    <button class="sidebar-toggle" id="sidebarToggle" title="Chat a online hráči">
-        <span class="toggle-icon">&#9776;</span>
-        <span class="toggle-badge" id="toggleBadge"><?php echo count($onlineHraci); ?></span>
-    </button>
+    <div class="sidebar-toggles">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Chat a online hráči">
+            <span class="toggle-icon">&#9776;</span>
+            <span class="toggle-badge" id="toggleBadge"><?php echo count($onlineHraci); ?></span>
+        </button>
+        <button class="sound-toggle" id="soundToggle" title="Zvuky">
+            <span class="sound-icon" id="soundIcon">&#128266;</span>
+        </button>
+    </div>
 
     <div class="sidebar-content" id="sidebarContent">
         <!-- Online hráči -->
@@ -98,7 +106,14 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     align-items: center;
 }
 
-.sidebar-toggle {
+.sidebar-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sidebar-toggle,
+.sound-toggle {
     background: rgba(0,0,0,0.9);
     border: 1px solid #333;
     border-right: none;
@@ -109,6 +124,13 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.sidebar-toggle:hover,
+.sound-toggle:hover {
+    background: rgba(0,153,255,0.2);
+    border-color: #0099ff;
 }
 
 .toggle-icon {
@@ -125,6 +147,16 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     border-radius: 10px;
     min-width: 18px;
     text-align: center;
+}
+
+.sound-icon {
+    color: #0099ff;
+    font-size: 1.2rem;
+}
+
+.sound-toggle.muted .sound-icon {
+    color: #666;
+    opacity: 0.5;
 }
 
 .sidebar-content {
@@ -296,9 +328,35 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     const pocetEl = document.getElementById('sidebarPocet');
     const badgeEl = document.getElementById('toggleBadge');
     const onlineList = document.getElementById('sidebarOnlineList');
+    const soundToggle = document.getElementById('soundToggle');
+    const soundIcon = document.getElementById('soundIcon');
 
     let posledniChatId = 0;
     let sidebarOpen = false;
+
+    // Nastavit stav ikony zvuku podle uloženého nastavení
+    function aktualizovatIkonuZvuku() {
+        if (window.HryZvuky && !window.HryZvuky.jeZapnuto()) {
+            soundToggle.classList.add('muted');
+            soundIcon.innerHTML = '&#128263;'; // Ztlumený reproduktor
+            soundToggle.title = 'Zvuky vypnuty';
+        } else {
+            soundToggle.classList.remove('muted');
+            soundIcon.innerHTML = '&#128266;'; // Reproduktor se zvukem
+            soundToggle.title = 'Zvuky zapnuty';
+        }
+    }
+
+    // Zvuk toggle
+    soundToggle.addEventListener('click', () => {
+        if (window.HryZvuky) {
+            window.HryZvuky.prepnout();
+            aktualizovatIkonuZvuku();
+        }
+    });
+
+    // Inicializovat stav ikony
+    setTimeout(aktualizovatIkonuZvuku, 100);
 
     // Toggle sidebar
     toggle.addEventListener('click', () => {
@@ -306,6 +364,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
         content.classList.toggle('open', sidebarOpen);
         if (sidebarOpen) {
             scrollChatDolu();
+            if (window.HryZvuky) window.HryZvuky.prehrat('klik');
         }
     });
 
@@ -353,7 +412,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
         chatInput.focus();
     }
 
-    function pridatZpravu(data) {
+    function pridatZpravu(data, prehratZvuk = true) {
         if (!data || !data.username || !data.zprava) return;
 
         const div = document.createElement('div');
@@ -373,6 +432,11 @@ $currentUserId = $_SESSION['user_id'] ?? '';
 
         if (data.id) {
             posledniChatId = Math.max(posledniChatId, parseInt(data.id) || 0);
+        }
+
+        // Přehrát zvuk pro novou zprávu
+        if (prehratZvuk && window.HryZvuky) {
+            window.HryZvuky.prehrat('chat');
         }
     }
 

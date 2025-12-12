@@ -421,6 +421,11 @@ try {
                             ball.dy = -ball.dy;
                             brick.status--;
 
+                            // Zvuk zničení cihly
+                            if (window.HryZvuky) {
+                                window.HryZvuky.prehrat(brick.status === 0 ? 'exploze' : 'bod');
+                            }
+
                             if (brick.status === 0) {
                                 score += 10 * level;
                             } else {
@@ -461,6 +466,9 @@ try {
             initBricks();
             resetBall();
             updateUI();
+
+            // Zvuk level up
+            if (window.HryZvuky) window.HryZvuky.prehrat('levelUp');
 
             // Zobrazit level info
             showLevelInfo();
@@ -576,6 +584,9 @@ try {
                 ball.x > paddle.x &&
                 ball.x < paddle.x + paddle.width) {
 
+                // Zvuk odrazu
+                if (window.HryZvuky) window.HryZvuky.prehrat('odraz');
+
                 // Změna úhlu podle místa dopadu
                 const hitPoint = (ball.x - paddle.x) / paddle.width;
                 const angle = (hitPoint - 0.5) * Math.PI * 0.7;
@@ -591,6 +602,9 @@ try {
             if (ball.y - ball.radius > canvas.height) {
                 lives--;
                 updateUI();
+
+                // Zvuk ztráty života
+                if (window.HryZvuky) window.HryZvuky.prehrat('ztrataZivota');
 
                 if (lives <= 0) {
                     gameOver(false);

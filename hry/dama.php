@@ -758,11 +758,19 @@ try {
                     capturedBlack.push(captured);
                 }
                 board[move.captured.row][move.captured.col] = null;
+
+                // Zvuk sebrání
+                if (window.HryZvuky) window.HryZvuky.prehrat('sebrani');
+            } else {
+                // Zvuk pohybu
+                if (window.HryZvuky) window.HryZvuky.prehrat('pohyb');
             }
 
             // Povýšení na dámu
             if ((piece.color === 'white' && toRow === 0) || (piece.color === 'black' && toRow === 7)) {
                 piece.king = true;
+                // Zvuk povýšení
+                if (window.HryZvuky) window.HryZvuky.prehrat('levelUp');
             }
 
             selectedPiece = null;
@@ -947,11 +955,14 @@ try {
             if (gameMode === 'ai') {
                 if (winner === 'white') {
                     vysledekText.innerHTML = '<span class="vitez">Vyhrál jsi!</span>';
+                    if (window.HryZvuky) window.HryZvuky.prehrat('vyhra');
                 } else {
                     vysledekText.innerHTML = '<span class="prohra">Prohrál jsi</span>';
+                    if (window.HryZvuky) window.HryZvuky.prehrat('prohra');
                 }
             } else {
                 vysledekText.innerHTML = `<span class="vitez">Vyhrál ${winner === 'white' ? 'Bílý' : 'Černý'}!</span>`;
+                if (window.HryZvuky) window.HryZvuky.prehrat('vyhra');
             }
 
             vysledekOverlay.classList.add('show');

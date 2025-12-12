@@ -798,8 +798,12 @@ try {
             if (!muzuZahrat(karta)) {
                 element.classList.add('nelze');
                 setTimeout(() => element.classList.remove('nelze'), 300);
+                if (window.HryZvuky) window.HryZvuky.prehrat('chyba');
                 return;
             }
+
+            // Zvuk položení karty
+            if (window.HryZvuky) window.HryZvuky.prehrat('karta');
 
             // Odebrat z ruky
             hra.mojeKarty = hra.mojeKarty.filter(k =>
@@ -847,6 +851,9 @@ try {
         // Táhnout z balíčku (když nemám co hrát)
         function tahniZBalicku() {
             if (hra.naTahu !== 1 || hra.konec) return;
+
+            // Zvuk tažení
+            if (window.HryZvuky) window.HryZvuky.prehrat('tah');
 
             const pocet = hra.kartyKTazeni > 0 ? hra.kartyKTazeni : 1;
             hra.kartyKTazeni = 0;
@@ -903,6 +910,9 @@ try {
             }
 
             if (hratelna && hra.kartyKTazeni === 0) {
+                // Zvuk položení karty protihráčem
+                if (window.HryZvuky) window.HryZvuky.prehrat('karta');
+
                 // Zahrát kartu
                 hra.protihrKarty = hra.protihrKarty.filter(k =>
                     !(k.barva === hratelna.barva && k.hodnota === hratelna.hodnota)
@@ -1007,6 +1017,11 @@ try {
             vysledekText.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI';
             vysledekText.className = 'vysledek-text ' + (vyhral ? 'vyhra' : 'prohra');
             vysledekOverlay.classList.add('active');
+
+            // Zvuk výhry nebo prohry
+            if (window.HryZvuky) {
+                window.HryZvuky.prehrat(vyhral ? 'vyhra' : 'prohra');
+            }
         }
 
         // Vykreslit vše
