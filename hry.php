@@ -573,7 +573,7 @@ $dostupneHry = [
             }
         });
 
-        // Periodicky aktualizovat online hráče a chat (každých 10s)
+        // Periodicky aktualizovat online hráče a chat (každých 5s)
         setInterval(async () => {
             try {
                 const response = await fetch('/api/hry_api.php?action=stav');
@@ -591,7 +591,7 @@ $dostupneHry = [
             } catch (error) {
                 console.error('Polling error:', error);
             }
-        }, 10000);
+        }, 5000);
 
         // Aktualizovat seznam online hráčů
         function aktualizovatOnline(hraci) {
