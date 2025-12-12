@@ -1168,7 +1168,7 @@ if ($reklamaceId > 0) {
             // === DOPRAVA ===
             if (data.dopravne > 0) {
                 polozky.push({
-                    nazev: `Dopravné (${data.vzdalenost} km × 2 cesty × 1 EUR/km)`,
+                    nazev: `Dopravné (${data.vzdalenost} km × 2 cesty × 0.28 EUR/km)`,
                     cena: data.dopravne,
                     pocet: 1,
                     skupina: 'doprava'
@@ -1260,10 +1260,9 @@ if ($reklamaceId > 0) {
                     if (data.sedaky > 0) {
                         const cenaZaSedaky = vypoctiCenuZaDily(data.sedaky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Sedáky`,
+                            nazev: `Sedáky (${data.sedaky} ks)`,
                             cena: cenaZaSedaky,
-                            pocet: data.sedaky,
-                            jednotkovaCena: (cenaZaSedaky / data.sedaky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.sedaky;
@@ -1272,10 +1271,9 @@ if ($reklamaceId > 0) {
                     if (data.operky > 0) {
                         const cenaZaOperky = vypoctiCenuZaDily(data.operky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Opěrky`,
+                            nazev: `Opěrky (${data.operky} ks)`,
                             cena: cenaZaOperky,
-                            pocet: data.operky,
-                            jednotkovaCena: (cenaZaOperky / data.operky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.operky;
@@ -1284,10 +1282,9 @@ if ($reklamaceId > 0) {
                     if (data.podrucky > 0) {
                         const cenaZaPodrucky = vypoctiCenuZaDily(data.podrucky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Područky`,
+                            nazev: `Područky (${data.podrucky} ks)`,
                             cena: cenaZaPodrucky,
-                            pocet: data.podrucky,
-                            jednotkovaCena: (cenaZaPodrucky / data.podrucky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.podrucky;
@@ -1296,10 +1293,9 @@ if ($reklamaceId > 0) {
                     if (data.panely > 0) {
                         const cenaZaPanely = vypoctiCenuZaDily(data.panely, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Panely`,
+                            nazev: `Panely (${data.panely} ks)`,
                             cena: cenaZaPanely,
-                            pocet: data.panely,
-                            jednotkovaCena: (cenaZaPanely / data.panely).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.panely;
@@ -1320,18 +1316,18 @@ if ($reklamaceId > 0) {
 
                 if (data.relax > 0) {
                     polozky.push({
-                        nazev: 'Relax mechanismus',
-                        cena: CENY.mechanismusPriplatek,
-                        pocet: data.relax,
+                        nazev: `Relax mechanismus (${data.relax} ks × ${CENY.mechanismusPriplatek} EUR)`,
+                        cena: CENY.mechanismusPriplatek * data.relax,
+                        pocet: 1,
                         skupina: 'mechanika'
                     });
                 }
 
                 if (data.vysuv > 0) {
                     polozky.push({
-                        nazev: 'Elektrický díl',
-                        cena: CENY.mechanismusPriplatek,
-                        pocet: data.vysuv,
+                        nazev: `Elektrický díl (${data.vysuv} ks × ${CENY.mechanismusPriplatek} EUR)`,
+                        cena: CENY.mechanismusPriplatek * data.vysuv,
+                        pocet: 1,
                         skupina: 'mechanika'
                     });
                 }
@@ -1420,10 +1416,7 @@ if ($reklamaceId > 0) {
                     skupina.polozky.forEach(p => {
                         const cenaCelkem = p.cena * (p.pocet || 1);
                         html += `<div class="kalkulace-polozka">
-                            <span class="kalkulace-polozka-nazev">
-                                ${p.nazev}
-                                ${p.pocet > 1 ? `<span class="kalkulace-pocet">${p.pocet} ks</span>` : ''}
-                            </span>
+                            <span class="kalkulace-polozka-nazev">${p.nazev}</span>
                             <span class="kalkulace-polozka-cena">${cenaCelkem.toFixed(2)} EUR</span>
                         </div>`;
                     });
