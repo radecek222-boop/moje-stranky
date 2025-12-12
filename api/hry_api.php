@@ -10,11 +10,8 @@
  *
  * Použitelné pro všechny hry (Prší, Mariáš, Piškvorky...)
  */
-require_once __DIR__ . '/../init.php';
-require_once __DIR__ . '/../includes/csrf_helper.php';
-require_once __DIR__ . '/../includes/api_response.php';
 
-// CORS hlavicky pro herni zonu
+// CORS hlavicky MUSI byt nastaveny PRED vsim ostatnim
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: https://www.wgs-service.cz');
 header('Access-Control-Allow-Credentials: true');
@@ -26,6 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
+
+require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/api_response.php';
 
 // Kontrola přihlášení
 if (!isset($_SESSION['user_id'])) {
