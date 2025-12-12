@@ -486,7 +486,7 @@
         <input type="text" class="modal-input" id="input-jmeno" placeholder="Jmeno pasazera">
         <input type="text" class="modal-input" id="input-odkud" placeholder="Odkud">
         <input type="text" class="modal-input" id="input-kam" placeholder="Kam">
-        <input type="password" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni">
+        <input type="tel" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModal()">Zrusit</button>
@@ -500,7 +500,7 @@
     <div class="modal-obsah">
         <div class="modal-titulek">Smazat transport?</div>
         <p style="color: #888; margin-bottom: 15px;" id="smazat-info"></p>
-        <input type="password" class="modal-input" id="input-heslo-smazat" placeholder="Heslo pro potvrzeni">
+        <input type="tel" class="modal-input" id="input-heslo-smazat" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba-smazat">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalSmazat()">Zrusit</button>
@@ -514,7 +514,7 @@
     <div class="modal-obsah">
         <div class="modal-titulek">Resetovat stav na WAIT?</div>
         <p style="color: #888; margin-bottom: 15px;" id="reset-info"></p>
-        <input type="password" class="modal-input" id="input-heslo-reset" placeholder="Heslo pro potvrzeni">
+        <input type="tel" class="modal-input" id="input-heslo-reset" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba-reset">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalReset()">Zrusit</button>
