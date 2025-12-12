@@ -62,13 +62,15 @@ try {
     <link rel="stylesheet" href="/assets/css/wgs-base.min.css">
     <style>
         :root {
-            --prsi-bg: #0a0a0a;
-            --prsi-table: #1a1a1a;
-            --prsi-border: #333;
+            --prsi-bg: #000;
+            --prsi-table: #fff;
+            --prsi-border: #ccc;
             --prsi-card-bg: #fff;
-            --prsi-card-border: #ccc;
+            --prsi-card-border: #999;
             --prsi-red: #c41e3a;
             --prsi-black: #1a1a1a;
+            --prsi-green: #228B22;
+            --prsi-gold: #DAA520;
             --prsi-accent: #0099ff;
         }
 
@@ -88,13 +90,13 @@ try {
         /* Herní stůl */
         .herni-stul {
             background: var(--prsi-table);
-            border: 2px solid var(--prsi-border);
+            border: 3px solid var(--prsi-border);
             border-radius: 20px;
             min-height: 70vh;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(255,255,255,0.1);
         }
 
         /* Protihráč (nahoře) */
@@ -147,9 +149,10 @@ try {
             bottom: -25px;
             left: 50%;
             transform: translateX(-50%);
-            color: #fff;
+            color: #333;
             font-size: 0.8rem;
             white-space: nowrap;
+            font-weight: 500;
         }
 
         /* Odkládací balíček */
@@ -162,8 +165,9 @@ try {
             bottom: -25px;
             left: 50%;
             transform: translateX(-50%);
-            color: #fff;
+            color: #333;
             font-size: 0.8rem;
+            font-weight: 500;
         }
 
         /* Karta */
@@ -189,12 +193,20 @@ try {
             box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
         }
 
-        .karta.cervena {
+        .karta.srdce {
             color: var(--prsi-red);
         }
 
-        .karta.cerna {
-            color: var(--prsi-black);
+        .karta.kule {
+            color: var(--prsi-gold);
+        }
+
+        .karta.zaludy {
+            color: var(--prsi-green);
+        }
+
+        .karta.listy {
+            color: var(--prsi-green);
         }
 
         .karta.vybrana {
@@ -243,11 +255,12 @@ try {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             padding: 1rem;
             border-radius: 10px;
             color: #fff;
             min-width: 150px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .info-radek {
@@ -279,14 +292,15 @@ try {
         }
 
         .akce-btn {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             color: #fff;
-            border: 1px solid #fff;
+            border: 1px solid #333;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .akce-btn:hover {
@@ -351,9 +365,9 @@ try {
         }
 
         .volba-barvy-btn.srdce { background: #ffdddd; color: var(--prsi-red); }
-        .volba-barvy-btn.kary { background: #ffdddd; color: var(--prsi-red); }
-        .volba-barvy-btn.piky { background: #dddddd; color: var(--prsi-black); }
-        .volba-barvy-btn.kriz { background: #dddddd; color: var(--prsi-black); }
+        .volba-barvy-btn.kule { background: #fff3cd; color: var(--prsi-gold); }
+        .volba-barvy-btn.zaludy { background: #d4edda; color: var(--prsi-green); }
+        .volba-barvy-btn.listy { background: #d4edda; color: var(--prsi-green); }
 
         /* Zprávy */
         .zprava {
@@ -560,10 +574,10 @@ try {
         <div class="volba-barvy-modal">
             <h3>Vyber novou barvu:</h3>
             <div class="volba-barvy-btns">
-                <button class="volba-barvy-btn srdce" data-barva="srdce">♥</button>
-                <button class="volba-barvy-btn kary" data-barva="kary">♦</button>
-                <button class="volba-barvy-btn piky" data-barva="piky">♠</button>
-                <button class="volba-barvy-btn kriz" data-barva="kriz">♣</button>
+                <button class="volba-barvy-btn srdce" data-barva="srdce" title="Srdce">&#9829;</button>
+                <button class="volba-barvy-btn kule" data-barva="kule" title="Kule">&#9679;</button>
+                <button class="volba-barvy-btn zaludy" data-barva="zaludy" title="Žaludy">&#9827;</button>
+                <button class="volba-barvy-btn listy" data-barva="listy" title="Listy">&#9824;</button>
             </div>
         </div>
     </div>
@@ -583,16 +597,27 @@ try {
     (function() {
         'use strict';
 
-        // Konstanty
-        const BARVY = ['srdce', 'kary', 'piky', 'kriz'];
-        const HODNOTY = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        // Konstanty - Mariášové karty (české/německé)
+        const BARVY = ['srdce', 'kule', 'zaludy', 'listy'];
+        const HODNOTY = ['7', '8', '9', '10', 'S', 'V', 'K', 'A']; // Spodek, Svršek, Král, Eso
+        const HODNOTY_NAZVY = {
+            '7': '7', '8': '8', '9': '9', '10': '10',
+            'S': 'Spodek', 'V': 'Svršek', 'K': 'Král', 'A': 'Eso'
+        };
         const SYMBOLY = {
             srdce: '♥',
-            kary: '♦',
-            piky: '♠',
-            kriz: '♣'
+            kule: '●',
+            zaludy: '♣',
+            listy: '♠'
         };
-        const CERVENE = ['srdce', 'kary'];
+        const BARVY_NAZVY = {
+            srdce: 'Srdce',
+            kule: 'Kule',
+            zaludy: 'Žaludy',
+            listy: 'Listy'
+        };
+        // Srdce = červené, ostatní = černé/zelené/zlaté
+        const CERVENE = ['srdce'];
 
         // Herní stav
         let hra = {
@@ -661,7 +686,7 @@ try {
         // Vykreslit kartu
         function vykresliKartu(karta, jeKlikatelna = true) {
             const div = document.createElement('div');
-            div.className = 'karta ' + (CERVENE.includes(karta.barva) ? 'cervena' : 'cerna');
+            div.className = 'karta ' + karta.barva;
             div.dataset.barva = karta.barva;
             div.dataset.hodnota = karta.hodnota;
 
@@ -692,17 +717,17 @@ try {
             if (hra.kartyKTazeni > 0) {
                 // Můžu přihodit sedmičku
                 if (karta.hodnota === '7') return true;
-                // Nebo krále pikového
-                if (karta.hodnota === 'K' && karta.barva === 'piky') return true;
+                // Nebo krále zeleného (listy)
+                if (karta.hodnota === 'K' && karta.barva === 'listy') return true;
                 return false;
             }
 
-            // Svršek (Q) může vždy
-            if (karta.hodnota === 'Q') return true;
+            // Svršek (V) může vždy - mění barvu
+            if (karta.hodnota === 'V') return true;
 
             // Pokud je změněná barva
             if (hra.aktivniBarva) {
-                return karta.barva === hra.aktivniBarva || karta.hodnota === 'Q';
+                return karta.barva === hra.aktivniBarva || karta.hodnota === 'V';
             }
 
             // Stejná barva nebo hodnota
@@ -729,14 +754,14 @@ try {
             // Efekty speciálních karet
             if (karta.hodnota === '7') {
                 hra.kartyKTazeni += 2;
-            } else if (karta.hodnota === 'K' && karta.barva === 'piky') {
+            } else if (karta.hodnota === 'K' && karta.barva === 'listy') {
                 hra.kartyKTazeni += 4;
             } else {
                 hra.kartyKTazeni = 0;
             }
 
-            // Svršek - volba barvy
-            if (karta.hodnota === 'Q') {
+            // Svršek (V) - volba barvy
+            if (karta.hodnota === 'V') {
                 volbaBarvy.classList.add('active');
                 // Po volbě barvy pokračuje tahProtihr()
                 return;
@@ -789,17 +814,17 @@ try {
             // Najít hratelnou kartu
             let hratelna = null;
 
-            // Priorita: pokud musí brát, zkus sedmičku nebo krále pikového
+            // Priorita: pokud musí brát, zkus sedmičku nebo krále zeleného (listy)
             if (hra.kartyKTazeni > 0) {
                 hratelna = hra.protihrKarty.find(k =>
-                    k.hodnota === '7' || (k.hodnota === 'K' && k.barva === 'piky')
+                    k.hodnota === '7' || (k.hodnota === 'K' && k.barva === 'listy')
                 );
             }
 
             // Jinak hledej normální kartu
             if (!hratelna) {
                 for (const karta of hra.protihrKarty) {
-                    if (karta.hodnota === 'Q') {
+                    if (karta.hodnota === 'V') {
                         hratelna = karta;
                         break;
                     }
@@ -829,14 +854,14 @@ try {
                 // Efekty
                 if (hratelna.hodnota === '7') {
                     hra.kartyKTazeni += 2;
-                } else if (hratelna.hodnota === 'K' && hratelna.barva === 'piky') {
+                } else if (hratelna.hodnota === 'K' && hratelna.barva === 'listy') {
                     hra.kartyKTazeni += 4;
                 } else {
                     hra.kartyKTazeni = 0;
                 }
 
-                // Svršek - AI vybere nejčastější barvu
-                if (hratelna.hodnota === 'Q') {
+                // Svršek (V) - AI vybere nejčastější barvu
+                if (hratelna.hodnota === 'V') {
                     const poctyBarev = {};
                     for (const k of hra.protihrKarty) {
                         poctyBarev[k.barva] = (poctyBarev[k.barva] || 0) + 1;
@@ -1005,7 +1030,7 @@ try {
             let prvni;
             do {
                 prvni = tahniKartu();
-            } while (['7', 'Q', 'A'].includes(prvni.hodnota) || (prvni.hodnota === 'K' && prvni.barva === 'piky'));
+            } while (['7', 'V', 'A'].includes(prvni.hodnota) || (prvni.hodnota === 'K' && prvni.barva === 'listy'));
             hra.odkladaci.push(prvni);
 
             vysledekOverlay.classList.remove('active');
