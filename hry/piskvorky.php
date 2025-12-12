@@ -721,7 +721,7 @@ try {
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    mistnostId = result.data.mistnost_id;
+                    mistnostId = result.mistnost_id;
                     spustitPolling();
                 } else {
                     alert('Chyba: ' + result.message);
@@ -857,15 +857,15 @@ try {
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    aktualizujBoard(result.data.plocha);
-                    aktualizujHrace(result.data.hraci, result.data.na_tahu);
+                    aktualizujBoard(result.plocha);
+                    aktualizujHrace(result.hraci, result.na_tahu);
 
-                    if (result.data.vitez) {
+                    if (result.vitez) {
                         hraSkoncila = true;
                         zastavitPolling();
                         novaHraBtn.style.display = 'inline-block';
 
-                        if (result.data.vitez === mujSymbol) {
+                        if (result.vitez === mujSymbol) {
                             statusEl.textContent = 'Vyhrál jsi!';
                             statusEl.className = 'pisk-status vyhral';
                         }

@@ -826,7 +826,7 @@ try {
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    mistnostId = result.data.mistnost_id;
+                    mistnostId = result.mistnost_id;
                     spustitPolling();
                 } else {
                     alert('Chyba: ' + result.message);
@@ -1040,10 +1040,10 @@ try {
 
                 if (result.status === 'success') {
                     const cell = souperBoard.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-                    if (result.data.zasah) {
+                    if (result.zasah) {
                         cell.classList.add('hit');
                         cell.textContent = 'X';
-                        statusEl.textContent = result.data.potopena ? `Potopil jsi ${result.data.potopena}!` : 'Zásah! Střílej znovu.';
+                        statusEl.textContent = result.potopena ? `Potopil jsi ${result.potopena}!` : 'Zásah! Střílej znovu.';
                         jsemNaTahu = true;
                         souperBoard.classList.add('aktivni');
                     } else {
@@ -1054,11 +1054,11 @@ try {
 
                     mojeZasahy.push(zasahKlic);
 
-                    if (result.data.vitez) {
+                    if (result.vitez) {
                         faze = 'konec';
                         zastavitPolling();
                         novaHraBtn.style.display = 'inline-block';
-                        const vyhral = (jsemHrac1 && result.data.vitez === 1) || (!jsemHrac1 && result.data.vitez === 2);
+                        const vyhral = (jsemHrac1 && result.vitez === 1) || (!jsemHrac1 && result.vitez === 2);
                         statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
                         statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
                     }
