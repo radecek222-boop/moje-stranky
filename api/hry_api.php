@@ -59,13 +59,13 @@ try {
                 ];
             }
 
-            // Globální chat (posledních 20)
+            // Globální chat (posledních 10)
             $stmtChat = $pdo->query("
                 SELECT id, username, zprava, DATE_FORMAT(cas, '%H:%i') as cas
                 FROM wgs_hry_chat
                 WHERE mistnost_id IS NULL
                 ORDER BY id DESC
-                LIMIT 20
+                LIMIT 10
             ");
             $chat = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
@@ -81,7 +81,7 @@ try {
                 FROM wgs_hry_chat
                 WHERE mistnost_id IS NULL AND id > :posledni_id
                 ORDER BY id ASC
-                LIMIT 50
+                LIMIT 10
             ");
             $stmt->execute(['posledni_id' => $posledniId]);
             $chat = $stmt->fetchAll(PDO::FETCH_ASSOC);

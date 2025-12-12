@@ -40,13 +40,13 @@ try {
     $stmtOnline = $pdo->query("SELECT user_id, username, aktualni_hra FROM wgs_hry_online ORDER BY posledni_aktivita DESC");
     $onlineHraci = $stmtOnline->fetchAll(PDO::FETCH_ASSOC);
 
-    // Načíst posledních 20 chat zpráv (globální chat)
+    // Načíst posledních 10 chat zpráv (globální chat)
     $stmtChat = $pdo->query("
-        SELECT username, zprava, cas
+        SELECT id, username, zprava, cas
         FROM wgs_hry_chat
         WHERE mistnost_id IS NULL
         ORDER BY cas DESC
-        LIMIT 20
+        LIMIT 10
     ");
     $chatZpravy = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
@@ -561,6 +561,12 @@ $dostupneHry = [
                 <div class="chat-text">${escapeHtml(data.zprava)}</div>
             `;
             chatMessages.appendChild(div);
+
+            // Omezit na max 10 zpráv
+            while (chatMessages.children.length > 10) {
+                chatMessages.removeChild(chatMessages.firstChild);
+            }
+
             scrollChatDolu();
 
             // Aktualizovat poslední ID pro polling
