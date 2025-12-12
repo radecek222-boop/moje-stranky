@@ -871,5 +871,13 @@ nactiData();
 setInterval(nactiData, 3000);
 </script>
 
+<!-- Footer -->
+<footer style="text-align: center; padding: 30px 15px; margin-top: 40px; border-top: 1px solid #222; color: #555; font-size: 11px; line-height: 1.6;">
+    Aplikaci vytvořil a transport servis zajišťuje<br>
+    <strong style="color: #888;">Radek Zikmund</strong>
+    <a href="tel:+420725965826" style="color: #888; text-decoration: none;">+420 725 965 826</a><br>
+    <span style="color: #666; letter-spacing: 1px;">WHITE GLOVE SERVICE</span>
+</footer>
+
 </body>
 </html>
