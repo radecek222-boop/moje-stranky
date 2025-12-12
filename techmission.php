@@ -70,7 +70,7 @@
             color: #fff;
             padding: 6px 8px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 300;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -96,7 +96,7 @@
         .lang-option {
             padding: 10px 14px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 300;
             cursor: pointer;
             transition: background 0.2s;
             white-space: nowrap;
