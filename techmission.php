@@ -1040,13 +1040,10 @@ async function zmenStav(id) {
         stavy[id] = { stav: 'onway', cas: cas };
         vykresli();
         await ulozData();
-        // Po uložení načíst data ze serveru pro potvrzení
-        setTimeout(() => nactiData(), 500);
     } else if (aktualniStav === 'onway') {
         stavy[id] = { stav: 'drop', casDrop: cas, cas: stavy[id].cas };
         vykresli();
         await ulozData();
-        setTimeout(() => nactiData(), 500);
     } else if (aktualniStav === 'drop') {
         // DROP OFF - otevřít modal pro reset
         otevriModalReset(id);
@@ -1094,21 +1091,28 @@ function zavriModalReset() {
 
 // Flag pro zamezení přepsání během ukládání
 let ukladaSe = false;
+let posledniUlozeni = 0;
 
 // Uložit data na server
 async function ulozData() {
     ukladaSe = true;
+    posledniUlozeni = Date.now();
     try {
         const formData = new FormData();
         formData.append('stavy', JSON.stringify(stavy));
         formData.append('transporty', JSON.stringify(transporty));
-        await fetch('api/transport_sync.php', {
+        const odpoved = await fetch('api/transport_sync.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            cache: 'no-store'
         });
+        const vysledek = await odpoved.json();
+        console.log('Ulozeno:', vysledek);
     } catch (e) {
-        console.log('Chyba pri ukladani');
+        console.log('Chyba pri ukladani:', e);
     }
+    // Počkat ještě 500ms před povolením načítání
+    await new Promise(r => setTimeout(r, 500));
     ukladaSe = false;
 }
 
@@ -1117,13 +1121,25 @@ let prvniNacteni = true;
 
 // Načíst data ze serveru
 async function nactiData() {
-    // Nepřepisovat lokální data pokud právě ukládáme
-    if (ukladaSe) return;
+    // Nepřepisovat lokální data pokud právě ukládáme nebo krátce po uložení
+    if (ukladaSe) {
+        console.log('Preskakuji nacitani - probiha ukladani');
+        return;
+    }
+
+    // Cooldown 2 sekundy po uložení
+    if (Date.now() - posledniUlozeni < 2000) {
+        console.log('Preskakuji nacitani - cooldown po ulozeni');
+        return;
+    }
 
     try {
         // Cache-busting - přidat timestamp k URL
         const odpoved = await fetch('api/transport_sync.php?t=' + Date.now(), {
-            cache: 'no-store'
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
         });
         const data = await odpoved.json();
         if (data.status === 'success') {
@@ -1143,7 +1159,7 @@ async function nactiData() {
             vykresli();
         }
     } catch (e) {
-        console.log('Chyba pri nacitani');
+        console.log('Chyba pri nacitani:', e);
         vykresli();
     }
 }
