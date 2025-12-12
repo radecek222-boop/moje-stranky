@@ -135,19 +135,33 @@ try {
 
         // ===== MÍSTNOSTI - seznam volných místností =====
         case 'mistnosti':
-            $hra = $_GET['hra'] ?? 'prsi';
+            $hra = $_GET['hra'] ?? '';
 
-            $stmt = $pdo->prepare("
-                SELECT m.id, m.nazev, m.stav, m.max_hracu,
-                       (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
-                       u.username as vytvoril
-                FROM wgs_hry_mistnosti m
-                LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
-                WHERE m.hra = :hra AND m.stav IN ('ceka', 'hra')
-                ORDER BY m.vytvoreno DESC
-                LIMIT 20
-            ");
-            $stmt->execute(['hra' => $hra]);
+            // Pokud hra neni zadana, vrati vsechny cekajici mistnosti (pro sidebar)
+            if (empty($hra)) {
+                $stmt = $pdo->query("
+                    SELECT m.id, m.nazev, m.hra, m.stav, m.max_hracu,
+                           (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
+                           u.username as vytvoril
+                    FROM wgs_hry_mistnosti m
+                    LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
+                    WHERE m.stav IN ('ceka', 'hra')
+                    ORDER BY m.vytvoreno DESC
+                    LIMIT 20
+                ");
+            } else {
+                $stmt = $pdo->prepare("
+                    SELECT m.id, m.nazev, m.hra, m.stav, m.max_hracu,
+                           (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
+                           u.username as vytvoril
+                    FROM wgs_hry_mistnosti m
+                    LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
+                    WHERE m.hra = :hra AND m.stav IN ('ceka', 'hra')
+                    ORDER BY m.vytvoreno DESC
+                    LIMIT 20
+                ");
+                $stmt->execute(['hra' => $hra]);
+            }
             $mistnosti = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             sendJsonSuccess('OK', ['mistnosti' => $mistnosti]);

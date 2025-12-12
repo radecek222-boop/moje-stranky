@@ -948,7 +948,11 @@ try {
         // Cleanup při opuštění stránky
         window.addEventListener('beforeunload', () => {
             if (mistnostId) {
-                navigator.sendBeacon('/api/hry_api.php?action=opustit&mistnost_id=' + mistnostId);
+                const data = new FormData();
+                data.append('action', 'opustit');
+                data.append('mistnost_id', mistnostId);
+                data.append('csrf_token', CSRF_TOKEN);
+                navigator.sendBeacon('/api/hry_api.php', data);
             }
         });
 
