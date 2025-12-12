@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
-$username = $_SESSION['username'] ?? $_SESSION['email'] ?? 'Hráč';
+$username = $_SESSION['user_name'] ?? $_SESSION['user_email'] ?? 'Hráč';
 
 // Aktualizovat online status
 try {
@@ -502,6 +502,9 @@ $dostupneHry = [
         const chatSend = document.getElementById('chatSend');
         const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
+        // Sledovat poslední ID zprávy pro polling
+        let posledniChatId = 0;
+
         // Scroll chat dolů
         function scrollChatDolu() {
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -556,6 +559,11 @@ $dostupneHry = [
             `;
             chatMessages.appendChild(div);
             scrollChatDolu();
+
+            // Aktualizovat poslední ID pro polling
+            if (data.id) {
+                posledniChatId = Math.max(posledniChatId, data.id);
+            }
         }
 
         // Escape HTML
@@ -573,25 +581,38 @@ $dostupneHry = [
             }
         });
 
-        // Periodicky aktualizovat online hráče a chat (každých 10s)
-        setInterval(async () => {
+        // Periodicky aktualizovat online hráče (každých 5s)
+        async function obnovitOnline() {
             try {
                 const response = await fetch('/api/hry_api.php?action=stav');
                 const result = await response.json();
 
-                if (result.status === 'success') {
-                    // Aktualizovat online hráče
-                    aktualizovatOnline(result.data.online);
-
-                    // Aktualizovat chat (pokud jsou nové zprávy)
-                    if (result.data.chat && result.data.chat.length > 0) {
-                        aktualizovatChat(result.data.chat);
-                    }
+                if (result.status === 'success' && result.online) {
+                    aktualizovatOnline(result.online);
                 }
             } catch (error) {
-                console.error('Polling error:', error);
+                console.error('Online polling error:', error);
             }
-        }, 10000);
+        }
+        setInterval(obnovitOnline, 5000);
+
+        // Periodicky aktualizovat chat (každou 1s)
+        async function obnovitChat() {
+            try {
+                const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.chat && result.chat.length > 0) {
+                    result.chat.forEach(z => {
+                        pridatZpravu(z);
+                        posledniChatId = Math.max(posledniChatId, z.id);
+                    });
+                }
+            } catch (error) {
+                console.error('Chat polling error:', error);
+            }
+        }
+        setInterval(obnovitChat, 1000);
 
         // Aktualizovat seznam online hráčů
         function aktualizovatOnline(hraci) {
@@ -616,17 +637,6 @@ $dostupneHry = [
                     ${h.aktualni_hra ? `<span class="online-hra">${escapeHtml(h.aktualni_hra)}</span>` : ''}
                 </div>
             `).join('');
-        }
-
-        // Aktualizovat chat
-        let posledniChatId = 0;
-        function aktualizovatChat(zpravy) {
-            zpravy.forEach(z => {
-                if (z.id > posledniChatId) {
-                    pridatZpravu(z);
-                    posledniChatId = z.id;
-                }
-            });
         }
 
         // Heartbeat - udržovat online status

@@ -23,7 +23,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
-$username = $_SESSION['username'] ?? $_SESSION['email'] ?? 'Hráč';
+$username = $_SESSION['user_name'] ?? $_SESSION['user_email'] ?? 'Hráč';
 
 // Režim: solo (proti PC) nebo multiplayer (místnost)
 $rezim = $_GET['rezim'] ?? 'solo';
@@ -87,12 +87,23 @@ try {
             padding: 1rem;
         }
 
+        /* Horní panel - mimo herní stůl */
+        .horni-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
         /* Herní stůl */
         .herni-stul {
             background: var(--prsi-table);
             border: 3px solid var(--prsi-border);
             border-radius: 20px;
-            min-height: 70vh;
+            min-height: 60vh;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -252,21 +263,19 @@ try {
 
         /* Info panel */
         .info-panel {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
             background: rgba(0,0,0,0.85);
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 10px;
             color: #fff;
-            min-width: 150px;
+            display: flex;
+            gap: 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .info-radek {
-            margin-bottom: 0.5rem;
             display: flex;
-            justify-content: space-between;
+            gap: 0.5rem;
+            align-items: center;
         }
 
         .info-label {
@@ -283,11 +292,7 @@ try {
 
         /* Akční tlačítka */
         .akce-panel {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
             display: flex;
-            flex-direction: column;
             gap: 0.5rem;
         }
 
@@ -465,25 +470,42 @@ try {
 
         /* Zpět tlačítko */
         .zpet-btn {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             color: #fff;
-            border: 1px solid #fff;
-            padding: 0.5rem 1rem;
+            border: 1px solid #333;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             font-size: 0.9rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .zpet-btn:hover {
-            background: #fff;
-            color: #000;
+            background: var(--prsi-accent);
+            color: #fff;
+            border-color: var(--prsi-accent);
         }
 
         /* Responsive */
+        @media (max-width: 768px) {
+            .horni-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .info-panel {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .akce-panel {
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 600px) {
             .karta {
                 width: 60px;
@@ -506,6 +528,17 @@ try {
                 width: 60px;
                 height: 84px;
             }
+
+            .info-panel {
+                padding: 0.75rem;
+                gap: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .akce-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -513,9 +546,34 @@ try {
     <?php include __DIR__ . '/../includes/hamburger-menu.php'; ?>
 
     <main class="prsi-container">
-        <div class="herni-stul" id="herniStul">
+        <!-- Horní panel - mimo herní stůl -->
+        <div class="horni-panel">
             <a href="/hry.php" class="zpet-btn">Zpět do lobby</a>
 
+            <!-- Info panel -->
+            <div class="info-panel">
+                <div class="info-radek">
+                    <span class="info-label">Na tahu:</span>
+                    <span class="info-hodnota" id="naTahu">--</span>
+                </div>
+                <div class="info-radek">
+                    <span class="info-label">Moje karty:</span>
+                    <span class="info-hodnota" id="mojeKartyPocet">0</span>
+                </div>
+                <div class="info-radek">
+                    <span class="info-label">Protihráč:</span>
+                    <span class="info-hodnota" id="protihrKartyPocet">0</span>
+                </div>
+            </div>
+
+            <!-- Akční tlačítka -->
+            <div class="akce-panel">
+                <button class="akce-btn" id="btnNemamCo">Nemám co hrát</button>
+                <button class="akce-btn" id="btnNovaHra">Nová hra</button>
+            </div>
+        </div>
+
+        <div class="herni-stul" id="herniStul">
             <!-- Protihráč -->
             <div class="protihra-zona" id="protihrZona">
                 <!-- Karty protihráče (rubem) -->
@@ -543,28 +601,6 @@ try {
             <!-- Moje karty -->
             <div class="moje-zona" id="mojeZona">
                 <!-- Moje karty -->
-            </div>
-
-            <!-- Info panel -->
-            <div class="info-panel">
-                <div class="info-radek">
-                    <span class="info-label">Na tahu:</span>
-                    <span class="info-hodnota" id="naTahu">--</span>
-                </div>
-                <div class="info-radek">
-                    <span class="info-label">Moje karty:</span>
-                    <span class="info-hodnota" id="mojeKartyPocet">0</span>
-                </div>
-                <div class="info-radek">
-                    <span class="info-label">Protihráč:</span>
-                    <span class="info-hodnota" id="protihrKartyPocet">0</span>
-                </div>
-            </div>
-
-            <!-- Akční tlačítka -->
-            <div class="akce-panel">
-                <button class="akce-btn" id="btnNemamCo">Nemám co hrát</button>
-                <button class="akce-btn" id="btnNovaHra">Nová hra</button>
             </div>
         </div>
     </main>
