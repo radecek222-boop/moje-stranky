@@ -1,7 +1,7 @@
 <?php
 /**
- * Hra Lodě (Battleship) - Multiplayer
- * Námořní bitva pro 2 hráče online
+ * Hra Lodě (Battleship) - Solo proti PC nebo Multiplayer
+ * Námořní bitva - najdi a potop všechny soupeřovy lodě!
  */
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
@@ -97,6 +97,13 @@ try {
         .lode-lobby h2 {
             margin-bottom: 1.5rem;
             color: var(--lode-accent);
+        }
+
+        .lode-lobby-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .lode-loader {
@@ -285,20 +292,6 @@ try {
             border-radius: 3px;
         }
 
-        /* Ships list */
-        .lode-ships-remaining {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-
-        .lode-ships-col { text-align: center; }
-        .lode-ships-col h4 { font-size: 0.9rem; color: var(--lode-muted); margin-bottom: 0.5rem; }
-        .lode-ships-list { font-size: 0.85rem; }
-        .lode-ships-list span { display: block; margin: 0.25rem 0; }
-        .lode-ships-list span.sunk { text-decoration: line-through; color: var(--lode-hit); }
-
         @media (max-width: 800px) {
             .lode-boards { grid-template-columns: 1fr; }
             .lode-board {
@@ -315,16 +308,19 @@ try {
     <main id="main-content" class="lode-container">
         <div class="lode-header">
             <h1>LODĚ</h1>
-            <p>Multiplayer - najdi a potop všechny soupeřovy lodě!</p>
+            <p>Najdi a potop všechny soupeřovy lodě!</p>
         </div>
 
         <!-- Lobby -->
         <div class="lode-lobby" id="lobby">
-            <h2>Najdi soupeře</h2>
+            <h2>Vyber režim hry</h2>
             <p style="color: var(--lode-muted); margin-bottom: 1.5rem;">
-                Klikni na tlačítko a systém tě automaticky spáruje s dalším hráčem.
+                Hraj proti počítači nebo najdi soupeře online.
             </p>
-            <button class="lode-btn velke" id="hledatBtn">HRÁT ONLINE</button>
+            <div class="lode-lobby-btns">
+                <button class="lode-btn velke" id="soloBtn">HRÁT PROTI POČÍTAČI</button>
+                <button class="lode-btn velke secondary" id="hledatBtn">HRÁT ONLINE</button>
+            </div>
         </div>
 
         <!-- Čekání -->
@@ -353,7 +349,7 @@ try {
                     <div class="lode-board" id="mojeBoard"></div>
                 </div>
                 <div class="lode-board-wrapper">
-                    <div class="lode-board-title">Soupeř</div>
+                    <div class="lode-board-title" id="souperTitle">Soupeř</div>
                     <div class="lode-board" id="souperBoard"></div>
                 </div>
             </div>
@@ -383,7 +379,8 @@ try {
 
         const VELIKOST = 10;
         const CSRF_TOKEN = '<?php echo $csrfToken; ?>';
-        const USER_ID = <?php echo $userId; ?>;
+        const USER_ID = '<?php echo $userId; ?>';
+        const USERNAME = '<?php echo addslashes($username); ?>';
 
         const LODE = [
             { nazev: 'Letadlová loď', delka: 5 },
@@ -394,9 +391,9 @@ try {
         ];
 
         // Stav
+        let rezim = null; // 'solo' nebo 'multiplayer'
         let mistnostId = null;
-        let faze = 'lobby'; // lobby, cekani, umistovani, cekaniNaSoupere, hra, konec
-        let jsemHrac1 = false;
+        let faze = 'lobby';
         let jsemNaTahu = false;
         let pollingInterval = null;
 
@@ -406,7 +403,19 @@ try {
         let mojePole = vytvoritPrazdnePole();
         let mojeLode = [];
 
-        // Zobrazení
+        // Solo stav
+        let pcPole = vytvoritPrazdnePole();
+        let pcLode = [];
+        let mojeZasahySolo = vytvoritPrazdnePole(); // 0 = neznámé, 1 = miss, 2 = hit
+        let pcZasahy = vytvoritPrazdnePole();
+
+        // AI stav pro chytré střílení
+        let aiLastHit = null;
+        let aiHuntMode = false;
+        let aiTargets = [];
+
+        // Multiplayer
+        let jsemHrac1 = false;
         let mojeZasahy = [];
         let souperZasahy = [];
 
@@ -420,6 +429,8 @@ try {
         const currentShipEl = document.getElementById('currentShip');
         const mojeBoard = document.getElementById('mojeBoard');
         const souperBoard = document.getElementById('souperBoard');
+        const souperTitle = document.getElementById('souperTitle');
+        const soloBtn = document.getElementById('soloBtn');
         const hledatBtn = document.getElementById('hledatBtn');
         const zrusitBtn = document.getElementById('zrusitBtn');
         const rotateBtn = document.getElementById('rotateBtn');
@@ -429,8 +440,378 @@ try {
             return Array(VELIKOST).fill(null).map(() => Array(VELIKOST).fill(0));
         }
 
-        // Hledat soupeře
+        // ==================== SPOLEČNÉ FUNKCE ====================
+
+        function zobrazLobby() {
+            lobbyEl.style.display = 'block';
+            cekaniEl.style.display = 'none';
+            hraEl.style.display = 'none';
+            faze = 'lobby';
+            rezim = null;
+        }
+
+        function getPoziceLode(x, y, delka, ori) {
+            const pozice = [];
+            for (let i = 0; i < delka; i++) {
+                const px = ori === 'horizontal' ? x + i : x;
+                const py = ori === 'vertical' ? y + i : y;
+                if (px >= VELIKOST || py >= VELIKOST) return null;
+                pozice.push([px, py]);
+            }
+            return pozice;
+        }
+
+        function lzeUmistitLod(pole, pozice) {
+            for (const [px, py] of pozice) {
+                if (pole[py][px] !== 0) return false;
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = px + dx, ny = py + dy;
+                        if (nx >= 0 && nx < VELIKOST && ny >= 0 && ny < VELIKOST) {
+                            if (pole[ny][nx] !== 0) return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== SOLO REŽIM ====================
+
+        function spustitSolo() {
+            rezim = 'solo';
+            faze = 'umistovani';
+
+            // Reset
+            mojePole = vytvoritPrazdnePole();
+            mojeLode = [];
+            pcPole = vytvoritPrazdnePole();
+            pcLode = [];
+            mojeZasahySolo = vytvoritPrazdnePole();
+            pcZasahy = vytvoritPrazdnePole();
+            aktualniLodIndex = 0;
+            aiLastHit = null;
+            aiHuntMode = false;
+            aiTargets = [];
+
+            lobbyEl.style.display = 'none';
+            cekaniEl.style.display = 'none';
+            hraEl.style.display = 'block';
+
+            placementInfo.style.display = 'block';
+            currentShipEl.textContent = `${LODE[0].nazev} (${LODE[0].delka} polí)`;
+            statusEl.textContent = 'Umísti své lodě kliknutím na plochu';
+            statusEl.className = 'lode-status';
+            souperTitle.textContent = 'Počítač';
+
+            aktualizujHraceSolo();
+            vykresliMojePole();
+            vykresliSouperPoleSolo();
+        }
+
+        function aktualizujHraceSolo() {
+            const mojePripraveno = aktualniLodIndex >= LODE.length;
+            hraciPanelEl.innerHTML = `
+                <div class="lode-hrac ${jsemNaTahu ? 'aktivni' : ''} ja">
+                    <div>${escapeHtml(USERNAME)} (ty)</div>
+                    <div class="lode-hrac-stav ${mojePripraveno ? 'pripraveny' : ''}">${mojePripraveno ? 'Připraven' : 'Rozmisťuje...'}</div>
+                </div>
+                <div class="lode-hrac ${!jsemNaTahu && faze === 'hra' ? 'aktivni' : ''}">
+                    <div>Počítač</div>
+                    <div class="lode-hrac-stav pripraveny">Připraven</div>
+                </div>
+            `;
+        }
+
+        function rozmistiLodePocitace() {
+            pcPole = vytvoritPrazdnePole();
+            pcLode = [];
+
+            for (let i = 0; i < LODE.length; i++) {
+                const lod = LODE[i];
+                let umisteno = false;
+                let pokusy = 0;
+
+                while (!umisteno && pokusy < 100) {
+                    const ori = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+                    const maxX = ori === 'horizontal' ? VELIKOST - lod.delka : VELIKOST - 1;
+                    const maxY = ori === 'vertical' ? VELIKOST - lod.delka : VELIKOST - 1;
+                    const x = Math.floor(Math.random() * (maxX + 1));
+                    const y = Math.floor(Math.random() * (maxY + 1));
+
+                    const pozice = getPoziceLode(x, y, lod.delka, ori);
+                    if (pozice && lzeUmistitLod(pcPole, pozice)) {
+                        const lodId = i + 1;
+                        pozice.forEach(([px, py]) => pcPole[py][px] = lodId);
+                        pcLode.push({ nazev: lod.nazev, pozice, potopena: false });
+                        umisteno = true;
+                    }
+                    pokusy++;
+                }
+            }
+        }
+
+        function vykresliMojePole() {
+            mojeBoard.innerHTML = '';
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'lode-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    if (mojePole[y][x] > 0) {
+                        cell.classList.add('ship');
+                    }
+
+                    // Zobrazit zásahy (solo)
+                    if (rezim === 'solo' && pcZasahy[y][x] > 0) {
+                        cell.classList.add(mojePole[y][x] > 0 ? 'hit' : 'miss');
+                        cell.textContent = mojePole[y][x] > 0 ? 'X' : 'o';
+                    }
+
+                    if (faze === 'umistovani') {
+                        cell.addEventListener('click', () => klikMojePole(x, y));
+                        cell.addEventListener('mouseover', () => previewLod(x, y));
+                        cell.addEventListener('mouseout', clearPreview);
+                    }
+
+                    mojeBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function vykresliSouperPoleSolo() {
+            souperBoard.innerHTML = '';
+            souperBoard.classList.remove('aktivni');
+
+            if (faze === 'hra' && jsemNaTahu) {
+                souperBoard.classList.add('aktivni');
+            }
+
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'lode-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    if (mojeZasahySolo[y][x] === 1) {
+                        cell.classList.add('miss');
+                        cell.textContent = 'o';
+                    } else if (mojeZasahySolo[y][x] === 2) {
+                        cell.classList.add('hit');
+                        cell.textContent = 'X';
+                    }
+
+                    if (faze === 'hra' && jsemNaTahu && mojeZasahySolo[y][x] === 0) {
+                        cell.addEventListener('click', () => strelitSolo(x, y));
+                    }
+
+                    souperBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function previewLod(x, y) {
+            if (faze !== 'umistovani') return;
+            clearPreview();
+
+            const lod = LODE[aktualniLodIndex];
+            const pozice = getPoziceLode(x, y, lod.delka, orientace);
+            if (!pozice) return;
+
+            pozice.forEach(([px, py]) => {
+                const cell = mojeBoard.querySelector(`[data-x="${px}"][data-y="${py}"]`);
+                if (cell && !cell.classList.contains('ship')) {
+                    cell.classList.add('preview');
+                }
+            });
+        }
+
+        function clearPreview() {
+            mojeBoard.querySelectorAll('.preview').forEach(c => c.classList.remove('preview'));
+        }
+
+        function klikMojePole(x, y) {
+            if (faze !== 'umistovani') return;
+
+            const lod = LODE[aktualniLodIndex];
+            const pozice = getPoziceLode(x, y, lod.delka, orientace);
+
+            if (!pozice || !lzeUmistitLod(mojePole, pozice)) {
+                statusEl.textContent = 'Sem loď umístit nelze!';
+                return;
+            }
+
+            const lodId = aktualniLodIndex + 1;
+            pozice.forEach(([px, py]) => mojePole[py][px] = lodId);
+            mojeLode.push({ nazev: lod.nazev, pozice, potopena: false });
+
+            aktualniLodIndex++;
+
+            if (aktualniLodIndex >= LODE.length) {
+                if (rezim === 'solo') {
+                    zahajitHruSolo();
+                } else {
+                    odeslatRozmisteni();
+                }
+            } else {
+                currentShipEl.textContent = `${LODE[aktualniLodIndex].nazev} (${LODE[aktualniLodIndex].delka} polí)`;
+                vykresliMojePole();
+            }
+        }
+
+        function zahajitHruSolo() {
+            faze = 'hra';
+            jsemNaTahu = true;
+            placementInfo.style.display = 'none';
+
+            // Počítač rozmístí lodě
+            rozmistiLodePocitace();
+
+            statusEl.textContent = 'Tvůj tah - klikni na soupeřovo pole';
+            aktualizujHraceSolo();
+            vykresliMojePole();
+            vykresliSouperPoleSolo();
+        }
+
+        function strelitSolo(x, y) {
+            if (faze !== 'hra' || !jsemNaTahu) return;
+            if (mojeZasahySolo[y][x] !== 0) return;
+
+            const zasah = pcPole[y][x] > 0;
+            mojeZasahySolo[y][x] = zasah ? 2 : 1;
+
+            if (zasah) {
+                // Zkontrolovat potopení
+                const lodId = pcPole[y][x];
+                const lod = pcLode[lodId - 1];
+                let potopena = true;
+                lod.pozice.forEach(([px, py]) => {
+                    if (mojeZasahySolo[py][px] !== 2) potopena = false;
+                });
+
+                if (potopena) {
+                    lod.potopena = true;
+                    statusEl.textContent = `Potopil jsi ${lod.nazev}! Střílej znovu.`;
+                } else {
+                    statusEl.textContent = 'Zásah! Střílej znovu.';
+                }
+
+                // Zkontrolovat výhru
+                if (pcLode.every(l => l.potopena)) {
+                    konecHrySolo(true);
+                    return;
+                }
+            } else {
+                statusEl.textContent = 'Mimo. Počítač střílí...';
+                jsemNaTahu = false;
+                aktualizujHraceSolo();
+                vykresliSouperPoleSolo();
+
+                setTimeout(tahPocitace, 1000);
+                return;
+            }
+
+            vykresliSouperPoleSolo();
+        }
+
+        function tahPocitace() {
+            if (faze !== 'hra') return;
+
+            let x, y;
+
+            // Chytrá AI - po zásahu hledá sousední pole
+            if (aiHuntMode && aiTargets.length > 0) {
+                const target = aiTargets.shift();
+                x = target.x;
+                y = target.y;
+            } else {
+                // Náhodná střela
+                let pokusy = 0;
+                do {
+                    x = Math.floor(Math.random() * VELIKOST);
+                    y = Math.floor(Math.random() * VELIKOST);
+                    pokusy++;
+                } while (pcZasahy[y][x] !== 0 && pokusy < 100);
+            }
+
+            const zasah = mojePole[y][x] > 0;
+            pcZasahy[y][x] = zasah ? 2 : 1;
+
+            if (zasah) {
+                aiHuntMode = true;
+                aiLastHit = { x, y };
+
+                // Přidat sousední pole jako cíle
+                const sousedi = [
+                    { x: x - 1, y },
+                    { x: x + 1, y },
+                    { x, y: y - 1 },
+                    { x, y: y + 1 }
+                ];
+                sousedi.forEach(s => {
+                    if (s.x >= 0 && s.x < VELIKOST && s.y >= 0 && s.y < VELIKOST && pcZasahy[s.y][s.x] === 0) {
+                        if (!aiTargets.some(t => t.x === s.x && t.y === s.y)) {
+                            aiTargets.push(s);
+                        }
+                    }
+                });
+
+                // Zkontrolovat potopení
+                const lodId = mojePole[y][x];
+                const lod = mojeLode[lodId - 1];
+                let potopena = true;
+                lod.pozice.forEach(([px, py]) => {
+                    if (pcZasahy[py][px] !== 2) potopena = false;
+                });
+
+                if (potopena) {
+                    lod.potopena = true;
+                    aiHuntMode = false;
+                    aiTargets = [];
+                }
+
+                // Zkontrolovat prohru
+                if (mojeLode.every(l => l.potopena)) {
+                    vykresliMojePole();
+                    konecHrySolo(false);
+                    return;
+                }
+
+                vykresliMojePole();
+                setTimeout(tahPocitace, 1000);
+            } else {
+                jsemNaTahu = true;
+                statusEl.textContent = 'Tvůj tah - klikni na soupeřovo pole';
+                aktualizujHraceSolo();
+                vykresliMojePole();
+                vykresliSouperPoleSolo();
+            }
+        }
+
+        function konecHrySolo(vyhral) {
+            faze = 'konec';
+            jsemNaTahu = false;
+            souperBoard.classList.remove('aktivni');
+            novaHraBtn.style.display = 'inline-block';
+
+            statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
+            statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
+            aktualizujHraceSolo();
+        }
+
+        // ==================== MULTIPLAYER REŽIM ====================
+
         async function hledatSoupere() {
+            rezim = 'multiplayer';
             lobbyEl.style.display = 'none';
             cekaniEl.style.display = 'block';
             faze = 'cekani';
@@ -455,13 +836,6 @@ try {
                 console.error('Chyba:', error);
                 zobrazLobby();
             }
-        }
-
-        function zobrazLobby() {
-            lobbyEl.style.display = 'block';
-            cekaniEl.style.display = 'none';
-            hraEl.style.display = 'none';
-            faze = 'lobby';
         }
 
         function spustitPolling() {
@@ -490,58 +864,52 @@ try {
                 mojeZasahy = data.moje_zasahy || [];
                 souperZasahy = data.souper_zasahy || [];
 
-                // Čekám na soupeře?
                 if (data.hraci.length < 2) {
                     cekaniEl.style.display = 'block';
                     hraEl.style.display = 'none';
                     return;
                 }
 
-                // Zobrazit hru
                 cekaniEl.style.display = 'none';
                 hraEl.style.display = 'block';
+                souperTitle.textContent = 'Soupeř';
 
                 aktualizujHrace(data.hraci, data);
 
-                // Fáze umisťování
                 if (!data.moje_lode && faze !== 'umistovani') {
                     faze = 'umistovani';
+                    aktualniLodIndex = 0;
+                    mojePole = vytvoritPrazdnePole();
+                    mojeLode = [];
                     placementInfo.style.display = 'block';
+                    currentShipEl.textContent = `${LODE[0].nazev} (${LODE[0].delka} polí)`;
                     statusEl.textContent = 'Umísti své lodě kliknutím na plochu';
                     vykresliMojePole();
-                    vykresliSouperPole();
+                    vykresliSouperPoleMP();
                     return;
                 }
 
-                // Čekání na soupeře
                 if (data.moje_lode && !data.souper_pripraveny) {
                     faze = 'cekaniNaSoupere';
                     placementInfo.style.display = 'none';
                     statusEl.textContent = 'Čekám až soupeř rozmístí lodě...';
                     vykresliMojePole();
-                    vykresliSouperPole();
+                    vykresliSouperPoleMP();
                     return;
                 }
 
-                // Hra probíhá
                 if (data.stav === 'hra') {
                     faze = 'hra';
                     placementInfo.style.display = 'none';
                     jsemNaTahu = (jsemHrac1 && data.na_tahu === 1) || (!jsemHrac1 && data.na_tahu === 2);
 
-                    if (jsemNaTahu) {
-                        statusEl.textContent = 'Tvůj tah - klikni na soupeřovo pole';
-                        souperBoard.classList.add('aktivni');
-                    } else {
-                        statusEl.textContent = 'Soupeř střílí...';
-                        souperBoard.classList.remove('aktivni');
-                    }
+                    statusEl.textContent = jsemNaTahu ? 'Tvůj tah - klikni na soupeřovo pole' : 'Soupeř střílí...';
+                    souperBoard.classList.toggle('aktivni', jsemNaTahu);
 
-                    vykresliMojePole();
-                    vykresliSouperPole();
+                    vykresliMojePoleMP();
+                    vykresliSouperPoleMP();
                 }
 
-                // Konec hry
                 if (data.vitez) {
                     faze = 'konec';
                     zastavitPolling();
@@ -576,30 +944,18 @@ try {
             }).join('');
         }
 
-        function vykresliMojePole() {
+        function vykresliMojePoleMP() {
             mojeBoard.innerHTML = '';
             for (let y = 0; y < VELIKOST; y++) {
                 for (let x = 0; x < VELIKOST; x++) {
                     const cell = document.createElement('div');
                     cell.className = 'lode-cell';
-                    cell.dataset.x = x;
-                    cell.dataset.y = y;
+                    if (mojePole[y][x] > 0) cell.classList.add('ship');
 
-                    if (mojePole[y][x] > 0) {
-                        cell.classList.add('ship');
-                    }
-
-                    // Zobrazit zásahy soupeře
                     const zasahKlic = `${y}_${x}`;
                     if (souperZasahy.includes(zasahKlic)) {
                         cell.classList.add(mojePole[y][x] > 0 ? 'hit' : 'miss');
                         cell.textContent = mojePole[y][x] > 0 ? 'X' : 'o';
-                    }
-
-                    if (faze === 'umistovani') {
-                        cell.addEventListener('click', () => klikMojePole(x, y));
-                        cell.addEventListener('mouseover', () => previewLod(x, y));
-                        cell.addEventListener('mouseout', clearPreview);
                     }
 
                     mojeBoard.appendChild(cell);
@@ -607,7 +963,7 @@ try {
             }
         }
 
-        function vykresliSouperPole() {
+        function vykresliSouperPoleMP() {
             souperBoard.innerHTML = '';
             for (let y = 0; y < VELIKOST; y++) {
                 for (let x = 0; x < VELIKOST; x++) {
@@ -618,90 +974,16 @@ try {
 
                     const zasahKlic = `${y}_${x}`;
                     if (mojeZasahy.includes(zasahKlic)) {
-                        // Nemůžeme vědět, jestli je zásah, dokud server nepotvrdí
-                        // Ale pro vizuální feedback zobrazíme jako miss (server pošle správnou info)
                         cell.classList.add('miss');
                         cell.textContent = 'o';
                     }
 
                     if (faze === 'hra' && jsemNaTahu) {
-                        cell.addEventListener('click', () => strelit(x, y));
+                        cell.addEventListener('click', () => strelitMP(x, y));
                     }
 
                     souperBoard.appendChild(cell);
                 }
-            }
-        }
-
-        function previewLod(x, y) {
-            if (faze !== 'umistovani') return;
-            clearPreview();
-
-            const lod = LODE[aktualniLodIndex];
-            const pozice = getPoziceLode(x, y, lod.delka, orientace);
-            if (!pozice) return;
-
-            pozice.forEach(([px, py]) => {
-                const cell = mojeBoard.querySelector(`[data-x="${px}"][data-y="${py}"]`);
-                if (cell && !cell.classList.contains('ship')) {
-                    cell.classList.add('preview');
-                }
-            });
-        }
-
-        function clearPreview() {
-            mojeBoard.querySelectorAll('.preview').forEach(c => c.classList.remove('preview'));
-        }
-
-        function getPoziceLode(x, y, delka, ori) {
-            const pozice = [];
-            for (let i = 0; i < delka; i++) {
-                const px = ori === 'horizontal' ? x + i : x;
-                const py = ori === 'vertical' ? y + i : y;
-                if (px >= VELIKOST || py >= VELIKOST) return null;
-                pozice.push([px, py]);
-            }
-            return pozice;
-        }
-
-        function lzeUmistitLod(pozice) {
-            for (const [px, py] of pozice) {
-                if (mojePole[py][px] !== 0) return false;
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
-                        const nx = px + dx, ny = py + dy;
-                        if (nx >= 0 && nx < VELIKOST && ny >= 0 && ny < VELIKOST) {
-                            if (mojePole[ny][nx] !== 0) return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        function klikMojePole(x, y) {
-            if (faze !== 'umistovani') return;
-
-            const lod = LODE[aktualniLodIndex];
-            const pozice = getPoziceLode(x, y, lod.delka, orientace);
-
-            if (!pozice || !lzeUmistitLod(pozice)) {
-                statusEl.textContent = 'Sem loď umístit nelze!';
-                return;
-            }
-
-            const lodId = aktualniLodIndex + 1;
-            pozice.forEach(([px, py]) => mojePole[py][px] = lodId);
-            mojeLode.push({ nazev: lod.nazev, pozice: pozice.map(p => [p[1], p[0]]) }); // [row, col]
-
-            aktualniLodIndex++;
-
-            if (aktualniLodIndex >= LODE.length) {
-                // Odeslat rozmístění na server
-                odeslatRozmisteni();
-            } else {
-                currentShipEl.textContent = `${LODE[aktualniLodIndex].nazev} (${LODE[aktualniLodIndex].delka} polí)`;
-                vykresliMojePole();
             }
         }
 
@@ -710,10 +992,15 @@ try {
             placementInfo.style.display = 'none';
 
             try {
+                const lodeData = mojeLode.map(l => ({
+                    nazev: l.nazev,
+                    pozice: l.pozice.map(([px, py]) => [py, px])
+                }));
+
                 const formData = new FormData();
                 formData.append('action', 'lode_rozmisteni');
                 formData.append('mistnost_id', mistnostId);
-                formData.append('lode', JSON.stringify(mojeLode));
+                formData.append('lode', JSON.stringify(lodeData));
                 formData.append('csrf_token', CSRF_TOKEN);
 
                 const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
@@ -722,7 +1009,6 @@ try {
                 if (result.status === 'success') {
                     faze = 'cekaniNaSoupere';
                     statusEl.textContent = 'Čekám až soupeř rozmístí lodě...';
-                    vykresliMojePole();
                 } else {
                     alert('Chyba: ' + result.message);
                 }
@@ -731,7 +1017,7 @@ try {
             }
         }
 
-        async function strelit(x, y) {
+        async function strelitMP(x, y) {
             if (faze !== 'hra' || !jsemNaTahu) return;
 
             const zasahKlic = `${y}_${x}`;
@@ -757,11 +1043,7 @@ try {
                     if (result.data.zasah) {
                         cell.classList.add('hit');
                         cell.textContent = 'X';
-                        if (result.data.potopena) {
-                            statusEl.textContent = `Potopil jsi ${result.data.potopena}!`;
-                        } else {
-                            statusEl.textContent = 'Zásah! Střílej znovu.';
-                        }
+                        statusEl.textContent = result.data.potopena ? `Potopil jsi ${result.data.potopena}!` : 'Zásah! Střílej znovu.';
                         jsemNaTahu = true;
                         souperBoard.classList.add('aktivni');
                     } else {
@@ -780,10 +1062,6 @@ try {
                         statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
                         statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
                     }
-                } else {
-                    alert('Chyba: ' + result.message);
-                    jsemNaTahu = true;
-                    souperBoard.classList.add('aktivni');
                 }
             } catch (error) {
                 console.error('Střela error:', error);
@@ -791,7 +1069,11 @@ try {
             }
         }
 
+        // ==================== NOVÁ HRA ====================
+
         async function novaHra() {
+            zastavitPolling();
+
             if (mistnostId) {
                 try {
                     const formData = new FormData();
@@ -802,27 +1084,19 @@ try {
                 } catch (e) {}
             }
 
-            // Reset
             mistnostId = null;
-            faze = 'lobby';
-            aktualniLodIndex = 0;
-            mojePole = vytvoritPrazdnePole();
-            mojeLode = [];
-            mojeZasahy = [];
-            souperZasahy = [];
-            currentShipEl.textContent = `${LODE[0].nazev} (${LODE[0].delka} polí)`;
-            statusEl.className = 'lode-status';
             novaHraBtn.style.display = 'none';
-            hledatSoupere();
-        }
+            statusEl.className = 'lode-status';
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            if (rezim === 'solo') {
+                spustitSolo();
+            } else {
+                zobrazLobby();
+            }
         }
 
         // Event listenery
+        soloBtn.addEventListener('click', spustitSolo);
         hledatBtn.addEventListener('click', hledatSoupere);
         zrusitBtn.addEventListener('click', () => {
             zastavitPolling();

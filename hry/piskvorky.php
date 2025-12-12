@@ -1,7 +1,7 @@
 <?php
 /**
- * Hra Piškvorky - Multiplayer
- * Strategická hra pro 2 hráče online
+ * Hra Piškvorky - Solo proti PC nebo Multiplayer
+ * Strategická hra - spoj 5 symbolů v řadě
  */
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
@@ -98,6 +98,13 @@ try {
         .pisk-lobby h2 {
             margin-bottom: 1.5rem;
             color: var(--pisk-accent);
+        }
+
+        .pisk-lobby-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .pisk-cekani {
@@ -284,16 +291,19 @@ try {
     <main id="main-content" class="pisk-container">
         <div class="pisk-header">
             <h1>PIŠKVORKY</h1>
-            <p>Multiplayer - spoj 5 symbolů v řadě a vyhraj!</p>
+            <p>Spoj 5 symbolů v řadě a vyhraj!</p>
         </div>
 
-        <!-- Lobby - hledání soupeře -->
+        <!-- Lobby - výběr režimu -->
         <div class="pisk-lobby" id="lobby">
-            <h2>Najdi soupeře</h2>
+            <h2>Vyber režim hry</h2>
             <p style="color: var(--pisk-muted); margin-bottom: 1.5rem;">
-                Klikni na tlačítko a systém tě automaticky spáruje s dalším hráčem.
+                Hraj proti počítači nebo najdi soupeře online.
             </p>
-            <button class="pisk-btn velke" id="hledatBtn">HRÁT ONLINE</button>
+            <div class="pisk-lobby-btns">
+                <button class="pisk-btn velke" id="soloBtn">HRÁT PROTI POČÍTAČI</button>
+                <button class="pisk-btn velke secondary" id="hledatBtn">HRÁT ONLINE</button>
+            </div>
         </div>
 
         <!-- Čekání na soupeře -->
@@ -324,14 +334,19 @@ try {
 
         const VELIKOST = 15;
         const CSRF_TOKEN = '<?php echo $csrfToken; ?>';
-        const USER_ID = <?php echo $userId; ?>;
+        const USER_ID = '<?php echo $userId; ?>';
+        const USERNAME = '<?php echo addslashes($username); ?>';
 
         // Stav
+        let rezim = null; // 'solo' nebo 'multiplayer'
         let mistnostId = null;
         let mujSymbol = null; // 1 = X, 2 = O
         let jsemNaTahu = false;
         let hraSkoncila = false;
         let pollingInterval = null;
+
+        // Solo stav
+        let plocha = [];
 
         // DOM elementy
         const lobbyEl = document.getElementById('lobby');
@@ -340,6 +355,7 @@ try {
         const boardEl = document.getElementById('board');
         const statusEl = document.getElementById('status');
         const hraciPanelEl = document.getElementById('hraciPanel');
+        const soloBtn = document.getElementById('soloBtn');
         const hledatBtn = document.getElementById('hledatBtn');
         const zrusitBtn = document.getElementById('zrusitBtn');
         const novaHraBtn = document.getElementById('novaHraBtn');
@@ -359,13 +375,13 @@ try {
             }
         }
 
-        // Aktualizovat board podle stavu ze serveru
-        function aktualizujBoard(plocha) {
+        // Aktualizovat board podle stavu
+        function aktualizujBoard(plochaData) {
             const cells = boardEl.querySelectorAll('.pisk-cell');
             cells.forEach(cell => {
                 const x = parseInt(cell.dataset.x);
                 const y = parseInt(cell.dataset.y);
-                const hodnota = plocha[y][x];
+                const hodnota = plochaData[y][x];
 
                 cell.textContent = '';
                 cell.className = 'pisk-cell';
@@ -384,7 +400,21 @@ try {
             });
         }
 
-        // Aktualizovat panel hráčů
+        // Aktualizovat panel hráčů (solo)
+        function aktualizujHraceSolo(naTahu) {
+            hraciPanelEl.innerHTML = `
+                <div class="pisk-hrac ${naTahu === 1 ? 'aktivni' : ''} ja">
+                    <div class="pisk-hrac-symbol x">X</div>
+                    <div class="pisk-hrac-jmeno">${escapeHtml(USERNAME)} (ty)</div>
+                </div>
+                <div class="pisk-hrac ${naTahu === 2 ? 'aktivni' : ''}">
+                    <div class="pisk-hrac-symbol o">O</div>
+                    <div class="pisk-hrac-jmeno">Počítač</div>
+                </div>
+            `;
+        }
+
+        // Aktualizovat panel hráčů (multiplayer)
         function aktualizujHrace(hraci, naTahu) {
             hraciPanelEl.innerHTML = hraci.map((hrac, index) => {
                 const symbol = index === 0 ? 'X' : 'O';
@@ -401,8 +431,279 @@ try {
             }).join('');
         }
 
-        // Hledat soupeře
+        // ==================== SOLO REŽIM ====================
+
+        function spustitSolo() {
+            rezim = 'solo';
+            mujSymbol = 1; // Hráč je vždy X
+            jsemNaTahu = true;
+            hraSkoncila = false;
+
+            // Inicializovat prázdnou plochu
+            plocha = [];
+            for (let y = 0; y < VELIKOST; y++) {
+                plocha[y] = [];
+                for (let x = 0; x < VELIKOST; x++) {
+                    plocha[y][x] = 0;
+                }
+            }
+
+            lobbyEl.style.display = 'none';
+            cekaniEl.style.display = 'none';
+            hraEl.style.display = 'block';
+
+            aktualizujHraceSolo(1);
+            aktualizujBoard(plocha);
+            statusEl.textContent = 'Tvůj tah - klikni na pole';
+            statusEl.className = 'pisk-status';
+        }
+
+        // Klik na pole (solo)
+        function klikSolo(x, y) {
+            if (!jsemNaTahu || hraSkoncila) return;
+            if (plocha[y][x] !== 0) return;
+
+            // Můj tah
+            plocha[y][x] = 1;
+            jsemNaTahu = false;
+
+            aktualizujBoard(plocha);
+            aktualizujHraceSolo(2);
+            statusEl.textContent = 'Počítač přemýšlí...';
+
+            // Zkontrolovat výhru
+            if (zkontrolujVyhru(1)) {
+                hraSkoncila = true;
+                statusEl.textContent = 'Vyhrál jsi!';
+                statusEl.className = 'pisk-status vyhral';
+                novaHraBtn.style.display = 'inline-block';
+                return;
+            }
+
+            // Zkontrolovat remízu
+            if (jeRemiza()) {
+                hraSkoncila = true;
+                statusEl.textContent = 'Remíza!';
+                statusEl.className = 'pisk-status';
+                novaHraBtn.style.display = 'inline-block';
+                return;
+            }
+
+            // Tah počítače
+            setTimeout(tahPocitace, 500);
+        }
+
+        // AI tah
+        function tahPocitace() {
+            if (hraSkoncila) return;
+
+            const tah = najdiNejlepsiTah();
+            if (tah) {
+                plocha[tah.y][tah.x] = 2;
+            }
+
+            aktualizujBoard(plocha);
+
+            // Zkontrolovat výhru počítače
+            if (zkontrolujVyhru(2)) {
+                hraSkoncila = true;
+                statusEl.textContent = 'Prohrál jsi!';
+                statusEl.className = 'pisk-status prohral';
+                novaHraBtn.style.display = 'inline-block';
+                return;
+            }
+
+            // Zkontrolovat remízu
+            if (jeRemiza()) {
+                hraSkoncila = true;
+                statusEl.textContent = 'Remíza!';
+                statusEl.className = 'pisk-status';
+                novaHraBtn.style.display = 'inline-block';
+                return;
+            }
+
+            jsemNaTahu = true;
+            aktualizujHraceSolo(1);
+            aktualizujBoard(plocha);
+            statusEl.textContent = 'Tvůj tah - klikni na pole';
+        }
+
+        // AI - najít nejlepší tah
+        function najdiNejlepsiTah() {
+            // 1. Můžu vyhrát? (4 v řadě + prázdné pole)
+            const vyhra = najdiTahProRaduN(2, 4);
+            if (vyhra) return vyhra;
+
+            // 2. Musím blokovat? (hráč má 4 v řadě)
+            const blokuj4 = najdiTahProRaduN(1, 4);
+            if (blokuj4) return blokuj4;
+
+            // 3. Můžu udělat 4 v řadě?
+            const moje4 = najdiTahProRaduN(2, 3);
+            if (moje4) return moje4;
+
+            // 4. Blokovat 3 v řadě hráče
+            const blokuj3 = najdiTahProRaduN(1, 3);
+            if (blokuj3) return blokuj3;
+
+            // 5. Udělat 3 v řadě
+            const moje3 = najdiTahProRaduN(2, 2);
+            if (moje3) return moje3;
+
+            // 6. Hrát blízko existujících kamenů
+            const blizko = najdiTahBlizkoKamenu();
+            if (blizko) return blizko;
+
+            // 7. Hrát do středu
+            const stred = Math.floor(VELIKOST / 2);
+            if (plocha[stred][stred] === 0) {
+                return { x: stred, y: stred };
+            }
+
+            // 8. Náhodný tah
+            return nahodnyTah();
+        }
+
+        // Najít tah, který vytvoří/blokuje N v řadě
+        function najdiTahProRaduN(hrac, n) {
+            const smery = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    if (plocha[y][x] !== 0) continue;
+
+                    for (const [dy, dx] of smery) {
+                        // Počítat v obou směrech
+                        let pocet = 0;
+                        let otevrenych = 0;
+
+                        // Směr +
+                        for (let i = 1; i <= 4; i++) {
+                            const ny = y + dy * i;
+                            const nx = x + dx * i;
+                            if (ny < 0 || ny >= VELIKOST || nx < 0 || nx >= VELIKOST) break;
+                            if (plocha[ny][nx] === hrac) pocet++;
+                            else if (plocha[ny][nx] === 0) { otevrenych++; break; }
+                            else break;
+                        }
+
+                        // Směr -
+                        for (let i = 1; i <= 4; i++) {
+                            const ny = y - dy * i;
+                            const nx = x - dx * i;
+                            if (ny < 0 || ny >= VELIKOST || nx < 0 || nx >= VELIKOST) break;
+                            if (plocha[ny][nx] === hrac) pocet++;
+                            else if (plocha[ny][nx] === 0) { otevrenych++; break; }
+                            else break;
+                        }
+
+                        if (pocet >= n) {
+                            return { x, y };
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // Najít tah blízko existujících kamenů
+        function najdiTahBlizkoKamenu() {
+            const kandidati = [];
+
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    if (plocha[y][x] !== 0) continue;
+
+                    // Zkontrolovat sousedy
+                    let maSouseda = false;
+                    for (let dy = -2; dy <= 2; dy++) {
+                        for (let dx = -2; dx <= 2; dx++) {
+                            if (dy === 0 && dx === 0) continue;
+                            const ny = y + dy;
+                            const nx = x + dx;
+                            if (ny >= 0 && ny < VELIKOST && nx >= 0 && nx < VELIKOST) {
+                                if (plocha[ny][nx] !== 0) {
+                                    maSouseda = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (maSouseda) break;
+                    }
+
+                    if (maSouseda) {
+                        kandidati.push({ x, y });
+                    }
+                }
+            }
+
+            if (kandidati.length > 0) {
+                return kandidati[Math.floor(Math.random() * kandidati.length)];
+            }
+
+            return null;
+        }
+
+        // Náhodný tah
+        function nahodnyTah() {
+            const volne = [];
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    if (plocha[y][x] === 0) {
+                        volne.push({ x, y });
+                    }
+                }
+            }
+
+            if (volne.length > 0) {
+                return volne[Math.floor(Math.random() * volne.length)];
+            }
+
+            return null;
+        }
+
+        // Zkontrolovat výhru
+        function zkontrolujVyhru(hrac) {
+            const smery = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    if (plocha[y][x] !== hrac) continue;
+
+                    for (const [dy, dx] of smery) {
+                        let pocet = 1;
+                        for (let i = 1; i < 5; i++) {
+                            const ny = y + dy * i;
+                            const nx = x + dx * i;
+                            if (ny >= 0 && ny < VELIKOST && nx >= 0 && nx < VELIKOST && plocha[ny][nx] === hrac) {
+                                pocet++;
+                            } else {
+                                break;
+                            }
+                        }
+                        if (pocet >= 5) return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // Zkontrolovat remízu
+        function jeRemiza() {
+            for (let y = 0; y < VELIKOST; y++) {
+                for (let x = 0; x < VELIKOST; x++) {
+                    if (plocha[y][x] === 0) return false;
+                }
+            }
+            return true;
+        }
+
+        // ==================== MULTIPLAYER REŽIM ====================
+
         async function hledatSoupere() {
+            rezim = 'multiplayer';
             lobbyEl.style.display = 'none';
             cekaniEl.style.display = 'block';
 
@@ -433,7 +734,6 @@ try {
             }
         }
 
-        // Zrušit hledání
         async function zrusitHledani() {
             zastavitPolling();
 
@@ -455,21 +755,19 @@ try {
             zobrazLobby();
         }
 
-        // Zobrazit lobby
         function zobrazLobby() {
+            rezim = null;
             lobbyEl.style.display = 'block';
             cekaniEl.style.display = 'none';
             hraEl.style.display = 'none';
             novaHraBtn.style.display = 'none';
         }
 
-        // Spustit polling pro stav hry
         function spustitPolling() {
             nacistStav();
             pollingInterval = setInterval(nacistStav, 1000);
         }
 
-        // Zastavit polling
         function zastavitPolling() {
             if (pollingInterval) {
                 clearInterval(pollingInterval);
@@ -477,7 +775,6 @@ try {
             }
         }
 
-        // Načíst stav hry ze serveru
         async function nacistStav() {
             if (!mistnostId) return;
 
@@ -492,26 +789,21 @@ try {
 
                 const data = result.data;
 
-                // Aktualizovat můj symbol
                 mujSymbol = data.muj_symbol;
                 jsemNaTahu = data.jsem_na_tahu;
 
-                // Čekám na soupeře?
                 if (data.hraci.length < 2) {
                     cekaniEl.style.display = 'block';
                     hraEl.style.display = 'none';
                     return;
                 }
 
-                // Zobrazit hru
                 cekaniEl.style.display = 'none';
                 hraEl.style.display = 'block';
 
-                // Aktualizovat UI
                 aktualizujHrace(data.hraci, data.na_tahu);
                 aktualizujBoard(data.plocha);
 
-                // Status
                 if (data.vitez) {
                     hraSkoncila = true;
                     zastavitPolling();
@@ -540,15 +832,12 @@ try {
             }
         }
 
-        // Klik na pole
-        async function klikNaPole(x, y) {
+        async function klikMultiplayer(x, y) {
             if (!jsemNaTahu || hraSkoncila || !mistnostId) return;
 
-            // Zkontrolovat, zda je pole prázdné
             const cell = boardEl.querySelector(`[data-x="${x}"][data-y="${y}"]`);
             if (cell.classList.contains('obsazeno')) return;
 
-            // Dočasně zablokovat další tahy
             jsemNaTahu = false;
             statusEl.textContent = 'Odesílám tah...';
 
@@ -568,7 +857,6 @@ try {
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // Okamžitě aktualizovat UI
                     aktualizujBoard(result.data.plocha);
                     aktualizujHrace(result.data.hraci, result.data.na_tahu);
 
@@ -595,13 +883,22 @@ try {
             }
         }
 
-        // Nová hra
+        // ==================== SPOLEČNÉ ====================
+
+        function klikNaPole(x, y) {
+            if (rezim === 'solo') {
+                klikSolo(x, y);
+            } else if (rezim === 'multiplayer') {
+                klikMultiplayer(x, y);
+            }
+        }
+
         async function novaHra() {
             hraSkoncila = false;
             mujSymbol = null;
             jsemNaTahu = false;
+            zastavitPolling();
 
-            // Opustit starou místnost
             if (mistnostId) {
                 try {
                     const formData = new FormData();
@@ -614,10 +911,14 @@ try {
 
             mistnostId = null;
             novaHraBtn.style.display = 'none';
-            hledatSoupere();
+
+            if (rezim === 'solo') {
+                spustitSolo();
+            } else {
+                zobrazLobby();
+            }
         }
 
-        // Escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -625,6 +926,7 @@ try {
         }
 
         // Event listenery
+        soloBtn.addEventListener('click', spustitSolo);
         hledatBtn.addEventListener('click', hledatSoupere);
         zrusitBtn.addEventListener('click', zrusitHledani);
         novaHraBtn.addEventListener('click', novaHra);
