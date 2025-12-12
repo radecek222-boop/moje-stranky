@@ -1097,6 +1097,7 @@ let posledniUlozeni = 0;
 async function ulozData() {
     ukladaSe = true;
     posledniUlozeni = Date.now();
+    console.log('Ukladam stavy:', JSON.stringify(stavy));
     try {
         const formData = new FormData();
         formData.append('stavy', JSON.stringify(stavy));
@@ -1107,7 +1108,7 @@ async function ulozData() {
             cache: 'no-store'
         });
         const vysledek = await odpoved.json();
-        console.log('Ulozeno:', vysledek);
+        console.log('Ulozeno - odpoved serveru:', vysledek);
     } catch (e) {
         console.log('Chyba pri ukladani:', e);
     }
@@ -1142,9 +1143,13 @@ async function nactiData() {
             }
         });
         const data = await odpoved.json();
+        console.log('Nacteno ze serveru:', data);
+        console.log('Stavy ze serveru:', data.stavy);
+
         if (data.status === 'success') {
             // Při prvním načtení - pokud server nemá data, uložit výchozí
             if (prvniNacteni && (!data.transporty || !data.transporty.sobota)) {
+                console.log('Prvni nacteni - server nema data, ukladam vychozi');
                 prvniNacteni = false;
                 await ulozData();
                 return;
@@ -1156,6 +1161,7 @@ async function nactiData() {
             if (data.transporty) {
                 transporty = data.transporty;
             }
+            console.log('Lokalni stavy po nacteni:', stavy);
             vykresli();
         }
     } catch (e) {
