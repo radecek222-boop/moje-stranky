@@ -56,6 +56,68 @@
             object-fit: contain;
         }
 
+        /* Language switcher */
+        .lang-switcher {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+        }
+
+        .lang-current {
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .lang-current::after {
+            content: '';
+            border: 4px solid transparent;
+            border-top-color: #888;
+            margin-left: 2px;
+        }
+
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: hidden;
+            min-width: 100%;
+        }
+
+        .lang-switcher.open .lang-dropdown {
+            display: block;
+        }
+
+        .lang-option {
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .lang-option:hover {
+            background: #333;
+        }
+
+        .lang-option.active {
+            background: #444;
+        }
+
         .logo-tech {
             height: 200px;
             object-fit: contain;
@@ -245,6 +307,30 @@
 
         .btn-smazat:hover {
             color: #ff4444;
+        }
+
+        /* Tlačítko upravit */
+        .btn-upravit {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            color: #444;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .transport:hover .btn-upravit {
+            opacity: 1;
+        }
+
+        .btn-upravit:hover {
+            color: #fff;
         }
 
         /* Stav */
@@ -440,6 +526,19 @@
 <!-- Header s logy -->
 <div class="header">
     <img src="assets/img/um_white.png.webp" alt="United Music" class="logo-um">
+
+    <!-- Language switcher -->
+    <div class="lang-switcher" id="lang-switcher" onclick="toggleLangMenu(event)">
+        <div class="lang-current" id="lang-current">CZ</div>
+        <div class="lang-dropdown">
+            <div class="lang-option active" data-lang="cz">CZ</div>
+            <div class="lang-option" data-lang="sk">SK</div>
+            <div class="lang-option" data-lang="en">EN</div>
+            <div class="lang-option" data-lang="de">DE</div>
+            <div class="lang-option" data-lang="nl">NL</div>
+        </div>
+    </div>
+
     <img src="assets/img/front_logo_tech.png" alt="Techmission" class="logo-tech">
 </div>
 
@@ -472,8 +571,8 @@
 <!-- SOBOTA 13.12. -->
 <div class="den den-sobota" data-den="sobota">
     <div class="den-header">
-        <span>Sobota 13.12.</span>
-        <button class="btn-pridat" onclick="otevriModalPridat('sobota')">+ Pridat</button>
+        <span data-i18n="saturday">Sobota 13.12.</span>
+        <button class="btn-pridat" onclick="otevriModalPridat('sobota')" data-i18n="add">+ Pridat</button>
     </div>
     <div class="transporty" id="transporty-sobota"></div>
 </div>
@@ -481,8 +580,8 @@
 <!-- NEDĚLE 14.12. -->
 <div class="den den-nedele" data-den="nedele">
     <div class="den-header">
-        <span>Nedele 14.12.</span>
-        <button class="btn-pridat" onclick="otevriModalPridat('nedele')">+ Pridat</button>
+        <span data-i18n="sunday">Nedele 14.12.</span>
+        <button class="btn-pridat" onclick="otevriModalPridat('nedele')" data-i18n="add">+ Pridat</button>
     </div>
     <div class="transporty" id="transporty-nedele"></div>
 </div>
@@ -491,16 +590,16 @@
 <!-- Modal pro přidání/editaci -->
 <div class="modal" id="modal-edit">
     <div class="modal-obsah">
-        <div class="modal-titulek" id="modal-titulek">Pridat transport</div>
-        <input type="text" class="modal-input" id="input-cas" placeholder="Cas (napr. 21:30)">
-        <input type="text" class="modal-input" id="input-jmeno" placeholder="Jmeno pasazera">
-        <input type="text" class="modal-input" id="input-odkud" placeholder="Odkud">
-        <input type="text" class="modal-input" id="input-kam" placeholder="Kam">
-        <input type="tel" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-        <div class="modal-chyba" id="modal-chyba">Spatne heslo</div>
+        <div class="modal-titulek" id="modal-titulek" data-i18n="addTransport">Pridat transport</div>
+        <input type="text" class="modal-input" id="input-cas" data-i18n-placeholder="timePlaceholder" placeholder="Cas (napr. 21:30)">
+        <input type="text" class="modal-input" id="input-jmeno" data-i18n-placeholder="namePlaceholder" placeholder="Jmeno pasazera">
+        <input type="text" class="modal-input" id="input-odkud" data-i18n-placeholder="fromPlaceholder" placeholder="Odkud">
+        <input type="text" class="modal-input" id="input-kam" data-i18n-placeholder="toPlaceholder" placeholder="Kam">
+        <input type="tel" class="modal-input" id="input-heslo" data-i18n-placeholder="passwordPlaceholder" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="modal-chyba" id="modal-chyba" data-i18n="wrongPassword">Spatne heslo</div>
         <div class="modal-btns">
-            <button class="modal-btn modal-btn-zrusit" onclick="zavriModal()">Zrusit</button>
-            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdEdit()">Potvrdit</button>
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModal()" data-i18n="cancel">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdEdit()" data-i18n="confirm">Potvrdit</button>
         </div>
     </div>
 </div>
@@ -508,13 +607,13 @@
 <!-- Modal pro smazání -->
 <div class="modal" id="modal-smazat">
     <div class="modal-obsah">
-        <div class="modal-titulek">Smazat transport?</div>
+        <div class="modal-titulek" data-i18n="deleteTransport">Smazat transport?</div>
         <p style="color: #888; margin-bottom: 15px;" id="smazat-info"></p>
-        <input type="tel" class="modal-input" id="input-heslo-smazat" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-        <div class="modal-chyba" id="modal-chyba-smazat">Spatne heslo</div>
+        <input type="tel" class="modal-input" id="input-heslo-smazat" data-i18n-placeholder="passwordPlaceholder" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="modal-chyba" id="modal-chyba-smazat" data-i18n="wrongPassword">Spatne heslo</div>
         <div class="modal-btns">
-            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalSmazat()">Zrusit</button>
-            <button class="modal-btn modal-btn-smazat" onclick="potvrdSmazat()">Smazat</button>
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalSmazat()" data-i18n="cancel">Zrusit</button>
+            <button class="modal-btn modal-btn-smazat" onclick="potvrdSmazat()" data-i18n="delete">Smazat</button>
         </div>
     </div>
 </div>
@@ -522,13 +621,13 @@
 <!-- Modal pro reset stavu -->
 <div class="modal" id="modal-reset">
     <div class="modal-obsah">
-        <div class="modal-titulek">Resetovat stav na WAIT?</div>
+        <div class="modal-titulek" data-i18n="resetStatus">Resetovat stav na WAIT?</div>
         <p style="color: #888; margin-bottom: 15px;" id="reset-info"></p>
-        <input type="tel" class="modal-input" id="input-heslo-reset" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-        <div class="modal-chyba" id="modal-chyba-reset">Spatne heslo</div>
+        <input type="tel" class="modal-input" id="input-heslo-reset" data-i18n-placeholder="passwordPlaceholder" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="modal-chyba" id="modal-chyba-reset" data-i18n="wrongPassword">Spatne heslo</div>
         <div class="modal-btns">
-            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalReset()">Zrusit</button>
-            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdReset()">Resetovat</button>
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalReset()" data-i18n="cancel">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdReset()" data-i18n="reset">Resetovat</button>
         </div>
     </div>
 </div>
@@ -536,6 +635,214 @@
 <script>
 // Heslo pro editaci
 const HESLO = '9545';
+
+// Aktuální jazyk - výchozí angličtina
+let currentLang = localStorage.getItem('techLang') || 'en';
+
+// Překlady
+const translations = {
+    cz: {
+        saturday: 'Sobota 13.12.',
+        sunday: 'Nedele 14.12.',
+        add: '+ Pridat',
+        addTransport: 'Pridat transport',
+        editTransport: 'Upravit transport',
+        deleteTransport: 'Smazat transport?',
+        resetStatus: 'Resetovat stav na WAIT?',
+        timePlaceholder: 'Cas (napr. 21:30)',
+        namePlaceholder: 'Jmeno pasazera',
+        fromPlaceholder: 'Odkud',
+        toPlaceholder: 'Kam',
+        passwordPlaceholder: 'Heslo pro potvrzeni',
+        wrongPassword: 'Spatne heslo',
+        cancel: 'Zrusit',
+        confirm: 'Potvrdit',
+        delete: 'Smazat',
+        reset: 'Resetovat',
+        wait: 'WAIT',
+        onway: 'ON THE WAY',
+        drop: 'DROP OFF',
+        departed: 'vyjeli',
+        delivered: 'doruceno',
+        footerText: 'Aplikaci vytvořil a transport servis zajišťuje',
+        transportVan: 'transport van',
+        standby: 'STAND BY 21:00 - 06:00'
+    },
+    sk: {
+        saturday: 'Sobota 13.12.',
+        sunday: 'Nedela 14.12.',
+        add: '+ Pridat',
+        addTransport: 'Pridat transport',
+        editTransport: 'Upravit transport',
+        deleteTransport: 'Zmazat transport?',
+        resetStatus: 'Resetovat stav na WAIT?',
+        timePlaceholder: 'Cas (napr. 21:30)',
+        namePlaceholder: 'Meno pasaziera',
+        fromPlaceholder: 'Odkial',
+        toPlaceholder: 'Kam',
+        passwordPlaceholder: 'Heslo pre potvrdenie',
+        wrongPassword: 'Nespravne heslo',
+        cancel: 'Zrusit',
+        confirm: 'Potvrdit',
+        delete: 'Zmazat',
+        reset: 'Resetovat',
+        wait: 'WAIT',
+        onway: 'ON THE WAY',
+        drop: 'DROP OFF',
+        departed: 'odisli',
+        delivered: 'dorucene',
+        footerText: 'Aplikaciu vytvoril a transport servis zabezpecuje',
+        transportVan: 'transport van',
+        standby: 'STAND BY 21:00 - 06:00'
+    },
+    en: {
+        saturday: 'Saturday 13.12.',
+        sunday: 'Sunday 14.12.',
+        add: '+ Add',
+        addTransport: 'Add transport',
+        editTransport: 'Edit transport',
+        deleteTransport: 'Delete transport?',
+        resetStatus: 'Reset status to WAIT?',
+        timePlaceholder: 'Time (e.g. 21:30)',
+        namePlaceholder: 'Passenger name',
+        fromPlaceholder: 'From',
+        toPlaceholder: 'To',
+        passwordPlaceholder: 'Password to confirm',
+        wrongPassword: 'Wrong password',
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+        delete: 'Delete',
+        reset: 'Reset',
+        wait: 'WAIT',
+        onway: 'ON THE WAY',
+        drop: 'DROP OFF',
+        departed: 'departed',
+        delivered: 'delivered',
+        footerText: 'App created and transport service provided by',
+        transportVan: 'transport van',
+        standby: 'STAND BY 21:00 - 06:00'
+    },
+    de: {
+        saturday: 'Samstag 13.12.',
+        sunday: 'Sonntag 14.12.',
+        add: '+ Hinzufugen',
+        addTransport: 'Transport hinzufugen',
+        editTransport: 'Transport bearbeiten',
+        deleteTransport: 'Transport loschen?',
+        resetStatus: 'Status auf WAIT zurucksetzen?',
+        timePlaceholder: 'Zeit (z.B. 21:30)',
+        namePlaceholder: 'Passagiername',
+        fromPlaceholder: 'Von',
+        toPlaceholder: 'Nach',
+        passwordPlaceholder: 'Passwort zur Bestatigung',
+        wrongPassword: 'Falsches Passwort',
+        cancel: 'Abbrechen',
+        confirm: 'Bestatigen',
+        delete: 'Loschen',
+        reset: 'Zurucksetzen',
+        wait: 'WARTEN',
+        onway: 'UNTERWEGS',
+        drop: 'ABGESETZT',
+        departed: 'abgefahren',
+        delivered: 'zugestellt',
+        footerText: 'App erstellt und Transportservice bereitgestellt von',
+        transportVan: 'transport van',
+        standby: 'BEREITSCHAFT 21:00 - 06:00'
+    },
+    nl: {
+        saturday: 'Zaterdag 13.12.',
+        sunday: 'Zondag 14.12.',
+        add: '+ Toevoegen',
+        addTransport: 'Transport toevoegen',
+        editTransport: 'Transport bewerken',
+        deleteTransport: 'Transport verwijderen?',
+        resetStatus: 'Status resetten naar WAIT?',
+        timePlaceholder: 'Tijd (bijv. 21:30)',
+        namePlaceholder: 'Naam passagier',
+        fromPlaceholder: 'Van',
+        toPlaceholder: 'Naar',
+        passwordPlaceholder: 'Wachtwoord ter bevestiging',
+        wrongPassword: 'Verkeerd wachtwoord',
+        cancel: 'Annuleren',
+        confirm: 'Bevestigen',
+        delete: 'Verwijderen',
+        reset: 'Resetten',
+        wait: 'WACHT',
+        onway: 'ONDERWEG',
+        drop: 'AFGELEVERD',
+        departed: 'vertrokken',
+        delivered: 'afgeleverd',
+        footerText: 'App gemaakt en transportservice verzorgd door',
+        transportVan: 'transport van',
+        standby: 'STAND-BY 21:00 - 06:00'
+    }
+};
+
+// Přepnout jazyk
+function toggleLangMenu(event) {
+    event.stopPropagation();
+    const switcher = document.getElementById('lang-switcher');
+    switcher.classList.toggle('open');
+}
+
+// Zavřít menu při kliknutí mimo
+document.addEventListener('click', () => {
+    document.getElementById('lang-switcher').classList.remove('open');
+});
+
+// Vybrat jazyk
+document.querySelectorAll('.lang-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = option.dataset.lang;
+        setLanguage(lang);
+        document.getElementById('lang-switcher').classList.remove('open');
+    });
+});
+
+// Nastavit jazyk
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('techLang', lang);
+
+    // Aktualizovat tlačítko
+    document.getElementById('lang-current').textContent = lang.toUpperCase();
+
+    // Aktualizovat aktivní volbu
+    document.querySelectorAll('.lang-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === lang);
+    });
+
+    // Přeložit stránku
+    translatePage();
+    vykresli();
+}
+
+// Přeložit stránku
+function translatePage() {
+    const t = translations[currentLang];
+
+    // Přeložit elementy s data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key]) {
+            el.textContent = t[key];
+        }
+    });
+
+    // Přeložit placeholdery
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        if (t[key]) {
+            el.placeholder = t[key];
+        }
+    });
+}
+
+// Získat překlad
+function t(key) {
+    return translations[currentLang][key] || translations['cz'][key] || key;
+}
 
 // Data transportů
 let transporty = {
@@ -566,6 +873,8 @@ function generujId() {
 
 // Vykreslit transporty
 function vykresli() {
+    const tr = translations[currentLang];
+
     ['sobota', 'nedele'].forEach(den => {
         const kontejner = document.getElementById('transporty-' + den);
         kontejner.innerHTML = '';
@@ -573,39 +882,38 @@ function vykresli() {
         // Seřadit podle času
         transporty[den].sort((a, b) => a.cas.localeCompare(b.cas));
 
-        transporty[den].forEach(t => {
-            const stavData = stavy[t.id] || { stav: 'wait' };
+        transporty[den].forEach(item => {
+            const stavData = stavy[item.id] || { stav: 'wait' };
             let stavClass = 'stav-wait';
-            let stavText = 'WAIT';
+            let stavText = tr.wait;
             let stavCas = '';
 
             if (stavData.stav === 'onway') {
                 stavClass = 'stav-onway';
-                stavText = 'ON THE WAY';
-                stavCas = 'vyjeli ' + stavData.cas;
+                stavText = tr.onway;
+                stavCas = tr.departed + ' ' + stavData.cas;
             } else if (stavData.stav === 'drop') {
                 stavClass = 'stav-drop';
-                stavText = 'DROP OFF';
-                stavCas = 'doruceno ' + stavData.casDrop;
+                stavText = tr.drop;
+                stavCas = tr.delivered + ' ' + stavData.casDrop;
             }
 
             const div = document.createElement('div');
             div.className = 'transport';
-            div.dataset.id = t.id;
+            div.dataset.id = item.id;
             div.innerHTML = `
-                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${t.id}', '${den}')">&times;</button>
-                <div class="transport-cas">${t.cas}</div>
+                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
+                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${den}')">&times;</button>
+                <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${t.jmeno}</div>
-                    <div class="transport-trasa">${t.odkud} → ${t.kam}</div>
+                    <div class="transport-jmena">${item.jmeno}</div>
+                    <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
                 <div class="transport-stav">
-                    <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${t.id}')">${stavText}</button>
+                    <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
                 </div>
             `;
-            // Klik na celý transport otevře editaci všeho
-            div.addEventListener('click', () => editujVse('${t.id}', '${den}'));
             kontejner.appendChild(div);
         });
     });
@@ -865,6 +1173,13 @@ document.addEventListener('keydown', e => {
 });
 
 // Inicializace
+// Nastavit jazyk při načtení
+document.getElementById('lang-current').textContent = currentLang.toUpperCase();
+document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.lang === currentLang);
+});
+translatePage();
+
 nactiData();
 
 // Pravidelná synchronizace každé 3 sekundy
@@ -873,7 +1188,7 @@ setInterval(nactiData, 3000);
 
 <!-- Footer -->
 <footer style="text-align: center; padding: 30px 15px; margin-top: 40px; border-top: 1px solid #222; color: #555; font-size: 11px; line-height: 1.6;">
-    Aplikaci vytvořil a transport servis zajišťuje<br>
+    <span data-i18n="footerText">Aplikaci vytvořil a transport servis zajišťuje</span><br>
     <strong style="color: #888;">Radek Zikmund</strong>
     <a href="tel:+420725965826" style="color: #fff; text-decoration: none;">+420 725 965 826</a><br>
     <span style="color: #666; letter-spacing: 1px;">WHITE GLOVE SERVICE</span>
