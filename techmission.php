@@ -278,10 +278,10 @@
             color: #666;
         }
 
-        /* Tlačítko smazat */
+        /* Tlačítko smazat - pravý dolní roh */
         .btn-smazat {
             position: absolute;
-            top: 8px;
+            bottom: 8px;
             right: 8px;
             width: 28px;
             height: 28px;
