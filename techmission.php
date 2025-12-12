@@ -816,6 +816,9 @@ async function ulozData() {
     ukladaSe = false;
 }
 
+// Flag pro první načtení
+let prvniNacteni = true;
+
 // Načíst data ze serveru
 async function nactiData() {
     // Nepřepisovat lokální data pokud právě ukládáme
@@ -825,12 +828,17 @@ async function nactiData() {
         const odpoved = await fetch('api/transport_sync.php');
         const data = await odpoved.json();
         if (data.status === 'success') {
-            // Přepsat stavy ze serveru (pokud existují)
-            if (data.stavy && Object.keys(data.stavy).length > 0) {
-                stavy = data.stavy;
+            // Při prvním načtení - pokud server nemá data, uložit výchozí
+            if (prvniNacteni && (!data.transporty || !data.transporty.sobota)) {
+                prvniNacteni = false;
+                await ulozData();
+                return;
             }
-            // Přepsat transporty ze serveru (pokud existují)
-            if (data.transporty && data.transporty.sobota && data.transporty.nedele) {
+            prvniNacteni = false;
+
+            // Server je zdroj pravdy - vždy přepsat lokální data
+            stavy = data.stavy || {};
+            if (data.transporty) {
                 transporty = data.transporty;
             }
             vykresli();
