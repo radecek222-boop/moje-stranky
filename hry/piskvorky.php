@@ -787,12 +787,11 @@ try {
                     return;
                 }
 
-                const data = result.data;
+                // API vraci data primo v result objektu
+                mujSymbol = result.muj_symbol;
+                jsemNaTahu = result.jsem_na_tahu;
 
-                mujSymbol = data.muj_symbol;
-                jsemNaTahu = data.jsem_na_tahu;
-
-                if (data.hraci.length < 2) {
+                if (result.hraci.length < 2) {
                     cekaniEl.style.display = 'block';
                     hraEl.style.display = 'none';
                     return;
@@ -801,18 +800,18 @@ try {
                 cekaniEl.style.display = 'none';
                 hraEl.style.display = 'block';
 
-                aktualizujHrace(data.hraci, data.na_tahu);
-                aktualizujBoard(data.plocha);
+                aktualizujHrace(result.hraci, result.na_tahu);
+                aktualizujBoard(result.plocha);
 
-                if (data.vitez) {
+                if (result.vitez) {
                     hraSkoncila = true;
                     zastavitPolling();
                     novaHraBtn.style.display = 'inline-block';
 
-                    if (data.vitez === 'remiza') {
+                    if (result.vitez === 'remiza') {
                         statusEl.textContent = 'Remíza!';
                         statusEl.className = 'pisk-status';
-                    } else if (data.vitez === mujSymbol) {
+                    } else if (result.vitez === mujSymbol) {
                         statusEl.textContent = 'Vyhrál jsi!';
                         statusEl.className = 'pisk-status vyhral';
                     } else {
