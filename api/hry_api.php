@@ -908,7 +908,9 @@ try {
             break;
 
         default:
-            sendJsonError('Neznámá akce');
+            // Diagnostika - logovat neznámou akci
+            error_log("Hry API neznama akce: '" . $action . "' | Method: " . $_SERVER['REQUEST_METHOD'] . " | GET: " . json_encode($_GET) . " | POST keys: " . json_encode(array_keys($_POST)));
+            sendJsonError('Neznámá akce: ' . ($action ?: '(prázdná)'));
     }
 
     // ===== POMOCNÉ FUNKCE =====
