@@ -816,6 +816,9 @@ async function ulozData() {
     ukladaSe = false;
 }
 
+// Flag pro první načtení
+let prvniNacteni = true;
+
 // Načíst data ze serveru
 async function nactiData() {
     // Nepřepisovat lokální data pokud právě ukládáme
@@ -829,14 +832,19 @@ async function nactiData() {
             if (data.stavy !== undefined) {
                 stavy = data.stavy;
             }
-            // Vždy přepsat transporty ze serveru
-            if (data.transporty) {
+            // Pokud server má transporty, použít je
+            if (data.transporty && data.transporty.sobota && data.transporty.nedele) {
                 transporty = data.transporty;
+            } else if (prvniNacteni) {
+                // Při prvním načtení, pokud server nemá data, uložit výchozí
+                await ulozData();
             }
+            prvniNacteni = false;
             vykresli();
         }
     } catch (e) {
         console.log('Chyba pri nacitani');
+        vykresli();
     }
 }
 
