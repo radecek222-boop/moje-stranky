@@ -101,9 +101,25 @@ $dostupneHry = [
     [
         'id' => 'breakout',
         'nazev' => 'Breakout',
-        'popis' => 'Arkádová hra. Rozbi všechny cihly míčkem!',
+        'popis' => 'Arkádová hra. Rozbi míčkem cihly!',
         'hracu' => '1',
         'ikona' => '▬ ●',
+        'hotovo' => true
+    ],
+    [
+        'id' => 'had',
+        'nazev' => 'Had',
+        'popis' => 'Sbírej jídlo a vyhni se stěnám!',
+        'hracu' => '1',
+        'ikona' => '~o~',
+        'hotovo' => true
+    ],
+    [
+        'id' => 'tetris',
+        'nazev' => 'Tetris',
+        'popis' => 'Skládej bloky a maž řádky!',
+        'hracu' => '1',
+        'ikona' => '▢▣▤',
         'hotovo' => true
     ]
 ];
@@ -161,18 +177,30 @@ $dostupneHry = [
             gap: 2rem;
         }
 
-        /* Karty her */
+        /* Karty her - 4x2 grid */
         .hry-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .hry-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .hry-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .hra-karta {
             background: var(--hry-card);
             border: 1px solid var(--hry-border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 8px;
+            padding: 1rem;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -203,22 +231,22 @@ $dostupneHry = [
         }
 
         .hra-ikona {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            letter-spacing: 0.2em;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
         }
 
         .hra-nazev {
-            font-size: 1.5rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .hra-popis {
             color: var(--hry-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            line-height: 1.5;
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
         }
 
         .hra-info {
