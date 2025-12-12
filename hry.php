@@ -101,7 +101,6 @@ $dostupneHry = [
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/wgs-base.min.css">
     <style>
         :root {
             --hry-bg: #0a0a0a;
@@ -550,11 +549,15 @@ $dostupneHry = [
 
         // Přidat zprávu do UI
         function pridatZpravu(data) {
+            if (!data || !data.username || !data.zprava) {
+                return; // Neplatná data
+            }
+
             const div = document.createElement('div');
             div.className = 'chat-zprava';
             div.innerHTML = `
                 <span class="chat-autor">${escapeHtml(data.username)}</span>
-                <span class="chat-cas">${data.cas}</span>
+                <span class="chat-cas">${data.cas || ''}</span>
                 <div class="chat-text">${escapeHtml(data.zprava)}</div>
             `;
             chatMessages.appendChild(div);
@@ -562,7 +565,7 @@ $dostupneHry = [
 
             // Aktualizovat poslední ID pro polling
             if (data.id) {
-                posledniChatId = Math.max(posledniChatId, data.id);
+                posledniChatId = Math.max(posledniChatId, parseInt(data.id) || 0);
             }
         }
 
