@@ -290,19 +290,6 @@
             margin-top: 4px;
         }
 
-        /* Poznámka */
-        .poznamka {
-            text-align: center;
-            padding: 15px;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #888;
-            letter-spacing: 1px;
-        }
-
         /* Modal */
         .modal {
             display: none;
@@ -489,9 +476,6 @@
     <div class="transporty" id="transporty-nedele"></div>
 </div>
 
-<div class="poznamka">
-    SHOW 21:00 - 06:00 — CAR ON STAND BY
-</div>
 
 <!-- Modal pro přidání/editaci -->
 <div class="modal" id="modal-edit">
