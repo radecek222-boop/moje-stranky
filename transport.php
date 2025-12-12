@@ -1,334 +1,575 @@
+<?php
+/**
+ * TRANSPORT - Techmission Festival / United Music Events
+ * Přehled transportů pro řidiče
+ * Dočasná stránka - bude odstraněna po akci
+ */
+
+// Bez přihlášení - přístup má kdokoli s odkazem
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#000000">
-    <title>TM Transport</title>
-    <link rel="manifest" href="manifest-transport.json">
-    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport - Techmission</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #111;
             color: #fff;
             min-height: 100vh;
-            padding: 10px;
-            padding-bottom: 80px;
+            padding: 20px;
         }
-        .header {
-            text-align: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #333;
-            margin-bottom: 15px;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .header h1 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-        .header .datum {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
-        }
-        .tabs {
+
+        /* Loga */
+        .loga {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            padding: 30px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
         }
-        .tab {
-            flex: 1;
-            padding: 12px;
+
+        .loga img {
+            max-height: 80px;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
             background: #222;
-            border: none;
-            color: #888;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 20px 40px;
             border-radius: 8px;
-            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
         }
-        .tab.active {
-            background: #333;
+
+        /* Řidiči */
+        .ridici {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .ridic {
+            text-align: center;
+            padding: 20px 30px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .ridic-jmeno {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
             color: #fff;
         }
-        .sekce {
-            margin-bottom: 20px;
+
+        .ridic-telefon {
+            font-size: 22px;
+            color: #0099ff;
+            text-decoration: none;
+            display: block;
         }
-        .sekce-nazev {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
+
+        .ridic-telefon:hover {
+            text-decoration: underline;
         }
-        .jizda {
-            display: flex;
+
+        /* Dny */
+        .den {
+            margin-bottom: 40px;
+        }
+
+        .den-nazev {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 15px 20px;
+            background: #222;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 2px solid #444;
+        }
+
+        .den-nazev.vikend {
+            background: #2a2a2a;
+        }
+
+        /* Transporty */
+        .transporty {
+            border: 1px solid #333;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+
+        .transport {
+            display: grid;
+            grid-template-columns: 100px 200px 200px 180px;
             align-items: center;
-            padding: 15px 10px;
-            border-bottom: 1px solid #1a1a1a;
-            cursor: pointer;
-            transition: all 0.2s;
-            gap: 12px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            transition: background 0.2s;
         }
-        .jizda:active {
-            background: #111;
+
+        .transport:last-child {
+            border-bottom: none;
         }
-        .jizda.hotovo {
-            background: rgba(40, 167, 69, 0.15);
+
+        .transport:hover {
+            background: #1a1a1a;
         }
-        .jizda.hotovo .cas,
-        .jizda.hotovo .jmeno,
-        .jizda.hotovo .trasa {
-            opacity: 0.5;
+
+        /* Víkendové dny - lehce jiný odstín */
+        .sobota .transport {
+            background: #161616;
         }
-        .check {
-            width: 28px;
-            height: 28px;
-            border: 2px solid #444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.2s;
+
+        .sobota .transport:hover {
+            background: #1c1c1c;
         }
-        .jizda.hotovo .check {
-            background: #28a745;
-            border-color: #28a745;
+
+        .nedele .transport {
+            background: #1a1a1a;
         }
-        .check::after {
-            content: '';
-            width: 10px;
-            height: 6px;
-            border-left: 2px solid transparent;
-            border-bottom: 2px solid transparent;
-            transform: rotate(-45deg);
-            margin-top: -2px;
+
+        .nedele .transport:hover {
+            background: #202020;
         }
-        .jizda.hotovo .check::after {
-            border-color: #fff;
-        }
-        .cas {
+
+        .transport-cas {
             font-size: 20px;
             font-weight: 700;
-            min-width: 55px;
+            color: #fff;
         }
-        .info {
-            flex: 1;
-            overflow: hidden;
+
+        .transport-odkud,
+        .transport-kam {
+            font-size: 16px;
+            color: #ccc;
         }
-        .jmeno {
-            font-size: 15px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .trasa {
-            font-size: 12px;
-            color: #888;
-            margin-top: 3px;
-        }
-        .telefon-btn {
-            width: 40px;
-            height: 40px;
-            background: #222;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-        .telefon-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: #fff;
-        }
-        .self-label {
-            font-size: 11px;
+
+        .transport-odkud::before {
+            content: 'Z: ';
             color: #666;
-            background: #1a1a1a;
-            padding: 3px 8px;
-            border-radius: 4px;
         }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #111;
-            padding: 15px;
+
+        .transport-kam::before {
+            content: 'DO: ';
+            color: #666;
+        }
+
+        /* Stav */
+        .transport-stav {
             display: flex;
-            gap: 10px;
-            border-top: 1px solid #333;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
-        .footer-btn {
-            flex: 1;
-            padding: 12px;
-            background: #222;
+
+        .stav-btn {
+            padding: 10px 20px;
             border: none;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s;
+            min-width: 140px;
+            text-transform: uppercase;
         }
-        .footer-btn.reset {
+
+        .stav-wait {
             background: #333;
-            color: #888;
+            color: #fff;
         }
-        .skryto {
-            display: none;
+
+        .stav-wait:hover {
+            background: #444;
         }
-        .ridic-info {
-            background: #111;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+
+        .stav-ontheway {
+            background: #0099ff;
+            color: #fff;
+            animation: pulse 2s infinite;
+        }
+
+        .stav-dropoff {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .stav-cas {
             font-size: 12px;
             color: #888;
         }
-        .ridic-info strong {
-            color: #fff;
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Header tabulky */
+        .transport-header {
+            display: grid;
+            grid-template-columns: 100px 200px 200px 180px;
+            padding: 12px 20px;
+            background: #333;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .transport,
+            .transport-header {
+                grid-template-columns: 80px 1fr 1fr 120px;
+                gap: 10px;
+            }
+
+            .transport-cas {
+                font-size: 16px;
+            }
+
+            .transport-odkud,
+            .transport-kam {
+                font-size: 14px;
+            }
+
+            .stav-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+
+            .ridici {
+                gap: 20px;
+            }
+
+            .ridic-jmeno {
+                font-size: 22px;
+            }
+
+            .ridic-telefon {
+                font-size: 18px;
+            }
+
+            .loga {
+                gap: 30px;
+            }
+
+            .loga img {
+                max-height: 50px;
+            }
+        }
+
+        /* Poznámka */
+        .poznamka {
+            text-align: center;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .poznamka strong {
+            color: #0099ff;
         }
     </style>
 </head>
 <body>
+    <div class="container">
 
-<div class="header">
-    <h1>TM TRANSPORT</h1>
-    <div class="datum">Praha - Holešovice</div>
-</div>
+        <!-- Loga -->
+        <div class="loga">
+            <!-- Nahraďte src vlastními logy -->
+            <div class="logo-placeholder">
+                <img src="uploads/logo-united-music.png" alt="United Music"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='UNITED MUSIC';">
+            </div>
+            <div class="logo-placeholder">
+                <img src="uploads/logo-techmission.png" alt="Techmission"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='TECHMISSION';">
+            </div>
+        </div>
 
-<div class="ridic-info">
-    <strong>Milan</strong> (V-Class) - hlavní | <strong>Mirek</strong> (S-Class) - backup
-</div>
+        <!-- Řidiči -->
+        <div class="ridici">
+            <div class="ridic">
+                <div class="ridic-jmeno">MIREK</div>
+                <a href="tel:+420736611777" class="ridic-telefon">+420 736 611 777</a>
+            </div>
+            <div class="ridic">
+                <div class="ridic-jmeno">MILAN</div>
+                <a href="tel:+420735084519" class="ridic-telefon">+420 735 084 519</a>
+            </div>
+        </div>
 
-<div class="tabs">
-    <button class="tab active" onclick="zobrazDen('sobota')">SO 13.12.</button>
-    <button class="tab" onclick="zobrazDen('nedele')">NE 14.12.</button>
-</div>
+        <!-- SOBOTA 13.12. -->
+        <div class="den sobota">
+            <div class="den-nazev vikend">SOBOTA 13.12.</div>
+            <div class="transport-header">
+                <div>PICK UP</div>
+                <div>FROM</div>
+                <div>TO</div>
+                <div>STATUS</div>
+            </div>
+            <div class="transporty">
+                <div class="transport" data-id="1">
+                    <div class="transport-cas">21:30</div>
+                    <div class="transport-odkud">Marriott Airport</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 1)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="2">
+                    <div class="transport-cas">22:30</div>
+                    <div class="transport-odkud">Marriott Airport</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 2)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="3">
+                    <div class="transport-cas">22:30</div>
+                    <div class="transport-odkud">Marriott Airport</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 3)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="4">
+                    <div class="transport-cas">23:30</div>
+                    <div class="transport-odkud">Marriott Airport</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 4)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div id="obsah"></div>
+        <!-- NEDĚLE 14.12. -->
+        <div class="den nedele">
+            <div class="den-nazev vikend">NEDĚLE 14.12.</div>
+            <div class="transport-header">
+                <div>PICK UP</div>
+                <div>FROM</div>
+                <div>TO</div>
+                <div>STATUS</div>
+            </div>
+            <div class="transporty">
+                <div class="transport" data-id="5">
+                    <div class="transport-cas">01:50</div>
+                    <div class="transport-odkud">T3</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 5)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="6">
+                    <div class="transport-cas">03:00</div>
+                    <div class="transport-odkud">T3</div>
+                    <div class="transport-kam">venue</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 6)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="7">
+                    <div class="transport-cas">17:30</div>
+                    <div class="transport-odkud">Hotel Expo</div>
+                    <div class="transport-kam">T2</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 7)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+                <div class="transport" data-id="8">
+                    <div class="transport-cas">17:30</div>
+                    <div class="transport-odkud">Hotel Expo</div>
+                    <div class="transport-kam">T2</div>
+                    <div class="transport-stav">
+                        <button class="stav-btn stav-wait" onclick="zmenStav(this, 8)">WAIT</button>
+                        <span class="stav-cas"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="footer">
-    <button class="footer-btn reset" onclick="resetovat()">Resetovat</button>
-    <button class="footer-btn" onclick="sdilej()">Sdílet stav</button>
-</div>
+        <!-- Poznámka -->
+        <div class="poznamka">
+            <strong>SHOW 21:00 - 06:00</strong> - CAR ON STAND BY<br>
+            Kliknutím na tlačítko změníte stav transportu. Ostatní uvidí změnu okamžitě.
+        </div>
 
-<script>
-const DATA = {
-    sobota: [
-        { id: 's1', cas: '21:30', jmeno: 'T78 (Manuele)', odkud: 'Marriott Airport', kam: 'Venue', tel: '46701424228' },
-        { id: 's2', cas: '22:30', jmeno: 'BYORN (Bjorn)', odkud: 'Marriott Airport', kam: 'Venue', tel: '32471230478' },
-        { id: 's3', cas: '22:30', jmeno: 'BYORN manager', odkud: 'Marriott Airport', kam: 'Venue', tel: '32477082652' },
-        { id: 's4', cas: '23:30', jmeno: 'DYEN (Yanick + Sem)', odkud: 'Marriott Airport', kam: 'Venue', tel: '31642753844' }
-    ],
-    nedele: [
-        { id: 'n1', cas: '01:50', jmeno: 'Fantasm (Kenzo + Lucas)', odkud: 'T3', kam: 'Venue', tel: '' },
-        { id: 'n2', cas: '03:00', jmeno: 'Holy Priest (Simon +2)', odkud: 'T3', kam: 'Venue', tel: '4917672054357' },
-        { id: 'n3', cas: '17:30', jmeno: 'Kenzo', odkud: 'Hotel Expo', kam: 'T2', tel: '' },
-        { id: 'n4', cas: '17:30', jmeno: 'Lucas', odkud: 'Hotel Expo', kam: 'T2', tel: '' },
-        { id: 'sep', typ: 'separator', text: 'ODVOZ PO SHOW (21:00-06:00)' },
-        { id: 'n5', cas: '22:30', jmeno: 'T78', odkud: 'Venue', kam: 'Marriott Airport', self: false },
-        { id: 'n6', cas: '23:30', jmeno: 'Byorn', odkud: 'Venue', kam: 'Marriott Airport', self: false },
-        { id: 'n7', cas: '00:30', jmeno: 'Dyen', odkud: 'Venue', kam: 'Marriott Airport', self: false },
-        { id: 'n8', cas: '02:30', jmeno: 'Fantasm', odkud: 'Venue', kam: 'Hotel Expo', self: false },
-        { id: 'n9', cas: '04:00', jmeno: 'Holy Priest', odkud: 'Venue', kam: 'Marriott Airport', self: false }
-    ]
-};
+    </div>
 
-let aktualniDen = 'sobota';
-let stav = JSON.parse(localStorage.getItem('transport_stav') || '{}');
+    <script>
+        // Stavy transportů - uložené v localStorage pro synchronizaci
+        const STAVY = {
+            WAIT: 'WAIT',
+            ON_THE_WAY: 'ON THE WAY',
+            DROP_OFF: 'DROP OFF'
+        };
 
-function ulozStav() {
-    localStorage.setItem('transport_stav', JSON.stringify(stav));
-}
+        // Klíč pro localStorage
+        const STORAGE_KEY = 'techmission_transporty_stavy';
 
-function zobrazDen(den) {
-    aktualniDen = den;
-    document.querySelectorAll('.tab').forEach((t, i) => {
-        t.classList.toggle('active', (i === 0 && den === 'sobota') || (i === 1 && den === 'nedele'));
-    });
-    renderuj();
-}
-
-function toggleJizda(id) {
-    stav[id] = !stav[id];
-    ulozStav();
-    renderuj();
-}
-
-function renderuj() {
-    const obsah = document.getElementById('obsah');
-    const jizdy = DATA[aktualniDen];
-
-    let html = '';
-
-    jizdy.forEach(j => {
-        if (j.typ === 'separator') {
-            html += `<div class="sekce-nazev">${j.text}</div>`;
-            return;
+        // Načíst stavy z localStorage
+        function nactiStavy() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {};
+            } catch (e) {
+                return {};
+            }
         }
 
-        const hotovo = stav[j.id] ? 'hotovo' : '';
-        const telBtn = j.tel ? `<a href="tel:+${j.tel}" class="telefon-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </a>` : '';
+        // Uložit stavy do localStorage
+        function ulozStavy(stavy) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stavy));
+        }
 
-        html += `
-        <div class="jizda ${hotovo}" onclick="toggleJizda('${j.id}')">
-            <div class="check"></div>
-            <div class="cas">${j.cas}</div>
-            <div class="info">
-                <div class="jmeno">${j.jmeno}</div>
-                <div class="trasa">${j.odkud} → ${j.kam}</div>
-            </div>
-            ${telBtn}
-        </div>`;
-    });
+        // Změnit stav transportu
+        function zmenStav(btn, id) {
+            const stavy = nactiStavy();
+            const aktualniStav = stavy[id]?.stav || STAVY.WAIT;
 
-    obsah.innerHTML = html;
-}
+            let novyStav;
+            let cas = null;
 
-function resetovat() {
-    if (confirm('Resetovat všechny položky?')) {
-        stav = {};
-        ulozStav();
-        renderuj();
-    }
-}
+            // Přepínat stavy: WAIT -> ON THE WAY -> DROP OFF -> WAIT
+            switch (aktualniStav) {
+                case STAVY.WAIT:
+                    novyStav = STAVY.ON_THE_WAY;
+                    cas = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                    break;
+                case STAVY.ON_THE_WAY:
+                    novyStav = STAVY.DROP_OFF;
+                    cas = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                    break;
+                case STAVY.DROP_OFF:
+                    novyStav = STAVY.WAIT;
+                    cas = null;
+                    break;
+            }
 
-function sdilej() {
-    const hotove = Object.keys(stav).filter(k => stav[k]).length;
-    const celkem = DATA.sobota.length + DATA.nedele.filter(j => !j.typ).length;
-    const text = `TECHMISSION Transport: ${hotove}/${celkem} hotovo`;
+            stavy[id] = { stav: novyStav, cas: cas };
+            ulozStavy(stavy);
 
-    if (navigator.share) {
-        navigator.share({ title: 'Transport stav', text: text });
-    } else {
-        alert(text);
-    }
-}
+            // Aktualizovat UI
+            aktualizujUI();
 
-// PWA install
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw-transport.js');
-}
+            // Odeslat na server pro synchronizaci (pokud existuje API)
+            synchronizujServer(id, novyStav, cas);
+        }
 
-// Init
-renderuj();
-</script>
+        // Aktualizovat UI podle stavů
+        function aktualizujUI() {
+            const stavy = nactiStavy();
 
+            document.querySelectorAll('.transport').forEach(transport => {
+                const id = transport.dataset.id;
+                const btn = transport.querySelector('.stav-btn');
+                const casSpan = transport.querySelector('.stav-cas');
+                const data = stavy[id] || { stav: STAVY.WAIT, cas: null };
+
+                // Reset tříd
+                btn.className = 'stav-btn';
+
+                switch (data.stav) {
+                    case STAVY.WAIT:
+                        btn.classList.add('stav-wait');
+                        btn.textContent = 'WAIT';
+                        casSpan.textContent = '';
+                        break;
+                    case STAVY.ON_THE_WAY:
+                        btn.classList.add('stav-ontheway');
+                        btn.textContent = 'ON THE WAY';
+                        casSpan.textContent = data.cas ? `Vyjel: ${data.cas}` : '';
+                        break;
+                    case STAVY.DROP_OFF:
+                        btn.classList.add('stav-dropoff');
+                        btn.textContent = 'DROP OFF';
+                        casSpan.textContent = data.cas ? `Doručeno: ${data.cas}` : '';
+                        break;
+                }
+            });
+        }
+
+        // Synchronizace se serverem (pro sdílení mezi více zařízeními)
+        async function synchronizujServer(id, stav, cas) {
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('stav', stav);
+                formData.append('cas', cas || '');
+
+                await fetch('api/transport_sync.php', {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (e) {
+                // Ignorovat chyby - localStorage funguje jako záloha
+                console.log('Sync nedostupný, používám localStorage');
+            }
+        }
+
+        // Načíst stavy ze serveru
+        async function nactiZeServeru() {
+            try {
+                const response = await fetch('api/transport_sync.php');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.stavy) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.stavy));
+                        aktualizujUI();
+                    }
+                }
+            } catch (e) {
+                console.log('Server nedostupný, používám localStorage');
+            }
+        }
+
+        // Automatická aktualizace každých 10 sekund
+        setInterval(() => {
+            nactiZeServeru();
+        }, 10000);
+
+        // Inicializace při načtení stránky
+        document.addEventListener('DOMContentLoaded', () => {
+            nactiZeServeru();
+            aktualizujUI();
+        });
+    </script>
 </body>
 </html>
