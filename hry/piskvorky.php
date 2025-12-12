@@ -715,13 +715,14 @@ try {
 
                 const response = await fetch('/api/hry_api.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    mistnostId = result.data.mistnost_id;
+                    mistnostId = result.mistnost_id;
                     spustitPolling();
                 } else {
                     alert('Chyba: ' + result.message);
@@ -746,7 +747,8 @@ try {
 
                     await fetch('/api/hry_api.php', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        credentials: 'include'
                     });
                 } catch (e) {}
             }
@@ -779,7 +781,9 @@ try {
             if (!mistnostId) return;
 
             try {
-                const response = await fetch(`/api/hry_api.php?action=piskvorky_stav&mistnost_id=${mistnostId}`);
+                const response = await fetch(`/api/hry_api.php?action=piskvorky_stav&mistnost_id=${mistnostId}`, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.status !== 'success') {
@@ -787,12 +791,11 @@ try {
                     return;
                 }
 
-                const data = result.data;
+                // API vraci data primo v result objektu
+                mujSymbol = result.muj_symbol;
+                jsemNaTahu = result.jsem_na_tahu;
 
-                mujSymbol = data.muj_symbol;
-                jsemNaTahu = data.jsem_na_tahu;
-
-                if (data.hraci.length < 2) {
+                if (result.hraci.length < 2) {
                     cekaniEl.style.display = 'block';
                     hraEl.style.display = 'none';
                     return;
@@ -801,18 +804,18 @@ try {
                 cekaniEl.style.display = 'none';
                 hraEl.style.display = 'block';
 
-                aktualizujHrace(data.hraci, data.na_tahu);
-                aktualizujBoard(data.plocha);
+                aktualizujHrace(result.hraci, result.na_tahu);
+                aktualizujBoard(result.plocha);
 
-                if (data.vitez) {
+                if (result.vitez) {
                     hraSkoncila = true;
                     zastavitPolling();
                     novaHraBtn.style.display = 'inline-block';
 
-                    if (data.vitez === 'remiza') {
+                    if (result.vitez === 'remiza') {
                         statusEl.textContent = 'Remíza!';
                         statusEl.className = 'pisk-status';
-                    } else if (data.vitez === mujSymbol) {
+                    } else if (result.vitez === mujSymbol) {
                         statusEl.textContent = 'Vyhrál jsi!';
                         statusEl.className = 'pisk-status vyhral';
                     } else {
@@ -851,21 +854,22 @@ try {
 
                 const response = await fetch('/api/hry_api.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    aktualizujBoard(result.data.plocha);
-                    aktualizujHrace(result.data.hraci, result.data.na_tahu);
+                    aktualizujBoard(result.plocha);
+                    aktualizujHrace(result.hraci, result.na_tahu);
 
-                    if (result.data.vitez) {
+                    if (result.vitez) {
                         hraSkoncila = true;
                         zastavitPolling();
                         novaHraBtn.style.display = 'inline-block';
 
-                        if (result.data.vitez === mujSymbol) {
+                        if (result.vitez === mujSymbol) {
                             statusEl.textContent = 'Vyhrál jsi!';
                             statusEl.className = 'pisk-status vyhral';
                         }
@@ -905,7 +909,7 @@ try {
                     formData.append('action', 'opustit');
                     formData.append('mistnost_id', mistnostId);
                     formData.append('csrf_token', CSRF_TOKEN);
-                    await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                    await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 } catch (e) {}
             }
 
@@ -937,14 +941,18 @@ try {
         // Heartbeat
         setInterval(async () => {
             try {
-                await fetch('/api/hry_api.php?action=heartbeat');
+                await fetch('/api/hry_api.php?action=heartbeat', { credentials: 'include' });
             } catch (e) {}
         }, 30000);
 
         // Cleanup při opuštění stránky
         window.addEventListener('beforeunload', () => {
             if (mistnostId) {
-                navigator.sendBeacon('/api/hry_api.php?action=opustit&mistnost_id=' + mistnostId);
+                const data = new FormData();
+                data.append('action', 'opustit');
+                data.append('mistnost_id', mistnostId);
+                data.append('csrf_token', CSRF_TOKEN);
+                navigator.sendBeacon('/api/hry_api.php', data);
             }
         });
 

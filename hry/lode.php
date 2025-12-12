@@ -822,11 +822,11 @@ try {
                 formData.append('hra', 'lode');
                 formData.append('csrf_token', CSRF_TOKEN);
 
-                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    mistnostId = result.data.mistnost_id;
+                    mistnostId = result.mistnost_id;
                     spustitPolling();
                 } else {
                     alert('Chyba: ' + result.message);
@@ -854,17 +854,17 @@ try {
             if (!mistnostId) return;
 
             try {
-                const response = await fetch(`/api/hry_api.php?action=lode_stav&mistnost_id=${mistnostId}`);
+                const response = await fetch(`/api/hry_api.php?action=lode_stav&mistnost_id=${mistnostId}`, { credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status !== 'success') return;
 
-                const data = result.data;
-                jsemHrac1 = data.jsem_hrac1;
-                mojeZasahy = data.moje_zasahy || [];
-                souperZasahy = data.souper_zasahy || [];
+                // API vraci data primo v result objektu
+                jsemHrac1 = result.jsem_hrac1;
+                mojeZasahy = result.moje_zasahy || [];
+                souperZasahy = result.souper_zasahy || [];
 
-                if (data.hraci.length < 2) {
+                if (result.hraci.length < 2) {
                     cekaniEl.style.display = 'block';
                     hraEl.style.display = 'none';
                     return;
@@ -874,9 +874,9 @@ try {
                 hraEl.style.display = 'block';
                 souperTitle.textContent = 'Soupeř';
 
-                aktualizujHrace(data.hraci, data);
+                aktualizujHrace(result.hraci, result);
 
-                if (!data.moje_lode && faze !== 'umistovani') {
+                if (!result.moje_lode && faze !== 'umistovani') {
                     faze = 'umistovani';
                     aktualniLodIndex = 0;
                     mojePole = vytvoritPrazdnePole();
@@ -889,7 +889,7 @@ try {
                     return;
                 }
 
-                if (data.moje_lode && !data.souper_pripraveny) {
+                if (result.moje_lode && !result.souper_pripraveny) {
                     faze = 'cekaniNaSoupere';
                     placementInfo.style.display = 'none';
                     statusEl.textContent = 'Čekám až soupeř rozmístí lodě...';
@@ -898,10 +898,10 @@ try {
                     return;
                 }
 
-                if (data.stav === 'hra') {
+                if (result.stav === 'hra') {
                     faze = 'hra';
                     placementInfo.style.display = 'none';
-                    jsemNaTahu = (jsemHrac1 && data.na_tahu === 1) || (!jsemHrac1 && data.na_tahu === 2);
+                    jsemNaTahu = (jsemHrac1 && result.na_tahu === 1) || (!jsemHrac1 && result.na_tahu === 2);
 
                     statusEl.textContent = jsemNaTahu ? 'Tvůj tah - klikni na soupeřovo pole' : 'Soupeř střílí...';
                     souperBoard.classList.toggle('aktivni', jsemNaTahu);
@@ -910,13 +910,13 @@ try {
                     vykresliSouperPoleMP();
                 }
 
-                if (data.vitez) {
+                if (result.vitez) {
                     faze = 'konec';
                     zastavitPolling();
                     novaHraBtn.style.display = 'inline-block';
                     souperBoard.classList.remove('aktivni');
 
-                    const vyhral = (jsemHrac1 && data.vitez === 1) || (!jsemHrac1 && data.vitez === 2);
+                    const vyhral = (jsemHrac1 && result.vitez === 1) || (!jsemHrac1 && result.vitez === 2);
                     statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
                     statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
                 }
@@ -1003,7 +1003,7 @@ try {
                 formData.append('lode', JSON.stringify(lodeData));
                 formData.append('csrf_token', CSRF_TOKEN);
 
-                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status === 'success') {
@@ -1035,15 +1035,15 @@ try {
                 formData.append('sloupec', x);
                 formData.append('csrf_token', CSRF_TOKEN);
 
-                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                const response = await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     const cell = souperBoard.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-                    if (result.data.zasah) {
+                    if (result.zasah) {
                         cell.classList.add('hit');
                         cell.textContent = 'X';
-                        statusEl.textContent = result.data.potopena ? `Potopil jsi ${result.data.potopena}!` : 'Zásah! Střílej znovu.';
+                        statusEl.textContent = result.potopena ? `Potopil jsi ${result.potopena}!` : 'Zásah! Střílej znovu.';
                         jsemNaTahu = true;
                         souperBoard.classList.add('aktivni');
                     } else {
@@ -1054,11 +1054,11 @@ try {
 
                     mojeZasahy.push(zasahKlic);
 
-                    if (result.data.vitez) {
+                    if (result.vitez) {
                         faze = 'konec';
                         zastavitPolling();
                         novaHraBtn.style.display = 'inline-block';
-                        const vyhral = (jsemHrac1 && result.data.vitez === 1) || (!jsemHrac1 && result.data.vitez === 2);
+                        const vyhral = (jsemHrac1 && result.vitez === 1) || (!jsemHrac1 && result.vitez === 2);
                         statusEl.textContent = vyhral ? 'VYHRÁL JSI!' : 'PROHRÁL JSI!';
                         statusEl.className = 'lode-status ' + (vyhral ? 'vyhral' : 'prohral');
                     }
@@ -1080,7 +1080,7 @@ try {
                     formData.append('action', 'opustit');
                     formData.append('mistnost_id', mistnostId);
                     formData.append('csrf_token', CSRF_TOKEN);
-                    await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                    await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 } catch (e) {}
             }
 
@@ -1105,7 +1105,7 @@ try {
                 formData.append('action', 'opustit');
                 formData.append('mistnost_id', mistnostId);
                 formData.append('csrf_token', CSRF_TOKEN);
-                fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
             }
             mistnostId = null;
             zobrazLobby();
@@ -1122,13 +1122,17 @@ try {
 
         // Heartbeat
         setInterval(async () => {
-            try { await fetch('/api/hry_api.php?action=heartbeat'); } catch (e) {}
+            try { await fetch('/api/hry_api.php?action=heartbeat', { credentials: 'include' }); } catch (e) {}
         }, 30000);
 
         // Cleanup
         window.addEventListener('beforeunload', () => {
             if (mistnostId) {
-                navigator.sendBeacon('/api/hry_api.php?action=opustit&mistnost_id=' + mistnostId);
+                const data = new FormData();
+                data.append('action', 'opustit');
+                data.append('mistnost_id', mistnostId);
+                data.append('csrf_token', CSRF_TOKEN);
+                navigator.sendBeacon('/api/hry_api.php', data);
             }
         });
 

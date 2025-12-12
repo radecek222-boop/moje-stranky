@@ -40,6 +40,14 @@ class ApiResponse
      */
     public static function error($message = 'Došlo k chybě.', int $httpCode = 400, $details = null): void
     {
+        // Diagnostika - logovat vsechny chyby s kontextem
+        $action = $_GET['action'] ?? $_POST['action'] ?? '';
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        // Logovat pouze pro hry API (aby nezahltilo log)
+        if (strpos($requestUri, 'hry_api') !== false) {
+            error_log("API ERROR {$httpCode} | action='{$action}' | msg='{$message}' | method=" . ($_SERVER['REQUEST_METHOD'] ?? '') . " | GET=" . json_encode($_GET) . " | POSTkeys=" . json_encode(array_keys($_POST)));
+        }
+
         // OPRAVA: Vyčistit output buffer PŘED odesláním odpovědi
         while (ob_get_level() > 0) {
             ob_end_clean();

@@ -508,7 +508,8 @@ $currentUserId = $_SESSION['user_id'] ?? '';
 
             const response = await fetch('/api/hry_api.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'include'
             });
 
             const result = await response.json();
@@ -596,7 +597,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     // Polling - online hráči (5s)
     setInterval(async () => {
         try {
-            const response = await fetch('/api/hry_api.php?action=stav');
+            const response = await fetch('/api/hry_api.php?action=stav', { credentials: 'include' });
             const result = await response.json();
             if (result.status === 'success' && result.online) {
                 aktualizovatOnline(result.online);
@@ -607,7 +608,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     // Polling - chat (1s)
     setInterval(async () => {
         try {
-            const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId);
+            const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId, { credentials: 'include' });
             const result = await response.json();
             if (result.status === 'success' && result.chat && result.chat.length > 0) {
                 result.chat.forEach(z => {
@@ -624,7 +625,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
 
     async function aktualizovatLobby() {
         try {
-            const response = await fetch('/api/hry_api.php?action=mistnosti');
+            const response = await fetch('/api/hry_api.php?action=mistnosti', { credentials: 'include' });
             const result = await response.json();
             if (result.status === 'success' && result.mistnosti) {
                 const cekajici = result.mistnosti.filter(m => m.stav === 'ceka');
@@ -653,6 +654,21 @@ $currentUserId = $_SESSION['user_id'] ?? '';
 
 // Globalni funkce pro pripojeni ke hre
 async function pripojitSeKeHre(mistnostId, hra) {
+    // Validace mistnostId
+    mistnostId = parseInt(mistnostId, 10);
+    if (!Number.isInteger(mistnostId) || mistnostId <= 0) {
+        console.error('Neplatne mistnostId:', mistnostId);
+        alert('Neplatna mistnost');
+        return;
+    }
+
+    // Validace hra
+    if (!hra || typeof hra !== 'string') {
+        console.error('Neplatna hra:', hra);
+        alert('Neplatna hra');
+        return;
+    }
+
     try {
         const csrfToken = document.getElementById('sidebarCsrfToken').value;
         const formData = new FormData();
@@ -662,7 +678,8 @@ async function pripojitSeKeHre(mistnostId, hra) {
 
         const response = await fetch('/api/hry_api.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
         });
         const result = await response.json();
 

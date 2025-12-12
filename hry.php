@@ -568,7 +568,8 @@ $dostupneHry = [
 
                 const response = await fetch('/api/hry_api.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -576,7 +577,7 @@ $dostupneHry = [
                 if (result.status === 'success') {
                     chatInput.value = '';
                     // Přidat zprávu do chatu
-                    pridatZpravu(result.data);
+                    pridatZpravu(result);
                 } else {
                     console.error('Chat error:', result.message);
                 }
@@ -648,7 +649,7 @@ $dostupneHry = [
         // Periodicky aktualizovat online hráče (každých 5s)
         async function obnovitOnline() {
             try {
-                const response = await fetch('/api/hry_api.php?action=stav');
+                const response = await fetch('/api/hry_api.php?action=stav', { credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status === 'success' && result.online) {
@@ -663,7 +664,7 @@ $dostupneHry = [
         // Periodicky aktualizovat chat (každou 1s)
         async function obnovitChat() {
             try {
-                const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId);
+                const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId, { credentials: 'include' });
                 const result = await response.json();
 
                 if (result.status === 'success' && result.chat && result.chat.length > 0) {
@@ -706,7 +707,7 @@ $dostupneHry = [
         // Heartbeat - udržovat online status
         setInterval(async () => {
             try {
-                await fetch('/api/hry_api.php?action=heartbeat');
+                await fetch('/api/hry_api.php?action=heartbeat', { credentials: 'include' });
             } catch (e) {}
         }, 30000);
 
