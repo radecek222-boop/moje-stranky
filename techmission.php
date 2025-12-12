@@ -657,7 +657,7 @@ function editujVse(id, den) {
 }
 
 // Potvrdit editaci
-function potvrdEdit() {
+async function potvrdEdit() {
     const heslo = document.getElementById('input-heslo').value;
     if (heslo !== HESLO) {
         document.getElementById('modal-chyba').style.display = 'block';
@@ -695,7 +695,7 @@ function potvrdEdit() {
 
     zavriModal();
     vykresli();
-    ulozData();
+    await ulozData();
 }
 
 // Zavřít modal
@@ -717,7 +717,7 @@ function otevriModalSmazat(id, den) {
 }
 
 // Potvrdit smazání
-function potvrdSmazat() {
+async function potvrdSmazat() {
     const heslo = document.getElementById('input-heslo-smazat').value;
     if (heslo !== HESLO) {
         document.getElementById('modal-chyba-smazat').style.display = 'block';
@@ -729,7 +729,7 @@ function potvrdSmazat() {
 
     zavriModalSmazat();
     vykresli();
-    ulozData();
+    await ulozData();
 }
 
 // Zavřít modal smazání
@@ -739,18 +739,18 @@ function zavriModalSmazat() {
 }
 
 // Změnit stav transportu
-function zmenStav(id) {
+async function zmenStav(id) {
     const aktualniStav = stavy[id]?.stav || 'wait';
     const cas = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
 
     if (aktualniStav === 'wait') {
         stavy[id] = { stav: 'onway', cas: cas };
         vykresli();
-        ulozData();
+        await ulozData();
     } else if (aktualniStav === 'onway') {
         stavy[id] = { stav: 'drop', casDrop: cas, cas: stavy[id].cas };
         vykresli();
-        ulozData();
+        await ulozData();
     } else if (aktualniStav === 'drop') {
         // DROP OFF - otevřít modal pro reset
         otevriModalReset(id);
@@ -775,7 +775,7 @@ function otevriModalReset(id) {
 }
 
 // Potvrdit reset stavu
-function potvrdReset() {
+async function potvrdReset() {
     const heslo = document.getElementById('input-heslo-reset').value;
     if (heslo !== HESLO) {
         document.getElementById('modal-chyba-reset').style.display = 'block';
@@ -787,7 +787,7 @@ function potvrdReset() {
 
     zavriModalReset();
     vykresli();
-    ulozData();
+    await ulozData();
 }
 
 // Zavřít modal reset
@@ -825,18 +825,19 @@ async function nactiData() {
         const odpoved = await fetch('api/transport_sync.php');
         const data = await odpoved.json();
         if (data.status === 'success') {
-            // Vždy přepsat stavy ze serveru (server má vždy pravdu)
-            if (data.stavy !== undefined) {
+            // Přepsat stavy ze serveru (pokud existují)
+            if (data.stavy && Object.keys(data.stavy).length > 0) {
                 stavy = data.stavy;
             }
-            // Vždy přepsat transporty ze serveru
-            if (data.transporty) {
+            // Přepsat transporty ze serveru (pokud existují)
+            if (data.transporty && data.transporty.sobota && data.transporty.nedele) {
                 transporty = data.transporty;
             }
             vykresli();
         }
     } catch (e) {
         console.log('Chyba pri nacitani');
+        vykresli();
     }
 }
 
