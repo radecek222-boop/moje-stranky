@@ -477,7 +477,7 @@ $dostupneHry = [
                             </div>
                             <?php else: ?>
                                 <?php foreach ($chatZpravy as $zprava): ?>
-                                <div class="chat-zprava">
+                                <div class="chat-zprava" data-id="<?php echo (int)$zprava['id']; ?>">
                                     <span class="chat-autor"><?php echo htmlspecialchars($zprava['username']); ?></span>
                                     <span class="chat-cas"><?php echo date('H:i', strtotime($zprava['cas'])); ?></span>
                                     <div class="chat-text"><?php echo htmlspecialchars($zprava['zprava']); ?></div>
@@ -508,6 +508,15 @@ $dostupneHry = [
         // Sledovat poslední ID zprávy pro polling
         let posledniChatId = 0;
         const zobrazeneZpravyIds = new Set(); // Sledování již zobrazených zpráv
+
+        // Inicializovat z existujících zpráv v DOM (z PHP)
+        document.querySelectorAll('#chatMessages .chat-zprava[data-id]').forEach(el => {
+            const id = parseInt(el.getAttribute('data-id')) || 0;
+            if (id > 0) {
+                zobrazeneZpravyIds.add(id);
+                posledniChatId = Math.max(posledniChatId, id);
+            }
+        });
 
         // Scroll chat dolů
         function scrollChatDolu() {
