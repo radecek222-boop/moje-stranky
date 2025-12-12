@@ -47,27 +47,31 @@
         .logo-tech {
             height: 200px;
             object-fit: contain;
-            margin-top: 10px;
+            margin-top: 30px;
         }
 
         /* Řidiči */
         .ridici {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
             margin-bottom: 25px;
             padding-bottom: 20px;
             border-bottom: 1px solid #333;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .ridic {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: grid;
+            justify-items: center;
+            text-align: center;
+            gap: 8px;
         }
 
         .ridic-info {
-            text-align: left;
+            text-align: center;
         }
 
         .ridic-jmeno {
@@ -90,10 +94,9 @@
         }
 
         .ridic-auto-svg {
-            width: 24px;
-            height: 24px;
-            fill: #666;
-            margin-right: 8px;
+            width: 28px;
+            height: 28px;
+            fill: #888;
         }
 
         .ridic-tel {
@@ -392,18 +395,8 @@
 
         @media (max-width: 500px) {
             .ridici {
-                gap: 15px;
-            }
-
-            .ridic {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .ridic-auto-svg {
-                margin-right: 0;
-                margin-bottom: 5px;
+                gap: 20px;
+                max-width: 100%;
             }
 
             .transport {
