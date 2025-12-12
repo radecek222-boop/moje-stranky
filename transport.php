@@ -405,9 +405,18 @@
 
         @media (max-width: 500px) {
             .ridici {
-                flex-direction: column;
                 gap: 15px;
+            }
+
+            .ridic {
+                flex-direction: column;
                 align-items: center;
+                text-align: center;
+            }
+
+            .ridic-auto-svg {
+                margin-right: 0;
+                margin-bottom: 5px;
             }
 
             .transport {
