@@ -6,6 +6,9 @@
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Soubory pro uložení dat (jednoduchá implementace bez databáze)
 $dataFile = __DIR__ . '/../logs/transport_data.json';
@@ -14,13 +17,18 @@ $dataFile = __DIR__ . '/../logs/transport_data.json';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (file_exists($dataFile)) {
         $data = json_decode(file_get_contents($dataFile), true);
+        // Vrátit stavy jako objekt (ne pole) - použít (object) pro prázdné
+        $stavy = $data['stavy'] ?? [];
+        if (empty($stavy)) {
+            $stavy = new stdClass();
+        }
         echo json_encode([
             'status' => 'success',
-            'stavy' => $data['stavy'] ?? [],
+            'stavy' => $stavy,
             'transporty' => $data['transporty'] ?? null
         ]);
     } else {
-        echo json_encode(['status' => 'success', 'stavy' => [], 'transporty' => null]);
+        echo json_encode(['status' => 'success', 'stavy' => new stdClass(), 'transporty' => null]);
     }
     exit;
 }
