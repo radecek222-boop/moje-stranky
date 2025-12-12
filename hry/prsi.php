@@ -56,20 +56,24 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prší | White Glove Service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/wgs-base.min.css">
     <style>
         :root {
-            --prsi-bg: #0a4a0a;
-            --prsi-table: #0d5f0d;
-            --prsi-border: #1a7a1a;
+            --prsi-bg: #0a0a0a;
+            --prsi-table: #1a1a1a;
+            --prsi-border: #333;
             --prsi-card-bg: #fff;
             --prsi-card-border: #ccc;
             --prsi-red: #c41e3a;
             --prsi-black: #1a1a1a;
-            --prsi-accent: #39ff14;
+            --prsi-accent: #0099ff;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
             background: var(--prsi-bg);
             min-height: 100vh;
             overflow-x: hidden;
@@ -84,13 +88,13 @@ try {
         /* Herní stůl */
         .herni-stul {
             background: var(--prsi-table);
-            border: 4px solid var(--prsi-border);
+            border: 2px solid var(--prsi-border);
             border-radius: 20px;
             min-height: 70vh;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
         }
 
         /* Protihráč (nahoře) */
@@ -287,7 +291,7 @@ try {
 
         .akce-btn:hover {
             background: var(--prsi-accent);
-            color: #000;
+            color: #fff;
             border-color: var(--prsi-accent);
         }
 

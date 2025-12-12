@@ -70,25 +70,25 @@ $dostupneHry = [
         'id' => 'lode',
         'nazev' => 'Lodě',
         'popis' => 'Námořní bitva! Najdi a potop všechny soupeřovy lodě.',
-        'hracu' => '1-2',
+        'hracu' => '1',
         'ikona' => '~~~',
-        'hotovo' => false
+        'hotovo' => true
     ],
     [
         'id' => 'pong',
         'nazev' => 'Pong',
         'popis' => 'Klasická arkádová hra. Odraž míček a poraz soupeře!',
-        'hracu' => '1-2',
+        'hracu' => '1',
         'ikona' => '| o |',
-        'hotovo' => false
+        'hotovo' => true
     ],
     [
         'id' => 'piskvorky',
         'nazev' => 'Piškvorky',
         'popis' => 'Jednoduchá strategická hra pro 2 hráče.',
-        'hracu' => '2',
+        'hracu' => '1',
         'ikona' => '✕○',
-        'hotovo' => false
+        'hotovo' => true
     ]
 ];
 ?>
