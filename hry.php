@@ -399,18 +399,6 @@ $dostupneHry = [
     <?php include __DIR__ . '/includes/hamburger-menu.php'; ?>
 
     <main id="main-content" class="hry-container">
-        <div class="hry-header">
-            <h1>HERNÍ ZÓNA</h1>
-            <p>
-                Proč se chvilku neodreagovat, ne?
-                <svg class="smajlik" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 8px;">
-                    <circle cx="12" cy="12" r="10" stroke="#0099ff" stroke-width="2" fill="none"/>
-                    <circle cx="8" cy="10" r="1.5" fill="#0099ff"/>
-                    <circle cx="16" cy="10" r="1.5" fill="#0099ff"/>
-                    <path d="M8 15c1.5 2 6.5 2 8 0" stroke="#0099ff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </p>
-        </div>
 
         <div class="hry-layout">
             <!-- Hlavní obsah - karty her -->

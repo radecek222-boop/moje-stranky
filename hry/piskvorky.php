@@ -950,5 +950,7 @@ try {
 
     })();
     </script>
+
+<?php include __DIR__ . '/../includes/hry-sidebar.php'; ?>
 </body>
 </html>
