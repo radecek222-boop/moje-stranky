@@ -78,7 +78,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
             <div class="sidebar-header">CHAT</div>
             <div class="sidebar-chat-messages" id="sidebarChatMessages">
                 <?php foreach ($chatZpravy as $zprava): ?>
-                <div class="sidebar-zprava">
+                <div class="sidebar-zprava" data-id="<?php echo (int)$zprava['id']; ?>">
                     <span class="sidebar-autor"><?php echo htmlspecialchars($zprava['username']); ?></span>
                     <span class="sidebar-cas"><?php echo date('H:i', strtotime($zprava['cas'])); ?></span>
                     <div class="sidebar-text"><?php echo htmlspecialchars($zprava['zprava']); ?></div>
@@ -334,6 +334,15 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     let posledniChatId = 0;
     let sidebarOpen = false;
     const zobrazeneZpravyIds = new Set(); // Sledování již zobrazených zpráv
+
+    // Inicializovat z existujících zpráv v DOM (z PHP)
+    document.querySelectorAll('#sidebarChatMessages .sidebar-zprava[data-id]').forEach(el => {
+        const id = parseInt(el.getAttribute('data-id')) || 0;
+        if (id > 0) {
+            zobrazeneZpravyIds.add(id);
+            posledniChatId = Math.max(posledniChatId, id);
+        }
+    });
 
     // Nastavit stav ikony zvuku podle uloženého nastavení
     function aktualizovatIkonuZvuku() {
