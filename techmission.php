@@ -299,15 +299,11 @@
             color: #ff6666;
         }
 
-        /* Wrapper pro čas a tužku */
-        .transport-cas-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Tlačítko upravit */
+        /* Tlačítko upravit - levý dolní roh */
         .btn-upravit {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
             background: transparent;
             border: none;
             color: #888;
@@ -315,6 +311,7 @@
             cursor: pointer;
             padding: 0;
             transition: all 0.2s;
+            z-index: 10;
         }
 
         .btn-upravit:hover {
@@ -891,10 +888,8 @@ function vykresli() {
             div.dataset.id = item.id;
             div.innerHTML = `
                 <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${den}')">&times;</button>
-                <div class="transport-cas-wrapper">
-                    <div class="transport-cas">${item.cas}</div>
-                    <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
-                </div>
+                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
+                <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
                     <div class="transport-jmena">${item.jmeno}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
