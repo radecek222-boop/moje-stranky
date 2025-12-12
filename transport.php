@@ -11,10 +11,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Techmission</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/front_logo_tech.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/front_logo_tech.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/front_logo_tech.png">
-    <link rel="shortcut icon" href="assets/img/front_logo_tech.png">
+    <!-- Favicon pro desktop -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/front_logo_tech.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/front_logo_tech.png">
+    <link rel="shortcut icon" href="/assets/img/front_logo_tech.png">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/front_logo_tech.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Techmission">
+    <!-- Android -->
+    <link rel="manifest" href="/manifest-transport.json">
+    <meta name="theme-color" content="#000000">
     <style>
         * {
             margin: 0;
