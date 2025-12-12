@@ -283,19 +283,16 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: transparent;
             border: none;
-            color: #444;
+            color: #666;
             font-size: 16px;
             cursor: pointer;
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .transport:hover .btn-smazat {
             opacity: 1;
+            transition: all 0.2s;
+            z-index: 10;
         }
 
         .btn-smazat:hover {
@@ -307,19 +304,16 @@
             position: absolute;
             top: 8px;
             left: 8px;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: transparent;
             border: none;
-            color: #444;
+            color: #666;
             font-size: 14px;
             cursor: pointer;
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .transport:hover .btn-upravit {
             opacity: 1;
+            transition: all 0.2s;
+            z-index: 10;
         }
 
         .btn-upravit:hover {
