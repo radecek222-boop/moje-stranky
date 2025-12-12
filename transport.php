@@ -727,8 +727,12 @@ function zmenStav(id) {
     ulozData();
 }
 
+// Flag pro zamezení přepsání během ukládání
+let ukladaSe = false;
+
 // Uložit data na server
 async function ulozData() {
+    ukladaSe = true;
     try {
         const formData = new FormData();
         formData.append('stavy', JSON.stringify(stavy));
@@ -740,16 +744,26 @@ async function ulozData() {
     } catch (e) {
         console.log('Chyba pri ukladani');
     }
+    ukladaSe = false;
 }
 
 // Načíst data ze serveru
 async function nactiData() {
+    // Nepřepisovat lokální data pokud právě ukládáme
+    if (ukladaSe) return;
+
     try {
         const odpoved = await fetch('api/transport_sync.php');
         const data = await odpoved.json();
         if (data.status === 'success') {
-            if (data.stavy) stavy = data.stavy;
-            if (data.transporty) transporty = data.transporty;
+            // Pouze přepsat pokud server má skutečná data (ne prázdný objekt)
+            if (data.stavy && Object.keys(data.stavy).length > 0) {
+                // Sloučit server stavy s lokálními - server má přednost
+                stavy = { ...stavy, ...data.stavy };
+            }
+            if (data.transporty && (data.transporty.sobota || data.transporty.nedele)) {
+                transporty = data.transporty;
+            }
             vykresli();
         }
     } catch (e) {
