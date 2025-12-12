@@ -72,6 +72,23 @@ try {
             sendJsonSuccess('OK', ['online' => $online, 'chat' => $chat]);
             break;
 
+        // ===== CHAT POLL - rychlé načtení nových zpráv =====
+        case 'chat_poll':
+            $posledniId = (int)($_GET['posledni_id'] ?? 0);
+
+            $stmt = $pdo->prepare("
+                SELECT id, username, zprava, DATE_FORMAT(cas, '%H:%i') as cas
+                FROM wgs_hry_chat
+                WHERE mistnost_id IS NULL AND id > :posledni_id
+                ORDER BY id ASC
+                LIMIT 50
+            ");
+            $stmt->execute(['posledni_id' => $posledniId]);
+            $chat = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            sendJsonSuccess('OK', ['chat' => $chat]);
+            break;
+
         // ===== CHAT - odeslat zprávu =====
         case 'chat':
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
