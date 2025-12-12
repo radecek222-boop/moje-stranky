@@ -582,21 +582,22 @@ $dostupneHry = [
         });
 
         // Periodicky aktualizovat online hráče (každých 5s)
-        setInterval(async () => {
+        async function obnovitOnline() {
             try {
                 const response = await fetch('/api/hry_api.php?action=stav');
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                if (result.status === 'success' && result.data.online) {
                     aktualizovatOnline(result.data.online);
                 }
             } catch (error) {
                 console.error('Online polling error:', error);
             }
-        }, 5000);
+        }
+        setInterval(obnovitOnline, 5000);
 
         // Periodicky aktualizovat chat (každou 1s)
-        setInterval(async () => {
+        async function obnovitChat() {
             try {
                 const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId);
                 const result = await response.json();
@@ -610,7 +611,8 @@ $dostupneHry = [
             } catch (error) {
                 console.error('Chat polling error:', error);
             }
-        }, 1000);
+        }
+        setInterval(obnovitChat, 1000);
 
         // Aktualizovat seznam online hráčů
         function aktualizovatOnline(hraci) {
