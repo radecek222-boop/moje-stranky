@@ -853,8 +853,8 @@ document.addEventListener('keydown', e => {
 // Inicializace
 nactiData();
 
-// Pravidelná synchronizace každých 10 sekund
-setInterval(nactiData, 10000);
+// Pravidelná synchronizace každých 5 sekund
+setInterval(nactiData, 5000);
 </script>
 
 </body>
