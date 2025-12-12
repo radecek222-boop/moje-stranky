@@ -45,7 +45,7 @@
         }
 
         .logo-tech {
-            height: 100px;
+            height: 200px;
             object-fit: contain;
             margin-top: 10px;
         }
