@@ -507,6 +507,7 @@ $dostupneHry = [
 
         // Sledovat poslední ID zprávy pro polling
         let posledniChatId = 0;
+        const zobrazeneZpravyIds = new Set(); // Sledování již zobrazených zpráv
 
         // Scroll chat dolů
         function scrollChatDolu() {
@@ -557,8 +558,15 @@ $dostupneHry = [
                 return; // Neplatná data
             }
 
+            // Kontrola duplicity - pokud už zprávu máme, přeskočit
+            const zpravaId = parseInt(data.id) || 0;
+            if (zpravaId > 0 && zobrazeneZpravyIds.has(zpravaId)) {
+                return; // Zpráva už existuje, nepřidávat
+            }
+
             const div = document.createElement('div');
             div.className = 'chat-zprava';
+            div.setAttribute('data-id', zpravaId);
             div.innerHTML = `
                 <span class="chat-autor">${escapeHtml(data.username)}</span>
                 <span class="chat-cas">${data.cas || ''}</span>
@@ -566,17 +574,23 @@ $dostupneHry = [
             `;
             chatMessages.appendChild(div);
 
-            // Omezit na max 10 zpráv
+            // Zapamatovat si ID
+            if (zpravaId > 0) {
+                zobrazeneZpravyIds.add(zpravaId);
+                posledniChatId = Math.max(posledniChatId, zpravaId);
+            }
+
+            // Odstranit staré zprávy (max 10)
             while (chatMessages.children.length > 10) {
-                chatMessages.removeChild(chatMessages.firstChild);
+                const stara = chatMessages.firstChild;
+                const stareId = parseInt(stara.getAttribute('data-id')) || 0;
+                if (stareId > 0) {
+                    zobrazeneZpravyIds.delete(stareId);
+                }
+                chatMessages.removeChild(stara);
             }
 
             scrollChatDolu();
-
-            // Aktualizovat poslední ID pro polling
-            if (data.id) {
-                posledniChatId = Math.max(posledniChatId, parseInt(data.id) || 0);
-            }
         }
 
         // Escape HTML

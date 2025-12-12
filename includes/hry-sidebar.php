@@ -333,6 +333,7 @@ $currentUserId = $_SESSION['user_id'] ?? '';
 
     let posledniChatId = 0;
     let sidebarOpen = false;
+    const zobrazeneZpravyIds = new Set(); // Sledování již zobrazených zpráv
 
     // Nastavit stav ikony zvuku podle uloženého nastavení
     function aktualizovatIkonuZvuku() {
@@ -415,8 +416,15 @@ $currentUserId = $_SESSION['user_id'] ?? '';
     function pridatZpravu(data, prehratZvuk = true) {
         if (!data || !data.username || !data.zprava) return;
 
+        // Kontrola duplicity - pokud už zprávu máme, přeskočit
+        const zpravaId = parseInt(data.id) || 0;
+        if (zpravaId > 0 && zobrazeneZpravyIds.has(zpravaId)) {
+            return; // Zpráva už existuje, nepřidávat
+        }
+
         const div = document.createElement('div');
         div.className = 'sidebar-zprava';
+        div.setAttribute('data-id', zpravaId);
         div.innerHTML = `
             <span class="sidebar-autor">${escapeHtml(data.username)}</span>
             <span class="sidebar-cas">${data.cas || ''}</span>
@@ -424,15 +432,23 @@ $currentUserId = $_SESSION['user_id'] ?? '';
         `;
         chatMessages.appendChild(div);
 
+        // Zapamatovat si ID
+        if (zpravaId > 0) {
+            zobrazeneZpravyIds.add(zpravaId);
+            posledniChatId = Math.max(posledniChatId, zpravaId);
+        }
+
+        // Odstranit staré zprávy (max 10)
         while (chatMessages.children.length > 10) {
-            chatMessages.removeChild(chatMessages.firstChild);
+            const stara = chatMessages.firstChild;
+            const stareId = parseInt(stara.getAttribute('data-id')) || 0;
+            if (stareId > 0) {
+                zobrazeneZpravyIds.delete(stareId);
+            }
+            chatMessages.removeChild(stara);
         }
 
         scrollChatDolu();
-
-        if (data.id) {
-            posledniChatId = Math.max(posledniChatId, parseInt(data.id) || 0);
-        }
 
         // Přehrát zvuk pro novou zprávu
         if (prehratZvuk && window.HryZvuky) {
