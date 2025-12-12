@@ -715,7 +715,8 @@ try {
 
                 const response = await fetch('/api/hry_api.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -746,7 +747,8 @@ try {
 
                     await fetch('/api/hry_api.php', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        credentials: 'include'
                     });
                 } catch (e) {}
             }
@@ -779,7 +781,9 @@ try {
             if (!mistnostId) return;
 
             try {
-                const response = await fetch(`/api/hry_api.php?action=piskvorky_stav&mistnost_id=${mistnostId}`);
+                const response = await fetch(`/api/hry_api.php?action=piskvorky_stav&mistnost_id=${mistnostId}`, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.status !== 'success') {
@@ -850,7 +854,8 @@ try {
 
                 const response = await fetch('/api/hry_api.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -904,7 +909,7 @@ try {
                     formData.append('action', 'opustit');
                     formData.append('mistnost_id', mistnostId);
                     formData.append('csrf_token', CSRF_TOKEN);
-                    await fetch('/api/hry_api.php', { method: 'POST', body: formData });
+                    await fetch('/api/hry_api.php', { method: 'POST', body: formData, credentials: 'include' });
                 } catch (e) {}
             }
 
@@ -936,7 +941,7 @@ try {
         // Heartbeat
         setInterval(async () => {
             try {
-                await fetch('/api/hry_api.php?action=heartbeat');
+                await fetch('/api/hry_api.php?action=heartbeat', { credentials: 'include' });
             } catch (e) {}
         }, 30000);
 
