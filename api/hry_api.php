@@ -833,8 +833,9 @@ try {
                 SELECT m.id, m.nazev, m.max_hracu,
                        (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet
                 FROM wgs_hry_mistnosti m
-                WHERE m.hra = :hra AND m.stav = 'ceka'
-                HAVING pocet < max_hracu
+                WHERE m.hra = :hra
+                  AND m.stav = 'ceka'
+                  AND (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) < m.max_hracu
                 ORDER BY m.vytvoreno ASC
                 LIMIT 1
             ");
