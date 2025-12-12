@@ -825,19 +825,18 @@ async function nactiData() {
         const odpoved = await fetch('api/transport_sync.php');
         const data = await odpoved.json();
         if (data.status === 'success') {
-            // Pouze přepsat pokud server má skutečná data (ne prázdný objekt)
-            if (data.stavy && Object.keys(data.stavy).length > 0) {
-                // Sloučit server stavy s lokálními - server má přednost
-                stavy = { ...stavy, ...data.stavy };
+            // Vždy přepsat stavy ze serveru (server má vždy pravdu)
+            if (data.stavy !== undefined) {
+                stavy = data.stavy;
             }
-            if (data.transporty && (data.transporty.sobota || data.transporty.nedele)) {
+            // Vždy přepsat transporty ze serveru
+            if (data.transporty) {
                 transporty = data.transporty;
             }
             vykresli();
         }
     } catch (e) {
         console.log('Chyba pri nacitani');
-        vykresli();
     }
 }
 
