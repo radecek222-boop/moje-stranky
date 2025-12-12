@@ -86,16 +86,13 @@
             font-size: 11px;
             color: #888;
             margin-top: 2px;
+            text-transform: uppercase;
         }
 
         .ridic-standby {
             font-size: 9px;
             color: #666;
             margin-top: 2px;
-            text-transform: lowercase;
-        }
-
-        .ridic-standby.standby-caps {
             text-transform: uppercase;
         }
 
@@ -247,7 +244,7 @@
         }
 
         .stav-btn {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
@@ -256,6 +253,10 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
         }
 
         .stav-wait {
@@ -275,7 +276,7 @@
         .stav-drop {
             background: #111;
             color: #39ff14;
-            cursor: default;
+            cursor: pointer;
             border: 1px solid #39ff14;
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.2);
             animation: drop-pulse 2s ease-in-out infinite;
@@ -503,6 +504,20 @@
     </div>
 </div>
 
+<!-- Modal pro reset stavu -->
+<div class="modal" id="modal-reset">
+    <div class="modal-obsah">
+        <div class="modal-titulek">Resetovat stav na WAIT?</div>
+        <p style="color: #888; margin-bottom: 15px;" id="reset-info"></p>
+        <input type="password" class="modal-input" id="input-heslo-reset" placeholder="Heslo pro potvrzeni">
+        <div class="modal-chyba" id="modal-chyba-reset">Spatne heslo</div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalReset()">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" onclick="potvrdReset()">Resetovat</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // Heslo pro editaci
 const HESLO = '7890';
@@ -527,6 +542,7 @@ let stavy = {};
 // Aktuální editace
 let editAkce = null; // { typ: 'pridat'/'editovat', den: 'sobota'/'nedele', id: null/string, pole: null/'cas'/'jmeno'/'trasa' }
 let smazatId = null;
+let resetId = null;
 
 // Generovat unikátní ID
 function generujId() {
@@ -714,13 +730,55 @@ function zmenStav(id) {
 
     if (aktualniStav === 'wait') {
         stavy[id] = { stav: 'onway', cas: cas };
+        vykresli();
+        ulozData();
     } else if (aktualniStav === 'onway') {
         stavy[id] = { stav: 'drop', casDrop: cas, cas: stavy[id].cas };
+        vykresli();
+        ulozData();
+    } else if (aktualniStav === 'drop') {
+        // DROP OFF - otevřít modal pro reset
+        otevriModalReset(id);
     }
-    // drop je finální stav
+}
 
+// Otevřít modal pro reset stavu
+function otevriModalReset(id) {
+    resetId = id;
+    // Najít transport info
+    let info = 'Transport';
+    ['sobota', 'nedele'].forEach(den => {
+        const transport = transporty[den].find(t => t.id === id);
+        if (transport) {
+            info = transport.cas + ' - ' + transport.jmeno;
+        }
+    });
+    document.getElementById('reset-info').textContent = info;
+    document.getElementById('input-heslo-reset').value = '';
+    document.getElementById('modal-chyba-reset').style.display = 'none';
+    document.getElementById('modal-reset').classList.add('aktivni');
+}
+
+// Potvrdit reset stavu
+function potvrdReset() {
+    const heslo = document.getElementById('input-heslo-reset').value;
+    if (heslo !== HESLO) {
+        document.getElementById('modal-chyba-reset').style.display = 'block';
+        return;
+    }
+
+    // Resetovat stav na wait
+    delete stavy[resetId];
+
+    zavriModalReset();
     vykresli();
     ulozData();
+}
+
+// Zavřít modal reset
+function zavriModalReset() {
+    document.getElementById('modal-reset').classList.remove('aktivni');
+    resetId = null;
 }
 
 // Flag pro zamezení přepsání během ukládání
@@ -773,6 +831,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         zavriModal();
         zavriModalSmazat();
+        zavriModalReset();
     }
 });
 
