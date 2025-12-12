@@ -226,32 +226,19 @@ try {
             // Použít číslo nabídky nebo fallback na ID
             $cisloPro = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
 
-            // Načíst BCC z šablony notifikací
-            $bccEmails = [];
-            $stmtNotif = $pdo->prepare("SELECT bcc_emails FROM wgs_notifications WHERE id = 'price_quote_sent' LIMIT 1");
-            $stmtNotif->execute();
-            $notifRow = $stmtNotif->fetch(PDO::FETCH_ASSOC);
-            if ($notifRow && !empty($notifRow['bcc_emails'])) {
-                $bccEmails = json_decode($notifRow['bcc_emails'], true) ?: [];
-            }
-
-            // Použít enqueue místo add pro podporu BCC
-            $emailQueue->enqueue([
-                'to' => $nabidka['zakaznik_email'],
-                'to_name' => $nabidka['zakaznik_jmeno'],
-                'subject' => 'Cenová nabídka č. ' . $cisloPro . ' - White Glove Service',
-                'body' => $emailBody,
-                'notification_id' => 'nabidka_' . $nabidka['id'],
-                'bcc' => $bccEmails,
-                'priority' => 'high'
-            ]);
+            // EmailQueue->add() automaticky načte CC/BCC ze šablony 'price_quote_sent'
+            $emailQueue->add(
+                $nabidka['zakaznik_email'],
+                'Cenová nabídka č. ' . $cisloPro . ' - White Glove Service',
+                $emailBody,
+                'price_quote_sent'  // ID šablony - automaticky se načtou CC/BCC
+            );
 
             // Aktualizovat stav
             $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'odeslana', odeslano_at = NOW() WHERE id = ?");
             $stmt->execute([$nabidkaId]);
 
-            $bccInfo = !empty($bccEmails) ? ' (BCC: ' . implode(', ', $bccEmails) . ')' : '';
-            sendJsonSuccess('Nabídka odeslána na ' . $nabidka['zakaznik_email'] . $bccInfo);
+            sendJsonSuccess('Nabídka odeslána na ' . $nabidka['zakaznik_email']);
             break;
 
         // ========================================

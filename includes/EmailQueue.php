@@ -35,12 +35,39 @@ function __construct($pdo = null) {
      * @return bool Success
      */
     public function add($toEmail, $subject, $body, $notificationId = 'custom', $relatedId = null) {
+        // Automaticky načíst BCC ze šablony notifikace
+        $bccEmails = [];
+        $ccEmails = [];
+
+        if ($notificationId !== 'custom' && $this->pdo) {
+            try {
+                // Zkusit najít šablonu podle notification_id
+                $stmt = $this->pdo->prepare("SELECT cc_emails, bcc_emails FROM wgs_notifications WHERE id = :id OR trigger_event = :id LIMIT 1");
+                $stmt->execute(['id' => $notificationId]);
+                $notifRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                if ($notifRow) {
+                    if (!empty($notifRow['cc_emails'])) {
+                        $ccEmails = json_decode($notifRow['cc_emails'], true) ?: [];
+                    }
+                    if (!empty($notifRow['bcc_emails'])) {
+                        $bccEmails = json_decode($notifRow['bcc_emails'], true) ?: [];
+                    }
+                }
+            } catch (\PDOException $e) {
+                // Ignorovat chyby, pokračovat bez CC/BCC
+                error_log("EmailQueue: Nelze načíst CC/BCC pro notifikaci {$notificationId}: " . $e->getMessage());
+            }
+        }
+
         return $this->enqueue([
             'to' => $toEmail,
             'to_name' => null,
             'subject' => $subject,
             'body' => $body,
             'notification_id' => $notificationId,
+            'cc' => $ccEmails,
+            'bcc' => $bccEmails,
             'priority' => 'normal'
         ]);
     }
