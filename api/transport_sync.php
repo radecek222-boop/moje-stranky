@@ -1,57 +1,62 @@
 <?php
 /**
- * API pro synchronizaci stavů transportů
+ * API pro synchronizaci stavů a dat transportů
  * Dočasné API pro akci Techmission - bude odstraněno po akci
  */
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-// Soubor pro uložení stavů (jednoduchá implementace bez databáze)
-$stavyFile = __DIR__ . '/../logs/transport_stavy.json';
+// Soubory pro uložení dat (jednoduchá implementace bez databáze)
+$dataFile = __DIR__ . '/../logs/transport_data.json';
 
-// GET - načíst stavy
+// GET - načíst data
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (file_exists($stavyFile)) {
-        $stavy = json_decode(file_get_contents($stavyFile), true);
-        echo json_encode(['status' => 'success', 'stavy' => $stavy]);
+    if (file_exists($dataFile)) {
+        $data = json_decode(file_get_contents($dataFile), true);
+        echo json_encode([
+            'status' => 'success',
+            'stavy' => $data['stavy'] ?? [],
+            'transporty' => $data['transporty'] ?? null
+        ]);
     } else {
-        echo json_encode(['status' => 'success', 'stavy' => []]);
+        echo json_encode(['status' => 'success', 'stavy' => [], 'transporty' => null]);
     }
     exit;
 }
 
-// POST - uložit stav
+// POST - uložit data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'] ?? null;
-    $stav = $_POST['stav'] ?? null;
-    $cas = $_POST['cas'] ?? null;
-
-    if (!$id || !$stav) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Chybí id nebo stav']);
-        exit;
+    // Načíst existující data
+    $data = [];
+    if (file_exists($dataFile)) {
+        $data = json_decode(file_get_contents($dataFile), true) ?: [];
     }
 
-    // Načíst existující stavy
-    $stavy = [];
-    if (file_exists($stavyFile)) {
-        $stavy = json_decode(file_get_contents($stavyFile), true) ?: [];
+    // Aktualizovat stavy
+    if (isset($_POST['stavy'])) {
+        $stavy = json_decode($_POST['stavy'], true);
+        if (is_array($stavy)) {
+            $data['stavy'] = $stavy;
+        }
     }
 
-    // Aktualizovat stav
-    $stavy[$id] = [
-        'stav' => $stav,
-        'cas' => $cas,
-        'aktualizovano' => date('Y-m-d H:i:s')
-    ];
+    // Aktualizovat transporty
+    if (isset($_POST['transporty'])) {
+        $transporty = json_decode($_POST['transporty'], true);
+        if (is_array($transporty)) {
+            $data['transporty'] = $transporty;
+        }
+    }
+
+    $data['aktualizovano'] = date('Y-m-d H:i:s');
 
     // Uložit
-    file_put_contents($stavyFile, json_encode($stavy, JSON_PRETTY_PRINT));
+    file_put_contents($dataFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-    echo json_encode(['status' => 'success', 'message' => 'Stav uložen']);
+    echo json_encode(['status' => 'success', 'message' => 'Data ulozena']);
     exit;
 }
 
 http_response_code(405);
-echo json_encode(['status' => 'error', 'message' => 'Nepodporovaná metoda']);
+echo json_encode(['status' => 'error', 'message' => 'Nepodporovana metoda']);
