@@ -283,12 +283,12 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             background: transparent;
             border: none;
-            color: #666;
-            font-size: 16px;
+            color: #ff4444;
+            font-size: 20px;
             cursor: pointer;
             opacity: 1;
             transition: all 0.2s;
@@ -296,24 +296,25 @@
         }
 
         .btn-smazat:hover {
-            color: #ff4444;
+            color: #ff6666;
+        }
+
+        /* Wrapper pro čas a tužku */
+        .transport-cas-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* Tlačítko upravit */
         .btn-upravit {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            width: 24px;
-            height: 24px;
             background: transparent;
             border: none;
-            color: #666;
-            font-size: 14px;
+            color: #888;
+            font-size: 24px;
             cursor: pointer;
-            opacity: 1;
+            padding: 0;
             transition: all 0.2s;
-            z-index: 10;
         }
 
         .btn-upravit:hover {
@@ -889,9 +890,11 @@ function vykresli() {
             div.className = 'transport';
             div.dataset.id = item.id;
             div.innerHTML = `
-                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
                 <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${den}')">&times;</button>
-                <div class="transport-cas">${item.cas}</div>
+                <div class="transport-cas-wrapper">
+                    <div class="transport-cas">${item.cas}</div>
+                    <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
+                </div>
                 <div class="transport-info">
                     <div class="transport-jmena">${item.jmeno}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
