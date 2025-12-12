@@ -241,6 +241,11 @@
         .transport-stav {
             min-width: 110px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .stav-btn {
@@ -290,9 +295,9 @@
         .stav-cas {
             font-size: 11px;
             color: #666;
-            margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            min-height: 14px;
         }
 
         /* Modal */
