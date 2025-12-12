@@ -587,8 +587,8 @@ $dostupneHry = [
                 const response = await fetch('/api/hry_api.php?action=stav');
                 const result = await response.json();
 
-                if (result.status === 'success' && result.data.online) {
-                    aktualizovatOnline(result.data.online);
+                if (result.status === 'success' && result.online) {
+                    aktualizovatOnline(result.online);
                 }
             } catch (error) {
                 console.error('Online polling error:', error);
@@ -602,8 +602,8 @@ $dostupneHry = [
                 const response = await fetch('/api/hry_api.php?action=chat_poll&posledni_id=' + posledniChatId);
                 const result = await response.json();
 
-                if (result.status === 'success' && result.data.chat && result.data.chat.length > 0) {
-                    result.data.chat.forEach(z => {
+                if (result.status === 'success' && result.chat && result.chat.length > 0) {
+                    result.chat.forEach(z => {
                         pridatZpravu(z);
                         posledniChatId = Math.max(posledniChatId, z.id);
                     });
