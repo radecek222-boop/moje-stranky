@@ -791,10 +791,10 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         ${record.documents && record.documents.length > 0 ? `
-          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
+          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">KNIHOVNA PDF</button>
         ` : `
           <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
-            <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
+            <div class="detail-info-box-subtitle">Knihovna PDF je prazdna</div>
           </div>
         `}
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
@@ -2041,18 +2041,18 @@ async function showCustomerDetail(id) {
         if (!pdfDoc) {
           return `
             <div style="padding: 0.75rem; text-align: center; background: #222; border: 1px dashed #444; border-radius: 4px; margin-bottom: 1rem;">
-              <p style="margin: 0; color: #888; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
+              <p style="margin: 0; color: #888; font-size: 0.8rem;">Knihovna PDF je prazdna</p>
             </div>
           `;
         }
 
         return `
           <div style="margin-bottom: 1rem;">
-            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">KNIHOVNA PDF:</label>
             <button class="btn customer-detail-btn"
                     data-action="openPDF"
                     data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
-              Otevřít PDF Report
+              KNIHOVNA PDF
             </button>
           </div>
         `;
@@ -2097,7 +2097,7 @@ async function showCustomerDetail(id) {
  * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
 function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
-  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'KNIHOVNA PDF';
 
   // Hlavní overlay - flexbox layout s fixní hlavičkou a patičkou
   const overlay = document.createElement('div');
@@ -2152,7 +2152,7 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
   btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = pdfUrl;
-    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
+    link.download = `WGS_PDF_${claimId || 'dokument'}.pdf`;
     link.click();
   };
 
@@ -2169,7 +2169,7 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
       btnSdilet.textContent = 'Načítám...';
       const response = await fetch(pdfUrl);
       const blob = await response.blob();
-      const file = new File([blob], `PDF_Report_${claimId || 'dokument'}.pdf`, { type: 'application/pdf' });
+      const file = new File([blob], `WGS_PDF_${claimId || 'dokument'}.pdf`, { type: 'application/pdf' });
       await navigator.share({ files: [file], title: titulek });
     } catch (e) {
       if (e.name !== 'AbortError') wgsToast.error('Chyba: ' + e.message);

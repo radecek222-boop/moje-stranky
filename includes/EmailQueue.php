@@ -35,12 +35,66 @@ function __construct($pdo = null) {
      * @return bool Success
      */
     public function add($toEmail, $subject, $body, $notificationId = 'custom', $relatedId = null) {
+        // Automaticky načíst CC/BCC ze šablony notifikace
+        $bccEmails = [];
+        $ccEmails = [];
+
+        if ($notificationId !== 'custom' && $this->pdo) {
+            try {
+                // Zkusit najít šablonu podle notification_id
+                $stmt = $this->pdo->prepare("
+                    SELECT cc_emails, bcc_emails, cc_recipients, bcc_recipients
+                    FROM wgs_notifications
+                    WHERE id = :id OR trigger_event = :id
+                    LIMIT 1
+                ");
+                $stmt->execute(['id' => $notificationId]);
+                $notifRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                if ($notifRow) {
+                    // Konkrétní emaily
+                    if (!empty($notifRow['cc_emails'])) {
+                        $ccEmails = json_decode($notifRow['cc_emails'], true) ?: [];
+                    }
+                    if (!empty($notifRow['bcc_emails'])) {
+                        $bccEmails = json_decode($notifRow['bcc_emails'], true) ?: [];
+                    }
+
+                    // Role - pouze 'admin' lze přeložit bez kontextu reklamace
+                    $ccRoles = !empty($notifRow['cc_recipients']) ? json_decode($notifRow['cc_recipients'], true) : [];
+                    $bccRoles = !empty($notifRow['bcc_recipients']) ? json_decode($notifRow['bcc_recipients'], true) : [];
+
+                    // Načíst admin email pokud je v rolích
+                    if ((is_array($ccRoles) && in_array('admin', $ccRoles)) ||
+                        (is_array($bccRoles) && in_array('admin', $bccRoles))) {
+                        $stmtAdmin = $this->pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'admin_email' LIMIT 1");
+                        $stmtAdmin->execute();
+                        $adminEmail = $stmtAdmin->fetchColumn();
+
+                        if ($adminEmail && filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                            if (is_array($ccRoles) && in_array('admin', $ccRoles) && !in_array($adminEmail, $ccEmails)) {
+                                $ccEmails[] = $adminEmail;
+                            }
+                            if (is_array($bccRoles) && in_array('admin', $bccRoles) && !in_array($adminEmail, $bccEmails)) {
+                                $bccEmails[] = $adminEmail;
+                            }
+                        }
+                    }
+                }
+            } catch (\PDOException $e) {
+                // Ignorovat chyby, pokračovat bez CC/BCC
+                error_log("EmailQueue: Nelze načíst CC/BCC pro notifikaci {$notificationId}: " . $e->getMessage());
+            }
+        }
+
         return $this->enqueue([
             'to' => $toEmail,
             'to_name' => null,
             'subject' => $subject,
             'body' => $body,
             'notification_id' => $notificationId,
+            'cc' => $ccEmails,
+            'bcc' => $bccEmails,
             'priority' => 'normal'
         ]);
     }
@@ -89,6 +143,12 @@ function __construct($pdo = null) {
             // Odesílatel a příjemce
             $mail->setFrom($settings['smtp_from_email'], $settings['smtp_from_name']);
             $mail->addAddress($toEmail);
+
+            // Globalni BCC pro archivaci vsech emailu
+            $archiveEmail = $this->getArchiveEmail();
+            if ($archiveEmail) {
+                $mail->addBCC($archiveEmail);
+            }
 
             // HTML obsah
             $mail->isHTML(true);
@@ -182,6 +242,27 @@ function enqueue($data, $useTransaction = false) {
             }
             throw $e;
         }
+    }
+
+    /**
+     * Získá email pro archivaci (globální BCC pro všechny emaily)
+     * Načítá z wgs_system_config klíč 'email_archive_address'
+     *
+     * @return string|null Email pro archivaci nebo null
+     */
+    private function getArchiveEmail() {
+        try {
+            $stmt = $this->pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'email_archive_address' LIMIT 1");
+            $stmt->execute();
+            $archiveEmail = $stmt->fetchColumn();
+
+            if ($archiveEmail && filter_var($archiveEmail, FILTER_VALIDATE_EMAIL)) {
+                return $archiveEmail;
+            }
+        } catch (\PDOException $e) {
+            error_log("EmailQueue: Nelze nacist archive email: " . $e->getMessage());
+        }
+        return null;
     }
 
     /**
@@ -327,6 +408,12 @@ function sendWithPHPMailer($queueItem, $settings) {
                         }
                     }
                 }
+            }
+
+            // Globalni BCC pro archivaci vsech emailu
+            $archiveEmail = $this->getArchiveEmail();
+            if ($archiveEmail) {
+                $mail->addBCC($archiveEmail);
             }
 
             // Content - auto-detect HTML

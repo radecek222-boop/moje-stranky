@@ -154,17 +154,21 @@ try {
             $cisloNabidky = generujCisloNabidky($pdo);
             error_log("nabidka_api vytvorit: Vygenerováno číslo {$cisloNabidky}");
 
+            // Získat reklamace_id pokud existuje
+            $reklamaceId = !empty($_POST['reklamace_id']) ? intval($_POST['reklamace_id']) : null;
+
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_nabidky (
-                    cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, zakaznik_adresa,
+                    reklamace_id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, zakaznik_adresa,
                     polozky_json, celkova_cena, mena, platnost_do, token,
                     poznamka, vytvoril_user_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
-            error_log("nabidka_api vytvorit: Provádím INSERT");
+            error_log("nabidka_api vytvorit: Provádím INSERT s reklamace_id=" . ($reklamaceId ?? 'NULL'));
 
             $stmt->execute([
+                $reklamaceId,
                 $cisloNabidky,
                 $_POST['zakaznik_jmeno'],
                 $_POST['zakaznik_email'],
@@ -226,18 +230,34 @@ try {
             // Použít číslo nabídky nebo fallback na ID
             $cisloPro = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
 
+            // EmailQueue->add() automaticky načte CC/BCC ze šablony 'price_quote_sent'
             $emailQueue->add(
                 $nabidka['zakaznik_email'],
                 'Cenová nabídka č. ' . $cisloPro . ' - White Glove Service',
                 $emailBody,
-                'nabidka_' . $nabidka['id']
+                'price_quote_sent'  // ID šablony - automaticky se načtou CC/BCC
             );
+
+            // Uložit PDF do dokumentů pokud je k dispozici reklamace_id
+            $pdfUlozeno = false;
+            if (!empty($nabidka['reklamace_id']) && !empty($_POST['pdf_data'])) {
+                try {
+                    $pdfUlozeno = ulozNabidkuPdf($pdo, $nabidka, $_POST['pdf_data']);
+                } catch (Exception $e) {
+                    error_log("Chyba pri ukladani PDF nabidky: " . $e->getMessage());
+                    // Pokračovat - email se odešle i když PDF selže
+                }
+            }
 
             // Aktualizovat stav
             $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'odeslana', odeslano_at = NOW() WHERE id = ?");
             $stmt->execute([$nabidkaId]);
 
-            sendJsonSuccess('Nabídka odeslána na ' . $nabidka['zakaznik_email']);
+            $message = 'Nabídka odeslána na ' . $nabidka['zakaznik_email'];
+            if ($pdfUlozeno) {
+                $message .= ' (PDF uloženo do dokumentů)';
+            }
+            sendJsonSuccess($message);
             break;
 
         // ========================================
@@ -538,6 +558,83 @@ try {
         'file' => $errorFile,
         'line' => $errorLine
     ]);
+}
+
+/**
+ * Uloží PDF nabídky do souborového systému a databáze
+ *
+ * @param PDO $pdo Database connection
+ * @param array $nabidka Data nabídky
+ * @param string $pdfBase64 Base64 encoded PDF data
+ * @return bool True pokud úspěšně uloženo
+ */
+function ulozNabidkuPdf($pdo, $nabidka, $pdfBase64) {
+    $reklamaceId = $nabidka['reklamace_id'];
+    $cisloNabidky = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
+
+    if (!$reklamaceId) {
+        throw new Exception('Nabídka není propojena s reklamací');
+    }
+
+    // Dekódovat base64 data
+    // Odstranit prefix "data:application/pdf;base64," pokud existuje
+    if (strpos($pdfBase64, 'base64,') !== false) {
+        $pdfBase64 = explode('base64,', $pdfBase64)[1];
+    }
+
+    $pdfData = base64_decode($pdfBase64);
+    if ($pdfData === false) {
+        throw new Exception('Neplatná base64 data PDF');
+    }
+
+    // Vytvořit adresář pro nabídky pokud neexistuje
+    $uploadDir = __DIR__ . '/../uploads/nabidky';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    // Vytvořit název souboru: nabidka_CN-2025-12-1-01_reklamace_123.pdf
+    $safeNabidkaCislo = preg_replace('/[^a-zA-Z0-9\-]/', '_', $cisloNabidky);
+    $filename = "nabidka_{$safeNabidkaCislo}_reklamace_{$reklamaceId}.pdf";
+    $filePath = $uploadDir . '/' . $filename;
+    $relativePathForDb = '/uploads/nabidky/' . $filename;
+
+    // Uložit soubor
+    $bytesWritten = file_put_contents($filePath, $pdfData);
+    if ($bytesWritten === false) {
+        throw new Exception('Nepodařilo se uložit PDF soubor');
+    }
+
+    // Smazat starý záznam pokud existuje
+    $stmt = $pdo->prepare("
+        DELETE FROM wgs_documents
+        WHERE claim_id = :claim_id AND document_type = 'nabidka_pdf'
+    ");
+    $stmt->execute(['claim_id' => $reklamaceId]);
+
+    // Vložit nový záznam do databáze
+    $stmt = $pdo->prepare("
+        INSERT INTO wgs_documents (
+            claim_id, document_name, document_path, document_type,
+            file_size, uploaded_by, uploaded_at
+        ) VALUES (
+            :claim_id, :document_name, :document_path, :document_type,
+            :file_size, :uploaded_by, NOW()
+        )
+    ");
+
+    $stmt->execute([
+        ':claim_id' => $reklamaceId,
+        ':document_name' => 'Cenová nabídka ' . $cisloNabidky,
+        ':document_path' => $relativePathForDb,
+        ':document_type' => 'nabidka_pdf',
+        ':file_size' => $bytesWritten,
+        ':uploaded_by' => $_SESSION['user_id'] ?? null
+    ]);
+
+    error_log("PDF nabídky uloženo: {$filePath} ({$bytesWritten} bytes)");
+
+    return true;
 }
 
 /**

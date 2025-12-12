@@ -1059,6 +1059,7 @@ if ($reklamaceId > 0) {
 
         // Elements
         const csrfToken = document.getElementById('csrf_token').value;
+        const reklamaceId = <?php echo $reklamaceId ? $reklamaceId : 'null'; ?>;
         const modal = document.getElementById('kalkulacka-modal');
         const kalkulaceVysledek = document.getElementById('kalkulace-vysledek');
         const kalkulacePolozkyEl = document.getElementById('kalkulace-polozky');
@@ -1168,7 +1169,7 @@ if ($reklamaceId > 0) {
             // === DOPRAVA ===
             if (data.dopravne > 0) {
                 polozky.push({
-                    nazev: `Dopravné (${data.vzdalenost} km × 2 cesty × 1 EUR/km)`,
+                    nazev: `Dopravné (${data.vzdalenost} km × 2 cesty × 0.28 EUR/km)`,
                     cena: data.dopravne,
                     pocet: 1,
                     skupina: 'doprava'
@@ -1260,10 +1261,9 @@ if ($reklamaceId > 0) {
                     if (data.sedaky > 0) {
                         const cenaZaSedaky = vypoctiCenuZaDily(data.sedaky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Sedáky`,
+                            nazev: `Sedáky (${data.sedaky} ks)`,
                             cena: cenaZaSedaky,
-                            pocet: data.sedaky,
-                            jednotkovaCena: (cenaZaSedaky / data.sedaky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.sedaky;
@@ -1272,10 +1272,9 @@ if ($reklamaceId > 0) {
                     if (data.operky > 0) {
                         const cenaZaOperky = vypoctiCenuZaDily(data.operky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Opěrky`,
+                            nazev: `Opěrky (${data.operky} ks)`,
                             cena: cenaZaOperky,
-                            pocet: data.operky,
-                            jednotkovaCena: (cenaZaOperky / data.operky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.operky;
@@ -1284,10 +1283,9 @@ if ($reklamaceId > 0) {
                     if (data.podrucky > 0) {
                         const cenaZaPodrucky = vypoctiCenuZaDily(data.podrucky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Područky`,
+                            nazev: `Područky (${data.podrucky} ks)`,
                             cena: cenaZaPodrucky,
-                            pocet: data.podrucky,
-                            jednotkovaCena: (cenaZaPodrucky / data.podrucky).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.podrucky;
@@ -1296,10 +1294,9 @@ if ($reklamaceId > 0) {
                     if (data.panely > 0) {
                         const cenaZaPanely = vypoctiCenuZaDily(data.panely, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Panely`,
+                            nazev: `Panely (${data.panely} ks)`,
                             cena: cenaZaPanely,
-                            pocet: data.panely,
-                            jednotkovaCena: (cenaZaPanely / data.panely).toFixed(2),
+                            pocet: 1, // cena je už celková za všechny kusy
                             skupina: 'calouneni'
                         });
                         poradiDilu += data.panely;
@@ -1320,18 +1317,18 @@ if ($reklamaceId > 0) {
 
                 if (data.relax > 0) {
                     polozky.push({
-                        nazev: 'Relax mechanismus',
-                        cena: CENY.mechanismusPriplatek,
-                        pocet: data.relax,
+                        nazev: `Relax mechanismus (${data.relax} ks × ${CENY.mechanismusPriplatek} EUR)`,
+                        cena: CENY.mechanismusPriplatek * data.relax,
+                        pocet: 1,
                         skupina: 'mechanika'
                     });
                 }
 
                 if (data.vysuv > 0) {
                     polozky.push({
-                        nazev: 'Elektrický díl',
-                        cena: CENY.mechanismusPriplatek,
-                        pocet: data.vysuv,
+                        nazev: `Elektrický díl (${data.vysuv} ks × ${CENY.mechanismusPriplatek} EUR)`,
+                        cena: CENY.mechanismusPriplatek * data.vysuv,
+                        pocet: 1,
                         skupina: 'mechanika'
                     });
                 }
@@ -1420,10 +1417,7 @@ if ($reklamaceId > 0) {
                     skupina.polozky.forEach(p => {
                         const cenaCelkem = p.cena * (p.pocet || 1);
                         html += `<div class="kalkulace-polozka">
-                            <span class="kalkulace-polozka-nazev">
-                                ${p.nazev}
-                                ${p.pocet > 1 ? `<span class="kalkulace-pocet">${p.pocet} ks</span>` : ''}
-                            </span>
+                            <span class="kalkulace-polozka-nazev">${p.nazev}</span>
                             <span class="kalkulace-polozka-cena">${cenaCelkem.toFixed(2)} EUR</span>
                         </div>`;
                     });
@@ -1642,6 +1636,9 @@ if ($reklamaceId > 0) {
             const formData = new FormData();
             formData.append('action', 'vytvorit');
             formData.append('csrf_token', csrfToken);
+            if (reklamaceId) {
+                formData.append('reklamace_id', reklamaceId);
+            }
             formData.append('zakaznik_jmeno', jmeno);
             formData.append('zakaznik_email', email);
             formData.append('zakaznik_telefon', document.getElementById('zakaznik_telefon').value);
@@ -1674,11 +1671,32 @@ if ($reklamaceId > 0) {
 
                 const nabidkaId = data.nabidka_id;
 
+                // Vygenerovat PDF pro ulozeni do dokumentu
+                let celkemCena = 0;
+                vsechnyPolozky.forEach(p => {
+                    celkemCena += p.cena * p.pocet;
+                });
+
+                const pdfBase64 = await vygenerujPdfBase64({
+                    jmeno: jmeno,
+                    email: email,
+                    telefon: document.getElementById('zakaznik_telefon').value,
+                    adresa: document.getElementById('zakaznik_adresa').value,
+                    polozky: vsechnyPolozky,
+                    celkem: celkemCena,
+                    mena: mena
+                });
+
                 // Odeslat email
                 const odeslatData = new FormData();
                 odeslatData.append('action', 'odeslat');
                 odeslatData.append('csrf_token', csrfToken);
                 odeslatData.append('nabidka_id', nabidkaId);
+
+                // Pridat PDF data pro ulozeni do dokumentu zakaznika
+                if (pdfBase64) {
+                    odeslatData.append('pdf_data', pdfBase64);
+                }
 
                 const odeslatResponse = await fetch('/api/nabidka_api.php', {
                     method: 'POST',
@@ -1974,6 +1992,153 @@ if ($reklamaceId > 0) {
                     btnZrusit: null,
                     nebezpecne: true
                 });
+            }
+        }
+
+        // ========================================
+        // GENEROVAT PDF JAKO BASE64 PRO ULOZENI
+        // ========================================
+        async function vygenerujPdfBase64(data) {
+            if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
+                console.error('PDF knihovny nejsou dostupne');
+                return null;
+            }
+
+            const datum = new Date().toLocaleDateString('cs-CZ');
+            const platnostDo = new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('cs-CZ');
+
+            // Seskupit polozky pro PDF
+            const skupinyNazvy = {
+                doprava: 'DOPRAVA',
+                calouneni: 'CALOUNICKE PRACE',
+                mechanika: 'MECHANICKE PRACE',
+                priplatky: 'PRIPLATKY',
+                dily: 'NAHRADNI DILY',
+                prace: 'PRACE',
+                ostatni: 'OSTATNI'
+            };
+
+            const skupiny = {};
+            data.polozky.forEach(p => {
+                const sk = p.skupina || 'ostatni';
+                if (!skupiny[sk]) {
+                    skupiny[sk] = { nazev: skupinyNazvy[sk] || sk.toUpperCase(), polozky: [], celkem: 0 };
+                }
+                skupiny[sk].polozky.push(p);
+                skupiny[sk].celkem += p.cena * p.pocet;
+            });
+
+            // Vytvorit HTML tabulky se skupinami
+            let polozkyHtml = '';
+            const poradiSkupin = ['doprava', 'calouneni', 'mechanika', 'priplatky', 'dily', 'prace', 'ostatni'];
+
+            poradiSkupin.forEach(skKey => {
+                if (skupiny[skKey] && skupiny[skKey].polozky.length > 0) {
+                    const sk = skupiny[skKey];
+                    polozkyHtml += `<tr>
+                        <td colspan="4" style="padding: 12px 10px 8px 10px; background: #e9e9e9; font-weight: bold; font-size: 11px; color: #333; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ${sk.nazev}
+                        </td>
+                    </tr>`;
+                    sk.polozky.forEach(p => {
+                        const celkemPol = (p.cena * p.pocet).toFixed(2);
+                        polozkyHtml += `<tr>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${p.nazev}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 13px;">${p.pocet} ks</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; color: #666;">-</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${data.mena}</td>
+                        </tr>`;
+                    });
+                    polozkyHtml += `<tr>
+                        <td colspan="3" style="padding: 8px 10px; text-align: right; font-size: 12px; color: #666; border-bottom: 2px solid #ddd;">Mezisoucet ${sk.nazev.toLowerCase()}:</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${data.mena}</td>
+                    </tr>`;
+                }
+            });
+
+            const pdfContent = document.createElement('div');
+            pdfContent.style.cssText = 'width: 794px; padding: 40px; background: white; font-family: Poppins, sans-serif; position: fixed; left: -9999px; top: 0;';
+            pdfContent.innerHTML = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 28px; color: #1a1a1a; margin: 0;">WHITE GLOVE SERVICE</h1>
+                    <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Cenova nabidka</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                    <div>
+                        <h3 style="font-size: 14px; color: #888; margin: 0 0 10px 0;">Zakaznik</h3>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>${data.jmeno}</strong></p>
+                        ${data.email ? `<p style="margin: 5px 0; font-size: 14px;">${data.email}</p>` : ''}
+                        ${data.telefon ? `<p style="margin: 5px 0; font-size: 14px;">${data.telefon}</p>` : ''}
+                        ${data.adresa ? `<p style="margin: 5px 0; font-size: 14px;">${data.adresa}</p>` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 5px 0; font-size: 14px;"><strong>Datum:</strong> ${datum}</p>
+                        <p style="margin: 5px 0; font-size: 14px;"><strong>Platnost do:</strong> ${platnostDo}</p>
+                    </div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ccc;">
+                    <thead>
+                        <tr style="background: #f0f0f0; color: #333;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #999;">Polozka</th>
+                            <th style="padding: 12px; text-align: center; width: 80px; border-bottom: 2px solid #999;">Pocet</th>
+                            <th style="padding: 12px; text-align: right; width: 100px; border-bottom: 2px solid #999;">Cena/ks</th>
+                            <th style="padding: 12px; text-align: right; width: 120px; border-bottom: 2px solid #999;">Celkem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${polozkyHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f8f8f8; border-top: 2px solid #333;">
+                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; color: #333;">CELKOVA CENA (bez DPH):</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${data.mena}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="background: #f5f5f5; border-left: 4px solid #333; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
+                    <strong>Upozorneni:</strong> Ceny jsou uvedeny bez DPH. U nahradnich dilu muzeme pozadovat zalohu ve vysi jejich ceny. Doba dodani originalnich dilu z tovarny Natuzzi je 4-8 tydnu.
+                </div>
+                <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
+                    <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong></p>
+                    <p style="margin: 5px 0;">Do Dubce 364, Bechovice 190 11 | Tel: +420 725 965 826</p>
+                    <p style="margin: 5px 0;">www.wgs-service.cz | reklamace@wgs-service.cz</p>
+                </div>
+            `;
+
+            document.body.appendChild(pdfContent);
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            try {
+                const canvas = await html2canvas(pdfContent, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 10;
+                const availableWidth = pageWidth - (margin * 2);
+                const canvasRatio = canvas.height / canvas.width;
+                const imgWidth = availableWidth;
+                const imgHeight = imgWidth * canvasRatio;
+
+                doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, Math.min(imgHeight, pageHeight - margin * 2));
+
+                document.body.removeChild(pdfContent);
+
+                // Vratit base64 bez prefixu data:application/pdf;base64,
+                const pdfBase64 = doc.output('datauristring').split(',')[1];
+                return pdfBase64;
+            } catch (error) {
+                console.error('Chyba pri generovani PDF:', error);
+                document.body.removeChild(pdfContent);
+                return null;
             }
         }
 
