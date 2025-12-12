@@ -79,7 +79,7 @@ try {
             if ($existujici !== false) {
                 $stmt = $pdo->prepare("UPDATE wgs_system_config SET config_value = :email WHERE config_key = 'email_archive_address'");
             } else {
-                $stmt = $pdo->prepare("INSERT INTO wgs_system_config (config_key, config_value, config_type, description) VALUES ('email_archive_address', :email, 'string', 'Email pro archivaci vsech odeslanych emailu (BCC)')");
+                $stmt = $pdo->prepare("INSERT INTO wgs_system_config (config_key, config_value) VALUES ('email_archive_address', :email)");
             }
             $stmt->execute(['email' => $email]);
             echo "<div class='success'><strong>Archivacni email nastaven na:</strong> " . htmlspecialchars($email) . "</div>";
