@@ -114,6 +114,27 @@ if ($isAdmin) {
 </div><!-- /Hamburger Menu Wrapper -->
 
 <style>
+/* Skip link - skrytý, viditelný při focusu */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  color: #fff;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 10002;
+  border-radius: 0 0 8px 8px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .hamburger-header {
   display: flex;
   justify-content: space-between;
