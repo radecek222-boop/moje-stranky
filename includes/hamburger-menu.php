@@ -23,7 +23,7 @@ if ($isAdmin) {
 <!-- Hamburger Menu Wrapper - Alpine.js (Step 41) -->
 <div x-data="hamburgerMenu" x-init="init">
 <header class="hamburger-header">
-  <a href="index.php" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
+  <a href="/" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
   <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false" @click.stop="prepnout">
     <span></span><span></span><span></span>
   </button>
@@ -44,7 +44,7 @@ if ($isAdmin) {
           <?php echo htmlspecialchars($item['header_label'], ENT_QUOTES, 'UTF-8'); ?>
         </a>
       <?php endforeach; ?>
-      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link">PLAY<span class="play-badge" id="playBadgeAdmin" style="display:none;">0</span></a>
+      <a href="/hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link">PLAY<span class="play-badge" id="playBadgeAdmin" style="display:none;">0</span></a>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
         <svg class="notif-bell" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -73,11 +73,11 @@ if ($isAdmin) {
           style="cursor: default; pointer-events: none;"
         >PROVIZE / <span x-text="mesic"></span> / <span x-text="castka"></span> €</a>
       <?php endif; ?>
-      <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
-      <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
-      <a href="hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link" data-lang-cs="PLAY" data-lang-en="PLAY" data-lang-it="PLAY">PLAY<span class="play-badge" id="playBadge" style="display:none;">0</span></a>
+      <a href="/novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
+      <a href="/seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
+      <a href="/hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link" data-lang-cs="PLAY" data-lang-en="PLAY" data-lang-it="PLAY">PLAY<span class="play-badge" id="playBadge" style="display:none;">0</span></a>
       <?php if ($isTechnik): ?>
-        <a href="cenik.php#kalkulacka" <?php if($current == "cenik.php" && strpos($_SERVER['REQUEST_URI'], '#kalkulacka') !== false) echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY SLUŽBY" data-lang-en="SERVICE PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO SERVIZIO">KALKULACE CENY SLUŽBY</a>
+        <a href="/cenik.php#kalkulacka" <?php if($current == "cenik.php" && strpos($_SERVER['REQUEST_URI'], '#kalkulacka') !== false) echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY SLUŽBY" data-lang-en="SERVICE PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO SERVIZIO">KALKULACE CENY SLUŽBY</a>
       <?php endif; ?>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" title="Notifikace">
@@ -95,13 +95,13 @@ if ($isAdmin) {
     <?php
     else:
     ?>
-      <a href="index.php" <?php if($current == "index.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="DOMŮ" data-lang-en="HOME" data-lang-it="CASA">DOMŮ</a>
-      <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
-      <a href="cenik.php" <?php if($current == "cenik.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="CENÍK" data-lang-en="PRICE LIST" data-lang-it="LISTINO PREZZI">CENÍK</a>
-      <a href="nasesluzby.php" <?php if($current == "nasesluzby.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="NAŠE SLUŽBY" data-lang-en="OUR SERVICES" data-lang-it="I NOSTRI SERVIZI">NAŠE SLUŽBY</a>
-      <a href="onas.php" <?php if($current == "onas.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="O NÁS" data-lang-en="ABOUT US" data-lang-it="CHI SIAMO">O NÁS</a>
-      <a href="aktuality.php" <?php if($current == "aktuality.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="AKTUALITY" data-lang-en="NEWS" data-lang-it="NOTIZIE">AKTUALITY</a>
-      <a href="login.php" <?php if($current == "login.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
+      <a href="/" <?php if($current == "index.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="DOMŮ" data-lang-en="HOME" data-lang-it="CASA">DOMŮ</a>
+      <a href="/novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
+      <a href="/cenik.php" <?php if($current == "cenik.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="CENÍK" data-lang-en="PRICE LIST" data-lang-it="LISTINO PREZZI">CENÍK</a>
+      <a href="/nasesluzby.php" <?php if($current == "nasesluzby.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="NAŠE SLUŽBY" data-lang-en="OUR SERVICES" data-lang-it="I NOSTRI SERVIZI">NAŠE SLUŽBY</a>
+      <a href="/onas.php" <?php if($current == "onas.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="O NÁS" data-lang-en="ABOUT US" data-lang-it="CHI SIAMO">O NÁS</a>
+      <a href="/aktuality.php" <?php if($current == "aktuality.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="AKTUALITY" data-lang-en="NEWS" data-lang-it="NOTIZIE">AKTUALITY</a>
+      <a href="/login.php" <?php if($current == "login.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
         <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
