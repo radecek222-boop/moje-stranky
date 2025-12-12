@@ -747,10 +747,13 @@ async function zmenStav(id) {
         stavy[id] = { stav: 'onway', cas: cas };
         vykresli();
         await ulozData();
+        // Po uložení načíst data ze serveru pro potvrzení
+        setTimeout(() => nactiData(), 500);
     } else if (aktualniStav === 'onway') {
         stavy[id] = { stav: 'drop', casDrop: cas, cas: stavy[id].cas };
         vykresli();
         await ulozData();
+        setTimeout(() => nactiData(), 500);
     } else if (aktualniStav === 'drop') {
         // DROP OFF - otevřít modal pro reset
         otevriModalReset(id);
@@ -825,7 +828,10 @@ async function nactiData() {
     if (ukladaSe) return;
 
     try {
-        const odpoved = await fetch('api/transport_sync.php');
+        // Cache-busting - přidat timestamp k URL
+        const odpoved = await fetch('api/transport_sync.php?t=' + Date.now(), {
+            cache: 'no-store'
+        });
         const data = await odpoved.json();
         if (data.status === 'success') {
             // Při prvním načtení - pokud server nemá data, uložit výchozí
@@ -861,8 +867,8 @@ document.addEventListener('keydown', e => {
 // Inicializace
 nactiData();
 
-// Pravidelná synchronizace každých 5 sekund
-setInterval(nactiData, 5000);
+// Pravidelná synchronizace každé 3 sekundy
+setInterval(nactiData, 3000);
 </script>
 
 </body>

@@ -6,6 +6,9 @@
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Soubory pro uložení dat (jednoduchá implementace bez databáze)
 $dataFile = __DIR__ . '/../logs/transport_data.json';
