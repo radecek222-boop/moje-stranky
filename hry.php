@@ -89,6 +89,22 @@ $dostupneHry = [
         'hracu' => '1',
         'ikona' => '✕○',
         'hotovo' => true
+    ],
+    [
+        'id' => 'dama',
+        'nazev' => 'Dáma',
+        'popis' => 'Klasická desková hra. Seber všechny soupeřovy kameny!',
+        'hracu' => '1-2',
+        'ikona' => '◉○',
+        'hotovo' => true
+    ],
+    [
+        'id' => 'breakout',
+        'nazev' => 'Breakout',
+        'popis' => 'Arkádová hra. Rozbi všechny cihly míčkem!',
+        'hracu' => '1',
+        'ikona' => '▬ ●',
+        'hotovo' => true
     ]
 ];
 ?>
