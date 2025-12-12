@@ -907,7 +907,7 @@ function vykresli() {
 // Otevřít modal pro přidání
 function otevriModalPridat(den) {
     editAkce = { typ: 'pridat', den: den, id: null, pole: null };
-    document.getElementById('modal-titulek').textContent = 'Pridat transport';
+    document.getElementById('modal-titulek').textContent = t('addTransport');
     document.getElementById('input-cas').value = '';
     document.getElementById('input-jmeno').value = '';
     document.getElementById('input-odkud').value = '';
@@ -930,7 +930,7 @@ function editujVse(id, den) {
     if (!transport) return;
 
     editAkce = { typ: 'editovat', den: den, id: id, pole: 'vse' };
-    document.getElementById('modal-titulek').textContent = 'Upravit transport';
+    document.getElementById('modal-titulek').textContent = t('editTransport');
 
     // Zobrazit všechny inputy
     document.getElementById('input-cas').style.display = 'block';
