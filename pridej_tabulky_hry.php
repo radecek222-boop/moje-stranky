@@ -38,7 +38,7 @@ $sql_tabulky = [
     'wgs_hry_online' => "
         CREATE TABLE IF NOT EXISTS `wgs_hry_online` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            `user_id` INT UNSIGNED NOT NULL,
+            `user_id` VARCHAR(50) NOT NULL COMMENT 'ID uzivatele (ADMIN001, TCH2025001, PRT2025001)',
             `username` VARCHAR(100) NOT NULL,
             `posledni_aktivita` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             `aktualni_hra` VARCHAR(50) DEFAULT NULL,
@@ -54,9 +54,10 @@ $sql_tabulky = [
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `nazev` VARCHAR(100) NOT NULL,
             `hra` VARCHAR(50) NOT NULL DEFAULT 'prsi',
-            `stav` ENUM('cekani', 'hra', 'dokonceno') DEFAULT 'cekani',
+            `stav` ENUM('cekani', 'hra', 'dokoncena') DEFAULT 'cekani',
             `max_hracu` TINYINT UNSIGNED DEFAULT 4,
-            `vytvoril_user_id` INT UNSIGNED NOT NULL,
+            `vytvoril_user_id` VARCHAR(50) NOT NULL COMMENT 'ID uzivatele',
+            `herni_stav` LONGTEXT DEFAULT NULL COMMENT 'JSON stav hry',
             `vytvoreno` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             `aktualizovano` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX `idx_stav` (`stav`),
@@ -69,7 +70,7 @@ $sql_tabulky = [
         CREATE TABLE IF NOT EXISTS `wgs_hry_hraci_mistnosti` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `mistnost_id` INT UNSIGNED NOT NULL,
-            `user_id` INT UNSIGNED NOT NULL,
+            `user_id` VARCHAR(50) NOT NULL COMMENT 'ID uzivatele',
             `username` VARCHAR(100) NOT NULL,
             `poradi` TINYINT UNSIGNED DEFAULT 0,
             `pripojeno` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -83,7 +84,7 @@ $sql_tabulky = [
         CREATE TABLE IF NOT EXISTS `wgs_hry_chat` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `mistnost_id` INT UNSIGNED DEFAULT NULL,
-            `user_id` INT UNSIGNED NOT NULL,
+            `user_id` VARCHAR(50) NOT NULL COMMENT 'ID uzivatele',
             `username` VARCHAR(100) NOT NULL,
             `zprava` TEXT NOT NULL,
             `cas` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -97,8 +98,8 @@ $sql_tabulky = [
         CREATE TABLE IF NOT EXISTS `wgs_hry_prsi_partie` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `mistnost_id` INT UNSIGNED DEFAULT NULL,
-            `hrac1_id` INT UNSIGNED NOT NULL,
-            `hrac2_id` INT UNSIGNED DEFAULT NULL COMMENT 'NULL = pocitac',
+            `hrac1_id` VARCHAR(50) NOT NULL COMMENT 'ID hrace 1',
+            `hrac2_id` VARCHAR(50) DEFAULT NULL COMMENT 'NULL = pocitac',
             `balicek` TEXT NOT NULL COMMENT 'JSON pole karet v balicku',
             `odkladaci` TEXT NOT NULL COMMENT 'JSON pole karet na odkladacim balicku',
             `karty_hrac1` TEXT NOT NULL COMMENT 'JSON pole karet hrace 1',
