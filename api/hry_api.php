@@ -142,7 +142,7 @@ try {
                        u.username as vytvoril
                 FROM wgs_hry_mistnosti m
                 LEFT JOIN wgs_users u ON m.vytvoril_user_id = u.user_id
-                WHERE m.hra = :hra AND m.stav IN ('cekani', 'hra')
+                WHERE m.hra = :hra AND m.stav IN ('ceka', 'hra')
                 ORDER BY m.vytvoreno DESC
                 LIMIT 20
             ");
@@ -227,7 +227,7 @@ try {
                 sendJsonError('Místnost neexistuje');
             }
 
-            if ($mistnost['stav'] !== 'cekani') {
+            if ($mistnost['stav'] !== 'ceka') {
                 sendJsonError('Hra již probíhá nebo je dokončena');
             }
 
@@ -355,7 +355,7 @@ try {
                 sendJsonError('Pouze tvůrce může spustit hru');
             }
 
-            if ($mistnost['stav'] !== 'cekani') {
+            if ($mistnost['stav'] !== 'ceka') {
                 sendJsonError('Hra již probíhá');
             }
 
@@ -829,11 +829,11 @@ try {
 
             // Najít volnou místnost čekající na hráče
             $stmt = $pdo->prepare("
-                SELECT m.id, m.nazev,
+                SELECT m.id, m.nazev, m.max_hracu,
                        (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet
                 FROM wgs_hry_mistnosti m
-                WHERE m.hra = :hra AND m.stav = 'cekani'
-                HAVING pocet < m.max_hracu
+                WHERE m.hra = :hra AND m.stav = 'ceka'
+                HAVING pocet < max_hracu
                 ORDER BY m.vytvoreno ASC
                 LIMIT 1
             ");

@@ -38,7 +38,7 @@ if (!isset($cekajiciMistnosti)) {
         $stmtMistnosti = $pdo->query("
             SELECT m.id, m.nazev, m.hra, m.max_hracu,
                    (SELECT COUNT(*) FROM wgs_hry_hraci_mistnosti WHERE mistnost_id = m.id) as pocet_hracu,
-                   (SELECT username FROM wgs_users WHERE id = m.vytvoril_user_id) as vytvoril
+                   (SELECT username FROM wgs_users WHERE user_id = m.vytvoril_user_id) as vytvoril
             FROM wgs_hry_mistnosti m
             WHERE m.stav = 'ceka'
             ORDER BY m.vytvoreno DESC
@@ -656,7 +656,7 @@ async function pripojitSeKeHre(mistnostId, hra) {
     try {
         const csrfToken = document.getElementById('sidebarCsrfToken').value;
         const formData = new FormData();
-        formData.append('action', 'pripojit_do_mistnosti');
+        formData.append('action', 'pripojit');
         formData.append('csrf_token', csrfToken);
         formData.append('mistnost_id', mistnostId);
 
