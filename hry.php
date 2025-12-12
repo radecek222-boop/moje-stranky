@@ -106,7 +106,7 @@ $dostupneHry = [
             --hry-border: #333;
             --hry-text: #fff;
             --hry-muted: #888;
-            --hry-accent: #39ff14;
+            --hry-accent: #0099ff;
         }
 
         body {
@@ -162,7 +162,7 @@ $dostupneHry = [
         .hra-karta:hover {
             border-color: var(--hry-accent);
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(57, 255, 20, 0.1);
+            box-shadow: 0 8px 30px rgba(0, 153, 255, 0.15);
         }
 
         .hra-karta.neaktivni {
@@ -228,7 +228,7 @@ $dostupneHry = [
         }
 
         .hra-btn:hover {
-            background: #2dd310;
+            background: #33bbff;
             transform: scale(1.05);
         }
 
@@ -287,7 +287,7 @@ $dostupneHry = [
             height: 8px;
             background: var(--hry-accent);
             border-radius: 50%;
-            box-shadow: 0 0 6px var(--hry-accent);
+            box-shadow: 0 0 6px rgba(0, 153, 255, 0.6);
         }
 
         .online-jmeno {
