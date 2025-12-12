@@ -65,24 +65,16 @@
         }
 
         .lang-current {
-            background: #222;
-            border: 1px solid #444;
+            background: transparent;
+            border: none;
             color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 6px 8px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
-        }
-
-        .lang-current::after {
-            content: '';
-            border: 4px solid transparent;
-            border-top-color: #888;
-            margin-left: 2px;
+            letter-spacing: 0.5px;
         }
 
         .lang-dropdown {
@@ -90,8 +82,7 @@
             position: absolute;
             top: 100%;
             right: 0;
-            background: #222;
-            border: 1px solid #444;
+            background: #111;
             border-radius: 4px;
             margin-top: 4px;
             overflow: hidden;
@@ -103,11 +94,13 @@
         }
 
         .lang-option {
-            padding: 8px 12px;
-            font-size: 12px;
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
             white-space: nowrap;
+            color: #fff;
         }
 
         .lang-option:hover {
@@ -115,7 +108,7 @@
         }
 
         .lang-option.active {
-            background: #444;
+            background: #222;
         }
 
         .logo-tech {
