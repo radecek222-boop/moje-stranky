@@ -11,6 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transport - Techmission</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -103,6 +104,11 @@
             fill: #888;
         }
 
+        .ridic-auto-icon {
+            font-size: 32px;
+            color: #888;
+        }
+
         .ridic-tel {
             width: 36px;
             height: 36px;
@@ -113,16 +119,13 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
+            text-decoration: none;
+            color: #fff;
+            font-size: 16px;
         }
 
         .ridic-tel:hover {
             background: #444;
-        }
-
-        .ridic-tel svg {
-            width: 18px;
-            height: 18px;
-            fill: #fff;
         }
 
         /* Sekce dne */
@@ -433,27 +436,25 @@
 <!-- Řidiči -->
 <div class="ridici">
     <div class="ridic">
-        <!-- Van / Minivan pro V CLASS -->
-        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5c0 1.65 1.34 3 3 3s3-1.35 3-3h2v-5l-3-4h-2zm-1.5 11c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6h-2V8h1l1 2zM6 16.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        <i class="fa-solid fa-van-shuttle ridic-auto-icon"></i>
         <div class="ridic-info">
             <div class="ridic-jmeno">MILAN</div>
             <div class="ridic-auto">MB V CLASS</div>
             <div class="ridic-standby">transport van</div>
         </div>
         <a href="tel:+420735084519" class="ridic-tel">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <i class="fa-solid fa-phone"></i>
         </a>
     </div>
     <div class="ridic">
-        <!-- Limuzína / Sedan pro S CLASS -->
-        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 5.01C18.72 4.42 18.16 4 17.5 4h-11c-.66 0-1.21.42-1.42 1.01L3 11v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 6h10.29l1.04 3H5.81l1.04-3zM19 16H5v-4h14v4zM6 13.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S8.33 15 7.5 15 6 14.33 6 13.5zm9 0c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5z"/></svg>
+        <i class="fa-solid fa-car-side ridic-auto-icon"></i>
         <div class="ridic-info">
             <div class="ridic-jmeno">MIREK</div>
             <div class="ridic-auto">MB S CLASS</div>
             <div class="ridic-standby standby-caps">STAND BY 21:00 - 06:00</div>
         </div>
         <a href="tel:+420736611777" class="ridic-tel">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <i class="fa-solid fa-phone"></i>
         </a>
     </div>
 </div>
