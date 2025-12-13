@@ -378,7 +378,14 @@ async function loadAll(status = 'all', append = false) {
   try {
     // PAGINATION FIX: Přidat page a per_page parametry
     const page = append ? CURRENT_PAGE + 1 : 1;
-    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}`);
+    // Cache-busting pro Safari PWA
+    const cacheBuster = Date.now();
+    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     if (!response.ok) throw new Error('Chyba načítání');
 
     const json = await response.json();
@@ -492,7 +499,10 @@ async function renderOrders(items = null) {
 
   // Načíst emaily zákazníků s cenovou nabídkou (CN)
   try {
-    const cnResponse = await fetch('/api/nabidka_api.php?action=emaily_s_nabidkou');
+    const cnResponse = await fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     const cnData = await cnResponse.json();
     if (cnData.status === 'success') {
       EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];

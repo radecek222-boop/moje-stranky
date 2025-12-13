@@ -16,6 +16,10 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
+// Zakázat cachování pro PWA
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 try {
     $pdo = getDbConnection();
@@ -44,9 +48,12 @@ try {
 
         // ========================================
         // EMAILY_S_NABIDKOU - Seznam emailů zákazníků s aktivní CN (pro seznam.php)
+        // Přístup: admin + technik (pouze čtení, technik nemůže vytvářet CN)
         // ========================================
         case 'emaily_s_nabidkou':
-            if (!$isAdmin) {
+            $userRole = strtolower(trim($_SESSION['role'] ?? ''));
+            $isTechnik = in_array($userRole, ['technik', 'technician'], true);
+            if (!$isAdmin && !$isTechnik) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
