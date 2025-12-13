@@ -278,6 +278,32 @@
             color: #666;
         }
 
+        /* Telefon v transportu */
+        .transport-tel {
+            width: 32px;
+            height: 32px;
+            background: #222;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .transport-tel:hover {
+            background: #444;
+        }
+
+        .transport-tel svg {
+            width: 16px;
+            height: 16px;
+            fill: #fff;
+        }
+
         /* Tlačítko smazat - pravý dolní roh */
         .btn-smazat {
             position: absolute;
@@ -832,14 +858,14 @@ function t(key) {
 // Data transportů
 let transporty = {
     sobota: [
-        { id: 'so-2130', cas: '21:30', jmeno: 'Manuele Tessarollo (T78)', odkud: 'Marriott Airport', kam: 'venue' },
-        { id: 'so-2230', cas: '22:30', jmeno: 'Bjorn Verbeeck (BYORN) + Manager', odkud: 'Marriott Airport', kam: 'venue' },
-        { id: 'so-2330', cas: '23:30', jmeno: 'Yanick van Geldere + Sem Klinkenberg (DYEN)', odkud: 'Marriott Airport', kam: 'venue' }
+        { id: 'so-2130', cas: '21:30', jmeno: 'Manuele Tessarollo (T78)', odkud: 'Marriott Airport', kam: 'venue', telefon: '+46701424228' },
+        { id: 'so-2230', cas: '22:30', jmeno: 'Bjorn Verbeeck (BYORN) + Manager', odkud: 'Marriott Airport', kam: 'venue', telefon: '+32477082652' },
+        { id: 'so-2330', cas: '23:30', jmeno: 'Yanick van Geldere + Sem Klinkenberg (DYEN)', odkud: 'Marriott Airport', kam: 'venue', telefon: '+31642753844' }
     ],
     nedele: [
-        { id: 'ne-0150', cas: '01:50', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort (Fantasm)', odkud: 'T3', kam: 'venue' },
-        { id: 'ne-0300', cas: '03:00', jmeno: 'Simon Andre Schytrumpf + 2 (Holy Priest)', odkud: 'T3', kam: 'venue' },
-        { id: 'ne-1730', cas: '17:30', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort', odkud: 'Hotel Expo', kam: 'T2' }
+        { id: 'ne-0150', cas: '01:50', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort (Fantasm)', odkud: 'T3', kam: 'venue', telefon: '' },
+        { id: 'ne-0300', cas: '03:00', jmeno: 'Simon Andre Schytrumpf + 2 (Holy Priest)', odkud: 'T3', kam: 'venue', telefon: '+4917672054357' },
+        { id: 'ne-1730', cas: '17:30', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort', odkud: 'Hotel Expo', kam: 'T2', telefon: '' }
     ]
 };
 
@@ -883,6 +909,13 @@ function vykresli() {
                 stavCas = tr.delivered + ' ' + stavData.casDrop;
             }
 
+            // Ikona telefonu - zobrazit pouze pokud má telefon
+            const telefonHtml = item.telefon ? `
+                <a href="tel:${item.telefon}" class="transport-tel" onclick="event.stopPropagation();">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </a>
+            ` : '';
+
             const div = document.createElement('div');
             div.className = 'transport';
             div.dataset.id = item.id;
@@ -894,6 +927,7 @@ function vykresli() {
                     <div class="transport-jmena">${item.jmeno}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
+                ${telefonHtml}
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
