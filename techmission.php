@@ -856,6 +856,28 @@ function generujId() {
     return 'tr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
 }
 
+// Normalizovat čas na formát HH:MM (s vedoucí nulou)
+function normalizujCas(cas) {
+    if (!cas) return '00:00';
+    // Odstranit mezery
+    cas = cas.trim();
+    // Pokud obsahuje ':', rozdělit
+    const casti = cas.split(':');
+    if (casti.length >= 2) {
+        const hodiny = casti[0].padStart(2, '0');
+        const minuty = casti[1].padStart(2, '0');
+        return hodiny + ':' + minuty;
+    }
+    return cas;
+}
+
+// Porovnat dva časy pro řazení
+function porovnejCas(cas1, cas2) {
+    const norm1 = normalizujCas(cas1);
+    const norm2 = normalizujCas(cas2);
+    return norm1.localeCompare(norm2);
+}
+
 // Vykreslit transporty
 function vykresli() {
     const tr = translations[currentLang];
@@ -864,8 +886,8 @@ function vykresli() {
         const kontejner = document.getElementById('transporty-' + den);
         kontejner.innerHTML = '';
 
-        // Seřadit podle času
-        transporty[den].sort((a, b) => a.cas.localeCompare(b.cas));
+        // Seřadit podle data a času (automaticky při každém vykreslení)
+        transporty[den].sort((a, b) => porovnejCas(a.cas, b.cas));
 
         transporty[den].forEach(item => {
             const stavData = stavy[item.id] || { stav: 'wait' };
@@ -960,7 +982,7 @@ async function potvrdEdit() {
     if (editAkce.typ === 'pridat') {
         const novy = {
             id: generujId(),
-            cas: document.getElementById('input-cas').value || '00:00',
+            cas: normalizujCas(document.getElementById('input-cas').value) || '00:00',
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
             odkud: document.getElementById('input-odkud').value || '?',
             kam: document.getElementById('input-kam').value || '?'
@@ -970,13 +992,13 @@ async function potvrdEdit() {
         const transport = transporty[editAkce.den].find(t => t.id === editAkce.id);
         if (transport) {
             if (editAkce.pole === 'vse') {
-                // Editace všech polí najednou
-                transport.cas = document.getElementById('input-cas').value;
+                // Editace všech polí najednou - normalizovat čas pro správné řazení
+                transport.cas = normalizujCas(document.getElementById('input-cas').value);
                 transport.jmeno = document.getElementById('input-jmeno').value;
                 transport.odkud = document.getElementById('input-odkud').value;
                 transport.kam = document.getElementById('input-kam').value;
             } else if (editAkce.pole === 'cas') {
-                transport.cas = document.getElementById('input-cas').value;
+                transport.cas = normalizujCas(document.getElementById('input-cas').value);
             } else if (editAkce.pole === 'jmeno') {
                 transport.jmeno = document.getElementById('input-jmeno').value;
             } else if (editAkce.pole === 'trasa') {
