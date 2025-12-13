@@ -1158,18 +1158,20 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// Inicializace
-// Nastavit jazyk při načtení
-document.getElementById('lang-current').textContent = currentLang.toUpperCase();
-document.querySelectorAll('.lang-option').forEach(opt => {
-    opt.classList.toggle('active', opt.dataset.lang === currentLang);
+// Inicializace po načtení stránky
+document.addEventListener('DOMContentLoaded', function() {
+    // Nastavit jazyk při načtení
+    document.getElementById('lang-current').textContent = currentLang.toUpperCase();
+    document.querySelectorAll('.lang-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === currentLang);
+    });
+    translatePage();
+
+    nactiData();
+
+    // Pravidelná synchronizace každé 3 sekundy
+    setInterval(nactiData, 3000);
 });
-translatePage();
-
-nactiData();
-
-// Pravidelná synchronizace každé 3 sekundy
-setInterval(nactiData, 3000);
 </script>
 
 <!-- Footer -->
