@@ -278,10 +278,13 @@
             color: #666;
         }
 
-        /* Telefon v transportu */
+        /* Telefon v transportu - pravý horní roh */
         .transport-tel {
-            width: 32px;
-            height: 32px;
+            position: absolute;
+            top: 8px;
+            right: 40px;
+            width: 28px;
+            height: 28px;
             background: #222;
             border-radius: 50%;
             display: flex;
@@ -290,8 +293,7 @@
             cursor: pointer;
             transition: background 0.2s;
             text-decoration: none;
-            margin-left: 10px;
-            flex-shrink: 0;
+            z-index: 10;
         }
 
         .transport-tel:hover {
@@ -299,8 +301,8 @@
         }
 
         .transport-tel svg {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             fill: #fff;
         }
 
@@ -921,13 +923,13 @@ function vykresli() {
             div.dataset.id = item.id;
             div.innerHTML = `
                 <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${den}')">&times;</button>
+                ${telefonHtml}
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
                     <div class="transport-jmena">${item.jmeno}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
-                ${telefonHtml}
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
