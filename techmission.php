@@ -237,13 +237,13 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 50px 15px 45px;
+            padding: 38px 15px 32px;
             margin-bottom: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 8px;
+            gap: 5px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -370,8 +370,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            margin-top: 5px;
+            gap: 4px;
+            margin-top: 3px;
         }
 
         .stav-btn {
