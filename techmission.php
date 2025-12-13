@@ -857,6 +857,14 @@ function t(key) {
     return translations[currentLang][key] || translations['cz'][key] || key;
 }
 
+// Výchozí telefony podle ID (pro případ že server nemá telefon)
+const VYCHOZI_TELEFONY = {
+    'so-2130': '+46701424228',
+    'so-2230': '+32477082652',
+    'so-2330': '+31642753844',
+    'ne-0300': '+4917672054357'
+};
+
 // Data transportů
 let transporty = {
     sobota: [
@@ -1175,6 +1183,18 @@ async function nactiData() {
             // Pozor: server může vrátit [] (prázdné pole) místo {} (objekt)
             stavy = (Array.isArray(data.stavy) || !data.stavy) ? {} : data.stavy;
             if (data.transporty) {
+                // Zachovat telefony z výchozích dat (server je nemusí mít)
+                ['sobota', 'nedele'].forEach(den => {
+                    if (data.transporty[den]) {
+                        data.transporty[den].forEach(item => {
+                            // Najít odpovídající výchozí transport podle ID
+                            const vychoziTransport = VYCHOZI_TELEFONY[item.id];
+                            if (vychoziTransport && !item.telefon) {
+                                item.telefon = vychoziTransport;
+                            }
+                        });
+                    }
+                });
                 transporty = data.transporty;
             }
             vykresli();
