@@ -232,16 +232,18 @@
             color: #fff;
         }
 
-        /* Transport řádek */
+        /* Transport řádek - vertikální layout */
         .transport {
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 50px 15px 45px;
             margin-bottom: 8px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
+            text-align: center;
+            gap: 8px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -256,25 +258,28 @@
             border-color: #1a1a1a;
         }
 
+        /* Čas - levý horní roh */
         .transport-cas {
-            font-size: 24px;
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-size: 22px;
             font-weight: 700;
-            min-width: 70px;
             font-variant-numeric: tabular-nums;
         }
 
         .transport-info {
-            flex: 1;
+            text-align: center;
         }
 
         .transport-jmena {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         .transport-trasa {
-            font-size: 12px;
+            font-size: 13px;
             color: #666;
         }
 
@@ -360,13 +365,13 @@
 
         /* Stav */
         .transport-stav {
-            min-width: 110px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            margin-top: 5px;
         }
 
         .stav-btn {
@@ -527,21 +532,8 @@
                 max-width: 100%;
             }
 
-            .transport {
-                flex-wrap: wrap;
-            }
-
             .transport-cas {
                 font-size: 20px;
-            }
-
-            .transport-stav {
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .btn-smazat {
-                opacity: 1;
             }
         }
     </style>
