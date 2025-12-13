@@ -237,13 +237,13 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 38px 15px 32px;
-            margin-bottom: 8px;
+            padding: 32px 15px 22px;
+            margin-bottom: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 5px;
+            gap: 3px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -275,7 +275,7 @@
         .transport-jmena {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .transport-trasa {
@@ -370,8 +370,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            margin-top: 3px;
+            gap: 2px;
+            margin-top: 2px;
         }
 
         .stav-btn {
