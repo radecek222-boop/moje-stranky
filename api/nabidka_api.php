@@ -48,9 +48,12 @@ try {
 
         // ========================================
         // EMAILY_S_NABIDKOU - Seznam emailů zákazníků s aktivní CN (pro seznam.php)
+        // Přístup: admin + technik (pouze čtení, technik nemůže vytvářet CN)
         // ========================================
         case 'emaily_s_nabidkou':
-            if (!$isAdmin) {
+            $userRole = strtolower(trim($_SESSION['role'] ?? ''));
+            $isTechnik = in_array($userRole, ['technik', 'technician'], true);
+            if (!$isAdmin && !$isTechnik) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
