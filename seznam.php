@@ -1,5 +1,10 @@
 <?php require_once "init.php"; ?>
 <?php
+// Zakázat cachování pro PWA
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 // Detect embed mode
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
