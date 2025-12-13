@@ -499,7 +499,10 @@ async function renderOrders(items = null) {
 
   // Načíst emaily zákazníků s cenovou nabídkou (CN)
   try {
-    const cnResponse = await fetch('/api/nabidka_api.php?action=emaily_s_nabidkou');
+    const cnResponse = await fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     const cnData = await cnResponse.json();
     if (cnData.status === 'success') {
       EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
