@@ -378,7 +378,14 @@ async function loadAll(status = 'all', append = false) {
   try {
     // PAGINATION FIX: Přidat page a per_page parametry
     const page = append ? CURRENT_PAGE + 1 : 1;
-    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}`);
+    // Cache-busting pro Safari PWA
+    const cacheBuster = Date.now();
+    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     if (!response.ok) throw new Error('Chyba načítání');
 
     const json = await response.json();

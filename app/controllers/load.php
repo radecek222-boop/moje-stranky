@@ -8,6 +8,10 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 
 header('Content-Type: application/json');
+// Zakázat cachování pro PWA
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 try {
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
