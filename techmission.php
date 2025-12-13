@@ -282,7 +282,7 @@
         .transport-tel {
             position: absolute;
             top: 8px;
-            right: 40px;
+            right: 8px;
             width: 28px;
             height: 28px;
             background: #222;
@@ -304,6 +304,18 @@
             width: 14px;
             height: 14px;
             fill: #fff;
+        }
+
+        @media (max-width: 500px) {
+            .transport-tel {
+                width: 36px;
+                height: 36px;
+            }
+
+            .transport-tel svg {
+                width: 18px;
+                height: 18px;
+            }
         }
 
         /* Tlačítko smazat - pravý dolní roh */
@@ -608,6 +620,7 @@
         <input type="text" class="modal-input" id="input-jmeno" data-i18n-placeholder="namePlaceholder" placeholder="Jmeno pasazera">
         <input type="text" class="modal-input" id="input-odkud" data-i18n-placeholder="fromPlaceholder" placeholder="Odkud">
         <input type="text" class="modal-input" id="input-kam" data-i18n-placeholder="toPlaceholder" placeholder="Kam">
+        <input type="tel" class="modal-input" id="input-telefon" data-i18n-placeholder="phonePlaceholder" placeholder="Telefon pasazera">
         <input type="tel" class="modal-input" id="input-heslo" data-i18n-placeholder="passwordPlaceholder" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
         <div class="modal-chyba" id="modal-chyba" data-i18n="wrongPassword">Spatne heslo</div>
         <div class="modal-btns">
@@ -666,6 +679,7 @@ const translations = {
         namePlaceholder: 'Jmeno pasazera',
         fromPlaceholder: 'Odkud',
         toPlaceholder: 'Kam',
+        phonePlaceholder: 'Telefon pasazera',
         passwordPlaceholder: 'Heslo pro potvrzeni',
         wrongPassword: 'Spatne heslo',
         cancel: 'Zrusit',
@@ -693,6 +707,7 @@ const translations = {
         namePlaceholder: 'Meno pasaziera',
         fromPlaceholder: 'Odkial',
         toPlaceholder: 'Kam',
+        phonePlaceholder: 'Telefon pasaziera',
         passwordPlaceholder: 'Heslo pre potvrdenie',
         wrongPassword: 'Nespravne heslo',
         cancel: 'Zrusit',
@@ -720,6 +735,7 @@ const translations = {
         namePlaceholder: 'Passenger name',
         fromPlaceholder: 'From',
         toPlaceholder: 'To',
+        phonePlaceholder: 'Passenger phone',
         passwordPlaceholder: 'Password to confirm',
         wrongPassword: 'Wrong password',
         cancel: 'Cancel',
@@ -747,6 +763,7 @@ const translations = {
         namePlaceholder: 'Passagiername',
         fromPlaceholder: 'Von',
         toPlaceholder: 'Nach',
+        phonePlaceholder: 'Passagiertelefon',
         passwordPlaceholder: 'Passwort zur Bestatigung',
         wrongPassword: 'Falsches Passwort',
         cancel: 'Abbrechen',
@@ -774,6 +791,7 @@ const translations = {
         namePlaceholder: 'Naam passagier',
         fromPlaceholder: 'Van',
         toPlaceholder: 'Naar',
+        phonePlaceholder: 'Telefoon passagier',
         passwordPlaceholder: 'Wachtwoord ter bevestiging',
         wrongPassword: 'Verkeerd wachtwoord',
         cancel: 'Annuleren',
@@ -956,6 +974,7 @@ function otevriModalPridat(den) {
     document.getElementById('input-jmeno').value = '';
     document.getElementById('input-odkud').value = '';
     document.getElementById('input-kam').value = '';
+    document.getElementById('input-telefon').value = '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
 
@@ -964,6 +983,7 @@ function otevriModalPridat(den) {
     document.getElementById('input-jmeno').style.display = 'block';
     document.getElementById('input-odkud').style.display = 'block';
     document.getElementById('input-kam').style.display = 'block';
+    document.getElementById('input-telefon').style.display = 'block';
 
     document.getElementById('modal-edit').classList.add('aktivni');
 }
@@ -981,12 +1001,14 @@ function editujVse(id, den) {
     document.getElementById('input-jmeno').style.display = 'block';
     document.getElementById('input-odkud').style.display = 'block';
     document.getElementById('input-kam').style.display = 'block';
+    document.getElementById('input-telefon').style.display = 'block';
 
     // Vyplnit aktuální hodnoty
     document.getElementById('input-cas').value = transport.cas;
     document.getElementById('input-jmeno').value = transport.jmeno;
     document.getElementById('input-odkud').value = transport.odkud;
     document.getElementById('input-kam').value = transport.kam;
+    document.getElementById('input-telefon').value = transport.telefon || '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
 
@@ -1007,7 +1029,8 @@ async function potvrdEdit() {
             cas: document.getElementById('input-cas').value || '00:00',
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
             odkud: document.getElementById('input-odkud').value || '?',
-            kam: document.getElementById('input-kam').value || '?'
+            kam: document.getElementById('input-kam').value || '?',
+            telefon: document.getElementById('input-telefon').value || ''
         };
         transporty[editAkce.den].push(novy);
     } else if (editAkce.typ === 'editovat') {
@@ -1019,6 +1042,7 @@ async function potvrdEdit() {
                 transport.jmeno = document.getElementById('input-jmeno').value;
                 transport.odkud = document.getElementById('input-odkud').value;
                 transport.kam = document.getElementById('input-kam').value;
+                transport.telefon = document.getElementById('input-telefon').value || '';
             } else if (editAkce.pole === 'cas') {
                 transport.cas = document.getElementById('input-cas').value;
             } else if (editAkce.pole === 'jmeno') {
