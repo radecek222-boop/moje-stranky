@@ -181,6 +181,25 @@
             background: #444;
         }
 
+        .ridic-pridat-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .ridic-pridat-btn:hover {
+            color: #fff;
+        }
+
+        .ridic-pridat .ridic-info {
+            opacity: 0.6;
+        }
+
         /* Sekce dne */
         .den {
             margin-bottom: 25px;
@@ -876,7 +895,12 @@ function vykresliRidice() {
 
     kontejner.innerHTML = '';
 
-    ridici.forEach(ridic => {
+    // Seradit ridice podle jmena (A-Z)
+    const serazeniRidici = [...ridici].sort((a, b) =>
+        (a.jmeno || '').localeCompare(b.jmeno || '', 'cs')
+    );
+
+    serazeniRidici.forEach(ridic => {
         const div = document.createElement('div');
         div.className = 'ridic';
         div.innerHTML = `
@@ -898,18 +922,53 @@ function vykresliRidice() {
         `;
         kontejner.appendChild(div);
     });
+
+    // Pridat tlacitko "+" pro pridani noveho ridice
+    const pridatDiv = document.createElement('div');
+    pridatDiv.className = 'ridic ridic-pridat';
+    pridatDiv.innerHTML = `
+        <div class="ridic-pridat-btn" onclick="otevriModalPridatRidice()" title="Pridat ridice">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+        </div>
+        <div class="ridic-info">
+            <div class="ridic-jmeno" style="color: #666;">PRIDAT</div>
+        </div>
+    `;
+    kontejner.appendChild(pridatDiv);
 }
+
+// Mod editace ridice: 'edit' nebo 'add'
+let ridicEditMod = 'edit';
 
 // Otevřít modal pro editaci řidiče
 function otevriModalRidic(id) {
     const ridic = ridici.find(r => r.id === id);
     if (!ridic) return;
 
+    ridicEditMod = 'edit';
+    document.getElementById('modal-ridic-titulek').textContent = 'Upravit ridice';
     document.getElementById('ridic-edit-id').value = id;
     document.getElementById('ridic-jmeno').value = ridic.jmeno || '';
     document.getElementById('ridic-auto').value = ridic.auto || '';
     document.getElementById('ridic-poznamka').value = ridic.poznamka || '';
     document.getElementById('ridic-telefon').value = ridic.telefon || '';
+    document.getElementById('ridic-heslo').value = '';
+    document.getElementById('modal-ridic-chyba').style.display = 'none';
+
+    document.getElementById('modal-ridic').classList.add('aktivni');
+}
+
+// Otevřít modal pro přidání nového řidiče
+function otevriModalPridatRidice() {
+    ridicEditMod = 'add';
+    document.getElementById('modal-ridic-titulek').textContent = 'Pridat ridice';
+    document.getElementById('ridic-edit-id').value = '';
+    document.getElementById('ridic-jmeno').value = '';
+    document.getElementById('ridic-auto').value = '';
+    document.getElementById('ridic-poznamka').value = '';
+    document.getElementById('ridic-telefon').value = '';
     document.getElementById('ridic-heslo').value = '';
     document.getElementById('modal-ridic-chyba').style.display = 'none';
 
@@ -929,14 +988,27 @@ async function ulozRidice() {
         return;
     }
 
-    const id = document.getElementById('ridic-edit-id').value;
-    const ridic = ridici.find(r => r.id === id);
-    if (!ridic) return;
+    if (ridicEditMod === 'add') {
+        // Pridat noveho ridice
+        const novyRidic = {
+            id: 'ridic-' + Date.now(),
+            jmeno: document.getElementById('ridic-jmeno').value.toUpperCase() || 'NOVY',
+            auto: document.getElementById('ridic-auto').value.toUpperCase() || '',
+            poznamka: document.getElementById('ridic-poznamka').value || '',
+            telefon: document.getElementById('ridic-telefon').value || ''
+        };
+        ridici.push(novyRidic);
+    } else {
+        // Editovat existujiciho ridice
+        const id = document.getElementById('ridic-edit-id').value;
+        const ridic = ridici.find(r => r.id === id);
+        if (!ridic) return;
 
-    ridic.jmeno = document.getElementById('ridic-jmeno').value.toUpperCase();
-    ridic.auto = document.getElementById('ridic-auto').value.toUpperCase();
-    ridic.poznamka = document.getElementById('ridic-poznamka').value;
-    ridic.telefon = document.getElementById('ridic-telefon').value;
+        ridic.jmeno = document.getElementById('ridic-jmeno').value.toUpperCase();
+        ridic.auto = document.getElementById('ridic-auto').value.toUpperCase();
+        ridic.poznamka = document.getElementById('ridic-poznamka').value;
+        ridic.telefon = document.getElementById('ridic-telefon').value;
+    }
 
     zavriModalRidic();
     vykresliRidice();
