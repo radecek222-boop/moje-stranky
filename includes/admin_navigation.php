@@ -112,6 +112,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Konzole',
                 'tab' => 'admin_console',
             ],
+            'transport' => [
+                'href' => 'admin.php?tab=transport',
+                'tab_label' => 'Transport',
+                'tab' => 'transport',
+            ],
         ];
     }
 }
