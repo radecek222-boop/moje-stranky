@@ -421,6 +421,32 @@ try {
             ]);
             break;
 
+        // =============================================
+        // TRANSPORT - Prirazeni ridice
+        // =============================================
+        case 'prirad_ridice':
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatny CSRF token', 403);
+            }
+            if (empty($_POST['event_id'])) {
+                sendJsonError('Chybi event_id');
+            }
+
+            $ridicId = !empty($_POST['ridic_id']) ? (int)$_POST['ridic_id'] : null;
+
+            $stmt = $pdo->prepare("
+                UPDATE wgs_transport_events
+                SET ridic_id = :ridic_id
+                WHERE event_id = :id
+            ");
+            $stmt->execute([
+                'ridic_id' => $ridicId,
+                'id' => (int)$_POST['event_id']
+            ]);
+
+            sendJsonSuccess('Ridic prirazen');
+            break;
+
         default:
             sendJsonError('Neznama akce: ' . htmlspecialchars($akce));
     }

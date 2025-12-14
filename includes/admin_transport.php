@@ -683,6 +683,117 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     color: #666;
 }
 
+/* Kompaktni zobrazeni ridicu */
+.ridici-sekce-kompakt {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+}
+
+.ridici-header-kompakt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ridici-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ridici-seznam {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.ridic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ridic-chip:hover {
+    background: #333;
+    color: #fff;
+}
+
+.ridic-chip-jmeno {
+    font-weight: 600;
+}
+
+.ridic-chip-auto {
+    font-size: 10px;
+    color: #888;
+}
+
+.ridic-chip-akce {
+    display: flex;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+.ridic-chip-akce button {
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.ridic-chip-akce .btn-edit {
+    color: #888;
+}
+
+.ridic-chip-akce .btn-edit:hover {
+    color: #fff;
+}
+
+.ridic-chip-akce .btn-del {
+    color: #ff4444;
+}
+
+.ridic-chip-akce .btn-del:hover {
+    color: #ff6666;
+}
+
+/* Select ridice v transportu */
+.transport-ridic-select {
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ccc;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.transport-ridic-select:hover {
+    border-color: #666;
+}
+
+.transport-ridic-select option {
+    background: #222;
+    color: #ccc;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .transport-eventy-grid {
@@ -724,18 +835,17 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         <div class="transport-detail-title" id="detail-event-nazev">Nacitam...</div>
         <div class="transport-detail-actions">
             <button class="btn-pridat-transport" onclick="transportOtevritModal()">+ Pridat transport</button>
+            <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat ridice</button>
         </div>
     </div>
 
-    <!-- Sekce ridicu -->
-    <div class="ridici-sekce">
-        <div class="ridici-header">
-            <h3>Ridici</h3>
-            <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat ridice</button>
-        </div>
-        <div class="ridici-grid" id="ridici-kontejner">
-            <!-- Ridici se vykresli JavaScriptem -->
-            <div class="ridici-prazdne">Nacitam ridice...</div>
+    <!-- Ridici - kompaktni zobrazeni -->
+    <div class="ridici-sekce-kompakt">
+        <div class="ridici-header-kompakt">
+            <span class="ridici-label">Ridici:</span>
+            <div class="ridici-seznam" id="ridici-kontejner">
+                <span class="ridici-prazdne">Nacitam...</span>
+            </div>
         </div>
     </div>
 
@@ -1172,32 +1282,21 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         const kontejner = document.getElementById('ridici-kontejner');
 
         if (!ridici || ridici.length === 0) {
-            kontejner.innerHTML = `
-                <div class="ridici-prazdne">
-                    <p>Zatim zadni ridici</p>
-                    <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat prvniho ridice</button>
-                </div>
-            `;
+            kontejner.innerHTML = '<span class="ridici-prazdne" style="padding:0; font-size:12px;">Zadni ridici</span>';
             return;
         }
 
-        const autoSvg = '<svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
-        const telSvg = '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
-
         let html = '';
         ridici.forEach(function(r) {
+            const autoText = r.auto ? ` (${escapeHtml(r.auto)}${r.spz ? ' - ' + escapeHtml(r.spz) : ''})` : '';
             html += `
-                <div class="ridic-karta" data-ridic-id="${r.ridic_id}">
-                    <div class="ridic-karta-akce">
-                        <button class="btn-upravit-ridice" onclick="ridicEditovat(${r.ridic_id})">✎</button>
-                        <button class="btn-smazat-ridice" onclick="ridicOtevritModalSmazat(${r.ridic_id}, '${escapeHtml(r.jmeno)}')">&times;</button>
+                <div class="ridic-chip" data-ridic-id="${r.ridic_id}">
+                    <span class="ridic-chip-jmeno">${escapeHtml(r.jmeno)}</span>
+                    ${autoText ? `<span class="ridic-chip-auto">${autoText}</span>` : ''}
+                    <div class="ridic-chip-akce">
+                        <button class="btn-edit" onclick="event.stopPropagation(); ridicEditovat(${r.ridic_id})">✎</button>
+                        <button class="btn-del" onclick="event.stopPropagation(); ridicOtevritModalSmazat(${r.ridic_id}, '${escapeHtml(r.jmeno)}')">&times;</button>
                     </div>
-                    ${autoSvg}
-                    <div class="ridic-jmeno">${escapeHtml(r.jmeno)}</div>
-                    ${r.auto ? `<div class="ridic-auto">${escapeHtml(r.auto)}</div>` : ''}
-                    ${r.spz ? `<div class="ridic-spz">${escapeHtml(r.spz)}</div>` : ''}
-                    ${r.poznamka ? `<div class="ridic-poznamka">${escapeHtml(r.poznamka)}</div>` : ''}
-                    ${r.telefon ? `<a href="tel:${escapeHtml(r.telefon)}" class="ridic-tel-link">${telSvg}</a>` : ''}
                 </div>
             `;
         });
@@ -1383,6 +1482,15 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                 const stavClass = t.stav === 'drop' ? 'stav-drop' : (t.stav === 'onway' ? 'stav-onway' : 'stav-wait');
                 const stavText = t.stav === 'drop' ? 'DROP OFF' : (t.stav === 'onway' ? 'ON THE WAY' : 'WAIT');
 
+                // Select pro ridice
+                let ridicSelect = '<select class="transport-ridic-select" onchange="transportPriradRidice(' + t.event_id + ', this.value)">';
+                ridicSelect += '<option value="">-- Ridic --</option>';
+                aktualniRidici.forEach(function(r) {
+                    const selected = t.ridic_id == r.ridic_id ? ' selected' : '';
+                    ridicSelect += '<option value="' + r.ridic_id + '"' + selected + '>' + escapeHtml(r.jmeno) + (r.auto ? ' (' + escapeHtml(r.auto) + ')' : '') + '</option>';
+                });
+                ridicSelect += '</select>';
+
                 html += `
                     <div class="transport-radek" data-id="${t.event_id}">
                         <div class="transport-radek-akce">
@@ -1396,9 +1504,11 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                             ${t.destinace ? `<div class="transport-radek-trasa">${escapeHtml(t.destinace)}</div>` : ''}
                             ${t.telefon || t.email ? `<div class="transport-radek-kontakt">${t.telefon ? escapeHtml(t.telefon) : ''} ${t.email ? '| ' + escapeHtml(t.email) : ''}</div>` : ''}
                         </div>
+                        <div class="transport-radek-ridic">
+                            ${ridicSelect}
+                        </div>
                         <div class="transport-radek-stav">
                             <button class="stav-btn ${stavClass}" onclick="transportZmenStav(${t.event_id})">${stavText}</button>
-                            ${t.ridic_jmeno ? `<div class="stav-cas-info">${escapeHtml(t.ridic_jmeno)}${t.ridic_auto ? ' (' + escapeHtml(t.ridic_auto) + ')' : ''}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -1512,6 +1622,28 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             }
         } catch (error) {
             console.error('Chyba:', error);
+        }
+    };
+
+    window.transportPriradRidice = async function(transportId, ridicId) {
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('action', 'prirad_ridice');
+        formData.append('event_id', transportId);
+        formData.append('ridic_id', ridicId || '');
+
+        try {
+            const odpoved = await fetch('/api/transport_events_api.php', { method: 'POST', body: formData });
+            const data = await odpoved.json();
+            if (data.status === 'success') {
+                // Nemusime prekreslovat, select uz ukazuje spravnou hodnotu
+            } else {
+                alert('Chyba: ' + (data.message || 'Nepodarilo se prirazit ridice'));
+                nactiTransporty(); // Obnovit pro spravny stav
+            }
+        } catch (error) {
+            console.error('Chyba:', error);
+            nactiTransporty();
         }
     };
 
