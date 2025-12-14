@@ -77,8 +77,8 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card {
-    background: #fff;
-    border: 1px solid #d1d1d6;
+    background: #1a1a1a;
+    border: 1px solid #333;
     border-radius: 12px;
     padding: 1.5rem;
     cursor: pointer;
@@ -88,21 +88,21 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 
 .transport-event-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border-color: #555;
 }
 
 .transport-event-card-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #fff;
     margin-bottom: 0.5rem;
     letter-spacing: 0.5px;
 }
 
 .transport-event-card-datum {
     font-size: 0.85rem;
-    color: #666;
+    color: #999;
     margin-bottom: 0.75rem;
 }
 
@@ -113,7 +113,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     color: #888;
     margin-top: 1rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #333;
 }
 
 .transport-event-card-stat {
@@ -123,7 +123,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card-stat strong {
-    color: #333;
+    color: #fff;
 }
 
 .transport-event-card-akce {
@@ -135,18 +135,20 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card-akce button {
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background: #333;
+    border: 1px solid #444;
     border-radius: 4px;
     padding: 0.4rem 0.6rem;
     font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    color: #ccc;
 }
 
 .transport-event-card-akce button:hover {
-    background: #eee;
-    border-color: #333;
+    background: #444;
+    border-color: #666;
+    color: #fff;
 }
 
 .transport-event-card-akce button.btn-smazat-event {
