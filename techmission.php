@@ -200,6 +200,155 @@
             opacity: 0.6;
         }
 
+        /* Kalendář */
+        .kalendar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 1rem;
+            z-index: 2000;
+        }
+
+        .kalendar-overlay.aktivni {
+            display: flex;
+        }
+
+        .kalendar-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .kalendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .kalendar-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .kalendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .kalendar-nav button {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .kalendar-nav button:hover {
+            background: #444;
+        }
+
+        .kalendar-mesic {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .kalendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .kalendar-den-tyden {
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .kalendar-den {
+            text-align: center;
+            padding: 10px 4px;
+            cursor: pointer;
+            border: 1px solid #222;
+            border-radius: 4px;
+            transition: all 0.2s;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .kalendar-den:hover:not(.disabled) {
+            background: #333;
+            border-color: #555;
+        }
+
+        .kalendar-den.disabled {
+            opacity: 0;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .kalendar-den.vybrany {
+            background: #fff;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .kalendar-den.dnes {
+            border-color: #666;
+        }
+
+        .kalendar-zavrit {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: #222;
+            color: #888;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .kalendar-zavrit:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        /* Datum input wrapper */
+        .datum-input-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .datum-input-wrapper input {
+            cursor: pointer;
+        }
+
         /* Sekce dne */
         .den {
             margin-bottom: 25px;
@@ -576,11 +725,29 @@
 </div>
 
 
+<!-- Kalendář overlay -->
+<div class="kalendar-overlay" id="kalendar-overlay">
+    <div class="kalendar-box">
+        <div class="kalendar-header">
+            <h3>Vyberte datum</h3>
+            <div class="kalendar-nav">
+                <button id="kalendar-prev">&larr;</button>
+                <button id="kalendar-next">&rarr;</button>
+            </div>
+        </div>
+        <div class="kalendar-mesic" id="kalendar-mesic"></div>
+        <div class="kalendar-grid" id="kalendar-grid"></div>
+        <button class="kalendar-zavrit" onclick="zavriKalendar()">Zavrit</button>
+    </div>
+</div>
+
 <!-- Modal pro přidání/editaci -->
 <div class="modal" id="modal-edit">
     <div class="modal-obsah">
         <div class="modal-titulek" id="modal-titulek" data-i18n="addTransport">Pridat transport</div>
-        <input type="date" class="modal-input" id="input-datum" style="display: none;">
+        <div class="datum-input-wrapper" id="datum-wrapper" style="display: none;" onclick="otevriKalendar()">
+            <input type="text" class="modal-input" id="input-datum" placeholder="Datum (kliknete pro vyber)" readonly style="margin-bottom: 0;">
+        </div>
         <input type="text" class="modal-input" id="input-cas" data-i18n-placeholder="timePlaceholder" placeholder="Cas (napr. 21:30)">
         <input type="text" class="modal-input" id="input-jmeno" data-i18n-placeholder="namePlaceholder" placeholder="Jmeno pasazera">
         <input type="text" class="modal-input" id="input-odkud" data-i18n-placeholder="fromPlaceholder" placeholder="Odkud">
@@ -1076,13 +1243,17 @@ function otevriModalPridat(den) {
     document.getElementById('modal-chyba').style.display = 'none';
 
     // Zobrazit pole pro datum pri pridavani
+    const datumWrapper = document.getElementById('datum-wrapper');
     const datumInput = document.getElementById('input-datum');
-    datumInput.style.display = 'block';
-    // Nastavit vychozi datum podle dne
+    datumWrapper.style.display = 'block';
+
+    // Nastavit vychozi datum podle dne (zobrazeni v ceskem formatu)
     if (den === 'sobota') {
-        datumInput.value = '2024-12-13';
+        datumInput.value = '13.12.2024';
+        datumInput.dataset.hodnota = '2024-12-13';
     } else {
-        datumInput.value = '2024-12-14';
+        datumInput.value = '14.12.2024';
+        datumInput.dataset.hodnota = '2024-12-14';
     }
 
     // Zobrazit všechny inputy
@@ -1103,7 +1274,7 @@ function editujVse(id, den) {
     document.getElementById('modal-titulek').textContent = t('editTransport');
 
     // Skryt pole pro datum pri editaci
-    document.getElementById('input-datum').style.display = 'none';
+    document.getElementById('datum-wrapper').style.display = 'none';
 
     // Zobrazit všechny inputy
     document.getElementById('input-cas').style.display = 'block';
@@ -1131,8 +1302,9 @@ async function potvrdEdit() {
     }
 
     if (editAkce.typ === 'pridat') {
-        // Zjistit den podle vybraneho data
-        const vybraneDatum = document.getElementById('input-datum').value;
+        // Zjistit den podle vybraneho data (z dataset.hodnota)
+        const datumInput = document.getElementById('input-datum');
+        const vybraneDatum = datumInput.dataset.hodnota || '';
         let cilovyDen = editAkce.den;
 
         // Urcit den podle datumu (13.12 = sobota, 14.12 = nedele, ostatni = podle dne v tydnu)
@@ -1188,6 +1360,128 @@ function zavriModal() {
     document.getElementById('modal-edit').classList.remove('aktivni');
     editAkce = null;
 }
+
+// ===== KALENDÁŘ =====
+let kalendarDatum = new Date();
+const mesiceNazvy = ['Leden', 'Unor', 'Brezen', 'Duben', 'Kveten', 'Cerven', 'Cervenec', 'Srpen', 'Zari', 'Rijen', 'Listopad', 'Prosinec'];
+const dnyTydne = ['Po', 'Ut', 'St', 'Ct', 'Pa', 'So', 'Ne'];
+
+// Otevřít kalendář
+function otevriKalendar() {
+    // Nastavit aktualni mesic podle vybrane hodnoty
+    const datumInput = document.getElementById('input-datum');
+    if (datumInput.dataset.hodnota) {
+        kalendarDatum = new Date(datumInput.dataset.hodnota);
+    } else {
+        kalendarDatum = new Date();
+    }
+    vykresliKalendar();
+    document.getElementById('kalendar-overlay').classList.add('aktivni');
+}
+
+// Zavřít kalendář
+function zavriKalendar() {
+    document.getElementById('kalendar-overlay').classList.remove('aktivni');
+}
+
+// Vykreslit kalendář
+function vykresliKalendar() {
+    const rok = kalendarDatum.getFullYear();
+    const mesic = kalendarDatum.getMonth();
+
+    // Zobrazit mesic a rok
+    document.getElementById('kalendar-mesic').textContent = mesiceNazvy[mesic] + ' ' + rok;
+
+    const grid = document.getElementById('kalendar-grid');
+    grid.innerHTML = '';
+
+    // Hlavička - dny týdne
+    dnyTydne.forEach(den => {
+        const div = document.createElement('div');
+        div.className = 'kalendar-den-tyden';
+        div.textContent = den;
+        grid.appendChild(div);
+    });
+
+    // Prvni den mesice
+    const prvniDen = new Date(rok, mesic, 1).getDay();
+    const dniVMesici = new Date(rok, mesic + 1, 0).getDate();
+    const upravenyPrvniDen = prvniDen === 0 ? 6 : prvniDen - 1; // Pondeli = 0
+
+    // Prazdne dny na zacatku
+    for (let i = 0; i < upravenyPrvniDen; i++) {
+        const div = document.createElement('div');
+        div.className = 'kalendar-den disabled';
+        grid.appendChild(div);
+    }
+
+    // Dny mesice
+    const dnes = new Date();
+    const datumInput = document.getElementById('input-datum');
+    const vybranaHodnota = datumInput.dataset.hodnota || '';
+
+    for (let den = 1; den <= dniVMesici; den++) {
+        const div = document.createElement('div');
+        div.className = 'kalendar-den';
+        div.textContent = den;
+
+        // Oznacit dnesni den
+        if (den === dnes.getDate() && mesic === dnes.getMonth() && rok === dnes.getFullYear()) {
+            div.classList.add('dnes');
+        }
+
+        // Oznacit vybrany den
+        const datumStr = rok + '-' + String(mesic + 1).padStart(2, '0') + '-' + String(den).padStart(2, '0');
+        if (datumStr === vybranaHodnota) {
+            div.classList.add('vybrany');
+        }
+
+        div.addEventListener('click', () => {
+            // Nastavit vybrany datum
+            const vybranyDatum = rok + '-' + String(mesic + 1).padStart(2, '0') + '-' + String(den).padStart(2, '0');
+            const zobrazenyDatum = String(den).padStart(2, '0') + '.' + String(mesic + 1).padStart(2, '0') + '.' + rok;
+
+            datumInput.value = zobrazenyDatum;
+            datumInput.dataset.hodnota = vybranyDatum;
+
+            zavriKalendar();
+        });
+
+        grid.appendChild(div);
+    }
+}
+
+// Inicializace kalendáře - navigace
+document.addEventListener('DOMContentLoaded', function() {
+    const prevBtn = document.getElementById('kalendar-prev');
+    const nextBtn = document.getElementById('kalendar-next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            kalendarDatum.setMonth(kalendarDatum.getMonth() - 1);
+            vykresliKalendar();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            kalendarDatum.setMonth(kalendarDatum.getMonth() + 1);
+            vykresliKalendar();
+        });
+    }
+
+    // Zavrit kalendar klikem na overlay
+    const overlay = document.getElementById('kalendar-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                zavriKalendar();
+            }
+        });
+    }
+});
 
 // Otevřít modal pro smazání
 function otevriModalSmazat(id, den) {
