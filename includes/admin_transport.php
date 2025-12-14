@@ -1583,14 +1583,23 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         }
     });
 
-    // Inicializace
-    document.addEventListener('DOMContentLoaded', function() {
+    // Inicializace - spustit ihned nebo po nacteni DOM
+    function inicializace() {
+        console.log('[Transport] Inicializace, eventId:', eventId);
         if (eventId) {
             nactiRidice();
             nactiTransporty();
         } else {
             nactiEventy();
         }
-    });
+    }
+
+    // Spustit inicializaci - bud hned pokud DOM je ready, nebo cekat
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', inicializace);
+    } else {
+        // DOM uz je nacteny, spustit ihned
+        inicializace();
+    }
 })();
 </script>
