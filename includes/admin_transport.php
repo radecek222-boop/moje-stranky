@@ -361,37 +361,43 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 /* Akce na radku */
-.transport-radek-akce {
+/* Tlacitko smazat - pravy dolni roh */
+.btn-smazat-transport {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    display: flex;
-    gap: 8px;
-}
-
-.transport-radek-akce button {
+    width: 28px;
+    height: 28px;
     background: transparent;
     border: none;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.2s;
-    padding: 4px;
-}
-
-.btn-upravit-transport {
-    color: #888;
-}
-
-.btn-upravit-transport:hover {
-    color: #fff;
-}
-
-.btn-smazat-transport {
     color: #ff4444;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
 }
 
 .btn-smazat-transport:hover {
     color: #ff6666;
+}
+
+/* Tlacitko upravit - levy dolni roh */
+.btn-upravit-transport {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.btn-upravit-transport:hover {
+    color: #fff;
 }
 
 /* Modal - tmavý styl */
@@ -932,7 +938,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     </div>
 </div>
 
-<!-- Modal pro přidání/editaci transportu -->
+<!-- Modal pro přidání/editaci transportu - Techmission styl -->
 <div class="transport-modal-overlay" id="modal-transport">
     <div class="transport-modal">
         <div class="transport-modal-header">
@@ -952,43 +958,24 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                 </div>
             </div>
             <div class="transport-form-group">
-                <label>Jmeno a prijmeni *</label>
-                <input type="text" id="transport-jmeno" placeholder="Jan Novak" required>
+                <label>Jmeno pasazera *</label>
+                <input type="text" id="transport-jmeno" placeholder="Jmeno pasazera" required>
             </div>
             <div class="transport-form-row">
                 <div class="transport-form-group">
-                    <label>Cislo letu</label>
-                    <input type="text" id="transport-let" placeholder="OK123">
+                    <label>Odkud *</label>
+                    <input type="text" id="transport-odkud" placeholder="Odkud" required>
                 </div>
                 <div class="transport-form-group">
-                    <label>Cas priletu</label>
-                    <input type="time" id="transport-prilet">
-                </div>
-            </div>
-            <div class="transport-form-group">
-                <label>Destinace</label>
-                <input type="text" id="transport-destinace" placeholder="Letiste -> Hotel">
-            </div>
-            <div class="transport-form-row">
-                <div class="transport-form-group">
-                    <label>Telefon</label>
-                    <input type="tel" id="transport-telefon" placeholder="+420 123 456 789">
-                </div>
-                <div class="transport-form-group">
-                    <label>Email</label>
-                    <input type="email" id="transport-email" placeholder="jan@example.com">
+                    <label>Kam *</label>
+                    <input type="text" id="transport-kam" placeholder="Kam" required>
                 </div>
             </div>
             <div class="transport-form-group">
                 <label>Ridic</label>
                 <select id="transport-ridic-id">
                     <option value="">-- Vyberte ridice --</option>
-                    <!-- Ridici se naplni JavaScriptem -->
                 </select>
-            </div>
-            <div class="transport-form-group">
-                <label>Poznamka</label>
-                <textarea id="transport-poznamka" rows="2" placeholder="Dalsi poznamky..."></textarea>
             </div>
         </div>
         <div class="transport-modal-footer">
@@ -1491,18 +1478,17 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                 });
                 ridicSelect += '</select>';
 
+                // Trasa - odkud kam
+                const trasa = (t.odkud || t.kam) ? `${escapeHtml(t.odkud || '?')} → ${escapeHtml(t.kam || '?')}` : '';
+
                 html += `
                     <div class="transport-radek" data-id="${t.event_id}">
-                        <div class="transport-radek-akce">
-                            <button class="btn-upravit-transport" onclick="transportEditovat(${t.event_id})">✎</button>
-                            <button class="btn-smazat-transport" onclick="transportOtevritModalSmazat(${t.event_id}, '${escapeHtml(t.jmeno_prijmeni)}')">&times;</button>
-                        </div>
+                        <button class="btn-smazat-transport" onclick="event.stopPropagation(); transportOtevritModalSmazat(${t.event_id}, '${escapeHtml(t.jmeno_prijmeni)}')">&times;</button>
+                        <button class="btn-upravit-transport" onclick="event.stopPropagation(); transportEditovat(${t.event_id})">✎</button>
                         <div class="transport-radek-cas">${(t.cas || '').substring(0, 5)}</div>
                         <div class="transport-radek-info">
-                            <div class="transport-radek-jmeno">${escapeHtml(t.jmeno_prijmeni)}</div>
-                            ${t.cislo_letu ? `<div class="transport-radek-let">Let: ${escapeHtml(t.cislo_letu)}${t.cas_priletu ? ' (prilet ' + t.cas_priletu.substring(0, 5) + ')' : ''}</div>` : ''}
-                            ${t.destinace ? `<div class="transport-radek-trasa">${escapeHtml(t.destinace)}</div>` : ''}
-                            ${t.telefon || t.email ? `<div class="transport-radek-kontakt">${t.telefon ? escapeHtml(t.telefon) : ''} ${t.email ? '| ' + escapeHtml(t.email) : ''}</div>` : ''}
+                            <div class="transport-radek-jmeno">${escapeHtml(t.jmeno_prijmeni || '')}</div>
+                            ${trasa ? `<div class="transport-radek-trasa">${trasa}</div>` : ''}
                         </div>
                         <div class="transport-radek-ridic">
                             ${ridicSelect}
@@ -1528,13 +1514,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         document.getElementById('transport-datum').value = datum || new Date().toISOString().split('T')[0];
         document.getElementById('transport-cas').value = '';
         document.getElementById('transport-jmeno').value = '';
-        document.getElementById('transport-let').value = '';
-        document.getElementById('transport-prilet').value = '';
-        document.getElementById('transport-destinace').value = '';
-        document.getElementById('transport-telefon').value = '';
-        document.getElementById('transport-email').value = '';
+        document.getElementById('transport-odkud').value = '';
+        document.getElementById('transport-kam').value = '';
         document.getElementById('transport-ridic-id').value = '';
-        document.getElementById('transport-poznamka').value = '';
         document.getElementById('modal-transport-titulek').textContent = 'Pridat transport';
 
         if (data) {
@@ -1542,13 +1524,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             document.getElementById('transport-datum').value = data.datum || '';
             document.getElementById('transport-cas').value = (data.cas || '').substring(0, 5);
             document.getElementById('transport-jmeno').value = data.jmeno_prijmeni || '';
-            document.getElementById('transport-let').value = data.cislo_letu || '';
-            document.getElementById('transport-prilet').value = (data.cas_priletu || '').substring(0, 5);
-            document.getElementById('transport-destinace').value = data.destinace || '';
-            document.getElementById('transport-telefon').value = data.telefon || '';
-            document.getElementById('transport-email').value = data.email || '';
+            document.getElementById('transport-odkud').value = data.odkud || '';
+            document.getElementById('transport-kam').value = data.kam || '';
             document.getElementById('transport-ridic-id').value = data.ridic_id || '';
-            document.getElementById('transport-poznamka').value = data.poznamka || '';
             document.getElementById('modal-transport-titulek').textContent = 'Upravit transport';
         }
 
@@ -1584,13 +1562,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         formData.append('datum', document.getElementById('transport-datum').value);
         formData.append('cas', document.getElementById('transport-cas').value);
         formData.append('jmeno_prijmeni', document.getElementById('transport-jmeno').value);
-        formData.append('cislo_letu', document.getElementById('transport-let').value);
-        formData.append('cas_priletu', document.getElementById('transport-prilet').value);
-        formData.append('destinace', document.getElementById('transport-destinace').value);
-        formData.append('telefon', document.getElementById('transport-telefon').value);
-        formData.append('email', document.getElementById('transport-email').value);
+        formData.append('odkud', document.getElementById('transport-odkud').value);
+        formData.append('kam', document.getElementById('transport-kam').value);
         formData.append('ridic_id', document.getElementById('transport-ridic-id').value);
-        formData.append('poznamka', document.getElementById('transport-poznamka').value);
 
         try {
             const odpoved = await fetch('/api/transport_events_api.php', { method: 'POST', body: formData });
