@@ -41,26 +41,22 @@
         .header {
             position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 15px 0 25px;
+            justify-content: space-between;
+            padding: 15px;
             border-bottom: 1px solid #333;
             margin-bottom: 20px;
         }
 
-        .logo-um {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            height: 25px;
-            object-fit: contain;
+        .logo-wgs {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #fff;
         }
 
         /* Language switcher */
         .lang-switcher {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             z-index: 100;
         }
 
@@ -109,12 +105,6 @@
 
         .lang-option.active {
             background: #222;
-        }
-
-        .logo-tech {
-            height: 200px;
-            object-fit: contain;
-            margin-top: 80px;
         }
 
         /* Řidiči */
@@ -508,9 +498,9 @@
 </head>
 <body>
 
-<!-- Header s logy -->
+<!-- Header -->
 <div class="header">
-    <img src="assets/img/um_white.png.webp" alt="United Music" class="logo-um">
+    <div class="logo-wgs">WGS</div>
 
     <!-- Language switcher -->
     <div class="lang-switcher" id="lang-switcher" onclick="toggleLangMenu(event)">
@@ -523,8 +513,6 @@
             <div class="lang-option" data-lang="nl">NL</div>
         </div>
     </div>
-
-    <img src="assets/img/front_logo_tech.png" alt="Techmission" class="logo-tech">
 </div>
 
 <!-- Řidiči -->
