@@ -992,7 +992,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             console.log('[Transport] API data:', data);
 
             if (data.status === 'success') {
-                const eventy = data.data?.eventy || [];
+                const eventy = data.eventy || [];
                 if (eventy.length > 0) {
                     vykresliEventy(eventy);
                 } else {
@@ -1068,7 +1068,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const odpoved = await fetch('/api/transport_events_api.php?action=eventy_list');
             const data = await odpoved.json();
             if (data.status === 'success') {
-                const event = data.data.eventy.find(e => e.event_id == id);
+                const event = data.eventy.find(e => e.event_id == id);
                 if (event) eventOtevritModal(event);
             }
         } catch (error) {
@@ -1156,7 +1156,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const data = await odpoved.json();
 
             if (data.status === 'success') {
-                aktualniRidici = data.data.ridici || [];
+                aktualniRidici = data.ridici || [];
                 vykresliRidice(aktualniRidici);
                 aktualizujSelectRidicu();
             }
@@ -1330,7 +1330,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const data = await odpoved.json();
 
             if (data.status === 'success') {
-                vykresliTransporty(data.data.transporty);
+                vykresliTransporty(data.transporty || []);
             }
         } catch (error) {
             console.error('Chyba:', error);
@@ -1452,7 +1452,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const odpoved = await fetch('/api/transport_events_api.php?action=list&event_id=' + eventId);
             const data = await odpoved.json();
             if (data.status === 'success') {
-                const transport = data.data.transporty.find(t => t.event_id == id);
+                const transport = (data.transporty || []).find(t => t.event_id == id);
                 if (transport) transportOtevritModal(transport);
             }
         } catch (error) {
