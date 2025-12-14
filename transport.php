@@ -1649,7 +1649,8 @@ async function nactiData() {
         const data = await odpoved.json();
         if (data.status === 'success') {
             // Při prvním načtení - pokud server nemá data, uložit výchozí
-            if (prvniNacteni && (!data.transporty || !data.transporty.sobota)) {
+            const maServerData = data.transporty && typeof data.transporty === 'object' && Object.keys(data.transporty).length > 0;
+            if (prvniNacteni && !maServerData) {
                 prvniNacteni = false;
                 await ulozData();
                 return;
@@ -1659,9 +1660,26 @@ async function nactiData() {
             // Server je zdroj pravdy - vždy přepsat lokální data
             // Pozor: server může vrátit [] (prázdné pole) místo {} (objekt)
             stavy = (Array.isArray(data.stavy) || !data.stavy) ? {} : data.stavy;
-            if (data.transporty) {
-                transporty = data.transporty;
+
+            // Nacist transporty - kontrola zda jsou ve spravnem formatu
+            if (data.transporty && typeof data.transporty === 'object' && !Array.isArray(data.transporty)) {
+                // Migrace stare struktury (sobota/nedele) na novou (datumy)
+                if (data.transporty.sobota || data.transporty.nedele) {
+                    const novyFormat = {};
+                    if (data.transporty.sobota) {
+                        novyFormat['2024-12-13'] = data.transporty.sobota.map(t => ({...t, datum: '2024-12-13'}));
+                    }
+                    if (data.transporty.nedele) {
+                        novyFormat['2024-12-14'] = data.transporty.nedele.map(t => ({...t, datum: '2024-12-14'}));
+                    }
+                    transporty = novyFormat;
+                    // Ulozit migrovana data
+                    await ulozData();
+                } else {
+                    transporty = data.transporty;
+                }
             }
+
             // Načíst řidiče - pokud existují na serveru
             if (data.ridici && Array.isArray(data.ridici) && data.ridici.length > 0) {
                 ridici = data.ridici;
@@ -1670,7 +1688,7 @@ async function nactiData() {
             vykresliRidice();
         }
     } catch (e) {
-        console.log('Chyba pri nacitani');
+        console.log('Chyba pri nacitani:', e);
         vykresli();
         vykresliRidice();
     }
