@@ -580,6 +580,7 @@
 <div class="modal" id="modal-edit">
     <div class="modal-obsah">
         <div class="modal-titulek" id="modal-titulek" data-i18n="addTransport">Pridat transport</div>
+        <input type="date" class="modal-input" id="input-datum" style="display: none;">
         <input type="text" class="modal-input" id="input-cas" data-i18n-placeholder="timePlaceholder" placeholder="Cas (napr. 21:30)">
         <input type="text" class="modal-input" id="input-jmeno" data-i18n-placeholder="namePlaceholder" placeholder="Jmeno pasazera">
         <input type="text" class="modal-input" id="input-odkud" data-i18n-placeholder="fromPlaceholder" placeholder="Odkud">
@@ -1074,6 +1075,16 @@ function otevriModalPridat(den) {
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
 
+    // Zobrazit pole pro datum pri pridavani
+    const datumInput = document.getElementById('input-datum');
+    datumInput.style.display = 'block';
+    // Nastavit vychozi datum podle dne
+    if (den === 'sobota') {
+        datumInput.value = '2024-12-13';
+    } else {
+        datumInput.value = '2024-12-14';
+    }
+
     // Zobrazit všechny inputy
     document.getElementById('input-cas').style.display = 'block';
     document.getElementById('input-jmeno').style.display = 'block';
@@ -1090,6 +1101,9 @@ function editujVse(id, den) {
 
     editAkce = { typ: 'editovat', den: den, id: id, pole: 'vse' };
     document.getElementById('modal-titulek').textContent = t('editTransport');
+
+    // Skryt pole pro datum pri editaci
+    document.getElementById('input-datum').style.display = 'none';
 
     // Zobrazit všechny inputy
     document.getElementById('input-cas').style.display = 'block';
@@ -1117,14 +1131,33 @@ async function potvrdEdit() {
     }
 
     if (editAkce.typ === 'pridat') {
+        // Zjistit den podle vybraneho data
+        const vybraneDatum = document.getElementById('input-datum').value;
+        let cilovyDen = editAkce.den;
+
+        // Urcit den podle datumu (13.12 = sobota, 14.12 = nedele, ostatni = podle dne v tydnu)
+        if (vybraneDatum) {
+            const datumObj = new Date(vybraneDatum);
+            const denVTydnu = datumObj.getDay(); // 0 = nedele, 6 = sobota
+            if (denVTydnu === 6) {
+                cilovyDen = 'sobota';
+            } else if (denVTydnu === 0) {
+                cilovyDen = 'nedele';
+            } else {
+                // Pro jine dny - pridat do soboty nebo nedele podle toho co je bliz
+                cilovyDen = editAkce.den;
+            }
+        }
+
         const novy = {
             id: generujId(),
             cas: normalizujCas(document.getElementById('input-cas').value) || '00:00',
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
             odkud: document.getElementById('input-odkud').value || '?',
-            kam: document.getElementById('input-kam').value || '?'
+            kam: document.getElementById('input-kam').value || '?',
+            datum: vybraneDatum || null
         };
-        transporty[editAkce.den].push(novy);
+        transporty[cilovyDen].push(novy);
     } else if (editAkce.typ === 'editovat') {
         const transport = transporty[editAkce.den].find(t => t.id === editAkce.id);
         if (transport) {
