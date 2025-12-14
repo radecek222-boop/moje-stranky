@@ -983,15 +983,21 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const odpoved = await fetch('/api/transport_events_api.php?action=eventy_list');
             const data = await odpoved.json();
 
-            if (data.status === 'success' && data.data.eventy.length > 0) {
-                vykresliEventy(data.data.eventy);
+            if (data.status === 'success') {
+                const eventy = data.data?.eventy || [];
+                if (eventy.length > 0) {
+                    vykresliEventy(eventy);
+                } else {
+                    grid.innerHTML = `
+                        <div class="transport-eventy-prazdne">
+                            <p>Zatim zadne eventy</p>
+                            <button class="btn-pridat-event" onclick="eventOtevritModal()">+ Pridat prvni event</button>
+                        </div>
+                    `;
+                }
             } else {
-                grid.innerHTML = `
-                    <div class="transport-eventy-prazdne">
-                        <p>Zatim zadne eventy</p>
-                        <button class="btn-pridat-event" onclick="eventOtevritModal()">+ Pridat prvni event</button>
-                    </div>
-                `;
+                console.error('API chyba:', data.message);
+                grid.innerHTML = `<div class="transport-eventy-prazdne"><p>Chyba: ${escapeHtml(data.message || 'Neznama chyba')}</p></div>`;
             }
         } catch (error) {
             console.error('Chyba pri nacitani eventu:', error);
