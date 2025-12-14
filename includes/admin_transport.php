@@ -976,12 +976,20 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     // ==========================================
 
     window.nactiEventy = async function() {
+        console.log('[Transport] nactiEventy() zavolano');
         const grid = document.getElementById('eventy-grid');
-        if (!grid) return;
+        console.log('[Transport] eventy-grid element:', grid);
+        if (!grid) {
+            console.warn('[Transport] eventy-grid NENALEZEN - ukoncuji');
+            return;
+        }
 
         try {
+            console.log('[Transport] Volam API eventy_list...');
             const odpoved = await fetch('/api/transport_events_api.php?action=eventy_list');
+            console.log('[Transport] API odpoved status:', odpoved.status);
             const data = await odpoved.json();
+            console.log('[Transport] API data:', data);
 
             if (data.status === 'success') {
                 const eventy = data.data?.eventy || [];
