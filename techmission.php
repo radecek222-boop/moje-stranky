@@ -515,29 +515,26 @@
     </div>
 </div>
 
-<!-- Řidiči -->
-<div class="ridici">
-    <div class="ridic">
-        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
-        <div class="ridic-info">
-            <div class="ridic-jmeno">MILAN</div>
-            <div class="ridic-auto">MB V CLASS</div>
-            <div class="ridic-standby">transport van</div>
+<!-- Řidiči - dynamicky generováno -->
+<div class="ridici" id="ridici-kontejner">
+    <!-- Ridici se vykresli JavaScriptem -->
+</div>
+
+<!-- Modal pro editaci řidiče -->
+<div class="modal" id="modal-ridic">
+    <div class="modal-obsah">
+        <div class="modal-titulek" id="modal-ridic-titulek">Upravit ridice</div>
+        <input type="hidden" id="ridic-edit-id">
+        <input type="text" class="modal-input" id="ridic-jmeno" placeholder="Jmeno (napr. MILAN)">
+        <input type="text" class="modal-input" id="ridic-auto" placeholder="Auto (napr. MB V CLASS)">
+        <input type="text" class="modal-input" id="ridic-poznamka" placeholder="Poznamka (napr. transport van)">
+        <input type="tel" class="modal-input" id="ridic-telefon" placeholder="Telefon (napr. +420735084519)">
+        <input type="tel" class="modal-input" id="ridic-heslo" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="modal-chyba" id="modal-ridic-chyba">Spatne heslo</div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalRidic()">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" onclick="ulozRidice()">Ulozit</button>
         </div>
-        <a href="tel:+420735084519" class="ridic-tel">
-            <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </a>
-    </div>
-    <div class="ridic">
-        <svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
-        <div class="ridic-info">
-            <div class="ridic-jmeno">MIREK</div>
-            <div class="ridic-auto">MB S CLASS</div>
-            <div class="ridic-standby standby-caps">STAND BY 21:00 - 06:00</div>
-        </div>
-        <a href="tel:+420736611777" class="ridic-tel">
-            <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </a>
     </div>
 </div>
 
@@ -834,6 +831,12 @@ let transporty = {
 // Stavy transportů
 let stavy = {};
 
+// Data řidičů
+let ridici = [
+    { id: 'ridic-1', jmeno: 'MILAN', auto: 'MB V CLASS', poznamka: 'transport van', telefon: '+420735084519' },
+    { id: 'ridic-2', jmeno: 'RADEK', auto: 'KIA CARNIVAL', poznamka: 'transport van', telefon: '+420725965826' }
+];
+
 // Aktuální editace
 let editAkce = null; // { typ: 'pridat'/'editovat', den: 'sobota'/'nedele', id: null/string, pole: null/'cas'/'jmeno'/'trasa' }
 let smazatId = null;
@@ -864,6 +867,80 @@ function porovnejCas(cas1, cas2) {
     const norm1 = normalizujCas(cas1);
     const norm2 = normalizujCas(cas2);
     return norm1.localeCompare(norm2);
+}
+
+// Vykreslit řidiče
+function vykresliRidice() {
+    const kontejner = document.getElementById('ridici-kontejner');
+    if (!kontejner) return;
+
+    kontejner.innerHTML = '';
+
+    ridici.forEach(ridic => {
+        const div = document.createElement('div');
+        div.className = 'ridic';
+        div.innerHTML = `
+            <div class="ridic-auto-svg" onclick="otevriModalRidic('${ridic.id}')" style="cursor: pointer;" title="Kliknete pro upravu">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                </svg>
+            </div>
+            <div class="ridic-info">
+                <div class="ridic-jmeno">${ridic.jmeno}</div>
+                <div class="ridic-auto">${ridic.auto}</div>
+                <div class="ridic-standby">${ridic.poznamka || t('transportVan')}</div>
+            </div>
+            <a href="tel:${ridic.telefon}" class="ridic-tel" onclick="event.stopPropagation();">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+            </a>
+        `;
+        kontejner.appendChild(div);
+    });
+}
+
+// Otevřít modal pro editaci řidiče
+function otevriModalRidic(id) {
+    const ridic = ridici.find(r => r.id === id);
+    if (!ridic) return;
+
+    document.getElementById('ridic-edit-id').value = id;
+    document.getElementById('ridic-jmeno').value = ridic.jmeno || '';
+    document.getElementById('ridic-auto').value = ridic.auto || '';
+    document.getElementById('ridic-poznamka').value = ridic.poznamka || '';
+    document.getElementById('ridic-telefon').value = ridic.telefon || '';
+    document.getElementById('ridic-heslo').value = '';
+    document.getElementById('modal-ridic-chyba').style.display = 'none';
+
+    document.getElementById('modal-ridic').classList.add('aktivni');
+}
+
+// Zavřít modal řidiče
+function zavriModalRidic() {
+    document.getElementById('modal-ridic').classList.remove('aktivni');
+}
+
+// Uložit změny řidiče
+async function ulozRidice() {
+    const heslo = document.getElementById('ridic-heslo').value;
+    if (heslo !== HESLO) {
+        document.getElementById('modal-ridic-chyba').style.display = 'block';
+        return;
+    }
+
+    const id = document.getElementById('ridic-edit-id').value;
+    const ridic = ridici.find(r => r.id === id);
+    if (!ridic) return;
+
+    ridic.jmeno = document.getElementById('ridic-jmeno').value.toUpperCase();
+    ridic.auto = document.getElementById('ridic-auto').value.toUpperCase();
+    ridic.poznamka = document.getElementById('ridic-poznamka').value;
+    ridic.telefon = document.getElementById('ridic-telefon').value;
+
+    zavriModalRidic();
+    vykresliRidice();
+    await ulozData();
 }
 
 // Vykreslit transporty
@@ -1112,6 +1189,7 @@ async function ulozData() {
         const formData = new FormData();
         formData.append('stavy', JSON.stringify(stavy));
         formData.append('transporty', JSON.stringify(transporty));
+        formData.append('ridici', JSON.stringify(ridici));
         await fetch('api/transport_sync.php', {
             method: 'POST',
             body: formData
@@ -1151,11 +1229,17 @@ async function nactiData() {
             if (data.transporty) {
                 transporty = data.transporty;
             }
+            // Načíst řidiče - pokud existují na serveru
+            if (data.ridici && Array.isArray(data.ridici) && data.ridici.length > 0) {
+                ridici = data.ridici;
+            }
             vykresli();
+            vykresliRidice();
         }
     } catch (e) {
         console.log('Chyba pri nacitani');
         vykresli();
+        vykresliRidice();
     }
 }
 
@@ -1165,6 +1249,7 @@ document.addEventListener('keydown', e => {
         zavriModal();
         zavriModalSmazat();
         zavriModalReset();
+        zavriModalRidic();
     }
 });
 
@@ -1176,6 +1261,9 @@ document.addEventListener('DOMContentLoaded', function() {
         opt.classList.toggle('active', opt.dataset.lang === currentLang);
     });
     translatePage();
+
+    // Vykreslit řidiče ihned s výchozími daty
+    vykresliRidice();
 
     nactiData();
 
