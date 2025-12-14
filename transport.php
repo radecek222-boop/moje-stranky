@@ -706,22 +706,12 @@
     </div>
 </div>
 
-<!-- SOBOTA 13.12. -->
-<div class="den den-sobota" data-den="sobota">
-    <div class="den-header">
-        <span data-i18n="saturday">Sobota 13.12.</span>
-        <button class="btn-pridat" onclick="otevriModalPridat('sobota')" data-i18n="add">+ Pridat</button>
-    </div>
-    <div class="transporty" id="transporty-sobota"></div>
-</div>
+<!-- Dynamické sekce dnů - generováno JavaScriptem -->
+<div id="dny-kontejner"></div>
 
-<!-- NEDĚLE 14.12. -->
-<div class="den den-nedele" data-den="nedele">
-    <div class="den-header">
-        <span data-i18n="sunday">Nedele 14.12.</span>
-        <button class="btn-pridat" onclick="otevriModalPridat('nedele')" data-i18n="add">+ Pridat</button>
-    </div>
-    <div class="transporty" id="transporty-nedele"></div>
+<!-- Tlačítko pro přidání nového dne/transportu -->
+<div style="text-align: center; margin: 20px 0;">
+    <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Pridat transport</button>
 </div>
 
 
@@ -1001,17 +991,37 @@ function t(key) {
     return translations[currentLang][key] || translations['cz'][key] || key;
 }
 
-// Data transportů
+// Názvy dnů v týdnu pro různé jazyky
+const dnyVTydnu = {
+    cz: ['Nedele', 'Pondeli', 'Utery', 'Streda', 'Ctvrtek', 'Patek', 'Sobota'],
+    sk: ['Nedela', 'Pondelok', 'Utorok', 'Streda', 'Stvrtok', 'Piatok', 'Sobota'],
+    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    de: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+    nl: ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
+};
+
+// Získat název dne z data
+function ziskejNazevDne(datumStr) {
+    if (!datumStr) return '';
+    const datum = new Date(datumStr);
+    const denIndex = datum.getDay();
+    const nazevDne = dnyVTydnu[currentLang]?.[denIndex] || dnyVTydnu['en'][denIndex];
+    const den = datum.getDate();
+    const mesic = datum.getMonth() + 1;
+    return nazevDne.toUpperCase() + ' ' + den + '.' + mesic + '.';
+}
+
+// Data transportů - nyní s datem
 let transporty = {
-    sobota: [
-        { id: 'so-2130', cas: '21:30', jmeno: 'Manuele Tessarollo (T78)', odkud: 'Marriott Airport', kam: 'venue' },
-        { id: 'so-2230', cas: '22:30', jmeno: 'Bjorn Verbeeck (BYORN) + Manager', odkud: 'Marriott Airport', kam: 'venue' },
-        { id: 'so-2330', cas: '23:30', jmeno: 'Yanick van Geldere + Sem Klinkenberg (DYEN)', odkud: 'Marriott Airport', kam: 'venue' }
+    '2024-12-13': [
+        { id: 'so-2130', cas: '21:30', jmeno: 'Manuele Tessarollo (T78)', odkud: 'Marriott Airport', kam: 'venue', datum: '2024-12-13' },
+        { id: 'so-2230', cas: '22:30', jmeno: 'Bjorn Verbeeck (BYORN) + Manager', odkud: 'Marriott Airport', kam: 'venue', datum: '2024-12-13' },
+        { id: 'so-2330', cas: '23:30', jmeno: 'Yanick van Geldere + Sem Klinkenberg (DYEN)', odkud: 'Marriott Airport', kam: 'venue', datum: '2024-12-13' }
     ],
-    nedele: [
-        { id: 'ne-0150', cas: '01:50', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort (Fantasm)', odkud: 'T3', kam: 'venue' },
-        { id: 'ne-0300', cas: '03:00', jmeno: 'Simon Andre Schytrumpf + 2 (Holy Priest)', odkud: 'T3', kam: 'venue' },
-        { id: 'ne-1730', cas: '17:30', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort', odkud: 'Hotel Expo', kam: 'T2' }
+    '2024-12-14': [
+        { id: 'ne-0150', cas: '01:50', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort (Fantasm)', odkud: 'T3', kam: 'venue', datum: '2024-12-14' },
+        { id: 'ne-0300', cas: '03:00', jmeno: 'Simon Andre Schytrumpf + 2 (Holy Priest)', odkud: 'T3', kam: 'venue', datum: '2024-12-14' },
+        { id: 'ne-1730', cas: '17:30', jmeno: 'Kenzo Thomas Meservey + Lucas van den Nadort', odkud: 'Hotel Expo', kam: 'T2', datum: '2024-12-14' }
     ]
 };
 
@@ -1183,18 +1193,40 @@ async function ulozRidice() {
     await ulozData();
 }
 
-// Vykreslit transporty
+// Vykreslit transporty - dynamické sekce podle data
 function vykresli() {
     const tr = translations[currentLang];
+    const kontejner = document.getElementById('dny-kontejner');
+    kontejner.innerHTML = '';
 
-    ['sobota', 'nedele'].forEach(den => {
-        const kontejner = document.getElementById('transporty-' + den);
-        kontejner.innerHTML = '';
+    // Získat všechna data a seřadit je
+    const data = Object.keys(transporty).sort();
 
-        // Seřadit podle data a času (automaticky při každém vykreslení)
-        transporty[den].sort((a, b) => porovnejCas(a.cas, b.cas));
+    data.forEach(datum => {
+        if (!transporty[datum] || transporty[datum].length === 0) return;
 
-        transporty[den].forEach(item => {
+        // Vytvořit sekci pro den
+        const denDiv = document.createElement('div');
+        denDiv.className = 'den';
+        denDiv.dataset.datum = datum;
+
+        // Hlavička dne
+        const nazevDne = ziskejNazevDne(datum);
+        denDiv.innerHTML = `
+            <div class="den-header">
+                <span>${nazevDne}</span>
+                <button class="btn-pridat" onclick="otevriModalPridat('${datum}')">+ ${t('add').replace('+ ', '')}</button>
+            </div>
+            <div class="transporty" id="transporty-${datum}"></div>
+        `;
+        kontejner.appendChild(denDiv);
+
+        const transportyKontejner = document.getElementById('transporty-' + datum);
+
+        // Seřadit podle času
+        transporty[datum].sort((a, b) => porovnejCas(a.cas, b.cas));
+
+        transporty[datum].forEach(item => {
             const stavData = stavy[item.id] || { stav: 'wait' };
             let stavClass = 'stav-wait';
             let stavText = tr.wait;
@@ -1214,8 +1246,8 @@ function vykresli() {
             div.className = 'transport';
             div.dataset.id = item.id;
             div.innerHTML = `
-                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${den}')">&times;</button>
-                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${den}')">✎</button>
+                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${datum}')">&times;</button>
+                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
                     <div class="transport-jmena">${item.jmeno}</div>
@@ -1226,14 +1258,14 @@ function vykresli() {
                     <div class="stav-cas">${stavCas}</div>
                 </div>
             `;
-            kontejner.appendChild(div);
+            transportyKontejner.appendChild(div);
         });
     });
 }
 
 // Otevřít modal pro přidání
-function otevriModalPridat(den) {
-    editAkce = { typ: 'pridat', den: den, id: null, pole: null };
+function otevriModalPridat(datum) {
+    editAkce = { typ: 'pridat', datum: datum, id: null, pole: null };
     document.getElementById('modal-titulek').textContent = t('addTransport');
     document.getElementById('input-cas').value = '';
     document.getElementById('input-jmeno').value = '';
@@ -1247,13 +1279,23 @@ function otevriModalPridat(den) {
     const datumInput = document.getElementById('input-datum');
     datumWrapper.style.display = 'block';
 
-    // Nastavit vychozi datum podle dne (zobrazeni v ceskem formatu)
-    if (den === 'sobota') {
-        datumInput.value = '13.12.2024';
-        datumInput.dataset.hodnota = '2024-12-13';
+    // Nastavit vychozi datum
+    if (datum) {
+        // Pokud je zadano datum, pouzit ho
+        const d = new Date(datum);
+        const den = d.getDate().toString().padStart(2, '0');
+        const mesic = (d.getMonth() + 1).toString().padStart(2, '0');
+        const rok = d.getFullYear();
+        datumInput.value = den + '.' + mesic + '.' + rok;
+        datumInput.dataset.hodnota = datum;
     } else {
-        datumInput.value = '14.12.2024';
-        datumInput.dataset.hodnota = '2024-12-14';
+        // Jinak dnesni datum
+        const dnes = new Date();
+        const den = dnes.getDate().toString().padStart(2, '0');
+        const mesic = (dnes.getMonth() + 1).toString().padStart(2, '0');
+        const rok = dnes.getFullYear();
+        datumInput.value = den + '.' + mesic + '.' + rok;
+        datumInput.dataset.hodnota = rok + '-' + mesic + '-' + den;
     }
 
     // Zobrazit všechny inputy
@@ -1266,11 +1308,11 @@ function otevriModalPridat(den) {
 }
 
 // Editovat všechna pole najednou
-function editujVse(id, den) {
-    const transport = transporty[den].find(t => t.id === id);
+function editujVse(id, datum) {
+    const transport = transporty[datum]?.find(t => t.id === id);
     if (!transport) return;
 
-    editAkce = { typ: 'editovat', den: den, id: id, pole: 'vse' };
+    editAkce = { typ: 'editovat', datum: datum, id: id, pole: 'vse' };
     document.getElementById('modal-titulek').textContent = t('editTransport');
 
     // Skryt pole pro datum pri editaci
@@ -1302,23 +1344,13 @@ async function potvrdEdit() {
     }
 
     if (editAkce.typ === 'pridat') {
-        // Zjistit den podle vybraneho data (z dataset.hodnota)
+        // Zjistit datum z inputu
         const datumInput = document.getElementById('input-datum');
         const vybraneDatum = datumInput.dataset.hodnota || '';
-        let cilovyDen = editAkce.den;
 
-        // Urcit den podle datumu (13.12 = sobota, 14.12 = nedele, ostatni = podle dne v tydnu)
-        if (vybraneDatum) {
-            const datumObj = new Date(vybraneDatum);
-            const denVTydnu = datumObj.getDay(); // 0 = nedele, 6 = sobota
-            if (denVTydnu === 6) {
-                cilovyDen = 'sobota';
-            } else if (denVTydnu === 0) {
-                cilovyDen = 'nedele';
-            } else {
-                // Pro jine dny - pridat do soboty nebo nedele podle toho co je bliz
-                cilovyDen = editAkce.den;
-            }
+        if (!vybraneDatum) {
+            alert('Vyberte datum');
+            return;
         }
 
         const novy = {
@@ -1327,26 +1359,22 @@ async function potvrdEdit() {
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
             odkud: document.getElementById('input-odkud').value || '?',
             kam: document.getElementById('input-kam').value || '?',
-            datum: vybraneDatum || null
+            datum: vybraneDatum
         };
-        transporty[cilovyDen].push(novy);
+
+        // Pridat do spravneho datumu
+        if (!transporty[vybraneDatum]) {
+            transporty[vybraneDatum] = [];
+        }
+        transporty[vybraneDatum].push(novy);
+
     } else if (editAkce.typ === 'editovat') {
-        const transport = transporty[editAkce.den].find(t => t.id === editAkce.id);
+        const transport = transporty[editAkce.datum]?.find(t => t.id === editAkce.id);
         if (transport) {
-            if (editAkce.pole === 'vse') {
-                // Editace všech polí najednou - normalizovat čas pro správné řazení
-                transport.cas = normalizujCas(document.getElementById('input-cas').value);
-                transport.jmeno = document.getElementById('input-jmeno').value;
-                transport.odkud = document.getElementById('input-odkud').value;
-                transport.kam = document.getElementById('input-kam').value;
-            } else if (editAkce.pole === 'cas') {
-                transport.cas = normalizujCas(document.getElementById('input-cas').value);
-            } else if (editAkce.pole === 'jmeno') {
-                transport.jmeno = document.getElementById('input-jmeno').value;
-            } else if (editAkce.pole === 'trasa') {
-                transport.odkud = document.getElementById('input-odkud').value;
-                transport.kam = document.getElementById('input-kam').value;
-            }
+            transport.cas = normalizujCas(document.getElementById('input-cas').value);
+            transport.jmeno = document.getElementById('input-jmeno').value;
+            transport.odkud = document.getElementById('input-odkud').value;
+            transport.kam = document.getElementById('input-kam').value;
         }
     }
 
@@ -1484,11 +1512,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Otevřít modal pro smazání
-function otevriModalSmazat(id, den) {
-    const transport = transporty[den].find(t => t.id === id);
+function otevriModalSmazat(id, datum) {
+    const transport = transporty[datum]?.find(t => t.id === id);
     if (!transport) return;
 
-    smazatId = { id: id, den: den };
+    smazatId = { id: id, datum: datum };
     document.getElementById('smazat-info').textContent = transport.cas + ' - ' + transport.jmeno;
     document.getElementById('input-heslo-smazat').value = '';
     document.getElementById('modal-chyba-smazat').style.display = 'none';
@@ -1503,7 +1531,13 @@ async function potvrdSmazat() {
         return;
     }
 
-    transporty[smazatId.den] = transporty[smazatId.den].filter(t => t.id !== smazatId.id);
+    if (transporty[smazatId.datum]) {
+        transporty[smazatId.datum] = transporty[smazatId.datum].filter(t => t.id !== smazatId.id);
+        // Pokud je datum prazdne, odstranit ho
+        if (transporty[smazatId.datum].length === 0) {
+            delete transporty[smazatId.datum];
+        }
+    }
     delete stavy[smazatId.id];
 
     zavriModalSmazat();
@@ -1544,8 +1578,8 @@ function otevriModalReset(id) {
     resetId = id;
     // Najít transport info
     let info = 'Transport';
-    ['sobota', 'nedele'].forEach(den => {
-        const transport = transporty[den].find(t => t.id === id);
+    Object.keys(transporty).forEach(datum => {
+        const transport = transporty[datum]?.find(t => t.id === id);
         if (transport) {
             info = transport.cas + ' - ' + transport.jmeno;
         }
