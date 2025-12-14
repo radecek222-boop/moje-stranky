@@ -1422,8 +1422,8 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const eventOdpoved = await fetch('/api/transport_events_api.php?action=event_detail&event_id=' + eventId);
             const eventData = await eventOdpoved.json();
 
-            if (eventData.status === 'success' && eventData.data.event) {
-                document.getElementById('detail-event-nazev').textContent = eventData.data.event.nazev;
+            if (eventData.status === 'success' && eventData.event) {
+                document.getElementById('detail-event-nazev').textContent = eventData.event.nazev;
             }
 
             // Načíst transporty
