@@ -195,6 +195,11 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
             <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
+
+        <div class="cc-card" data-href="admin.php?tab=transport">
+            <div class="cc-card-title" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
+            <div class="cc-card-description" data-lang-cs="Správa transportních eventů a logistiky" data-lang-en="Transport events and logistics management" data-lang-it="Gestione eventi di trasporto e logistica">Správa transportních eventů a logistiky</div>
+        </div>
     </div>
 </div>
 
@@ -979,6 +984,11 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
   <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
+  <?php endif; ?>
+
+  <?php if ($activeTab === 'transport'): ?>
+  <!-- TAB: TRANSPORT EVENTS -->
+  <?php require_once __DIR__ . '/includes/admin_transport.php'; ?>
   <?php endif; ?>
 
 </div>
