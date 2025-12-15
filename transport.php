@@ -407,16 +407,18 @@
             color: #fff;
         }
 
-        /* Transport řádek */
+        /* Transport řádek - Grid layout */
         .transport {
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
             padding: 12px 15px;
             margin-bottom: 8px;
-            display: flex;
+            display: grid;
+            grid-template-columns: 70px 1fr auto auto;
+            grid-template-rows: auto auto auto;
+            gap: 4px 15px;
             align-items: center;
-            gap: 15px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -434,32 +436,62 @@
         .transport-cas {
             font-size: 24px;
             font-weight: 700;
-            min-width: 70px;
             font-variant-numeric: tabular-nums;
-        }
-
-        .transport-info {
-            flex: 1;
+            grid-row: 1 / 4;
+            align-self: center;
         }
 
         .transport-jmena {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .transport-trasa {
-            font-size: 12px;
-            color: #666;
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .transport-meta {
             font-size: 12px;
             color: #999;
-            margin-bottom: 2px;
+            grid-column: 2;
+            grid-row: 2;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .transport-trasa {
+            font-size: 12px;
+            color: #666;
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .transport-poznamka {
+            font-size: 11px;
+            color: #888;
+            grid-column: 2 / 5;
+            padding: 4px 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 2px solid #444;
+            margin-top: 4px;
+        }
+
+        .transport-kontakty {
+            grid-column: 3;
+            grid-row: 1 / 4;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .transport-stav {
+            grid-column: 4;
+            grid-row: 1 / 4;
+            text-align: center;
         }
 
         .transport-let {
@@ -532,42 +564,27 @@
             margin-left: 8px;
         }
 
-        /* Poznamka */
-        .transport-poznamka {
-            font-size: 11px;
-            color: #888;
-            margin-top: 4px;
-            padding: 4px 8px;
-            background: #1a1a1a;
-            border-radius: 4px;
-            border-left: 2px solid #444;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
-        }
-
         /* Kontaktni ikony */
         .transport-kontakt {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
+            width: 44px;
+            height: 44px;
             background: #222;
-            border: 1px solid #444;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
+            border-radius: 50%;
             color: #888;
-            margin-left: 4px;
             text-decoration: none;
             transition: all 0.2s;
         }
 
+        .transport-kontakt svg {
+            width: 20px;
+            height: 20px;
+        }
+
         .transport-kontakt:hover {
-            background: #333;
-            border-color: #666;
+            background: #444;
             color: #fff;
         }
 
@@ -1610,17 +1627,17 @@ function vykresli() {
             // Sestavit kontaktni ikony
             let kontaktIkony = '';
             if (item.telefon) {
-                kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`;
+                kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`;
             }
             if (item.email) {
-                kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}">@</a>`;
+                kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>`;
             }
 
             // Pocet osob badge
             const pocetOsobInfo = item.pocetOsob ? `<span class="transport-pocet" title="Pocet osob">${item.pocetOsob}x</span>` : '';
 
             // Poznamka
-            const poznamkaInfo = item.poznamka ? `<div class="transport-poznamka" title="${item.poznamka}">${item.poznamka}</div>` : '';
+            const poznamkaInfo = item.poznamka ? `<div class="transport-poznamka">${item.poznamka}</div>` : '';
 
             const div = document.createElement('div');
             div.className = 'transport';
@@ -1631,12 +1648,11 @@ function vykresli() {
                 <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${datum}')">&times;</button>
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
-                <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno} ${pocetOsobInfo} ${kontaktIkony}</div>
-                    <div class="transport-meta">${letInfo} ${ridicInfo}</div>
-                    <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
-                    ${poznamkaInfo}
-                </div>
+                <div class="transport-jmena">${item.jmeno} ${pocetOsobInfo}</div>
+                <div class="transport-meta">${letInfo} ${ridicInfo}</div>
+                <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
+                ${poznamkaInfo}
+                <div class="transport-kontakty">${kontaktIkony}</div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
