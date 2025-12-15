@@ -2246,33 +2246,142 @@ function zobrazExcelChybu(zprava) {
 }
 
 // Zobrazit nahled dat
+// Zjistit status polozky pro nahled (NOVY/ZMENA/EXISTUJE/DOKONCENO)
+function zjistiStatusPolozky(item) {
+    const datum = item.datum || new Date().toISOString().split('T')[0];
+    const novyTransport = {
+        cas: item.cas || '00:00',
+        jmeno: item.jmeno,
+        odkud: item.odkud || '',
+        kam: item.kam || '',
+        cisloLetu: item.cisloLetu || null,
+        pocetOsob: item.pocetOsob || null,
+        datum: datum
+    };
+
+    const existujici = najdiExistujiciTransport(item.jmeno);
+
+    if (!existujici) {
+        return { status: 'novy', text: 'NOVY', barva: '#39ff14' };
+    }
+
+    if (existujici.typ === 'dokonceny') {
+        return { status: 'dokonceno', text: 'HOTOVO', barva: '#666' };
+    }
+
+    if (transportSeZmenil(existujici.transport, novyTransport)) {
+        // Zjistit co se zmenilo
+        const zmeny = [];
+        if (existujici.transport.cas !== novyTransport.cas) {
+            zmeny.push(`cas: ${existujici.transport.cas} -> ${novyTransport.cas}`);
+        }
+        if (existujici.transport.cisloLetu !== novyTransport.cisloLetu) {
+            zmeny.push(`let: ${existujici.transport.cisloLetu || '-'} -> ${novyTransport.cisloLetu || '-'}`);
+        }
+        if (existujici.transport.datum !== novyTransport.datum) {
+            zmeny.push(`datum zmenen`);
+        }
+        return { status: 'zmena', text: 'ZMENA', barva: '#ff8800', detail: zmeny.join(', ') };
+    }
+
+    return { status: 'existuje', text: 'BEZ ZMENY', barva: '#555' };
+}
+
 function zobrazExcelNahled() {
     const kontejner = document.getElementById('excel-seznam');
-    document.getElementById('excel-pocet').textContent = excelData.length;
 
     // Debug - prvni zaznam
     if (excelData.length > 0) {
         console.log('Prvni zaznam:', excelData[0]);
     }
 
-    kontejner.innerHTML = excelData.map((item, index) => `
-        <div class="excel-item">
+    // Spocitat statistiky
+    let pocetNovych = 0;
+    let pocetZmen = 0;
+    let pocetExistuje = 0;
+    let pocetDokoncenych = 0;
+
+    excelData.forEach(item => {
+        const statusInfo = zjistiStatusPolozky(item);
+        item._status = statusInfo;
+        if (statusInfo.status === 'novy') pocetNovych++;
+        else if (statusInfo.status === 'zmena') pocetZmen++;
+        else if (statusInfo.status === 'existuje') pocetExistuje++;
+        else if (statusInfo.status === 'dokonceno') pocetDokoncenych++;
+    });
+
+    // Zobrazit souhrn
+    document.getElementById('excel-pocet').innerHTML = `${excelData.length} zaznamu: <span style="color:#39ff14">${pocetNovych} novych</span>${pocetZmen > 0 ? `, <span style="color:#ff8800">${pocetZmen} zmen</span>` : ''}${pocetExistuje > 0 ? `, <span style="color:#555">${pocetExistuje} bez zmeny</span>` : ''}${pocetDokoncenych > 0 ? `, <span style="color:#666">${pocetDokoncenych} hotovych</span>` : ''}`;
+
+    kontejner.innerHTML = excelData.map((item, index) => {
+        const statusInfo = item._status;
+        const statusBadge = `<span style="display:inline-block; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:700; background:${statusInfo.barva}; color:#fff; margin-left:8px;">${statusInfo.text}</span>`;
+
+        return `
+        <div class="excel-item" style="${statusInfo.status === 'existuje' || statusInfo.status === 'dokonceno' ? 'opacity:0.5;' : ''}">
             <div class="excel-item-info">
-                <div><span class="excel-item-cas">${item.cas || '?'}</span> <span class="excel-item-jmeno">${item.jmeno}</span></div>
+                <div><span class="excel-item-cas">${item.cas || '?'}</span> <span class="excel-item-jmeno">${item.jmeno}</span>${statusBadge}</div>
                 <div class="excel-item-trasa">${item.odkud || '?'} → ${item.kam || '?'}</div>
-                ${item.cisloLetu ? `<div style="color: #39ff14; font-weight: 600;">Let: ${item.cisloLetu}</div>` : '<div style="color: #666;">Bez letu</div>'}
+                ${item.cisloLetu ? `<div style="color: #39ff14; font-weight: 600;">Let: ${item.cisloLetu}</div>` : ''}
+                ${statusInfo.detail ? `<div style="color: #ff8800; font-size: 11px;">${statusInfo.detail}</div>` : ''}
             </div>
             <div class="excel-item-checkbox">
-                <input type="checkbox" ${item.vybrano ? 'checked' : ''} onchange="excelData[${index}].vybrano = this.checked">
+                <input type="checkbox" ${item.vybrano && statusInfo.status !== 'existuje' && statusInfo.status !== 'dokonceno' ? 'checked' : ''} onchange="excelData[${index}].vybrano = this.checked" ${statusInfo.status === 'dokonceno' ? 'disabled' : ''}>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 
     document.getElementById('excel-nahled').style.display = 'block';
     document.getElementById('btn-importovat').style.display = 'block';
 }
 
-// Importovat vybrana data
+// Normalizovat jmeno pro porovnani (lowercase, bez diakritiky, bez extra mezer)
+function normalizujJmeno(jmeno) {
+    if (!jmeno) return '';
+    return jmeno
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Odstranit diakritiku
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// Najit existujici transport podle jmena (ve vsech datech a dokoncenech)
+function najdiExistujiciTransport(jmenoHledane) {
+    const normalJmeno = normalizujJmeno(jmenoHledane);
+
+    // Hledat v aktivnich transportech
+    for (const datum in transporty) {
+        for (const transport of transporty[datum]) {
+            if (normalizujJmeno(transport.jmeno) === normalJmeno) {
+                return { transport, datum, typ: 'aktivni' };
+            }
+        }
+    }
+
+    // Hledat v dokoncenech
+    for (const transport of dokoncene) {
+        if (normalizujJmeno(transport.jmeno) === normalJmeno) {
+            return { transport, datum: transport.datum, typ: 'dokonceny' };
+        }
+    }
+
+    return null;
+}
+
+// Porovnat zda se data zmenila
+function transportSeZmenil(stary, novy) {
+    // Porovnat dulezite pole
+    if (stary.cas !== novy.cas) return true;
+    if (stary.cisloLetu !== novy.cisloLetu) return true;
+    if (stary.odkud !== novy.odkud) return true;
+    if (stary.kam !== novy.kam) return true;
+    if (stary.datum !== novy.datum) return true;
+    if ((stary.pocetOsob || 1) !== (novy.pocetOsob || 1)) return true;
+    return false;
+}
+
+// Importovat vybrana data s detekci duplicit
 async function importovatExcel() {
     const kImportu = excelData.filter(item => item.vybrano);
 
@@ -2281,16 +2390,15 @@ async function importovatExcel() {
         return;
     }
 
-    // Pridat do transportu
+    let pocetNovych = 0;
+    let pocetAktualizovanych = 0;
+    let pocetPreskocenych = 0;
+    let pocetDokoncenych = 0;
+    const zmeny = [];
+
     for (const item of kImportu) {
         const datum = item.datum || new Date().toISOString().split('T')[0];
-
-        if (!transporty[datum]) {
-            transporty[datum] = [];
-        }
-
-        transporty[datum].push({
-            id: generujId(),
+        const novyTransport = {
             cas: item.cas || '00:00',
             jmeno: item.jmeno,
             telefon: item.telefon || null,
@@ -2299,9 +2407,68 @@ async function importovatExcel() {
             kam: item.kam || '',
             cisloLetu: item.cisloLetu || null,
             pocetOsob: item.pocetOsob || null,
-            ridic: null,
             datum: datum
-        });
+        };
+
+        // Hledat existujici
+        const existujici = najdiExistujiciTransport(item.jmeno);
+
+        if (existujici) {
+            if (existujici.typ === 'dokonceny') {
+                // Uz je dokonceny - preskocit
+                pocetDokoncenych++;
+                continue;
+            }
+
+            // Porovnat zda se neco zmenilo
+            if (transportSeZmenil(existujici.transport, novyTransport)) {
+                // Aktualizovat existujici
+                const staryDatum = existujici.datum;
+                const stareData = { ...existujici.transport };
+
+                // Pokud se zmenilo datum, presunout
+                if (staryDatum !== datum) {
+                    // Odstranit ze stareho data
+                    const indexStary = transporty[staryDatum]?.findIndex(t => t.id === existujici.transport.id);
+                    if (indexStary >= 0) {
+                        transporty[staryDatum].splice(indexStary, 1);
+                        if (transporty[staryDatum].length === 0) {
+                            delete transporty[staryDatum];
+                        }
+                    }
+
+                    // Pridat do noveho data
+                    if (!transporty[datum]) {
+                        transporty[datum] = [];
+                    }
+                    transporty[datum].push({
+                        ...existujici.transport,
+                        ...novyTransport
+                    });
+                } else {
+                    // Aktualizovat na miste
+                    Object.assign(existujici.transport, novyTransport);
+                }
+
+                pocetAktualizovanych++;
+                zmeny.push(`${item.jmeno}: ${stareData.cas} -> ${novyTransport.cas}${stareData.cisloLetu !== novyTransport.cisloLetu ? ', let: ' + (novyTransport.cisloLetu || 'zadny') : ''}`);
+            } else {
+                // Zadna zmena - preskocit
+                pocetPreskocenych++;
+            }
+        } else {
+            // Novy transport
+            if (!transporty[datum]) {
+                transporty[datum] = [];
+            }
+
+            transporty[datum].push({
+                id: generujId(),
+                ...novyTransport,
+                ridic: null
+            });
+            pocetNovych++;
+        }
     }
 
     // Ulozit a aktualizovat
@@ -2309,8 +2476,20 @@ async function importovatExcel() {
     vykresli();
     zavriModalNahrat();
 
-    // Informovat uzivatele
-    alert('Importovano ' + kImportu.length + ' zaznamu');
+    // Zobrazit souhrn
+    let zprava = `Import dokoncen:\n`;
+    zprava += `- Novych: ${pocetNovych}\n`;
+    zprava += `- Aktualizovanych: ${pocetAktualizovanych}\n`;
+    zprava += `- Preskocenych (beze zmeny): ${pocetPreskocenych}\n`;
+    if (pocetDokoncenych > 0) {
+        zprava += `- Uz dokoncenych: ${pocetDokoncenych}\n`;
+    }
+
+    if (zmeny.length > 0 && zmeny.length <= 10) {
+        zprava += `\nZmeny:\n${zmeny.join('\n')}`;
+    }
+
+    alert(zprava);
 }
 
 // Vykreslit dokončené transporty
