@@ -658,6 +658,17 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .let-info-inline {
+            width: 100%;
+            font-size: 10px;
+            padding: 4px 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .transport-poznamka {
@@ -1266,6 +1277,101 @@
             height: 18px;
             cursor: pointer;
         }
+
+        /* Confirm modal */
+        .transport-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .transport-confirm-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .transport-confirm-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .transport-confirm-message {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .transport-confirm-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        .transport-confirm-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .transport-confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .transport-confirm-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .transport-confirm-btn-zrusit {
+            background: #333;
+            color: #fff;
+        }
+
+        .transport-confirm-btn-zrusit:hover {
+            background: #444;
+        }
+
+        .transport-confirm-btn-potvrdit {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .transport-confirm-btn-potvrdit:hover {
+            background: #218838;
+        }
+
+        .transport-confirm-btn-potvrdit.nebezpecne {
+            background: #dc3545;
+        }
+
+        .transport-confirm-btn-potvrdit.nebezpecne:hover {
+            background: #c82333;
+        }
     </style>
     <!-- SheetJS pro parsovani Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1685,6 +1791,81 @@ const translations = {
         standby: 'STAND-BY 21:00 - 06:00'
     }
 };
+
+// Confirm modal funkce (podobna wgsConfirm)
+function transportConfirm(zprava, options = {}) {
+    return new Promise((resolve) => {
+        const {
+            titulek = 'Potvrzeni',
+            btnPotvrdit = 'Potvrdit',
+            btnZrusit = 'Zrusit',
+            nebezpecne = false,
+            heslo = false
+        } = options;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'transport-confirm-overlay';
+
+        let inputHtml = '';
+        if (heslo) {
+            inputHtml = `<input type="password" class="transport-confirm-input" placeholder="Zadejte heslo" id="confirm-heslo-input">`;
+        }
+
+        let zrusitBtn = '';
+        if (btnZrusit !== null) {
+            zrusitBtn = `<button class="transport-confirm-btn transport-confirm-btn-zrusit" id="confirm-zrusit">${btnZrusit}</button>`;
+        }
+
+        overlay.innerHTML = `
+            <div class="transport-confirm-modal">
+                <div class="transport-confirm-title">${titulek}</div>
+                <div class="transport-confirm-message">${zprava}</div>
+                ${inputHtml}
+                <div class="transport-confirm-buttons">
+                    ${zrusitBtn}
+                    <button class="transport-confirm-btn transport-confirm-btn-potvrdit ${nebezpecne ? 'nebezpecne' : ''}" id="confirm-potvrdit">${btnPotvrdit}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const hesloInput = document.getElementById('confirm-heslo-input');
+        if (hesloInput) {
+            hesloInput.focus();
+            hesloInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('confirm-potvrdit').click();
+                }
+            });
+        }
+
+        const zavrit = (vysledek) => {
+            overlay.remove();
+            resolve(vysledek);
+        };
+
+        document.getElementById('confirm-potvrdit').addEventListener('click', () => {
+            if (heslo) {
+                const zadaneHeslo = hesloInput?.value || '';
+                zavrit({ potvrzeno: true, heslo: zadaneHeslo });
+            } else {
+                zavrit({ potvrzeno: true });
+            }
+        });
+
+        const zrusitEl = document.getElementById('confirm-zrusit');
+        if (zrusitEl) {
+            zrusitEl.addEventListener('click', () => zavrit({ potvrzeno: false }));
+        }
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                zavrit({ potvrzeno: false });
+            }
+        });
+    });
+}
 
 // Přepnout jazyk
 function toggleLangMenu(event) {
@@ -2533,20 +2714,36 @@ function aktualizovatPocetDokoncenych() {
 
 // Smazat dokončený transport (s heslem)
 async function smazatDokonceny(index) {
-    const heslo = prompt('Zadejte heslo pro smazani:');
-    if (!heslo) return;
-
-    if (heslo !== HESLO) {
-        alert('Spatne heslo!');
-        return;
-    }
-
     const item = dokoncene[index];
     if (!item) return;
 
-    if (!confirm(`Opravdu smazat dokonceny transport: ${item.jmeno}?`)) {
+    // Prvni krok - zadat heslo
+    const hesloVysledek = await transportConfirm('Zadejte heslo pro smazani', {
+        titulek: 'Overeni',
+        btnPotvrdit: 'Pokracovat',
+        heslo: true
+    });
+
+    if (!hesloVysledek.potvrzeno) return;
+
+    if (hesloVysledek.heslo !== HESLO) {
+        await transportConfirm('Spatne heslo!', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
         return;
     }
+
+    // Druhy krok - potvrzeni smazani
+    const potvrzeni = await transportConfirm(`Opravdu smazat dokonceny transport: ${item.jmeno}?`, {
+        titulek: 'Smazat transport',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+
+    if (!potvrzeni.potvrzeno) return;
 
     dokoncene.splice(index, 1);
     await ulozData();
@@ -2555,9 +2752,13 @@ async function smazatDokonceny(index) {
 }
 
 // Export dokončených transportů do PDF
-function exportDokoncenych() {
+async function exportDokoncenych() {
     if (dokoncene.length === 0) {
-        alert('Zadne dokoncene transporty k exportu');
+        await transportConfirm('Zadne dokoncene transporty k exportu', {
+            titulek: 'Export',
+            btnPotvrdit: 'OK',
+            btnZrusit: null
+        });
         return;
     }
 
@@ -3558,35 +3759,98 @@ async function aktualizujVsechnyLety() {
     }
 }
 
-// Kliknuti na badge letu - zobrazit detaily
+// Kliknuti na badge letu - zobrazit detaily INLINE pod číslem
 function zobrazDetailLetu(event) {
-    const cisloLetu = event.target.dataset.let;
+    const letElement = event.target;
+    const cisloLetu = letElement.dataset.let;
     if (!cisloLetu) return;
 
     event.stopPropagation();
 
+    // Najit nebo vytvorit info element pod letem
+    const parent = letElement.closest('.transport-meta');
+    let infoEl = parent.querySelector('.let-info-inline');
+
+    // Pokud info uz existuje, skryt/zobrazit
+    if (infoEl) {
+        infoEl.remove();
+        return;
+    }
+
     // Pokud mame cachovana data, zobrazit je
     const data = letoveStavy[cisloLetu];
     if (data) {
-        zobrazLetOverlay(data);
+        zobrazLetInline(letElement, data);
     } else {
         // Nacist data a pak zobrazit
-        nactiAZobrazLet(cisloLetu);
+        nactiAZobrazLetInline(letElement, cisloLetu);
     }
 }
 
-// Nacist data letu a zobrazit overlay
-async function nactiAZobrazLet(cisloLetu) {
+// Nacist data letu a zobrazit inline
+async function nactiAZobrazLetInline(letElement, cisloLetu) {
+    // Zobrazit loading
+    const parent = letElement.closest('.transport-meta');
+    let infoEl = document.createElement('div');
+    infoEl.className = 'let-info-inline';
+    infoEl.innerHTML = '<span style="color:#666;">Nacitam...</span>';
+    parent.appendChild(infoEl);
+
     try {
         const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
         const data = await odpoved.json();
         if (data.status === 'success') {
             letoveStavy[cisloLetu] = data;
-            zobrazLetOverlay(data);
+            zobrazLetInline(letElement, data);
+        } else {
+            infoEl.innerHTML = '<span style="color:#ff4444;">Let nenalezen</span>';
         }
     } catch (e) {
+        infoEl.innerHTML = '<span style="color:#ff4444;">Chyba</span>';
         console.log('Chyba pri nacitani letu:', e);
     }
+}
+
+// Zobrazit info o letu inline pod číslem
+function zobrazLetInline(letElement, data) {
+    const parent = letElement.closest('.transport-meta');
+
+    // Odstranit stary info element
+    const oldInfo = parent.querySelector('.let-info-inline');
+    if (oldInfo) oldInfo.remove();
+
+    const prilet = data.prilet;
+    const cas = prilet.odhadovano || prilet.planovano || '';
+    const casStr = cas ? new Date(cas).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '';
+
+    const stavyPreklad = {
+        'scheduled': 'NAPLANOVANO',
+        'active': 'VE VZDUCHU',
+        'landed': 'PRISTANO',
+        'cancelled': 'ZRUSENO',
+        'delayed': 'ZPOZDENO'
+    };
+
+    const stavyBarvy = {
+        'scheduled': '#666',
+        'active': '#39ff14',
+        'landed': '#39ff14',
+        'cancelled': '#ff4444',
+        'delayed': '#ff8800'
+    };
+
+    const stav = data.stavLetu || 'scheduled';
+    const stavText = stavyPreklad[stav] || stav;
+    const stavBarva = stavyBarvy[stav] || '#666';
+
+    const infoEl = document.createElement('div');
+    infoEl.className = 'let-info-inline';
+    infoEl.innerHTML = `
+        <span style="color:${stavBarva};font-weight:700;">${stavText}</span>
+        ${casStr ? `<span style="color:#fff;margin-left:8px;">${casStr}</span>` : ''}
+        ${prilet.terminal ? `<span style="color:#666;margin-left:8px;">T${prilet.terminal}</span>` : ''}
+    `;
+    parent.appendChild(infoEl);
 }
 
 // Zobrazit WGS overlay s informacemi o letu
