@@ -589,7 +589,7 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 4px 8px;
+            padding: 6px 10px;
             margin-bottom: 3px;
             display: grid;
             grid-template-columns: auto 1fr auto;
