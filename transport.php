@@ -572,6 +572,20 @@
             margin-bottom: 20px;
         }
 
+        .modal-pole {
+            margin-bottom: 12px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
         .modal-input {
             width: 100%;
             background: #222;
@@ -580,7 +594,11 @@
             padding: 12px;
             border-radius: 6px;
             font-size: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 0;
+        }
+
+        .modal-pole .modal-input {
+            margin-bottom: 0;
         }
 
         .modal-input:focus {
@@ -735,14 +753,39 @@
 <div class="modal" id="modal-edit">
     <div class="modal-obsah">
         <div class="modal-titulek" id="modal-titulek" data-i18n="addTransport">Pridat transport</div>
-        <div class="datum-input-wrapper" id="datum-wrapper" style="display: none;" onclick="otevriKalendar()">
-            <input type="text" class="modal-input" id="input-datum" placeholder="Datum (kliknete pro vyber)" readonly style="margin-bottom: 0;">
+
+        <div class="modal-pole" id="datum-wrapper" style="display: none;">
+            <label class="modal-label">Datum</label>
+            <div class="datum-input-wrapper" onclick="otevriKalendar()">
+                <input type="text" class="modal-input" id="input-datum" placeholder="Kliknete pro vyber" readonly>
+            </div>
         </div>
-        <input type="text" class="modal-input" id="input-cas" data-i18n-placeholder="timePlaceholder" placeholder="Cas (napr. 21:30)">
-        <input type="text" class="modal-input" id="input-jmeno" data-i18n-placeholder="namePlaceholder" placeholder="Jmeno pasazera">
-        <input type="text" class="modal-input" id="input-odkud" data-i18n-placeholder="fromPlaceholder" placeholder="Odkud">
-        <input type="text" class="modal-input" id="input-kam" data-i18n-placeholder="toPlaceholder" placeholder="Kam">
-        <input type="tel" class="modal-input" id="input-heslo" data-i18n-placeholder="passwordPlaceholder" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+
+        <div class="modal-pole" id="pole-cas">
+            <label class="modal-label">Cas</label>
+            <input type="text" class="modal-input" id="input-cas" placeholder="napr. 21:30">
+        </div>
+
+        <div class="modal-pole" id="pole-jmeno">
+            <label class="modal-label">Jmeno</label>
+            <input type="text" class="modal-input" id="input-jmeno" placeholder="Jmeno pasazera">
+        </div>
+
+        <div class="modal-pole" id="pole-odkud">
+            <label class="modal-label">Odkud</label>
+            <input type="text" class="modal-input" id="input-odkud" placeholder="Misto vyzvednut">
+        </div>
+
+        <div class="modal-pole" id="pole-kam">
+            <label class="modal-label">Kam</label>
+            <input type="text" class="modal-input" id="input-kam" placeholder="Cilove misto">
+        </div>
+
+        <div class="modal-pole">
+            <label class="modal-label">Heslo</label>
+            <input type="tel" class="modal-input" id="input-heslo" placeholder="Heslo pro potvrzeni" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        </div>
+
         <div class="modal-chyba" id="modal-chyba" data-i18n="wrongPassword">Spatne heslo</div>
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModal()" data-i18n="cancel">Zrusit</button>
@@ -1298,12 +1341,6 @@ function otevriModalPridat(datum) {
         datumInput.dataset.hodnota = rok + '-' + mesic + '-' + den;
     }
 
-    // Zobrazit všechny inputy
-    document.getElementById('input-cas').style.display = 'block';
-    document.getElementById('input-jmeno').style.display = 'block';
-    document.getElementById('input-odkud').style.display = 'block';
-    document.getElementById('input-kam').style.display = 'block';
-
     document.getElementById('modal-edit').classList.add('aktivni');
 }
 
@@ -1315,14 +1352,8 @@ function editujVse(id, datum) {
     editAkce = { typ: 'editovat', datum: datum, id: id, pole: 'vse' };
     document.getElementById('modal-titulek').textContent = t('editTransport');
 
-    // Skryt pole pro datum pri editaci
+    // Skryt pole pro datum pri editaci (datum nelze menit)
     document.getElementById('datum-wrapper').style.display = 'none';
-
-    // Zobrazit všechny inputy
-    document.getElementById('input-cas').style.display = 'block';
-    document.getElementById('input-jmeno').style.display = 'block';
-    document.getElementById('input-odkud').style.display = 'block';
-    document.getElementById('input-kam').style.display = 'block';
 
     // Vyplnit aktuální hodnoty
     document.getElementById('input-cas').value = transport.cas;
