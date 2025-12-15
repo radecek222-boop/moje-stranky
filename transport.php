@@ -2068,6 +2068,9 @@ function zpracujExcel(input) {
             const hlavicka = json[0];
             console.log('Excel hlavicka:', hlavicka);
 
+            // DEBUG - zobrazit hlavicku
+            alert('Sloupce v Excelu:\n' + hlavicka.map((h, i) => `${i}: "${h}"`).join('\n'));
+
             // Detekovat format - novy (WHEN, NAME, PICKUP, DROPOFF) nebo stary (FIRSTNAME, LASTNAME, ARRIVAL...)
             const sloupceNovy = {
                 when: najdiSloupec(hlavicka, ['WHEN', 'DATE', 'DATUM', 'KDY']),
