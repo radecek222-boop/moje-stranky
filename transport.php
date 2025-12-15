@@ -436,6 +436,49 @@
             color: #666;
         }
 
+        .transport-let {
+            display: inline-block;
+            background: #222;
+            border: 1px solid #444;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .transport-let:hover {
+            background: #333;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .transport-let.aktivni {
+            border-color: #39ff14;
+            color: #39ff14;
+            animation: let-pulse 2s ease-in-out infinite;
+        }
+
+        .transport-let.pristano {
+            background: #39ff14;
+            border-color: #39ff14;
+            color: #000;
+        }
+
+        .transport-let.zpozdeno {
+            background: #ff8800;
+            border-color: #ff8800;
+            color: #000;
+        }
+
+        @keyframes let-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(57, 255, 20, 0.3); }
+            50% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
+        }
+
         /* Tlačítko smazat - pravý dolní roh */
         .btn-smazat {
             position: absolute;
@@ -657,6 +700,104 @@
             display: none;
         }
 
+        /* Let - vyhledavani */
+        .let-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .let-input-wrapper .modal-input {
+            flex: 1;
+        }
+
+        .btn-hledat-let {
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-hledat-let:hover {
+            background: #444;
+            border-color: #555;
+        }
+
+        .btn-hledat-let:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-hledat-let.nacitam {
+            background: #222;
+            color: #666;
+        }
+
+        .let-info {
+            margin-top: 8px;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .let-info.aktivni {
+            display: block;
+        }
+
+        .let-info.chyba {
+            border-color: #ff4444;
+            color: #ff6666;
+        }
+
+        .let-info.uspech {
+            border-color: #39ff14;
+        }
+
+        .let-info-radek {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: #888;
+        }
+
+        .let-info-radek:last-child {
+            margin-bottom: 0;
+        }
+
+        .let-info-hodnota {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .let-info-cas {
+            color: #39ff14;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .let-info-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .let-info-status.scheduled { background: #333; color: #888; }
+        .let-info-status.active { background: #fff; color: #000; }
+        .let-info-status.landed { background: #39ff14; color: #000; }
+        .let-info-status.cancelled { background: #ff4444; color: #fff; }
+        .let-info-status.delayed { background: #ff8800; color: #000; }
+
         @media (max-width: 500px) {
             .ridici {
                 gap: 20px;
@@ -759,6 +900,15 @@
             <div class="datum-input-wrapper" onclick="otevriKalendar()">
                 <input type="text" class="modal-input" id="input-datum" placeholder="Kliknete pro vyber" readonly>
             </div>
+        </div>
+
+        <div class="modal-pole" id="pole-let">
+            <label class="modal-label">Cislo letu (volitelne)</label>
+            <div class="let-input-wrapper">
+                <input type="text" class="modal-input" id="input-let" placeholder="napr. OK123, FR1234" style="text-transform: uppercase;">
+                <button type="button" class="btn-hledat-let" id="btn-hledat-let" onclick="hledejLet()">Hledat</button>
+            </div>
+            <div class="let-info" id="let-info"></div>
         </div>
 
         <div class="modal-pole" id="pole-cas">
@@ -1285,15 +1435,20 @@ function vykresli() {
                 stavCas = tr.delivered + ' ' + stavData.casDrop;
             }
 
+            // Sestavit info o letu
+            const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}</span>` : '';
+
             const div = document.createElement('div');
             div.className = 'transport';
             div.dataset.id = item.id;
+            if (item.cisloLetu) div.dataset.let = item.cisloLetu;
+
             div.innerHTML = `
                 <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${datum}')">&times;</button>
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno}</div>
+                    <div class="transport-jmena">${item.jmeno} ${letInfo}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
                 <div class="transport-stav">
@@ -1310,12 +1465,15 @@ function vykresli() {
 function otevriModalPridat(datum) {
     editAkce = { typ: 'pridat', datum: datum, id: null, pole: null };
     document.getElementById('modal-titulek').textContent = t('addTransport');
+    document.getElementById('input-let').value = '';
     document.getElementById('input-cas').value = '';
     document.getElementById('input-jmeno').value = '';
     document.getElementById('input-odkud').value = '';
     document.getElementById('input-kam').value = '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
+    document.getElementById('let-info').className = 'let-info';
+    document.getElementById('let-info').innerHTML = '';
 
     // Zobrazit pole pro datum pri pridavani
     const datumWrapper = document.getElementById('datum-wrapper');
@@ -1356,12 +1514,15 @@ function editujVse(id, datum) {
     document.getElementById('datum-wrapper').style.display = 'none';
 
     // Vyplnit aktuální hodnoty
+    document.getElementById('input-let').value = transport.cisloLetu || '';
     document.getElementById('input-cas').value = transport.cas;
     document.getElementById('input-jmeno').value = transport.jmeno;
     document.getElementById('input-odkud').value = transport.odkud;
     document.getElementById('input-kam').value = transport.kam;
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
+    document.getElementById('let-info').className = 'let-info';
+    document.getElementById('let-info').innerHTML = '';
 
     document.getElementById('modal-edit').classList.add('aktivni');
 }
@@ -1384,13 +1545,15 @@ async function potvrdEdit() {
             return;
         }
 
+        const cisloLetu = document.getElementById('input-let').value.trim().toUpperCase();
         const novy = {
             id: generujId(),
             cas: normalizujCas(document.getElementById('input-cas').value) || '00:00',
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
             odkud: document.getElementById('input-odkud').value || '?',
             kam: document.getElementById('input-kam').value || '?',
-            datum: vybraneDatum
+            datum: vybraneDatum,
+            cisloLetu: cisloLetu || null
         };
 
         // Pridat do spravneho datumu
@@ -1406,6 +1569,7 @@ async function potvrdEdit() {
             transport.jmeno = document.getElementById('input-jmeno').value;
             transport.odkud = document.getElementById('input-odkud').value;
             transport.kam = document.getElementById('input-kam').value;
+            transport.cisloLetu = document.getElementById('input-let').value.trim().toUpperCase() || null;
         }
     }
 
@@ -1419,6 +1583,147 @@ function zavriModal() {
     document.getElementById('modal-edit').classList.remove('aktivni');
     editAkce = null;
 }
+
+// ===== VYHLEDAVANI LETU =====
+let aktualniLetData = null;
+
+// Hledat let podle čísla
+async function hledejLet() {
+    const cisloLetu = document.getElementById('input-let').value.trim().toUpperCase();
+    const letInfo = document.getElementById('let-info');
+    const btnHledat = document.getElementById('btn-hledat-let');
+
+    if (!cisloLetu) {
+        letInfo.className = 'let-info aktivni chyba';
+        letInfo.innerHTML = 'Zadejte cislo letu';
+        return;
+    }
+
+    // Zobrazit načítání
+    btnHledat.disabled = true;
+    btnHledat.classList.add('nacitam');
+    btnHledat.textContent = '...';
+    letInfo.className = 'let-info aktivni';
+    letInfo.innerHTML = 'Hledam let ' + cisloLetu + '...';
+
+    try {
+        const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            aktualniLetData = data;
+
+            // Získat čas příletu
+            const prilet = data.prilet;
+            let casPriletu = '';
+
+            // Použít odhadovaný čas, pokud existuje, jinak plánovaný
+            const casStr = prilet.odhadovano || prilet.planovano || '';
+            if (casStr) {
+                const datum = new Date(casStr);
+                casPriletu = datum.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Překlad stavů
+            const stavyPreklad = {
+                'scheduled': 'Naplanovano',
+                'active': 'Ve vzduchu',
+                'landed': 'Pristano',
+                'cancelled': 'Zruseno',
+                'delayed': 'Zpozdeno',
+                'unknown': 'Neznamy'
+            };
+
+            const stavText = stavyPreklad[data.stavLetu] || data.stavLetu;
+            const stavClass = data.stavLetu || 'scheduled';
+
+            // Zobrazit info o letu
+            letInfo.className = 'let-info aktivni uspech';
+            letInfo.innerHTML = `
+                <div class="let-info-radek">
+                    <span>${data.aerolinky}</span>
+                    <span class="let-info-status ${stavClass}">${stavText}</span>
+                </div>
+                <div class="let-info-radek">
+                    <span>${prilet.letiste} (${prilet.iata})</span>
+                </div>
+                <div class="let-info-radek">
+                    <span>Prilet:</span>
+                    <span class="let-info-cas">${casPriletu}</span>
+                </div>
+                ${prilet.terminal ? `<div class="let-info-radek"><span>Terminal:</span><span class="let-info-hodnota">T${prilet.terminal}</span></div>` : ''}
+                ${prilet.bagaz ? `<div class="let-info-radek"><span>Zavazadla:</span><span class="let-info-hodnota">Pas ${prilet.bagaz}</span></div>` : ''}
+                ${data.zdroj === 'demo' ? '<div style="color: #666; font-size: 10px; margin-top: 5px;">Demo data - pro live data nastavte API klic</div>' : ''}
+                <button type="button" onclick="pouzitDataLetu()" style="margin-top: 10px; width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: #fff; border-radius: 4px; cursor: pointer;">Pouzit tento cas</button>
+            `;
+
+            // Automaticky nastavit odkud na letiště
+            if (prilet.iata) {
+                const odkudInput = document.getElementById('input-odkud');
+                if (!odkudInput.value) {
+                    odkudInput.value = 'T' + (prilet.terminal || '') + ' ' + prilet.iata;
+                }
+            }
+
+        } else {
+            aktualniLetData = null;
+            letInfo.className = 'let-info aktivni chyba';
+            letInfo.innerHTML = data.message || 'Let nenalezen';
+        }
+
+    } catch (e) {
+        console.error('Chyba pri hledani letu:', e);
+        letInfo.className = 'let-info aktivni chyba';
+        letInfo.innerHTML = 'Chyba pri komunikaci s API';
+    }
+
+    // Reset tlačítka
+    btnHledat.disabled = false;
+    btnHledat.classList.remove('nacitam');
+    btnHledat.textContent = 'Hledat';
+}
+
+// Použít data z nalezeného letu
+function pouzitDataLetu() {
+    if (!aktualniLetData) return;
+
+    const prilet = aktualniLetData.prilet;
+    const casStr = prilet.odhadovano || prilet.planovano || '';
+
+    if (casStr) {
+        const datum = new Date(casStr);
+        const cas = datum.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('input-cas').value = cas;
+
+        // Nastavit také datum pokud je to přidání
+        if (editAkce?.typ === 'pridat') {
+            const datumInput = document.getElementById('input-datum');
+            const den = datum.getDate().toString().padStart(2, '0');
+            const mesic = (datum.getMonth() + 1).toString().padStart(2, '0');
+            const rok = datum.getFullYear();
+            datumInput.value = den + '.' + mesic + '.' + rok;
+            datumInput.dataset.hodnota = rok + '-' + mesic + '-' + den;
+        }
+    }
+
+    // Nastavit odkud na letiště
+    if (prilet.iata) {
+        document.getElementById('input-odkud').value = 'T' + (prilet.terminal || '') + ' ' + prilet.iata;
+    }
+}
+
+// Vyhledat let při stisknutí Enter v inputu
+document.addEventListener('DOMContentLoaded', function() {
+    const inputLet = document.getElementById('input-let');
+    if (inputLet) {
+        inputLet.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                hledejLet();
+            }
+        });
+    }
+});
 
 // ===== KALENDÁŘ =====
 let kalendarDatum = new Date();
@@ -1735,6 +2040,97 @@ document.addEventListener('keydown', e => {
     }
 });
 
+// ===== SLEDOVANI STAVU LETU =====
+// Cache pro stavy letu
+let letoveStavy = {};
+
+// Aktualizovat stav letu pro konkretní transport
+async function aktualizujStavLetu(cisloLetu, elementLet) {
+    if (!cisloLetu) return;
+
+    try {
+        const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            letoveStavy[cisloLetu] = data;
+
+            // Aktualizovat vsechny elementy s timto letem
+            document.querySelectorAll(`.transport-let[data-let="${cisloLetu}"]`).forEach(el => {
+                // Odstranit stare tridy
+                el.classList.remove('aktivni', 'pristano', 'zpozdeno');
+
+                // Pridat novou tridu podle stavu
+                switch (data.stavLetu) {
+                    case 'active':
+                        el.classList.add('aktivni');
+                        break;
+                    case 'landed':
+                        el.classList.add('pristano');
+                        break;
+                    case 'delayed':
+                        el.classList.add('zpozdeno');
+                        break;
+                }
+            });
+        }
+    } catch (e) {
+        console.log('Chyba pri aktualizaci letu:', cisloLetu, e);
+    }
+}
+
+// Aktualizovat vsechny lety na strance
+async function aktualizujVsechnyLety() {
+    // Ziskat unikatni cisla letu
+    const cislaLetu = new Set();
+    document.querySelectorAll('.transport-let[data-let]').forEach(el => {
+        cislaLetu.add(el.dataset.let);
+    });
+
+    // Aktualizovat kazdy let (postupne, aby se nepretizilo API)
+    for (const cislo of cislaLetu) {
+        await aktualizujStavLetu(cislo);
+        // Pockej 500ms mezi pozadavky
+        await new Promise(r => setTimeout(r, 500));
+    }
+}
+
+// Kliknuti na badge letu - zobrazit detaily
+function zobrazDetailLetu(event) {
+    const cisloLetu = event.target.dataset.let;
+    if (!cisloLetu) return;
+
+    event.stopPropagation();
+
+    // Pokud mame cachovana data, zobrazit je
+    const data = letoveStavy[cisloLetu];
+    if (data) {
+        const prilet = data.prilet;
+        const cas = prilet.odhadovano || prilet.planovano || '';
+        const casStr = cas ? new Date(cas).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '?';
+
+        const stavyPreklad = {
+            'scheduled': 'Naplanovano',
+            'active': 'Ve vzduchu',
+            'landed': 'Pristano',
+            'cancelled': 'Zruseno',
+            'delayed': 'Zpozdeno'
+        };
+
+        alert(`Let: ${cisloLetu}\nAerolinky: ${data.aerolinky}\nZ: ${data.odlet.letiste}\nDo: ${prilet.letiste}\nPrilet: ${casStr}\nStav: ${stavyPreklad[data.stavLetu] || data.stavLetu}`);
+    } else {
+        // Nacist data
+        aktualizujStavLetu(cisloLetu);
+    }
+}
+
+// Event delegation pro kliknuti na let badge
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('transport-let')) {
+        zobrazDetailLetu(e);
+    }
+});
+
 // Inicializace po načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
     // Nastavit jazyk při načtení
@@ -1751,6 +2147,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Pravidelná synchronizace každé 3 sekundy
     setInterval(nactiData, 3000);
+
+    // Aktualizovat stavy letu kazde 2 minuty (setrit API volani)
+    setTimeout(aktualizujVsechnyLety, 5000); // Prvni aktualizace po 5s
+    setInterval(aktualizujVsechnyLety, 120000); // Pak kazde 2 minuty
 });
 </script>
 
