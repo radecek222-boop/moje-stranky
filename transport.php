@@ -2618,8 +2618,8 @@ async function nactiData() {
 // Obnovit timery pro existující DROP stavy po načtení
 function obnovitDropTimery() {
     Object.keys(stavy).forEach(id => {
-        if (stavy[id]?.stav === 'drop') {
-            // Spustit timer (zbývající čas - pro jednoduchost spustíme znovu celou minutu)
+        if (stavy[id]?.stav === 'drop' && !dropTimery[id]) {
+            // Spustit timer pouze pokud ještě neběží
             spustitDropTimer(id);
         }
     });
