@@ -2068,36 +2068,38 @@ function zpracujExcel(input) {
             const hlavicka = json[0];
             console.log('Excel hlavicka:', hlavicka);
 
-            // DEBUG - zobrazit hlavicku
-            alert('Sloupce v Excelu:\n' + hlavicka.map((h, i) => `${i}: "${h}"`).join('\n'));
-
-            // Detekovat format - novy (WHEN, NAME, PICKUP, DROPOFF) nebo stary (FIRSTNAME, LASTNAME, ARRIVAL...)
-            const sloupceNovy = {
-                when: najdiSloupec(hlavicka, ['WHEN', 'DATE', 'DATUM', 'KDY']),
-                name: najdiSloupec(hlavicka, ['NAME', 'JMENO', 'GUEST']),
-                pickup: najdiSloupec(hlavicka, ['PICKUP', 'PICK-UP', 'PICK UP', 'ODKUD', 'FROM']),
-                dropoff: najdiSloupec(hlavicka, ['DROPOFF', 'DROP-OFF', 'DROP OFF', 'KAM', 'TO', 'DESTINATION']),
-                ride: najdiSloupec(hlavicka, ['RIDE', 'ROUTE', 'TRASA']),
-                status: najdiSloupec(hlavicka, ['STATUS', 'STAV'])
-            };
-
+            // Nejprve zkontrolovat STARY format (FIRSTNAME, LASTNAME) - ma prednost
             const sloupceStary = {
-                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
-                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO', 'FIRST NAME']),
+                prijmeni: najdiSloupecPresne(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
+                jmeno: najdiSloupecPresne(hlavicka, ['FIRSTNAME', 'JMENO', 'FIRST NAME']),
                 email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL', 'E-MAIL']),
-                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL', 'ARRIVAL DATE']),
-                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION']),
-                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION']),
-                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT NUMBER', 'FLIGHT NO']),
-                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET', 'PASSENGERS']),
+                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL DATE/TIME', 'ARRIVAL']),
+                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP LOCATION']),
+                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF LOCATION']),
+                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT NUMBER', 'FLIGHT NO', 'FLIGHT']),
+                pocet: najdiSloupecPresne(hlavicka, ['PAX', 'POCET', 'PASSENGERS']),
                 telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON'])
             };
 
-            // Urcit ktery format pouzit
-            const jeNovyFormat = sloupceNovy.when >= 0 && sloupceNovy.name >= 0 && sloupceNovy.pickup >= 0;
-            console.log('Format:', jeNovyFormat ? 'NOVY (When/Name/Pickup)' : 'STARY (Firstname/Lastname)');
-            console.log('Sloupce novy:', sloupceNovy);
+            // Stary format ma FIRSTNAME a LASTNAME jako samostatne sloupce
+            const jeStaryFormat = sloupceStary.jmeno >= 0 && sloupceStary.prijmeni >= 0;
+
+            // Novy format (WHEN, NAME jako jeden sloupec)
+            const sloupceNovy = {
+                when: najdiSloupecPresne(hlavicka, ['WHEN', 'KDY']),
+                name: najdiSloupecPresne(hlavicka, ['NAME', 'GUEST']),
+                pickup: najdiSloupecPresne(hlavicka, ['PICKUP', 'PICK-UP']),
+                dropoff: najdiSloupecPresne(hlavicka, ['DROPOFF', 'DROP-OFF']),
+                ride: najdiSloupecPresne(hlavicka, ['RIDE', 'ROUTE', 'TRASA']),
+                status: najdiSloupecPresne(hlavicka, ['STATUS', 'STAV'])
+            };
+
+            // Novy format POUZE pokud neni stary a ma specificke sloupce
+            const jeNovyFormat = !jeStaryFormat && sloupceNovy.when >= 0 && sloupceNovy.name >= 0;
+
+            console.log('Detekce formatu:', jeStaryFormat ? 'STARY (Firstname/Lastname)' : (jeNovyFormat ? 'NOVY (When/Name)' : 'NEZNAMY'));
             console.log('Sloupce stary:', sloupceStary);
+            console.log('Sloupce novy:', sloupceNovy);
 
             // Mesice pro parsovani "30 Apr" formatu
             const mesice = {
@@ -2227,12 +2229,30 @@ function zpracujExcel(input) {
     reader.readAsArrayBuffer(soubor);
 }
 
-// Najit sloupec podle moznych nazvu
-function najdiSloupec(hlavicka, nazvy) {
+// Najit sloupec podle PRESNEHO nazvu (bez includes)
+function najdiSloupecPresne(hlavicka, nazvy) {
     for (let i = 0; i < hlavicka.length; i++) {
         const val = String(hlavicka[i] || '').toUpperCase().trim();
         for (const nazev of nazvy) {
-            if (val === nazev.toUpperCase() || val.includes(nazev.toUpperCase())) {
+            if (val === nazev.toUpperCase()) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// Najit sloupec podle moznych nazvu (vcetne castecne shody)
+function najdiSloupec(hlavicka, nazvy) {
+    // Nejprve zkusit presnou shodu
+    const presny = najdiSloupecPresne(hlavicka, nazvy);
+    if (presny >= 0) return presny;
+
+    // Pak zkusit castecnou shodu (includes)
+    for (let i = 0; i < hlavicka.length; i++) {
+        const val = String(hlavicka[i] || '').toUpperCase().trim();
+        for (const nazev of nazvy) {
+            if (val.includes(nazev.toUpperCase())) {
                 return i;
             }
         }
