@@ -436,6 +436,15 @@
             color: #666;
         }
 
+        .transport-meta {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .transport-let {
             display: inline-block;
             background: #222;
@@ -1531,7 +1540,8 @@ function vykresli() {
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno} ${letInfo} ${kontaktIkony} ${ridicInfo}</div>
+                    <div class="transport-jmena">${item.jmeno} ${kontaktIkony}</div>
+                    <div class="transport-meta">${letInfo} ${ridicInfo}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
                 <div class="transport-stav">
