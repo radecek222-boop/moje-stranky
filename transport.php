@@ -586,7 +586,7 @@
 
         /* Levy horni roh - cas */
         .transport-cas {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
             grid-column: 1;
@@ -612,7 +612,7 @@
 
         /* Jmeno klienta */
         .transport-jmena {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: 700;
             grid-column: 1 / 4;
             grid-row: 3;
