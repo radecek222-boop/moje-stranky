@@ -684,13 +684,13 @@
             padding: 0;
             font-size: 10px;
             font-weight: 500;
-            color: #666;
+            color: #fff;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .transport-let:hover {
-            color: #999;
+            color: #ccc;
         }
 
         .transport-let.aktivni {
@@ -718,7 +718,7 @@
             padding: 0;
             font-size: 10px;
             font-weight: 500;
-            color: #666;
+            color: #fff;
             text-transform: uppercase;
         }
 
