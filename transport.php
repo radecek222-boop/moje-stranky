@@ -66,58 +66,6 @@
             background: #222;
         }
 
-        /* Language switcher */
-        .lang-switcher {
-            z-index: 100;
-        }
-
-        .lang-current {
-            background: transparent;
-            border: none;
-            color: #fff;
-            padding: 6px 8px;
-            font-size: 16px;
-            font-weight: 300;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            letter-spacing: 0.5px;
-        }
-
-        .lang-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: #111;
-            border-radius: 4px;
-            margin-top: 4px;
-            overflow: hidden;
-            min-width: 100%;
-        }
-
-        .lang-switcher.open .lang-dropdown {
-            display: block;
-        }
-
-        .lang-option {
-            padding: 10px 14px;
-            font-size: 15px;
-            font-weight: 300;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-            color: #fff;
-        }
-
-        .lang-option:hover {
-            background: #333;
-        }
-
-        .lang-option.active {
-            background: #222;
-        }
-
         /* Kontejner pro hlavni tlacitka */
         .hlavni-tlacitka {
             display: flex;
@@ -1387,23 +1335,11 @@
 
     <!-- Editovatelny nazev -->
     <div class="header-title" id="header-title" onclick="editovatNazev()">TRANSPORT</div>
-
-    <!-- Language switcher -->
-    <div class="lang-switcher" id="lang-switcher" onclick="toggleLangMenu(event)">
-        <div class="lang-current" id="lang-current">CZ</div>
-        <div class="lang-dropdown">
-            <div class="lang-option active" data-lang="cz">CZ</div>
-            <div class="lang-option" data-lang="sk">SK</div>
-            <div class="lang-option" data-lang="en">EN</div>
-            <div class="lang-option" data-lang="de">DE</div>
-            <div class="lang-option" data-lang="nl">NL</div>
-        </div>
-    </div>
 </div>
 
 <!-- Tlačítka pro řidiče a dokončené -->
 <div class="hlavni-tlacitka">
-    <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
+    <button class="btn-ridici" onclick="otevriModalRidici()">Ridici</button>
     <button class="btn-ridici btn-dokoncene" onclick="otevriModalDokoncene()">Dokoncene <span id="pocet-dokoncenych"></span></button>
     <button class="btn-ridici btn-excel" onclick="otevriModalNahrat()" id="btn-excel-hlavni">Aktualizovat z Excelu</button>
 </div>
@@ -1656,147 +1592,39 @@
 // Heslo pro editaci
 const HESLO = '9545';
 
-// Aktuální jazyk - výchozí angličtina
-let currentLang = localStorage.getItem('techLang') || 'en';
-
-// Překlady
-const translations = {
-    cz: {
-        saturday: 'Sobota 13.12.',
-        sunday: 'Nedele 14.12.',
-        add: '+ Pridat',
-        addTransport: 'Pridat transport',
-        editTransport: 'Upravit transport',
-        deleteTransport: 'Smazat transport?',
-        resetStatus: 'Resetovat stav na WAIT?',
-        timePlaceholder: 'Cas (napr. 21:30)',
-        namePlaceholder: 'Jmeno pasazera',
-        fromPlaceholder: 'Odkud',
-        toPlaceholder: 'Kam',
-        passwordPlaceholder: 'Heslo pro potvrzeni',
-        wrongPassword: 'Spatne heslo',
-        cancel: 'Zrusit',
-        confirm: 'Potvrdit',
-        delete: 'Smazat',
-        reset: 'Resetovat',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'vyjeli',
-        delivered: 'doruceno',
-        footerText: 'Aplikaci vytvořil a transport servis zajišťuje',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    sk: {
-        saturday: 'Sobota 13.12.',
-        sunday: 'Nedela 14.12.',
-        add: '+ Pridat',
-        addTransport: 'Pridat transport',
-        editTransport: 'Upravit transport',
-        deleteTransport: 'Zmazat transport?',
-        resetStatus: 'Resetovat stav na WAIT?',
-        timePlaceholder: 'Cas (napr. 21:30)',
-        namePlaceholder: 'Meno pasaziera',
-        fromPlaceholder: 'Odkial',
-        toPlaceholder: 'Kam',
-        passwordPlaceholder: 'Heslo pre potvrdenie',
-        wrongPassword: 'Nespravne heslo',
-        cancel: 'Zrusit',
-        confirm: 'Potvrdit',
-        delete: 'Zmazat',
-        reset: 'Resetovat',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'odisli',
-        delivered: 'dorucene',
-        footerText: 'Aplikaciu vytvoril a transport servis zabezpecuje',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    en: {
-        saturday: 'Saturday 13.12.',
-        sunday: 'Sunday 14.12.',
-        add: '+ Add',
-        addTransport: 'Add transport',
-        editTransport: 'Edit transport',
-        deleteTransport: 'Delete transport?',
-        resetStatus: 'Reset status to WAIT?',
-        timePlaceholder: 'Time (e.g. 21:30)',
-        namePlaceholder: 'Passenger name',
-        fromPlaceholder: 'From',
-        toPlaceholder: 'To',
-        passwordPlaceholder: 'Password to confirm',
-        wrongPassword: 'Wrong password',
-        cancel: 'Cancel',
-        confirm: 'Confirm',
-        delete: 'Delete',
-        reset: 'Reset',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'departed',
-        delivered: 'delivered',
-        footerText: 'App created and transport service provided by',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    de: {
-        saturday: 'Samstag 13.12.',
-        sunday: 'Sonntag 14.12.',
-        add: '+ Hinzufugen',
-        addTransport: 'Transport hinzufugen',
-        editTransport: 'Transport bearbeiten',
-        deleteTransport: 'Transport loschen?',
-        resetStatus: 'Status auf WAIT zurucksetzen?',
-        timePlaceholder: 'Zeit (z.B. 21:30)',
-        namePlaceholder: 'Passagiername',
-        fromPlaceholder: 'Von',
-        toPlaceholder: 'Nach',
-        passwordPlaceholder: 'Passwort zur Bestatigung',
-        wrongPassword: 'Falsches Passwort',
-        cancel: 'Abbrechen',
-        confirm: 'Bestatigen',
-        delete: 'Loschen',
-        reset: 'Zurucksetzen',
-        wait: 'WARTEN',
-        onway: 'UNTERWEGS',
-        drop: 'ABGESETZT',
-        departed: 'abgefahren',
-        delivered: 'zugestellt',
-        footerText: 'App erstellt und Transportservice bereitgestellt von',
-        transportVan: 'transport van',
-        standby: 'BEREITSCHAFT 21:00 - 06:00'
-    },
-    nl: {
-        saturday: 'Zaterdag 13.12.',
-        sunday: 'Zondag 14.12.',
-        add: '+ Toevoegen',
-        addTransport: 'Transport toevoegen',
-        editTransport: 'Transport bewerken',
-        deleteTransport: 'Transport verwijderen?',
-        resetStatus: 'Status resetten naar WAIT?',
-        timePlaceholder: 'Tijd (bijv. 21:30)',
-        namePlaceholder: 'Naam passagier',
-        fromPlaceholder: 'Van',
-        toPlaceholder: 'Naar',
-        passwordPlaceholder: 'Wachtwoord ter bevestiging',
-        wrongPassword: 'Verkeerd wachtwoord',
-        cancel: 'Annuleren',
-        confirm: 'Bevestigen',
-        delete: 'Verwijderen',
-        reset: 'Resetten',
-        wait: 'WACHT',
-        onway: 'ONDERWEG',
-        drop: 'AFGELEVERD',
-        departed: 'vertrokken',
-        delivered: 'afgeleverd',
-        footerText: 'App gemaakt en transportservice verzorgd door',
-        transportVan: 'transport van',
-        standby: 'STAND-BY 21:00 - 06:00'
-    }
+// Texty v cestine
+const texty = {
+    saturday: 'Sobota',
+    sunday: 'Nedele',
+    add: '+ Pridat',
+    addTransport: 'Pridat transport',
+    editTransport: 'Upravit transport',
+    deleteTransport: 'Smazat transport?',
+    resetStatus: 'Resetovat stav na WAIT?',
+    timePlaceholder: 'Cas (napr. 21:30)',
+    namePlaceholder: 'Jmeno pasazera',
+    fromPlaceholder: 'Odkud',
+    toPlaceholder: 'Kam',
+    passwordPlaceholder: 'Heslo pro potvrzeni',
+    wrongPassword: 'Spatne heslo',
+    cancel: 'Zrusit',
+    confirm: 'Potvrdit',
+    delete: 'Smazat',
+    reset: 'Resetovat',
+    wait: 'WAIT',
+    onway: 'ON THE WAY',
+    drop: 'DROP OFF',
+    departed: 'vyjeli',
+    delivered: 'doruceno',
+    footerText: 'Aplikaci vytvoril a transport servis zajistuje',
+    transportVan: 'transport van',
+    standby: 'STAND BY'
 };
+
+// Funkce pro ziskani textu
+function t(key) {
+    return texty[key] || key;
+}
 
 // Nazev stranky (ulozeny v localStorage)
 function nactiNazev() {
@@ -1925,87 +1753,15 @@ function transportConfirm(zprava, options = {}) {
     });
 }
 
-// Přepnout jazyk
-function toggleLangMenu(event) {
-    event.stopPropagation();
-    const switcher = document.getElementById('lang-switcher');
-    switcher.classList.toggle('open');
-}
-
-// Zavřít menu při kliknutí mimo
-document.addEventListener('click', () => {
-    document.getElementById('lang-switcher').classList.remove('open');
-});
-
-// Vybrat jazyk
-document.querySelectorAll('.lang-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const lang = option.dataset.lang;
-        setLanguage(lang);
-        document.getElementById('lang-switcher').classList.remove('open');
-    });
-});
-
-// Nastavit jazyk
-function setLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('techLang', lang);
-
-    // Aktualizovat tlačítko
-    document.getElementById('lang-current').textContent = lang.toUpperCase();
-
-    // Aktualizovat aktivní volbu
-    document.querySelectorAll('.lang-option').forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.lang === lang);
-    });
-
-    // Přeložit stránku
-    translatePage();
-    vykresli();
-}
-
-// Přeložit stránku
-function translatePage() {
-    const t = translations[currentLang];
-
-    // Přeložit elementy s data-i18n
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        if (t[key]) {
-            el.textContent = t[key];
-        }
-    });
-
-    // Přeložit placeholdery
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.dataset.i18nPlaceholder;
-        if (t[key]) {
-            el.placeholder = t[key];
-        }
-    });
-}
-
-// Získat překlad
-function t(key) {
-    return translations[currentLang][key] || translations['cz'][key] || key;
-}
-
-// Názvy dnů v týdnu pro různé jazyky
-const dnyVTydnu = {
-    cz: ['Nedele', 'Pondeli', 'Utery', 'Streda', 'Ctvrtek', 'Patek', 'Sobota'],
-    sk: ['Nedela', 'Pondelok', 'Utorok', 'Streda', 'Stvrtok', 'Piatok', 'Sobota'],
-    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    de: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-    nl: ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
-};
+// Názvy dnů v týdnu
+const dnyVTydnu = ['Nedele', 'Pondeli', 'Utery', 'Streda', 'Ctvrtek', 'Patek', 'Sobota'];
 
 // Získat název dne z data
 function ziskejNazevDne(datumStr) {
     if (!datumStr) return '';
     const datum = new Date(datumStr);
     const denIndex = datum.getDay();
-    const nazevDne = dnyVTydnu[currentLang]?.[denIndex] || dnyVTydnu['en'][denIndex];
+    const nazevDne = dnyVTydnu[denIndex];
     const den = datum.getDate();
     const mesic = datum.getMonth() + 1;
     return nazevDne.toUpperCase() + ' ' + den + '.' + mesic + '.';
@@ -2922,7 +2678,7 @@ async function ulozRidice() {
 
 // Vykreslit transporty - dynamické sekce podle data
 function vykresli() {
-    const tr = translations[currentLang];
+    const tr = texty;
     const kontejner = document.getElementById('dny-kontejner');
     kontejner.innerHTML = '';
 
@@ -3976,13 +3732,6 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // Nacist ulozeny nazev
     nactiNazev();
-
-    // Nastavit jazyk při načtení
-    document.getElementById('lang-current').textContent = currentLang.toUpperCase();
-    document.querySelectorAll('.lang-option').forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.lang === currentLang);
-    });
-    translatePage();
 
     // Vykreslit řidiče ihned s výchozími daty
     vykresliRidice();
