@@ -412,13 +412,12 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 15px;
             margin-bottom: 8px;
             display: grid;
-            grid-template-columns: 70px 1fr auto auto;
-            grid-template-rows: auto auto auto;
-            gap: 4px 15px;
-            align-items: center;
+            grid-template-columns: auto 1fr auto;
+            grid-template-rows: auto auto auto auto;
+            gap: 8px 15px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -433,19 +432,30 @@
             border-color: #1a1a1a;
         }
 
+        /* Levy horni roh - cas */
         .transport-cas {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
-            grid-row: 1 / 4;
-            align-self: center;
+            grid-column: 1;
+            grid-row: 1;
         }
 
+        /* Pravy horni roh - telefon */
+        .transport-kontakty {
+            grid-column: 3;
+            grid-row: 1;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Stred - info */
         .transport-jmena {
             font-size: 24px;
             font-weight: 700;
-            grid-column: 2;
-            grid-row: 1;
+            grid-column: 1 / 4;
+            grid-row: 2;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -457,44 +467,58 @@
         .transport-meta {
             font-size: 12px;
             color: #999;
-            grid-column: 2;
-            grid-row: 2;
+            grid-column: 1 / 4;
+            grid-row: 3;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .transport-trasa {
-            font-size: 12px;
+            font-size: 13px;
             color: #666;
-            grid-column: 2;
-            grid-row: 3;
+            grid-column: 1 / 4;
+            grid-row: 4;
         }
 
         .transport-poznamka {
             font-size: 11px;
             color: #888;
-            grid-column: 2 / 5;
-            padding: 4px 8px;
+            grid-column: 1 / 4;
+            grid-row: 5;
+            padding: 6px 10px;
             background: #1a1a1a;
             border-radius: 4px;
             border-left: 2px solid #444;
-            margin-top: 4px;
         }
 
-        .transport-kontakty {
+        /* Levy dolni roh - upravit */
+        .btn-upravit {
+            grid-column: 1;
+            grid-row: 6;
+            justify-self: start;
+            background: #222;
+            border: 1px solid #444;
+            color: #888;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-upravit:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        /* Pravy dolni roh - stav */
+        .transport-stav {
             grid-column: 3;
-            grid-row: 1 / 4;
+            grid-row: 6;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .transport-stav {
-            grid-column: 4;
-            grid-row: 1 / 4;
-            text-align: center;
+            align-items: flex-end;
         }
 
         .transport-let {
@@ -591,55 +615,11 @@
             color: #fff;
         }
 
-        /* Tlačítko smazat - pravý dolní roh */
-        .btn-smazat {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 28px;
-            height: 28px;
-            background: transparent;
-            border: none;
-            color: #ff4444;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 1;
-            transition: all 0.2s;
-            z-index: 10;
-        }
-
-        .btn-smazat:hover {
-            color: #ff6666;
-        }
-
-        /* Tlačítko upravit - levý dolní roh */
-        .btn-upravit {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: transparent;
-            border: none;
-            color: #888;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            transition: all 0.2s;
-            z-index: 10;
-        }
-
-        .btn-upravit:hover {
-            color: #fff;
-        }
-
         /* Stav */
-        .transport-stav {
-            min-width: 110px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+        .stav-cas {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
         }
 
         .stav-btn {
@@ -935,6 +915,129 @@
         .let-info-status.cancelled { background: #ff4444; color: #fff; }
         .let-info-status.delayed { background: #ff8800; color: #000; }
 
+        /* WGS Info Overlay pro let */
+        .wgs-let-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .wgs-let-overlay.aktivni {
+            display: flex;
+        }
+
+        .wgs-let-box {
+            background: #111;
+            border: 2px solid #39ff14;
+            border-radius: 12px;
+            padding: 25px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow:
+                0 0 15px rgba(57, 255, 20, 0.4),
+                0 0 30px rgba(57, 255, 20, 0.2),
+                0 0 45px rgba(57, 255, 20, 0.1);
+            animation: wgsLetSlideIn 0.3s ease;
+        }
+
+        @keyframes wgsLetSlideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .wgs-let-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .wgs-let-cislo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #39ff14;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .wgs-let-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .wgs-let-status.scheduled { background: #333; color: #888; }
+        .wgs-let-status.active { background: #fff; color: #000; }
+        .wgs-let-status.landed { background: #39ff14; color: #000; }
+        .wgs-let-status.delayed { background: #ff8800; color: #000; }
+        .wgs-let-status.cancelled { background: #ff4444; color: #fff; }
+
+        .wgs-let-aerolinky {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .wgs-let-radek {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+            font-size: 14px;
+        }
+
+        .wgs-let-radek:last-child {
+            border-bottom: none;
+        }
+
+        .wgs-let-label {
+            color: #666;
+        }
+
+        .wgs-let-hodnota {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .wgs-let-cas-prilet {
+            font-size: 32px;
+            font-weight: 700;
+            color: #39ff14;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .wgs-let-zavrit {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .wgs-let-zavrit:hover {
+            background: #333;
+            color: #fff;
+        }
+
         @media (max-width: 500px) {
             .ridici {
                 gap: 20px;
@@ -950,12 +1053,7 @@
             }
 
             .transport-stav {
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .btn-smazat {
-                opacity: 1;
+                grid-row: 6;
             }
         }
     </style>
@@ -1023,6 +1121,34 @@
     <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Pridat transport</button>
 </div>
 
+<!-- WGS Let Info Overlay -->
+<div class="wgs-let-overlay" id="wgs-let-overlay" onclick="zavriLetOverlay(event)">
+    <div class="wgs-let-box" onclick="event.stopPropagation()">
+        <div class="wgs-let-header">
+            <div class="wgs-let-cislo" id="wgs-let-cislo">OK123</div>
+            <div class="wgs-let-status" id="wgs-let-status">SCHEDULED</div>
+        </div>
+        <div class="wgs-let-aerolinky" id="wgs-let-aerolinky">Czech Airlines</div>
+        <div class="wgs-let-cas-prilet" id="wgs-let-cas-prilet">21:30</div>
+        <div class="wgs-let-radek">
+            <span class="wgs-let-label">Z letiste</span>
+            <span class="wgs-let-hodnota" id="wgs-let-odkud">Paris CDG</span>
+        </div>
+        <div class="wgs-let-radek">
+            <span class="wgs-let-label">Na letiste</span>
+            <span class="wgs-let-hodnota" id="wgs-let-kam">Praha PRG</span>
+        </div>
+        <div class="wgs-let-radek" id="wgs-let-terminal-row">
+            <span class="wgs-let-label">Terminal</span>
+            <span class="wgs-let-hodnota" id="wgs-let-terminal">T2</span>
+        </div>
+        <div class="wgs-let-radek" id="wgs-let-bagaz-row">
+            <span class="wgs-let-label">Zavazadla</span>
+            <span class="wgs-let-hodnota" id="wgs-let-bagaz">Pas 5</span>
+        </div>
+        <button class="wgs-let-zavrit" onclick="zavriLetOverlay()">Zavrit</button>
+    </div>
+</div>
 
 <!-- Kalendář overlay -->
 <div class="kalendar-overlay" id="kalendar-overlay">
@@ -1650,18 +1776,17 @@ function vykresli() {
             if (item.cisloLetu) div.dataset.let = item.cisloLetu;
 
             div.innerHTML = `
-                <button class="btn-smazat" onclick="event.stopPropagation(); otevriModalSmazat('${item.id}', '${datum}')">&times;</button>
-                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
+                <div class="transport-kontakty">${kontaktIkony}</div>
                 <div class="transport-jmena">${item.jmeno} ${pocetOsobInfo}</div>
                 <div class="transport-meta">${letInfo} ${ridicInfo}</div>
+                <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">Upravit</button>
                 <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
-                ${poznamkaInfo}
-                <div class="transport-kontakty">${kontaktIkony}</div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
                 </div>
+                ${poznamkaInfo}
             `;
             transportyKontejner.appendChild(div);
         });
@@ -2319,6 +2444,7 @@ document.addEventListener('keydown', e => {
         zavriModalReset();
         zavriModalRidic();
         zavriModalRidici();
+        zavriLetOverlay();
     }
 });
 
@@ -2387,23 +2513,80 @@ function zobrazDetailLetu(event) {
     // Pokud mame cachovana data, zobrazit je
     const data = letoveStavy[cisloLetu];
     if (data) {
-        const prilet = data.prilet;
-        const cas = prilet.odhadovano || prilet.planovano || '';
-        const casStr = cas ? new Date(cas).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '?';
-
-        const stavyPreklad = {
-            'scheduled': 'Naplanovano',
-            'active': 'Ve vzduchu',
-            'landed': 'Pristano',
-            'cancelled': 'Zruseno',
-            'delayed': 'Zpozdeno'
-        };
-
-        alert(`Let: ${cisloLetu}\nAerolinky: ${data.aerolinky}\nZ: ${data.odlet.letiste}\nDo: ${prilet.letiste}\nPrilet: ${casStr}\nStav: ${stavyPreklad[data.stavLetu] || data.stavLetu}`);
+        zobrazLetOverlay(data);
     } else {
-        // Nacist data
-        aktualizujStavLetu(cisloLetu);
+        // Nacist data a pak zobrazit
+        nactiAZobrazLet(cisloLetu);
     }
+}
+
+// Nacist data letu a zobrazit overlay
+async function nactiAZobrazLet(cisloLetu) {
+    try {
+        const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
+        const data = await odpoved.json();
+        if (data.status === 'success') {
+            letoveStavy[cisloLetu] = data;
+            zobrazLetOverlay(data);
+        }
+    } catch (e) {
+        console.log('Chyba pri nacitani letu:', e);
+    }
+}
+
+// Zobrazit WGS overlay s informacemi o letu
+function zobrazLetOverlay(data) {
+    const prilet = data.prilet;
+    const odlet = data.odlet;
+    const cas = prilet.odhadovano || prilet.planovano || '';
+    const casStr = cas ? new Date(cas).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '?';
+
+    const stavyPreklad = {
+        'scheduled': 'NAPLANOVANO',
+        'active': 'VE VZDUCHU',
+        'landed': 'PRISTANO',
+        'cancelled': 'ZRUSENO',
+        'delayed': 'ZPOZDENO'
+    };
+
+    // Vyplnit overlay
+    document.getElementById('wgs-let-cislo').textContent = data.cisloLetu;
+    document.getElementById('wgs-let-aerolinky').textContent = data.aerolinky || '';
+    document.getElementById('wgs-let-cas-prilet').textContent = casStr;
+    document.getElementById('wgs-let-odkud').textContent = odlet.letiste + (odlet.iata ? ' (' + odlet.iata + ')' : '');
+    document.getElementById('wgs-let-kam').textContent = prilet.letiste + (prilet.iata ? ' (' + prilet.iata + ')' : '');
+
+    // Status
+    const statusEl = document.getElementById('wgs-let-status');
+    statusEl.textContent = stavyPreklad[data.stavLetu] || data.stavLetu;
+    statusEl.className = 'wgs-let-status ' + (data.stavLetu || 'scheduled');
+
+    // Terminal
+    const terminalRow = document.getElementById('wgs-let-terminal-row');
+    if (prilet.terminal) {
+        terminalRow.style.display = 'flex';
+        document.getElementById('wgs-let-terminal').textContent = 'T' + prilet.terminal;
+    } else {
+        terminalRow.style.display = 'none';
+    }
+
+    // Bagaz
+    const bagazRow = document.getElementById('wgs-let-bagaz-row');
+    if (prilet.bagaz) {
+        bagazRow.style.display = 'flex';
+        document.getElementById('wgs-let-bagaz').textContent = 'Pas ' + prilet.bagaz;
+    } else {
+        bagazRow.style.display = 'none';
+    }
+
+    // Zobrazit overlay
+    document.getElementById('wgs-let-overlay').classList.add('aktivni');
+}
+
+// Zavrit overlay
+function zavriLetOverlay(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('wgs-let-overlay').classList.remove('aktivni');
 }
 
 // Event delegation pro kliknuti na let badge
