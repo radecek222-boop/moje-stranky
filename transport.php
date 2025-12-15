@@ -2068,44 +2068,26 @@ function zpracujExcel(input) {
             const hlavicka = json[0];
             console.log('Excel hlavicka:', hlavicka);
 
-            // Nejprve zkontrolovat STARY format (FIRSTNAME, LASTNAME) - ma prednost
-            const sloupceStary = {
-                prijmeni: najdiSloupecPresne(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
-                jmeno: najdiSloupecPresne(hlavicka, ['FIRSTNAME', 'JMENO', 'FIRST NAME']),
+            // Mapovani sloupcu z Excel souboru
+            const sloupce = {
+                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
+                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO', 'FIRST NAME']),
                 email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL', 'E-MAIL']),
                 datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL DATE/TIME', 'ARRIVAL']),
                 odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP LOCATION']),
                 kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF LOCATION']),
-                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT NUMBER', 'FLIGHT NO', 'FLIGHT']),
-                pocet: najdiSloupecPresne(hlavicka, ['PAX', 'POCET', 'PASSENGERS']),
+                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT NUMBER', 'FLIGHT NO']),
+                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET', 'PASSENGERS']),
                 telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON'])
             };
 
-            // Stary format ma FIRSTNAME a LASTNAME jako samostatne sloupce
-            const jeStaryFormat = sloupceStary.jmeno >= 0 && sloupceStary.prijmeni >= 0;
+            console.log('Mapovani sloupcu:', sloupce);
 
-            // Novy format (WHEN, NAME jako jeden sloupec)
-            const sloupceNovy = {
-                when: najdiSloupecPresne(hlavicka, ['WHEN', 'KDY']),
-                name: najdiSloupecPresne(hlavicka, ['NAME', 'GUEST']),
-                pickup: najdiSloupecPresne(hlavicka, ['PICKUP', 'PICK-UP']),
-                dropoff: najdiSloupecPresne(hlavicka, ['DROPOFF', 'DROP-OFF']),
-                ride: najdiSloupecPresne(hlavicka, ['RIDE', 'ROUTE', 'TRASA']),
-                status: najdiSloupecPresne(hlavicka, ['STATUS', 'STAV'])
-            };
-
-            // Novy format POUZE pokud neni stary a ma specificke sloupce
-            const jeNovyFormat = !jeStaryFormat && sloupceNovy.when >= 0 && sloupceNovy.name >= 0;
-
-            console.log('Detekce formatu:', jeStaryFormat ? 'STARY (Firstname/Lastname)' : (jeNovyFormat ? 'NOVY (When/Name)' : 'NEZNAMY'));
-            console.log('Sloupce stary:', sloupceStary);
-            console.log('Sloupce novy:', sloupceNovy);
-
-            // Mesice pro parsovani "30 Apr" formatu
-            const mesice = {
-                'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
-                'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
-            };
+            // Kontrola povinnych sloupcu
+            if (sloupce.jmeno < 0 && sloupce.prijmeni < 0) {
+                zobrazExcelChybu('Excel neobsahuje sloupec FIRSTNAME ani LASTNAME');
+                return;
+            }
 
             // Zpracovat radky
             excelData = [];
@@ -2113,90 +2095,44 @@ function zpracujExcel(input) {
                 const radek = json[i];
                 if (!radek || radek.length === 0) continue;
 
-                let jmeno = '';
+                // Jmeno: FIRSTNAME + LASTNAME
+                const jmenoVal = sloupce.jmeno >= 0 ? String(radek[sloupce.jmeno] || '').trim() : '';
+                const prijmeniVal = sloupce.prijmeni >= 0 ? String(radek[sloupce.prijmeni] || '').trim() : '';
+                const jmeno = (jmenoVal + ' ' + prijmeniVal).trim();
+
+                if (!jmeno) continue; // Preskocit prazdne radky
+
+                // Datum a cas: "30/04/2022 19:00" nebo Excel datum
                 let datum = '';
                 let cas = '';
-                let odkud = '';
-                let kam = '';
-                let cisloLetu = '';
-                let pocetOsob = 1;
-                let telefon = '';
-                let email = '';
+                const datumCas = radek[sloupce.datum];
 
-                if (jeNovyFormat) {
-                    // NOVY FORMAT: When, Name, Pickup, Dropoff
-                    // When: "30 Apr\n9:30" nebo "30 Apr 9:30"
-                    const whenVal = String(radek[sloupceNovy.when] || '');
-                    const whenMatch = whenVal.match(/(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s*[\n\r]*\s*(\d{1,2}):(\d{2})/i);
-                    if (whenMatch) {
-                        const den = whenMatch[1].padStart(2, '0');
-                        const mesic = mesice[whenMatch[2].toLowerCase().substring(0, 3)];
-                        const rok = new Date().getFullYear(); // Pouzit aktualni rok
-                        datum = `${rok}-${mesic}-${den}`;
-                        cas = `${whenMatch[3].padStart(2, '0')}:${whenMatch[4]}`;
-                    }
-
-                    // Name: "Cachin, Pedro\nPlayer" - vzit prvni radek
-                    const nameVal = String(radek[sloupceNovy.name] || '');
-                    const nameLines = nameVal.split(/[\n\r]+/);
-                    jmeno = nameLines[0]?.trim() || '';
-                    // Prevratit "Prijmeni, Jmeno" na "Jmeno Prijmeni"
-                    if (jmeno.includes(',')) {
-                        const [prijmeni, krestni] = jmeno.split(',').map(s => s.trim());
-                        jmeno = `${krestni} ${prijmeni}`;
-                    }
-
-                    // Pickup: "Václav Havel Airport...\nVY8652 BARCELONA" - lokace + let
-                    const pickupVal = String(radek[sloupceNovy.pickup] || '');
-                    const pickupLines = pickupVal.split(/[\n\r]+/);
-                    odkud = pickupLines[0]?.trim() || '';
-                    // Druhy radek muze obsahovat cislo letu
-                    if (pickupLines[1]) {
-                        const letMatch = pickupLines[1].match(/^([A-Z]{2}\d+)/);
-                        if (letMatch) {
-                            cisloLetu = letMatch[1];
-                        }
-                    }
-
-                    // Dropoff: "Hotel Expo\n2 guest(s)" - lokace + pocet
-                    const dropoffVal = String(radek[sloupceNovy.dropoff] || '');
-                    const dropoffLines = dropoffVal.split(/[\n\r]+/);
-                    kam = dropoffLines[0]?.trim() || '';
-                    // Hledat pocet hostu
-                    for (const line of dropoffLines) {
-                        const guestMatch = line.match(/(\d+)\s*guest/i);
-                        if (guestMatch) {
-                            pocetOsob = parseInt(guestMatch[1]) || 1;
-                        }
-                    }
-
-                } else {
-                    // STARY FORMAT: Firstname, Lastname, Arrival Date/Time...
-                    const prijmeniVal = radek[sloupceStary.prijmeni] || '';
-                    const jmenoVal = radek[sloupceStary.jmeno] || '';
-                    jmeno = (jmenoVal + ' ' + prijmeniVal).trim();
-
-                    // Datum a cas: "30/04/2022 19:00"
-                    const datumCas = radek[sloupceStary.datum] || '';
-                    const datumMatch = String(datumCas).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(\d{1,2}):(\d{2})/);
+                if (datumCas) {
+                    const datumStr = String(datumCas);
+                    // Zkusit format "DD/MM/YYYY HH:MM"
+                    const datumMatch = datumStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(\d{1,2}):(\d{2})/);
                     if (datumMatch) {
                         datum = `${datumMatch[3]}-${datumMatch[2].padStart(2, '0')}-${datumMatch[1].padStart(2, '0')}`;
                         cas = `${datumMatch[4].padStart(2, '0')}:${datumMatch[5]}`;
                     }
-
-                    odkud = radek[sloupceStary.odkud] || '';
-                    kam = radek[sloupceStary.kam] || '';
-
-                    if (sloupceStary.let >= 0 && radek[sloupceStary.let]) {
-                        cisloLetu = String(radek[sloupceStary.let]).trim();
-                    }
-
-                    pocetOsob = parseInt(radek[sloupceStary.pocet]) || 1;
-                    telefon = radek[sloupceStary.telefon] || '';
-                    email = radek[sloupceStary.email] || '';
                 }
 
-                if (!jmeno) continue;
+                // Lokace
+                const odkud = sloupce.odkud >= 0 ? String(radek[sloupce.odkud] || '').trim() : '';
+                const kam = sloupce.kam >= 0 ? String(radek[sloupce.kam] || '').trim() : '';
+
+                // Cislo letu
+                let cisloLetu = '';
+                if (sloupce.let >= 0 && radek[sloupce.let]) {
+                    cisloLetu = String(radek[sloupce.let]).trim();
+                }
+
+                // Pocet osob
+                const pocetOsob = sloupce.pocet >= 0 ? (parseInt(radek[sloupce.pocet]) || 1) : 1;
+
+                // Kontakty
+                const telefon = sloupce.telefon >= 0 ? String(radek[sloupce.telefon] || '').trim() : '';
+                const email = sloupce.email >= 0 ? String(radek[sloupce.email] || '').trim() : '';
 
                 excelData.push({
                     jmeno,
