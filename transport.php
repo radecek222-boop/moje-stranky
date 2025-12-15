@@ -1349,7 +1349,7 @@
 
         <div class="modal-pole" id="pole-cas">
             <label class="modal-label">Cas</label>
-            <input type="text" class="modal-input" id="input-cas" placeholder="napr. 21:30">
+            <input type="text" class="modal-input" id="input-cas" placeholder="napr. 21:30" inputmode="numeric" pattern="[0-9:]*">
         </div>
 
         <div class="modal-pole" id="pole-jmeno">
@@ -1386,7 +1386,7 @@
 
         <div class="modal-pole" id="pole-pocet">
             <label class="modal-label">Pocet osob</label>
-            <input type="number" class="modal-input" id="input-pocet" placeholder="napr. 2" min="1" max="99">
+            <input type="text" class="modal-input" id="input-pocet" placeholder="napr. 2" inputmode="numeric" pattern="[0-9]*">
         </div>
 
         <div class="modal-pole" id="pole-poznamka">
