@@ -1189,7 +1189,50 @@
                 grid-row: 6;
             }
         }
+
+        /* Excel nahled */
+        .excel-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .excel-item-info {
+            flex: 1;
+        }
+
+        .excel-item-cas {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .excel-item-jmeno {
+            color: #ccc;
+        }
+
+        .excel-item-trasa {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .excel-item-checkbox {
+            margin-left: 10px;
+        }
+
+        .excel-item-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
     </style>
+    <!-- SheetJS pro parsovani Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1273,12 +1316,37 @@
     </div>
 </div>
 
+<!-- Modal pro nahrání Excel souboru -->
+<div class="modal" id="modal-nahrat">
+    <div class="modal-obsah" style="max-width: 600px;">
+        <div class="modal-titulek">Nahrat Excel</div>
+
+        <div class="modal-pole">
+            <label class="modal-label">Vyberte soubor (.xls, .xlsx)</label>
+            <input type="file" class="modal-input" id="input-excel" accept=".xls,.xlsx" onchange="zpracujExcel(this)">
+        </div>
+
+        <div id="excel-nahled" style="display: none;">
+            <div class="modal-label" style="margin-top: 15px;">Nahled (<span id="excel-pocet">0</span> zaznamu)</div>
+            <div id="excel-seznam" style="max-height: 300px; overflow-y: auto; margin: 10px 0;"></div>
+        </div>
+
+        <div id="excel-chyba" style="display: none; color: #ff4444; padding: 10px; background: #331111; border-radius: 6px; margin: 10px 0;"></div>
+
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalNahrat()">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" id="btn-importovat" onclick="importovatExcel()" style="display: none;">Importovat</button>
+        </div>
+    </div>
+</div>
+
 <!-- Dynamické sekce dnů - generováno JavaScriptem -->
 <div id="dny-kontejner"></div>
 
-<!-- Tlačítko pro přidání nového dne/transportu -->
-<div style="text-align: center; margin: 20px 0;">
-    <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Pridat transport</button>
+<!-- Tlačítka pro přidání transportu -->
+<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+    <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Zadat rucne</button>
+    <button class="btn-pridat" onclick="otevriModalNahrat()" style="padding: 10px 20px;">+ Nahrat Excel</button>
 </div>
 
 <!-- WGS Let Info Overlay -->
@@ -1949,6 +2017,206 @@ function otevriModalDokoncene() {
 // Zavřít modal s dokončenými
 function zavriModalDokoncene() {
     document.getElementById('modal-dokoncene').classList.remove('aktivni');
+}
+
+// ===== NAHRANI EXCEL =====
+// Data z Excel souboru
+let excelData = [];
+
+// Otevrit modal pro nahrani
+function otevriModalNahrat() {
+    document.getElementById('input-excel').value = '';
+    document.getElementById('excel-nahled').style.display = 'none';
+    document.getElementById('excel-chyba').style.display = 'none';
+    document.getElementById('btn-importovat').style.display = 'none';
+    excelData = [];
+    document.getElementById('modal-nahrat').classList.add('aktivni');
+}
+
+// Zavrit modal nahrani
+function zavriModalNahrat() {
+    document.getElementById('modal-nahrat').classList.remove('aktivni');
+}
+
+// Zpracovat Excel soubor
+function zpracujExcel(input) {
+    const soubor = input.files[0];
+    if (!soubor) return;
+
+    document.getElementById('excel-chyba').style.display = 'none';
+    document.getElementById('excel-nahled').style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Prvni list
+            const listName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[listName];
+
+            // Prevest na JSON
+            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (json.length < 2) {
+                zobrazExcelChybu('Soubor neobsahuje zadna data');
+                return;
+            }
+
+            // Hlavicka - najit indexy sloupcu
+            const hlavicka = json[0];
+            const sloupce = {
+                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI']),
+                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO']),
+                email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL']),
+                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL', 'DATUM']),
+                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP', 'ODKUD']),
+                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF', 'KAM']),
+                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT', 'LET']),
+                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET']),
+                telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON'])
+            };
+
+            // Zpracovat radky
+            excelData = [];
+            for (let i = 1; i < json.length; i++) {
+                const radek = json[i];
+                if (!radek || radek.length === 0) continue;
+
+                // Jmeno
+                const prijmeni = radek[sloupce.prijmeni] || '';
+                const jmenoVal = radek[sloupce.jmeno] || '';
+                const celeJmeno = (jmenoVal + ' ' + prijmeni).trim();
+                if (!celeJmeno) continue;
+
+                // Datum a cas
+                let datumCas = radek[sloupce.datum] || '';
+                let datum = '';
+                let cas = '';
+
+                if (datumCas) {
+                    // Format: "30/04/2022 19:00" nebo podobne
+                    const match = String(datumCas).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(\d{1,2}):(\d{2})/);
+                    if (match) {
+                        datum = match[3] + '-' + match[2].padStart(2, '0') + '-' + match[1].padStart(2, '0');
+                        cas = match[4].padStart(2, '0') + ':' + match[5];
+                    }
+                }
+
+                excelData.push({
+                    jmeno: celeJmeno,
+                    datum: datum,
+                    cas: cas,
+                    odkud: radek[sloupce.odkud] || '',
+                    kam: radek[sloupce.kam] || '',
+                    cisloLetu: radek[sloupce.let] || '',
+                    pocetOsob: parseInt(radek[sloupce.pocet]) || 1,
+                    telefon: radek[sloupce.telefon] || '',
+                    email: radek[sloupce.email] || '',
+                    vybrano: true
+                });
+            }
+
+            if (excelData.length === 0) {
+                zobrazExcelChybu('Nepodarilo se najit platna data');
+                return;
+            }
+
+            // Zobrazit nahled
+            zobrazExcelNahled();
+
+        } catch (err) {
+            console.error('Chyba pri cteni Excel:', err);
+            zobrazExcelChybu('Chyba pri cteni souboru: ' + err.message);
+        }
+    };
+
+    reader.readAsArrayBuffer(soubor);
+}
+
+// Najit sloupec podle moznych nazvu
+function najdiSloupec(hlavicka, nazvy) {
+    for (let i = 0; i < hlavicka.length; i++) {
+        const val = String(hlavicka[i] || '').toUpperCase().trim();
+        for (const nazev of nazvy) {
+            if (val === nazev.toUpperCase() || val.includes(nazev.toUpperCase())) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// Zobrazit chybu
+function zobrazExcelChybu(zprava) {
+    document.getElementById('excel-chyba').textContent = zprava;
+    document.getElementById('excel-chyba').style.display = 'block';
+    document.getElementById('excel-nahled').style.display = 'none';
+    document.getElementById('btn-importovat').style.display = 'none';
+}
+
+// Zobrazit nahled dat
+function zobrazExcelNahled() {
+    const kontejner = document.getElementById('excel-seznam');
+    document.getElementById('excel-pocet').textContent = excelData.length;
+
+    kontejner.innerHTML = excelData.map((item, index) => `
+        <div class="excel-item">
+            <div class="excel-item-info">
+                <span class="excel-item-cas">${item.datum} ${item.cas}</span>
+                <span class="excel-item-jmeno">${item.jmeno}</span>
+                <div class="excel-item-trasa">${item.odkud || '?'} → ${item.kam || '?'}${item.cisloLetu ? ' | Let: ' + item.cisloLetu : ''}</div>
+            </div>
+            <div class="excel-item-checkbox">
+                <input type="checkbox" ${item.vybrano ? 'checked' : ''} onchange="excelData[${index}].vybrano = this.checked">
+            </div>
+        </div>
+    `).join('');
+
+    document.getElementById('excel-nahled').style.display = 'block';
+    document.getElementById('btn-importovat').style.display = 'block';
+}
+
+// Importovat vybrana data
+async function importovatExcel() {
+    const kImportu = excelData.filter(item => item.vybrano);
+
+    if (kImportu.length === 0) {
+        zobrazExcelChybu('Nevybrano zadne zaznamy k importu');
+        return;
+    }
+
+    // Pridat do transportu
+    for (const item of kImportu) {
+        const datum = item.datum || new Date().toISOString().split('T')[0];
+
+        if (!transporty[datum]) {
+            transporty[datum] = [];
+        }
+
+        transporty[datum].push({
+            id: generujId(),
+            cas: item.cas || '00:00',
+            jmeno: item.jmeno,
+            telefon: item.telefon || null,
+            email: item.email || null,
+            odkud: item.odkud || '',
+            kam: item.kam || '',
+            cisloLetu: item.cisloLetu || null,
+            pocetOsob: item.pocetOsob || null,
+            ridic: null,
+            datum: datum
+        });
+    }
+
+    // Ulozit a aktualizovat
+    await ulozData();
+    vykresli();
+    zavriModalNahrat();
+
+    // Informovat uzivatele
+    alert('Importovano ' + kImportu.length + ' zaznamu');
 }
 
 // Vykreslit dokončené transporty
@@ -2853,6 +3121,7 @@ document.addEventListener('keydown', e => {
         zavriModalRidic();
         zavriModalRidici();
         zavriModalDokoncene();
+        zavriModalNahrat();
         // Zavřít seznam řidiče bez otevření hlavního modalu
         document.getElementById('modal-seznam-ridice')?.classList.remove('aktivni');
         zavriVsechnyMenuRidicu();
