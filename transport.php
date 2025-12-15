@@ -1828,11 +1828,16 @@ async function editovatNazev() {
 
     // Heslo spravne - zobrazit input pro novy nazev
     const aktualniNazev = document.getElementById('header-title').textContent;
-    const novyNazev = prompt('Zadejte novy nazev:', aktualniNazev);
+    const nazevVysledek = await transportConfirm('Zadejte novy nazev', {
+        titulek: 'Upravit nazev',
+        btnPotvrdit: 'Ulozit',
+        input: true,
+        inputValue: aktualniNazev
+    });
 
-    if (novyNazev && novyNazev.trim()) {
-        document.getElementById('header-title').textContent = novyNazev.trim();
-        localStorage.setItem('transportNazev', novyNazev.trim());
+    if (nazevVysledek.potvrzeno && nazevVysledek.hodnota && nazevVysledek.hodnota.trim()) {
+        document.getElementById('header-title').textContent = nazevVysledek.hodnota.trim();
+        localStorage.setItem('transportNazev', nazevVysledek.hodnota.trim());
     }
 }
 
@@ -1844,7 +1849,10 @@ function transportConfirm(zprava, options = {}) {
             btnPotvrdit = 'Potvrdit',
             btnZrusit = 'Zrusit',
             nebezpecne = false,
-            heslo = false
+            heslo = false,
+            input = false,
+            inputValue = '',
+            inputPlaceholder = ''
         } = options;
 
         const overlay = document.createElement('div');
@@ -1852,7 +1860,9 @@ function transportConfirm(zprava, options = {}) {
 
         let inputHtml = '';
         if (heslo) {
-            inputHtml = `<input type="password" class="transport-confirm-input" placeholder="Zadejte heslo" id="confirm-heslo-input">`;
+            inputHtml = `<input type="password" class="transport-confirm-input" placeholder="Zadejte heslo" id="confirm-input">`;
+        } else if (input) {
+            inputHtml = `<input type="text" class="transport-confirm-input" placeholder="${inputPlaceholder}" value="${inputValue}" id="confirm-input">`;
         }
 
         let zrusitBtn = '';
@@ -1874,10 +1884,11 @@ function transportConfirm(zprava, options = {}) {
 
         document.body.appendChild(overlay);
 
-        const hesloInput = document.getElementById('confirm-heslo-input');
-        if (hesloInput) {
-            hesloInput.focus();
-            hesloInput.addEventListener('keydown', (e) => {
+        const inputEl = document.getElementById('confirm-input');
+        if (inputEl) {
+            inputEl.focus();
+            if (input) inputEl.select();
+            inputEl.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     document.getElementById('confirm-potvrdit').click();
                 }
@@ -1891,8 +1902,11 @@ function transportConfirm(zprava, options = {}) {
 
         document.getElementById('confirm-potvrdit').addEventListener('click', () => {
             if (heslo) {
-                const zadaneHeslo = hesloInput?.value || '';
+                const zadaneHeslo = inputEl?.value || '';
                 zavrit({ potvrzeno: true, heslo: zadaneHeslo });
+            } else if (input) {
+                const hodnota = inputEl?.value || '';
+                zavrit({ potvrzeno: true, hodnota: hodnota });
             } else {
                 zavrit({ potvrzeno: true });
             }
