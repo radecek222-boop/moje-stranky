@@ -77,8 +77,8 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card {
-    background: #fff;
-    border: 1px solid #d1d1d6;
+    background: #1a1a1a;
+    border: 1px solid #333;
     border-radius: 12px;
     padding: 1.5rem;
     cursor: pointer;
@@ -88,21 +88,21 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 
 .transport-event-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border-color: #555;
 }
 
 .transport-event-card-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #fff;
     margin-bottom: 0.5rem;
     letter-spacing: 0.5px;
 }
 
 .transport-event-card-datum {
     font-size: 0.85rem;
-    color: #666;
+    color: #999;
     margin-bottom: 0.75rem;
 }
 
@@ -113,7 +113,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     color: #888;
     margin-top: 1rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #333;
 }
 
 .transport-event-card-stat {
@@ -123,7 +123,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card-stat strong {
-    color: #333;
+    color: #fff;
 }
 
 .transport-event-card-akce {
@@ -135,18 +135,20 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 .transport-event-card-akce button {
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background: #333;
+    border: 1px solid #444;
     border-radius: 4px;
     padding: 0.4rem 0.6rem;
     font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    color: #ccc;
 }
 
 .transport-event-card-akce button:hover {
-    background: #eee;
-    border-color: #333;
+    background: #444;
+    border-color: #666;
+    color: #fff;
 }
 
 .transport-event-card-akce button.btn-smazat-event {
@@ -359,37 +361,43 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
 }
 
 /* Akce na radku */
-.transport-radek-akce {
+/* Tlacitko smazat - pravy dolni roh */
+.btn-smazat-transport {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    display: flex;
-    gap: 8px;
-}
-
-.transport-radek-akce button {
+    width: 28px;
+    height: 28px;
     background: transparent;
     border: none;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.2s;
-    padding: 4px;
-}
-
-.btn-upravit-transport {
-    color: #888;
-}
-
-.btn-upravit-transport:hover {
-    color: #fff;
-}
-
-.btn-smazat-transport {
     color: #ff4444;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
 }
 
 .btn-smazat-transport:hover {
     color: #ff6666;
+}
+
+/* Tlacitko upravit - levy dolni roh */
+.btn-upravit-transport {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.btn-upravit-transport:hover {
+    color: #fff;
 }
 
 /* Modal - tmavý styl */
@@ -681,6 +689,117 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     color: #666;
 }
 
+/* Kompaktni zobrazeni ridicu */
+.ridici-sekce-kompakt {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+}
+
+.ridici-header-kompakt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ridici-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ridici-seznam {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.ridic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ridic-chip:hover {
+    background: #333;
+    color: #fff;
+}
+
+.ridic-chip-jmeno {
+    font-weight: 600;
+}
+
+.ridic-chip-auto {
+    font-size: 10px;
+    color: #888;
+}
+
+.ridic-chip-akce {
+    display: flex;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+.ridic-chip-akce button {
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.ridic-chip-akce .btn-edit {
+    color: #888;
+}
+
+.ridic-chip-akce .btn-edit:hover {
+    color: #fff;
+}
+
+.ridic-chip-akce .btn-del {
+    color: #ff4444;
+}
+
+.ridic-chip-akce .btn-del:hover {
+    color: #ff6666;
+}
+
+/* Select ridice v transportu */
+.transport-ridic-select {
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ccc;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.transport-ridic-select:hover {
+    border-color: #666;
+}
+
+.transport-ridic-select option {
+    background: #222;
+    color: #ccc;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .transport-eventy-grid {
@@ -722,18 +841,17 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         <div class="transport-detail-title" id="detail-event-nazev">Nacitam...</div>
         <div class="transport-detail-actions">
             <button class="btn-pridat-transport" onclick="transportOtevritModal()">+ Pridat transport</button>
+            <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat ridice</button>
         </div>
     </div>
 
-    <!-- Sekce ridicu -->
-    <div class="ridici-sekce">
-        <div class="ridici-header">
-            <h3>Ridici</h3>
-            <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat ridice</button>
-        </div>
-        <div class="ridici-grid" id="ridici-kontejner">
-            <!-- Ridici se vykresli JavaScriptem -->
-            <div class="ridici-prazdne">Nacitam ridice...</div>
+    <!-- Ridici - kompaktni zobrazeni -->
+    <div class="ridici-sekce-kompakt">
+        <div class="ridici-header-kompakt">
+            <span class="ridici-label">Ridici:</span>
+            <div class="ridici-seznam" id="ridici-kontejner">
+                <span class="ridici-prazdne">Nacitam...</span>
+            </div>
         </div>
     </div>
 
@@ -820,7 +938,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
     </div>
 </div>
 
-<!-- Modal pro přidání/editaci transportu -->
+<!-- Modal pro přidání/editaci transportu - Techmission styl -->
 <div class="transport-modal-overlay" id="modal-transport">
     <div class="transport-modal">
         <div class="transport-modal-header">
@@ -840,43 +958,24 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                 </div>
             </div>
             <div class="transport-form-group">
-                <label>Jmeno a prijmeni *</label>
-                <input type="text" id="transport-jmeno" placeholder="Jan Novak" required>
+                <label>Jmeno pasazera *</label>
+                <input type="text" id="transport-jmeno" placeholder="Jmeno pasazera" required>
             </div>
             <div class="transport-form-row">
                 <div class="transport-form-group">
-                    <label>Cislo letu</label>
-                    <input type="text" id="transport-let" placeholder="OK123">
+                    <label>Odkud *</label>
+                    <input type="text" id="transport-odkud" placeholder="Odkud" required>
                 </div>
                 <div class="transport-form-group">
-                    <label>Cas priletu</label>
-                    <input type="time" id="transport-prilet">
-                </div>
-            </div>
-            <div class="transport-form-group">
-                <label>Destinace</label>
-                <input type="text" id="transport-destinace" placeholder="Letiste -> Hotel">
-            </div>
-            <div class="transport-form-row">
-                <div class="transport-form-group">
-                    <label>Telefon</label>
-                    <input type="tel" id="transport-telefon" placeholder="+420 123 456 789">
-                </div>
-                <div class="transport-form-group">
-                    <label>Email</label>
-                    <input type="email" id="transport-email" placeholder="jan@example.com">
+                    <label>Kam *</label>
+                    <input type="text" id="transport-kam" placeholder="Kam" required>
                 </div>
             </div>
             <div class="transport-form-group">
                 <label>Ridic</label>
                 <select id="transport-ridic-id">
                     <option value="">-- Vyberte ridice --</option>
-                    <!-- Ridici se naplni JavaScriptem -->
                 </select>
-            </div>
-            <div class="transport-form-group">
-                <label>Poznamka</label>
-                <textarea id="transport-poznamka" rows="2" placeholder="Dalsi poznamky..."></textarea>
             </div>
         </div>
         <div class="transport-modal-footer">
@@ -992,7 +1091,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             console.log('[Transport] API data:', data);
 
             if (data.status === 'success') {
-                const eventy = data.data?.eventy || [];
+                const eventy = data.eventy || [];
                 if (eventy.length > 0) {
                     vykresliEventy(eventy);
                 } else {
@@ -1068,7 +1167,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const odpoved = await fetch('/api/transport_events_api.php?action=eventy_list');
             const data = await odpoved.json();
             if (data.status === 'success') {
-                const event = data.data.eventy.find(e => e.event_id == id);
+                const event = data.eventy.find(e => e.event_id == id);
                 if (event) eventOtevritModal(event);
             }
         } catch (error) {
@@ -1156,7 +1255,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const data = await odpoved.json();
 
             if (data.status === 'success') {
-                aktualniRidici = data.data.ridici || [];
+                aktualniRidici = data.ridici || [];
                 vykresliRidice(aktualniRidici);
                 aktualizujSelectRidicu();
             }
@@ -1170,32 +1269,21 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         const kontejner = document.getElementById('ridici-kontejner');
 
         if (!ridici || ridici.length === 0) {
-            kontejner.innerHTML = `
-                <div class="ridici-prazdne">
-                    <p>Zatim zadni ridici</p>
-                    <button class="btn-pridat-ridice" onclick="ridicOtevritModal()">+ Pridat prvniho ridice</button>
-                </div>
-            `;
+            kontejner.innerHTML = '<span class="ridici-prazdne" style="padding:0; font-size:12px;">Zadni ridici</span>';
             return;
         }
 
-        const autoSvg = '<svg class="ridic-auto-svg" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
-        const telSvg = '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
-
         let html = '';
         ridici.forEach(function(r) {
+            const autoText = r.auto ? ` (${escapeHtml(r.auto)}${r.spz ? ' - ' + escapeHtml(r.spz) : ''})` : '';
             html += `
-                <div class="ridic-karta" data-ridic-id="${r.ridic_id}">
-                    <div class="ridic-karta-akce">
-                        <button class="btn-upravit-ridice" onclick="ridicEditovat(${r.ridic_id})">✎</button>
-                        <button class="btn-smazat-ridice" onclick="ridicOtevritModalSmazat(${r.ridic_id}, '${escapeHtml(r.jmeno)}')">&times;</button>
+                <div class="ridic-chip" data-ridic-id="${r.ridic_id}">
+                    <span class="ridic-chip-jmeno">${escapeHtml(r.jmeno)}</span>
+                    ${autoText ? `<span class="ridic-chip-auto">${autoText}</span>` : ''}
+                    <div class="ridic-chip-akce">
+                        <button class="btn-edit" onclick="event.stopPropagation(); ridicEditovat(${r.ridic_id})">✎</button>
+                        <button class="btn-del" onclick="event.stopPropagation(); ridicOtevritModalSmazat(${r.ridic_id}, '${escapeHtml(r.jmeno)}')">&times;</button>
                     </div>
-                    ${autoSvg}
-                    <div class="ridic-jmeno">${escapeHtml(r.jmeno)}</div>
-                    ${r.auto ? `<div class="ridic-auto">${escapeHtml(r.auto)}</div>` : ''}
-                    ${r.spz ? `<div class="ridic-spz">${escapeHtml(r.spz)}</div>` : ''}
-                    ${r.poznamka ? `<div class="ridic-poznamka">${escapeHtml(r.poznamka)}</div>` : ''}
-                    ${r.telefon ? `<a href="tel:${escapeHtml(r.telefon)}" class="ridic-tel-link">${telSvg}</a>` : ''}
                 </div>
             `;
         });
@@ -1321,8 +1409,8 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const eventOdpoved = await fetch('/api/transport_events_api.php?action=event_detail&event_id=' + eventId);
             const eventData = await eventOdpoved.json();
 
-            if (eventData.status === 'success' && eventData.data.event) {
-                document.getElementById('detail-event-nazev').textContent = eventData.data.event.nazev;
+            if (eventData.status === 'success' && eventData.event) {
+                document.getElementById('detail-event-nazev').textContent = eventData.event.nazev;
             }
 
             // Načíst transporty
@@ -1330,7 +1418,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const data = await odpoved.json();
 
             if (data.status === 'success') {
-                vykresliTransporty(data.data.transporty);
+                vykresliTransporty(data.transporty || []);
             }
         } catch (error) {
             console.error('Chyba:', error);
@@ -1381,22 +1469,32 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
                 const stavClass = t.stav === 'drop' ? 'stav-drop' : (t.stav === 'onway' ? 'stav-onway' : 'stav-wait');
                 const stavText = t.stav === 'drop' ? 'DROP OFF' : (t.stav === 'onway' ? 'ON THE WAY' : 'WAIT');
 
+                // Select pro ridice
+                let ridicSelect = '<select class="transport-ridic-select" onchange="transportPriradRidice(' + t.event_id + ', this.value)">';
+                ridicSelect += '<option value="">-- Ridic --</option>';
+                aktualniRidici.forEach(function(r) {
+                    const selected = t.ridic_id == r.ridic_id ? ' selected' : '';
+                    ridicSelect += '<option value="' + r.ridic_id + '"' + selected + '>' + escapeHtml(r.jmeno) + (r.auto ? ' (' + escapeHtml(r.auto) + ')' : '') + '</option>';
+                });
+                ridicSelect += '</select>';
+
+                // Trasa - odkud kam
+                const trasa = (t.odkud || t.kam) ? `${escapeHtml(t.odkud || '?')} → ${escapeHtml(t.kam || '?')}` : '';
+
                 html += `
                     <div class="transport-radek" data-id="${t.event_id}">
-                        <div class="transport-radek-akce">
-                            <button class="btn-upravit-transport" onclick="transportEditovat(${t.event_id})">✎</button>
-                            <button class="btn-smazat-transport" onclick="transportOtevritModalSmazat(${t.event_id}, '${escapeHtml(t.jmeno_prijmeni)}')">&times;</button>
-                        </div>
+                        <button class="btn-smazat-transport" onclick="event.stopPropagation(); transportOtevritModalSmazat(${t.event_id}, '${escapeHtml(t.jmeno_prijmeni)}')">&times;</button>
+                        <button class="btn-upravit-transport" onclick="event.stopPropagation(); transportEditovat(${t.event_id})">✎</button>
                         <div class="transport-radek-cas">${(t.cas || '').substring(0, 5)}</div>
                         <div class="transport-radek-info">
-                            <div class="transport-radek-jmeno">${escapeHtml(t.jmeno_prijmeni)}</div>
-                            ${t.cislo_letu ? `<div class="transport-radek-let">Let: ${escapeHtml(t.cislo_letu)}${t.cas_priletu ? ' (prilet ' + t.cas_priletu.substring(0, 5) + ')' : ''}</div>` : ''}
-                            ${t.destinace ? `<div class="transport-radek-trasa">${escapeHtml(t.destinace)}</div>` : ''}
-                            ${t.telefon || t.email ? `<div class="transport-radek-kontakt">${t.telefon ? escapeHtml(t.telefon) : ''} ${t.email ? '| ' + escapeHtml(t.email) : ''}</div>` : ''}
+                            <div class="transport-radek-jmeno">${escapeHtml(t.jmeno_prijmeni || '')}</div>
+                            ${trasa ? `<div class="transport-radek-trasa">${trasa}</div>` : ''}
+                        </div>
+                        <div class="transport-radek-ridic">
+                            ${ridicSelect}
                         </div>
                         <div class="transport-radek-stav">
                             <button class="stav-btn ${stavClass}" onclick="transportZmenStav(${t.event_id})">${stavText}</button>
-                            ${t.ridic_jmeno ? `<div class="stav-cas-info">${escapeHtml(t.ridic_jmeno)}${t.ridic_auto ? ' (' + escapeHtml(t.ridic_auto) + ')' : ''}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -1416,13 +1514,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         document.getElementById('transport-datum').value = datum || new Date().toISOString().split('T')[0];
         document.getElementById('transport-cas').value = '';
         document.getElementById('transport-jmeno').value = '';
-        document.getElementById('transport-let').value = '';
-        document.getElementById('transport-prilet').value = '';
-        document.getElementById('transport-destinace').value = '';
-        document.getElementById('transport-telefon').value = '';
-        document.getElementById('transport-email').value = '';
+        document.getElementById('transport-odkud').value = '';
+        document.getElementById('transport-kam').value = '';
         document.getElementById('transport-ridic-id').value = '';
-        document.getElementById('transport-poznamka').value = '';
         document.getElementById('modal-transport-titulek').textContent = 'Pridat transport';
 
         if (data) {
@@ -1430,13 +1524,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             document.getElementById('transport-datum').value = data.datum || '';
             document.getElementById('transport-cas').value = (data.cas || '').substring(0, 5);
             document.getElementById('transport-jmeno').value = data.jmeno_prijmeni || '';
-            document.getElementById('transport-let').value = data.cislo_letu || '';
-            document.getElementById('transport-prilet').value = (data.cas_priletu || '').substring(0, 5);
-            document.getElementById('transport-destinace').value = data.destinace || '';
-            document.getElementById('transport-telefon').value = data.telefon || '';
-            document.getElementById('transport-email').value = data.email || '';
+            document.getElementById('transport-odkud').value = data.odkud || '';
+            document.getElementById('transport-kam').value = data.kam || '';
             document.getElementById('transport-ridic-id').value = data.ridic_id || '';
-            document.getElementById('transport-poznamka').value = data.poznamka || '';
             document.getElementById('modal-transport-titulek').textContent = 'Upravit transport';
         }
 
@@ -1452,7 +1542,7 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             const odpoved = await fetch('/api/transport_events_api.php?action=list&event_id=' + eventId);
             const data = await odpoved.json();
             if (data.status === 'success') {
-                const transport = data.data.transporty.find(t => t.event_id == id);
+                const transport = (data.transporty || []).find(t => t.event_id == id);
                 if (transport) transportOtevritModal(transport);
             }
         } catch (error) {
@@ -1472,13 +1562,9 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
         formData.append('datum', document.getElementById('transport-datum').value);
         formData.append('cas', document.getElementById('transport-cas').value);
         formData.append('jmeno_prijmeni', document.getElementById('transport-jmeno').value);
-        formData.append('cislo_letu', document.getElementById('transport-let').value);
-        formData.append('cas_priletu', document.getElementById('transport-prilet').value);
-        formData.append('destinace', document.getElementById('transport-destinace').value);
-        formData.append('telefon', document.getElementById('transport-telefon').value);
-        formData.append('email', document.getElementById('transport-email').value);
+        formData.append('odkud', document.getElementById('transport-odkud').value);
+        formData.append('kam', document.getElementById('transport-kam').value);
         formData.append('ridic_id', document.getElementById('transport-ridic-id').value);
-        formData.append('poznamka', document.getElementById('transport-poznamka').value);
 
         try {
             const odpoved = await fetch('/api/transport_events_api.php', { method: 'POST', body: formData });
@@ -1510,6 +1596,28 @@ $eventId = isset($_GET['event']) ? (int)$_GET['event'] : null;
             }
         } catch (error) {
             console.error('Chyba:', error);
+        }
+    };
+
+    window.transportPriradRidice = async function(transportId, ridicId) {
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('action', 'prirad_ridice');
+        formData.append('event_id', transportId);
+        formData.append('ridic_id', ridicId || '');
+
+        try {
+            const odpoved = await fetch('/api/transport_events_api.php', { method: 'POST', body: formData });
+            const data = await odpoved.json();
+            if (data.status === 'success') {
+                // Nemusime prekreslovat, select uz ukazuje spravnou hodnotu
+            } else {
+                alert('Chyba: ' + (data.message || 'Nepodarilo se prirazit ridice'));
+                nactiTransporty(); // Obnovit pro spravny stav
+            }
+        } catch (error) {
+            console.error('Chyba:', error);
+            nactiTransporty();
         }
     };
 

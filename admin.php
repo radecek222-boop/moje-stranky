@@ -196,9 +196,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=transport">
+        <div class="cc-card" data-href="transport.php">
             <div class="cc-card-title" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
-            <div class="cc-card-description" data-lang-cs="Správa transportních eventů a logistiky" data-lang-en="Transport events and logistics management" data-lang-it="Gestione eventi di trasporto e logistica">Správa transportních eventů a logistiky</div>
+            <div class="cc-card-description" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
         </div>
     </div>
 </div>

@@ -294,22 +294,18 @@ try {
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_transport_events
-                (parent_event_id, jmeno_prijmeni, cas, cislo_letu, destinace, cas_priletu, telefon, email, ridic_id, stav, datum, poznamka)
+                (parent_event_id, jmeno_prijmeni, cas, odkud, kam, ridic_id, stav, datum)
                 VALUES
-                (:parent_event_id, :jmeno_prijmeni, :cas, :cislo_letu, :destinace, :cas_priletu, :telefon, :email, :ridic_id, 'wait', :datum, :poznamka)
+                (:parent_event_id, :jmeno_prijmeni, :cas, :odkud, :kam, :ridic_id, 'wait', :datum)
             ");
             $stmt->execute([
                 'parent_event_id' => $_POST['parent_event_id'] ?: null,
                 'jmeno_prijmeni' => trim($_POST['jmeno_prijmeni']),
                 'cas' => $_POST['cas'],
-                'cislo_letu' => trim($_POST['cislo_letu'] ?? '') ?: null,
-                'destinace' => trim($_POST['destinace'] ?? '') ?: null,
-                'cas_priletu' => $_POST['cas_priletu'] ?: null,
-                'telefon' => trim($_POST['telefon'] ?? '') ?: null,
-                'email' => trim($_POST['email'] ?? '') ?: null,
+                'odkud' => trim($_POST['odkud'] ?? '') ?: null,
+                'kam' => trim($_POST['kam'] ?? '') ?: null,
                 'ridic_id' => $_POST['ridic_id'] ?: null,
                 'datum' => $_POST['datum'],
-                'poznamka' => trim($_POST['poznamka'] ?? '') ?: null,
             ]);
 
             sendJsonSuccess('Transport vytvoren', ['event_id' => $pdo->lastInsertId()]);
@@ -337,27 +333,19 @@ try {
                 UPDATE wgs_transport_events SET
                 jmeno_prijmeni = :jmeno_prijmeni,
                 cas = :cas,
-                cislo_letu = :cislo_letu,
-                destinace = :destinace,
-                cas_priletu = :cas_priletu,
-                telefon = :telefon,
-                email = :email,
+                odkud = :odkud,
+                kam = :kam,
                 ridic_id = :ridic_id,
-                datum = :datum,
-                poznamka = :poznamka
+                datum = :datum
                 WHERE event_id = :event_id
             ");
             $stmt->execute([
                 'jmeno_prijmeni' => trim($_POST['jmeno_prijmeni']),
                 'cas' => $_POST['cas'],
-                'cislo_letu' => trim($_POST['cislo_letu'] ?? '') ?: null,
-                'destinace' => trim($_POST['destinace'] ?? '') ?: null,
-                'cas_priletu' => $_POST['cas_priletu'] ?: null,
-                'telefon' => trim($_POST['telefon'] ?? '') ?: null,
-                'email' => trim($_POST['email'] ?? '') ?: null,
+                'odkud' => trim($_POST['odkud'] ?? '') ?: null,
+                'kam' => trim($_POST['kam'] ?? '') ?: null,
                 'ridic_id' => $_POST['ridic_id'] ?: null,
                 'datum' => $_POST['datum'],
-                'poznamka' => trim($_POST['poznamka'] ?? '') ?: null,
                 'event_id' => (int)$_POST['event_id'],
             ]);
 
@@ -419,6 +407,32 @@ try {
                 'novy_stav' => $novyStav,
                 'novy_stav_text' => $stavyMapovani[$novyStav]
             ]);
+            break;
+
+        // =============================================
+        // TRANSPORT - Prirazeni ridice
+        // =============================================
+        case 'prirad_ridice':
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatny CSRF token', 403);
+            }
+            if (empty($_POST['event_id'])) {
+                sendJsonError('Chybi event_id');
+            }
+
+            $ridicId = !empty($_POST['ridic_id']) ? (int)$_POST['ridic_id'] : null;
+
+            $stmt = $pdo->prepare("
+                UPDATE wgs_transport_events
+                SET ridic_id = :ridic_id
+                WHERE event_id = :id
+            ");
+            $stmt->execute([
+                'ridic_id' => $ridicId,
+                'id' => (int)$_POST['event_id']
+            ]);
+
+            sendJsonSuccess('Ridic prirazen');
             break;
 
         default:
