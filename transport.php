@@ -1,8 +1,7 @@
 <?php
 /**
- * TRANSPORT - Techmission Festival / United Music Events
+ * TRANSPORT - Správa transportů
  * Přehled transportů pro řidiče
- * Dočasná stránka - bude odstraněna po akci
  */
 ?>
 <!DOCTYPE html>
@@ -10,18 +9,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Techmission</title>
-    <!-- Favicon pro desktop -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon_tech_32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon_tech_32.png">
-    <link rel="shortcut icon" href="/assets/img/favicon_tech_32.png">
+    <title>Transport</title>
+    <!-- Favicon - SVG auto -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z'/%3E%3C/svg%3E">
+    <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z'/%3E%3C/svg%3E">
     <!-- iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon_tech_180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Techmission">
+    <meta name="apple-mobile-web-app-title" content="Transport">
     <!-- Android -->
-    <link rel="manifest" href="/manifest-transport.json">
     <meta name="theme-color" content="#000000">
     <style>
         * {
@@ -107,17 +103,38 @@
             background: #222;
         }
 
+        /* Tlacitko ridici */
+        .btn-ridici {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-ridici:hover {
+            background: #333;
+            border-color: #555;
+        }
+
+        /* Modal ridici obsah */
+        .modal-ridici-obsah {
+            max-width: 450px;
+        }
+
         /* Řidiči */
         .ridici {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #333;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            gap: 30px;
+            margin: 20px 0;
+            max-width: 100%;
         }
 
         .ridic {
@@ -426,9 +443,9 @@
         }
 
         .transport-jmena {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 3px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
         .transport-trasa {
@@ -500,6 +517,34 @@
             color: #fff;
             margin-left: 8px;
             text-transform: uppercase;
+        }
+
+        /* Pocet osob */
+        .transport-pocet {
+            display: inline-block;
+            background: #444;
+            border: 1px solid #666;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            margin-left: 8px;
+        }
+
+        /* Poznamka */
+        .transport-poznamka {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            padding: 4px 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 2px solid #444;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
 
         /* Kontaktni ikony */
@@ -711,6 +756,14 @@
             padding: 10px;
         }
 
+        .modal-textarea {
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
         .modal-btns {
             display: flex;
             gap: 10px;
@@ -904,9 +957,22 @@
     </div>
 </div>
 
-<!-- Řidiči - dynamicky generováno -->
-<div class="ridici" id="ridici-kontejner">
-    <!-- Ridici se vykresli JavaScriptem -->
+<!-- Tlačítko pro otevření modalu řidičů -->
+<div style="text-align: center; margin: 20px 0;">
+    <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
+</div>
+
+<!-- Modal se seznamem řidičů -->
+<div class="modal" id="modal-ridici-seznam">
+    <div class="modal-obsah modal-ridici-obsah">
+        <div class="modal-titulek" data-i18n="drivers">Ridici</div>
+        <div class="ridici" id="ridici-kontejner">
+            <!-- Ridici se vykresli JavaScriptem -->
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalRidici()" data-i18n="close">Zavrit</button>
+        </div>
+    </div>
 </div>
 
 <!-- Modal pro editaci řidiče -->
@@ -1008,6 +1074,16 @@
             <select class="modal-input modal-select" id="input-ridic">
                 <option value="">-- Neprirazeno --</option>
             </select>
+        </div>
+
+        <div class="modal-pole" id="pole-pocet">
+            <label class="modal-label">Pocet osob</label>
+            <input type="number" class="modal-input" id="input-pocet" placeholder="napr. 2" min="1" max="99">
+        </div>
+
+        <div class="modal-pole" id="pole-poznamka">
+            <label class="modal-label">Poznamka</label>
+            <textarea class="modal-input modal-textarea" id="input-poznamka" placeholder="Zvlastni pozadavky, informace..." rows="2"></textarea>
         </div>
 
         <div class="modal-pole">
@@ -1425,7 +1501,17 @@ function otevriModalPridatRidice() {
     document.getElementById('modal-ridic').classList.add('aktivni');
 }
 
-// Zavřít modal řidiče
+// Otevřít modal se seznamem řidičů
+function otevriModalRidici() {
+    vykresliRidice();
+    document.getElementById('modal-ridici-seznam').classList.add('aktivni');
+}
+
+// Zavřít modal se seznamem řidičů
+function zavriModalRidici() {
+    document.getElementById('modal-ridici-seznam').classList.remove('aktivni');
+}
+
 function zavriModalRidic() {
     document.getElementById('modal-ridic').classList.remove('aktivni');
 }
@@ -1530,6 +1616,12 @@ function vykresli() {
                 kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}">@</a>`;
             }
 
+            // Pocet osob badge
+            const pocetOsobInfo = item.pocetOsob ? `<span class="transport-pocet" title="Pocet osob">${item.pocetOsob}x</span>` : '';
+
+            // Poznamka
+            const poznamkaInfo = item.poznamka ? `<div class="transport-poznamka" title="${item.poznamka}">${item.poznamka}</div>` : '';
+
             const div = document.createElement('div');
             div.className = 'transport';
             div.dataset.id = item.id;
@@ -1540,9 +1632,10 @@ function vykresli() {
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno} ${kontaktIkony}</div>
+                    <div class="transport-jmena">${item.jmeno} ${pocetOsobInfo} ${kontaktIkony}</div>
                     <div class="transport-meta">${letInfo} ${ridicInfo}</div>
                     <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
+                    ${poznamkaInfo}
                 </div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
@@ -1586,10 +1679,13 @@ function otevriModalPridat(datum) {
     document.getElementById('input-email').value = '';
     document.getElementById('input-odkud').value = '';
     document.getElementById('input-kam').value = '';
+    document.getElementById('input-pocet').value = '';
+    document.getElementById('input-poznamka').value = '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
     document.getElementById('let-info').className = 'let-info';
     document.getElementById('let-info').innerHTML = '';
+    resetTextareaVyska();
 
     // Naplnit select ridicu
     naplnSelectRidicu('');
@@ -1640,10 +1736,13 @@ function editujVse(id, datum) {
     document.getElementById('input-email').value = transport.email || '';
     document.getElementById('input-odkud').value = transport.odkud;
     document.getElementById('input-kam').value = transport.kam;
+    document.getElementById('input-pocet').value = transport.pocetOsob || '';
+    document.getElementById('input-poznamka').value = transport.poznamka || '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
     document.getElementById('let-info').className = 'let-info';
     document.getElementById('let-info').innerHTML = '';
+    upravTextareaVyska();
 
     // Naplnit select ridicu a vybrat aktualniho
     naplnSelectRidicu(transport.ridicId || '');
@@ -1671,6 +1770,8 @@ async function potvrdEdit() {
 
         const cisloLetu = document.getElementById('input-let').value.trim().toUpperCase();
         const ridicId = document.getElementById('input-ridic').value || null;
+        const pocetOsob = parseInt(document.getElementById('input-pocet').value) || null;
+        const poznamka = document.getElementById('input-poznamka').value.trim() || null;
         const novy = {
             id: generujId(),
             cas: normalizujCas(document.getElementById('input-cas').value) || '00:00',
@@ -1681,7 +1782,9 @@ async function potvrdEdit() {
             kam: document.getElementById('input-kam').value || '?',
             datum: vybraneDatum,
             cisloLetu: cisloLetu || null,
-            ridicId: ridicId
+            ridicId: ridicId,
+            pocetOsob: pocetOsob,
+            poznamka: poznamka
         };
 
         // Pridat do spravneho datumu
@@ -1701,6 +1804,8 @@ async function potvrdEdit() {
             transport.kam = document.getElementById('input-kam').value;
             transport.cisloLetu = document.getElementById('input-let').value.trim().toUpperCase() || null;
             transport.ridicId = document.getElementById('input-ridic').value || null;
+            transport.pocetOsob = parseInt(document.getElementById('input-pocet').value) || null;
+            transport.poznamka = document.getElementById('input-poznamka').value.trim() || null;
         }
     }
 
@@ -1853,6 +1958,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 hledejLet();
             }
         });
+    }
+});
+
+// ===== AUTO-EXPAND TEXTAREA =====
+function upravTextareaVyska() {
+    const textarea = document.getElementById('input-poznamka');
+    if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+    }
+}
+
+function resetTextareaVyska() {
+    const textarea = document.getElementById('input-poznamka');
+    if (textarea) {
+        textarea.style.height = '60px';
+    }
+}
+
+// Event listener pro auto-expand
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('input-poznamka');
+    if (textarea) {
+        textarea.addEventListener('input', upravTextareaVyska);
     }
 });
 
@@ -2168,6 +2297,7 @@ document.addEventListener('keydown', e => {
         zavriModalSmazat();
         zavriModalReset();
         zavriModalRidic();
+        zavriModalRidici();
     }
 });
 
