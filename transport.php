@@ -51,72 +51,43 @@
             color: #fff;
         }
 
-        /* Language switcher */
-        .lang-switcher {
-            z-index: 100;
-        }
-
-        .lang-current {
-            background: transparent;
-            border: none;
-            color: #fff;
-            padding: 6px 8px;
+        .header-title {
             font-size: 16px;
-            font-weight: 300;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            letter-spacing: 0.5px;
-        }
-
-        .lang-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: #111;
-            border-radius: 4px;
-            margin-top: 4px;
-            overflow: hidden;
-            min-width: 100%;
-        }
-
-        .lang-switcher.open .lang-dropdown {
-            display: block;
-        }
-
-        .lang-option {
-            padding: 10px 14px;
-            font-size: 15px;
-            font-weight: 300;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
+            font-weight: 600;
+            letter-spacing: 2px;
             color: #fff;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
 
-        .lang-option:hover {
-            background: #333;
-        }
-
-        .lang-option.active {
+        .header-title:hover {
             background: #222;
+        }
+
+        /* Kontejner pro hlavni tlacitka */
+        .hlavni-tlacitka {
+            display: flex;
+            gap: 10px;
+            padding: 15px 10px;
+            margin: 0;
         }
 
         /* Tlacitko ridici */
         .btn-ridici {
+            flex: 1;
             background: #222;
             color: #fff;
             border: 1px solid #444;
-            padding: 12px 30px;
+            padding: 12px 5px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: clamp(9px, 2.5vw, 14px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            min-width: 160px;
+            letter-spacing: 0.5px;
             text-align: center;
         }
 
@@ -166,6 +137,28 @@
             font-size: 12px;
             color: #39ff14;
             font-weight: 600;
+        }
+
+        .dokonceny-akce {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-smazat-dokonceny {
+            background: transparent;
+            border: none;
+            color: #dc3545;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-smazat-dokonceny:hover {
+            color: #ff4444;
         }
 
         /* Modal ridici obsah */
@@ -554,11 +547,11 @@
             border: 1px solid #222;
             border-radius: 8px;
             padding: 6px 10px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             display: grid;
             grid-template-columns: auto 1fr auto;
             grid-template-rows: auto auto auto auto;
-            gap: 1px 10px;
+            gap: 0px 8px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -575,7 +568,7 @@
 
         /* Levy horni roh - cas */
         .transport-cas {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
             grid-column: 1;
@@ -601,7 +594,7 @@
 
         /* Jmeno klienta */
         .transport-jmena {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: 700;
             grid-column: 1 / 4;
             grid-row: 3;
@@ -619,6 +612,17 @@
             color: #555;
             grid-column: 1 / 4;
             grid-row: 4;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .let-info-inline {
+            width: 100%;
+            font-size: 10px;
+            padding: 4px 0;
+            margin-top: 2px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -673,13 +677,13 @@
             padding: 0;
             font-size: 10px;
             font-weight: 500;
-            color: #666;
+            color: #fff;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .transport-let:hover {
-            color: #999;
+            color: #ccc;
         }
 
         .transport-let.aktivni {
@@ -707,19 +711,13 @@
             padding: 0;
             font-size: 10px;
             font-weight: 500;
-            color: #666;
+            color: #fff;
             text-transform: uppercase;
         }
 
         /* Pocet osob */
         .transport-pocet {
             display: inline-block;
-            background: #444;
-            border: 1px solid #666;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
             color: #fff;
             margin-left: 8px;
         }
@@ -1088,24 +1086,26 @@
 
         .wgs-let-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #333;
         }
 
         .wgs-let-cislo {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #39ff14;
             text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 10px;
         }
 
         .wgs-let-status {
-            padding: 6px 12px;
+            padding: 6px 16px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
         }
@@ -1189,7 +1189,145 @@
                 grid-row: 6;
             }
         }
+
+        /* Excel nahled */
+        .excel-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .excel-item-info {
+            flex: 1;
+        }
+
+        .excel-item-cas {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .excel-item-jmeno {
+            color: #ccc;
+        }
+
+        .excel-item-trasa {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .excel-item-checkbox {
+            margin-left: 10px;
+        }
+
+        .excel-item-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Confirm modal */
+        .transport-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .transport-confirm-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .transport-confirm-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .transport-confirm-message {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .transport-confirm-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        .transport-confirm-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .transport-confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .transport-confirm-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .transport-confirm-btn-zrusit {
+            background: #333;
+            color: #fff;
+        }
+
+        .transport-confirm-btn-zrusit:hover {
+            background: #444;
+        }
+
+        .transport-confirm-btn-potvrdit {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .transport-confirm-btn-potvrdit:hover {
+            background: #218838;
+        }
+
+        .transport-confirm-btn-potvrdit.nebezpecne {
+            background: #dc3545;
+        }
+
+        .transport-confirm-btn-potvrdit.nebezpecne:hover {
+            background: #c82333;
+        }
     </style>
+    <!-- SheetJS pro parsovani Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1197,23 +1335,15 @@
 <div class="header">
     <div class="logo-wgs">WGS</div>
 
-    <!-- Language switcher -->
-    <div class="lang-switcher" id="lang-switcher" onclick="toggleLangMenu(event)">
-        <div class="lang-current" id="lang-current">CZ</div>
-        <div class="lang-dropdown">
-            <div class="lang-option active" data-lang="cz">CZ</div>
-            <div class="lang-option" data-lang="sk">SK</div>
-            <div class="lang-option" data-lang="en">EN</div>
-            <div class="lang-option" data-lang="de">DE</div>
-            <div class="lang-option" data-lang="nl">NL</div>
-        </div>
-    </div>
+    <!-- Editovatelny nazev -->
+    <div class="header-title" id="header-title" onclick="editovatNazev()">TRANSPORT</div>
 </div>
 
 <!-- Tlačítka pro řidiče a dokončené -->
-<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px;">
-    <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
+<div class="hlavni-tlacitka">
+    <button class="btn-ridici" onclick="otevriModalRidici()">Ridici</button>
     <button class="btn-ridici btn-dokoncene" onclick="otevriModalDokoncene()">Dokoncene <span id="pocet-dokoncenych"></span></button>
+    <button class="btn-ridici btn-excel" onclick="otevriModalNahrat()" id="btn-excel-hlavni">Aktualizovat z Excelu</button>
 </div>
 
 <!-- Modal se seznamem řidičů -->
@@ -1255,6 +1385,7 @@
             <!-- Dokončené transporty se vykreslí JavaScriptem -->
         </div>
         <div class="modal-btns">
+            <button class="modal-btn modal-btn-potvrdit" onclick="exportDokoncenych()" style="background:#333;">Export PDF</button>
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalDokoncene()">Zavrit</button>
         </div>
     </div>
@@ -1273,10 +1404,34 @@
     </div>
 </div>
 
+<!-- Modal pro nahrání Excel souboru -->
+<div class="modal" id="modal-nahrat">
+    <div class="modal-obsah" style="max-width: 600px;">
+        <div class="modal-titulek">Nahrat Excel</div>
+
+        <div class="modal-pole">
+            <label class="modal-label">Vyberte soubor (.xls, .xlsx)</label>
+            <input type="file" class="modal-input" id="input-excel" accept=".xls,.xlsx" onchange="zpracujExcel(this)">
+        </div>
+
+        <div id="excel-nahled" style="display: none;">
+            <div class="modal-label" style="margin-top: 15px;">Nahled (<span id="excel-pocet">0</span> zaznamu)</div>
+            <div id="excel-seznam" style="max-height: 300px; overflow-y: auto; margin: 10px 0;"></div>
+        </div>
+
+        <div id="excel-chyba" style="display: none; color: #ff4444; padding: 10px; background: #331111; border-radius: 6px; margin: 10px 0;"></div>
+
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalNahrat()">Zrusit</button>
+            <button class="modal-btn modal-btn-potvrdit" id="btn-importovat" onclick="importovatExcel()" style="display: none;">Importovat</button>
+        </div>
+    </div>
+</div>
+
 <!-- Dynamické sekce dnů - generováno JavaScriptem -->
 <div id="dny-kontejner"></div>
 
-<!-- Tlačítko pro přidání nového dne/transportu -->
+<!-- Tlačítko pro ruční přidání (dole) -->
 <div style="text-align: center; margin: 20px 0;">
     <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Pridat transport</button>
 </div>
@@ -1439,229 +1594,176 @@
 // Heslo pro editaci
 const HESLO = '9545';
 
-// Aktuální jazyk - výchozí angličtina
-let currentLang = localStorage.getItem('techLang') || 'en';
-
-// Překlady
-const translations = {
-    cz: {
-        saturday: 'Sobota 13.12.',
-        sunday: 'Nedele 14.12.',
-        add: '+ Pridat',
-        addTransport: 'Pridat transport',
-        editTransport: 'Upravit transport',
-        deleteTransport: 'Smazat transport?',
-        resetStatus: 'Resetovat stav na WAIT?',
-        timePlaceholder: 'Cas (napr. 21:30)',
-        namePlaceholder: 'Jmeno pasazera',
-        fromPlaceholder: 'Odkud',
-        toPlaceholder: 'Kam',
-        passwordPlaceholder: 'Heslo pro potvrzeni',
-        wrongPassword: 'Spatne heslo',
-        cancel: 'Zrusit',
-        confirm: 'Potvrdit',
-        delete: 'Smazat',
-        reset: 'Resetovat',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'vyjeli',
-        delivered: 'doruceno',
-        footerText: 'Aplikaci vytvořil a transport servis zajišťuje',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    sk: {
-        saturday: 'Sobota 13.12.',
-        sunday: 'Nedela 14.12.',
-        add: '+ Pridat',
-        addTransport: 'Pridat transport',
-        editTransport: 'Upravit transport',
-        deleteTransport: 'Zmazat transport?',
-        resetStatus: 'Resetovat stav na WAIT?',
-        timePlaceholder: 'Cas (napr. 21:30)',
-        namePlaceholder: 'Meno pasaziera',
-        fromPlaceholder: 'Odkial',
-        toPlaceholder: 'Kam',
-        passwordPlaceholder: 'Heslo pre potvrdenie',
-        wrongPassword: 'Nespravne heslo',
-        cancel: 'Zrusit',
-        confirm: 'Potvrdit',
-        delete: 'Zmazat',
-        reset: 'Resetovat',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'odisli',
-        delivered: 'dorucene',
-        footerText: 'Aplikaciu vytvoril a transport servis zabezpecuje',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    en: {
-        saturday: 'Saturday 13.12.',
-        sunday: 'Sunday 14.12.',
-        add: '+ Add',
-        addTransport: 'Add transport',
-        editTransport: 'Edit transport',
-        deleteTransport: 'Delete transport?',
-        resetStatus: 'Reset status to WAIT?',
-        timePlaceholder: 'Time (e.g. 21:30)',
-        namePlaceholder: 'Passenger name',
-        fromPlaceholder: 'From',
-        toPlaceholder: 'To',
-        passwordPlaceholder: 'Password to confirm',
-        wrongPassword: 'Wrong password',
-        cancel: 'Cancel',
-        confirm: 'Confirm',
-        delete: 'Delete',
-        reset: 'Reset',
-        wait: 'WAIT',
-        onway: 'ON THE WAY',
-        drop: 'DROP OFF',
-        departed: 'departed',
-        delivered: 'delivered',
-        footerText: 'App created and transport service provided by',
-        transportVan: 'transport van',
-        standby: 'STAND BY 21:00 - 06:00'
-    },
-    de: {
-        saturday: 'Samstag 13.12.',
-        sunday: 'Sonntag 14.12.',
-        add: '+ Hinzufugen',
-        addTransport: 'Transport hinzufugen',
-        editTransport: 'Transport bearbeiten',
-        deleteTransport: 'Transport loschen?',
-        resetStatus: 'Status auf WAIT zurucksetzen?',
-        timePlaceholder: 'Zeit (z.B. 21:30)',
-        namePlaceholder: 'Passagiername',
-        fromPlaceholder: 'Von',
-        toPlaceholder: 'Nach',
-        passwordPlaceholder: 'Passwort zur Bestatigung',
-        wrongPassword: 'Falsches Passwort',
-        cancel: 'Abbrechen',
-        confirm: 'Bestatigen',
-        delete: 'Loschen',
-        reset: 'Zurucksetzen',
-        wait: 'WARTEN',
-        onway: 'UNTERWEGS',
-        drop: 'ABGESETZT',
-        departed: 'abgefahren',
-        delivered: 'zugestellt',
-        footerText: 'App erstellt und Transportservice bereitgestellt von',
-        transportVan: 'transport van',
-        standby: 'BEREITSCHAFT 21:00 - 06:00'
-    },
-    nl: {
-        saturday: 'Zaterdag 13.12.',
-        sunday: 'Zondag 14.12.',
-        add: '+ Toevoegen',
-        addTransport: 'Transport toevoegen',
-        editTransport: 'Transport bewerken',
-        deleteTransport: 'Transport verwijderen?',
-        resetStatus: 'Status resetten naar WAIT?',
-        timePlaceholder: 'Tijd (bijv. 21:30)',
-        namePlaceholder: 'Naam passagier',
-        fromPlaceholder: 'Van',
-        toPlaceholder: 'Naar',
-        passwordPlaceholder: 'Wachtwoord ter bevestiging',
-        wrongPassword: 'Verkeerd wachtwoord',
-        cancel: 'Annuleren',
-        confirm: 'Bevestigen',
-        delete: 'Verwijderen',
-        reset: 'Resetten',
-        wait: 'WACHT',
-        onway: 'ONDERWEG',
-        drop: 'AFGELEVERD',
-        departed: 'vertrokken',
-        delivered: 'afgeleverd',
-        footerText: 'App gemaakt en transportservice verzorgd door',
-        transportVan: 'transport van',
-        standby: 'STAND-BY 21:00 - 06:00'
-    }
+// Texty v cestine
+const texty = {
+    saturday: 'Sobota',
+    sunday: 'Nedele',
+    add: '+ Pridat',
+    addTransport: 'Pridat transport',
+    editTransport: 'Upravit transport',
+    deleteTransport: 'Smazat transport?',
+    resetStatus: 'Resetovat stav na WAIT?',
+    timePlaceholder: 'Cas (napr. 21:30)',
+    namePlaceholder: 'Jmeno pasazera',
+    fromPlaceholder: 'Odkud',
+    toPlaceholder: 'Kam',
+    passwordPlaceholder: 'Heslo pro potvrzeni',
+    wrongPassword: 'Spatne heslo',
+    cancel: 'Zrusit',
+    confirm: 'Potvrdit',
+    delete: 'Smazat',
+    reset: 'Resetovat',
+    wait: 'WAIT',
+    onway: 'ON THE WAY',
+    drop: 'DROP OFF',
+    departed: 'vyjeli',
+    delivered: 'doruceno',
+    footerText: 'Aplikaci vytvoril a transport servis zajistuje',
+    transportVan: 'transport van',
+    standby: 'STAND BY'
 };
 
-// Přepnout jazyk
-function toggleLangMenu(event) {
-    event.stopPropagation();
-    const switcher = document.getElementById('lang-switcher');
-    switcher.classList.toggle('open');
-}
-
-// Zavřít menu při kliknutí mimo
-document.addEventListener('click', () => {
-    document.getElementById('lang-switcher').classList.remove('open');
-});
-
-// Vybrat jazyk
-document.querySelectorAll('.lang-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const lang = option.dataset.lang;
-        setLanguage(lang);
-        document.getElementById('lang-switcher').classList.remove('open');
-    });
-});
-
-// Nastavit jazyk
-function setLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('techLang', lang);
-
-    // Aktualizovat tlačítko
-    document.getElementById('lang-current').textContent = lang.toUpperCase();
-
-    // Aktualizovat aktivní volbu
-    document.querySelectorAll('.lang-option').forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.lang === lang);
-    });
-
-    // Přeložit stránku
-    translatePage();
-    vykresli();
-}
-
-// Přeložit stránku
-function translatePage() {
-    const t = translations[currentLang];
-
-    // Přeložit elementy s data-i18n
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        if (t[key]) {
-            el.textContent = t[key];
-        }
-    });
-
-    // Přeložit placeholdery
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.dataset.i18nPlaceholder;
-        if (t[key]) {
-            el.placeholder = t[key];
-        }
-    });
-}
-
-// Získat překlad
+// Funkce pro ziskani textu
 function t(key) {
-    return translations[currentLang][key] || translations['cz'][key] || key;
+    return texty[key] || key;
 }
 
-// Názvy dnů v týdnu pro různé jazyky
-const dnyVTydnu = {
-    cz: ['Nedele', 'Pondeli', 'Utery', 'Streda', 'Ctvrtek', 'Patek', 'Sobota'],
-    sk: ['Nedela', 'Pondelok', 'Utorok', 'Streda', 'Stvrtok', 'Piatok', 'Sobota'],
-    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    de: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-    nl: ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
-};
+// Nazev stranky (ulozeny v localStorage)
+function nactiNazev() {
+    const ulozenyNazev = localStorage.getItem('transportNazev');
+    if (ulozenyNazev) {
+        document.getElementById('header-title').textContent = ulozenyNazev;
+    }
+}
+
+// Editovat nazev (s heslem)
+async function editovatNazev() {
+    const hesloVysledek = await transportConfirm('Zadejte heslo pro editaci', {
+        titulek: 'Overeni',
+        btnPotvrdit: 'Pokracovat',
+        heslo: true
+    });
+
+    if (!hesloVysledek.potvrzeno) return;
+
+    if (hesloVysledek.heslo !== HESLO) {
+        await transportConfirm('Spatne heslo!', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
+        return;
+    }
+
+    // Heslo spravne - zobrazit input pro novy nazev
+    const aktualniNazev = document.getElementById('header-title').textContent;
+    const nazevVysledek = await transportConfirm('Zadejte novy nazev', {
+        titulek: 'Upravit nazev',
+        btnPotvrdit: 'Ulozit',
+        input: true,
+        inputValue: aktualniNazev
+    });
+
+    if (nazevVysledek.potvrzeno && nazevVysledek.hodnota && nazevVysledek.hodnota.trim()) {
+        document.getElementById('header-title').textContent = nazevVysledek.hodnota.trim();
+        localStorage.setItem('transportNazev', nazevVysledek.hodnota.trim());
+    }
+}
+
+// Confirm modal funkce (podobna wgsConfirm)
+function transportConfirm(zprava, options = {}) {
+    return new Promise((resolve) => {
+        const {
+            titulek = 'Potvrzeni',
+            btnPotvrdit = 'Potvrdit',
+            btnZrusit = 'Zrusit',
+            nebezpecne = false,
+            heslo = false,
+            input = false,
+            inputValue = '',
+            inputPlaceholder = ''
+        } = options;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'transport-confirm-overlay';
+
+        let inputHtml = '';
+        if (heslo) {
+            inputHtml = `<input type="password" class="transport-confirm-input" placeholder="Zadejte heslo" id="confirm-input">`;
+        } else if (input) {
+            inputHtml = `<input type="text" class="transport-confirm-input" placeholder="${inputPlaceholder}" value="${inputValue}" id="confirm-input">`;
+        }
+
+        let zrusitBtn = '';
+        if (btnZrusit !== null) {
+            zrusitBtn = `<button class="transport-confirm-btn transport-confirm-btn-zrusit" id="confirm-zrusit">${btnZrusit}</button>`;
+        }
+
+        overlay.innerHTML = `
+            <div class="transport-confirm-modal">
+                <div class="transport-confirm-title">${titulek}</div>
+                <div class="transport-confirm-message">${zprava}</div>
+                ${inputHtml}
+                <div class="transport-confirm-buttons">
+                    ${zrusitBtn}
+                    <button class="transport-confirm-btn transport-confirm-btn-potvrdit ${nebezpecne ? 'nebezpecne' : ''}" id="confirm-potvrdit">${btnPotvrdit}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const inputEl = document.getElementById('confirm-input');
+        if (inputEl) {
+            inputEl.focus();
+            if (input) inputEl.select();
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('confirm-potvrdit').click();
+                }
+            });
+        }
+
+        const zavrit = (vysledek) => {
+            overlay.remove();
+            resolve(vysledek);
+        };
+
+        document.getElementById('confirm-potvrdit').addEventListener('click', () => {
+            if (heslo) {
+                const zadaneHeslo = inputEl?.value || '';
+                zavrit({ potvrzeno: true, heslo: zadaneHeslo });
+            } else if (input) {
+                const hodnota = inputEl?.value || '';
+                zavrit({ potvrzeno: true, hodnota: hodnota });
+            } else {
+                zavrit({ potvrzeno: true });
+            }
+        });
+
+        const zrusitEl = document.getElementById('confirm-zrusit');
+        if (zrusitEl) {
+            zrusitEl.addEventListener('click', () => zavrit({ potvrzeno: false }));
+        }
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                zavrit({ potvrzeno: false });
+            }
+        });
+    });
+}
+
+// Názvy dnů v týdnu
+const dnyVTydnu = ['Nedele', 'Pondeli', 'Utery', 'Streda', 'Ctvrtek', 'Patek', 'Sobota'];
 
 // Získat název dne z data
 function ziskejNazevDne(datumStr) {
     if (!datumStr) return '';
     const datum = new Date(datumStr);
     const denIndex = datum.getDay();
-    const nazevDne = dnyVTydnu[currentLang]?.[denIndex] || dnyVTydnu['en'][denIndex];
+    const nazevDne = dnyVTydnu[denIndex];
     const den = datum.getDate();
     const mesic = datum.getMonth() + 1;
     return nazevDne.toUpperCase() + ' ' + den + '.' + mesic + '.';
@@ -1851,7 +1953,7 @@ function spocitatTransportyRidice(ridicId) {
     let pocet = 0;
     Object.keys(transporty).forEach(datum => {
         transporty[datum]?.forEach(transport => {
-            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+            if (transport.ridicId === ridicId || stavy[transport.id]?.ridic === ridicId) {
                 pocet++;
             }
         });
@@ -1864,7 +1966,7 @@ function ziskatTransportyRidice(ridicId) {
     const seznam = [];
     Object.keys(transporty).forEach(datum => {
         transporty[datum]?.forEach(transport => {
-            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+            if (transport.ridicId === ridicId || stavy[transport.id]?.ridic === ridicId) {
                 seznam.push({
                     ...transport,
                     datum: datum,
@@ -1951,6 +2053,438 @@ function zavriModalDokoncene() {
     document.getElementById('modal-dokoncene').classList.remove('aktivni');
 }
 
+// ===== NAHRANI EXCEL =====
+// Data z Excel souboru
+let excelData = [];
+
+// Otevrit modal pro nahrani
+function otevriModalNahrat() {
+    document.getElementById('input-excel').value = '';
+    document.getElementById('excel-nahled').style.display = 'none';
+    document.getElementById('excel-chyba').style.display = 'none';
+    document.getElementById('btn-importovat').style.display = 'none';
+    excelData = [];
+    document.getElementById('modal-nahrat').classList.add('aktivni');
+}
+
+// Zavrit modal nahrani
+function zavriModalNahrat() {
+    document.getElementById('modal-nahrat').classList.remove('aktivni');
+}
+
+// Zpracovat Excel soubor
+function zpracujExcel(input) {
+    const soubor = input.files[0];
+    if (!soubor) return;
+
+    document.getElementById('excel-chyba').style.display = 'none';
+    document.getElementById('excel-nahled').style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Prvni list
+            const listName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[listName];
+
+            // Prevest na JSON
+            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (json.length < 2) {
+                zobrazExcelChybu('Soubor neobsahuje zadna data');
+                return;
+            }
+
+            // Hlavicka - najit indexy sloupcu
+            const hlavicka = json[0];
+            console.log('Excel hlavicka:', hlavicka);
+
+            // Mapovani sloupcu z Excel souboru
+            const sloupce = {
+                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
+                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO', 'FIRST NAME']),
+                email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL', 'E-MAIL']),
+                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL DATE/TIME', 'ARRIVAL']),
+                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP LOCATION']),
+                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF LOCATION']),
+                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT NUMBER', 'FLIGHT NO']),
+                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET', 'PASSENGERS']),
+                telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON'])
+            };
+
+            console.log('Mapovani sloupcu:', sloupce);
+
+            // Kontrola povinnych sloupcu
+            if (sloupce.jmeno < 0 && sloupce.prijmeni < 0) {
+                zobrazExcelChybu('Excel neobsahuje sloupec FIRSTNAME ani LASTNAME');
+                return;
+            }
+
+            // Zpracovat radky
+            excelData = [];
+            for (let i = 1; i < json.length; i++) {
+                const radek = json[i];
+                if (!radek || radek.length === 0) continue;
+
+                // Jmeno: FIRSTNAME + LASTNAME
+                const jmenoVal = sloupce.jmeno >= 0 ? String(radek[sloupce.jmeno] || '').trim() : '';
+                const prijmeniVal = sloupce.prijmeni >= 0 ? String(radek[sloupce.prijmeni] || '').trim() : '';
+                const jmeno = (jmenoVal + ' ' + prijmeniVal).trim();
+
+                if (!jmeno) continue; // Preskocit prazdne radky
+
+                // Datum a cas: "30/04/2022 19:00" nebo Excel datum
+                let datum = '';
+                let cas = '';
+                const datumCas = radek[sloupce.datum];
+
+                if (datumCas) {
+                    const datumStr = String(datumCas);
+                    // Zkusit format "DD/MM/YYYY HH:MM"
+                    const datumMatch = datumStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(\d{1,2}):(\d{2})/);
+                    if (datumMatch) {
+                        datum = `${datumMatch[3]}-${datumMatch[2].padStart(2, '0')}-${datumMatch[1].padStart(2, '0')}`;
+                        cas = `${datumMatch[4].padStart(2, '0')}:${datumMatch[5]}`;
+                    }
+                }
+
+                // Lokace
+                const odkud = sloupce.odkud >= 0 ? String(radek[sloupce.odkud] || '').trim() : '';
+                const kam = sloupce.kam >= 0 ? String(radek[sloupce.kam] || '').trim() : '';
+
+                // Cislo letu
+                let cisloLetu = '';
+                if (sloupce.let >= 0 && radek[sloupce.let]) {
+                    cisloLetu = String(radek[sloupce.let]).trim();
+                }
+
+                // Pocet osob
+                const pocetOsob = sloupce.pocet >= 0 ? (parseInt(radek[sloupce.pocet]) || 1) : 1;
+
+                // Kontakty
+                const telefon = sloupce.telefon >= 0 ? String(radek[sloupce.telefon] || '').trim() : '';
+                const email = sloupce.email >= 0 ? String(radek[sloupce.email] || '').trim() : '';
+
+                excelData.push({
+                    jmeno,
+                    datum,
+                    cas,
+                    odkud,
+                    kam,
+                    cisloLetu,
+                    pocetOsob,
+                    telefon,
+                    email,
+                    vybrano: true
+                });
+            }
+
+            if (excelData.length === 0) {
+                zobrazExcelChybu('Nepodarilo se najit platna data');
+                return;
+            }
+
+            // Zobrazit nahled
+            zobrazExcelNahled();
+
+        } catch (err) {
+            console.error('Chyba pri cteni Excel:', err);
+            zobrazExcelChybu('Chyba pri cteni souboru: ' + err.message);
+        }
+    };
+
+    reader.readAsArrayBuffer(soubor);
+}
+
+// Najit sloupec podle PRESNEHO nazvu (bez includes)
+function najdiSloupecPresne(hlavicka, nazvy) {
+    for (let i = 0; i < hlavicka.length; i++) {
+        const val = String(hlavicka[i] || '').toUpperCase().trim();
+        for (const nazev of nazvy) {
+            if (val === nazev.toUpperCase()) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// Najit sloupec podle moznych nazvu (vcetne castecne shody)
+function najdiSloupec(hlavicka, nazvy) {
+    // Nejprve zkusit presnou shodu
+    const presny = najdiSloupecPresne(hlavicka, nazvy);
+    if (presny >= 0) return presny;
+
+    // Pak zkusit castecnou shodu (includes)
+    for (let i = 0; i < hlavicka.length; i++) {
+        const val = String(hlavicka[i] || '').toUpperCase().trim();
+        for (const nazev of nazvy) {
+            if (val.includes(nazev.toUpperCase())) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// Zobrazit chybu
+function zobrazExcelChybu(zprava) {
+    document.getElementById('excel-chyba').textContent = zprava;
+    document.getElementById('excel-chyba').style.display = 'block';
+    document.getElementById('excel-nahled').style.display = 'none';
+    document.getElementById('btn-importovat').style.display = 'none';
+}
+
+// Zobrazit nahled dat
+// Zjistit status polozky pro nahled (NOVY/ZMENA/EXISTUJE/DOKONCENO)
+function zjistiStatusPolozky(item) {
+    const datum = item.datum || new Date().toISOString().split('T')[0];
+    const novyTransport = {
+        cas: item.cas || '00:00',
+        jmeno: item.jmeno,
+        odkud: item.odkud || '',
+        kam: item.kam || '',
+        cisloLetu: item.cisloLetu || null,
+        pocetOsob: item.pocetOsob || null,
+        datum: datum
+    };
+
+    const existujici = najdiExistujiciTransport(item.jmeno);
+
+    if (!existujici) {
+        return { status: 'novy', text: 'NOVY', barva: '#39ff14' };
+    }
+
+    if (existujici.typ === 'dokonceny') {
+        return { status: 'dokonceno', text: 'HOTOVO', barva: '#666' };
+    }
+
+    if (transportSeZmenil(existujici.transport, novyTransport)) {
+        // Zjistit co se zmenilo
+        const zmeny = [];
+        if (existujici.transport.cas !== novyTransport.cas) {
+            zmeny.push(`cas: ${existujici.transport.cas} -> ${novyTransport.cas}`);
+        }
+        if (existujici.transport.cisloLetu !== novyTransport.cisloLetu) {
+            zmeny.push(`let: ${existujici.transport.cisloLetu || '-'} -> ${novyTransport.cisloLetu || '-'}`);
+        }
+        if (existujici.transport.datum !== novyTransport.datum) {
+            zmeny.push(`datum zmenen`);
+        }
+        return { status: 'zmena', text: 'ZMENA', barva: '#ff8800', detail: zmeny.join(', ') };
+    }
+
+    return { status: 'existuje', text: 'BEZ ZMENY', barva: '#555' };
+}
+
+function zobrazExcelNahled() {
+    const kontejner = document.getElementById('excel-seznam');
+
+    // Debug - prvni zaznam
+    if (excelData.length > 0) {
+        console.log('Prvni zaznam:', excelData[0]);
+    }
+
+    // Spocitat statistiky
+    let pocetNovych = 0;
+    let pocetZmen = 0;
+    let pocetExistuje = 0;
+    let pocetDokoncenych = 0;
+
+    excelData.forEach(item => {
+        const statusInfo = zjistiStatusPolozky(item);
+        item._status = statusInfo;
+        if (statusInfo.status === 'novy') pocetNovych++;
+        else if (statusInfo.status === 'zmena') pocetZmen++;
+        else if (statusInfo.status === 'existuje') pocetExistuje++;
+        else if (statusInfo.status === 'dokonceno') pocetDokoncenych++;
+    });
+
+    // Zobrazit souhrn
+    document.getElementById('excel-pocet').innerHTML = `${excelData.length} zaznamu: <span style="color:#39ff14">${pocetNovych} novych</span>${pocetZmen > 0 ? `, <span style="color:#ff8800">${pocetZmen} zmen</span>` : ''}${pocetExistuje > 0 ? `, <span style="color:#555">${pocetExistuje} bez zmeny</span>` : ''}${pocetDokoncenych > 0 ? `, <span style="color:#666">${pocetDokoncenych} hotovych</span>` : ''}`;
+
+    kontejner.innerHTML = excelData.map((item, index) => {
+        const statusInfo = item._status;
+        const statusBadge = `<span style="display:inline-block; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:700; background:${statusInfo.barva}; color:#fff; margin-left:8px;">${statusInfo.text}</span>`;
+
+        return `
+        <div class="excel-item" style="${statusInfo.status === 'existuje' || statusInfo.status === 'dokonceno' ? 'opacity:0.5;' : ''}">
+            <div class="excel-item-info">
+                <div><span class="excel-item-cas">${item.cas || '?'}</span> <span class="excel-item-jmeno">${item.jmeno}</span>${statusBadge}</div>
+                <div class="excel-item-trasa">${item.odkud || '?'} → ${item.kam || '?'}</div>
+                ${item.cisloLetu ? `<div style="color: #39ff14; font-weight: 600;">Let: ${item.cisloLetu}</div>` : ''}
+                ${statusInfo.detail ? `<div style="color: #ff8800; font-size: 11px;">${statusInfo.detail}</div>` : ''}
+            </div>
+            <div class="excel-item-checkbox">
+                <input type="checkbox" ${item.vybrano && statusInfo.status !== 'existuje' && statusInfo.status !== 'dokonceno' ? 'checked' : ''} onchange="excelData[${index}].vybrano = this.checked" ${statusInfo.status === 'dokonceno' ? 'disabled' : ''}>
+            </div>
+        </div>
+    `}).join('');
+
+    document.getElementById('excel-nahled').style.display = 'block';
+    document.getElementById('btn-importovat').style.display = 'block';
+}
+
+// Normalizovat jmeno pro porovnani (lowercase, bez diakritiky, bez extra mezer)
+function normalizujJmeno(jmeno) {
+    if (!jmeno) return '';
+    return jmeno
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Odstranit diakritiku
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// Najit existujici transport podle jmena (ve vsech datech a dokoncenech)
+function najdiExistujiciTransport(jmenoHledane) {
+    const normalJmeno = normalizujJmeno(jmenoHledane);
+
+    // Hledat v aktivnich transportech
+    for (const datum in transporty) {
+        for (const transport of transporty[datum]) {
+            if (normalizujJmeno(transport.jmeno) === normalJmeno) {
+                return { transport, datum, typ: 'aktivni' };
+            }
+        }
+    }
+
+    // Hledat v dokoncenech
+    for (const transport of dokoncene) {
+        if (normalizujJmeno(transport.jmeno) === normalJmeno) {
+            return { transport, datum: transport.datum, typ: 'dokonceny' };
+        }
+    }
+
+    return null;
+}
+
+// Porovnat zda se data zmenila
+function transportSeZmenil(stary, novy) {
+    // Porovnat dulezite pole
+    if (stary.cas !== novy.cas) return true;
+    if (stary.cisloLetu !== novy.cisloLetu) return true;
+    if (stary.odkud !== novy.odkud) return true;
+    if (stary.kam !== novy.kam) return true;
+    if (stary.datum !== novy.datum) return true;
+    if ((stary.pocetOsob || 1) !== (novy.pocetOsob || 1)) return true;
+    return false;
+}
+
+// Importovat vybrana data s detekci duplicit
+async function importovatExcel() {
+    const kImportu = excelData.filter(item => item.vybrano);
+
+    if (kImportu.length === 0) {
+        zobrazExcelChybu('Nevybrano zadne zaznamy k importu');
+        return;
+    }
+
+    let pocetNovych = 0;
+    let pocetAktualizovanych = 0;
+    let pocetPreskocenych = 0;
+    let pocetDokoncenych = 0;
+    const zmeny = [];
+
+    for (const item of kImportu) {
+        const datum = item.datum || new Date().toISOString().split('T')[0];
+        const novyTransport = {
+            cas: item.cas || '00:00',
+            jmeno: item.jmeno,
+            telefon: item.telefon || null,
+            email: item.email || null,
+            odkud: item.odkud || '',
+            kam: item.kam || '',
+            cisloLetu: item.cisloLetu || null,
+            pocetOsob: item.pocetOsob || null,
+            datum: datum
+        };
+
+        // Hledat existujici
+        const existujici = najdiExistujiciTransport(item.jmeno);
+
+        if (existujici) {
+            if (existujici.typ === 'dokonceny') {
+                // Uz je dokonceny - preskocit
+                pocetDokoncenych++;
+                continue;
+            }
+
+            // Porovnat zda se neco zmenilo
+            if (transportSeZmenil(existujici.transport, novyTransport)) {
+                // Aktualizovat existujici
+                const staryDatum = existujici.datum;
+                const stareData = { ...existujici.transport };
+
+                // Pokud se zmenilo datum, presunout
+                if (staryDatum !== datum) {
+                    // Odstranit ze stareho data
+                    const indexStary = transporty[staryDatum]?.findIndex(t => t.id === existujici.transport.id);
+                    if (indexStary >= 0) {
+                        transporty[staryDatum].splice(indexStary, 1);
+                        if (transporty[staryDatum].length === 0) {
+                            delete transporty[staryDatum];
+                        }
+                    }
+
+                    // Pridat do noveho data
+                    if (!transporty[datum]) {
+                        transporty[datum] = [];
+                    }
+                    transporty[datum].push({
+                        ...existujici.transport,
+                        ...novyTransport
+                    });
+                } else {
+                    // Aktualizovat na miste
+                    Object.assign(existujici.transport, novyTransport);
+                }
+
+                pocetAktualizovanych++;
+                zmeny.push(`${item.jmeno}: ${stareData.cas} -> ${novyTransport.cas}${stareData.cisloLetu !== novyTransport.cisloLetu ? ', let: ' + (novyTransport.cisloLetu || 'zadny') : ''}`);
+            } else {
+                // Zadna zmena - preskocit
+                pocetPreskocenych++;
+            }
+        } else {
+            // Novy transport
+            if (!transporty[datum]) {
+                transporty[datum] = [];
+            }
+
+            transporty[datum].push({
+                id: generujId(),
+                ...novyTransport,
+                ridic: null
+            });
+            pocetNovych++;
+        }
+    }
+
+    // Ulozit a aktualizovat
+    await ulozData();
+    vykresli();
+    zavriModalNahrat();
+
+    // Zobrazit souhrn
+    let zprava = `Import dokoncen:\n`;
+    zprava += `- Novych: ${pocetNovych}\n`;
+    zprava += `- Aktualizovanych: ${pocetAktualizovanych}\n`;
+    zprava += `- Preskocenych (beze zmeny): ${pocetPreskocenych}\n`;
+    if (pocetDokoncenych > 0) {
+        zprava += `- Uz dokoncenych: ${pocetDokoncenych}\n`;
+    }
+
+    if (zmeny.length > 0 && zmeny.length <= 10) {
+        zprava += `\nZmeny:\n${zmeny.join('\n')}`;
+    }
+
+    alert(zprava);
+}
+
 // Vykreslit dokončené transporty
 function vykresliDokoncene() {
     const kontejner = document.getElementById('dokoncene-kontejner');
@@ -1963,9 +2497,11 @@ function vykresliDokoncene() {
     // Seřadit od nejnovějších
     const serazene = [...dokoncene].reverse();
 
-    kontejner.innerHTML = serazene.map(item => {
-        const ridic = item.ridic ? ridici.find(r => r.id === item.ridic) : null;
+    kontejner.innerHTML = serazene.map((item, index) => {
+        const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
         const ridicJmeno = ridic ? ridic.jmeno : '';
+        // Index v původním poli (ne v seřazeném)
+        const origIndex = dokoncene.length - 1 - index;
 
         return `
             <div class="dokonceny-item">
@@ -1973,7 +2509,10 @@ function vykresliDokoncene() {
                     <div class="dokonceny-jmeno">${item.jmeno}</div>
                     <div class="dokonceny-meta">${item.odkud} → ${item.kam}${ridicJmeno ? ' | ' + ridicJmeno : ''}</div>
                 </div>
-                <div class="dokonceny-cas">${item.casDrop || item.dokoncenoCas}</div>
+                <div class="dokonceny-akce">
+                    <div class="dokonceny-cas">${item.casDrop || item.dokoncenoCas}</div>
+                    <button class="btn-smazat-dokonceny" onclick="smazatDokonceny(${origIndex})" title="Smazat">X</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -1987,6 +2526,121 @@ function aktualizovatPocetDokoncenych() {
     } else {
         badge.textContent = '';
     }
+}
+
+// Smazat dokončený transport (s heslem)
+async function smazatDokonceny(index) {
+    const item = dokoncene[index];
+    if (!item) return;
+
+    // Prvni krok - zadat heslo
+    const hesloVysledek = await transportConfirm('Zadejte heslo pro smazani', {
+        titulek: 'Overeni',
+        btnPotvrdit: 'Pokracovat',
+        heslo: true
+    });
+
+    if (!hesloVysledek.potvrzeno) return;
+
+    if (hesloVysledek.heslo !== HESLO) {
+        await transportConfirm('Spatne heslo!', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
+        return;
+    }
+
+    // Druhy krok - potvrzeni smazani
+    const potvrzeni = await transportConfirm(`Opravdu smazat dokonceny transport: ${item.jmeno}?`, {
+        titulek: 'Smazat transport',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+
+    if (!potvrzeni.potvrzeno) return;
+
+    dokoncene.splice(index, 1);
+    await ulozData();
+    vykresliDokoncene();
+    aktualizovatPocetDokoncenych();
+}
+
+// Export dokončených transportů do PDF
+async function exportDokoncenych() {
+    if (dokoncene.length === 0) {
+        await transportConfirm('Zadne dokoncene transporty k exportu', {
+            titulek: 'Export',
+            btnPotvrdit: 'OK',
+            btnZrusit: null
+        });
+        return;
+    }
+
+    // Vytvorit obsah pro tisk
+    const datum = new Date().toLocaleDateString('cs-CZ');
+    let html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Dokoncene transporty - ${datum}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { font-size: 18px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                th { background: #333; color: #fff; }
+                .cas { font-weight: bold; }
+                .footer { margin-top: 30px; font-size: 11px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>Dokoncene transporty - ${datum}</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cas</th>
+                        <th>Jmeno</th>
+                        <th>Trasa</th>
+                        <th>Ridic</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Seřadit od nejnovějších
+    const serazene = [...dokoncene].reverse();
+
+    serazene.forEach(item => {
+        const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
+        const ridicJmeno = ridic ? ridic.jmeno : '-';
+        html += `
+            <tr>
+                <td class="cas">${item.casDrop || item.dokoncenoCas || '-'}</td>
+                <td>${item.jmeno}</td>
+                <td>${item.odkud} → ${item.kam}</td>
+                <td>${ridicJmeno}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+            <div class="footer">
+                Celkem: ${dokoncene.length} transportu | Vygenerovano: ${new Date().toLocaleString('cs-CZ')}
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Otevřít nové okno pro tisk/PDF
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
 }
 
 // Uložit změny řidiče
@@ -2026,7 +2680,7 @@ async function ulozRidice() {
 
 // Vykreslit transporty - dynamické sekce podle data
 function vykresli() {
-    const tr = translations[currentLang];
+    const tr = texty;
     const kontejner = document.getElementById('dny-kontejner');
     kontejner.innerHTML = '';
 
@@ -2074,23 +2728,27 @@ function vykresli() {
             }
 
             // Sestavit info o letu
-            const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}</span>` : '';
+            const letadloSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;vertical-align:middle;margin-left:4px;"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>';
+            const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}${letadloSvg}</span>` : '';
 
             // Sestavit info o ridici
+            const autoSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;vertical-align:middle;margin-left:4px;"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
             const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
-            const ridicInfo = ridic ? `<span class="transport-ridic" title="${ridic.auto || ''}">${ridic.jmeno}</span>` : '';
+            const ridicInfo = ridic ? `<span class="transport-ridic" title="${ridic.auto || ''}">${ridic.jmeno}${autoSvg}</span>` : '';
 
-            // Sestavit kontaktni ikony
+            // Sestavit kontaktni ikonu telefonu
             let kontaktIkony = '';
             if (item.telefon) {
                 kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`;
             }
-            if (item.email) {
-                kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>`;
-            }
 
-            // Pocet osob badge
-            const pocetOsobInfo = item.pocetOsob ? `<span class="transport-pocet" title="Pocet osob">${item.pocetOsob}x</span>` : '';
+            // Pocet osob badge - tolik panacku kolik je osob
+            let pocetOsobInfo = '';
+            if (item.pocetOsob && item.pocetOsob > 0) {
+                const panacek = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;vertical-align:middle;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                const pocet = Math.min(item.pocetOsob, 6); // Max 6 panacku
+                pocetOsobInfo = `<span class="transport-pocet" title="${item.pocetOsob} PAX">${panacek.repeat(pocet)}${item.pocetOsob > 6 ? '+' : ''}</span>`;
+            }
 
             // Poznamka
             const poznamkaInfo = item.poznamka ? `<div class="transport-poznamka">${item.poznamka}</div>` : '';
@@ -2853,6 +3511,7 @@ document.addEventListener('keydown', e => {
         zavriModalRidic();
         zavriModalRidici();
         zavriModalDokoncene();
+        zavriModalNahrat();
         // Zavřít seznam řidiče bez otevření hlavního modalu
         document.getElementById('modal-seznam-ridice')?.classList.remove('aktivni');
         zavriVsechnyMenuRidicu();
@@ -2915,9 +3574,10 @@ async function aktualizujVsechnyLety() {
     }
 }
 
-// Kliknuti na badge letu - zobrazit detaily
+// Kliknuti na badge letu - zobrazit detaily v MODALU
 function zobrazDetailLetu(event) {
-    const cisloLetu = event.target.dataset.let;
+    const letElement = event.target;
+    const cisloLetu = letElement.dataset.let;
     if (!cisloLetu) return;
 
     event.stopPropagation();
@@ -2928,20 +3588,40 @@ function zobrazDetailLetu(event) {
         zobrazLetOverlay(data);
     } else {
         // Nacist data a pak zobrazit
-        nactiAZobrazLet(cisloLetu);
+        nactiAZobrazLetModal(cisloLetu);
     }
 }
 
-// Nacist data letu a zobrazit overlay
-async function nactiAZobrazLet(cisloLetu) {
+// Nacist data letu a zobrazit v modalu
+async function nactiAZobrazLetModal(cisloLetu) {
+    // Zobrazit loading modal
+    await transportConfirm('Nacitam informace o letu...', {
+        titulek: 'Let ' + cisloLetu,
+        btnPotvrdit: 'OK',
+        btnZrusit: null
+    });
+
     try {
         const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
         const data = await odpoved.json();
         if (data.status === 'success') {
             letoveStavy[cisloLetu] = data;
             zobrazLetOverlay(data);
+        } else {
+            await transportConfirm('Let nenalezen', {
+                titulek: 'Chyba',
+                btnPotvrdit: 'OK',
+                btnZrusit: null,
+                nebezpecne: true
+            });
         }
     } catch (e) {
+        await transportConfirm('Chyba pri nacitani letu', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
         console.log('Chyba pri nacitani letu:', e);
     }
 }
@@ -3010,12 +3690,8 @@ document.addEventListener('click', function(e) {
 
 // Inicializace po načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
-    // Nastavit jazyk při načtení
-    document.getElementById('lang-current').textContent = currentLang.toUpperCase();
-    document.querySelectorAll('.lang-option').forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.lang === currentLang);
-    });
-    translatePage();
+    // Nacist ulozeny nazev
+    nactiNazev();
 
     // Vykreslit řidiče ihned s výchozími daty
     vykresliRidice();
