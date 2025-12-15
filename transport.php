@@ -2912,11 +2912,13 @@ function vykresli() {
             }
 
             // Sestavit info o letu
-            const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}</span>` : '';
+            const letadloSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;vertical-align:middle;margin-left:4px;"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>';
+            const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}${letadloSvg}</span>` : '';
 
             // Sestavit info o ridici
+            const autoSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
             const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
-            const ridicInfo = ridic ? `<span class="transport-ridic" title="${ridic.auto || ''}">${ridic.jmeno}</span>` : '';
+            const ridicInfo = ridic ? `<span class="transport-ridic" title="${ridic.auto || ''}">${autoSvg}${ridic.jmeno}</span>` : '';
 
             // Sestavit kontaktni ikony
             let kontaktIkony = '';
