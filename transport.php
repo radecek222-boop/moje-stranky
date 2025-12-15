@@ -1086,24 +1086,26 @@
 
         .wgs-let-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #333;
         }
 
         .wgs-let-cislo {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #39ff14;
             text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 10px;
         }
 
         .wgs-let-status {
-            padding: 6px 12px;
+            padding: 6px 16px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
         }
