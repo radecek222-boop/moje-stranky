@@ -2066,17 +2066,20 @@ function zpracujExcel(input) {
 
             // Hlavicka - najit indexy sloupcu
             const hlavicka = json[0];
+            console.log('Excel hlavicka:', hlavicka);
+
             const sloupce = {
-                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI']),
-                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO']),
-                email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL']),
-                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL', 'DATUM']),
-                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP', 'ODKUD']),
-                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF', 'KAM']),
-                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT', 'LET']),
-                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET']),
-                telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON'])
+                prijmeni: najdiSloupec(hlavicka, ['LASTNAME', 'PRIJMENI', 'SURNAME']),
+                jmeno: najdiSloupec(hlavicka, ['FIRSTNAME', 'JMENO', 'NAME', 'FIRST NAME']),
+                email: najdiSloupec(hlavicka, ['CONTACT EMAIL', 'EMAIL', 'E-MAIL']),
+                datum: najdiSloupec(hlavicka, ['ARRIVAL FLIGHT/TRAIN DATE/TIME', 'ARRIVAL', 'DATUM', 'DATE', 'ARRIVAL DATE']),
+                odkud: najdiSloupec(hlavicka, ['PICK-UP LOCATION', 'PICKUP', 'ODKUD', 'FROM', 'PICK UP']),
+                kam: najdiSloupec(hlavicka, ['DROP-OFF LOCATION', 'DROPOFF', 'KAM', 'TO', 'DROP OFF', 'DESTINATION']),
+                let: najdiSloupec(hlavicka, ['FLIGHT/TRAIN NUMBER', 'FLIGHT', 'LET', 'FLIGHT NUMBER', 'TRAIN', 'FLIGHT NO']),
+                pocet: najdiSloupec(hlavicka, ['PAX', 'POCET', 'PASSENGERS', 'COUNT', 'PERSONS']),
+                telefon: najdiSloupec(hlavicka, ['CONTACT PHONE', 'PHONE', 'TELEFON', 'TEL', 'MOBILE'])
             };
+            console.log('Nalezene sloupce:', sloupce);
 
             // Zpracovat radky
             excelData = [];
@@ -2104,13 +2107,19 @@ function zpracujExcel(input) {
                     }
                 }
 
+                // Ziskat cislo letu - muze byt jako cislo nebo text
+                let cisloLetu = '';
+                if (sloupce.let >= 0 && radek[sloupce.let] !== undefined) {
+                    cisloLetu = String(radek[sloupce.let]).trim();
+                }
+
                 excelData.push({
                     jmeno: celeJmeno,
                     datum: datum,
                     cas: cas,
                     odkud: radek[sloupce.odkud] || '',
                     kam: radek[sloupce.kam] || '',
-                    cisloLetu: radek[sloupce.let] || '',
+                    cisloLetu: cisloLetu,
                     pocetOsob: parseInt(radek[sloupce.pocet]) || 1,
                     telefon: radek[sloupce.telefon] || '',
                     email: radek[sloupce.email] || '',
@@ -2161,12 +2170,17 @@ function zobrazExcelNahled() {
     const kontejner = document.getElementById('excel-seznam');
     document.getElementById('excel-pocet').textContent = excelData.length;
 
+    // Debug - prvni zaznam
+    if (excelData.length > 0) {
+        console.log('Prvni zaznam:', excelData[0]);
+    }
+
     kontejner.innerHTML = excelData.map((item, index) => `
         <div class="excel-item">
             <div class="excel-item-info">
-                <span class="excel-item-cas">${item.datum} ${item.cas}</span>
-                <span class="excel-item-jmeno">${item.jmeno}</span>
-                <div class="excel-item-trasa">${item.odkud || '?'} → ${item.kam || '?'}${item.cisloLetu ? ' | Let: ' + item.cisloLetu : ''}</div>
+                <div><span class="excel-item-cas">${item.cas || '?'}</span> <span class="excel-item-jmeno">${item.jmeno}</span></div>
+                <div class="excel-item-trasa">${item.odkud || '?'} → ${item.kam || '?'}</div>
+                ${item.cisloLetu ? `<div style="color: #39ff14; font-weight: 600;">Let: ${item.cisloLetu}</div>` : '<div style="color: #666;">Bez letu</div>'}
             </div>
             <div class="excel-item-checkbox">
                 <input type="checkbox" ${item.vybrano ? 'checked' : ''} onchange="excelData[${index}].vybrano = this.checked">
