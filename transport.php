@@ -119,16 +119,13 @@
             border: 1px solid #444;
             padding: 12px 5px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: clamp(9px, 2.5vw, 14px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .btn-ridici:hover {
