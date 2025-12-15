@@ -1254,9 +1254,10 @@
 </div>
 
 <!-- Tlačítka pro řidiče a dokončené -->
-<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px;">
+<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
     <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
     <button class="btn-ridici btn-dokoncene" onclick="otevriModalDokoncene()">Dokoncene <span id="pocet-dokoncenych"></span></button>
+    <button class="btn-ridici btn-excel" onclick="otevriModalNahrat()" id="btn-excel-hlavni">Aktualizovat z Excelu</button>
 </div>
 
 <!-- Modal se seznamem řidičů -->
@@ -1343,10 +1344,9 @@
 <!-- Dynamické sekce dnů - generováno JavaScriptem -->
 <div id="dny-kontejner"></div>
 
-<!-- Tlačítka pro přidání transportu -->
-<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-    <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Zadat rucne</button>
-    <button class="btn-pridat" onclick="otevriModalNahrat()" style="padding: 10px 20px;">+ Nahrat Excel</button>
+<!-- Tlačítko pro ruční přidání (dole) -->
+<div style="text-align: center; margin: 20px 0;">
+    <button class="btn-pridat" onclick="otevriModalPridat(null)" style="padding: 10px 20px;">+ Pridat transport</button>
 </div>
 
 <!-- WGS Let Info Overlay -->
