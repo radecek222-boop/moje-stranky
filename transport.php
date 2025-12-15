@@ -1515,7 +1515,7 @@ function vykresli() {
             // Sestavit kontaktni ikony
             let kontaktIkony = '';
             if (item.telefon) {
-                kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}">T</a>`;
+                kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`;
             }
             if (item.email) {
                 kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}">@</a>`;
@@ -1531,8 +1531,8 @@ function vykresli() {
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno} ${letInfo} ${kontaktIkony}</div>
-                    <div class="transport-trasa">${item.odkud} → ${item.kam} ${ridicInfo}</div>
+                    <div class="transport-jmena">${item.jmeno} ${letInfo} ${kontaktIkony} ${ridicInfo}</div>
+                    <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 </div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
