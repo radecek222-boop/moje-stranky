@@ -103,21 +103,32 @@
             background: #222;
         }
 
+        /* Kontejner pro hlavni tlacitka */
+        .hlavni-tlacitka {
+            display: flex;
+            gap: 10px;
+            padding: 15px 10px;
+            margin: 0;
+        }
+
         /* Tlacitko ridici */
         .btn-ridici {
+            flex: 1;
             background: #222;
             color: #fff;
             border: 1px solid #444;
-            padding: 12px 30px;
+            padding: 12px 5px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            min-width: 160px;
+            letter-spacing: 0.5px;
             text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .btn-ridici:hover {
@@ -1254,7 +1265,7 @@
 </div>
 
 <!-- Tlačítka pro řidiče a dokončené -->
-<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+<div class="hlavni-tlacitka">
     <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
     <button class="btn-ridici btn-dokoncene" onclick="otevriModalDokoncene()">Dokoncene <span id="pocet-dokoncenych"></span></button>
     <button class="btn-ridici btn-excel" onclick="otevriModalNahrat()" id="btn-excel-hlavni">Aktualizovat z Excelu</button>
