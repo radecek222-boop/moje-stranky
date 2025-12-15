@@ -26,10 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'status' => 'success',
             'stavy' => $stavy,
             'transporty' => $data['transporty'] ?? null,
-            'ridici' => $data['ridici'] ?? null
+            'ridici' => $data['ridici'] ?? null,
+            'dokoncene' => $data['dokoncene'] ?? []
         ]);
     } else {
-        echo json_encode(['status' => 'success', 'stavy' => new stdClass(), 'transporty' => null, 'ridici' => null]);
+        echo json_encode(['status' => 'success', 'stavy' => new stdClass(), 'transporty' => null, 'ridici' => null, 'dokoncene' => []]);
     }
     exit;
 }
@@ -63,6 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ridici = json_decode($_POST['ridici'], true);
         if (is_array($ridici)) {
             $data['ridici'] = $ridici;
+        }
+    }
+
+    // Aktualizovat dokoncene
+    if (isset($_POST['dokoncene'])) {
+        $dokoncene = json_decode($_POST['dokoncene'], true);
+        if (is_array($dokoncene)) {
+            $data['dokoncene'] = $dokoncene;
         }
     }
 

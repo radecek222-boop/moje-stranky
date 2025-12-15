@@ -123,6 +123,49 @@
             border-color: #555;
         }
 
+        .btn-dokoncene #pocet-dokoncenych:not(:empty) {
+            background: #39ff14;
+            color: #000;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+
+        /* Dokonceny transport v modalu */
+        .dokonceny-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dokonceny-info {
+            flex: 1;
+        }
+
+        .dokonceny-jmeno {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .dokonceny-meta {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .dokonceny-cas {
+            font-size: 12px;
+            color: #39ff14;
+            font-weight: 600;
+        }
+
         /* Modal ridici obsah */
         .modal-ridici-obsah {
             max-width: 450px;
@@ -1069,9 +1112,10 @@
     </div>
 </div>
 
-<!-- Tlačítko pro otevření modalu řidičů -->
-<div style="text-align: center; margin: 20px 0;">
+<!-- Tlačítka pro řidiče a dokončené -->
+<div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px;">
     <button class="btn-ridici" onclick="otevriModalRidici()" data-i18n="drivers">Ridici</button>
+    <button class="btn-ridici btn-dokoncene" onclick="otevriModalDokoncene()">Dokoncene <span id="pocet-dokoncenych"></span></button>
 </div>
 
 <!-- Modal se seznamem řidičů -->
@@ -1101,6 +1145,19 @@
         <div class="modal-btns">
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalRidic()">Zrusit</button>
             <button class="modal-btn modal-btn-potvrdit" onclick="ulozRidice()">Ulozit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pro dokončené transporty -->
+<div class="modal" id="modal-dokoncene">
+    <div class="modal-obsah" style="max-width: 500px;">
+        <div class="modal-titulek">Dokoncene transporty</div>
+        <div id="dokoncene-kontejner" style="max-height: 60vh; overflow-y: auto;">
+            <!-- Dokončené transporty se vykreslí JavaScriptem -->
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalDokoncene()">Zavrit</button>
         </div>
     </div>
 </div>
@@ -1516,6 +1573,12 @@ let transporty = {
 // Stavy transportů
 let stavy = {};
 
+// Dokončené transporty (po DROP)
+let dokoncene = [];
+
+// Timery pro automatický přesun do dokončených
+let dropTimery = {};
+
 // Data řidičů
 let ridici = [
     { id: 'ridic-1', jmeno: 'MILAN', auto: 'MB V CLASS', poznamka: 'transport van', telefon: '+420735084519' },
@@ -1654,6 +1717,55 @@ function zavriModalRidici() {
 
 function zavriModalRidic() {
     document.getElementById('modal-ridic').classList.remove('aktivni');
+}
+
+// Otevřít modal s dokončenými transporty
+function otevriModalDokoncene() {
+    vykresliDokoncene();
+    document.getElementById('modal-dokoncene').classList.add('aktivni');
+}
+
+// Zavřít modal s dokončenými
+function zavriModalDokoncene() {
+    document.getElementById('modal-dokoncene').classList.remove('aktivni');
+}
+
+// Vykreslit dokončené transporty
+function vykresliDokoncene() {
+    const kontejner = document.getElementById('dokoncene-kontejner');
+
+    if (dokoncene.length === 0) {
+        kontejner.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Zadne dokoncene transporty</div>';
+        return;
+    }
+
+    // Seřadit od nejnovějších
+    const serazene = [...dokoncene].reverse();
+
+    kontejner.innerHTML = serazene.map(item => {
+        const ridic = item.ridic ? ridici.find(r => r.id === item.ridic) : null;
+        const ridicJmeno = ridic ? ridic.jmeno : '';
+
+        return `
+            <div class="dokonceny-item">
+                <div class="dokonceny-info">
+                    <div class="dokonceny-jmeno">${item.jmeno}</div>
+                    <div class="dokonceny-meta">${item.odkud} → ${item.kam}${ridicJmeno ? ' | ' + ridicJmeno : ''}</div>
+                </div>
+                <div class="dokonceny-cas">${item.casDrop || item.dokoncenoCas}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Aktualizovat počet dokončených v badge
+function aktualizovatPocetDokoncenych() {
+    const badge = document.getElementById('pocet-dokoncenych');
+    if (dokoncene.length > 0) {
+        badge.textContent = dokoncene.length;
+    } else {
+        badge.textContent = '';
+    }
 }
 
 // Uložit změny řidiče
@@ -2301,10 +2413,71 @@ async function zmenStav(id) {
         vykresli();
         await ulozData();
         setTimeout(() => nactiData(), 500);
+
+        // Spustit timer pro přesun do dokončených (1 minuta)
+        spustitDropTimer(id);
     } else if (aktualniStav === 'drop') {
         // DROP OFF - otevřít modal pro reset
         otevriModalReset(id);
     }
+}
+
+// Spustit timer pro automatický přesun do dokončených
+function spustitDropTimer(id) {
+    // Zrušit existující timer pokud existuje
+    if (dropTimery[id]) {
+        clearTimeout(dropTimery[id]);
+    }
+
+    // Po 1 minutě přesunout do dokončených
+    dropTimery[id] = setTimeout(() => {
+        presunDoDokoncene(id);
+    }, 60000); // 60 sekund = 1 minuta
+}
+
+// Přesunout transport do dokončených
+async function presunDoDokoncene(id) {
+    // Najít transport data
+    let transportData = null;
+    let transportDatum = null;
+
+    Object.keys(transporty).forEach(datum => {
+        const transport = transporty[datum]?.find(t => t.id === id);
+        if (transport) {
+            transportData = { ...transport };
+            transportDatum = datum;
+        }
+    });
+
+    if (!transportData) return;
+
+    // Přidat do dokončených s časem dokončení
+    const stavData = stavy[id] || {};
+    dokoncene.push({
+        ...transportData,
+        casOdjezdu: stavData.cas || '',
+        casDrop: stavData.casDrop || '',
+        ridic: stavData.ridic || transportData.ridic || '',
+        dokoncenoCas: new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })
+    });
+
+    // Odstranit z aktivních transportů
+    if (transporty[transportDatum]) {
+        transporty[transportDatum] = transporty[transportDatum].filter(t => t.id !== id);
+        // Pokud je den prázdný, smazat
+        if (transporty[transportDatum].length === 0) {
+            delete transporty[transportDatum];
+        }
+    }
+
+    // Smazat stav
+    delete stavy[id];
+    delete dropTimery[id];
+
+    // Aktualizovat UI
+    vykresli();
+    aktualizovatPocetDokoncenych();
+    await ulozData();
 }
 
 // Otevřít modal pro reset stavu
@@ -2357,6 +2530,7 @@ async function ulozData() {
         formData.append('stavy', JSON.stringify(stavy));
         formData.append('transporty', JSON.stringify(transporty));
         formData.append('ridici', JSON.stringify(ridici));
+        formData.append('dokoncene', JSON.stringify(dokoncene));
         await fetch('api/transport_sync.php', {
             method: 'POST',
             body: formData
@@ -2418,14 +2592,35 @@ async function nactiData() {
             if (data.ridici && Array.isArray(data.ridici) && data.ridici.length > 0) {
                 ridici = data.ridici;
             }
+
+            // Načíst dokončené
+            if (data.dokoncene && Array.isArray(data.dokoncene)) {
+                dokoncene = data.dokoncene;
+            }
+
+            // Spustit timery pro existující DROP stavy
+            obnovitDropTimery();
+
             vykresli();
             vykresliRidice();
+            aktualizovatPocetDokoncenych();
         }
     } catch (e) {
         console.log('Chyba pri nacitani:', e);
         vykresli();
         vykresliRidice();
+        aktualizovatPocetDokoncenych();
     }
+}
+
+// Obnovit timery pro existující DROP stavy po načtení
+function obnovitDropTimery() {
+    Object.keys(stavy).forEach(id => {
+        if (stavy[id]?.stav === 'drop') {
+            // Spustit timer (zbývající čas - pro jednoduchost spustíme znovu celou minutu)
+            spustitDropTimer(id);
+        }
+    });
 }
 
 // Zavřít modaly klávesou Escape
@@ -2436,6 +2631,7 @@ document.addEventListener('keydown', e => {
         zavriModalReset();
         zavriModalRidic();
         zavriModalRidici();
+        zavriModalDokoncene();
         zavriLetOverlay();
     }
 });
