@@ -716,6 +716,8 @@
             padding: 25px;
             width: 90%;
             max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-titulek {
