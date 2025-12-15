@@ -450,12 +450,20 @@
             justify-content: flex-end;
         }
 
-        /* Stred - info */
+        /* Trasa - nad jmenem */
+        .transport-trasa {
+            font-size: 11px;
+            color: #555;
+            grid-column: 1 / 4;
+            grid-row: 2;
+        }
+
+        /* Jmeno klienta */
         .transport-jmena {
             font-size: 24px;
             font-weight: 700;
             grid-column: 1 / 4;
-            grid-row: 2;
+            grid-row: 3;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -464,21 +472,15 @@
             text-overflow: ellipsis;
         }
 
+        /* Meta info - let + ridic */
         .transport-meta {
-            font-size: 12px;
-            color: #999;
+            font-size: 10px;
+            color: #555;
             grid-column: 1 / 4;
-            grid-row: 3;
+            grid-row: 4;
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .transport-trasa {
-            font-size: 13px;
-            color: #666;
-            grid-column: 1 / 4;
-            grid-row: 4;
         }
 
         .transport-poznamka {
@@ -492,27 +494,29 @@
             border-left: 2px solid #444;
         }
 
-        /* Levy dolni roh - upravit */
+        /* Levy dolni roh - upravit (male) */
         .btn-upravit {
             grid-column: 1;
             grid-row: 6;
             justify-self: start;
-            background: #222;
-            border: 1px solid #444;
-            color: #888;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 12px;
+            background: transparent;
+            border: none;
+            color: #555;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-upravit:hover {
-            background: #333;
-            color: #fff;
+            background: #222;
+            color: #888;
         }
 
-        /* Pravy dolni roh - stav */
+        /* Pravy dolni roh - stav (male) */
         .transport-stav {
             grid-column: 3;
             grid-row: 6;
@@ -523,40 +527,30 @@
 
         .transport-let {
             display: inline-block;
-            background: #222;
-            border: 1px solid #444;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #888;
-            margin-left: 8px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 10px;
+            font-weight: 500;
+            color: #666;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .transport-let:hover {
-            background: #333;
-            border-color: #555;
-            color: #fff;
+            color: #999;
         }
 
         .transport-let.aktivni {
-            border-color: #39ff14;
             color: #39ff14;
-            animation: let-pulse 2s ease-in-out infinite;
         }
 
         .transport-let.pristano {
-            background: #39ff14;
-            border-color: #39ff14;
-            color: #000;
+            color: #39ff14;
         }
 
         .transport-let.zpozdeno {
-            background: #ff8800;
-            border-color: #ff8800;
-            color: #000;
+            color: #ff8800;
         }
 
         @keyframes let-pulse {
@@ -564,17 +558,15 @@
             50% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
         }
 
-        /* Ridic badge */
+        /* Ridic badge (male) */
         .transport-ridic {
             display: inline-block;
-            background: #333;
-            border: 1px solid #555;
-            padding: 2px 8px;
-            border-radius: 4px;
+            background: transparent;
+            border: none;
+            padding: 0;
             font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            margin-left: 8px;
+            font-weight: 500;
+            color: #666;
             text-transform: uppercase;
         }
 
@@ -623,19 +615,19 @@
         }
 
         .stav-btn {
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
             cursor: pointer;
             border: none;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 38px;
+            min-height: 22px;
         }
 
         .stav-wait {
@@ -1778,15 +1770,15 @@ function vykresli() {
             div.innerHTML = `
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-kontakty">${kontaktIkony}</div>
+                <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 <div class="transport-jmena">${item.jmeno} ${pocetOsobInfo}</div>
                 <div class="transport-meta">${letInfo} ${ridicInfo}</div>
+                ${poznamkaInfo}
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">Upravit</button>
-                <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
                     <div class="stav-cas">${stavCas}</div>
                 </div>
-                ${poznamkaInfo}
             `;
             transportyKontejner.appendChild(div);
         });
