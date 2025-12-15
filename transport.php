@@ -179,6 +179,31 @@
             font-weight: 600;
         }
 
+        .dokonceny-akce {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-smazat-dokonceny {
+            background: transparent;
+            border: 1px solid #666;
+            color: #666;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-smazat-dokonceny:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
         /* Modal ridici obsah */
         .modal-ridici-obsah {
             max-width: 450px;
@@ -1310,6 +1335,7 @@
             <!-- Dokončené transporty se vykreslí JavaScriptem -->
         </div>
         <div class="modal-btns">
+            <button class="modal-btn modal-btn-potvrdit" onclick="exportDokoncenych()" style="background:#333;">Export PDF</button>
             <button class="modal-btn modal-btn-zrusit" onclick="zavriModalDokoncene()">Zavrit</button>
         </div>
     </div>
@@ -2474,9 +2500,11 @@ function vykresliDokoncene() {
     // Seřadit od nejnovějších
     const serazene = [...dokoncene].reverse();
 
-    kontejner.innerHTML = serazene.map(item => {
-        const ridic = item.ridic ? ridici.find(r => r.id === item.ridic) : null;
+    kontejner.innerHTML = serazene.map((item, index) => {
+        const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
         const ridicJmeno = ridic ? ridic.jmeno : '';
+        // Index v původním poli (ne v seřazeném)
+        const origIndex = dokoncene.length - 1 - index;
 
         return `
             <div class="dokonceny-item">
@@ -2484,7 +2512,10 @@ function vykresliDokoncene() {
                     <div class="dokonceny-jmeno">${item.jmeno}</div>
                     <div class="dokonceny-meta">${item.odkud} → ${item.kam}${ridicJmeno ? ' | ' + ridicJmeno : ''}</div>
                 </div>
-                <div class="dokonceny-cas">${item.casDrop || item.dokoncenoCas}</div>
+                <div class="dokonceny-akce">
+                    <div class="dokonceny-cas">${item.casDrop || item.dokoncenoCas}</div>
+                    <button class="btn-smazat-dokonceny" onclick="smazatDokonceny(${origIndex})" title="Smazat">X</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -2498,6 +2529,101 @@ function aktualizovatPocetDokoncenych() {
     } else {
         badge.textContent = '';
     }
+}
+
+// Smazat dokončený transport (s heslem)
+async function smazatDokonceny(index) {
+    const heslo = prompt('Zadejte heslo pro smazani:');
+    if (!heslo) return;
+
+    if (heslo !== HESLO) {
+        alert('Spatne heslo!');
+        return;
+    }
+
+    const item = dokoncene[index];
+    if (!item) return;
+
+    if (!confirm(`Opravdu smazat dokonceny transport: ${item.jmeno}?`)) {
+        return;
+    }
+
+    dokoncene.splice(index, 1);
+    await ulozData();
+    vykresliDokoncene();
+    aktualizovatPocetDokoncenych();
+}
+
+// Export dokončených transportů do PDF
+function exportDokoncenych() {
+    if (dokoncene.length === 0) {
+        alert('Zadne dokoncene transporty k exportu');
+        return;
+    }
+
+    // Vytvorit obsah pro tisk
+    const datum = new Date().toLocaleDateString('cs-CZ');
+    let html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Dokoncene transporty - ${datum}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { font-size: 18px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                th { background: #333; color: #fff; }
+                .cas { font-weight: bold; }
+                .footer { margin-top: 30px; font-size: 11px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>Dokoncene transporty - ${datum}</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cas</th>
+                        <th>Jmeno</th>
+                        <th>Trasa</th>
+                        <th>Ridic</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Seřadit od nejnovějších
+    const serazene = [...dokoncene].reverse();
+
+    serazene.forEach(item => {
+        const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
+        const ridicJmeno = ridic ? ridic.jmeno : '-';
+        html += `
+            <tr>
+                <td class="cas">${item.casDrop || item.dokoncenoCas || '-'}</td>
+                <td>${item.jmeno}</td>
+                <td>${item.odkud} → ${item.kam}</td>
+                <td>${ridicJmeno}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+            <div class="footer">
+                Celkem: ${dokoncene.length} transportu | Vygenerovano: ${new Date().toLocaleString('cs-CZ')}
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Otevřít nové okno pro tisk/PDF
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
 }
 
 // Uložit změny řidiče
