@@ -761,12 +761,6 @@
         /* Pocet osob */
         .transport-pocet {
             display: inline-block;
-            background: #444;
-            border: 1px solid #666;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
             color: #fff;
             margin-left: 8px;
         }
