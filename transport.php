@@ -116,6 +116,8 @@
             transition: all 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            min-width: 160px;
+            text-align: center;
         }
 
         .btn-ridici:hover {
