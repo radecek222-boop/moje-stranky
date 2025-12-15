@@ -3572,7 +3572,7 @@ async function aktualizujVsechnyLety() {
     }
 }
 
-// Kliknuti na badge letu - zobrazit detaily INLINE pod číslem
+// Kliknuti na badge letu - zobrazit detaily v MODALU
 function zobrazDetailLetu(event) {
     const letElement = event.target;
     const cisloLetu = letElement.dataset.let;
@@ -3580,90 +3580,48 @@ function zobrazDetailLetu(event) {
 
     event.stopPropagation();
 
-    // Najit nebo vytvorit info element pod letem
-    const parent = letElement.closest('.transport-meta');
-    let infoEl = parent.querySelector('.let-info-inline');
-
-    // Pokud info uz existuje, skryt/zobrazit
-    if (infoEl) {
-        infoEl.remove();
-        return;
-    }
-
     // Pokud mame cachovana data, zobrazit je
     const data = letoveStavy[cisloLetu];
     if (data) {
-        zobrazLetInline(letElement, data);
+        zobrazLetOverlay(data);
     } else {
         // Nacist data a pak zobrazit
-        nactiAZobrazLetInline(letElement, cisloLetu);
+        nactiAZobrazLetModal(cisloLetu);
     }
 }
 
-// Nacist data letu a zobrazit inline
-async function nactiAZobrazLetInline(letElement, cisloLetu) {
-    // Zobrazit loading
-    const parent = letElement.closest('.transport-meta');
-    let infoEl = document.createElement('div');
-    infoEl.className = 'let-info-inline';
-    infoEl.innerHTML = '<span style="color:#666;">Nacitam...</span>';
-    parent.appendChild(infoEl);
+// Nacist data letu a zobrazit v modalu
+async function nactiAZobrazLetModal(cisloLetu) {
+    // Zobrazit loading modal
+    await transportConfirm('Nacitam informace o letu...', {
+        titulek: 'Let ' + cisloLetu,
+        btnPotvrdit: 'OK',
+        btnZrusit: null
+    });
 
     try {
         const odpoved = await fetch('api/flight_api.php?let=' + encodeURIComponent(cisloLetu));
         const data = await odpoved.json();
         if (data.status === 'success') {
             letoveStavy[cisloLetu] = data;
-            zobrazLetInline(letElement, data);
+            zobrazLetOverlay(data);
         } else {
-            infoEl.innerHTML = '<span style="color:#ff4444;">Let nenalezen</span>';
+            await transportConfirm('Let nenalezen', {
+                titulek: 'Chyba',
+                btnPotvrdit: 'OK',
+                btnZrusit: null,
+                nebezpecne: true
+            });
         }
     } catch (e) {
-        infoEl.innerHTML = '<span style="color:#ff4444;">Chyba</span>';
+        await transportConfirm('Chyba pri nacitani letu', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
         console.log('Chyba pri nacitani letu:', e);
     }
-}
-
-// Zobrazit info o letu inline pod číslem
-function zobrazLetInline(letElement, data) {
-    const parent = letElement.closest('.transport-meta');
-
-    // Odstranit stary info element
-    const oldInfo = parent.querySelector('.let-info-inline');
-    if (oldInfo) oldInfo.remove();
-
-    const prilet = data.prilet;
-    const cas = prilet.odhadovano || prilet.planovano || '';
-    const casStr = cas ? new Date(cas).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '';
-
-    const stavyPreklad = {
-        'scheduled': 'NAPLANOVANO',
-        'active': 'VE VZDUCHU',
-        'landed': 'PRISTANO',
-        'cancelled': 'ZRUSENO',
-        'delayed': 'ZPOZDENO'
-    };
-
-    const stavyBarvy = {
-        'scheduled': '#666',
-        'active': '#39ff14',
-        'landed': '#39ff14',
-        'cancelled': '#ff4444',
-        'delayed': '#ff8800'
-    };
-
-    const stav = data.stavLetu || 'scheduled';
-    const stavText = stavyPreklad[stav] || stav;
-    const stavBarva = stavyBarvy[stav] || '#666';
-
-    const infoEl = document.createElement('div');
-    infoEl.className = 'let-info-inline';
-    infoEl.innerHTML = `
-        <span style="color:${stavBarva};font-weight:700;">${stavText}</span>
-        ${casStr ? `<span style="color:#fff;margin-left:8px;">${casStr}</span>` : ''}
-        ${prilet.terminal ? `<span style="color:#666;margin-left:8px;">T${prilet.terminal}</span>` : ''}
-    `;
-    parent.appendChild(infoEl);
 }
 
 // Zobrazit WGS overlay s informacemi o letu
