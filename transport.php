@@ -187,10 +187,106 @@
             justify-items: center;
             text-align: center;
             gap: 8px;
+            position: relative;
+            cursor: pointer;
         }
 
         .ridic-info {
             text-align: center;
+        }
+
+        /* Mini-overlay pro řidiče */
+        .ridic-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 6px;
+            gap: 6px;
+            z-index: 100;
+            margin-top: 8px;
+        }
+
+        .ridic-menu.aktivni {
+            display: flex;
+        }
+
+        .ridic-menu-btn {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .ridic-menu-btn:hover {
+            background: #444;
+        }
+
+        /* Seznam transportů řidiče */
+        .seznam-transport-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .seznam-transport-info {
+            flex: 1;
+        }
+
+        .seznam-transport-cas {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .seznam-transport-jmeno {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 2px;
+        }
+
+        .seznam-transport-trasa {
+            font-size: 10px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .seznam-transport-stav {
+            font-size: 10px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #333;
+        }
+
+        .seznam-transport-stav.stav-onway-mini {
+            background: #fff;
+            color: #000;
+        }
+
+        .seznam-transport-stav.stav-drop-mini {
+            background: transparent;
+            color: #39ff14;
+            border: 1px solid #39ff14;
         }
 
         .ridic-jmeno {
@@ -457,12 +553,12 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 6px;
+            padding: 6px 10px;
+            margin-bottom: 4px;
             display: grid;
             grid-template-columns: auto 1fr auto;
             grid-template-rows: auto auto auto auto;
-            gap: 3px 12px;
+            gap: 1px 10px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
@@ -1164,6 +1260,19 @@
     </div>
 </div>
 
+<!-- Modal pro seznam transportů řidiče -->
+<div class="modal" id="modal-seznam-ridice">
+    <div class="modal-obsah" style="max-width: 500px;">
+        <div class="modal-titulek" id="modal-seznam-ridice-titulek">Seznam</div>
+        <div id="seznam-transportu-ridice" style="max-height: 60vh; overflow-y: auto;">
+            <!-- Transporty se vykreslí JavaScriptem -->
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-zrusit" onclick="zavriModalSeznamRidice()">Zpet</button>
+        </div>
+    </div>
+</div>
+
 <!-- Dynamické sekce dnů - generováno JavaScriptem -->
 <div id="dny-kontejner"></div>
 
@@ -1632,10 +1741,17 @@ function vykresliRidice() {
     );
 
     serazeniRidici.forEach(ridic => {
+        // Spočítat počet přiřazených transportů
+        const pocetTransportu = spocitatTransportyRidice(ridic.id);
+
         const div = document.createElement('div');
         div.className = 'ridic';
+        div.onclick = (e) => {
+            if (e.target.closest('.ridic-tel') || e.target.closest('.ridic-menu-btn')) return;
+            prepniMenuRidice(ridic.id);
+        };
         div.innerHTML = `
-            <div class="ridic-auto-svg" onclick="otevriModalRidic('${ridic.id}')" style="cursor: pointer;" title="Kliknete pro upravu">
+            <div class="ridic-auto-svg">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
                 </svg>
@@ -1650,6 +1766,10 @@ function vykresliRidice() {
                     <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
             </a>
+            <div class="ridic-menu" id="ridic-menu-${ridic.id}">
+                <button class="ridic-menu-btn" onclick="event.stopPropagation(); zavriVsechnyMenuRidicu(); otevriModalRidic('${ridic.id}')">Upravit</button>
+                <button class="ridic-menu-btn" onclick="event.stopPropagation(); zavriVsechnyMenuRidicu(); zobrazSeznamTransportuRidice('${ridic.id}')">Seznam ${pocetTransportu > 0 ? '(' + pocetTransportu + ')' : ''}</button>
+            </div>
         `;
         kontejner.appendChild(div);
     });
@@ -1704,6 +1824,105 @@ function otevriModalPridatRidice() {
     document.getElementById('modal-ridic-chyba').style.display = 'none';
 
     document.getElementById('modal-ridic').classList.add('aktivni');
+}
+
+// Přepnout menu řidiče
+function prepniMenuRidice(ridicId) {
+    const menu = document.getElementById('ridic-menu-' + ridicId);
+    if (!menu) return;
+
+    const jeOtevreno = menu.classList.contains('aktivni');
+    zavriVsechnyMenuRidicu();
+
+    if (!jeOtevreno) {
+        menu.classList.add('aktivni');
+    }
+}
+
+// Zavřít všechny menu řidičů
+function zavriVsechnyMenuRidicu() {
+    document.querySelectorAll('.ridic-menu').forEach(menu => {
+        menu.classList.remove('aktivni');
+    });
+}
+
+// Spočítat transporty přiřazené řidiči
+function spocitatTransportyRidice(ridicId) {
+    let pocet = 0;
+    Object.keys(transporty).forEach(datum => {
+        transporty[datum]?.forEach(transport => {
+            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+                pocet++;
+            }
+        });
+    });
+    return pocet;
+}
+
+// Získat transporty přiřazené řidiči
+function ziskatTransportyRidice(ridicId) {
+    const seznam = [];
+    Object.keys(transporty).forEach(datum => {
+        transporty[datum]?.forEach(transport => {
+            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+                seznam.push({
+                    ...transport,
+                    datum: datum,
+                    stav: stavy[transport.id]?.stav || 'wait'
+                });
+            }
+        });
+    });
+    // Seřadit podle data a času
+    return seznam.sort((a, b) => {
+        const datumA = a.datum + ' ' + a.cas;
+        const datumB = b.datum + ' ' + b.cas;
+        return datumA.localeCompare(datumB);
+    });
+}
+
+// Zobrazit seznam transportů řidiče
+function zobrazSeznamTransportuRidice(ridicId) {
+    const ridic = ridici.find(r => r.id === ridicId);
+    if (!ridic) return;
+
+    const transportyRidice = ziskatTransportyRidice(ridicId);
+
+    // Aktualizovat titulek
+    document.getElementById('modal-seznam-ridice-titulek').textContent = ridic.jmeno + ' - Seznam';
+
+    // Vykreslit transporty
+    const kontejner = document.getElementById('seznam-transportu-ridice');
+
+    if (transportyRidice.length === 0) {
+        kontejner.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Zadne prirazene transporty</div>';
+    } else {
+        kontejner.innerHTML = transportyRidice.map(t => {
+            const stavText = t.stav === 'wait' ? 'CEKA' : (t.stav === 'onway' ? 'CESTA' : 'DROP');
+            const stavClass = t.stav === 'wait' ? '' : (t.stav === 'onway' ? 'stav-onway-mini' : 'stav-drop-mini');
+            return `
+                <div class="seznam-transport-item">
+                    <div class="seznam-transport-info">
+                        <div class="seznam-transport-cas">${t.cas}</div>
+                        <div class="seznam-transport-jmeno">${t.jmeno}</div>
+                        <div class="seznam-transport-trasa">${t.odkud} → ${t.kam}</div>
+                    </div>
+                    <div class="seznam-transport-stav ${stavClass}">${stavText}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Zavřít modal řidičů a otevřít seznam
+    zavriModalRidici();
+    document.getElementById('modal-seznam-ridice').classList.add('aktivni');
+}
+
+// Zavřít modal seznamu transportů řidiče
+function zavriModalSeznamRidice() {
+    document.getElementById('modal-seznam-ridice').classList.remove('aktivni');
+    // Znovu otevřít modal řidičů
+    otevriModalRidici();
 }
 
 // Otevřít modal se seznamem řidičů
@@ -2634,6 +2853,9 @@ document.addEventListener('keydown', e => {
         zavriModalRidic();
         zavriModalRidici();
         zavriModalDokoncene();
+        // Zavřít seznam řidiče bez otevření hlavního modalu
+        document.getElementById('modal-seznam-ridice')?.classList.remove('aktivni');
+        zavriVsechnyMenuRidicu();
         zavriLetOverlay();
     }
 });
