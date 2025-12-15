@@ -564,12 +564,12 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 6px 10px;
-            margin-bottom: 4px;
+            padding: 4px 8px;
+            margin-bottom: 3px;
             display: grid;
             grid-template-columns: auto 1fr auto;
             grid-template-rows: auto auto auto auto;
-            gap: 1px 10px;
+            gap: 0px 8px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
