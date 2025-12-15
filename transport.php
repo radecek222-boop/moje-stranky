@@ -51,6 +51,21 @@
             color: #fff;
         }
 
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .header-title:hover {
+            background: #222;
+        }
+
         /* Language switcher */
         .lang-switcher {
             z-index: 100;
@@ -184,21 +199,18 @@
 
         .btn-smazat-dokonceny {
             background: transparent;
-            border: 1px solid #666;
-            color: #666;
+            border: none;
+            color: #dc3545;
             width: 24px;
             height: 24px;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
             transition: all 0.2s;
         }
 
         .btn-smazat-dokonceny:hover {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: #fff;
+            color: #ff4444;
         }
 
         /* Modal ridici obsah */
@@ -654,7 +666,7 @@
             grid-row: 4;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
@@ -1373,6 +1385,9 @@
 <div class="header">
     <div class="logo-wgs">WGS</div>
 
+    <!-- Editovatelny nazev -->
+    <div class="header-title" id="header-title" onclick="editovatNazev()">TRANSPORT</div>
+
     <!-- Language switcher -->
     <div class="lang-switcher" id="lang-switcher" onclick="toggleLangMenu(event)">
         <div class="lang-current" id="lang-current">CZ</div>
@@ -1782,6 +1797,44 @@ const translations = {
         standby: 'STAND-BY 21:00 - 06:00'
     }
 };
+
+// Nazev stranky (ulozeny v localStorage)
+function nactiNazev() {
+    const ulozenyNazev = localStorage.getItem('transportNazev');
+    if (ulozenyNazev) {
+        document.getElementById('header-title').textContent = ulozenyNazev;
+    }
+}
+
+// Editovat nazev (s heslem)
+async function editovatNazev() {
+    const hesloVysledek = await transportConfirm('Zadejte heslo pro editaci', {
+        titulek: 'Overeni',
+        btnPotvrdit: 'Pokracovat',
+        heslo: true
+    });
+
+    if (!hesloVysledek.potvrzeno) return;
+
+    if (hesloVysledek.heslo !== HESLO) {
+        await transportConfirm('Spatne heslo!', {
+            titulek: 'Chyba',
+            btnPotvrdit: 'OK',
+            btnZrusit: null,
+            nebezpecne: true
+        });
+        return;
+    }
+
+    // Heslo spravne - zobrazit input pro novy nazev
+    const aktualniNazev = document.getElementById('header-title').textContent;
+    const novyNazev = prompt('Zadejte novy nazev:', aktualniNazev);
+
+    if (novyNazev && novyNazev.trim()) {
+        document.getElementById('header-title').textContent = novyNazev.trim();
+        localStorage.setItem('transportNazev', novyNazev.trim());
+    }
+}
 
 // Confirm modal funkce (podobna wgsConfirm)
 function transportConfirm(zprava, options = {}) {
@@ -3907,6 +3960,9 @@ document.addEventListener('click', function(e) {
 
 // Inicializace po načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
+    // Nacist ulozeny nazev
+    nactiNazev();
+
     // Nastavit jazyk při načtení
     document.getElementById('lang-current').textContent = currentLang.toUpperCase();
     document.querySelectorAll('.lang-option').forEach(opt => {
