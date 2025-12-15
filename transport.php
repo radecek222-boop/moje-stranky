@@ -1930,7 +1930,7 @@ function spocitatTransportyRidice(ridicId) {
     let pocet = 0;
     Object.keys(transporty).forEach(datum => {
         transporty[datum]?.forEach(transport => {
-            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+            if (transport.ridicId === ridicId || stavy[transport.id]?.ridic === ridicId) {
                 pocet++;
             }
         });
@@ -1943,7 +1943,7 @@ function ziskatTransportyRidice(ridicId) {
     const seznam = [];
     Object.keys(transporty).forEach(datum => {
         transporty[datum]?.forEach(transport => {
-            if (transport.ridic === ridicId || stavy[transport.id]?.ridic === ridicId) {
+            if (transport.ridicId === ridicId || stavy[transport.id]?.ridic === ridicId) {
                 seznam.push({
                     ...transport,
                     datum: datum,
