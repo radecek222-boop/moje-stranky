@@ -412,12 +412,12 @@
             background: #111;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 8px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
             display: grid;
             grid-template-columns: auto 1fr auto;
             grid-template-rows: auto auto auto auto;
-            gap: 8px 15px;
+            gap: 3px 12px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
