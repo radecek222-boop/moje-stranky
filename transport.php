@@ -479,6 +479,44 @@
             50% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
         }
 
+        /* Ridic badge */
+        .transport-ridic {
+            display: inline-block;
+            background: #333;
+            border: 1px solid #555;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Kontaktni ikony */
+        .transport-kontakt {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #888;
+            margin-left: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .transport-kontakt:hover {
+            background: #333;
+            border-color: #666;
+            color: #fff;
+        }
+
         /* Tlačítko smazat - pravý dolní roh */
         .btn-smazat {
             position: absolute;
@@ -647,6 +685,21 @@
         .modal-input:focus {
             outline: none;
             border-color: #555;
+        }
+
+        .modal-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .modal-select option {
+            background: #222;
+            color: #fff;
+            padding: 10px;
         }
 
         .modal-btns {
@@ -921,6 +974,16 @@
             <input type="text" class="modal-input" id="input-jmeno" placeholder="Jmeno pasazera">
         </div>
 
+        <div class="modal-pole" id="pole-telefon">
+            <label class="modal-label">Telefon (volitelne)</label>
+            <input type="tel" class="modal-input" id="input-telefon" placeholder="napr. +420123456789">
+        </div>
+
+        <div class="modal-pole" id="pole-email">
+            <label class="modal-label">Email (volitelne)</label>
+            <input type="email" class="modal-input" id="input-email" placeholder="napr. pasazer@email.com">
+        </div>
+
         <div class="modal-pole" id="pole-odkud">
             <label class="modal-label">Odkud</label>
             <input type="text" class="modal-input" id="input-odkud" placeholder="Misto vyzvednut">
@@ -929,6 +992,13 @@
         <div class="modal-pole" id="pole-kam">
             <label class="modal-label">Kam</label>
             <input type="text" class="modal-input" id="input-kam" placeholder="Cilove misto">
+        </div>
+
+        <div class="modal-pole" id="pole-ridic">
+            <label class="modal-label">Ridic</label>
+            <select class="modal-input modal-select" id="input-ridic">
+                <option value="">-- Neprirazeno --</option>
+            </select>
         </div>
 
         <div class="modal-pole">
@@ -1438,6 +1508,19 @@ function vykresli() {
             // Sestavit info o letu
             const letInfo = item.cisloLetu ? `<span class="transport-let" data-let="${item.cisloLetu}" title="Kliknete pro aktualizaci">${item.cisloLetu}</span>` : '';
 
+            // Sestavit info o ridici
+            const ridic = item.ridicId ? ridici.find(r => r.id === item.ridicId) : null;
+            const ridicInfo = ridic ? `<span class="transport-ridic" title="${ridic.auto || ''}">${ridic.jmeno}</span>` : '';
+
+            // Sestavit kontaktni ikony
+            let kontaktIkony = '';
+            if (item.telefon) {
+                kontaktIkony += `<a href="tel:${item.telefon}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.telefon}">T</a>`;
+            }
+            if (item.email) {
+                kontaktIkony += `<a href="mailto:${item.email}" class="transport-kontakt" onclick="event.stopPropagation();" title="${item.email}">@</a>`;
+            }
+
             const div = document.createElement('div');
             div.className = 'transport';
             div.dataset.id = item.id;
@@ -1448,8 +1531,8 @@ function vykresli() {
                 <button class="btn-upravit" onclick="event.stopPropagation(); editujVse('${item.id}', '${datum}')">✎</button>
                 <div class="transport-cas">${item.cas}</div>
                 <div class="transport-info">
-                    <div class="transport-jmena">${item.jmeno} ${letInfo}</div>
-                    <div class="transport-trasa">${item.odkud} → ${item.kam}</div>
+                    <div class="transport-jmena">${item.jmeno} ${letInfo} ${kontaktIkony}</div>
+                    <div class="transport-trasa">${item.odkud} → ${item.kam} ${ridicInfo}</div>
                 </div>
                 <div class="transport-stav">
                     <button class="stav-btn ${stavClass}" onclick="event.stopPropagation(); zmenStav('${item.id}')">${stavText}</button>
@@ -1461,6 +1544,27 @@ function vykresli() {
     });
 }
 
+// Naplnit select s řidiči
+function naplnSelectRidicu(vybranyId = '') {
+    const select = document.getElementById('input-ridic');
+    select.innerHTML = '<option value="">-- Neprirazeno --</option>';
+
+    // Seradit ridice podle jmena
+    const serazeniRidici = [...ridici].sort((a, b) =>
+        (a.jmeno || '').localeCompare(b.jmeno || '', 'cs')
+    );
+
+    serazeniRidici.forEach(ridic => {
+        const option = document.createElement('option');
+        option.value = ridic.id;
+        option.textContent = ridic.jmeno + (ridic.auto ? ' (' + ridic.auto + ')' : '');
+        if (ridic.id === vybranyId) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+}
+
 // Otevřít modal pro přidání
 function otevriModalPridat(datum) {
     editAkce = { typ: 'pridat', datum: datum, id: null, pole: null };
@@ -1468,12 +1572,17 @@ function otevriModalPridat(datum) {
     document.getElementById('input-let').value = '';
     document.getElementById('input-cas').value = '';
     document.getElementById('input-jmeno').value = '';
+    document.getElementById('input-telefon').value = '';
+    document.getElementById('input-email').value = '';
     document.getElementById('input-odkud').value = '';
     document.getElementById('input-kam').value = '';
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
     document.getElementById('let-info').className = 'let-info';
     document.getElementById('let-info').innerHTML = '';
+
+    // Naplnit select ridicu
+    naplnSelectRidicu('');
 
     // Zobrazit pole pro datum pri pridavani
     const datumWrapper = document.getElementById('datum-wrapper');
@@ -1517,12 +1626,17 @@ function editujVse(id, datum) {
     document.getElementById('input-let').value = transport.cisloLetu || '';
     document.getElementById('input-cas').value = transport.cas;
     document.getElementById('input-jmeno').value = transport.jmeno;
+    document.getElementById('input-telefon').value = transport.telefon || '';
+    document.getElementById('input-email').value = transport.email || '';
     document.getElementById('input-odkud').value = transport.odkud;
     document.getElementById('input-kam').value = transport.kam;
     document.getElementById('input-heslo').value = '';
     document.getElementById('modal-chyba').style.display = 'none';
     document.getElementById('let-info').className = 'let-info';
     document.getElementById('let-info').innerHTML = '';
+
+    // Naplnit select ridicu a vybrat aktualniho
+    naplnSelectRidicu(transport.ridicId || '');
 
     document.getElementById('modal-edit').classList.add('aktivni');
 }
@@ -1546,14 +1660,18 @@ async function potvrdEdit() {
         }
 
         const cisloLetu = document.getElementById('input-let').value.trim().toUpperCase();
+        const ridicId = document.getElementById('input-ridic').value || null;
         const novy = {
             id: generujId(),
             cas: normalizujCas(document.getElementById('input-cas').value) || '00:00',
             jmeno: document.getElementById('input-jmeno').value || 'Neznamy',
+            telefon: document.getElementById('input-telefon').value.trim() || null,
+            email: document.getElementById('input-email').value.trim() || null,
             odkud: document.getElementById('input-odkud').value || '?',
             kam: document.getElementById('input-kam').value || '?',
             datum: vybraneDatum,
-            cisloLetu: cisloLetu || null
+            cisloLetu: cisloLetu || null,
+            ridicId: ridicId
         };
 
         // Pridat do spravneho datumu
@@ -1567,9 +1685,12 @@ async function potvrdEdit() {
         if (transport) {
             transport.cas = normalizujCas(document.getElementById('input-cas').value);
             transport.jmeno = document.getElementById('input-jmeno').value;
+            transport.telefon = document.getElementById('input-telefon').value.trim() || null;
+            transport.email = document.getElementById('input-email').value.trim() || null;
             transport.odkud = document.getElementById('input-odkud').value;
             transport.kam = document.getElementById('input-kam').value;
             transport.cisloLetu = document.getElementById('input-let').value.trim().toUpperCase() || null;
+            transport.ridicId = document.getElementById('input-ridic').value || null;
         }
     }
 
