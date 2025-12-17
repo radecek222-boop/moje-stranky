@@ -1986,6 +1986,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'openKnihovnaPDF':
+        // Otevrit knihovnu PDF se seznamem dokumentu a moznosti nahrat
+        console.log('[EMERGENCY] Oteviram knihovnu PDF pro ID:', id);
+        if (typeof zobrazKnihovnuPDF === 'function') {
+          zobrazKnihovnuPDF(id);
+        } else {
+          console.error('[EMERGENCY] zobrazKnihovnuPDF neni dostupna');
+        }
+        break;
+
       case 'startVisit':
         if (id && typeof startVisit === 'function') {
           console.log('[EMERGENCY] Zahajuji navstevu ID:', id);

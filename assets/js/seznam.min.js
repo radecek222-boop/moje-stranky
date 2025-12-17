@@ -812,13 +812,7 @@ async function showDetail(recordOrId) {
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-        ${record.documents && record.documents.length > 0 ? `
-          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">KNIHOVNA PDF</button>
-        ` : `
-          <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
-            <div class="detail-info-box-subtitle">Knihovna PDF je prazdna</div>
-          </div>
-        `}
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
       </div>
     `;
@@ -2052,33 +2046,15 @@ async function showCustomerDetail(id) {
         </div>
       </div>
 
-      <!-- PDF DOKUMENTY -->
-      ${(() => {
-        const docs = CURRENT_RECORD.documents || [];
-        // Hledat complete_report (nový formát) nebo fallback na jakýkoliv PDF dokument
-        const completeReport = docs.find(d => d.document_type === 'complete_report');
-        const anyPdf = docs.length > 0 ? docs[0] : null;
-        const pdfDoc = completeReport || anyPdf;
-
-        if (!pdfDoc) {
-          return `
-            <div style="padding: 0.75rem; text-align: center; background: #222; border: 1px dashed #444; border-radius: 4px; margin-bottom: 1rem;">
-              <p style="margin: 0; color: #888; font-size: 0.8rem;">Knihovna PDF je prazdna</p>
-            </div>
-          `;
-        }
-
-        return `
-          <div style="margin-bottom: 1rem;">
-            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">KNIHOVNA PDF:</label>
-            <button class="btn customer-detail-btn"
-                    data-action="openPDF"
-                    data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
-              KNIHOVNA PDF
-            </button>
-          </div>
-        `;
-      })()}
+      <!-- PDF DOKUMENTY - nyní jako knihovna s možností nahrát interní PDF -->
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">KNIHOVNA PDF:</label>
+        <button class="btn customer-detail-btn"
+                data-action="openKnihovnaPDF"
+                data-id="${id}">
+          KNIHOVNA PDF
+        </button>
+      </div>
 
       ${CURRENT_USER.is_admin ? `
         <div style="border-top: 1px solid #333; padding-top: 1rem; margin-top: 1rem;">
@@ -2228,6 +2204,368 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
   document.addEventListener('keydown', escHandler);
 
   document.body.appendChild(overlay);
+}
+
+/**
+ * Zobrazí knihovnu dokumentů (PDF) s možností nahrát interní dokument
+ * @param {string} claimId - ID zakázky
+ */
+async function zobrazKnihovnuPDF(claimId) {
+  if (!claimId) {
+    wgsToast.error('Chybí ID zakázky');
+    return;
+  }
+
+  // Vytvořit modal overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'knihovnaPdfOverlay';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 10003;
+    display: flex; flex-direction: column;
+  `;
+
+  // === HLAVIČKA ===
+  const header = document.createElement('div');
+  header.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #444;
+  `;
+  header.innerHTML = `
+    <div>
+      <div style="font-weight: 600; font-size: 1rem;">KNIHOVNA PDF</div>
+      <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId}</div>
+    </div>
+    <button id="knihovnaCloseBtn" style="
+      background: #555; color: white; border: none;
+      padding: 10px 20px; border-radius: 6px;
+      font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    ">Zavrit</button>
+  `;
+
+  // === OBSAH ===
+  const content = document.createElement('div');
+  content.style.cssText = `
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  `;
+  content.innerHTML = `
+    <div style="text-align: center; padding: 40px; color: #888;">
+      Nacitam dokumenty...
+    </div>
+  `;
+
+  // === PATIČKA S TLAČÍTKEM NAHRÁT ===
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; border-top: 1px solid #444;
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  `;
+  footer.innerHTML = `
+    <button id="btnNahratPdf" style="
+      padding: 12px 24px; font-size: 0.9rem; font-weight: 600;
+      background: #333; color: white; border: 1px solid #555;
+      border-radius: 6px; cursor: pointer;
+    ">+ Nahrat interni PDF</button>
+    <button id="btnZavritKnihovnu" style="
+      padding: 12px 24px; font-size: 0.9rem; font-weight: 600;
+      background: #666; color: white; border: none;
+      border-radius: 6px; cursor: pointer;
+    ">Zavrit</button>
+  `;
+
+  // Sestavení
+  overlay.appendChild(header);
+  overlay.appendChild(content);
+  overlay.appendChild(footer);
+
+  // Event handlery
+  const zavritKnihovnu = () => overlay.remove();
+  header.querySelector('#knihovnaCloseBtn').onclick = zavritKnihovnu;
+  footer.querySelector('#btnZavritKnihovnu').onclick = zavritKnihovnu;
+
+  // ESC pro zavření
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      zavritKnihovnu();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  // Tlačítko pro nahrání PDF
+  footer.querySelector('#btnNahratPdf').onclick = () => {
+    zobrazFormularNahraniPdf(claimId, () => nactiDokumenty());
+  };
+
+  document.body.appendChild(overlay);
+
+  // Funkce pro načtení dokumentů
+  async function nactiDokumenty() {
+    try {
+      const response = await fetch(`/api/documents_api.php?action=seznam&reklamace_id=${encodeURIComponent(claimId)}&_t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      const data = await response.json();
+
+      if (data.status !== 'success') {
+        throw new Error(data.message || 'Chyba při načítání');
+      }
+
+      const dokumenty = data.data?.dokumenty || [];
+
+      if (dokumenty.length === 0) {
+        content.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #888;">
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">Zadne dokumenty</div>
+            <div style="font-size: 0.85rem;">Kliknete na "Nahrat interni PDF" pro pridani dokumentu.</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Zobrazit seznam dokumentů
+      content.innerHTML = dokumenty.map(dok => {
+        const datum = dok.nahrano ? new Date(dok.nahrano).toLocaleDateString('cs-CZ') : '-';
+        const velikostKb = dok.velikost ? Math.round(dok.velikost / 1024) : 0;
+        const jeInterni = dok.interni;
+
+        return `
+          <div class="dokument-polozka" style="
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            padding: 12px 16px; display: flex; justify-content: space-between;
+            align-items: center; gap: 12px;
+          ">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; color: #fff; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${escapeHtml(dok.nazev)}
+              </div>
+              <div style="font-size: 0.75rem; color: #888; display: flex; gap: 12px; flex-wrap: wrap;">
+                <span>${dok.typ_popis}</span>
+                <span>${datum}</span>
+                <span>${velikostKb} KB</span>
+                ${jeInterni ? '<span style="color: #ff9800;">Interni</span>' : ''}
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-dokument-akce" data-action="zobrazitPdf" data-cesta="${escapeHtml(dok.cesta)}" style="
+                padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
+                background: #333; color: white; border: 1px solid #555;
+                border-radius: 4px; cursor: pointer;
+              ">Zobrazit</button>
+              ${CURRENT_USER.is_admin ? `
+                <button class="btn-dokument-akce" data-action="smazatPdf" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
+                  padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
+                  background: #dc3545; color: white; border: none;
+                  border-radius: 4px; cursor: pointer;
+                ">X</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listener pro tlačítka dokumentů
+      content.querySelectorAll('.btn-dokument-akce').forEach(btn => {
+        btn.onclick = async (e) => {
+          const akce = btn.getAttribute('data-action');
+
+          if (akce === 'zobrazitPdf') {
+            const cesta = btn.getAttribute('data-cesta');
+            zobrazPDFModal(cesta, claimId, 'report');
+          } else if (akce === 'smazatPdf') {
+            const dokumentId = btn.getAttribute('data-id');
+            const nazev = btn.getAttribute('data-nazev');
+
+            const potvrdit = await wgsConfirm(`Opravdu chcete smazat dokument "${nazev}"?`, {
+              titulek: 'Smazat dokument',
+              btnPotvrdit: 'Smazat',
+              nebezpecne: true
+            });
+
+            if (potvrdit) {
+              await smazatDokument(dokumentId);
+              nactiDokumenty();
+            }
+          }
+        };
+      });
+
+    } catch (error) {
+      logger.error('Chyba při načítání dokumentů:', error);
+      content.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #dc3545;">
+          Chyba: ${escapeHtml(error.message)}
+        </div>
+      `;
+    }
+  }
+
+  // Smazání dokumentu
+  async function smazatDokument(dokumentId) {
+    try {
+      const csrfToken = await getCSRFToken();
+      const formData = new FormData();
+      formData.append('action', 'smazat');
+      formData.append('dokument_id', dokumentId);
+      formData.append('csrf_token', csrfToken);
+
+      const response = await fetch('/api/documents_api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        wgsToast.success('Dokument smazan');
+      } else {
+        throw new Error(data.message || 'Chyba při mazání');
+      }
+    } catch (error) {
+      logger.error('Chyba při mazání dokumentu:', error);
+      wgsToast.error('Chyba: ' + error.message);
+    }
+  }
+
+  // Spustit načítání
+  nactiDokumenty();
+}
+
+/**
+ * Zobrazí formulář pro nahrání interního PDF
+ * @param {string} claimId - ID zakázky
+ * @param {Function} onUspech - Callback po úspěšném nahrání
+ */
+function zobrazFormularNahraniPdf(claimId, onUspech) {
+  const formOverlay = document.createElement('div');
+  formOverlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8); z-index: 10005;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  `;
+
+  const formBox = document.createElement('div');
+  formBox.style.cssText = `
+    background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+    padding: 24px; max-width: 400px; width: 100%;
+  `;
+
+  formBox.innerHTML = `
+    <h3 style="margin: 0 0 20px 0; color: #fff; font-size: 1.1rem;">Nahrat interni PDF</h3>
+
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 6px;">Nazev dokumentu</label>
+      <input type="text" id="inputNazevDokumentu" placeholder="Napr. Faktura, Smlouva..." style="
+        width: 100%; padding: 10px 12px; font-size: 0.95rem;
+        background: #222; color: #fff; border: 1px solid #444;
+        border-radius: 6px; box-sizing: border-box;
+      ">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 6px;">PDF soubor</label>
+      <input type="file" id="inputPdfSoubor" accept="application/pdf,.pdf" style="
+        width: 100%; padding: 10px 12px; font-size: 0.9rem;
+        background: #222; color: #fff; border: 1px solid #444;
+        border-radius: 6px; box-sizing: border-box;
+      ">
+      <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">Max. velikost: 10 MB</div>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+      <button id="btnZrusitUpload" style="
+        padding: 10px 20px; font-size: 0.9rem; font-weight: 600;
+        background: #333; color: #fff; border: 1px solid #555;
+        border-radius: 6px; cursor: pointer;
+      ">Zrusit</button>
+      <button id="btnPotvrditUpload" style="
+        padding: 10px 20px; font-size: 0.9rem; font-weight: 600;
+        background: #28a745; color: #fff; border: none;
+        border-radius: 6px; cursor: pointer;
+      ">Nahrat</button>
+    </div>
+  `;
+
+  formOverlay.appendChild(formBox);
+
+  // Event handlery
+  const zavritForm = () => formOverlay.remove();
+
+  formBox.querySelector('#btnZrusitUpload').onclick = zavritForm;
+  formOverlay.onclick = (e) => {
+    if (e.target === formOverlay) zavritForm();
+  };
+
+  formBox.querySelector('#btnPotvrditUpload').onclick = async () => {
+    const nazev = formBox.querySelector('#inputNazevDokumentu').value.trim();
+    const souborInput = formBox.querySelector('#inputPdfSoubor');
+    const soubor = souborInput.files[0];
+
+    if (!soubor) {
+      wgsToast.error('Vyberte PDF soubor');
+      return;
+    }
+
+    // Kontrola typu
+    if (soubor.type !== 'application/pdf' && !soubor.name.toLowerCase().endsWith('.pdf')) {
+      wgsToast.error('Povoleny jsou pouze PDF soubory');
+      return;
+    }
+
+    // Kontrola velikosti
+    if (soubor.size > 10 * 1024 * 1024) {
+      wgsToast.error('Soubor je prilis velky (max 10 MB)');
+      return;
+    }
+
+    try {
+      const btnUpload = formBox.querySelector('#btnPotvrditUpload');
+      btnUpload.textContent = 'Nahravam...';
+      btnUpload.disabled = true;
+
+      const csrfToken = await getCSRFToken();
+      const formData = new FormData();
+      formData.append('action', 'nahrat');
+      formData.append('reklamace_id', claimId);
+      formData.append('nazev', nazev || 'Interni dokument');
+      formData.append('soubor', soubor);
+      formData.append('csrf_token', csrfToken);
+
+      const response = await fetch('/api/documents_api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        wgsToast.success('Dokument nahran');
+        zavritForm();
+        if (onUspech) onUspech();
+      } else {
+        throw new Error(data.message || 'Chyba při nahrávání');
+      }
+    } catch (error) {
+      logger.error('Chyba při nahrávání dokumentu:', error);
+      wgsToast.error('Chyba: ' + error.message);
+
+      const btnUpload = formBox.querySelector('#btnPotvrditUpload');
+      btnUpload.textContent = 'Nahrat';
+      btnUpload.disabled = false;
+    }
+  };
+
+  document.body.appendChild(formOverlay);
+
+  // Focus na input
+  setTimeout(() => {
+    formBox.querySelector('#inputNazevDokumentu').focus();
+  }, 100);
 }
 
 function showPhotoFullscreen(photoUrl) {
@@ -3200,7 +3538,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
     const emergencyActions = [
-      'openPDF', 'startVisit', 'showCalendar', 'vytvorCenovouNabidku',
+      'openPDF', 'openKnihovnaPDF', 'startVisit', 'showCalendar', 'vytvorCenovouNabidku',
       'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace',
       'showDetailById', 'showDetail', 'showNotes', 'closeNotesModal', 'deleteNote',
       'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate',
