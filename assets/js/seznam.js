@@ -2407,7 +2407,7 @@ async function zobrazKnihovnuPDF(claimId) {
   // Smazání dokumentu
   async function smazatDokument(dokumentId) {
     try {
-      const csrfToken = await ziskejCsrfToken();
+      const csrfToken = await getCSRFToken();
       const formData = new FormData();
       formData.append('action', 'smazat');
       formData.append('dokument_id', dokumentId);
@@ -2528,7 +2528,7 @@ function zobrazFormularNahraniPdf(claimId, onUspech) {
       btnUpload.textContent = 'Nahravam...';
       btnUpload.disabled = true;
 
-      const csrfToken = await ziskejCsrfToken();
+      const csrfToken = await getCSRFToken();
       const formData = new FormData();
       formData.append('action', 'nahrat');
       formData.append('reklamace_id', claimId);
