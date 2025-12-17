@@ -199,17 +199,19 @@ try {
 
             // Vytvořit adresář pro dokumenty
             $uploadDir = __DIR__ . '/../uploads/dokumenty';
+
+            // Pokud adresář neexistuje, zkusit vytvořit
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
-                    error_log("documents_api: Nelze vytvorit adresar: {$uploadDir}");
-                    sendJsonError('Nelze vytvorit adresar pro dokumenty - kontaktujte administratora');
-                }
+                @mkdir($uploadDir, 0755, true);
             }
 
-            // Kontrola zapisovatelnosti
-            if (!is_writable($uploadDir)) {
-                error_log("documents_api: Adresar neni zapisovatelny: {$uploadDir}");
-                sendJsonError('Adresar pro dokumenty neni zapisovatelny - kontaktujte administratora');
+            // Pokud stále neexistuje nebo není zapisovatelný, použít uploads/ přímo
+            if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
+                $uploadDir = __DIR__ . '/../uploads';
+                if (!is_writable($uploadDir)) {
+                    error_log("documents_api: Ani uploads/ neni zapisovatelny");
+                    sendJsonError('Nelze ukladat dokumenty - kontaktujte administratora');
+                }
             }
 
             // Vygenerovat unikátní název souboru
@@ -217,7 +219,10 @@ try {
             $safeNazev = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $nazevDokumentu);
             $filename = "interni_{$reklamaceIdText}_{$safeNazev}_{$timestamp}.pdf";
             $filePath = $uploadDir . '/' . $filename;
-            $relativePathForDb = '/uploads/dokumenty/' . $filename;
+
+            // Relativní cesta pro DB - záleží na tom, který adresář se použil
+            $relativeDirName = (strpos($uploadDir, 'dokumenty') !== false) ? '/uploads/dokumenty/' : '/uploads/';
+            $relativePathForDb = $relativeDirName . $filename;
 
             // Přesunout soubor
             if (!move_uploaded_file($soubor['tmp_name'], $filePath)) {
