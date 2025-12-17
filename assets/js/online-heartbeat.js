@@ -58,8 +58,8 @@
 
         isRunning = true;
 
-        // Odeslat prvni heartbeat ihned
-        sendHeartbeat();
+        // Odeslat prvni heartbeat s malym zpozdenim (predejiti Load failed pri nacteni stranky)
+        setTimeout(sendHeartbeat, 500);
 
         // Nastavit interval
         heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
