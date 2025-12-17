@@ -197,8 +197,9 @@ try {
             $claimId = $claim['id'];
             $reklamaceIdText = $claim['reklamace_id'];
 
-            // Vytvořit adresář pro dokumenty
-            $uploadDir = __DIR__ . '/../uploads/dokumenty';
+            // Vytvořit adresář pro dokumenty - použít realpath pro normalizaci cesty
+            $baseDir = realpath(__DIR__ . '/..') ?: dirname(__DIR__);
+            $uploadDir = $baseDir . '/uploads/dokumenty';
 
             // Pokud adresář neexistuje, zkusit vytvořit
             if (!is_dir($uploadDir)) {
@@ -207,9 +208,9 @@ try {
 
             // Pokud stále neexistuje nebo není zapisovatelný, použít uploads/ přímo
             if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
-                $uploadDir = __DIR__ . '/../uploads';
+                $uploadDir = $baseDir . '/uploads';
                 if (!is_writable($uploadDir)) {
-                    error_log("documents_api: Ani uploads/ neni zapisovatelny");
+                    error_log("documents_api: Ani uploads/ neni zapisovatelny. baseDir={$baseDir}");
                     sendJsonError('Nelze ukladat dokumenty - kontaktujte administratora');
                 }
             }
@@ -217,7 +218,9 @@ try {
             // Vygenerovat unikátní název souboru
             $timestamp = date('Ymd_His');
             $safeNazev = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $nazevDokumentu);
-            $filename = "interni_{$reklamaceIdText}_{$safeNazev}_{$timestamp}.pdf";
+            // Nahradit lomitka v reklamace ID pomlckami (WGS/2025/09-12/00001 -> WGS-2025-09-12-00001)
+            $safeReklamaceId = str_replace(['/', '\\'], '-', $reklamaceIdText);
+            $filename = "interni_{$safeReklamaceId}_{$safeNazev}_{$timestamp}.pdf";
             $filePath = $uploadDir . '/' . $filename;
 
             // Relativní cesta pro DB - záleží na tom, který adresář se použil
@@ -226,7 +229,18 @@ try {
 
             // Přesunout soubor
             if (!move_uploaded_file($soubor['tmp_name'], $filePath)) {
-                sendJsonError('Nepodařilo se uložit soubor');
+                // Diagnostika pro ladění
+                $tmpExists = file_exists($soubor['tmp_name']) ? 'ano' : 'ne';
+                $dirExists = is_dir($uploadDir) ? 'ano' : 'ne';
+                $dirWritable = is_writable($uploadDir) ? 'ano' : 'ne';
+                error_log("documents_api CHYBA: move_uploaded_file selhalo");
+                error_log("  - tmp soubor existuje: {$tmpExists}");
+                error_log("  - tmp cesta: {$soubor['tmp_name']}");
+                error_log("  - cilovy adresar: {$uploadDir}");
+                error_log("  - adresar existuje: {$dirExists}");
+                error_log("  - adresar zapisovatelny: {$dirWritable}");
+                error_log("  - cilova cesta: {$filePath}");
+                sendJsonError('Nepodařilo se uložit soubor - zkontrolujte logy serveru');
             }
 
             // Vložit záznam do databáze
