@@ -2330,7 +2330,7 @@ async function zobrazKnihovnuPDF(claimId) {
         throw new Error(data.message || 'Chyba při načítání');
       }
 
-      const dokumenty = data.data?.dokumenty || [];
+      const dokumenty = data.dokumenty || data.data?.dokumenty || [];
 
       if (dokumenty.length === 0) {
         content.innerHTML = `
