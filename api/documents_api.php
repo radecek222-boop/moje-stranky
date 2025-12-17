@@ -322,6 +322,54 @@ try {
             sendJsonSuccess('Dokument byl smazán');
             break;
 
+        // ========================================
+        // PREJMENOVAT - Přejmenuje interní dokument
+        // ========================================
+        case 'prejmenovat':
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $dokumentId = intval($_POST['dokument_id'] ?? 0);
+            $novyNazev = trim($_POST['novy_nazev'] ?? '');
+
+            if (!$dokumentId) {
+                sendJsonError('Chybí ID dokumentu');
+            }
+
+            if (empty($novyNazev)) {
+                sendJsonError('Název dokumentu nemůže být prázdný');
+            }
+
+            // Najít dokument
+            $stmt = $pdo->prepare("SELECT * FROM wgs_documents WHERE id = :id");
+            $stmt->execute(['id' => $dokumentId]);
+            $dokument = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$dokument) {
+                sendJsonError('Dokument nenalezen', 404);
+            }
+
+            // Pouze interní dokumenty lze přejmenovat
+            if ($dokument['document_type'] !== 'internal_pdf') {
+                sendJsonError('Pouze interní dokumenty lze přejmenovat', 403);
+            }
+
+            // Aktualizovat název v databázi
+            $stmt = $pdo->prepare("UPDATE wgs_documents SET document_name = :nazev WHERE id = :id");
+            $stmt->execute([
+                'nazev' => $novyNazev,
+                'id' => $dokumentId
+            ]);
+
+            error_log("Dokument přejmenován: ID {$dokumentId}, nový název: {$novyNazev}");
+
+            sendJsonSuccess('Dokument byl přejmenován', [
+                'dokument_id' => $dokumentId,
+                'novy_nazev' => $novyNazev
+            ]);
+            break;
+
         default:
             sendJsonError('Neznámá akce: ' . $action);
     }

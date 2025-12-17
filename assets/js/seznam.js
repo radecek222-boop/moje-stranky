@@ -2389,6 +2389,13 @@ async function zobrazKnihovnuPDF(claimId) {
                 background: #333; color: white; border: 1px solid #555;
                 border-radius: 4px; cursor: pointer;
               ">Zobrazit</button>
+              ${jeInterni ? `
+                <button class="btn-dokument-akce" data-action="prejmenovat" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
+                  padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
+                  background: #555; color: white; border: none;
+                  border-radius: 4px; cursor: pointer;
+                ">Upravit</button>
+              ` : ''}
               ${CURRENT_USER.is_admin ? `
                 <button class="btn-dokument-akce" data-action="smazatPdf" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
                   padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
@@ -2409,6 +2416,10 @@ async function zobrazKnihovnuPDF(claimId) {
           if (akce === 'zobrazitPdf') {
             const cesta = btn.getAttribute('data-cesta');
             zobrazPDFModal(cesta, claimId, 'report');
+          } else if (akce === 'prejmenovat') {
+            const dokumentId = btn.getAttribute('data-id');
+            const stavajiciNazev = btn.getAttribute('data-nazev');
+            await zobrazDialogPrejmenovat(dokumentId, stavajiciNazev, nactiDokumenty);
           } else if (akce === 'smazatPdf') {
             const dokumentId = btn.getAttribute('data-id');
             const nazev = btn.getAttribute('data-nazev');
@@ -2460,6 +2471,45 @@ async function zobrazKnihovnuPDF(claimId) {
       }
     } catch (error) {
       logger.error('Chyba při mazání dokumentu:', error);
+      wgsToast.error('Chyba: ' + error.message);
+    }
+  }
+
+  // Dialog pro přejmenování dokumentu
+  async function zobrazDialogPrejmenovat(dokumentId, stavajiciNazev, onUspech) {
+    // Použít prompt pro jednoduchost
+    const novyNazev = prompt('Zadejte nový název dokumentu:', stavajiciNazev);
+
+    if (novyNazev === null) return; // Uživatel zrušil
+    if (novyNazev.trim() === '') {
+      wgsToast.error('Název nemůže být prázdný');
+      return;
+    }
+    if (novyNazev.trim() === stavajiciNazev) return; // Beze změny
+
+    try {
+      const csrfToken = await getCSRFToken();
+      const formData = new FormData();
+      formData.append('action', 'prejmenovat');
+      formData.append('dokument_id', dokumentId);
+      formData.append('novy_nazev', novyNazev.trim());
+      formData.append('csrf_token', csrfToken);
+
+      const response = await fetch('/api/documents_api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        wgsToast.success('Dokument prejmenovan');
+        if (onUspech) onUspech();
+      } else {
+        throw new Error(data.message || 'Chyba při přejmenování');
+      }
+    } catch (error) {
+      logger.error('Chyba při přejmenování dokumentu:', error);
       wgsToast.error('Chyba: ' + error.message);
     }
   }
