@@ -226,7 +226,18 @@ try {
 
             // Přesunout soubor
             if (!move_uploaded_file($soubor['tmp_name'], $filePath)) {
-                sendJsonError('Nepodařilo se uložit soubor');
+                // Diagnostika pro ladění
+                $tmpExists = file_exists($soubor['tmp_name']) ? 'ano' : 'ne';
+                $dirExists = is_dir($uploadDir) ? 'ano' : 'ne';
+                $dirWritable = is_writable($uploadDir) ? 'ano' : 'ne';
+                error_log("documents_api CHYBA: move_uploaded_file selhalo");
+                error_log("  - tmp soubor existuje: {$tmpExists}");
+                error_log("  - tmp cesta: {$soubor['tmp_name']}");
+                error_log("  - cilovy adresar: {$uploadDir}");
+                error_log("  - adresar existuje: {$dirExists}");
+                error_log("  - adresar zapisovatelny: {$dirWritable}");
+                error_log("  - cilova cesta: {$filePath}");
+                sendJsonError('Nepodařilo se uložit soubor - zkontrolujte logy serveru');
             }
 
             // Vložit záznam do databáze
