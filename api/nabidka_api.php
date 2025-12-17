@@ -49,6 +49,7 @@ try {
         // ========================================
         // EMAILY_S_NABIDKOU - Seznam emailů zákazníků s aktivní CN (pro seznam.php)
         // Přístup: admin + technik (pouze čtení, technik nemůže vytvářet CN)
+        // Vrací emaily + stav nabídky (potvrzena má přednost před odeslana)
         // ========================================
         case 'emaily_s_nabidkou':
             $userRole = strtolower(trim($_SESSION['role'] ?? ''));
@@ -57,17 +58,37 @@ try {
                 sendJsonError('Přístup odepřen', 403);
             }
 
-            // Načíst unikátní emaily zákazníků s potvrzenou nebo odeslanou nabídkou
+            // Načíst emaily s jejich nejvyšším stavem nabídky
+            // Priorita: potvrzena > odeslana (použijeme MAX a CASE)
             $stmt = $pdo->query("
-                SELECT DISTINCT LOWER(zakaznik_email) as email
+                SELECT
+                    LOWER(zakaznik_email) as email,
+                    MAX(CASE
+                        WHEN stav = 'potvrzena' THEN 2
+                        WHEN stav = 'odeslana' THEN 1
+                        ELSE 0
+                    END) as priorita_stavu
                 FROM wgs_nabidky
                 WHERE stav IN ('potvrzena', 'odeslana')
                 AND zakaznik_email IS NOT NULL
                 AND zakaznik_email != ''
+                GROUP BY LOWER(zakaznik_email)
             ");
-            $emaily = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $vysledky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            sendJsonSuccess('Emaily načteny', ['emaily' => $emaily]);
+            // Zpracovat do mapy email -> stav
+            $emaily = [];
+            $stavyNabidek = [];
+            foreach ($vysledky as $radek) {
+                $emaily[] = $radek['email'];
+                // Převést prioritu zpět na stav
+                $stavyNabidek[$radek['email']] = $radek['priorita_stavu'] == 2 ? 'potvrzena' : 'odeslana';
+            }
+
+            sendJsonSuccess('Emaily načteny', [
+                'emaily' => $emaily,
+                'stavy' => $stavyNabidek
+            ]);
             break;
 
         // ========================================

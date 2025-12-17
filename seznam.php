@@ -1156,6 +1156,27 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   font-size: 0.75rem !important;
 }
 
+/* ============================================
+   ZELENÝ RÁMEČEK - Odsouhlasená cenová nabídka
+   Zákazník potvrdil nabídku = zelená místo oranžové
+   ============================================ */
+.order-box.cn-odsouhlasena {
+  background: rgba(40, 167, 69, 0.08) !important; /* Lehký zelený nádech */
+  border: 2px solid #28a745 !important; /* Zelená */
+  box-shadow: 0 0 8px rgba(40, 167, 69, 0.3) !important;
+}
+
+.order-box.cn-odsouhlasena:hover {
+  background: rgba(40, 167, 69, 0.12) !important; /* Trochu více na hover */
+  box-shadow: 0 0 12px rgba(40, 167, 69, 0.5) !important;
+}
+
+/* Text "Odsouhlasena" v kartě - zelená varianta */
+.order-cn-text.odsouhlasena {
+  color: #28a745 !important; /* Zelená místo oranžové */
+  border-color: #28a745 !important;
+}
+
 /* Filtr tlačítko pro CN - oranžová barva */
 .filter-btn-cn {
   border-color: #ff9800 !important;
