@@ -200,7 +200,16 @@ try {
             // Vytvořit adresář pro dokumenty
             $uploadDir = __DIR__ . '/../uploads/dokumenty';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    error_log("documents_api: Nelze vytvorit adresar: {$uploadDir}");
+                    sendJsonError('Nelze vytvorit adresar pro dokumenty - kontaktujte administratora');
+                }
+            }
+
+            // Kontrola zapisovatelnosti
+            if (!is_writable($uploadDir)) {
+                error_log("documents_api: Adresar neni zapisovatelny: {$uploadDir}");
+                sendJsonError('Adresar pro dokumenty neni zapisovatelny - kontaktujte administratora');
             }
 
             // Vygenerovat unikátní název souboru
