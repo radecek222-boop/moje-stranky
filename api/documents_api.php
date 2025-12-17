@@ -71,6 +71,9 @@ try {
 
             $claimId = $claim['id'];
 
+            // Debug log
+            error_log("documents_api SEZNAM: reklamace_id={$reklamaceId}, internal_id={$claimId}");
+
             // Načíst všechny dokumenty
             $stmt = $pdo->prepare("
                 SELECT
@@ -88,6 +91,9 @@ try {
             ");
             $stmt->execute(['claim_id' => $claimId]);
             $dokumenty = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Debug log
+            error_log("documents_api SEZNAM: nalezeno " . count($dokumenty) . " dokumentu pro claim_id={$claimId}");
 
             // Formátovat dokumenty
             $formatovane = array_map(function ($dok) {
@@ -265,7 +271,7 @@ try {
 
             $dokumentId = $pdo->lastInsertId();
 
-            error_log("Interní dokument nahrán: {$filePath} pro reklamaci {$reklamaceIdText}");
+            error_log("documents_api NAHRANO: dokument_id={$dokumentId}, claim_id={$claimId}, reklamace_id={$reklamaceIdText}, cesta={$relativePathForDb}");
 
             sendJsonSuccess('Dokument byl nahrán', [
                 'dokument_id' => $dokumentId,
