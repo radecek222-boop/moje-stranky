@@ -1,2 +1,4 @@
 *
 !.gitignore
+!dokumenty/
+!dokumenty/.gitignore
