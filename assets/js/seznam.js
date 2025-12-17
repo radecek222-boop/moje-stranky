@@ -100,6 +100,7 @@ let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
 let EMAILS_S_CN = []; // Emaily zákazníků s cenovou nabídkou
+let STAVY_NABIDEK = {}; // Mapa email -> stav nabídky ('potvrzena' nebo 'odeslana')
 
 // PAGINATION FIX: Tracking pagination state
 let CURRENT_PAGE = 1;
@@ -497,7 +498,7 @@ async function renderOrders(items = null) {
     logger.warn('Nepodařilo se načíst unread counts:', e);
   }
 
-  // Načíst emaily zákazníků s cenovou nabídkou (CN)
+  // Načíst emaily zákazníků s cenovou nabídkou (CN) včetně stavů
   try {
     const cnResponse = await fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
       cache: 'no-store',
@@ -506,6 +507,7 @@ async function renderOrders(items = null) {
     const cnData = await cnResponse.json();
     if (cnData.status === 'success') {
       EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
+      STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
     }
   } catch (e) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
@@ -563,21 +565,31 @@ async function renderOrders(items = null) {
     const unreadCount = unreadCountsMap[claimId] || 0;
     const hasUnread = unreadCount > 0;
 
-    // Zkontrolovat zda zákazník má cenovou nabídku (CN)
+    // Zkontrolovat zda zákazník má cenovou nabídku (CN) a její stav
     const zakaznikEmail = (rec.email || '').toLowerCase().trim();
     const maCenovouNabidku = zakaznikEmail && EMAILS_S_CN.includes(zakaznikEmail);
+    const stavNabidky = STAVY_NABIDEK[zakaznikEmail] || null;
+    const jeOdsouhlasena = stavNabidky === 'potvrzena';
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
     const highlightedProduct = SEARCH_QUERY ? highlightText(product, SEARCH_QUERY) : product;
     const highlightedOrderId = SEARCH_QUERY ? highlightText(orderId, SEARCH_QUERY) : orderId;
-    
+
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
     // Přidat barevný nádech podle stavu
     const statusBgClass = `status-bg-${status.class}`;
     // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
+    // Zelený rámeček pro odsouhlasené nabídky
     // Když se domluví termín → modrá (DOMLUVENÁ), když se pošle nová CN → zase oranžová
-    const cnClass = (maCenovouNabidku && !appointmentText) ? 'ma-cenovou-nabidku' : '';
+    let cnClass = '';
+    if (maCenovouNabidku && !appointmentText) {
+      cnClass = jeOdsouhlasena ? 'cn-odsouhlasena' : 'ma-cenovou-nabidku';
+    }
+
+    // Text pro CN stav
+    const cnText = jeOdsouhlasena ? 'Odsouhlasena' : 'Poslána CN';
+    const cnTextClass = jeOdsouhlasena ? 'order-cn-text odsouhlasena' : 'order-cn-text';
 
     return `
       <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
@@ -602,7 +614,7 @@ async function renderOrders(items = null) {
               ${appointmentText
                 ? `<span class="order-appointment">${appointmentText}</span>`
                 : (maCenovouNabidku
-                    ? `<span class="order-cn-text">Poslána CN</span>`
+                    ? `<span class="${cnTextClass}">${cnText}</span>`
                     : `<span class="order-status-text status-${status.class}">${status.text}</span>`)}
             </div>
           </div>
