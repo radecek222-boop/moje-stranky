@@ -377,7 +377,7 @@ try {
             $stmt = $pdo->query("
                 SELECT id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, celkova_cena, mena,
                        stav, platnost_do, vytvoreno_at, odeslano_at, potvrzeno_at,
-                       zf_odeslana_at, zf_uhrazena_at, dokonceno_at, fa_uhrazena_at
+                       cekame_nd_at, zf_odeslana_at, zf_uhrazena_at, dokonceno_at, fa_uhrazena_at
                 FROM wgs_nabidky
                 ORDER BY vytvoreno_at DESC
                 LIMIT 100
