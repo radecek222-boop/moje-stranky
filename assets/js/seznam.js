@@ -2384,11 +2384,6 @@ async function zobrazKnihovnuPDF(claimId) {
               </div>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="btn-dokument-akce" data-action="zobrazitPdf" data-cesta="${escapeHtml(dok.cesta)}" style="
-                padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
-                background: #333; color: white; border: 1px solid #555;
-                border-radius: 4px; cursor: pointer;
-              ">Zobrazit</button>
               ${jeInterni ? `
                 <button class="btn-dokument-akce" data-action="prejmenovat" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
                   padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
@@ -2396,12 +2391,17 @@ async function zobrazKnihovnuPDF(claimId) {
                   border-radius: 4px; cursor: pointer;
                 ">Upravit</button>
               ` : ''}
+              <button class="btn-dokument-akce" data-action="zobrazitPdf" data-cesta="${escapeHtml(dok.cesta)}" style="
+                padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
+                background: #333; color: white; border: 1px solid #555;
+                border-radius: 4px; cursor: pointer;
+              ">Zobrazit</button>
               ${CURRENT_USER.is_admin ? `
                 <button class="btn-dokument-akce" data-action="smazatPdf" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
                   padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
                   background: #dc3545; color: white; border: none;
                   border-radius: 4px; cursor: pointer;
-                ">X</button>
+                ">Smazat</button>
               ` : ''}
             </div>
           </div>
@@ -2475,10 +2475,105 @@ async function zobrazKnihovnuPDF(claimId) {
     }
   }
 
+  // WGS Prompt dialog - podobný wgsConfirm ale s inputem
+  function wgsPrompt(zprava, vychoziHodnota = '', options = {}) {
+    return new Promise((resolve) => {
+      const {
+        titulek = 'Zadejte hodnotu',
+        btnPotvrdit = 'Potvrdit',
+        btnZrusit = 'Zrušit',
+        placeholder = ''
+      } = options;
+
+      // Odstranit existující modal
+      const existujici = document.getElementById('wgsPromptModal');
+      if (existujici) existujici.remove();
+
+      // Vytvořit overlay
+      const modal = document.createElement('div');
+      modal.id = 'wgsPromptModal';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7); display: flex;
+        align-items: center; justify-content: center; z-index: 10001;
+      `;
+
+      // Vytvořit dialog HTML
+      modal.innerHTML = `
+        <div class="wgs-prompt-dialog" style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                    max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333; text-align: center; font-family: 'Poppins', sans-serif;">
+          <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">${escapeHtml(titulek)}</h3>
+          <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${escapeHtml(zprava)}</p>
+          <input type="text" id="wgsPromptInput" value="${escapeHtml(vychoziHodnota)}" placeholder="${escapeHtml(placeholder)}"
+                 style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
+                        background: #222; color: #fff; font-size: 1rem; margin-bottom: 20px;
+                        box-sizing: border-box; outline: none;"
+                 onfocus="this.style.borderColor='#666'" onblur="this.style.borderColor='#444'">
+          <div style="display: grid; gap: 10px;">
+            <button type="button" class="wgs-prompt-btn-potvrdit" style="padding: 12px 24px; border: none;
+                        background: #28a745; color: #fff; border-radius: 8px; cursor: pointer;
+                        font-size: 0.9rem; font-weight: 500; transition: all 0.2s; width: 100%;">
+              ${escapeHtml(btnPotvrdit)}
+            </button>
+            <button type="button" class="wgs-prompt-btn-zrusit" style="padding: 12px 24px; border: 1px solid #555;
+                        background: transparent; color: #ccc; border-radius: 8px; cursor: pointer;
+                        font-size: 0.9rem; font-weight: 500; transition: all 0.2s; width: 100%;">
+              ${escapeHtml(btnZrusit)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const inputEl = document.getElementById('wgsPromptInput');
+      const btnPotvr = modal.querySelector('.wgs-prompt-btn-potvrdit');
+      const btnZrus = modal.querySelector('.wgs-prompt-btn-zrusit');
+
+      // Focus na input a vybrat text
+      setTimeout(() => {
+        inputEl.focus();
+        inputEl.select();
+      }, 50);
+
+      // Zavřít a vrátit hodnotu
+      const zavrit = (hodnota) => {
+        modal.remove();
+        resolve(hodnota);
+      };
+
+      btnPotvr.onclick = () => zavrit(inputEl.value);
+      btnZrus.onclick = () => zavrit(null);
+
+      // Enter pro potvrzení, Escape pro zrušení
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          zavrit(inputEl.value);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          zavrit(null);
+        }
+      });
+
+      // Klik mimo dialog zavře
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) zavrit(null);
+      });
+    });
+  }
+
   // Dialog pro přejmenování dokumentu
   async function zobrazDialogPrejmenovat(dokumentId, stavajiciNazev, onUspech) {
-    // Použít prompt pro jednoduchost
-    const novyNazev = prompt('Zadejte nový název dokumentu:', stavajiciNazev);
+    // Použít WGS prompt modal
+    const novyNazev = await wgsPrompt('Zadejte nový název dokumentu:', stavajiciNazev, {
+      titulek: 'Prejmenovat dokument',
+      btnPotvrdit: 'Uložit',
+      btnZrusit: 'Zrušit'
+    });
 
     if (novyNazev === null) return; // Uživatel zrušil
     if (novyNazev.trim() === '') {
