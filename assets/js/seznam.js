@@ -2236,8 +2236,18 @@ async function zobrazKnihovnuPDF(claimId) {
   overlay.id = 'knihovnaPdfOverlay';
   overlay.style.cssText = `
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.95); z-index: 10003;
+    background: rgba(0,0,0,0.85); z-index: 10003;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  `;
+
+  // Vnitřní kontejner s omezenou šířkou
+  const modalBox = document.createElement('div');
+  modalBox.style.cssText = `
+    width: 100%; max-width: 600px; max-height: 90vh;
+    background: #1a1a1a; border-radius: 12px;
     display: flex; flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   `;
 
   // === HLAVIČKA ===
@@ -2247,6 +2257,7 @@ async function zobrazKnihovnuPDF(claimId) {
     background: #222; color: white;
     display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid #444;
+    border-radius: 12px 12px 0 0;
   `;
   header.innerHTML = `
     <div>
@@ -2278,6 +2289,7 @@ async function zobrazKnihovnuPDF(claimId) {
     flex-shrink: 0; padding: 12px 16px;
     background: #222; border-top: 1px solid #444;
     display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+    border-radius: 0 0 12px 12px;
   `;
   footer.innerHTML = `
     <button id="btnNahratPdf" style="
@@ -2292,14 +2304,20 @@ async function zobrazKnihovnuPDF(claimId) {
     ">Zavrit</button>
   `;
 
-  // Sestavení
-  overlay.appendChild(header);
-  overlay.appendChild(content);
-  overlay.appendChild(footer);
+  // Sestavení - elementy jdou do modalBox
+  modalBox.appendChild(header);
+  modalBox.appendChild(content);
+  modalBox.appendChild(footer);
+  overlay.appendChild(modalBox);
 
   // Event handlery
   const zavritKnihovnu = () => overlay.remove();
   header.querySelector('#knihovnaCloseBtn').onclick = zavritKnihovnu;
+
+  // Zavřít kliknutím mimo modal
+  overlay.onclick = (e) => {
+    if (e.target === overlay) zavritKnihovnu();
+  };
   footer.querySelector('#btnZavritKnihovnu').onclick = zavritKnihovnu;
 
   // ESC pro zavření
