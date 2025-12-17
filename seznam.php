@@ -1177,6 +1177,27 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #28a745 !important;
 }
 
+/* ============================================
+   ŠEDÝ RÁMEČEK - Čekáme na náhradní díly (ND)
+   Admin nastavil že čekáme na ND = šedá barva
+   ============================================ */
+.order-box.cn-cekame-nd {
+  background: rgba(153, 153, 153, 0.08) !important; /* Lehký šedý nádech */
+  border: 2px solid #999 !important; /* Šedá */
+  box-shadow: 0 0 8px rgba(153, 153, 153, 0.3) !important;
+}
+
+.order-box.cn-cekame-nd:hover {
+  background: rgba(153, 153, 153, 0.12) !important;
+  box-shadow: 0 0 12px rgba(153, 153, 153, 0.5) !important;
+}
+
+/* Text "Čekáme ND" v kartě - šedá varianta */
+.order-cn-text.cekame-nd {
+  color: #999 !important; /* Šedá */
+  border-color: #999 !important;
+}
+
 /* Filtr tlačítko pro CN - oranžová barva */
 .filter-btn-cn {
   border-color: #ff9800 !important;

@@ -59,11 +59,12 @@ try {
             }
 
             // Načíst emaily s jejich nejvyšším stavem nabídky
-            // Priorita: potvrzena > odeslana (použijeme MAX a CASE)
+            // Priorita: cekame_nd > potvrzena > odeslana (použijeme MAX a CASE)
             $stmt = $pdo->query("
                 SELECT
                     LOWER(zakaznik_email) as email,
                     MAX(CASE
+                        WHEN cekame_nd_at IS NOT NULL THEN 3
                         WHEN stav = 'potvrzena' THEN 2
                         WHEN stav = 'odeslana' THEN 1
                         ELSE 0
@@ -82,7 +83,13 @@ try {
             foreach ($vysledky as $radek) {
                 $emaily[] = $radek['email'];
                 // Převést prioritu zpět na stav
-                $stavyNabidek[$radek['email']] = $radek['priorita_stavu'] == 2 ? 'potvrzena' : 'odeslana';
+                if ($radek['priorita_stavu'] == 3) {
+                    $stavyNabidek[$radek['email']] = 'cekame_nd';
+                } elseif ($radek['priorita_stavu'] == 2) {
+                    $stavyNabidek[$radek['email']] = 'potvrzena';
+                } else {
+                    $stavyNabidek[$radek['email']] = 'odeslana';
+                }
             }
 
             sendJsonSuccess('Emaily načteny', [
@@ -460,7 +467,7 @@ try {
             }
 
             // Povolené kroky workflow
-            $povoleneKroky = ['zf_odeslana', 'zf_uhrazena', 'dokonceno', 'fa_uhrazena'];
+            $povoleneKroky = ['cekame_nd', 'zf_odeslana', 'zf_uhrazena', 'dokonceno', 'fa_uhrazena'];
             if (!in_array($krok, $povoleneKroky)) {
                 sendJsonError('Neplatný workflow krok');
             }
