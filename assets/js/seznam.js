@@ -570,6 +570,7 @@ async function renderOrders(items = null) {
     const maCenovouNabidku = zakaznikEmail && EMAILS_S_CN.includes(zakaznikEmail);
     const stavNabidky = STAVY_NABIDEK[zakaznikEmail] || null;
     const jeOdsouhlasena = stavNabidky === 'potvrzena';
+    const jeCekameNd = stavNabidky === 'cekame_nd';
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
@@ -581,15 +582,29 @@ async function renderOrders(items = null) {
     const statusBgClass = `status-bg-${status.class}`;
     // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
     // Zelený rámeček pro odsouhlasené nabídky
+    // Šedý rámeček pro "Čekáme ND"
     // Když se domluví termín → modrá (DOMLUVENÁ), když se pošle nová CN → zase oranžová
     let cnClass = '';
     if (maCenovouNabidku && !appointmentText) {
-      cnClass = jeOdsouhlasena ? 'cn-odsouhlasena' : 'ma-cenovou-nabidku';
+      if (jeCekameNd) {
+        cnClass = 'cn-cekame-nd';
+      } else if (jeOdsouhlasena) {
+        cnClass = 'cn-odsouhlasena';
+      } else {
+        cnClass = 'ma-cenovou-nabidku';
+      }
     }
 
     // Text pro CN stav
-    const cnText = jeOdsouhlasena ? 'Odsouhlasena' : 'Poslána CN';
-    const cnTextClass = jeOdsouhlasena ? 'order-cn-text odsouhlasena' : 'order-cn-text';
+    let cnText = 'Poslána CN';
+    let cnTextClass = 'order-cn-text';
+    if (jeCekameNd) {
+      cnText = 'Cekame ND';
+      cnTextClass = 'order-cn-text cekame-nd';
+    } else if (jeOdsouhlasena) {
+      cnText = 'Odsouhlasena';
+      cnTextClass = 'order-cn-text odsouhlasena';
+    }
 
     return `
       <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">

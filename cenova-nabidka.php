@@ -2173,6 +2173,7 @@ if ($reklamaceId > 0) {
                 // Workflow stavy
                 const jePoslana = !!n.odeslano_at;
                 const jePotvrzena = !!n.potvrzeno_at;
+                const jeCekameNd = !!n.cekame_nd_at;
                 const jeZfOdeslana = !!n.zf_odeslana_at;
                 const jeZfUhrazena = !!n.zf_uhrazena_at;
                 const jeDokonceno = !!n.dokonceno_at;
@@ -2193,6 +2194,11 @@ if ($reklamaceId > 0) {
                                 Odsouhlasena
                             </span>
                             <!-- Manuální kroky -->
+                            <button class="workflow-btn ${jeCekameNd ? 'aktivni' : ''}"
+                                    onclick="zmenitWorkflow(${n.id}, 'cekame_nd')"
+                                    title="${jeCekameNd ? 'Nastaveno: ' + formatDatum(n.cekame_nd_at) : 'Klikněte pro nastavení - čekáme na náhradní díly'}">
+                                Čekáme ND
+                            </button>
                             <button class="workflow-btn ${jeZfOdeslana ? 'aktivni' : ''}"
                                     onclick="zmenitWorkflow(${n.id}, 'zf_odeslana')"
                                     title="${jeZfOdeslana ? 'Odesláno: ' + formatDatum(n.zf_odeslana_at) : 'Klikněte pro potvrzení'}">
