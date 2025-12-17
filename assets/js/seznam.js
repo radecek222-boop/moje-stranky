@@ -2384,11 +2384,6 @@ async function zobrazKnihovnuPDF(claimId) {
               </div>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="btn-dokument-akce" data-action="zobrazitPdf" data-cesta="${escapeHtml(dok.cesta)}" style="
-                padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
-                background: #333; color: white; border: 1px solid #555;
-                border-radius: 4px; cursor: pointer;
-              ">Zobrazit</button>
               ${jeInterni ? `
                 <button class="btn-dokument-akce" data-action="prejmenovat" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
                   padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
@@ -2396,12 +2391,17 @@ async function zobrazKnihovnuPDF(claimId) {
                   border-radius: 4px; cursor: pointer;
                 ">Upravit</button>
               ` : ''}
+              <button class="btn-dokument-akce" data-action="zobrazitPdf" data-cesta="${escapeHtml(dok.cesta)}" style="
+                padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
+                background: #333; color: white; border: 1px solid #555;
+                border-radius: 4px; cursor: pointer;
+              ">Zobrazit</button>
               ${CURRENT_USER.is_admin ? `
                 <button class="btn-dokument-akce" data-action="smazatPdf" data-id="${dok.id}" data-nazev="${escapeHtml(dok.nazev)}" style="
                   padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
                   background: #dc3545; color: white; border: none;
                   border-radius: 4px; cursor: pointer;
-                ">X</button>
+                ">Smazat</button>
               ` : ''}
             </div>
           </div>
