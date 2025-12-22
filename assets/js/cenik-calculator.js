@@ -87,6 +87,7 @@
         typServisu: 'calouneni', // diagnostika, calouneni, mechanika, kombinace
 
         // Čalounické práce
+        pocetProduktu: 1, // Počet samostatných produktů (každý produkt = nové rozebírání)
         sedaky: 0,
         operky: 0,
         podrucky: 0,
@@ -120,6 +121,9 @@
         document.querySelectorAll('input[type="number"]').forEach(input => {
             if (['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].includes(input.id)) {
                 input.value = 0;
+            }
+            if (input.id === 'pocetProduktu') {
+                input.value = 1;
             }
         });
 
@@ -305,11 +309,11 @@
         }
 
         // Countery - live update souhrnu
-        ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
+        ['pocetProduktu', 'sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
                 input.addEventListener('change', () => {
-                    stav[id] = parseInt(input.value) || 0;
+                    stav[id] = parseInt(input.value) || (id === 'pocetProduktu' ? 1 : 0);
                     aktualizovatSouhrnDilu();
                 });
             }
@@ -658,6 +662,7 @@
     // ========================================
     function aktualizovatSouhrnDilu() {
         const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+        const pocetProduktu = stav.pocetProduktu || 1;
         const totalPartsEl = document.getElementById('total-parts');
         const priceBreakdownEl = document.getElementById('parts-price-breakdown');
 
@@ -667,13 +672,23 @@
 
         if (priceBreakdownEl && celkemDilu > 0) {
             let cena = 0;
-            const firstPartText = preklad('summary.firstPart').toLowerCase();
-            if (celkemDilu === 1) {
-                cena = CENY.prvniDil;
-                priceBreakdownEl.textContent = `(1× ${firstPartText} = ${CENY.prvniDil}€)`;
+            // Počet produktů nemůže být větší než počet dílů
+            const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu);
+
+            if (skutecnyPocetProduktu === 1) {
+                // Jeden produkt - původní výpočet
+                if (celkemDilu === 1) {
+                    cena = CENY.prvniDil;
+                    priceBreakdownEl.textContent = `(1× první díl = ${CENY.prvniDil}€)`;
+                } else {
+                    cena = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    priceBreakdownEl.textContent = `(1× ${CENY.prvniDil}€ + ${celkemDilu - 1}× ${CENY.dalsiDil}€ = ${cena}€)`;
+                }
             } else {
-                cena = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
-                priceBreakdownEl.textContent = `(1× ${CENY.prvniDil}€ + ${celkemDilu - 1}× ${CENY.dalsiDil}€ = ${cena}€)`;
+                // Více produktů - každý produkt má svůj první díl
+                const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                cena = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                priceBreakdownEl.textContent = `(${skutecnyPocetProduktu}× ${CENY.prvniDil}€ + ${dalsiDily}× ${CENY.dalsiDil}€ = ${cena}€)`;
             }
         } else if (priceBreakdownEl) {
             priceBreakdownEl.textContent = '';
@@ -742,21 +757,38 @@
         // Čalounické práce
         if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
             const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+            const pocetProduktu = stav.pocetProduktu || 1;
+            // Počet produktů nemůže být větší než počet dílů
+            const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu || 1);
 
             if (celkemDilu > 0) {
-                const cenaDilu = celkemDilu === 1 ?
-                    CENY.prvniDil :
-                    CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                let cenaDilu;
+                if (skutecnyPocetProduktu === 1) {
+                    // Jeden produkt - původní výpočet
+                    cenaDilu = celkemDilu === 1 ?
+                        CENY.prvniDil :
+                        CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                } else {
+                    // Více produktů - každý produkt má svůj první díl
+                    const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                    cenaDilu = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                }
 
                 const partsWord = celkemDilu === 1 ? preklad('summary.part') : preklad('summary.parts');
+                const produktyInfo = skutecnyPocetProduktu > 1 ? `, ${skutecnyPocetProduktu} produkty` : '';
                 html += `<div class="summary-line">
-                    <span>${preklad('summary.upholsteryWork')} (${celkemDilu} ${partsWord}):</span>
+                    <span>${preklad('summary.upholsteryWork')} (${celkemDilu} ${partsWord}${produktyInfo}):</span>
                     <span class="summary-price">${cenaDilu.toFixed(2)} €</span>
                 </div>`;
 
-                if (celkemDilu > 1) {
+                if (skutecnyPocetProduktu === 1 && celkemDilu > 1) {
                     html += `<div class="summary-subline">
                         ↳ ${preklad('summary.firstPart')}: ${CENY.prvniDil}€, ${preklad('summary.additionalParts')}: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                    </div>`;
+                } else if (skutecnyPocetProduktu > 1) {
+                    const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                    html += `<div class="summary-subline">
+                        ↳ ${skutecnyPocetProduktu}× první díl: ${skutecnyPocetProduktu}× ${CENY.prvniDil}€${dalsiDily > 0 ? `, další: ${dalsiDily}× ${CENY.dalsiDil}€` : ''}
                     </div>`;
                 }
 
@@ -900,6 +932,7 @@
             reklamaceBezDopravy: false,
             vyzvednutiSklad: false,
             typServisu: 'calouneni',
+            pocetProduktu: 1,
             sedaky: 0,
             operky: 0,
             podrucky: 0,
@@ -921,7 +954,10 @@
         // Reset radio buttons
         document.querySelector('input[name="service-type"][value="calouneni"]').checked = true;
 
-        // Reset counterů
+        // Reset counterů - počet produktů na 1, ostatní na 0
+        const pocetProduktuInput = document.getElementById('pocetProduktu');
+        if (pocetProduktuInput) pocetProduktuInput.value = 1;
+
         ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
             const input = document.getElementById(id);
             if (input) input.value = 0;
@@ -992,8 +1028,16 @@
             // Čalounické práce
             if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
                 const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+                const pocetProduktu = stav.pocetProduktu || 1;
+                const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu || 1);
                 if (celkemDilu > 0) {
-                    const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    let cenaDilu;
+                    if (skutecnyPocetProduktu === 1) {
+                        cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    } else {
+                        const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                        cenaDilu = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                    }
                     celkem += cenaDilu;
                 }
             }
@@ -1167,20 +1211,38 @@
             // Čalounické práce
             if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
                 const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+                const pocetProduktu = stav.pocetProduktu || 1;
+                const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu || 1);
                 if (celkemDilu > 0) {
-                    const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    let cenaDilu;
+                    if (skutecnyPocetProduktu === 1) {
+                        cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    } else {
+                        const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                        cenaDilu = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                    }
                     const dilText = celkemDilu === 1 ? 'díl / part' : 'dílů / parts';
+                    const produktyInfo = skutecnyPocetProduktu > 1 ? `, ${skutecnyPocetProduktu} produkty / products` : '';
                     htmlContent += `
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px 0;">Čalounické práce / Upholstery (${celkemDilu} ${dilText})</td>
+                            <td style="padding: 8px 0;">Čalounické práce / Upholstery (${celkemDilu} ${dilText}${produktyInfo})</td>
                             <td style="padding: 8px 0; text-align: right; font-weight: bold;">${cenaDilu.toFixed(2)} €</td>
                         </tr>
                     `;
-                    if (celkemDilu > 1) {
+                    if (skutecnyPocetProduktu === 1 && celkemDilu > 1) {
                         htmlContent += `
                             <tr>
                                 <td colspan="2" style="padding: 4px 0 8px 20px; font-size: 12px; color: #666;">
                                     ↳ První díl / First part: ${CENY.prvniDil}€, další / additional: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                                </td>
+                            </tr>
+                        `;
+                    } else if (skutecnyPocetProduktu > 1) {
+                        const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                        htmlContent += `
+                            <tr>
+                                <td colspan="2" style="padding: 4px 0 8px 20px; font-size: 12px; color: #666;">
+                                    ↳ ${skutecnyPocetProduktu}× první díl / first part: ${skutecnyPocetProduktu}× ${CENY.prvniDil}€${dalsiDily > 0 ? `, další / additional: ${dalsiDily}× ${CENY.dalsiDil}€` : ''}
                                 </td>
                             </tr>
                         `;
@@ -1358,10 +1420,18 @@
         // Čalounické práce
         if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
             const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+            const pocetProduktu = stav.pocetProduktu || 1;
+            const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu || 1);
             if (celkemDilu > 0) {
-                const cenaDilu = celkemDilu === 1 ?
-                    CENY.prvniDil :
-                    CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                let cenaDilu;
+                if (skutecnyPocetProduktu === 1) {
+                    cenaDilu = celkemDilu === 1 ?
+                        CENY.prvniDil :
+                        CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                } else {
+                    const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                    cenaDilu = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                }
                 celkovaCena += cenaDilu;
             }
         }
@@ -1406,6 +1476,7 @@
             rozpis: {
                 diagnostika: stav.typServisu === 'diagnostika' ? CENY.diagnostika : 0,
                 calouneni: {
+                    pocetProduktu: stav.pocetProduktu || 1,
                     sedaky: stav.sedaky,
                     operky: stav.operky,
                     podrucky: stav.podrucky,
