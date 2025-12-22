@@ -225,7 +225,20 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       <!-- KROK 3A: Čalounické práce - počet dílů -->
       <div class="wizard-step hidden" id="step-upholstery">
         <h3 class="step-title" data-lang-cs="3. Kolik dílů potřebuje přečalounit?" data-lang-en="3. How many parts need reupholstering?" data-lang-it="3. Quante parti necessitano di ritappezzatura?">3. Kolik dílů potřebuje přečalounit?</h3>
-        <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part costs 205€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte costa 205€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€.</p>
+        <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl na každém produktu stojí 205€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part on each product costs 205€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte su ogni prodotto costa 205€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl na každém produktu stojí 205€, každý další 70€.</p>
+
+        <!-- Počet samostatných produktů -->
+        <div class="counter-group" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #ccc;">
+          <div class="counter-item">
+            <label data-lang-cs="Počet samostatných produktů" data-lang-en="Number of separate products" data-lang-it="Numero di prodotti separati">Počet samostatných produktů</label>
+            <p class="counter-hint" style="font-size: 12px; color: #666; margin: 5px 0;" data-lang-cs="(např. 1 pohovka + 1 křeslo = 2 produkty)" data-lang-en="(e.g. 1 sofa + 1 armchair = 2 products)" data-lang-it="(es. 1 divano + 1 poltrona = 2 prodotti)">(např. 1 pohovka + 1 křeslo = 2 produkty)</p>
+            <div class="counter-controls">
+              <button class="btn-counter" data-action="decrementCounter" data-counter="pocetProduktu" aria-label="Snížit počet produktů">−</button>
+              <input type="number" id="pocetProduktu" value="1" min="1" max="10" readonly aria-label="Počet samostatných produktů">
+              <button class="btn-counter" data-action="incrementCounter" data-counter="pocetProduktu" aria-label="Zvýšit počet produktů">+</button>
+            </div>
+          </div>
+        </div>
 
         <div class="counter-group">
           <div class="counter-item">
