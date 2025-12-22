@@ -2006,19 +2006,29 @@ async function saveProtokolToDB() {
 // debounce přesunuto do utils.js (Step 108)
 // Funkce je dostupná jako window.debounce() nebo Utils.debounce()
 
-// Funkce pro překlad textu přes Google Translate API
+// Funkce pro překlad textu přes server-side proxy (MyMemory API)
 async function translateTextApi(text, sourceLang = 'cs', targetLang = 'en') {
   if (!text || text.trim() === '') return '';
 
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=` + encodeURIComponent(text);
-    const response = await fetch(url);
+    // Použití server-side proxy místo přímého volání externího API
+    const response = await fetch('api/translate_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: text,
+        source: sourceLang,
+        target: targetLang
+      })
+    });
+
     const data = await response.json();
 
-    if (data && data[0] && data[0][0] && data[0][0][0]) {
-      return data[0][0][0];
+    if (data.status === 'success' && data.translated) {
+      return data.translated;
     }
 
+    logger.warn('Překlad selhal:', data.message || 'Neznámá chyba');
     return '';
   } catch (err) {
     logger.error('Chyba překladu:', err);
@@ -2138,7 +2148,7 @@ if (document.readyState === 'loading') {
   initAutoTranslation();
 }
 
-logger.log('🌐 Automatický překlad aktivován');
+logger.log('Automatický překlad aktivován');
 
 async function translateField(fieldName, silent = false) {
   const czField = document.getElementById(fieldName + '-cz');
