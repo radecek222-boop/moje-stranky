@@ -98,7 +98,11 @@
 
         // Další
         tezkyNabytek: false,
-        material: false
+        material: false,
+
+        // Vlastní cena (pouze pro přihlášené)
+        vlastniCena: false,
+        vlastniCenaHodnota: 0
     };
 
     // Stav kalkulačky (kopie výchozího stavu)
@@ -120,10 +124,20 @@
         });
 
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            if (['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad'].includes(checkbox.id)) {
+            if (['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad', 'vlastni-cena-checkbox'].includes(checkbox.id)) {
                 checkbox.checked = false;
             }
         });
+
+        // Skrýt input pro vlastní cenu
+        const vlastniCenaInputWrapper = document.getElementById('vlastni-cena-input-wrapper');
+        if (vlastniCenaInputWrapper) {
+            vlastniCenaInputWrapper.style.display = 'none';
+        }
+        const vlastniCenaInput = document.getElementById('vlastni-cena-input');
+        if (vlastniCenaInput) {
+            vlastniCenaInput.value = '';
+        }
 
         // Resetovat radio na výchozí (calouneni)
         const calouneniRadio = document.querySelector('input[name="service-type"][value="calouneni"]');
@@ -259,6 +273,37 @@
             });
         }
 
+        // Checkbox vlastní cena - speciální handling (pouze pro přihlášené)
+        const vlastniCenaCheckbox = document.getElementById('vlastni-cena-checkbox');
+        const vlastniCenaInputWrapper = document.getElementById('vlastni-cena-input-wrapper');
+        const vlastniCenaInput = document.getElementById('vlastni-cena-input');
+
+        if (vlastniCenaCheckbox && vlastniCenaInputWrapper) {
+            vlastniCenaCheckbox.addEventListener('change', (e) => {
+                stav.vlastniCena = e.target.checked;
+
+                if (e.target.checked) {
+                    vlastniCenaInputWrapper.style.display = 'block';
+                    // Focus na input
+                    if (vlastniCenaInput) {
+                        setTimeout(() => vlastniCenaInput.focus(), 100);
+                    }
+                } else {
+                    vlastniCenaInputWrapper.style.display = 'none';
+                    stav.vlastniCenaHodnota = 0;
+                    if (vlastniCenaInput) {
+                        vlastniCenaInput.value = '';
+                    }
+                }
+            });
+        }
+
+        if (vlastniCenaInput) {
+            vlastniCenaInput.addEventListener('input', (e) => {
+                stav.vlastniCenaHodnota = parseFloat(e.target.value) || 0;
+            });
+        }
+
         // Countery - live update souhrnu
         ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
             const input = document.getElementById(id);
@@ -387,6 +432,53 @@
         // Najít kontejner kalkulačky (může být na stránce nebo v modalu)
         const kalkulackaContainer = document.getElementById('kalkulacka') ||
                                     document.getElementById('calculatorModalBody');
+
+        // VLASTNÍ CENA - přeskočit všechny kroky a jít přímo na souhrn
+        if (stav.krok === 1 && stav.vlastniCena) {
+            // Validace - vlastní cena musí být zadána
+            if (!stav.vlastniCenaHodnota || stav.vlastniCenaHodnota <= 0) {
+                wgsToast.warning('Zadejte vlastní cenu');
+                return;
+            }
+
+            // Zkontrolovat checkbox reklamace
+            const reklamaceBezDopravyCheckbox = document.getElementById('reklamace-bez-dopravy');
+            if (reklamaceBezDopravyCheckbox && reklamaceBezDopravyCheckbox.checked) {
+                stav.reklamaceBezDopravy = true;
+                stav.dopravne = 0;
+            }
+
+            // Nastavit adresu pokud není (reklamace)
+            if (!stav.adresa) {
+                stav.adresa = stav.reklamaceBezDopravy ? preklad('summary.claimNoTransport') : '-';
+            }
+
+            // Nastavit typ servisu na vlastní
+            stav.typServisu = 'vlastni';
+
+            // Skrýt aktuální krok
+            const currentStep = kalkulackaContainer ?
+                kalkulackaContainer.querySelector('.wizard-step:not(.hidden)') :
+                document.querySelector('.wizard-step:not(.hidden)');
+            if (currentStep) {
+                currentStep.classList.add('hidden');
+                currentStep.style.display = 'none';
+            }
+
+            // Přeskočit na souhrn (krok 5)
+            stav.krok = 5;
+            zobrazitSouhrn();
+
+            const summaryStep = document.getElementById('step-summary');
+            if (summaryStep) {
+                summaryStep.classList.remove('hidden');
+                summaryStep.style.display = 'flex';
+            }
+
+            aktualizovatProgress();
+            scrollToTop();
+            return;
+        }
 
         // Validace před pokračováním
         if (stav.krok === 1 && !stav.adresa) {
@@ -598,6 +690,39 @@
         let html = '';
         let celkem = 0;
 
+        // VLASTNÍ CENA - zjednodušený souhrn
+        if (stav.typServisu === 'vlastni' && stav.vlastniCenaHodnota > 0) {
+            html += `<div class="summary-line" style="font-size: 1.1em;">
+                <span>Vlastní cena:</span>
+                <span class="summary-price">${stav.vlastniCenaHodnota.toFixed(2)} €</span>
+            </div>`;
+
+            // Vyzvednutí dílu na skladě (pokud je zaškrtnuté)
+            if (stav.vyzvednutiSklad) {
+                html += `<div class="summary-line">
+                    <span>${preklad('summary.warehousePickup')}:</span>
+                    <span class="summary-price">${CENY.vyzvednutiSklad.toFixed(2)} €</span>
+                </div>`;
+                celkem = stav.vlastniCenaHodnota + CENY.vyzvednutiSklad;
+            } else {
+                celkem = stav.vlastniCenaHodnota;
+            }
+
+            // Poznámka o reklamaci
+            if (stav.reklamaceBezDopravy) {
+                html += `<div class="summary-subline" style="color: #666; font-style: italic;">
+                    (${preklad('summary.claimNoTransport')})
+                </div>`;
+            }
+
+            summaryDetails.innerHTML = html;
+            grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
+
+            // Upravit tlačítka podle režimu kalkulačky
+            upravitTlacitkaProRezim();
+            return;
+        }
+
         // Dopravné
         html += `<div class="summary-line">
             <span>${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
@@ -782,7 +907,9 @@
             relax: 0,
             vysuv: 0,
             tezkyNabytek: false,
-            material: false
+            material: false,
+            vlastniCena: false,
+            vlastniCenaHodnota: 0
         };
         window.stav = stav; // DEBUG: Aktualizovat referenci
 
@@ -801,10 +928,20 @@
         });
 
         // Reset checkboxů
-        ['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad'].forEach(id => {
+        ['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad', 'vlastni-cena-checkbox'].forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) checkbox.checked = false;
         });
+
+        // Reset vlastní ceny
+        const vlastniCenaInputWrapper = document.getElementById('vlastni-cena-input-wrapper');
+        if (vlastniCenaInputWrapper) {
+            vlastniCenaInputWrapper.style.display = 'none';
+        }
+        const vlastniCenaInput = document.getElementById('vlastni-cena-input');
+        if (vlastniCenaInput) {
+            vlastniCenaInput.value = '';
+        }
 
         // Skrýt všechny kroky
         document.querySelectorAll('.wizard-step').forEach(step => {
