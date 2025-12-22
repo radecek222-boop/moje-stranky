@@ -230,6 +230,35 @@
             }
         });
 
+        // Checkbox reklamace bez dopravy - speciální handling
+        const reklamaceCheckbox = document.getElementById('reklamace-bez-dopravy');
+        if (reklamaceCheckbox) {
+            reklamaceCheckbox.addEventListener('change', (e) => {
+                stav.reklamaceBezDopravy = e.target.checked;
+
+                if (e.target.checked) {
+                    // Reklamace - dopravné = 0
+                    stav.dopravne = 0;
+
+                    // Aktualizovat zobrazení
+                    const transportCost = document.getElementById('transport-cost');
+                    if (transportCost) {
+                        transportCost.textContent = '0.00 (' + preklad('summary.claim') + ')';
+                    }
+                } else {
+                    // Není reklamace - přepočítat dopravné podle vzdálenosti
+                    if (stav.vzdalenost > 0) {
+                        stav.dopravne = Math.round(stav.vzdalenost * 2 * TRANSPORT_RATE * 100) / 100;
+
+                        const transportCost = document.getElementById('transport-cost');
+                        if (transportCost) {
+                            transportCost.textContent = stav.dopravne.toFixed(2);
+                        }
+                    }
+                }
+            });
+        }
+
         // Countery - live update souhrnu
         ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
             const input = document.getElementById(id);
