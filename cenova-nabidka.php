@@ -873,7 +873,20 @@ if ($reklamaceId > 0) {
                 <!-- KROK 3A: Čalounické práce -->
                 <div class="wizard-step hidden" id="step-upholstery">
                     <h3 class="step-title">3. Kolik dílů potřebuje přečalounit?</h3>
-                    <p class="step-desc">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205 EUR, každý další 70 EUR.</p>
+                    <p class="step-desc">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl na každém produktu stojí 205 EUR, každý další 70 EUR.</p>
+
+                    <!-- Počet samostatných produktů -->
+                    <div class="counter-group" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #ccc;">
+                        <div class="counter-item">
+                            <label>Počet samostatných produktů</label>
+                            <p class="counter-hint" style="font-size: 12px; color: #666; margin: 5px 0;">(např. 1 pohovka + 1 křeslo = 2 produkty)</p>
+                            <div class="counter-controls">
+                                <button class="btn-counter" data-action="decrementCounter" data-counter="pocetProduktu" aria-label="Snížit počet produktů">−</button>
+                                <input type="number" id="pocetProduktu" value="1" min="1" max="10" readonly aria-label="Počet samostatných produktů">
+                                <button class="btn-counter" data-action="incrementCounter" data-counter="pocetProduktu" aria-label="Zvýšit počet produktů">+</button>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="counter-group">
                         <div class="counter-item">
@@ -1187,119 +1200,99 @@ if ($reklamaceId > 0) {
             }
 
             // === ČALOUNICKÉ PRÁCE - DETAILNÍ ROZPIS ===
+            // Podporuje počet produktů - každý produkt má svůj první díl za 205€
             if (data.typServisu === 'calouneni' || data.typServisu === 'kombinace') {
-                const celkemDilu = data.sedaky + data.operky + data.podrucky + data.panely;
+                const celkemDilu = (data.sedaky || 0) + (data.operky || 0) + (data.podrucky || 0) + (data.panely || 0);
+                const pocetProduktu = data.pocetProduktu || 1;
+                const skutecnyPocetProduktu = Math.min(pocetProduktu, celkemDilu || 1);
 
                 if (celkemDilu > 0) {
-                    // Základní sazba (první díl)
+                    // Výpočet celkové ceny za čalounění
+                    let celkovaCenaCalouneni = 0;
+                    if (skutecnyPocetProduktu === 1) {
+                        // Jeden produkt: první díl 205€, každý další 70€
+                        celkovaCenaCalouneni = CENY.prvniDil + ((celkemDilu - 1) * CENY.dalsiDil);
+                    } else {
+                        // Více produktů: každý produkt má první díl za 205€
+                        const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                        celkovaCenaCalouneni = (skutecnyPocetProduktu * CENY.prvniDil) + (dalsiDily * CENY.dalsiDil);
+                    }
+
+                    // Zobrazit jako jednu položku s detailním popisem
+                    let popis = `Čalounění (${celkemDilu} dílů`;
+                    if (skutecnyPocetProduktu > 1) {
+                        popis += `, ${skutecnyPocetProduktu} produkty`;
+                    }
+                    popis += ')';
+
                     polozky.push({
-                        nazev: 'Čalounění - základní sazba (první díl)',
-                        cena: CENY.prvniDil,
+                        nazev: popis,
+                        cena: celkovaCenaCalouneni,
                         pocet: 1,
                         skupina: 'calouneni'
                     });
 
-                    // Jednotlivé díly (každý další = 70 EUR)
-                    let zbyvaDilu = celkemDilu - 1; // První díl je v základní sazbě
-
-                    if (data.sedaky > 0) {
-                        const pocetZaplaceno = Math.min(data.sedaky, zbyvaDilu + (zbyvaDilu < 0 ? 1 : 0));
-                        if (data.sedaky === 1 && zbyvaDilu < 0) {
-                            // První díl je sedák - už započítán v základní sazbě
-                        } else if (data.sedaky > 0) {
-                            const dalsichSedaku = zbyvaDilu >= data.sedaky ? data.sedaky : Math.max(0, data.sedaky - 1);
-                            if (dalsichSedaku > 0 || data.sedaky === celkemDilu) {
-                                polozky.push({
-                                    nazev: 'Sedáky (další díly)',
-                                    cena: CENY.dalsiDil,
-                                    pocet: data.sedaky > 1 ? data.sedaky - (celkemDilu === data.sedaky ? 1 : 0) : 0,
-                                    skupina: 'calouneni',
-                                    detail: `${data.sedaky} ks celkem`
-                                });
-                            }
+                    // Detail rozpisu - kolik prvních dílů a kolik dalších
+                    let detailRozpis = '';
+                    if (skutecnyPocetProduktu === 1) {
+                        detailRozpis = `(1× ${CENY.prvniDil}€`;
+                        if (celkemDilu > 1) {
+                            detailRozpis += ` + ${celkemDilu - 1}× ${CENY.dalsiDil}€`;
                         }
+                        detailRozpis += ')';
+                    } else {
+                        const dalsiDily = celkemDilu - skutecnyPocetProduktu;
+                        detailRozpis = `(${skutecnyPocetProduktu}× první díl ${CENY.prvniDil}€`;
+                        if (dalsiDily > 0) {
+                            detailRozpis += ` + ${dalsiDily}× další ${CENY.dalsiDil}€`;
+                        }
+                        detailRozpis += ')';
                     }
 
-                    // Zjednodušený přístup - zobrazit všechny typy dílů
-                    const typyDilu = [
-                        { nazev: 'Sedáky', pocet: data.sedaky },
-                        { nazev: 'Opěrky', pocet: data.operky },
-                        { nazev: 'Područky', pocet: data.podrucky },
-                        { nazev: 'Panely', pocet: data.panely }
-                    ].filter(d => d.pocet > 0);
-
-                    // Odebrat základní sazbu a přepočítat
-                    polozky.pop(); // Odstranit předchozí pokus
-
-                    // Správný výpočet: první díl 205, každý další 70
-                    let prvniDilPouzit = false;
-                    typyDilu.forEach(typ => {
-                        for (let i = 0; i < typ.pocet; i++) {
-                            if (!prvniDilPouzit) {
-                                polozky.push({
-                                    nazev: `${typ.nazev.slice(0, -1)} (první díl)`,
-                                    cena: CENY.prvniDil,
-                                    pocet: 1,
-                                    skupina: 'calouneni'
-                                });
-                                prvniDilPouzit = true;
-                            } else {
-                                // Přidat jako další díl - seskupíme stejné typy
-                            }
-                        }
+                    polozky.push({
+                        nazev: detailRozpis,
+                        cena: 0,
+                        pocet: 1,
+                        skupina: 'calouneni',
+                        jeDetail: true
                     });
 
-                    // Resetovat a udělat to správně
-                    // Odstraníme všechny položky skupiny calouneni
-                    while (polozky.length > 0 && polozky[polozky.length - 1].skupina === 'calouneni') {
-                        polozky.pop();
-                    }
-
-                    // SPRÁVNÝ DETAILNÍ ROZPIS
-                    let poradiDilu = 0;
-
+                    // Rozpad podle typů dílů
                     if (data.sedaky > 0) {
-                        const cenaZaSedaky = vypoctiCenuZaDily(data.sedaky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Sedáky (${data.sedaky} ks)`,
-                            cena: cenaZaSedaky,
-                            pocet: 1, // cena je už celková za všechny kusy
-                            skupina: 'calouneni'
+                            nazev: `↳ Sedáky: ${data.sedaky} ks`,
+                            cena: 0,
+                            pocet: 1,
+                            skupina: 'calouneni',
+                            jeDetail: true
                         });
-                        poradiDilu += data.sedaky;
                     }
-
                     if (data.operky > 0) {
-                        const cenaZaOperky = vypoctiCenuZaDily(data.operky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Opěrky (${data.operky} ks)`,
-                            cena: cenaZaOperky,
-                            pocet: 1, // cena je už celková za všechny kusy
-                            skupina: 'calouneni'
+                            nazev: `↳ Opěrky: ${data.operky} ks`,
+                            cena: 0,
+                            pocet: 1,
+                            skupina: 'calouneni',
+                            jeDetail: true
                         });
-                        poradiDilu += data.operky;
                     }
-
                     if (data.podrucky > 0) {
-                        const cenaZaPodrucky = vypoctiCenuZaDily(data.podrucky, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Područky (${data.podrucky} ks)`,
-                            cena: cenaZaPodrucky,
-                            pocet: 1, // cena je už celková za všechny kusy
-                            skupina: 'calouneni'
+                            nazev: `↳ Područky: ${data.podrucky} ks`,
+                            cena: 0,
+                            pocet: 1,
+                            skupina: 'calouneni',
+                            jeDetail: true
                         });
-                        poradiDilu += data.podrucky;
                     }
-
                     if (data.panely > 0) {
-                        const cenaZaPanely = vypoctiCenuZaDily(data.panely, poradiDilu, CENY);
                         polozky.push({
-                            nazev: `Panely (${data.panely} ks)`,
-                            cena: cenaZaPanely,
-                            pocet: 1, // cena je už celková za všechny kusy
-                            skupina: 'calouneni'
+                            nazev: `↳ Panely: ${data.panely} ks`,
+                            cena: 0,
+                            pocet: 1,
+                            skupina: 'calouneni',
+                            jeDetail: true
                         });
-                        poradiDilu += data.panely;
                     }
                 }
             }
@@ -1366,11 +1359,15 @@ if ($reklamaceId > 0) {
         }
 
         // Pomocná funkce pro výpočet ceny za díly
-        function vypoctiCenuZaDily(pocetDilu, startIndex, CENY) {
+        // Podporuje více produktů - každý produkt má svůj první díl za 205€
+        function vypoctiCenuZaDily(pocetDilu, startIndex, CENY, pocetProduktu = 1) {
             let cena = 0;
+            const skutecnyPocetProduktu = Math.min(pocetProduktu, pocetDilu);
+
             for (let i = 0; i < pocetDilu; i++) {
-                if (startIndex + i === 0) {
-                    cena += CENY.prvniDil; // První díl celkem = 205 EUR
+                // Pokud máme více produktů a jsme stále v "prvních dílech"
+                if (startIndex + i < skutecnyPocetProduktu) {
+                    cena += CENY.prvniDil; // První díl každého produktu = 205 EUR
                 } else {
                     cena += CENY.dalsiDil; // Každý další = 70 EUR
                 }
