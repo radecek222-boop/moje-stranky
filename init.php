@@ -33,6 +33,7 @@ require_once INCLUDES_PATH . '/security_headers.php';
 // Load helper functions
 require_once INCLUDES_PATH . '/csrf_helper.php';
 require_once INCLUDES_PATH . '/seo_meta.php';
+require_once INCLUDES_PATH . '/company_config.php';  // Firemní kontakty - single source of truth
 
 // Load advanced error handler (with detailed error reporting)
 require_once INCLUDES_PATH . '/error_handler.php';
@@ -187,7 +188,7 @@ if (session_status() === PHP_SESSION_NONE) {
                         $stmt->execute([
                             ':user_id' => $userId,
                             ':name' => $_SESSION['user_name'] ?? 'Administrator',
-                            ':email' => $_SESSION['user_email'] ?? 'admin@wgs-service.cz'
+                            ':email' => $_SESSION['user_email'] ?? WGS_EMAIL_REKLAMACE
                         ]);
                     }
 

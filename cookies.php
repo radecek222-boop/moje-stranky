@@ -201,7 +201,7 @@
 
       <article class="cookies-card">
         <h2>7. Kontakt</h2>
-        <p>Dotazy ohledně cookies: <a href="mailto:reklamace@wgs-service.cz" class="cookies-link">reklamace@wgs-service.cz</a></p>
+        <p>Dotazy ohledně cookies: <a href="mailto:<?php echo WGS_EMAIL_INFO; ?>" class="cookies-link"><?php echo WGS_EMAIL_INFO; ?></a></p>
         <p>Více informací: <a href="gdpr.php" class="cookies-link">Zpracování osobních údajů (GDPR)</a></p>
         <p class="cookies-meta">Poslední aktualizace: <?php echo date('d.m.Y'); ?></p>
       </article>
@@ -221,7 +221,7 @@
         <h2 class="footer-title">Kontakt</h2>
         <p class="footer-text">
           <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
-          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <?php echo wgsFooterKontakt('info'); ?>
         </p>
       </div>
       <div class="footer-column">

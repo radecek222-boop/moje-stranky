@@ -422,7 +422,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       <p data-lang-cs="Neváhejte nás kontaktovat pro nezávaznou cenovou nabídku." data-lang-en="Feel free to contact us for a non-binding quote." data-lang-it="Non esitare a contattarci per un preventivo non vincolante.">Neváhejte nás kontaktovat pro nezávaznou cenovou nabídku.</p>
       <p class="contact-info">
         <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Tel:">Tel:</strong> <a href="tel:+420725965826">+420 725 965 826</a><br>
-        <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz">reklamace@wgs-service.cz</a>
+        <?php echo wgsFooterKontakt('info'); ?>
       </p>
     </div>
 
@@ -442,7 +442,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         <h2 class="footer-title" data-lang-cs="Kontakt" data-lang-en="Contact" data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
           <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Tel:">Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
-          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <?php echo wgsFooterKontakt('info'); ?>
         </p>
       </div>
 
