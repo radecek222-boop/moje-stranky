@@ -239,7 +239,7 @@
         <h2>Správce údajů</h2>
         <p class="gdpr-highlight">
           White Glove Service, s.r.o., Do Dubče 364, 190 11 Praha 9 – Běchovice, IČ: 177 51 781<br>
-          E-mail: <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a>, Tel.: <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>
+          E-mail: <a href="mailto:<?php echo WGS_EMAIL_INFO; ?>" class="gdpr-link"><?php echo WGS_EMAIL_INFO; ?></a>, Tel.: <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>
         </p>
         <p>Správce zajišťuje servisní služby značky Natuzzi a dalších prémiových výrobců nábytku v České republice a na Slovensku.</p>
       </article>
@@ -327,7 +327,7 @@
           <li>
             <strong>Odvolání souhlasu</strong>
             Souhlas udělený ve formuláři <em>Objednat servis</em> můžete odvolat –
-            <span class="gdpr-contact-note">kontaktujte nás na <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a>.</span>
+            <span class="gdpr-contact-note">kontaktujte nás na <a href="mailto:<?php echo WGS_EMAIL_INFO; ?>" class="gdpr-link"><?php echo WGS_EMAIL_INFO; ?></a>.</span>
           </li>
           <li>
             <strong>Stížnost u dozorového úřadu</strong>
@@ -338,7 +338,7 @@
 
       <article class="gdpr-card">
         <h2>Jak nás kontaktovat</h2>
-        <p>Máte-li dotazy k ochraně soukromí nebo chcete uplatnit svá práva, napište na <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a> nebo volejte <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>. Vaše požadavky zpracujeme bez zbytečného odkladu, nejpozději do 30 dnů.</p>
+        <p>Máte-li dotazy k ochraně soukromí nebo chcete uplatnit svá práva, napište na <a href="mailto:<?php echo WGS_EMAIL_INFO; ?>" class="gdpr-link"><?php echo WGS_EMAIL_INFO; ?></a> nebo volejte <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>. Vaše požadavky zpracujeme bez zbytečného odkladu, nejpozději do 30 dnů.</p>
         <p class="gdpr-meta">Poslední aktualizace: <?php echo date('d.m.Y'); ?></p>
       </article>
     </div>
@@ -356,7 +356,7 @@
         <h2 class="footer-title">Kontakt</h2>
         <p class="footer-text">
           <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
-          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <?php echo wgsFooterKontakt('info'); ?>
         </p>
       </div>
       <div class="footer-column">

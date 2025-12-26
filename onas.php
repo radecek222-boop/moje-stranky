@@ -217,7 +217,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
             data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
           <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
-          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <?php echo wgsFooterKontakt('info'); ?>
         </p>
       </div>
 

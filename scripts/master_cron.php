@@ -21,6 +21,9 @@
 // Absolutní cesta k root složce
 $rootDir = dirname(__DIR__);
 
+// Načíst firemní konfiguraci
+require_once $rootDir . '/includes/company_config.php';
+
 // ========================================
 // KONFIGURACE
 // ========================================
@@ -68,7 +71,7 @@ function sendErrorEmail($subject, $body) {
         return;
     }
 
-    $headers = "From: WGS Cron <noreply@wgs-service.cz>\r\n";
+    $headers = "From: WGS Cron <" . WGS_EMAIL_REKLAMACE . ">\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
     mail($config['admin_email'], $subject, $body, $headers);

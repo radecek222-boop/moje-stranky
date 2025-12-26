@@ -47,7 +47,7 @@ if ($isAdmin || $isTechnik) {
         'authenticated' => true,
         'logged_in' => true,  // For backward compatibility
         'username' => $_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin',
-        'email' => $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'admin@wgs-service.cz',
+        'email' => $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? WGS_EMAIL_REKLAMACE,
         'role' => $isAdmin ? 'admin' : 'technik'
     ]);
 } else {

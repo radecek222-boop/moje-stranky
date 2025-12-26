@@ -38,7 +38,7 @@ try {
         $stmt->execute([
             ':user_id' => $userId,
             ':name' => $_SESSION['user_name'] ?? 'Administrator',
-            ':email' => $_SESSION['user_email'] ?? 'admin@wgs-service.cz'
+            ':email' => $_SESSION['user_email'] ?? WGS_EMAIL_REKLAMACE
         ]);
     }
 

@@ -231,7 +231,7 @@ try {
 
             <div class="form-group">
                 <label for="smtp_from_email">Odesílatel - Email</label>
-                <input type="email" id="smtp_from_email" name="smtp_from_email" value="<?php echo htmlspecialchars($settings['smtp_from_email'] ?? 'noreply@wgs-service.cz'); ?>" required>
+                <input type="email" id="smtp_from_email" name="smtp_from_email" value="<?php echo htmlspecialchars($settings['smtp_from_email'] ?? WGS_EMAIL_REKLAMACE); ?>" required>
             </div>
 
             <div class="form-group">

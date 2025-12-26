@@ -504,7 +504,7 @@
                     WHITE GLOVE SERVICE
                 </div>
                 <div style="font-size: 12px; color: #333; line-height: 1.6;">
-                    Do Dubče 364, Běchovice 190 11 · +420 725 965 826 · reklamace@wgs-service.cz · IČO 09769684
+                    Do Dubče 364, Běchovice 190 11 · +420 725 965 826 · info@wgs-service.cz · IČO 09769684
                 </div>
                 <div style="font-size: 11px; color: #333; margin-top: 5px; font-weight: 600;">
                     www.wgs-service.cz
@@ -683,7 +683,7 @@
                 <div>${t.footerContact}</div>
                 <div style="margin-top: 10px;">
                     <strong>${t.tel}</strong> +420 725 965 826 ·
-                    <strong>${t.email}</strong> reklamace@wgs-service.cz
+                    <strong>${t.email}</strong> info@wgs-service.cz
                 </div>
                 <div style="margin-top: 15px; font-size: 10px; color: #999;">
                     www.wgs-service.cz · ${t.generated} ${new Date().toLocaleDateString('cs-CZ')}

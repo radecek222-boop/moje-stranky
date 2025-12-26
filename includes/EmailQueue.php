@@ -289,7 +289,7 @@ function getSMTPSettings() {
                 'smtp_encryption' => 'tls',
                 'smtp_username' => getenv('SMTP_USER') ?: '',
                 'smtp_password' => getenv('SMTP_PASS') ?: '',
-                'smtp_from_email' => getenv('SMTP_FROM') ?: 'noreply@wgs-service.cz',
+                'smtp_from_email' => getenv('SMTP_FROM') ?: WGS_EMAIL_REKLAMACE,
                 'smtp_from_name' => 'White Glove Service'
             ];
         }

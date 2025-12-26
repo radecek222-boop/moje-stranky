@@ -109,7 +109,7 @@ try {
                 $note['author'] = $note['created_by'];
 
                 // Zobrazit jméno místo emailu
-                if ($note['created_by'] === 'admin@wgs-service.cz') {
+                if ($note['created_by'] === 'radek@wgs-service.cz') {
                     $note['author_name'] = 'Radek';
                 } else {
                     $note['author_name'] = $note['user_name'] ?: $note['created_by'];
