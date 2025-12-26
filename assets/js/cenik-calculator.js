@@ -648,8 +648,9 @@
     window.decrementCounter = function(id) {
         const input = document.getElementById(id);
         if (input) {
+            const min = parseInt(input.min) || 0;
             let value = parseInt(input.value) || 0;
-            if (value > 0) {
+            if (value > min) {
                 input.value = value - 1;
                 stav[id] = value - 1;
                 aktualizovatSouhrnDilu();
