@@ -40,6 +40,26 @@ try {
 
     $pdo = getDbConnection();
 
+    // FIX: Převést textové user_id na numerické id z wgs_users
+    // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
+    $stmtGetId = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtGetId->execute([':user_id' => $userId]);
+    $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
+    $numericUserId = $userRow['id'] ?? null;
+
+    if (!$numericUserId) {
+        // Fallback - zkusit jestli userId není už numerické
+        if (is_numeric($userId)) {
+            $numericUserId = (int)$userId;
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nepodařilo se najít ID uživatele'
+            ]);
+            exit;
+        }
+    }
+
     // Získat aktuální měsíc a rok
     $aktualniRok = date('Y');
     $aktualniMesic = date('m');
@@ -76,7 +96,7 @@ try {
     ");
 
     $stmt->execute([
-        'user_id' => $userId,
+        'user_id' => $numericUserId,
         'rok' => $aktualniRok,
         'mesic' => $aktualniMesic
     ]);
