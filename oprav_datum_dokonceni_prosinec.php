@@ -103,8 +103,8 @@ try {
     }
     echo "</table>";
 
-    // Najít všechny HOTOVO zakázky s lednovým datum_dokonceni ale prosincovým termínem
-    echo "<h2>Zakazky k oprave (datum_dokonceni v lednu, ale termin/vytvoreni v prosinci):</h2>";
+    // Najít všechny HOTOVO zakázky bez datum_dokonceni nebo s chybným datem
+    echo "<h2>Zakazky k oprave (chybi datum_dokonceni nebo je spatne):</h2>";
 
     $sqlOpravit = "
         SELECT
@@ -116,10 +116,11 @@ try {
             r.datum_dokonceni
         FROM wgs_reklamace r
         WHERE r.stav = 'done'
-        AND r.datum_dokonceni >= '2026-01-01'
         AND (
-            r.termin < '2026-01-01'
-            OR r.created_at < '2026-01-01'
+            r.datum_dokonceni IS NULL
+            OR r.datum_dokonceni = ''
+            OR (r.datum_dokonceni >= '2026-01-01' AND r.termin < '2026-01-01')
+            OR (r.datum_dokonceni >= '2026-01-01' AND r.created_at < '2026-01-01')
         )
     ";
 
