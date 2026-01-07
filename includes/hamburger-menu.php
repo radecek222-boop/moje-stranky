@@ -604,6 +604,11 @@ document.addEventListener('alpine:init', () => {
     mesic: '...',
     castka: '...',
 
+    init() {
+      // Automaticky načíst provize při inicializaci komponenty
+      this.load();
+    },
+
     async load() {
       try {
         const response = await fetch('/api/tech_provize_api.php');
