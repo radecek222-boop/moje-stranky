@@ -1091,6 +1091,17 @@ body.pdf-export-mode #signature-pad {
   min-height: auto !important;
   height: auto !important;
   overflow: visible !important;
+  /* Zalamování textu pro PDF */
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  resize: none !important;
+}
+
+/* Textová pole s delším obsahem - přizpůsobení výšky */
+.pdf-clone-desktop textarea {
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
 }
 
 .pdf-clone-desktop .label {
