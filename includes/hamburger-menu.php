@@ -68,7 +68,7 @@ if ($isAdmin) {
         <!-- Provize technika - Alpine.js komponenta (Step 34) -->
         <a
           x-data="techProvize"
-          x-init="load"
+          x-init="load()"
           class="tech-provize-link"
           style="cursor: default; pointer-events: none;"
         >PROVIZE / <span x-text="mesic"></span> / <span x-text="castka"></span> €</a>
