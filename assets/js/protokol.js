@@ -743,21 +743,15 @@ async function generateProtocolPDF() {
     logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
   }
 
-  // Zkopírovat hodnoty a vysky textarea do clone
+  // Zkopírovat hodnoty textarea do clone
   const originalTextareas = wrapper.querySelectorAll('textarea');
   const cloneTextareas = clone.querySelectorAll('textarea');
   originalTextareas.forEach((original, index) => {
     if (cloneTextareas[index]) {
       cloneTextareas[index].value = original.value;
-      // Zkopirovat vysku (dulezite pro auto-resize)
-      if (original.style.height) {
-        cloneTextareas[index].style.height = original.style.height;
-      }
-      // Nastavit min-height podle obsahu
-      cloneTextareas[index].style.minHeight = original.scrollHeight + 'px';
     }
   });
-  logger.log('Textarea hodnoty a vysky zkopirovany do clone');
+  logger.log('Textarea hodnoty zkopirovany do clone');
 
   // Zkopírovat hodnoty input a select do clone
   const originalInputs = wrapper.querySelectorAll('input, select');
@@ -783,6 +777,19 @@ async function generateProtocolPDF() {
 
   // Počkat na reflow clone (desktop layout se aplikuje)
   await new Promise(resolve => setTimeout(resolve, 150));
+
+  // Přepočítat výšku všech textarea podle obsahu (po reflow s novou šířkou)
+  const cloneTextareasAfterReflow = clone.querySelectorAll('textarea');
+  cloneTextareasAfterReflow.forEach((textarea) => {
+    // Reset výšky pro správný výpočet scrollHeight
+    textarea.style.height = 'auto';
+    // Nastavit výšku podle obsahu
+    const scrollHeight = textarea.scrollHeight;
+    textarea.style.height = scrollHeight + 'px';
+    textarea.style.minHeight = scrollHeight + 'px';
+    textarea.style.overflow = 'hidden';
+  });
+  logger.log('Textarea výšky přepočítány pro PDF');
 
   logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
