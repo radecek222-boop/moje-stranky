@@ -40,6 +40,17 @@ try {
 
     $pdo = getDbConnection();
 
+    // Získat numerické ID technika z tabulky wgs_users
+    // $_SESSION['user_id'] je textový user_id, ale assigned_to je INT (wgs_users.id)
+    $stmtUser = $pdo->prepare("
+        SELECT id, name FROM wgs_users WHERE user_id = :user_id LIMIT 1
+    ");
+    $stmtUser->execute(['user_id' => $userId]);
+    $userRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+    $numericUserId = $userRow['id'] ?? null;
+    $userName = $userRow['name'] ?? '';
+
     // Získat aktuální měsíc a rok
     $aktualniRok = date('Y');
     $aktualniMesic = date('m');
@@ -63,20 +74,22 @@ try {
     $nazevMesice = $mesiceCS[$aktualniMesic] ?? 'neznámý';
 
     // Spočítat provizi za aktuální měsíc
+    // Hledáme podle: assigned_to (INT) NEBO textového sloupce technik
     $stmt = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
         FROM wgs_reklamace r
-        WHERE r.assigned_to = :user_id
+        WHERE (r.assigned_to = :numeric_id OR r.technik LIKE :user_name)
           AND YEAR(r.created_at) = :rok
           AND MONTH(r.created_at) = :mesic
           AND r.stav = 'done'
     ");
 
     $stmt->execute([
-        'user_id' => $userId,
+        'numeric_id' => $numericUserId,
+        'user_name' => '%' . $userName . '%',
         'rok' => $aktualniRok,
         'mesic' => $aktualniMesic
     ]);
