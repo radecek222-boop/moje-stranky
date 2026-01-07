@@ -353,11 +353,16 @@ function initFilters() {
 // === AKTUALIZACE POČTŮ ===
 function updateCounts(items) {
   if (!Array.isArray(items)) return;
-  
+
   const countAll = items.length;
   const countWait = items.filter(r => {
     const stav = r.stav || 'wait';
-    return stav === 'ČEKÁ' || stav === 'wait';
+    const isWait = stav === 'ČEKÁ' || stav === 'wait';
+    if (!isWait) return false;
+    // Vyloučit zakázky s poslanou CN
+    const email = (r.email || '').toLowerCase().trim();
+    if (email && EMAILS_S_CN.includes(email)) return false;
+    return true;
   }).length;
   const countOpen = items.filter(r => {
     const stav = r.stav || 'wait';
@@ -454,7 +459,17 @@ async function renderOrders(items = null) {
 
     filtered = items.filter(r => {
       const stav = r.stav || 'wait';
-      return statusMap[ACTIVE_FILTER]?.includes(stav);
+      const matchesStatus = statusMap[ACTIVE_FILTER]?.includes(stav);
+
+      // V záložce ČEKAJÍCÍ vyloučit zakázky s poslanou CN
+      if (ACTIVE_FILTER === 'wait' && matchesStatus) {
+        const email = (r.email || '').toLowerCase().trim();
+        if (email && EMAILS_S_CN.includes(email)) {
+          return false; // Zakázka má CN - nezobrazovat v ČEKAJÍCÍ
+        }
+      }
+
+      return matchesStatus;
     });
   }
 
