@@ -538,6 +538,20 @@ async function renderOrders(items = null) {
     countCnEl.textContent = `(${countCn})`;
   }
 
+  // Aktualizovat počet ČEKAJÍCÍ (vyloučit zakázky s CN)
+  const countWaitEl = document.getElementById('count-wait');
+  if (countWaitEl) {
+    const countWait = items.filter(r => {
+      const stav = r.stav || 'wait';
+      const isWait = stav === 'ČEKÁ' || stav === 'wait';
+      if (!isWait) return false;
+      const email = (r.email || '').toLowerCase().trim();
+      if (email && EMAILS_S_CN.includes(email)) return false;
+      return true;
+    }).length;
+    countWaitEl.textContent = `(${countWait})`;
+  }
+
   // Filtr pro CN - zobrazit pouze reklamace s odeslanou cenovou nabídkou
   if (ACTIVE_FILTER === 'cn') {
     filtered = filtered.filter(r => {
