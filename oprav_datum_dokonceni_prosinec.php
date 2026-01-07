@@ -41,7 +41,7 @@ try {
 
     echo "<h1>Oprava datum_dokonceni - prosincove zakazky</h1>";
 
-    // Najít prosincové zakázky podle čísla nebo termin_datum
+    // Najít prosincové zakázky podle čísla nebo termin
     $sql = "
         SELECT
             r.id,
@@ -49,7 +49,7 @@ try {
             r.jmeno,
             r.adresa,
             r.stav,
-            r.termin_datum,
+            r.termin,
             r.created_at,
             r.updated_at,
             r.datum_dokonceni,
@@ -62,7 +62,7 @@ try {
             r.cislo LIKE '%2025%12%'
             OR r.cislo LIKE 'POZ/2025/17-12%'
             OR r.cislo = '3039'
-            OR r.termin_datum LIKE '2025-12%'
+            OR r.termin LIKE '2025-12%'
             OR (r.created_at >= '2025-12-01' AND r.created_at < '2026-01-01')
         )
         ORDER BY r.created_at DESC
@@ -94,7 +94,7 @@ try {
             <td>{$z['id']}</td>
             <td>{$z['cislo']}</td>
             <td>{$z['jmeno']}</td>
-            <td>{$z['termin_datum']}</td>
+            <td>{$z['termin']}</td>
             <td>{$z['created_at']}</td>
             <td {$datumDokonceniClass}>{$z['datum_dokonceni']}</td>
             <td>{$z['technik_jmeno']}</td>
@@ -111,14 +111,14 @@ try {
             r.id,
             r.cislo,
             r.jmeno,
-            r.termin_datum,
+            r.termin,
             r.created_at,
             r.datum_dokonceni
         FROM wgs_reklamace r
         WHERE r.stav = 'done'
         AND r.datum_dokonceni >= '2026-01-01'
         AND (
-            r.termin_datum < '2026-01-01'
+            r.termin < '2026-01-01'
             OR r.created_at < '2026-01-01'
         )
     ";
@@ -141,8 +141,8 @@ try {
             </tr>";
 
         foreach ($kOprave as $z) {
-            // Určit správné datum dokončení - použít termin_datum nebo den po termínu
-            $spravneDatum = $z['termin_datum'] ?: $z['created_at'];
+            // Určit správné datum dokončení - použít termin nebo den po termínu
+            $spravneDatum = $z['termin'] ?: $z['created_at'];
             if ($spravneDatum) {
                 $spravneDatum = date('Y-m-d 17:00:00', strtotime($spravneDatum));
             }
@@ -151,7 +151,7 @@ try {
                 <td>{$z['id']}</td>
                 <td>{$z['cislo']}</td>
                 <td>{$z['jmeno']}</td>
-                <td>{$z['termin_datum']}</td>
+                <td>{$z['termin']}</td>
                 <td>{$z['created_at']}</td>
                 <td style='background: #f8d7da;'>{$z['datum_dokonceni']}</td>
                 <td style='background: #d4edda;'>{$spravneDatum}</td>
@@ -164,7 +164,7 @@ try {
 
             $opraveno = 0;
             foreach ($kOprave as $z) {
-                $spravneDatum = $z['termin_datum'] ?: $z['created_at'];
+                $spravneDatum = $z['termin'] ?: $z['created_at'];
                 if ($spravneDatum) {
                     $spravneDatum = date('Y-m-d 17:00:00', strtotime($spravneDatum));
 
