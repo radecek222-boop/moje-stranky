@@ -65,6 +65,30 @@ try {
 
     echo "<h1>Migrace: Šablona protocol_sent</h1>";
 
+    // ============================================
+    // KONTROLA A PŘIDÁNÍ CHYBĚJÍCÍCH SLOUPCŮ
+    // ============================================
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_notifications");
+    $existujiciSloupce = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $potrebneSloupce = [
+        'to_recipients' => "ALTER TABLE wgs_notifications ADD COLUMN to_recipients JSON DEFAULT NULL AFTER bcc_emails",
+        'cc_recipients' => "ALTER TABLE wgs_notifications ADD COLUMN cc_recipients JSON DEFAULT NULL AFTER to_recipients",
+        'bcc_recipients' => "ALTER TABLE wgs_notifications ADD COLUMN bcc_recipients JSON DEFAULT NULL AFTER cc_recipients"
+    ];
+
+    $pridaneSloupce = [];
+    foreach ($potrebneSloupce as $sloupec => $sql) {
+        if (!in_array($sloupec, $existujiciSloupce)) {
+            $pdo->exec($sql);
+            $pridaneSloupce[] = $sloupec;
+        }
+    }
+
+    if (!empty($pridaneSloupce)) {
+        echo "<div class='success'>Přidány chybějící sloupce: <code>" . implode('</code>, <code>', $pridaneSloupce) . "</code></div>";
+    }
+
     // Definice šablony
     $sablonaData = [
         'name' => 'Servisní protokol odeslán',
@@ -147,6 +171,9 @@ try {
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='info'><strong>SPOUŠTÍM MIGRACI...</strong></div>";
 
+        // ID šablony (VARCHAR, ne AUTO_INCREMENT)
+        $sablonaId = 'protocol_sent';
+
         if ($existujiciId) {
             // Aktualizace existující šablony
             $stmt = $pdo->prepare("
@@ -184,19 +211,20 @@ try {
             echo "</div>";
 
         } else {
-            // Vložení nové šablony
+            // Vložení nové šablony - id je VARCHAR, ne AUTO_INCREMENT!
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notifications (
-                    name, trigger_event, recipient_type, type, subject, template,
+                    id, name, trigger_event, recipient_type, type, subject, template,
                     to_recipients, cc_recipients, bcc_recipients, cc_emails, bcc_emails,
                     active, created_at, updated_at
                 ) VALUES (
-                    :name, :trigger_event, :recipient_type, :type, :subject, :template,
+                    :id, :name, :trigger_event, :recipient_type, :type, :subject, :template,
                     :to_recipients, :cc_recipients, :bcc_recipients, :cc_emails, :bcc_emails,
                     :active, NOW(), NOW()
                 )
             ");
             $stmt->execute([
+                'id' => $sablonaId,
                 'name' => $sablonaData['name'],
                 'trigger_event' => $sablonaData['trigger_event'],
                 'recipient_type' => $sablonaData['recipient_type'],
@@ -211,11 +239,9 @@ try {
                 'active' => $sablonaData['active']
             ]);
 
-            $noveId = $pdo->lastInsertId();
-
             echo "<div class='success'>";
             echo "<strong>ŠABLONA VYTVOŘENA</strong><br>";
-            echo "ID: {$noveId}";
+            echo "ID: {$sablonaId}";
             echo "</div>";
         }
 
