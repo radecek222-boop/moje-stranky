@@ -531,10 +531,40 @@ async function renderOrders(items = null) {
     });
   }
 
+  // Řazení podle stavu:
+  // - ČEKÁ (wait): podle data vytvoření (nejnovější první)
+  // - DOMLUVENÁ (open): podle termínu návštěvy (nejbližší první)
+  // - HOTOVO (done): podle data dokončení (nejnovější první)
   filtered.sort((a, b) => {
-    const dateA = new Date(a.created_at || a.datum_reklamace || a.timestamp || 0);
-    const dateB = new Date(b.created_at || b.datum_reklamace || b.timestamp || 0);
-    return dateB - dateA;
+    const stavA = a.stav || 'wait';
+    const stavB = b.stav || 'wait';
+
+    // Pokud jsou různé stavy, seskupit podle priority: ČEKÁ > DOMLUVENÁ > HOTOVO
+    const priorita = { 'ČEKÁ': 1, 'wait': 1, 'DOMLUVENÁ': 2, 'open': 2, 'HOTOVO': 3, 'done': 3 };
+    const prioA = priorita[stavA] || 1;
+    const prioB = priorita[stavB] || 1;
+
+    if (prioA !== prioB) {
+      return prioA - prioB;
+    }
+
+    // Stejný stav - řadit podle příslušného data
+    if (stavA === 'ČEKÁ' || stavA === 'wait') {
+      // Čekající: podle data vytvoření (nejnovější první)
+      const dateA = new Date(a.created_at || a.datum_reklamace || 0);
+      const dateB = new Date(b.created_at || b.datum_reklamace || 0);
+      return dateB - dateA;
+    } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
+      // Domluvená: podle termínu návštěvy (nejbližší první)
+      const terminA = a.termin ? new Date(a.termin) : new Date('9999-12-31');
+      const terminB = b.termin ? new Date(b.termin) : new Date('9999-12-31');
+      return terminA - terminB;
+    } else {
+      // Hotovo: podle data dokončení (nejnovější první)
+      const doneA = new Date(a.datum_dokonceni || a.completed_at || a.updated_at || a.created_at || 0);
+      const doneB = new Date(b.datum_dokonceni || b.completed_at || b.updated_at || b.created_at || 0);
+      return doneB - doneA;
+    }
   });
 
   grid.innerHTML = filtered.map((rec, index) => {

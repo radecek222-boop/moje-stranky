@@ -670,8 +670,8 @@ function calculateStats() {
     let invoice = 0;
 
     if (isLenka) {
-      // Lenka má paušální mzdu 8716 Kč
-      salary = 8716;
+      // Lenka má editovatelnou paušální odměnu (výchozí 8716 Kč)
+      salary = emp.bonusAmount !== undefined ? (parseFloat(emp.bonusAmount) || 0) : 8716;
       invoice = 0;
     } else if (emp.type === 'bonus_girls') {
       // Bonus pro holky - editovatelná částka
@@ -1201,10 +1201,10 @@ function renderTable() {
 
     // Calculate based on employee type
     if (isLenka) {
-      // Lenka má paušální mzdu 8716 Kč (nepřepisovatelná)
-      salary = 8716;
+      // Lenka má editovatelnou paušální odměnu (výchozí 8716 Kč)
+      salary = emp.bonusAmount !== undefined ? (emp.bonusAmount || 0) : 8716;
       invoice = 0;
-      displayInfo = '<span class="employee-type-badge" style="background: var(--c-info);">Paušál 8716 Kč</span>';
+      displayInfo = '<span class="employee-type-badge" style="background: var(--c-info);">Paušální odměna</span>';
     } else if (emp.type === 'bonus_girls') {
       // Bonus pro holky - editovatelná částka
       salary = emp.bonusAmount || 0;
@@ -1256,8 +1256,19 @@ function renderTable() {
           ${displayInfo}
         </td>
         <td class="text-center">
-          ${(isLenka || emp.type === 'special' || emp.type === 'special2') ?
+          ${(emp.type === 'special' || emp.type === 'special2') ?
             '<span style="color: var(--c-grey);">–</span>' :
+            isLenka ?
+              `<input type="number"
+                     value="${emp.bonusAmount !== undefined ? emp.bonusAmount : 8716}"
+                     min="0"
+                     step="100"
+                     class="table-input"
+                     style="width: 100px; text-align: center; font-weight: 600; background: #d1ecf1;"
+                     placeholder="Částka (Kč)"
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="bonusAmount">` :
             emp.type === 'premie_polozka' ?
               `<input type="number"
                      value="${emp.premieCastka || 0}"
@@ -1362,8 +1373,8 @@ function updateStats() {
     let invoice = 0;
 
     if (isLenka) {
-      // Lenka má paušální mzdu 8716 Kč
-      salary = 8716;
+      // Lenka má editovatelnou paušální odměnu (výchozí 8716 Kč)
+      salary = emp.bonusAmount !== undefined ? (emp.bonusAmount || 0) : 8716;
       invoice = 0;
     } else if (emp.type === 'bonus_girls') {
       // Bonus pro holky - editovatelná částka

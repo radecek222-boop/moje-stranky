@@ -83,13 +83,14 @@ try {
     $nazevMesice = $mesiceCS[$aktualniMesic] ?? 'neznámý';
 
     // Spočítat provizi za aktuální měsíc
+    // Hledáme podle: assigned_to (INT) NEBO textového sloupce technik
     $stmt = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
         FROM wgs_reklamace r
-        WHERE r.assigned_to = :user_id
+        WHERE (r.assigned_to = :numeric_id OR r.technik LIKE :user_name)
           AND YEAR(r.created_at) = :rok
           AND MONTH(r.created_at) = :mesic
           AND r.stav = 'done'

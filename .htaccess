@@ -13,6 +13,12 @@
     RewriteRule ^assets/ - [L]
     RewriteRule ^uploads/ - [L]
 
+    # ======================================
+    # CRITICAL: Let's Encrypt - MUST be BEFORE Force HTTPS!
+    # Allows HTTP challenge for certificate renewal
+    # ======================================
+    RewriteRule ^\.well-known/ - [L]
+
     # Force HTTPS
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
