@@ -606,6 +606,7 @@ function saveProtokolData($data) {
 
 /**
  * Odeslání emailu zákazníkovi pomocí PHPMailer
+ * AKTUALIZACE: Načítá šablonu a příjemce z databáze (wgs_notifications)
  */
 function sendEmailToCustomer($data) {
     // BEZPEČNÉ LOGOVÁNÍ - pouze metadata (bez PDF payloadu)
@@ -672,8 +673,13 @@ function sendEmailToCustomer($data) {
         throw new Exception('Neplatná emailová adresa zákazníka');
     }
 
+    $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
+    $cisloReklamace = $reklamace['cislo'] ?? $reklamace['reklamace_id'] ?? $reklamaceId;
+    $technikJmeno = $reklamace['technik'] ?? '';
+
     // Kontrola jestli existuji videa pro tuto zakazku
     $videoDownloadUrl = null;
+    $videaCount = 0;
     $stmt = $pdo->prepare("SELECT COUNT(*) as pocet FROM wgs_videos WHERE claim_id = :claim_id");
     $stmt->execute([':claim_id' => $reklamace['id']]);
     $videaCount = $stmt->fetch(PDO::FETCH_ASSOC)['pocet'];
@@ -715,18 +721,183 @@ function sendEmailToCustomer($data) {
         throw new Exception('SMTP nastavení není nakonfigurováno. Spusťte Email System Installer na /admin/install_email_system.php nebo zkontrolujte konfiguraci na /diagnoza_smtp.php');
     }
 
-    // Příprava emailu
-    $storageKey = reklamaceStorageKey($reklamaceId);
-    // Pouzit zakaznicke cislo reklamace (cislo), ne interni WGS cislo (reklamace_id)
-    $cisloReklamace = $reklamace['cislo'] ?? $reklamace['reklamace_id'] ?? $reklamaceId;
-    $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
-    // Předmět vždy začíná jménem zákazníka a číslem reklamace
-    $subject = "{$customerName} - Reklamace č. {$cisloReklamace} - Servisní protokol WGS";
+    // ============================================
+    // NAČTENÍ ŠABLONY Z DATABÁZE
+    // ============================================
+    $stmt = $pdo->prepare("
+        SELECT * FROM wgs_notifications
+        WHERE trigger_event = 'protocol_sent' AND type = 'email' AND active = 1
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $sablona = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Sestavit sekci videodokumentace pokud existuji videa
-    $videoSection = '';
-    if ($videoDownloadUrl) {
-        $videoSection = "
+    // Funkce pro převod role na email
+    $resolveRoleToEmail = function($role) use ($pdo, $customerEmail, $reklamace) {
+        switch ($role) {
+            case 'customer':
+                return $customerEmail;
+            case 'admin':
+                $stmt = $pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'admin_email' LIMIT 1");
+                $stmt->execute();
+                return $stmt->fetchColumn() ?: null;
+            case 'technician':
+                // Najit email technika podle jmena
+                if (!empty($reklamace['technik'])) {
+                    $stmt = $pdo->prepare("SELECT email FROM wgs_users WHERE name LIKE :name AND role = 'technik' LIMIT 1");
+                    $stmt->execute(['name' => '%' . $reklamace['technik'] . '%']);
+                    return $stmt->fetchColumn() ?: null;
+                }
+                return null;
+            case 'seller':
+                return $reklamace['email_prodejce'] ?? null;
+            default:
+                return null;
+        }
+    };
+
+    // Proměnné pro náhradu v šabloně
+    $promenne = [
+        '{{customer_name}}' => $customerName,
+        '{{customer_email}}' => $customerEmail,
+        '{{order_id}}' => $cisloReklamace,
+        '{{technician_name}}' => $technikJmeno,
+        '{{address}}' => $reklamace['adresa'] ?? '',
+        '{{product}}' => $reklamace['model'] ?? '',
+        '{{company_email}}' => 'reklamace@wgs-service.cz',
+        '{{company_phone}}' => '+420 725 965 826',
+        '{{video_count}}' => $videaCount,
+        '{{video_url}}' => $videoDownloadUrl ?? '',
+    ];
+
+    // Pokud existuje šablona v databázi, použít ji
+    if ($sablona) {
+        error_log("Používám šablonu z databáze: ID {$sablona['id']}, trigger_event: protocol_sent");
+
+        // Příjemci z šablony
+        $toRecipients = [];
+        $ccRecipients = [];
+        $bccRecipients = [];
+
+        // TO příjemci
+        $toRoles = !empty($sablona['to_recipients']) ? json_decode($sablona['to_recipients'], true) : ['customer'];
+        if (is_array($toRoles)) {
+            foreach ($toRoles as $role) {
+                $email = $resolveRoleToEmail($role);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $toRecipients[] = $email;
+                }
+            }
+        }
+
+        // CC příjemci (role)
+        $ccRoles = !empty($sablona['cc_recipients']) ? json_decode($sablona['cc_recipients'], true) : [];
+        if (is_array($ccRoles)) {
+            foreach ($ccRoles as $role) {
+                $email = $resolveRoleToEmail($role);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $ccRecipients[] = $email;
+                }
+            }
+        }
+
+        // CC explicitní emaily
+        $ccEmails = !empty($sablona['cc_emails']) ? json_decode($sablona['cc_emails'], true) : [];
+        if (is_array($ccEmails)) {
+            foreach ($ccEmails as $email) {
+                // Nahradit proměnné v emailu
+                foreach ($promenne as $klic => $hodnota) {
+                    $email = str_replace($klic, $hodnota, $email);
+                }
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $ccRecipients[] = $email;
+                }
+            }
+        }
+
+        // BCC příjemci (role)
+        $bccRoles = !empty($sablona['bcc_recipients']) ? json_decode($sablona['bcc_recipients'], true) : [];
+        if (is_array($bccRoles)) {
+            foreach ($bccRoles as $role) {
+                $email = $resolveRoleToEmail($role);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $bccRecipients[] = $email;
+                }
+            }
+        }
+
+        // BCC explicitní emaily
+        $bccEmails = !empty($sablona['bcc_emails']) ? json_decode($sablona['bcc_emails'], true) : [];
+        if (is_array($bccEmails)) {
+            foreach ($bccEmails as $email) {
+                foreach ($promenne as $klic => $hodnota) {
+                    $email = str_replace($klic, $hodnota, $email);
+                }
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $bccRecipients[] = $email;
+                }
+            }
+        }
+
+        // Předmět a tělo z šablony
+        $subject = $sablona['subject'] ?? "{{customer_name}} - Reklamace č. {{order_id}} - Servisní protokol WGS";
+        foreach ($promenne as $klic => $hodnota) {
+            $subject = str_replace($klic, $hodnota, $subject);
+        }
+
+        // Tělo šablony
+        $message = $sablona['template'] ?? '';
+        foreach ($promenne as $klic => $hodnota) {
+            $message = str_replace($klic, $hodnota, $message);
+        }
+
+        // Přidat video sekci pokud existují videa a šablona obsahuje placeholder
+        if ($videoDownloadUrl && strpos($message, '{{video_section}}') !== false) {
+            $videoSection = "
+<table cellpadding='0' cellspacing='0' border='0' style='margin: 20px 0; background: #f5f5f5; border-radius: 8px; width: 100%;'>
+    <tr>
+        <td style='padding: 20px;'>
+            <p style='margin: 0 0 12px 0; font-weight: bold; color: #333;'>Videodokumentace</p>
+            <p style='margin: 0 0 12px 0; color: #666;'>K této zakázce je k dispozici videodokumentace ({$videaCount} " . ($videaCount == 1 ? 'video' : 'videí') . ").</p>
+            <a href='{$videoDownloadUrl}' style='display: inline-block; background: #333; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Stáhnout videodokumentaci</a>
+            <p style='margin: 12px 0 0 0; font-size: 12px; color: #999;'>Odkaz je platný 7 dní</p>
+        </td>
+    </tr>
+</table>";
+            $message = str_replace('{{video_section}}', $videoSection, $message);
+        } else {
+            $message = str_replace('{{video_section}}', '', $message);
+        }
+
+        // Pokud šablona nemá HTML strukturu, zabalit
+        if (strpos($message, '<html') === false && strpos($message, '<body') === false) {
+            $message = "<!DOCTYPE html>
+<html lang='cs'>
+<head><meta charset='UTF-8'></head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+{$message}
+</body>
+</html>";
+        }
+
+        // Odstranit duplicity
+        $ccRecipients = array_unique($ccRecipients);
+        $bccRecipients = array_unique($bccRecipients);
+
+    } else {
+        // FALLBACK: Použít hardcoded šablonu pokud v DB neexistuje
+        error_log("UPOZORNĚNÍ: Šablona 'protocol_sent' nenalezena v databázi, používám výchozí šablonu");
+
+        $toRecipients = [$customerEmail];
+        $ccRecipients = [];
+        $bccRecipients = [];
+
+        $subject = "{$customerName} - Reklamace č. {$cisloReklamace} - Servisní protokol WGS";
+
+        // Sestavit sekci videodokumentace pokud existuji videa
+        $videoSection = '';
+        if ($videoDownloadUrl) {
+            $videoSection = "
 <br>
 <table cellpadding='0' cellspacing='0' border='0' style='margin: 20px 0; background: #f5f5f5; border-radius: 8px; width: 100%;'>
     <tr>
@@ -739,10 +910,9 @@ function sendEmailToCustomer($data) {
     </tr>
 </table>
 ";
-    }
+        }
 
-    // HTML email zpráva
-    $message = "
+        $message = "
 <!DOCTYPE html>
 <html lang='cs'>
 <head>
@@ -769,8 +939,9 @@ function sendEmailToCustomer($data) {
 </body>
 </html>
 ";
+    }
 
-    // Textová verze pro klienty bez HTML
+    // Textová verze pro klienty bez HTML (vždy generovat)
     $messageText = "Dobrý den {$customerName},
 
 zasíláme Vám kompletní servisní report k reklamaci č. {$cisloReklamace}.
@@ -791,6 +962,11 @@ reklamace@wgs-service.cz
 +420 725 965 826
 ";
 
+    // Validace - musí být alespoň jeden příjemce
+    if (empty($toRecipients)) {
+        throw new Exception('Nebyl nalezen žádný příjemce emailu');
+    }
+
     // Vytvoření PHPMailer instance
     $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
@@ -800,7 +976,6 @@ reklamace@wgs-service.cz
         $mail->Host = $smtpSettings['smtp_host'];
 
         // SMTP Authentication - pouze pokud jsou zadány credentials
-        // Pro WebSMTP port 25 může být autentizace doménová (bez hesla)
         if (!empty($smtpSettings['smtp_username']) && !empty($smtpSettings['smtp_password'])) {
             $mail->SMTPAuth = true;
             $mail->Username = $smtpSettings['smtp_username'];
@@ -819,19 +994,38 @@ reklamace@wgs-service.cz
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         }
 
-        // Odesílatel a příjemce
+        // Odesílatel
         $mail->setFrom($smtpSettings['smtp_from_email'], $smtpSettings['smtp_from_name'] ?? 'White Glove Service');
-        $mail->addAddress($customerEmail, $customerName);
         $mail->addReplyTo('reklamace@wgs-service.cz', 'White Glove Service');
+
+        // TO příjemci (první jako hlavní, ostatní jako další TO)
+        $prvniPrijemce = array_shift($toRecipients);
+        $mail->addAddress($prvniPrijemce, $customerName);
+        foreach ($toRecipients as $dalsiTo) {
+            $mail->addAddress($dalsiTo);
+        }
+
+        // CC příjemci
+        foreach ($ccRecipients as $ccEmail) {
+            $mail->addCC($ccEmail);
+        }
+
+        // BCC příjemci
+        foreach ($bccRecipients as $bccEmail) {
+            $mail->addBCC($bccEmail);
+        }
+
+        error_log("Email příjemci - TO: " . $prvniPrijemce . (count($toRecipients) > 0 ? ', ' . implode(', ', $toRecipients) : '') .
+                  (count($ccRecipients) > 0 ? " | CC: " . implode(', ', $ccRecipients) : '') .
+                  (count($bccRecipients) > 0 ? " | BCC: " . implode(', ', $bccRecipients) : ''));
 
         // Obsah emailu - HTML s textovou alternativou
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $message;
-        $mail->AltBody = $messageText; // Textová verze pro klienty bez HTML
+        $mail->AltBody = $messageText;
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
-        // Nazev prilohy pouziva zakaznicke cislo reklamace + jmeno zakaznika
         $pdfData = base64_decode($completePdf);
         $safeCustomerName = preg_replace('/[^a-zA-Z0-9_-]/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $customerName));
         $safeCustomerName = preg_replace('/-+/', '-', trim($safeCustomerName, '-'));
