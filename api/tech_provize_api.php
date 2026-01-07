@@ -84,6 +84,7 @@ try {
 
     // Spočítat provizi za aktuální měsíc
     // Hledáme podle: assigned_to (INT) NEBO textového sloupce technik
+    // DŮLEŽITÉ: Počítáme podle datum_dokonceni (kdy byla zakázka DOKONČENA), ne created_at
     $stmt = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
@@ -91,8 +92,8 @@ try {
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
         FROM wgs_reklamace r
         WHERE (r.assigned_to = :numeric_id OR r.technik LIKE :user_name)
-          AND YEAR(r.created_at) = :rok
-          AND MONTH(r.created_at) = :mesic
+          AND YEAR(COALESCE(r.datum_dokonceni, r.updated_at)) = :rok
+          AND MONTH(COALESCE(r.datum_dokonceni, r.updated_at)) = :mesic
           AND r.stav = 'done'
     ");
 
