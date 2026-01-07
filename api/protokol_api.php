@@ -1093,29 +1093,48 @@ reklamace@wgs-service.cz
         // Aktualizovat stav reklamace, datum dokončení a kdo dokončil
         global $currentUserId;
 
+        // Zjistit zda existuje sloupec dokonceno_kym
+        $stmtCol = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
+        $hasDokoncenokym = $stmtCol->rowCount() > 0;
+
+        // Získat aktuální stav zakázky - nenastavovat dokonceno_kym při opakovaném odeslání
+        $stmtCheck = $pdo->prepare("SELECT stav, dokonceno_kym FROM wgs_reklamace WHERE id = :id");
+        $stmtCheck->execute([':id' => $reklamace['id']]);
+        $aktualniStav = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+        $jizDokoncena = ($aktualniStav['stav'] === 'done');
+        $jizMaDokoncenokym = !empty($aktualniStav['dokonceno_kym']);
+
         // Získat numerické ID přihlášeného uživatele pro provize
         $dokoncenokym = null;
-        if ($currentUserId) {
+        if ($currentUserId && !$jizDokoncena && !$jizMaDokoncenokym) {
+            // Pouze pokud zakázka ještě nebyla dokončena - nastavit kdo dokončil
             $stmtUser = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
             $stmtUser->execute(['user_id' => $currentUserId]);
             $dokoncenokym = $stmtUser->fetchColumn();
         }
 
-        // Zjistit zda existuje sloupec dokonceno_kym
-        $stmtCol = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
-        $hasDokoncenokym = $stmtCol->rowCount() > 0;
-
         if ($hasDokoncenokym && $dokoncenokym) {
+            // První dokončení - nastavit dokonceno_kym a datum_dokonceni
             $stmt = $pdo->prepare("
                 UPDATE wgs_reklamace
                 SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW(), dokonceno_kym = :dokonceno_kym
                 WHERE id = :id
             ");
             $stmt->execute([':id' => $reklamace['id'], ':dokonceno_kym' => $dokoncenokym]);
-        } else {
+        } elseif (!$jizDokoncena) {
+            // První dokončení bez dokonceno_kym (starý systém nebo chybí user)
             $stmt = $pdo->prepare("
                 UPDATE wgs_reklamace
                 SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW()
+                WHERE id = :id
+            ");
+            $stmt->execute([':id' => $reklamace['id']]);
+        } else {
+            // Opakované odeslání - pouze aktualizovat updated_at
+            $stmt = $pdo->prepare("
+                UPDATE wgs_reklamace
+                SET updated_at = NOW()
                 WHERE id = :id
             ");
             $stmt->execute([':id' => $reklamace['id']]);

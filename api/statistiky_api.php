@@ -29,6 +29,14 @@ $action = $_GET['action'] ?? '';
 try {
     $pdo = getDbConnection();
 
+    // Zjistit zda existuje sloupec dokonceno_kym
+    $stmtCol = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
+    $GLOBALS['hasDokoncenokym'] = $stmtCol->rowCount() > 0;
+
+    // Zjistit zda existuje sloupec datum_dokonceni
+    $stmtCol2 = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'datum_dokonceni'");
+    $GLOBALS['hasDatumDokonceni'] = $stmtCol2->rowCount() > 0;
+
     switch ($action) {
         case 'ping':
             echo json_encode([
@@ -186,13 +194,21 @@ function getZakazky($pdo) {
     $totalCount = (int)($stmtCount->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Hlavní dotaz
-    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
+    // Technik: priorita dokonceno_kym (kdo dokončil), pak assigned_to, pak textový sloupec technik
+    $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
+
+    // JOIN podmínka pro technika - podle dokonceno_kym nebo assigned_to
+    $technikJoin = $hasDokoncenokym
+        ? "LEFT JOIN wgs_users technik ON (r.dokonceno_kym = technik.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = technik.id)) AND technik.role = 'technik'"
+        : "LEFT JOIN wgs_users technik ON r.assigned_to = technik.id AND technik.role = 'technik'";
+
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
             r.assigned_to as assigned_to_raw,
+            " . ($hasDokoncenokym ? "r.dokonceno_kym as dokonceno_kym_raw," : "") . "
             COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
@@ -202,7 +218,7 @@ function getZakazky($pdo) {
             r.created_at as datum_raw
         FROM wgs_reklamace r
         LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.user_id
-        LEFT JOIN wgs_users technik ON r.assigned_to = technik.id AND technik.role = 'technik'
+        $technikJoin
         $where
         ORDER BY r.created_at DESC
     ";
@@ -292,7 +308,14 @@ function getCharty($pdo) {
     $prodejci = $stmtProdejci->fetchAll(PDO::FETCH_ASSOC);
 
     // 4. Statistiky techniků
-    // Technik: nejprve zkusit JOIN na assigned_to, pak fallback na textový sloupec technik
+    // Technik: priorita dokonceno_kym (kdo dokončil), pak assigned_to, pak textový sloupec technik
+    $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
+
+    // JOIN podmínka pro technika - podle dokonceno_kym nebo assigned_to
+    $technikJoinChart = $hasDokoncenokym
+        ? "LEFT JOIN wgs_users u ON (r.dokonceno_kym = u.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = u.id)) AND u.role = 'technik'"
+        : "LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'";
+
     $stmtTechnici = $pdo->prepare("
         SELECT
             COALESCE(u.name, r.technik, '-') as technik,
@@ -300,7 +323,7 @@ function getCharty($pdo) {
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'
+        $technikJoinChart
         $where
         GROUP BY COALESCE(u.name, r.technik, '-')
         ORDER BY pocet DESC
@@ -371,9 +394,10 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
-    // FIX: Hledáme v assigned_to (numerické id, textové user_id) A TAKÉ v textovém sloupci technik
+    // FIX: Priorita dokonceno_kym (kdo dokončil), pak assigned_to, pak textový sloupec technik
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
+        $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
 
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
@@ -391,8 +415,12 @@ function buildFilterWhere() {
             $params[$keyUserId] = $userRow['user_id'] ?? '';
             $params[$keyName] = $userRow['name'] ?? '';
 
-            // Hledáme podle: assigned_to = id NEBO assigned_to = user_id NEBO technik (text) = jméno
-            $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId OR r.technik = $keyName)";
+            // Hledáme podle: dokonceno_kym = id NEBO (dokonceno_kym IS NULL AND assigned_to) NEBO technik (text) = jméno
+            if ($hasDokoncenokym) {
+                $techniciConditions[] = "(r.dokonceno_kym = $keyId OR (r.dokonceno_kym IS NULL AND (r.assigned_to = $keyId OR r.assigned_to = $keyUserId)) OR r.technik = $keyName)";
+            } else {
+                $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId OR r.technik = $keyName)";
+            }
         }
 
         if (!empty($techniciConditions)) {
