@@ -555,9 +555,17 @@ async function renderOrders(items = null) {
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
       return dateB - dateA;
     } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
-      // Domluvená: podle termínu návštěvy (nejbližší první)
-      const terminA = a.termin ? new Date(a.termin) : new Date('9999-12-31');
-      const terminB = b.termin ? new Date(b.termin) : new Date('9999-12-31');
+      // Domluvená: podle termínu + času návštěvy (nejbližší první)
+      // Kombinujeme termin (YYYY-MM-DD) s cas_navstevy (HH:MM)
+      const getTerminDate = (rec) => {
+        if (!rec.termin) return new Date('9999-12-31');
+        // Formát: termin = '2025-01-08', cas_navstevy = '09:00'
+        const datumStr = rec.termin;
+        const casStr = rec.cas_navstevy || '00:00';
+        return new Date(`${datumStr}T${casStr}:00`);
+      };
+      const terminA = getTerminDate(a);
+      const terminB = getTerminDate(b);
       return terminA - terminB;
     } else {
       // Hotovo: podle data dokončení (nejnovější první)
