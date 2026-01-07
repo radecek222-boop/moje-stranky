@@ -202,6 +202,10 @@ function getZakazky($pdo) {
         ? "LEFT JOIN wgs_users technik ON (r.dokonceno_kym = technik.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = technik.id)) AND technik.role = 'technik'"
         : "LEFT JOIN wgs_users technik ON r.assigned_to = technik.id AND technik.role = 'technik'";
 
+    // Použít datum_dokonceni pokud existuje
+    $hasDatumDokonceni = $GLOBALS['hasDatumDokonceni'] ?? false;
+    $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.created_at)' : 'r.created_at';
+
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
@@ -214,13 +218,13 @@ function getZakazky($pdo) {
             CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
             CAST(COALESCE(r.cena_celkem, r.cena, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
             UPPER(COALESCE(r.fakturace_firma, 'cz')) as zeme,
-            DATE_FORMAT(r.created_at, '%d.%m.%Y') as datum,
-            r.created_at as datum_raw
+            DATE_FORMAT({$datumSloupec}, '%d.%m.%Y') as datum,
+            {$datumSloupec} as datum_raw
         FROM wgs_reklamace r
         LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.user_id
         $technikJoin
         $where
-        ORDER BY r.created_at DESC
+        ORDER BY {$datumSloupec} DESC
     ";
 
     if (!$proExport) {
@@ -360,15 +364,19 @@ function buildFilterWhere() {
     $conditions = [];
     $params = [];
 
-    // Rok
+    // Použít datum_dokonceni pokud existuje, jinak created_at
+    $hasDatumDokonceni = $GLOBALS['hasDatumDokonceni'] ?? false;
+    $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.created_at)' : 'r.created_at';
+
+    // Rok - podle data dokončení
     if (!empty($_GET['rok'])) {
-        $conditions[] = "YEAR(r.created_at) = :rok";
+        $conditions[] = "YEAR({$datumSloupec}) = :rok";
         $params[':rok'] = (int)$_GET['rok'];
     }
 
-    // Měsíc
+    // Měsíc - podle data dokončení
     if (!empty($_GET['mesic'])) {
-        $conditions[] = "MONTH(r.created_at) = :mesic";
+        $conditions[] = "MONTH({$datumSloupec}) = :mesic";
         $params[':mesic'] = (int)$_GET['mesic'];
     }
 
