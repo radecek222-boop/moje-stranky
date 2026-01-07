@@ -29,6 +29,7 @@ try {
     // PERFORMANCE FIX: Načíst session data a uvolnit zámek
     // Audit 2025-11-24: PDF generation (1-3s) blokuje ostatní requesty
     $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+    $currentUserId = $_SESSION['user_id'] ?? null;  // Pro provize - kdo dokončil
 
     // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
     session_write_close();
@@ -1089,13 +1090,36 @@ reklamace@wgs-service.cz
             }
         }
 
-        // Aktualizovat stav reklamace a datum dokončení
-        $stmt = $pdo->prepare("
-            UPDATE wgs_reklamace
-            SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW()
-            WHERE id = :id
-        ");
-        $stmt->execute([':id' => $reklamace['id']]);
+        // Aktualizovat stav reklamace, datum dokončení a kdo dokončil
+        global $currentUserId;
+
+        // Získat numerické ID přihlášeného uživatele pro provize
+        $dokoncenokym = null;
+        if ($currentUserId) {
+            $stmtUser = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+            $stmtUser->execute(['user_id' => $currentUserId]);
+            $dokoncenokym = $stmtUser->fetchColumn();
+        }
+
+        // Zjistit zda existuje sloupec dokonceno_kym
+        $stmtCol = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
+        $hasDokoncenokym = $stmtCol->rowCount() > 0;
+
+        if ($hasDokoncenokym && $dokoncenokym) {
+            $stmt = $pdo->prepare("
+                UPDATE wgs_reklamace
+                SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW(), dokonceno_kym = :dokonceno_kym
+                WHERE id = :id
+            ");
+            $stmt->execute([':id' => $reklamace['id'], ':dokonceno_kym' => $dokoncenokym]);
+        } else {
+            $stmt = $pdo->prepare("
+                UPDATE wgs_reklamace
+                SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW()
+                WHERE id = :id
+            ");
+            $stmt->execute([':id' => $reklamace['id']]);
+        }
 
         return [
             'status' => 'success',

@@ -83,15 +83,41 @@ try {
     $nazevMesice = $mesiceCS[$aktualniMesic] ?? 'neznámý';
 
     // Spočítat provizi za aktuální měsíc
-    // Hledáme podle: assigned_to (INT) NEBO textového sloupce technik
-    // DŮLEŽITÉ: Počítáme podle datum dokončení (updated_at pro hotové zakázky)
+    // Počítáme podle dokonceno_kym - kdo zakázku dokončil (odeslal protokol)
+    // DŮLEŽITÉ: Provize patří tomu, kdo byl přihlášen při dokončení
+
+    // Zjistit zda existuje sloupec dokonceno_kym
+    $stmtColumns = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
+    $hasDokoncenokym = $stmtColumns->rowCount() > 0;
 
     // Zjistit zda existuje sloupec datum_dokonceni
-    $stmtColumns = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'datum_dokonceni'");
-    $hasDatumDokonceni = $stmtColumns->rowCount() > 0;
+    $stmtColumns2 = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'datum_dokonceni'");
+    $hasDatumDokonceni = $stmtColumns2->rowCount() > 0;
 
     // Použít datum_dokonceni pokud existuje, jinak updated_at
     $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.updated_at)' : 'r.updated_at';
+
+    // Podmínka pro technika - priorita: dokonceno_kym, pak assigned_to, pak technik text
+    if ($hasDokoncenokym) {
+        // Nový systém - podle kdo dokončil
+        $whereCondition = "(r.dokonceno_kym = :numeric_id OR (r.dokonceno_kym IS NULL AND (r.assigned_to = :numeric_id2 OR r.technik LIKE :user_name)))";
+        $params = [
+            'numeric_id' => $numericUserId,
+            'numeric_id2' => $numericUserId,
+            'user_name' => '%' . $userName . '%',
+            'rok' => $aktualniRok,
+            'mesic' => $aktualniMesic
+        ];
+    } else {
+        // Starý systém - fallback
+        $whereCondition = "(r.assigned_to = :numeric_id OR r.technik LIKE :user_name)";
+        $params = [
+            'numeric_id' => $numericUserId,
+            'user_name' => '%' . $userName . '%',
+            'rok' => $aktualniRok,
+            'mesic' => $aktualniMesic
+        ];
+    }
 
     $stmt = $pdo->prepare("
         SELECT
@@ -99,17 +125,13 @@ try {
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
         FROM wgs_reklamace r
-        WHERE (r.assigned_to = :numeric_id OR r.technik LIKE :user_name)
+        WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
           AND MONTH({$datumSloupec}) = :mesic
           AND r.stav = 'done'
     ");
 
-    $stmt->execute([
-        'user_id' => $numericUserId,
-        'rok' => $aktualniRok,
-        'mesic' => $aktualniMesic
-    ]);
+    $stmt->execute($params);
 
     $vysledek = $stmt->fetch(PDO::FETCH_ASSOC);
 
