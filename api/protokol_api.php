@@ -895,10 +895,10 @@ reklamace@wgs-service.cz
             }
         }
 
-        // Aktualizovat stav reklamace
+        // Aktualizovat stav reklamace a datum dokončení
         $stmt = $pdo->prepare("
             UPDATE wgs_reklamace
-            SET stav = 'done', updated_at = NOW()
+            SET stav = 'done', updated_at = NOW(), datum_dokonceni = NOW()
             WHERE id = :id
         ");
         $stmt->execute([':id' => $reklamace['id']]);
