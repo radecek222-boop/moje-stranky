@@ -874,20 +874,68 @@ async function generateProtocolPDF() {
   const availableWidth = pageWidth - (margin * 2);
   const availableHeight = pageHeight - (margin * 2);
 
-  const canvasRatio = canvas.height / canvas.width;
+  // Šířka obrázku = dostupná šířka stránky
+  const imgWidth = availableWidth;
+  // Výška obrázku podle poměru stran
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  let imgWidth = availableWidth;
-  let imgHeight = imgWidth * canvasRatio;
-
+  // Pokud je obsah vyšší než jedna stránka, rozdělit na více stránek
   if (imgHeight > availableHeight) {
-    imgHeight = availableHeight;
-    imgWidth = imgHeight / canvasRatio;
+    logger.log(`[Doc] Obsah je vyšší než A4 (${imgHeight.toFixed(0)}mm vs ${availableHeight}mm), generuji více stránek...`);
+
+    // Výška jedné stránky v pixelech canvasu
+    const pageHeightInCanvasPixels = (availableHeight / imgHeight) * canvas.height;
+
+    let remainingHeight = canvas.height;
+    let currentY = 0;
+    let pageNum = 1;
+
+    while (remainingHeight > 0) {
+      // Výška části pro tuto stránku
+      const sliceHeight = Math.min(pageHeightInCanvasPixels, remainingHeight);
+
+      // Vytvořit nový canvas pro tuto část
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      const ctx = pageCanvas.getContext('2d');
+      ctx.drawImage(
+        canvas,
+        0, currentY,                    // Zdrojová pozice
+        canvas.width, sliceHeight,      // Zdrojová velikost
+        0, 0,                           // Cílová pozice
+        canvas.width, sliceHeight       // Cílová velikost
+      );
+
+      const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.98);
+
+      // Přidat novou stránku (kromě první)
+      if (pageNum > 1) {
+        doc.addPage();
+      }
+
+      // Výška této části v mm
+      const sliceHeightMm = (sliceHeight / canvas.height) * imgHeight;
+
+      // Přidat obrázek na stránku
+      const xOffset = (pageWidth - imgWidth) / 2;
+      doc.addImage(pageImgData, "JPEG", xOffset, margin, imgWidth, sliceHeightMm);
+
+      logger.log(`[Doc] Stránka ${pageNum}: výška ${sliceHeightMm.toFixed(0)}mm`);
+
+      currentY += sliceHeight;
+      remainingHeight -= sliceHeight;
+      pageNum++;
+    }
+
+    logger.log(`[Doc] PDF má celkem ${pageNum - 1} stránek`);
+  } else {
+    // Obsah se vejde na jednu stránku
+    const xOffset = (pageWidth - imgWidth) / 2;
+    doc.addImage(imgData, "JPEG", xOffset, margin, imgWidth, imgHeight);
+    logger.log('[Doc] PDF má 1 stránku');
   }
-
-  const xOffset = (pageWidth - imgWidth) / 2;
-  const yOffset = margin;
-
-  doc.addImage(imgData, "JPEG", xOffset, yOffset, imgWidth, imgHeight);
 
   // ❗ Odstranit clone z DOM
   document.body.removeChild(clone);
