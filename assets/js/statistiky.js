@@ -619,11 +619,6 @@ async function exportovatPDF() {
         const celkemCastka = zakazky.reduce((sum, z) => sum + parseFloat(z.castka_celkem), 0);
         const celkemVydelek = zakazky.reduce((sum, z) => sum + parseFloat(z.vydelek_technika), 0);
 
-        // Odhadnout počet stránek (přibližně 25 řádků na stránku)
-        const odhadPoctuStranek = Math.max(1, Math.ceil(zakazky.length / 25));
-        const pocetText = odhadPoctuStranek === 1 ? 'stránky' :
-                         (odhadPoctuStranek >= 2 && odhadPoctuStranek <= 4) ? 'stránek' : 'stránek';
-
         // Vytvořit HTML pro PDF (skrytý div) - bez fixní výšky, aby se přizpůsobil obsahu
         const pdfContainer = document.createElement('div');
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
@@ -666,25 +661,18 @@ async function exportovatPDF() {
             </table>
 
             <!-- SOUHRN - vždy za tabulkou s mezerou, nikdy se nepřepíše -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="font-size: 10px; color: #333;">
-                        Výpis se skládá z ${odhadPoctuStranek} ${pocetText}
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333; text-align: right;">
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px; display: inline-block;">
+                    Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
+                </div><br>
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px; display: inline-block;">
+                    Celkem za zakázky k fakturaci: <span style="color: #333; font-weight: bold;">${celkemCastka.toFixed(2)} €</span>
+                </div><br>
+                ${zobrazitOdmenu ? `
+                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 14px; display: inline-block;">
+                        Výdělek celkem technik: <span style="color: #333; font-weight: bold;">${celkemVydelek.toFixed(2)} €</span>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px;">
-                            Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
-                        </div>
-                        <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px;">
-                            Celkem za zakázky k fakturaci: <span style="color: #333; font-weight: bold;">${celkemCastka.toFixed(2)} €</span>
-                        </div>
-                        ${zobrazitOdmenu ? `
-                            <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 14px;">
-                                Výdělek celkem technik: <span style="color: #333; font-weight: bold;">${celkemVydelek.toFixed(2)} €</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
+                ` : ''}
             </div>
 
             <!-- PATIČKA - vždy na úplném konci -->
