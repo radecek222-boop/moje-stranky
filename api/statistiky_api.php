@@ -4,6 +4,28 @@
  * API pro reporty a vyúčtování
  */
 
+// DEBUG: Zobrazit skutečnou chybu
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+set_exception_handler(function($e) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        "status" => "error",
+        "debug_error" => true,
+        "message" => $e->getMessage(),
+        "file" => basename($e->getFile()),
+        "line" => $e->getLine(),
+        "trace" => $e->getTraceAsString()
+    ]);
+    exit;
+});
+
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
 require_once __DIR__ . '/../init.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -406,21 +428,26 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
-    // FIX 2025-01-08: Zjednodušeno - porovnáváme pouze numerické id s assigned_to/dokonceno_kym
+    // FIX 2025-01-08: Každý parametr musí mít unikátní jméno (PDO neumožňuje opakování)
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
         $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
 
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
-            $keyId = ":technik_id_$idx";
-            $params[$keyId] = (int)$technik; // Numerické id
+            $technikId = (int)$technik;
 
-            // Hledáme podle: dokonceno_kym = id NEBO assigned_to = id
+            // PDO vyžaduje unikátní jména parametrů - nelze použít stejný parametr 2x
             if ($hasDokoncenokym) {
-                $techniciConditions[] = "(r.dokonceno_kym = $keyId OR (r.dokonceno_kym IS NULL AND r.assigned_to = $keyId))";
+                $keyDok = ":technik_dok_$idx";
+                $keyAss = ":technik_ass_$idx";
+                $params[$keyDok] = $technikId;
+                $params[$keyAss] = $technikId;
+                $techniciConditions[] = "(r.dokonceno_kym = $keyDok OR (r.dokonceno_kym IS NULL AND r.assigned_to = $keyAss))";
             } else {
-                $techniciConditions[] = "r.assigned_to = $keyId";
+                $keyAss = ":technik_ass_$idx";
+                $params[$keyAss] = $technikId;
+                $techniciConditions[] = "r.assigned_to = $keyAss";
             }
         }
 
