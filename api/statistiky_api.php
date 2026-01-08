@@ -30,12 +30,13 @@ try {
     $pdo = getDbConnection();
 
     // Zjistit zda existuje sloupec dokonceno_kym
+    // FIX: rowCount() nefunguje pro SELECT/SHOW v PDO - použít fetch() místo toho
     $stmtCol = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'dokonceno_kym'");
-    $GLOBALS['hasDokoncenokym'] = $stmtCol->rowCount() > 0;
+    $GLOBALS['hasDokoncenokym'] = ($stmtCol->fetch() !== false);
 
     // Zjistit zda existuje sloupec datum_dokonceni
     $stmtCol2 = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'datum_dokonceni'");
-    $GLOBALS['hasDatumDokonceni'] = $stmtCol2->rowCount() > 0;
+    $GLOBALS['hasDatumDokonceni'] = ($stmtCol2->fetch() !== false);
 
     switch ($action) {
         case 'ping':
