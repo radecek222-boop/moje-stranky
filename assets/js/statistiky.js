@@ -553,11 +553,9 @@ function aplikovatFiltry() {
  * Resetovat filtry
  */
 function resetovitFiltry() {
-    // Reset year, month - dynamicky aktuální rok a měsíc
-    const aktualniRok = new Date().getFullYear().toString();
-    const aktualniMesic = (new Date().getMonth() + 1).toString(); // JS měsíce jsou 0-indexed
-    document.getElementById('filter-year').value = aktualniRok;
-    document.getElementById('filter-month').value = aktualniMesic;
+    // Reset year, month - na "Všechny" (prázdná hodnota)
+    document.getElementById('filter-year').value = '';
+    document.getElementById('filter-month').value = '';
 
     // Reset prodejci
     document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]').forEach(cb => {

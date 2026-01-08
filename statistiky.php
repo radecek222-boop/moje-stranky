@@ -713,10 +713,10 @@ body {
       <div class="filter-group">
         <label class="filter-label" for="filter-year">Rok</label>
         <select class="filter-select" id="filter-year">
-          <option value="">Všechny</option>
-          <option value="2024"<?= date('Y') == '2024' ? ' selected' : '' ?>>2024</option>
-          <option value="2025"<?= date('Y') == '2025' ? ' selected' : '' ?>>2025</option>
-          <option value="2026"<?= date('Y') == '2026' ? ' selected' : '' ?>>2026</option>
+          <option value="" selected>Všechny</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
         </select>
       </div>
 
@@ -724,19 +724,19 @@ body {
       <div class="filter-group">
         <label class="filter-label" for="filter-month">Měsíc</label>
         <select class="filter-select" id="filter-month">
-          <option value="">Všechny</option>
-          <option value="1"<?= date('n') == '1' ? ' selected' : '' ?>>Leden</option>
-          <option value="2"<?= date('n') == '2' ? ' selected' : '' ?>>Únor</option>
-          <option value="3"<?= date('n') == '3' ? ' selected' : '' ?>>Březen</option>
-          <option value="4"<?= date('n') == '4' ? ' selected' : '' ?>>Duben</option>
-          <option value="5"<?= date('n') == '5' ? ' selected' : '' ?>>Květen</option>
-          <option value="6"<?= date('n') == '6' ? ' selected' : '' ?>>Červen</option>
-          <option value="7"<?= date('n') == '7' ? ' selected' : '' ?>>Červenec</option>
-          <option value="8"<?= date('n') == '8' ? ' selected' : '' ?>>Srpen</option>
-          <option value="9"<?= date('n') == '9' ? ' selected' : '' ?>>Září</option>
-          <option value="10"<?= date('n') == '10' ? ' selected' : '' ?>>Říjen</option>
-          <option value="11"<?= date('n') == '11' ? ' selected' : '' ?>>Listopad</option>
-          <option value="12"<?= date('n') == '12' ? ' selected' : '' ?>>Prosinec</option>
+          <option value="" selected>Všechny</option>
+          <option value="1">Leden</option>
+          <option value="2">Únor</option>
+          <option value="3">Březen</option>
+          <option value="4">Duben</option>
+          <option value="5">Květen</option>
+          <option value="6">Červen</option>
+          <option value="7">Červenec</option>
+          <option value="8">Srpen</option>
+          <option value="9">Září</option>
+          <option value="10">Říjen</option>
+          <option value="11">Listopad</option>
+          <option value="12">Prosinec</option>
         </select>
       </div>
 
