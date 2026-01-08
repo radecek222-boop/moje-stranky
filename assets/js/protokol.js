@@ -761,29 +761,30 @@ async function generateProtocolPDF() {
 
   // FIX: Nahradit textarea za DIV elementy pro správné zalamování v PDF
   // html2canvas má problémy s renderováním textarea hodnot
+  // DŮLEŽITÉ: Použít 100% šířku a pevné styly pro správné zalamování na mobilu
   const originalTextareas = wrapper.querySelectorAll('textarea');
   const cloneTextareas = clone.querySelectorAll('textarea');
   originalTextareas.forEach((original, index) => {
     const cloneTextarea = cloneTextareas[index];
     if (cloneTextarea) {
       const div = document.createElement('div');
-      // Zkopírovat computed styly z textarea
-      const computedStyle = window.getComputedStyle(cloneTextarea);
+      // Pevné styly pro PDF - nezávislé na computed styles
       div.style.cssText = `
-        width: ${computedStyle.width};
-        min-height: ${computedStyle.minHeight || '80px'};
-        padding: ${computedStyle.padding};
-        border: ${computedStyle.border};
-        background: ${computedStyle.background};
-        font-family: ${computedStyle.fontFamily};
-        font-size: ${computedStyle.fontSize};
-        line-height: ${computedStyle.lineHeight || '1.4'};
-        color: ${computedStyle.color};
+        width: 100%;
+        min-height: 60px;
+        padding: 4px 8px;
+        border: 1px solid #999;
+        background: #fff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #1a1a1a;
         white-space: pre-wrap;
         word-wrap: break-word;
         overflow-wrap: break-word;
+        word-break: break-word;
         box-sizing: border-box;
-        overflow: hidden;
+        overflow: visible;
       `;
       div.textContent = original.value;
       cloneTextarea.parentNode.replaceChild(div, cloneTextarea);
@@ -791,65 +792,66 @@ async function generateProtocolPDF() {
   });
   logger.log('Textarea nahrazeny DIV elementy pro PDF');
 
-  // FIX: Nahradit input pole za SPAN elementy pro správné zobrazení v PDF
+  // FIX: Nahradit input pole za DIV elementy pro správné zobrazení v PDF
+  // DIV místo SPAN pro lepší zalamování dlouhého textu
   const originalInputs = wrapper.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type])');
   const cloneInputs = clone.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type])');
   originalInputs.forEach((original, index) => {
     const cloneInput = cloneInputs[index];
     if (cloneInput) {
-      const span = document.createElement('span');
-      // Zkopírovat computed styly z input
-      const computedStyle = window.getComputedStyle(cloneInput);
-      span.style.cssText = `
+      const div = document.createElement('div');
+      // Pevné styly pro PDF
+      div.style.cssText = `
         display: block;
-        width: ${computedStyle.width};
-        padding: ${computedStyle.padding};
-        border: ${computedStyle.border};
-        background: ${computedStyle.background};
-        font-family: ${computedStyle.fontFamily};
-        font-size: ${computedStyle.fontSize};
-        line-height: ${computedStyle.lineHeight || '1.4'};
-        color: ${computedStyle.color};
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #999;
+        background: #fff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #1a1a1a;
         white-space: pre-wrap;
         word-wrap: break-word;
         overflow-wrap: break-word;
+        word-break: break-word;
         box-sizing: border-box;
-        min-height: ${computedStyle.height || 'auto'};
+        min-height: 24px;
+        overflow: visible;
       `;
-      span.textContent = original.value;
-      cloneInput.parentNode.replaceChild(span, cloneInput);
+      div.textContent = original.value;
+      cloneInput.parentNode.replaceChild(div, cloneInput);
     }
   });
-  logger.log('Input pole nahrazeny SPAN elementy pro PDF');
+  logger.log('Input pole nahrazeny DIV elementy pro PDF');
 
-  // FIX: Nahradit select elementy za SPAN s vybranou hodnotou
+  // FIX: Nahradit select elementy za DIV s vybranou hodnotou
   const originalSelects = wrapper.querySelectorAll('select');
   const cloneSelects = clone.querySelectorAll('select');
   originalSelects.forEach((original, index) => {
     const cloneSelect = cloneSelects[index];
     if (cloneSelect) {
-      const span = document.createElement('span');
-      const computedStyle = window.getComputedStyle(cloneSelect);
-      span.style.cssText = `
+      const div = document.createElement('div');
+      div.style.cssText = `
         display: block;
-        width: ${computedStyle.width};
-        padding: ${computedStyle.padding};
-        border: ${computedStyle.border};
-        background: ${computedStyle.background};
-        font-family: ${computedStyle.fontFamily};
-        font-size: ${computedStyle.fontSize};
-        line-height: ${computedStyle.lineHeight || '1.4'};
-        color: ${computedStyle.color};
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #999;
+        background: #fff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #1a1a1a;
         box-sizing: border-box;
-        min-height: ${computedStyle.height || 'auto'};
+        min-height: 24px;
       `;
       // Získat text vybrané možnosti
       const selectedOption = original.options[original.selectedIndex];
-      span.textContent = selectedOption ? selectedOption.text : '';
-      cloneSelect.parentNode.replaceChild(span, cloneSelect);
+      div.textContent = selectedOption ? selectedOption.text : '';
+      cloneSelect.parentNode.replaceChild(div, cloneSelect);
     }
   });
-  logger.log('Select elementy nahrazeny SPAN elementy pro PDF');
+  logger.log('Select elementy nahrazeny DIV elementy pro PDF');
 
   logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
