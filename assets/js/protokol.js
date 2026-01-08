@@ -743,25 +743,6 @@ async function generateProtocolPDF() {
     logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
   }
 
-  // Zkopírovat hodnoty textarea do clone
-  const originalTextareas = wrapper.querySelectorAll('textarea');
-  const cloneTextareas = clone.querySelectorAll('textarea');
-  originalTextareas.forEach((original, index) => {
-    if (cloneTextareas[index]) {
-      cloneTextareas[index].value = original.value;
-    }
-  });
-  logger.log('Textarea hodnoty zkopirovany do clone');
-
-  // Zkopírovat hodnoty input a select do clone
-  const originalInputs = wrapper.querySelectorAll('input, select');
-  const cloneInputs = clone.querySelectorAll('input, select');
-  originalInputs.forEach((original, index) => {
-    if (cloneInputs[index]) {
-      cloneInputs[index].value = original.value;
-    }
-  });
-
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
   const cloneCanvas = clone.querySelector('#signature-pad');
@@ -778,18 +759,97 @@ async function generateProtocolPDF() {
   // Počkat na reflow clone (desktop layout se aplikuje)
   await new Promise(resolve => setTimeout(resolve, 150));
 
-  // Přepočítat výšku všech textarea podle obsahu (po reflow s novou šířkou)
-  const cloneTextareasAfterReflow = clone.querySelectorAll('textarea');
-  cloneTextareasAfterReflow.forEach((textarea) => {
-    // Reset výšky pro správný výpočet scrollHeight
-    textarea.style.height = 'auto';
-    // Nastavit výšku podle obsahu
-    const scrollHeight = textarea.scrollHeight;
-    textarea.style.height = scrollHeight + 'px';
-    textarea.style.minHeight = scrollHeight + 'px';
-    textarea.style.overflow = 'hidden';
+  // FIX: Nahradit textarea za DIV elementy pro správné zalamování v PDF
+  // html2canvas má problémy s renderováním textarea hodnot
+  const originalTextareas = wrapper.querySelectorAll('textarea');
+  const cloneTextareas = clone.querySelectorAll('textarea');
+  originalTextareas.forEach((original, index) => {
+    const cloneTextarea = cloneTextareas[index];
+    if (cloneTextarea) {
+      const div = document.createElement('div');
+      // Zkopírovat computed styly z textarea
+      const computedStyle = window.getComputedStyle(cloneTextarea);
+      div.style.cssText = `
+        width: ${computedStyle.width};
+        min-height: ${computedStyle.minHeight || '80px'};
+        padding: ${computedStyle.padding};
+        border: ${computedStyle.border};
+        background: ${computedStyle.background};
+        font-family: ${computedStyle.fontFamily};
+        font-size: ${computedStyle.fontSize};
+        line-height: ${computedStyle.lineHeight || '1.4'};
+        color: ${computedStyle.color};
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        box-sizing: border-box;
+        overflow: hidden;
+      `;
+      div.textContent = original.value;
+      cloneTextarea.parentNode.replaceChild(div, cloneTextarea);
+    }
   });
-  logger.log('Textarea výšky přepočítány pro PDF');
+  logger.log('Textarea nahrazeny DIV elementy pro PDF');
+
+  // FIX: Nahradit input pole za SPAN elementy pro správné zobrazení v PDF
+  const originalInputs = wrapper.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type])');
+  const cloneInputs = clone.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type])');
+  originalInputs.forEach((original, index) => {
+    const cloneInput = cloneInputs[index];
+    if (cloneInput) {
+      const span = document.createElement('span');
+      // Zkopírovat computed styly z input
+      const computedStyle = window.getComputedStyle(cloneInput);
+      span.style.cssText = `
+        display: block;
+        width: ${computedStyle.width};
+        padding: ${computedStyle.padding};
+        border: ${computedStyle.border};
+        background: ${computedStyle.background};
+        font-family: ${computedStyle.fontFamily};
+        font-size: ${computedStyle.fontSize};
+        line-height: ${computedStyle.lineHeight || '1.4'};
+        color: ${computedStyle.color};
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        box-sizing: border-box;
+        min-height: ${computedStyle.height || 'auto'};
+      `;
+      span.textContent = original.value;
+      cloneInput.parentNode.replaceChild(span, cloneInput);
+    }
+  });
+  logger.log('Input pole nahrazeny SPAN elementy pro PDF');
+
+  // FIX: Nahradit select elementy za SPAN s vybranou hodnotou
+  const originalSelects = wrapper.querySelectorAll('select');
+  const cloneSelects = clone.querySelectorAll('select');
+  originalSelects.forEach((original, index) => {
+    const cloneSelect = cloneSelects[index];
+    if (cloneSelect) {
+      const span = document.createElement('span');
+      const computedStyle = window.getComputedStyle(cloneSelect);
+      span.style.cssText = `
+        display: block;
+        width: ${computedStyle.width};
+        padding: ${computedStyle.padding};
+        border: ${computedStyle.border};
+        background: ${computedStyle.background};
+        font-family: ${computedStyle.fontFamily};
+        font-size: ${computedStyle.fontSize};
+        line-height: ${computedStyle.lineHeight || '1.4'};
+        color: ${computedStyle.color};
+        box-sizing: border-box;
+        min-height: ${computedStyle.height || 'auto'};
+      `;
+      // Získat text vybrané možnosti
+      const selectedOption = original.options[original.selectedIndex];
+      span.textContent = selectedOption ? selectedOption.text : '';
+      cloneSelect.parentNode.replaceChild(span, cloneSelect);
+    }
+  });
+  logger.log('Select elementy nahrazeny SPAN elementy pro PDF');
 
   logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
