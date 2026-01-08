@@ -624,10 +624,11 @@ async function exportovatPDF() {
         const pocetText = odhadPoctuStranek === 1 ? 'stránky' :
                          (odhadPoctuStranek >= 2 && odhadPoctuStranek <= 4) ? 'stránek' : 'stránek';
 
-        // Vytvořit HTML pro PDF (skrytý div)
+        // Vytvořit HTML pro PDF (skrytý div) - bez fixní výšky, aby se přizpůsobil obsahu
         const pdfContainer = document.createElement('div');
-        pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; height: 800px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
+        pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
 
+        // Souhrn VŽDY na konci za tabulkou (ne absolutní pozicování)
         pdfContainer.innerHTML = `
             <div style="margin-bottom: 15px;">
                 <h1 style="color: #333; font-size: 18px; margin: 0 0 8px 0; font-weight: 700;">Statistiky a reporty - WGS</h1>
@@ -663,25 +664,31 @@ async function exportovatPDF() {
                     `).join('')}
                 </tbody>
             </table>
-            <div style="position: absolute; bottom: 100px; left: 30px;">
-                <div style="font-size: 10px; color: #333;">
-                    Výpis se skládá z ${odhadPoctuStranek} ${pocetText}
+
+            <!-- SOUHRN - vždy za tabulkou s mezerou, nikdy se nepřepíše -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="font-size: 10px; color: #333;">
+                        Výpis se skládá z ${odhadPoctuStranek} ${pocetText}
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px;">
+                            Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
+                        </div>
+                        <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 14px;">
+                            Celkem za zakázky k fakturaci: <span style="color: #333; font-weight: bold;">${celkemCastka.toFixed(2)} €</span>
+                        </div>
+                        ${zobrazitOdmenu ? `
+                            <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 14px;">
+                                Výdělek celkem technik: <span style="color: #333; font-weight: bold;">${celkemVydelek.toFixed(2)} €</span>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
-            <div style="position: absolute; bottom: 100px; right: 30px; text-align: right;">
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; display: inline-block;">
-                    Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
-                </div><br>
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; display: inline-block;">
-                    Celkem za zakázky k fakturaci: <span style="color: #333; font-weight: bold;">${celkemCastka.toFixed(2)} €</span>
-                </div><br>
-                ${zobrazitOdmenu ? `
-                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 18px; display: inline-block;">
-                        Výdělek celkem technik: <span style="color: #333; font-weight: bold;">${celkemVydelek.toFixed(2)} €</span>
-                    </div><br>
-                ` : ''}
-            </div>
-            <div style="position: absolute; bottom: 30px; left: 30px; right: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+
+            <!-- PATIČKA - vždy na úplném konci -->
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
                 <div style="font-size: 10px; color: #999; margin-bottom: 5px;">
                     Vygenerováno: ${datum}
                 </div>
