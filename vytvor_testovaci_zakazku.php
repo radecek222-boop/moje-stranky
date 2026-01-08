@@ -74,7 +74,6 @@ Zákazník byl poučen o správné údržbě kožených povrchů a obdržel sadu
         popis_problemu, doplnujici_info, popis_opravy,
         stav, termin, cas_navstevy,
         technik,
-        poznamky,
         created_at, updated_at
     ) VALUES (
         :reklamace_id, 'SERVIS', :cislo,
@@ -84,7 +83,6 @@ Zákazník byl poučen o správné údržbě kožených povrchů a obdržel sadu
         :popis_problemu, :doplnujici_info, :popis_opravy,
         'open', :termin, :cas_navstevy,
         :technik,
-        :poznamky,
         NOW(), NOW()
     )";
 
@@ -102,8 +100,7 @@ Zákazník byl poučen o správné údržbě kožených povrchů a obdržel sadu
         'popis_opravy' => $popisOpravy,
         'termin' => date('Y-m-d', strtotime('+3 days')),
         'cas_navstevy' => '9:00 - 11:00',
-        'technik' => 'Radek Zikmund',
-        'poznamky' => 'TESTOVACÍ ZAKÁZKA pro ověření PDF exportu. Obsahuje dlouhé texty pro test zalamování.'
+        'technik' => 'Radek Zikmund'
     ]);
 
     $primaryId = $pdo->lastInsertId();
