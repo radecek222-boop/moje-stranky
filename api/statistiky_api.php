@@ -4,6 +4,28 @@
  * API pro reporty a vyúčtování
  */
 
+// DEBUG: Zobrazit skutečnou chybu
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+set_exception_handler(function($e) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        "status" => "error",
+        "debug_error" => true,
+        "message" => $e->getMessage(),
+        "file" => basename($e->getFile()),
+        "line" => $e->getLine(),
+        "trace" => $e->getTraceAsString()
+    ]);
+    exit;
+});
+
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
 require_once __DIR__ . '/../init.php';
 
 header('Content-Type: application/json; charset=utf-8');
