@@ -405,7 +405,7 @@ function buildFilterWhere() {
     }
 
     // Technici (multi-select) - může být pole
-    // FIX: Priorita dokonceno_kym (kdo dokončil), pak assigned_to, pak textový sloupec technik
+    // FIX 2025-01-08: Zjednodušeno - porovnáváme pouze numerické id s assigned_to/dokonceno_kym
     if (!empty($_GET['technici'])) {
         $technici = is_array($_GET['technici']) ? $_GET['technici'] : [$_GET['technici']];
         $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
@@ -413,24 +413,13 @@ function buildFilterWhere() {
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
             $keyId = ":technik_id_$idx";
-            $keyUserId = ":technik_uid_$idx";
-            $keyName = ":technik_name_$idx";
+            $params[$keyId] = (int)$technik; // Numerické id
 
-            // Získat user_id A jméno pro tohoto technika z DB
-            $pdoLocal = getDbConnection();
-            $stmtUser = $pdoLocal->prepare("SELECT user_id, name FROM wgs_users WHERE id = :id LIMIT 1");
-            $stmtUser->execute([':id' => (int)$technik]);
-            $userRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-            $params[$keyId] = (string)$technik; // Numerické id jako string
-            $params[$keyUserId] = $userRow['user_id'] ?? '';
-            $params[$keyName] = $userRow['name'] ?? '';
-
-            // Hledáme podle: dokonceno_kym = id NEBO (dokonceno_kym IS NULL AND assigned_to) NEBO technik (text) = jméno
+            // Hledáme podle: dokonceno_kym = id NEBO assigned_to = id
             if ($hasDokoncenokym) {
-                $techniciConditions[] = "(r.dokonceno_kym = $keyId OR (r.dokonceno_kym IS NULL AND (r.assigned_to = $keyId OR r.assigned_to = $keyUserId)) OR r.technik = $keyName)";
+                $techniciConditions[] = "(r.dokonceno_kym = $keyId OR (r.dokonceno_kym IS NULL AND r.assigned_to = $keyId))";
             } else {
-                $techniciConditions[] = "(r.assigned_to = $keyId OR r.assigned_to = $keyUserId OR r.technik = $keyName)";
+                $techniciConditions[] = "r.assigned_to = $keyId";
             }
         }
 
