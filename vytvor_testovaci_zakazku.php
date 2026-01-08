@@ -65,58 +65,45 @@ Zákazník byl poučen o správné údržbě kožených povrchů a obdržel sadu
 
     $doplnujiciInfo = "Zákazník je VIP klient s historií 3 předchozích nákupů. Požaduje rychlé vyřízení. Preferuje ranní termíny návštěv (8:00-10:00). Parkování před domem je možné. Pes v domácnosti - přátelský. Klíče u sousedů v případě nepřítomnosti.";
 
-    // Vložit testovací záznam
+    // Vložit testovací záznam - pouze sloupce které existují v DB
     $sql = "INSERT INTO wgs_reklamace (
-        reklamace_id, typ, cislo, datum_prodeje, datum_reklamace,
+        reklamace_id, typ, cislo,
         jmeno, email, telefon,
-        adresa, ulice, mesto, psc,
-        model, seriove_cislo, provedeni, barva,
+        adresa,
+        model,
         popis_problemu, doplnujici_info, popis_opravy,
-        stav, termin, cas_navstevy, vyreseno,
-        prodejce, technik,
-        cena, castka, fakturace_firma, zeme,
-        poznamky, email_zadavatele,
-        created_by_role, created_at, updated_at
+        stav, termin, cas_navstevy,
+        technik,
+        poznamky,
+        created_at, updated_at
     ) VALUES (
-        :reklamace_id, 'SERVIS', :cislo, :datum_prodeje, :datum_reklamace,
+        :reklamace_id, 'SERVIS', :cislo,
         :jmeno, :email, :telefon,
-        :adresa, :ulice, :mesto, :psc,
-        :model, :seriove_cislo, :provedeni, :barva,
+        :adresa,
+        :model,
         :popis_problemu, :doplnujici_info, :popis_opravy,
-        'open', :termin, :cas_navstevy, 0,
-        :prodejce, :technik,
-        :cena, :cena, 'cz', 'cz',
-        :poznamky, :email_zadavatele,
-        'admin', NOW(), NOW()
+        'open', :termin, :cas_navstevy,
+        :technik,
+        :poznamky,
+        NOW(), NOW()
     )";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         'reklamace_id' => $noveId,
         'cislo' => 'OBJ-2025-TEST-' . rand(1000, 9999),
-        'datum_prodeje' => '2024-03-15',
-        'datum_reklamace' => date('Y-m-d'),
         'jmeno' => 'Radek Zikmund (TEST)',
         'email' => 'zikmund.radek@seznam.cz',
         'telefon' => '+420 777 888 999',
         'adresa' => 'Testovací ulice 123/45, Praha 5 - Smíchov, 150 00',
-        'ulice' => 'Testovací ulice 123/45',
-        'mesto' => 'Praha 5 - Smíchov',
-        'psc' => '150 00',
         'model' => 'Natuzzi Editions B845 Leather Sofa',
-        'seriove_cislo' => 'SN-2024-B845-' . rand(10000, 99999),
-        'provedeni' => 'Kožené provedení, elektrické polohování, USB nabíjení',
-        'barva' => 'Cognac Brown (B845-CB)',
         'popis_problemu' => $popisProblemu,
         'doplnujici_info' => $doplnujiciInfo,
         'popis_opravy' => $popisOpravy,
         'termin' => date('Y-m-d', strtotime('+3 days')),
         'cas_navstevy' => '9:00 - 11:00',
-        'prodejce' => 'Natuzzi Gallery Praha',
         'technik' => 'Radek Zikmund',
-        'cena' => 4500.00,
-        'poznamky' => 'TESTOVACÍ ZAKÁZKA pro ověření PDF exportu. Obsahuje dlouhé texty pro test zalamování.',
-        'email_zadavatele' => 'zikmund.radek@seznam.cz'
+        'poznamky' => 'TESTOVACÍ ZAKÁZKA pro ověření PDF exportu. Obsahuje dlouhé texty pro test zalamování.'
     ]);
 
     $primaryId = $pdo->lastInsertId();
@@ -142,6 +129,7 @@ Zákazník byl poučen o správné údržbě kožených povrchů a obdržel sadu
     echo "<tr><td>Telefon</td><td>+420 777 888 999</td></tr>";
     echo "<tr><td>Adresa</td><td>Testovací ulice 123/45, Praha 5 - Smíchov, 150 00</td></tr>";
     echo "<tr><td>Model</td><td>Natuzzi Editions B845 Leather Sofa</td></tr>";
+    echo "<tr><td>Technik</td><td>Radek Zikmund</td></tr>";
     echo "<tr><td>Termin</td><td>" . date('Y-m-d', strtotime('+3 days')) . " (9:00 - 11:00)</td></tr>";
     echo "</table>";
 
