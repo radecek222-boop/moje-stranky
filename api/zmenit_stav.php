@@ -96,11 +96,12 @@ try {
         error_log("zmenit_stav.php: hasCekameNdAt = " . ($hasCekameNdAt ? 'true' : 'false'));
 
         // Najít CN pro zákazníka - dynamický SELECT podle existence sloupce
+        // COLLATE utf8mb4_unicode_ci řeší problém s rozdílnou kolací tabulek
         if ($hasCekameNdAt) {
             $stmt = $pdo->prepare("
                 SELECT id, stav, cekame_nd_at
                 FROM wgs_nabidky
-                WHERE LOWER(zakaznik_email) = :email
+                WHERE LOWER(zakaznik_email) COLLATE utf8mb4_unicode_ci = :email COLLATE utf8mb4_unicode_ci
                 ORDER BY vytvoreno_at DESC
                 LIMIT 1
             ");
@@ -108,12 +109,12 @@ try {
             $stmt = $pdo->prepare("
                 SELECT id, stav
                 FROM wgs_nabidky
-                WHERE LOWER(zakaznik_email) = :email
+                WHERE LOWER(zakaznik_email) COLLATE utf8mb4_unicode_ci = :email COLLATE utf8mb4_unicode_ci
                 ORDER BY vytvoreno_at DESC
                 LIMIT 1
             ");
         }
-        $stmt->execute(['email' => $zakaznikEmail]);
+        $stmt->execute(['email' => strtolower($zakaznikEmail)]);
         $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
 
         error_log("zmenit_stav.php: Hledám CN pro email '{$zakaznikEmail}', nalezeno: " . ($nabidka ? "ID {$nabidka['id']}" : 'NIC'));
@@ -221,12 +222,25 @@ try {
         $pdo->rollBack();
     }
     $chybaDetail = $e->getMessage();
-    error_log("zmenit_stav.php: Chyba databáze - reklamaceId={$reklamaceId}, novyStav={$novyStav}, email={$zakaznikEmail} - " . $chybaDetail);
+    $chybaTrace = $e->getTraceAsString();
+
+    // DETAILNÍ LOGOVÁNÍ
+    error_log("=== zmenit_stav.php PDOException ===");
+    error_log("reklamaceId: " . ($reklamaceId ?? 'NULL'));
+    error_log("novyStav: " . ($novyStav ?? 'NULL'));
+    error_log("zakaznikEmail: " . ($zakaznikEmail ?? 'NULL'));
+    error_log("Chyba: " . $chybaDetail);
+    error_log("Trace: " . $chybaTrace);
+    error_log("=== END PDOException ===");
 
     // Vrátit více detailů pro debugging (bez citlivých SQL údajů)
     $uzivatelChyba = 'Chyba při ukládání do databáze';
     if (strpos($chybaDetail, 'Unknown column') !== false) {
-        $uzivatelChyba = 'Chybí sloupec v databázi - kontaktujte administrátora';
+        preg_match("/Unknown column '([^']+)'/", $chybaDetail, $matches);
+        $missingCol = $matches[1] ?? 'neznámý';
+        $uzivatelChyba = "Chybí sloupec v databázi: {$missingCol}";
+    } elseif (strpos($chybaDetail, 'Illegal mix of collations') !== false) {
+        $uzivatelChyba = 'Chyba kolace databáze - kontaktujte administrátora';
     } elseif (strpos($chybaDetail, "Data too long") !== false || strpos($chybaDetail, "Incorrect") !== false) {
         $uzivatelChyba = 'Neplatná hodnota pro databázi';
     }
@@ -236,6 +250,7 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    error_log("zmenit_stav.php: Chyba - reklamaceId={$reklamaceId}, novyStav={$novyStav} - " . $e->getMessage());
-    sendJsonError('Chyba při zpracování požadavku');
+    error_log("zmenit_stav.php: Exception - " . $e->getMessage());
+    error_log("Trace: " . $e->getTraceAsString());
+    sendJsonError('Chyba při zpracování požadavku: ' . $e->getMessage());
 }
