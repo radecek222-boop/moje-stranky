@@ -46,7 +46,7 @@ try {
                     SELECT id, name, description, trigger_event, recipient_type,
                            type, subject, template, active,
                            to_recipients, cc_recipients, bcc_recipients,
-                           cc_emails, bcc_emails,
+                           cc_emails, bcc_emails, recipients,
                            created_at, updated_at
                     FROM wgs_notifications
                     WHERE id = :id
@@ -66,6 +66,8 @@ try {
                 // Dekodovat JSON pole - explicitní emaily
                 $notification['cc_emails'] = json_decode($notification['cc_emails'] ?? '[]', true) ?: [];
                 $notification['bcc_emails'] = json_decode($notification['bcc_emails'] ?? '[]', true) ?: [];
+                // Dekodovat JSON pole - struktura příjemců (customer, seller, technician, importer, other)
+                $notification['recipients'] = json_decode($notification['recipients'] ?? 'null', true);
 
                 echo json_encode([
                     'status' => 'success',
