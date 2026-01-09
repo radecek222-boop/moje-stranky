@@ -1028,9 +1028,10 @@ reklamace@wgs-service.cz
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
         $pdfData = base64_decode($completePdf);
+        // Název přílohy = číslo reklamace + jméno zákazníka (bez prefixu)
         $safeCustomerName = preg_replace('/[^a-zA-Z0-9_-]/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $customerName));
         $safeCustomerName = preg_replace('/-+/', '-', trim($safeCustomerName, '-'));
-        $attachmentName = "Protokol_" . reklamaceStorageKey($cisloReklamace) . "_" . $safeCustomerName . ".pdf";
+        $attachmentName = reklamaceStorageKey($cisloReklamace) . "_" . $safeCustomerName . ".pdf";
         $mail->addStringAttachment($pdfData, $attachmentName, 'base64', 'application/pdf');
 
         // Odeslat

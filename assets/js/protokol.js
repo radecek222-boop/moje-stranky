@@ -1598,8 +1598,9 @@ async function exportBothPDFs() {
 
     // Zobrazit PDF v preview modalu místo window.open
     const pdfBlob = doc.output("blob");
+    // Název souboru = ručně zadané číslo reklamace/zakázky (bez prefixu WGS)
     const cisloReklamace = document.getElementById('claim-number')?.value || 'protokol';
-    const nazevSouboru = `WGS_Protokol_${cisloReklamace.replace(/\s+/g, '_')}.pdf`;
+    const nazevSouboru = `${cisloReklamace.replace(/[\/\s]+/g, '_')}.pdf`;
 
     // Nastavit kontext na 'export' a uložit doc
     pdfPreviewContext = 'export';
