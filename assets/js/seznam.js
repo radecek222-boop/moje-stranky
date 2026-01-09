@@ -839,8 +839,26 @@ function createCustomerHeader() {
 
   // Pro adminy zobrazit dropdown pro změnu stavu
   const isAdmin = CURRENT_USER && CURRENT_USER.is_admin;
+
+  // Zjistit aktuální CN stav zákazníka
+  const zakaznikEmail = (CURRENT_RECORD.email || '').toLowerCase().trim();
+  const maCN = zakaznikEmail && EMAILS_S_CN && EMAILS_S_CN.includes(zakaznikEmail);
+  const cnStav = maCN && STAVY_NABIDEK ? STAVY_NABIDEK[zakaznikEmail] : null;
+
+  // Určit aktuálně vybranou hodnotu
+  let aktualniHodnota = CURRENT_RECORD.stav === 'wait' || CURRENT_RECORD.stav === 'ČEKÁ' ? 'wait' :
+                        CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
+                        CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' : 'wait';
+
+  // Pokud má CN a není HOTOVO, zobrazit CN stav
+  if (maCN && aktualniHodnota !== 'done' && cnStav) {
+    if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
+    else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
+    else aktualniHodnota = 'cn_poslana';
+  }
+
   const stavHtml = isAdmin ? `
-    <select id="zmenaStavuSelect" data-id="${CURRENT_RECORD.id}" style="
+    <select id="zmenaStavuSelect" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}" style="
       background: #333;
       color: #fff;
       border: 1px solid #555;
@@ -849,9 +867,16 @@ function createCustomerHeader() {
       font-size: 0.85rem;
       cursor: pointer;
     ">
-      <option value="wait" ${CURRENT_RECORD.stav === 'wait' || CURRENT_RECORD.stav === 'ČEKÁ' ? 'selected' : ''}>NOVÁ</option>
-      <option value="open" ${CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'selected' : ''}>DOMLUVENÁ</option>
-      <option value="done" ${CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'selected' : ''}>HOTOVO</option>
+      <optgroup label="Základní stavy">
+        <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
+        <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
+        <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
+      </optgroup>
+      <optgroup label="CN workflow">
+        <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
+        <option value="cn_odsouhlasena" ${aktualniHodnota === 'cn_odsouhlasena' ? 'selected' : ''}>Odsouhlasena</option>
+        <option value="cn_cekame_nd" ${aktualniHodnota === 'cn_cekame_nd' ? 'selected' : ''}>Čekáme ND</option>
+      </optgroup>
     </select>
   ` : status.text;
 
@@ -3842,7 +3867,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'zmenaStavuSelect') {
       const novyStav = e.target.value;
       const reklamaceId = e.target.getAttribute('data-id');
-      zmenitStavZakazky(reklamaceId, novyStav);
+      const zakaznikEmail = e.target.getAttribute('data-email');
+      zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail);
       return;
     }
 
@@ -3859,7 +3885,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // === ADMIN: ZMĚNA STAVU ZAKÁZKY ===
-async function zmenitStavZakazky(reklamaceId, novyStav) {
+async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
   if (!reklamaceId || !novyStav) {
     wgsToast.error('Chybí ID nebo nový stav');
     return;
@@ -3869,11 +3895,17 @@ async function zmenitStavZakazky(reklamaceId, novyStav) {
   const stavyMap = {
     'wait': 'NOVÁ',
     'open': 'DOMLUVENÁ',
-    'done': 'HOTOVO'
+    'done': 'HOTOVO',
+    'cn_poslana': 'Poslána CN',
+    'cn_odsouhlasena': 'Odsouhlasena',
+    'cn_cekame_nd': 'Čekáme ND'
   };
 
+  // Rozpoznat CN stavy
+  const jeCnStav = novyStav.startsWith('cn_');
+
   try {
-    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}`);
+    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
 
     const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
                       document.querySelector('meta[name="csrf-token"]')?.content;
@@ -3882,6 +3914,9 @@ async function zmenitStavZakazky(reklamaceId, novyStav) {
     formData.append('csrf_token', csrfToken);
     formData.append('id', reklamaceId);
     formData.append('stav', novyStav);
+    if (zakaznikEmail) {
+      formData.append('email', zakaznikEmail);
+    }
 
     const response = await fetch('/api/zmenit_stav.php', {
       method: 'POST',
@@ -3893,16 +3928,28 @@ async function zmenitStavZakazky(reklamaceId, novyStav) {
     if (data.status === 'success') {
       // Aktualizovat lokální cache
       const record = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
-      if (record) {
-        record.stav = novyStav;
+      if (record && data.db_stav) {
+        record.stav = data.db_stav;
       }
 
       // Aktualizovat CURRENT_RECORD
-      if (CURRENT_RECORD && CURRENT_RECORD.id == reklamaceId) {
-        CURRENT_RECORD.stav = novyStav;
+      if (CURRENT_RECORD && CURRENT_RECORD.id == reklamaceId && data.db_stav) {
+        CURRENT_RECORD.stav = data.db_stav;
       }
 
-      wgsToast.success(`Stav změněn na: ${stavyMap[novyStav]}`);
+      // Aktualizovat CN cache pokud se změnil CN stav
+      if (data.cn_stav && zakaznikEmail) {
+        const emailLower = zakaznikEmail.toLowerCase();
+        if (STAVY_NABIDEK) {
+          STAVY_NABIDEK[emailLower] = data.cn_stav;
+        }
+        // Přidat email do EMAILS_S_CN pokud tam není
+        if (EMAILS_S_CN && !EMAILS_S_CN.includes(emailLower) && data.cn_stav) {
+          EMAILS_S_CN.push(emailLower);
+        }
+      }
+
+      wgsToast.success(`Stav změněn na: ${stavyMap[novyStav] || novyStav}`);
 
       // Překreslit seznam (karty)
       renderOrders(WGS_DATA_CACHE);
@@ -3910,15 +3957,6 @@ async function zmenitStavZakazky(reklamaceId, novyStav) {
       logger.log(`[Admin] Stav zakázky ${reklamaceId} změněn na ${novyStav}`);
     } else {
       wgsToast.error(data.message || 'Nepodařilo se změnit stav');
-
-      // Vrátit dropdown na původní hodnotu
-      const select = document.getElementById('zmenaStavuSelect');
-      if (select && CURRENT_RECORD) {
-        select.value = CURRENT_RECORD.stav === 'ČEKÁ' ? 'wait' :
-                       CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
-                       CURRENT_RECORD.stav === 'HOTOVO' ? 'done' :
-                       CURRENT_RECORD.stav;
-      }
     }
   } catch (error) {
     logger.error('[Admin] Chyba při změně stavu:', error);
