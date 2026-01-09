@@ -225,7 +225,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       // Refresh pokud byl tab skryty dele nez 30 sekund
       if (timeSinceLastRefresh > 30000) {
         logger.log('[AutoRefresh] Tab aktivni - nacitam nova data...');
-        loadAll(ACTIVE_FILTER);
+        loadAll();
       }
     }
   });
@@ -250,7 +250,7 @@ function startAutoRefresh() {
     // Pouze refreshovat pokud je stranka viditelna
     if (document.visibilityState === 'visible') {
       logger.log('[AutoRefresh] Automaticka aktualizace dat...');
-      await loadAll(ACTIVE_FILTER);
+      await loadAll();
       lastRefreshTime = Date.now();
     }
   }, AUTO_REFRESH_INTERVAL);
@@ -1104,7 +1104,7 @@ async function saveData(data, successMsg) {
       wgsToast.success(successMsg);
 
       // Reload all data from DB to ensure consistency
-      await loadAll(ACTIVE_FILTER);
+      await loadAll();
 
       // Re-open detail to show updated data
       if (data.id) {
@@ -3187,7 +3187,7 @@ async function deleteNote(noteId, orderId) {
         notesContainer.innerHTML = '<div class="empty-notes">Zatim zadne poznamky</div>';
       }
 
-      await loadAll(ACTIVE_FILTER);
+      await loadAll();
     } else {
       wgsToast.error('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
     }
@@ -3332,7 +3332,7 @@ async function showNotes(recordOrId) {
 
   setTimeout(async () => {
     await markNotesAsRead(record.id);
-    await loadAll(ACTIVE_FILTER);
+    await loadAll();
     // Aktualizovat badge na ikone PWA
     if (window.WGSNotifikace) {
       window.WGSNotifikace.aktualizovat();
@@ -3363,7 +3363,7 @@ async function saveNewNote(orderId) {
     // Zavrit modal po uspesnem pridani poznamky
     closeNotesModal();
 
-    await loadAll(ACTIVE_FILTER);
+    await loadAll();
 
     // Aktualizovat badge na ikone PWA (nova poznamka)
     if (window.WGSNotifikace) {
@@ -4391,7 +4391,7 @@ async function loadMoreOrders() {
     btn.textContent = t('loading');
   }
 
-  await loadAll(ACTIVE_FILTER, true); // append = true
+  await loadAll('all', true); // append = true
 }
 
 // PAGINATION: Update "Load More" button visibility
