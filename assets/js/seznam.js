@@ -3886,7 +3886,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // === ADMIN: ZMĚNA STAVU ZAKÁZKY ===
 async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
+  console.log('[Admin] zmenitStavZakazky voláno:', { reklamaceId, novyStav, zakaznikEmail });
+
   if (!reklamaceId || !novyStav) {
+    console.error('[Admin] Chybí povinné parametry:', { reklamaceId, novyStav });
     wgsToast.error('Chybí ID nebo nový stav');
     return;
   }
