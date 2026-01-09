@@ -837,10 +837,53 @@ function createCustomerHeader() {
   const time = CURRENT_RECORD.cas_navstevy || '—';
   const status = getStatus(CURRENT_RECORD.stav);
 
+  // Pro adminy zobrazit dropdown pro změnu stavu
+  const isAdmin = CURRENT_USER && CURRENT_USER.is_admin;
+
+  // Zjistit aktuální CN stav zákazníka
+  const zakaznikEmail = (CURRENT_RECORD.email || '').toLowerCase().trim();
+  const maCN = zakaznikEmail && EMAILS_S_CN && EMAILS_S_CN.includes(zakaznikEmail);
+  const cnStav = maCN && STAVY_NABIDEK ? STAVY_NABIDEK[zakaznikEmail] : null;
+
+  // Určit aktuálně vybranou hodnotu
+  let aktualniHodnota = CURRENT_RECORD.stav === 'wait' || CURRENT_RECORD.stav === 'ČEKÁ' ? 'wait' :
+                        CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
+                        CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' : 'wait';
+
+  // Pokud má CN a není HOTOVO, zobrazit CN stav
+  if (maCN && aktualniHodnota !== 'done' && cnStav) {
+    if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
+    else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
+    else aktualniHodnota = 'cn_poslana';
+  }
+
+  const stavHtml = isAdmin ? `
+    <select id="zmenaStavuSelect" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}" style="
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    ">
+      <optgroup label="Základní stavy">
+        <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
+        <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
+        <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
+      </optgroup>
+      <optgroup label="CN workflow">
+        <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
+        <option value="cn_odsouhlasena" ${aktualniHodnota === 'cn_odsouhlasena' ? 'selected' : ''}>Odsouhlasena</option>
+        <option value="cn_cekame_nd" ${aktualniHodnota === 'cn_cekame_nd' ? 'selected' : ''}>Čekáme ND</option>
+      </optgroup>
+    </select>
+  ` : status.text;
+
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-    <strong>Stav:</strong> ${status.text}
+    <strong>Stav:</strong> ${stavHtml}
   `);
 }
 
@@ -3820,6 +3863,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('change', (e) => {
+    // Handler pro změnu stavu zakázky (admin dropdown)
+    if (e.target.id === 'zmenaStavuSelect') {
+      const novyStav = e.target.value;
+      const reklamaceId = e.target.getAttribute('data-id');
+      const zakaznikEmail = e.target.getAttribute('data-email');
+      zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail);
+      return;
+    }
+
     const target = e.target.closest('[data-onchange]');
     if (!target) return;
 
@@ -3831,6 +3883,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// === ADMIN: ZMĚNA STAVU ZAKÁZKY ===
+async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
+  if (!reklamaceId || !novyStav) {
+    wgsToast.error('Chybí ID nebo nový stav');
+    return;
+  }
+
+  // Mapování pro zobrazení
+  const stavyMap = {
+    'wait': 'NOVÁ',
+    'open': 'DOMLUVENÁ',
+    'done': 'HOTOVO',
+    'cn_poslana': 'Poslána CN',
+    'cn_odsouhlasena': 'Odsouhlasena',
+    'cn_cekame_nd': 'Čekáme ND'
+  };
+
+  // Rozpoznat CN stavy
+  const jeCnStav = novyStav.startsWith('cn_');
+
+  try {
+    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('id', reklamaceId);
+    formData.append('stav', novyStav);
+    if (zakaznikEmail) {
+      formData.append('email', zakaznikEmail);
+    }
+
+    const response = await fetch('/api/zmenit_stav.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Aktualizovat lokální cache
+      const record = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+      if (record && data.db_stav) {
+        record.stav = data.db_stav;
+      }
+
+      // Aktualizovat CURRENT_RECORD
+      if (CURRENT_RECORD && CURRENT_RECORD.id == reklamaceId && data.db_stav) {
+        CURRENT_RECORD.stav = data.db_stav;
+      }
+
+      // Aktualizovat CN cache pokud se změnil CN stav
+      if (data.cn_stav && zakaznikEmail) {
+        const emailLower = zakaznikEmail.toLowerCase();
+        if (STAVY_NABIDEK) {
+          STAVY_NABIDEK[emailLower] = data.cn_stav;
+        }
+        // Přidat email do EMAILS_S_CN pokud tam není
+        if (EMAILS_S_CN && !EMAILS_S_CN.includes(emailLower) && data.cn_stav) {
+          EMAILS_S_CN.push(emailLower);
+        }
+      }
+
+      wgsToast.success(`Stav změněn na: ${stavyMap[novyStav] || novyStav}`);
+
+      // Překreslit seznam (karty)
+      renderOrders(WGS_DATA_CACHE);
+
+      logger.log(`[Admin] Stav zakázky ${reklamaceId} změněn na ${novyStav}`);
+    } else {
+      wgsToast.error(data.message || 'Nepodařilo se změnit stav');
+    }
+  } catch (error) {
+    logger.error('[Admin] Chyba při změně stavu:', error);
+    wgsToast.error('Chyba při změně stavu: ' + error.message);
+  }
+}
 
 // === POMOCNÉ FUNKCE PRO DELETE MODALY ===
 function showDeleteConfirmModal(reklamaceNumber) {
