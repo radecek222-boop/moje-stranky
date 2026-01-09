@@ -837,10 +837,28 @@ function createCustomerHeader() {
   const time = CURRENT_RECORD.cas_navstevy || '—';
   const status = getStatus(CURRENT_RECORD.stav);
 
+  // Pro adminy zobrazit dropdown pro změnu stavu
+  const isAdmin = CURRENT_USER && CURRENT_USER.is_admin;
+  const stavHtml = isAdmin ? `
+    <select id="zmenaStavuSelect" data-id="${CURRENT_RECORD.id}" style="
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    ">
+      <option value="wait" ${CURRENT_RECORD.stav === 'wait' || CURRENT_RECORD.stav === 'ČEKÁ' ? 'selected' : ''}>NOVÁ</option>
+      <option value="open" ${CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'selected' : ''}>DOMLUVENÁ</option>
+      <option value="done" ${CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'selected' : ''}>HOTOVO</option>
+    </select>
+  ` : status.text;
+
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-    <strong>Stav:</strong> ${status.text}
+    <strong>Stav:</strong> ${stavHtml}
   `);
 }
 
@@ -3820,6 +3838,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('change', (e) => {
+    // Handler pro změnu stavu zakázky (admin dropdown)
+    if (e.target.id === 'zmenaStavuSelect') {
+      const novyStav = e.target.value;
+      const reklamaceId = e.target.getAttribute('data-id');
+      zmenitStavZakazky(reklamaceId, novyStav);
+      return;
+    }
+
     const target = e.target.closest('[data-onchange]');
     if (!target) return;
 
@@ -3831,6 +3857,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// === ADMIN: ZMĚNA STAVU ZAKÁZKY ===
+async function zmenitStavZakazky(reklamaceId, novyStav) {
+  if (!reklamaceId || !novyStav) {
+    wgsToast.error('Chybí ID nebo nový stav');
+    return;
+  }
+
+  // Mapování pro zobrazení
+  const stavyMap = {
+    'wait': 'NOVÁ',
+    'open': 'DOMLUVENÁ',
+    'done': 'HOTOVO'
+  };
+
+  try {
+    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}`);
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('id', reklamaceId);
+    formData.append('stav', novyStav);
+
+    const response = await fetch('/api/zmenit_stav.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Aktualizovat lokální cache
+      const record = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+      if (record) {
+        record.stav = novyStav;
+      }
+
+      // Aktualizovat CURRENT_RECORD
+      if (CURRENT_RECORD && CURRENT_RECORD.id == reklamaceId) {
+        CURRENT_RECORD.stav = novyStav;
+      }
+
+      wgsToast.success(`Stav změněn na: ${stavyMap[novyStav]}`);
+
+      // Překreslit seznam (karty)
+      renderOrders(WGS_DATA_CACHE);
+
+      logger.log(`[Admin] Stav zakázky ${reklamaceId} změněn na ${novyStav}`);
+    } else {
+      wgsToast.error(data.message || 'Nepodařilo se změnit stav');
+
+      // Vrátit dropdown na původní hodnotu
+      const select = document.getElementById('zmenaStavuSelect');
+      if (select && CURRENT_RECORD) {
+        select.value = CURRENT_RECORD.stav === 'ČEKÁ' ? 'wait' :
+                       CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
+                       CURRENT_RECORD.stav === 'HOTOVO' ? 'done' :
+                       CURRENT_RECORD.stav;
+      }
+    }
+  } catch (error) {
+    logger.error('[Admin] Chyba při změně stavu:', error);
+    wgsToast.error('Chyba při změně stavu: ' + error.message);
+  }
+}
 
 // === POMOCNÉ FUNKCE PRO DELETE MODALY ===
 function showDeleteConfirmModal(reklamaceNumber) {
