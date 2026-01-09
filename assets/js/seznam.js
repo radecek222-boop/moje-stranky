@@ -651,8 +651,10 @@ async function renderOrders(items = null) {
     // Zelený rámeček pro odsouhlasené nabídky
     // Šedý rámeček pro "Čekáme ND"
     // Když se domluví termín → modrá (DOMLUVENÁ), když se pošle nová CN → zase oranžová
+    // CN styling se NEaplikuje na dokončené zakázky (HOTOVO)
     let cnClass = '';
-    if (maCenovouNabidku && !appointmentText) {
+    const jeHotovo = status.class === 'done';
+    if (maCenovouNabidku && !appointmentText && !jeHotovo) {
       if (jeCekameNd) {
         cnClass = 'cn-cekame-nd';
       } else if (jeOdsouhlasena) {
@@ -695,7 +697,7 @@ async function renderOrders(items = null) {
             <div class="order-detail-right">
               ${appointmentText
                 ? `<span class="order-appointment">${appointmentText}</span>`
-                : (maCenovouNabidku
+                : (maCenovouNabidku && !jeHotovo
                     ? `<span class="${cnTextClass}">${cnText}</span>`
                     : `<span class="order-status-text status-${status.class}">${status.text}</span>`)}
             </div>
