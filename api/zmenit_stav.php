@@ -91,24 +91,37 @@ try {
             sendJsonError('Zákazník nemá email - nelze nastavit CN stav');
         }
 
-        // Najít CN pro zákazníka
-        $stmt = $pdo->prepare("
-            SELECT id, stav, cekame_nd_at
-            FROM wgs_nabidky
-            WHERE LOWER(zakaznik_email) = :email
-            ORDER BY vytvoreno_at DESC
-            LIMIT 1
-        ");
+        // Zjistit strukturu tabulky wgs_nabidky před dotazem
+        $hasCekameNdAt = db_table_has_column($pdo, 'wgs_nabidky', 'cekame_nd_at');
+        error_log("zmenit_stav.php: hasCekameNdAt = " . ($hasCekameNdAt ? 'true' : 'false'));
+
+        // Najít CN pro zákazníka - dynamický SELECT podle existence sloupce
+        if ($hasCekameNdAt) {
+            $stmt = $pdo->prepare("
+                SELECT id, stav, cekame_nd_at
+                FROM wgs_nabidky
+                WHERE LOWER(zakaznik_email) = :email
+                ORDER BY vytvoreno_at DESC
+                LIMIT 1
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                SELECT id, stav
+                FROM wgs_nabidky
+                WHERE LOWER(zakaznik_email) = :email
+                ORDER BY vytvoreno_at DESC
+                LIMIT 1
+            ");
+        }
         $stmt->execute(['email' => $zakaznikEmail]);
         $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        error_log("zmenit_stav.php: Hledám CN pro email '{$zakaznikEmail}', nalezeno: " . ($nabidka ? "ID {$nabidka['id']}" : 'NIC'));
 
         if (!$nabidka) {
             $pdo->rollBack();
             sendJsonError('Zákazník nemá cenovou nabídku - nelze nastavit CN stav');
         }
-
-        // Zjistit, zda existuje sloupec cekame_nd_at
-        $hasCekameNdAt = db_table_has_column($pdo, 'wgs_nabidky', 'cekame_nd_at');
 
         // Nastavit CN workflow podle zvoleného stavu
         switch ($novyStav) {
