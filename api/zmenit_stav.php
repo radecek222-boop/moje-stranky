@@ -14,6 +14,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/db_metadata.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -106,34 +107,55 @@ try {
             sendJsonError('Zákazník nemá cenovou nabídku - nelze nastavit CN stav');
         }
 
+        // Zjistit, zda existuje sloupec cekame_nd_at
+        $hasCekameNdAt = db_table_has_column($pdo, 'wgs_nabidky', 'cekame_nd_at');
+
         // Nastavit CN workflow podle zvoleného stavu
         switch ($novyStav) {
             case 'cn_poslana':
                 // CN odeslána - stav='odeslana', zrušit cekame_nd
-                $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'odeslana', cekame_nd_at = NULL WHERE id = ?");
+                if ($hasCekameNdAt) {
+                    $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'odeslana', cekame_nd_at = NULL WHERE id = ?");
+                } else {
+                    $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'odeslana' WHERE id = ?");
+                }
                 $stmt->execute([$nabidka['id']]);
                 $cnStavVystup = 'odeslana';
                 break;
 
             case 'cn_odsouhlasena':
                 // CN potvrzena - stav='potvrzena', zrušit cekame_nd
-                $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'potvrzena', cekame_nd_at = NULL WHERE id = ?");
+                if ($hasCekameNdAt) {
+                    $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'potvrzena', cekame_nd_at = NULL WHERE id = ?");
+                } else {
+                    $stmt = $pdo->prepare("UPDATE wgs_nabidky SET stav = 'potvrzena' WHERE id = ?");
+                }
                 $stmt->execute([$nabidka['id']]);
                 $cnStavVystup = 'potvrzena';
                 break;
 
             case 'cn_cekame_nd':
                 // Čekáme ND - nastavit cekame_nd_at
-                $stmt = $pdo->prepare("UPDATE wgs_nabidky SET cekame_nd_at = NOW() WHERE id = ?");
-                $stmt->execute([$nabidka['id']]);
-                $cnStavVystup = 'cekame_nd';
+                if ($hasCekameNdAt) {
+                    $stmt = $pdo->prepare("UPDATE wgs_nabidky SET cekame_nd_at = NOW() WHERE id = ?");
+                    $stmt->execute([$nabidka['id']]);
+                    $cnStavVystup = 'cekame_nd';
+                } else {
+                    $pdo->rollBack();
+                    sendJsonError('Stav "Čekáme ND" vyžaduje sloupec cekame_nd_at - spusťte migraci pridej_cekame_nd_sloupec.php');
+                }
                 break;
         }
 
         // Pokud je zakázka HOTOVO a nastavujeme CN stav, změnit na ČEKÁ
         if ($puvodniStav === 'done') {
             $dbStav = 'wait';
-            $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = 'wait', updated_at = NOW() WHERE id = ?");
+            $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
+            if ($hasUpdatedAt) {
+                $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = 'wait', updated_at = NOW() WHERE id = ?");
+            } else {
+                $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = 'wait' WHERE id = ?");
+            }
             $stmt->execute([$reklamaceId]);
         }
 
@@ -143,7 +165,12 @@ try {
         // === ZÁKLADNÍ STAV ===
 
         if ($puvodniStav !== $novyStav) {
-            $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = :stav, updated_at = NOW() WHERE id = :id");
+            $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
+            if ($hasUpdatedAt) {
+                $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = :stav, updated_at = NOW() WHERE id = :id");
+            } else {
+                $stmt = $pdo->prepare("UPDATE wgs_reklamace SET stav = :stav WHERE id = :id");
+            }
             $stmt->execute([
                 'stav' => $novyStav,
                 'id' => $reklamaceId
@@ -180,12 +207,22 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    error_log("zmenit_stav.php: Chyba databáze - " . $e->getMessage());
-    sendJsonError('Chyba při ukládání do databáze');
+    $chybaDetail = $e->getMessage();
+    error_log("zmenit_stav.php: Chyba databáze - reklamaceId={$reklamaceId}, novyStav={$novyStav}, email={$zakaznikEmail} - " . $chybaDetail);
+
+    // Vrátit více detailů pro debugging (bez citlivých SQL údajů)
+    $uzivatelChyba = 'Chyba při ukládání do databáze';
+    if (strpos($chybaDetail, 'Unknown column') !== false) {
+        $uzivatelChyba = 'Chybí sloupec v databázi - kontaktujte administrátora';
+    } elseif (strpos($chybaDetail, "Data too long") !== false || strpos($chybaDetail, "Incorrect") !== false) {
+        $uzivatelChyba = 'Neplatná hodnota pro databázi';
+    }
+
+    sendJsonError($uzivatelChyba);
 } catch (Exception $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    error_log("zmenit_stav.php: Chyba - " . $e->getMessage());
+    error_log("zmenit_stav.php: Chyba - reklamaceId={$reklamaceId}, novyStav={$novyStav} - " . $e->getMessage());
     sendJsonError('Chyba při zpracování požadavku');
 }
