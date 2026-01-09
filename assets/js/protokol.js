@@ -2596,9 +2596,14 @@ document.addEventListener('DOMContentLoaded', () => {
       },
 
       isEmpty: function() {
+        // FIX: Kontrolovat RGB hodnoty, ne alpha kanál
+        // Bílý pixel = (255, 255, 255), jakýkoli jiný = podpis
         const pixelData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
-        for (let i = 3; i < pixelData.length; i += 4) {
-          if (pixelData[i] > 0) return false;
+        for (let i = 0; i < pixelData.length; i += 4) {
+          // Pokud pixel není bílý (RGB != 255,255,255), canvas není prázdný
+          if (pixelData[i] !== 255 || pixelData[i+1] !== 255 || pixelData[i+2] !== 255) {
+            return false;
+          }
         }
         return true;
       },
@@ -2736,6 +2741,26 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (typeof showNotif === 'function') {
         showNotif('success', 'Podpis byl přenesen do protokolu');
       }
+
+      // FIX: Zavřít modal AŽ PO úspěšném přenosu podpisu (ne před ním!)
+      // Zkontrolovat checkbox prodloužení lhůty
+      const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+      const textProdlouzeniHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+
+      if (checkboxProdlouzeni && textProdlouzeniHlavni) {
+        if (checkboxProdlouzeni.checked) {
+          textProdlouzeniHlavni.style.display = 'block';
+          logger.log('[ZakaznikSchvaleni] Text prodloužení lhůty zobrazen v hlavním formuláři');
+        } else {
+          textProdlouzeniHlavni.style.display = 'none';
+        }
+      }
+
+      // Zavřít modal až po úspěšném přenosu
+      zavritZakaznikModal();
+
+      // Vynutit překlad všech textových polí
+      vynutitPreklad();
     };
 
     img.onerror = () => {
@@ -2743,28 +2768,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof showNotif === 'function') {
         showNotif('error', 'Chyba při přenosu podpisu');
       }
+      // I při chybě zavřít modal
+      zavritZakaznikModal();
     };
 
     img.src = signatureDataURL;
-
-    // Zkontrolovat checkbox prodloužení lhůty a zobrazit text v hlavním formuláři
-    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
-    const textProdlouzeniHlavni = document.getElementById('prodlouzeniLhutyHlavni');
-
-    if (checkboxProdlouzeni && textProdlouzeniHlavni) {
-      if (checkboxProdlouzeni.checked) {
-        textProdlouzeniHlavni.style.display = 'block';
-        logger.log('[ZakaznikSchvaleni] Text prodloužení lhůty zobrazen v hlavním formuláři');
-      } else {
-        textProdlouzeniHlavni.style.display = 'none';
-      }
-    }
-
-    // Zavřít modal
-    zavritZakaznikModal();
-
-    // Vynutit překlad všech textových polí
-    vynutitPreklad();
   }
 
   // Funkce pro vynucení překladu všech polí
