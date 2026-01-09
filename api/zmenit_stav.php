@@ -62,7 +62,7 @@ try {
     $pdo = getDbConnection();
 
     // Ověřit existenci zakázky
-    $stmt = $pdo->prepare("SELECT id, stav, reklamace_id, cislo_objednavky, email FROM wgs_reklamace WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, stav, reklamace_id, cislo, email FROM wgs_reklamace WHERE id = ?");
     $stmt->execute([$reklamaceId]);
     $zakazka = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -71,7 +71,7 @@ try {
     }
 
     $puvodniStav = $zakazka['stav'];
-    $cisloZakazky = $zakazka['reklamace_id'] ?: $zakazka['cislo_objednavky'] ?: $reklamaceId;
+    $cisloZakazky = $zakazka['reklamace_id'] ?: $zakazka['cislo'] ?: $reklamaceId;
 
     // Použít email ze zakázky pokud nebyl předán
     if (!$zakaznikEmail) {
