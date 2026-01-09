@@ -53,6 +53,14 @@ if ($isAdmin) {
           <line class="notif-slash" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
         </svg>
       </a>
+      <a href="#" id="update-app-btn-admin" class="hamburger-update-btn" role="button" title="Aktualizovat aplikaci" data-lang-cs-title="Aktualizovat aplikaci" data-lang-en-title="Update app" data-lang-it-title="Aggiorna app">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+          <path d="M21 21v-5h-5"></path>
+        </svg>
+      </a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
         <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
@@ -85,6 +93,14 @@ if ($isAdmin) {
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           <line class="notif-slash" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
+        </svg>
+      </a>
+      <a href="#" id="update-app-btn-user" class="hamburger-update-btn" role="button" title="Aktualizovat aplikaci" data-lang-cs-title="Aktualizovat aplikaci" data-lang-en-title="Update app" data-lang-it-title="Aggiorna app">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+          <path d="M21 21v-5h-5"></path>
         </svg>
       </a>
       <div class="hamburger-lang-switcher">
@@ -267,6 +283,34 @@ if ($isAdmin) {
 .hamburger-notif-btn:hover {
   color: #aaa !important;
   background: transparent !important;
+}
+
+/* Tlacitko Aktualizovat aplikaci */
+.hamburger-update-btn {
+  color: #888 !important;
+  border: none !important;
+  background: transparent !important;
+  transition: all 0.2s ease;
+  padding: 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.hamburger-update-btn:hover {
+  color: #39ff14 !important;
+  filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.5));
+}
+
+.hamburger-update-btn.updating {
+  animation: rotate-update 1s linear infinite;
+  color: #39ff14 !important;
+}
+
+@keyframes rotate-update {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .hamburger-notif-btn .notif-bell {
@@ -1466,6 +1510,103 @@ document.addEventListener('alpine:init', () => {
     document.addEventListener('DOMContentLoaded', initPlayBadge);
   } else {
     initPlayBadge();
+  }
+
+  /**
+   * InitUpdateAppButton - Tlačítko pro vynucenou aktualizaci aplikace (SW + cache)
+   */
+  function initUpdateAppButton() {
+    const btnAdmin = document.getElementById('update-app-btn-admin');
+    const btnUser = document.getElementById('update-app-btn-user');
+    const btn = btnAdmin || btnUser;
+
+    if (!btn) {
+      return;
+    }
+
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Animace rotace
+      btn.classList.add('updating');
+
+      // Překlady
+      const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
+      const texty = {
+        cs: {
+          aktualizuji: 'Aktualizuji aplikaci...',
+          hotovo: 'Aplikace aktualizována! Stránka se znovu načte.',
+          chyba: 'Nepodařilo se aktualizovat. Zkuste obnovit stránku ručně (Ctrl+Shift+R).'
+        },
+        en: {
+          aktualizuji: 'Updating app...',
+          hotovo: 'App updated! Page will reload.',
+          chyba: 'Update failed. Try refreshing manually (Ctrl+Shift+R).'
+        },
+        it: {
+          aktualizuji: 'Aggiornamento app...',
+          hotovo: 'App aggiornata! La pagina si ricaricherà.',
+          chyba: 'Aggiornamento fallito. Prova ad aggiornare manualmente (Ctrl+Shift+R).'
+        }
+      };
+      const t = texty[jazyk] || texty.cs;
+
+      try {
+        console.log('[UpdateApp] Začínám aktualizaci...');
+
+        // 1. Smazat všechny cache
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          console.log('[UpdateApp] Mažu cache:', cacheNames);
+          await Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          );
+        }
+
+        // 2. Odregistrovat všechny Service Workery
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          console.log('[UpdateApp] Odregistrovávám SW:', registrations.length);
+          await Promise.all(
+            registrations.map(registration => registration.unregister())
+          );
+        }
+
+        // 3. Vyčistit localStorage/sessionStorage (volitelné - ponechat přihlášení)
+        // sessionStorage.clear(); // Nemazat - obsahuje CSRF tokeny
+
+        console.log('[UpdateApp] Aktualizace dokončena, reload...');
+
+        // 4. Toast notifikace (pokud existuje)
+        if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+          wgsToast.success(t.hotovo);
+        }
+
+        // 5. Reload stránky s vynuceným obnovením cache
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 1000);
+
+      } catch (error) {
+        console.error('[UpdateApp] Chyba:', error);
+        btn.classList.remove('updating');
+
+        if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+          wgsToast.error(t.chyba);
+        } else {
+          alert(t.chyba);
+        }
+      }
+    });
+
+    console.log('[UpdateApp] Tlačítko inicializováno');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUpdateAppButton);
+  } else {
+    initUpdateAppButton();
   }
 })();
 </script>
