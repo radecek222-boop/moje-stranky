@@ -68,25 +68,23 @@ try {
     // Odstranit nečíselné znaky z VS
     $vs = preg_replace('/[^0-9]/', '', $vs);
 
-    // Částka
+    // Částka (může být 0 - uživatel ji zadá v modalu)
     $castka = floatval($reklamace['cena_celkem']);
 
-    if ($castka <= 0) {
-        sendJsonError('Zakázka nemá nastavenou cenu. Nejprve vyplňte cenu v detailu zákazníka.');
-    }
-
-    // Generovat SPD string pro QR kód
-    try {
-        $spdString = QRPaymentHelper::generateSPD([
-            'acc' => $iban,
-            'am' => $castka,
-            'cc' => 'CZK',
-            'vs' => $vs,
-            'msg' => 'WGS servis - zakázka ' . $vs
-        ]);
-    } catch (Exception $e) {
-        error_log("QR platba - chyba SPD: " . $e->getMessage());
-        sendJsonError('Chyba při generování QR dat: ' . $e->getMessage());
+    // Generovat SPD string pouze pokud je částka > 0
+    $spdString = null;
+    if ($castka > 0) {
+        try {
+            $spdString = QRPaymentHelper::generateSPD([
+                'acc' => $iban,
+                'am' => $castka,
+                'cc' => 'CZK',
+                'vs' => $vs,
+                'msg' => 'WGS servis - zakázka ' . $vs
+            ]);
+        } catch (Exception $e) {
+            error_log("QR platba - chyba SPD: " . $e->getMessage());
+        }
     }
 
     // Formátovat IBAN pro zobrazení (s mezerami)
