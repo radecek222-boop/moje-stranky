@@ -1210,29 +1210,17 @@ function regenerovatQrKod() {
   }, 300);
 }
 
-// Generování SPD stringu pro QR platbu (český standard ČBA)
+// Generování SPD stringu pro QR platbu (minimální formát jako PSA kalkulátor)
 function generujSpdString(iban, castka, vs) {
   // Sanitizace IBAN - odstranit mezery, převést na velká písmena
   const cleanIban = iban.replace(/\s/g, '').toUpperCase();
 
-  // Sanitizace VS - pouze čísla
-  const cleanVs = vs ? String(vs).replace(/[^0-9]/g, '') : '';
-
   // Částka - vždy 2 desetinná místa s tečkou
   const amountStr = castka.toFixed(2);
 
-  // Sestavení SPD stringu podle specifikace ČBA
-  let spd = 'SPD*1.0';
-  spd += '*ACC:' + cleanIban;
-  spd += '*AM:' + amountStr;
-  spd += '*CC:CZK';
-
-  if (cleanVs) {
-    spd += '*X-VS:' + cleanVs;
-  }
-
-  // MSG bez diakritiky (banky často nepodporují)
-  spd += '*MSG:WGS servis ' + cleanVs;
+  // MINIMÁLNÍ SPAYD formát (jako PSA kalkulátor) - pouze ACC, AM, CC
+  // Bez X-VS a MSG - některé banky je nepodporují správně
+  const spd = `SPD*1.0*ACC:${cleanIban}*AM:${amountStr}*CC:CZK`;
 
   console.log('[QR] SPD string:', spd);
   return spd;
