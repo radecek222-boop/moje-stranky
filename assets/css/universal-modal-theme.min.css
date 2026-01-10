@@ -681,93 +681,138 @@ button.note-delete-btn:focus {
 
 /* ============================================
    WGS INPUT/SELECT - Jednotný styl formulářových prvků
+   (styl jako wgsConfirm dialog)
    ============================================ */
 
-/* Základní WGS input styl */
-.wgs-input {
-    background: #2a2a2a !important;
+/* Základní WGS input styl - vysoká specificita */
+input.wgs-input,
+input.wgs-input[type="text"],
+input.wgs-input[type="number"],
+input.wgs-input[type="email"],
+input.wgs-input[type="tel"],
+textarea.wgs-input,
+.modal-body input.wgs-input,
+.modal-content input.wgs-input {
+    background: #1a1a1a !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid #333 !important;
     border-radius: 6px !important;
-    padding: 0.5rem 0.75rem !important;
+    padding: 10px 12px !important;
     font-family: 'Poppins', sans-serif !important;
-    font-size: 0.95rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
     transition: all 0.2s ease !important;
     outline: none !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
 }
 
-.wgs-input:hover {
-    border-color: rgba(255, 255, 255, 0.25) !important;
+/* Skrýt spinner u number inputů */
+input.wgs-input[type="number"]::-webkit-inner-spin-button,
+input.wgs-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
 }
 
-.wgs-input:focus {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+input.wgs-input[type="number"] {
+    -moz-appearance: textfield !important;
 }
 
-.wgs-input::placeholder {
-    color: #666666 !important;
+input.wgs-input:hover,
+textarea.wgs-input:hover,
+.modal-body input.wgs-input:hover {
+    border-color: #444 !important;
+    background: #222 !important;
+}
+
+input.wgs-input:focus,
+textarea.wgs-input:focus,
+.modal-body input.wgs-input:focus {
+    border-color: #555 !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
+    background: #222 !important;
+}
+
+input.wgs-input::placeholder,
+textarea.wgs-input::placeholder {
+    color: #666 !important;
+    font-style: italic !important;
 }
 
 /* Číselný input s neonově zeleným textem */
-.wgs-input--cislo {
+input.wgs-input.wgs-input--cislo,
+.modal-body input.wgs-input.wgs-input--cislo {
     text-align: right !important;
     font-weight: 600 !important;
-    font-family: 'Roboto Mono', monospace !important;
+    font-family: 'Roboto Mono', 'Consolas', monospace !important;
     color: #39ff14 !important;
+    letter-spacing: 0.5px !important;
 }
 
-/* WGS Select styl */
-.wgs-select {
-    background: #2a2a2a !important;
+/* WGS Select styl - vysoká specificita */
+select.wgs-select,
+.modal-body select.wgs-select,
+.modal-content select.wgs-select {
+    background: #1a1a1a !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid #333 !important;
     border-radius: 6px !important;
-    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    padding: 10px 32px 10px 12px !important;
     font-family: 'Poppins', sans-serif !important;
     font-size: 0.9rem !important;
+    font-weight: 400 !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     outline: none !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 0.75rem center !important;
+    background-position: right 10px center !important;
 }
 
-.wgs-select:hover {
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    background-color: #333333 !important;
+select.wgs-select:hover,
+.modal-body select.wgs-select:hover {
+    border-color: #444 !important;
+    background-color: #222 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaaaaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
 }
 
-.wgs-select:focus {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+select.wgs-select:focus,
+.modal-body select.wgs-select:focus {
+    border-color: #555 !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
+    background-color: #222 !important;
 }
 
 /* Select option styling */
-.wgs-select option {
-    background: #2a2a2a !important;
+select.wgs-select option {
+    background: #1a1a1a !important;
     color: #ffffff !important;
-    padding: 0.5rem !important;
+    padding: 8px !important;
 }
 
-.wgs-select optgroup {
-    background: #1a1a1a !important;
-    color: #888888 !important;
+select.wgs-select optgroup {
+    background: #111 !important;
+    color: #888 !important;
     font-weight: 600 !important;
+    font-style: normal !important;
 }
 
 /* Menší varianta inputu */
-.wgs-input--small {
-    padding: 0.35rem 0.5rem !important;
+input.wgs-input.wgs-input--small,
+.modal-body input.wgs-input.wgs-input--small {
+    padding: 6px 10px !important;
     font-size: 0.85rem !important;
 }
 
 /* Menší varianta selectu */
-.wgs-select--small {
-    padding: 0.35rem 1.5rem 0.35rem 0.5rem !important;
+select.wgs-select.wgs-select--small,
+.modal-body select.wgs-select.wgs-select--small {
+    padding: 6px 28px 6px 10px !important;
     font-size: 0.85rem !important;
 }
