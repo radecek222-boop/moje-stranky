@@ -112,7 +112,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <link rel="stylesheet" href="assets/css/admin-header.min.css">
 <?php endif; ?>
   <!-- Univerzální tmavý styl pro všechny modály -->
-  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
 <style>
 /* ============================================
    🔧 FIX: iOS/Safari/PWA Modal Scroll Lock
