@@ -1194,7 +1194,14 @@ function regenerovatQrKod() {
 
     // Generovat SPD string (vždy v CZK)
     // Použít účet ve formátu 188784838/0300, convertToIBAN ho převede na IBAN (jako PSA)
-    const spdString = generujSpdString(QR_PLATBA_DATA.ucet, castka, QR_PLATBA_DATA.vs);
+    // Přidat zprávu s číslem objednávky a jménem zákazníka
+    const spdString = generujSpdString(
+      QR_PLATBA_DATA.ucet,
+      castka,
+      QR_PLATBA_DATA.vs,
+      QR_PLATBA_DATA.cislo,
+      QR_PLATBA_DATA.jmeno
+    );
 
     // Vygenerovat QR kód
     container.innerHTML = '';
@@ -1211,9 +1218,32 @@ function regenerovatQrKod() {
   }, 300);
 }
 
-// Generování SPD stringu pro QR platbu (minimální formát jako PSA kalkulátor)
-function generujSpdString(ucet, castka, vs) {
-  console.log('[QR] Vstupní údaje - účet:', ucet, 'částka:', castka, 'vs:', vs);
+// Odstranění diakritiky pro SPAYD zprávu
+function odstranDiakritiku(text) {
+  if (!text) return '';
+  const mapa = {
+    'á': 'a', 'č': 'c', 'ď': 'd', 'é': 'e', 'ě': 'e', 'í': 'i', 'ň': 'n',
+    'ó': 'o', 'ř': 'r', 'š': 's', 'ť': 't', 'ú': 'u', 'ů': 'u', 'ý': 'y', 'ž': 'z',
+    'Á': 'A', 'Č': 'C', 'Ď': 'D', 'É': 'E', 'Ě': 'E', 'Í': 'I', 'Ň': 'N',
+    'Ó': 'O', 'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ú': 'U', 'Ů': 'U', 'Ý': 'Y', 'Ž': 'Z'
+  };
+  return text.split('').map(c => mapa[c] || c).join('');
+}
+
+// Sanitizace zprávy pro SPAYD (bez diakritiky, bez speciálních znaků)
+function sanitizujZpravu(zprava) {
+  if (!zprava) return '';
+  return odstranDiakritiku(zprava)
+    .replace(/[\r\n]+/g, ' ')  // Odstranit nové řádky
+    .replace(/\*/g, '')        // Odstranit hvězdičky (rezervováno v SPAYD)
+    .replace(/[^\w\s\-\.]/g, '') // Pouze alfanumerické, mezery, pomlčky, tečky
+    .trim()
+    .slice(0, 60);             // Max 60 znaků pro MSG pole
+}
+
+// Generování SPD stringu pro QR platbu
+function generujSpdString(ucet, castka, vs, cisloObj, jmeno) {
+  console.log('[QR] Vstupní údaje - účet:', ucet, 'částka:', castka, 'vs:', vs, 'obj:', cisloObj, 'jméno:', jmeno);
 
   // Pokud přijde účet ve formátu 188784838/0300, konvertuj na IBAN
   let cleanIban = ucet;
@@ -1229,13 +1259,17 @@ function generujSpdString(ucet, castka, vs) {
   // Částka - vždy 2 desetinná místa s tečkou
   const amountStr = castka.toFixed(2);
 
-  // MINIMÁLNÍ SPAYD formát (jako PSA kalkulátor) - pouze ACC, AM, CC
-  const spd = `SPD*1.0*ACC:${cleanIban}*AM:${amountStr}*CC:CZK`;
+  // Zpráva pro příjemce - číslo objednávky a jméno zákazníka
+  const zprava = sanitizujZpravu(`Obj ${cisloObj || vs} ${jmeno || ''}`);
+
+  // SPAYD formát s MSG
+  const spd = `SPD*1.0*ACC:${cleanIban}*AM:${amountStr}*CC:CZK*MSG:${zprava}`;
 
   console.log('[QR] === VÝSLEDNÝ SPD STRING ===');
   console.log('[QR]', spd);
   console.log('[QR] IBAN:', cleanIban, '(délka:', cleanIban.length, ')');
   console.log('[QR] Částka:', amountStr, 'CZK');
+  console.log('[QR] Zpráva:', zprava);
   return spd;
 }
 
