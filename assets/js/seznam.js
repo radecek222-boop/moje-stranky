@@ -1193,7 +1193,8 @@ function regenerovatQrKod() {
     }
 
     // Generovat SPD string (vždy v CZK)
-    const spdString = generujSpdString(QR_PLATBA_DATA.iban, castka, QR_PLATBA_DATA.vs);
+    // Použít účet ve formátu 188784838/0300, convertToIBAN ho převede na IBAN (jako PSA)
+    const spdString = generujSpdString(QR_PLATBA_DATA.ucet, castka, QR_PLATBA_DATA.vs);
 
     // Vygenerovat QR kód
     container.innerHTML = '';
@@ -1211,19 +1212,79 @@ function regenerovatQrKod() {
 }
 
 // Generování SPD stringu pro QR platbu (minimální formát jako PSA kalkulátor)
-function generujSpdString(iban, castka, vs) {
-  // Sanitizace IBAN - odstranit mezery, převést na velká písmena
-  const cleanIban = iban.replace(/\s/g, '').toUpperCase();
+function generujSpdString(ucet, castka, vs) {
+  console.log('[QR] Vstupní údaje - účet:', ucet, 'částka:', castka, 'vs:', vs);
+
+  // Pokud přijde účet ve formátu 188784838/0300, konvertuj na IBAN
+  let cleanIban = ucet;
+  if (ucet && ucet.includes('/')) {
+    const parts = ucet.split('/');
+    console.log('[QR] Konvertuji účet', parts[0], 'banka', parts[1]);
+    cleanIban = convertToIBAN(parts[0], parts[1]);
+  } else {
+    cleanIban = ucet.replace(/\s/g, '').toUpperCase();
+    console.log('[QR] Použití přímo IBAN:', cleanIban);
+  }
 
   // Částka - vždy 2 desetinná místa s tečkou
   const amountStr = castka.toFixed(2);
 
   // MINIMÁLNÍ SPAYD formát (jako PSA kalkulátor) - pouze ACC, AM, CC
-  // Bez X-VS a MSG - některé banky je nepodporují správně
   const spd = `SPD*1.0*ACC:${cleanIban}*AM:${amountStr}*CC:CZK`;
 
-  console.log('[QR] SPD string:', spd);
+  console.log('[QR] === VÝSLEDNÝ SPD STRING ===');
+  console.log('[QR]', spd);
+  console.log('[QR] IBAN:', cleanIban, '(délka:', cleanIban.length, ')');
+  console.log('[QR] Částka:', amountStr, 'CZK');
   return spd;
+}
+
+// Konverze čísla účtu na IBAN (z PSA kalkulátoru)
+function convertToIBAN(account, bankCode) {
+  let rawAccount = (account || '').toString().replace(/\s/g, '');
+  bankCode = (bankCode || '').toString().replace(/\D/g, '').padStart(4, '0');
+
+  let predcisli = '';
+  let cisloUctu = '';
+
+  if (rawAccount.includes('-')) {
+    const parts = rawAccount.split('-');
+    predcisli = (parts[0] || '').replace(/\D/g, '');
+    cisloUctu = (parts[1] || '').replace(/\D/g, '');
+  } else {
+    const digits = rawAccount.replace(/\D/g, '');
+    if (digits.length > 10) {
+      predcisli = digits.slice(0, -10);
+      cisloUctu = digits.slice(-10);
+    } else {
+      predcisli = '';
+      cisloUctu = digits;
+    }
+  }
+
+  predcisli = predcisli.padStart(6, '0');
+  cisloUctu = cisloUctu.padStart(10, '0');
+
+  const bban = bankCode + predcisli + cisloUctu;
+
+  if (bban.length !== 20) {
+    throw new Error(`Neplatná délka BBAN: ${bban.length}`);
+  }
+
+  // Výpočet kontrolních číslic (ISO 7064 Mod 97-10)
+  const checkString = bban + '123500';
+  let remainder = BigInt(checkString) % 97n;
+  const checkDigits = String(98n - remainder).padStart(2, '0');
+
+  const iban = 'CZ' + checkDigits + bban;
+
+  // Kontrola IBAN délky (CZ má vždy 24 znaků)
+  if (iban.length !== 24) {
+    throw new Error(`Neplatná délka IBAN: ${iban.length} (očekáváno 24)`);
+  }
+
+  console.log('[QR] Konverze účtu:', account, '/', bankCode, '→', iban);
+  return iban;
 }
 
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
