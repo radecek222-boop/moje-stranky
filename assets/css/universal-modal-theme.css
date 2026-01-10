@@ -678,3 +678,96 @@ button.note-delete-btn:focus {
     background: #ffffff !important;
     color: #000000 !important;
 }
+
+/* ============================================
+   WGS INPUT/SELECT - Jednotný styl formulářových prvků
+   ============================================ */
+
+/* Základní WGS input styl */
+.wgs-input {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 6px !important;
+    padding: 0.5rem 0.75rem !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+}
+
+.wgs-input:hover {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.wgs-input:focus {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+.wgs-input::placeholder {
+    color: #666666 !important;
+}
+
+/* Číselný input s neonově zeleným textem */
+.wgs-input--cislo {
+    text-align: right !important;
+    font-weight: 600 !important;
+    font-family: 'Roboto Mono', monospace !important;
+    color: #39ff14 !important;
+}
+
+/* WGS Select styl */
+.wgs-select {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 6px !important;
+    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+}
+
+.wgs-select:hover {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    background-color: #333333 !important;
+}
+
+.wgs-select:focus {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Select option styling */
+.wgs-select option {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    padding: 0.5rem !important;
+}
+
+.wgs-select optgroup {
+    background: #1a1a1a !important;
+    color: #888888 !important;
+    font-weight: 600 !important;
+}
+
+/* Menší varianta inputu */
+.wgs-input--small {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.85rem !important;
+}
+
+/* Menší varianta selectu */
+.wgs-select--small {
+    padding: 0.35rem 1.5rem 0.35rem 0.5rem !important;
+    font-size: 0.85rem !important;
+}

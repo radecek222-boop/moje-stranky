@@ -858,15 +858,7 @@ function createCustomerHeader() {
   }
 
   const stavHtml = isAdmin ? `
-    <select id="zmenaStavuSelect" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}" style="
-      background: #333;
-      color: #fff;
-      border: 1px solid #555;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    ">
+    <select id="zmenaStavuSelect" class="wgs-select wgs-select--small" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}">
       <optgroup label="Základní stavy">
         <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
         <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
@@ -1099,34 +1091,14 @@ async function showQrPlatbaModal(reklamaceId) {
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Částka CZK:</span>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="number" id="qrCastkaCzkInput" value="${initialCastka}" min="0" step="1" style="
-                  width: 90px;
-                  padding: 0.4rem 0.6rem;
-                  background: #333;
-                  border: 1px solid #555;
-                  border-radius: 4px;
-                  color: #39ff14;
-                  font-weight: bold;
-                  font-size: 1rem;
-                  text-align: right;
-                " onchange="prepoctiCastku('czk')" onkeyup="prepoctiCastku('czk')">
+                <input type="number" id="qrCastkaCzkInput" class="wgs-input wgs-input--cislo" value="${initialCastka}" min="0" step="1" style="width: 100px;" onchange="prepoctiCastku('czk')" onkeyup="prepoctiCastku('czk')">
                 <span style="color: #888;">Kč</span>
               </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Částka EUR:</span>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="number" id="qrCastkaEurInput" value="${initialCastka > 0 ? (initialCastka / 25).toFixed(0) : ''}" min="0" step="1" style="
-                  width: 90px;
-                  padding: 0.4rem 0.6rem;
-                  background: #333;
-                  border: 1px solid #555;
-                  border-radius: 4px;
-                  color: #fff;
-                  font-weight: bold;
-                  font-size: 1rem;
-                  text-align: right;
-                " onchange="prepoctiCastku('eur')" onkeyup="prepoctiCastku('eur')">
+                <input type="number" id="qrCastkaEurInput" class="wgs-input wgs-input--small" value="${initialCastka > 0 ? (initialCastka / 25).toFixed(0) : ''}" min="0" step="1" style="width: 100px; text-align: right;" onchange="prepoctiCastku('eur')" onkeyup="prepoctiCastku('eur')">
                 <span style="color: #888;">€</span>
               </div>
             </div>
