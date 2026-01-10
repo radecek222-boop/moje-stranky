@@ -1097,10 +1097,10 @@ async function showQrPlatbaModal(reklamaceId) {
               <span style="color: #fff; font-family: monospace; font-weight: bold;">${Utils.escapeHtml(data.ucet || data.iban_formatovany)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
-              <span style="color: #888;">Částka:</span>
+              <span style="color: #888;">Částka CZK:</span>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="number" id="qrCastkaInput" value="${initialCastka}" min="0" step="0.01" style="
-                  width: 100px;
+                <input type="number" id="qrCastkaCzkInput" value="${initialCastka}" min="0" step="1" style="
+                  width: 90px;
                   padding: 0.4rem 0.6rem;
                   background: #333;
                   border: 1px solid #555;
@@ -1109,9 +1109,29 @@ async function showQrPlatbaModal(reklamaceId) {
                   font-weight: bold;
                   font-size: 1rem;
                   text-align: right;
-                " onchange="regenerovatQrKod()" onkeyup="regenerovatQrKod()">
-                <span style="color: #888;">CZK</span>
+                " onchange="prepoctiCastku('czk')" onkeyup="prepoctiCastku('czk')">
+                <span style="color: #888;">Kč</span>
               </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+              <span style="color: #888;">Částka EUR:</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="number" id="qrCastkaEurInput" value="${initialCastka > 0 ? (initialCastka / 25).toFixed(0) : ''}" min="0" step="1" style="
+                  width: 90px;
+                  padding: 0.4rem 0.6rem;
+                  background: #333;
+                  border: 1px solid #555;
+                  border-radius: 4px;
+                  color: #fff;
+                  font-weight: bold;
+                  font-size: 1rem;
+                  text-align: right;
+                " onchange="prepoctiCastku('eur')" onkeyup="prepoctiCastku('eur')">
+                <span style="color: #888;">€</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 0.75rem; color: #666; margin-top: -0.5rem;">
+              Kurz: 1 EUR = 25 CZK
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Variabilní symbol:</span>
@@ -1154,25 +1174,53 @@ async function showQrPlatbaModal(reklamaceId) {
   }
 }
 
+// Konstanty pro přepočet měn
+const QR_KURZ_EUR_CZK = 25;
+
+// Funkce pro přepočet částky mezi CZK a EUR
+let prepocetTimeout = null;
+function prepoctiCastku(zdroj) {
+  clearTimeout(prepocetTimeout);
+  prepocetTimeout = setTimeout(() => {
+    const inputCzk = document.getElementById('qrCastkaCzkInput');
+    const inputEur = document.getElementById('qrCastkaEurInput');
+
+    if (!inputCzk || !inputEur) return;
+
+    if (zdroj === 'czk') {
+      // CZK → EUR
+      const czk = parseFloat(inputCzk.value) || 0;
+      inputEur.value = czk > 0 ? Math.round(czk / QR_KURZ_EUR_CZK) : '';
+    } else {
+      // EUR → CZK
+      const eur = parseFloat(inputEur.value) || 0;
+      inputCzk.value = eur > 0 ? Math.round(eur * QR_KURZ_EUR_CZK) : '';
+    }
+
+    // Regenerovat QR kód
+    regenerovatQrKod();
+  }, 200);
+}
+
 // Funkce pro regeneraci QR kódu při změně částky
 let qrRegenerateTimeout = null;
 function regenerovatQrKod() {
   // Debounce - počkat 300ms po posledním stisku
   clearTimeout(qrRegenerateTimeout);
   qrRegenerateTimeout = setTimeout(() => {
-    const input = document.getElementById('qrCastkaInput');
+    const inputCzk = document.getElementById('qrCastkaCzkInput');
     const container = document.getElementById('qrPlatbaContainer');
 
-    if (!input || !container || !QR_PLATBA_DATA) return;
+    if (!inputCzk || !container || !QR_PLATBA_DATA) return;
 
-    const castka = parseFloat(input.value) || 0;
+    const castka = parseFloat(inputCzk.value) || 0;
 
     if (castka <= 0) {
       container.innerHTML = '<div style="color: #666; font-size: 0.9rem;">Zadejte částku pro vygenerování QR kódu</div>';
       return;
     }
 
-    // Generovat SPD string
+    // Generovat SPD string (vždy v CZK)
     const spdString = generujSpdString(QR_PLATBA_DATA.iban, castka, QR_PLATBA_DATA.vs);
 
     // Vygenerovat QR kód
