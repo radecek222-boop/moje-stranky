@@ -1082,8 +1082,8 @@ async function showQrPlatbaModal(reklamaceId) {
         ">
           <div style="display: grid; gap: 0.75rem;">
             <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
-              <span style="color: #888;">Číslo účtu (IBAN):</span>
-              <span style="color: #fff; font-family: monospace; font-size: 0.85rem;">${Utils.escapeHtml(data.iban_formatovany)}</span>
+              <span style="color: #888;">Číslo účtu:</span>
+              <span style="color: #fff; font-family: monospace; font-weight: bold;">${Utils.escapeHtml(data.ucet || data.iban_formatovany)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Částka:</span>

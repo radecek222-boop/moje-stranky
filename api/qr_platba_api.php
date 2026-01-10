@@ -7,6 +7,7 @@
  *
  * Vrací:
  * - iban: Firemní IBAN
+ * - ucet: Číslo účtu v českém formátu
  * - castka: Celková cena
  * - vs: Variabilní symbol (číslo reklamace)
  * - qr_string: SPD string pro QR kód
@@ -42,16 +43,11 @@ if (!$reklamaceId) {
 try {
     $pdo = getDbConnection();
 
-    // Načíst IBAN z konfigurace
-    $stmt = $pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'company_iban' LIMIT 1");
-    $stmt->execute();
-    $ibanRow = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$ibanRow || empty($ibanRow['config_value'])) {
-        sendJsonError('Firemní IBAN není nakonfigurován. Kontaktujte administrátora.', 500);
-    }
-
-    $iban = $ibanRow['config_value'];
+    // Firemní účet - pevně nastavený
+    // Číslo účtu: 188784838/0300 (ČSOB)
+    // IBAN: CZ6503000000000188784838
+    $iban = 'CZ6503000000000188784838';
+    $ucetCislo = '188784838/0300';
 
     // Načíst data reklamace
     $stmt = $pdo->prepare("
@@ -100,6 +96,7 @@ try {
         'reklamace_id' => $reklamaceId,
         'cislo' => $vs,
         'jmeno' => $reklamace['jmeno'],
+        'ucet' => $ucetCislo,
         'iban' => $iban,
         'iban_formatovany' => $ibanFormatovany,
         'castka' => $castka,
