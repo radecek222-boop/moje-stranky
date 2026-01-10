@@ -1050,7 +1050,8 @@ async function showQrPlatbaModal(reklamaceId) {
       throw new Error(result.message || 'Chyba při načítání dat');
     }
 
-    const data = result.data;
+    // Data jsou přímo v result (ne v result.data)
+    const data = result;
     QR_PLATBA_DATA = data; // Uložit pro regeneraci
 
     // Načíst QR knihovnu
