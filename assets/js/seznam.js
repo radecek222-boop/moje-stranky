@@ -934,6 +934,7 @@ async function showDetail(recordOrId) {
       <div class="detail-buttons">
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${record.original_reklamace_id ? `
