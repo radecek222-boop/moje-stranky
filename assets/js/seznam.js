@@ -1019,6 +1019,9 @@ async function ensureQrLibraryLoaded() {
   return qrLibraryPromise;
 }
 
+// Globální data pro QR platbu (pro regeneraci)
+let QR_PLATBA_DATA = null;
+
 async function showQrPlatbaModal(reklamaceId) {
   if (!reklamaceId && CURRENT_RECORD) {
     reklamaceId = CURRENT_RECORD.id;
@@ -1048,11 +1051,13 @@ async function showQrPlatbaModal(reklamaceId) {
     }
 
     const data = result.data;
+    QR_PLATBA_DATA = data; // Uložit pro regeneraci
 
     // Načíst QR knihovnu
     await ensureQrLibraryLoaded();
 
-    // Vytvořit modal s QR kódem
+    // Vytvořit modal s QR kódem a editovatelnou částkou
+    const initialCastka = data.castka || 0;
     const content = `
       ${createCustomerHeader()}
 
@@ -1066,11 +1071,15 @@ async function showQrPlatbaModal(reklamaceId) {
         <div id="qrPlatbaContainer" style="
           display: flex;
           justify-content: center;
+          align-items: center;
           margin: 1.5rem 0;
           padding: 1rem;
           background: #fff;
           border-radius: 8px;
-        "></div>
+          min-height: 220px;
+        ">
+          ${initialCastka <= 0 ? '<div style="color: #666; font-size: 0.9rem;">Zadejte částku pro vygenerování QR kódu</div>' : ''}
+        </div>
 
         <!-- Platební údaje -->
         <div style="
@@ -1081,19 +1090,32 @@ async function showQrPlatbaModal(reklamaceId) {
           margin-top: 1rem;
         ">
           <div style="display: grid; gap: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Číslo účtu:</span>
               <span style="color: #fff; font-family: monospace; font-weight: bold;">${Utils.escapeHtml(data.ucet || data.iban_formatovany)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Částka:</span>
-              <span style="color: #39ff14; font-weight: bold; font-size: 1.1rem;">${Utils.escapeHtml(data.castka_formatovana)}</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="number" id="qrCastkaInput" value="${initialCastka}" min="0" step="0.01" style="
+                  width: 100px;
+                  padding: 0.4rem 0.6rem;
+                  background: #333;
+                  border: 1px solid #555;
+                  border-radius: 4px;
+                  color: #39ff14;
+                  font-weight: bold;
+                  font-size: 1rem;
+                  text-align: right;
+                " onchange="regenerovatQrKod()" onkeyup="regenerovatQrKod()">
+                <span style="color: #888;">CZK</span>
+              </div>
             </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
               <span style="color: #888;">Variabilní symbol:</span>
               <span style="color: #fff; font-family: monospace;">${Utils.escapeHtml(data.vs)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="color: #888;">Splatnost:</span>
               <span style="color: #fff;">Ihned</span>
             </div>
@@ -1109,21 +1131,10 @@ async function showQrPlatbaModal(reklamaceId) {
 
     ModalManager.show(content);
 
-    // Vygenerovat QR kód po zobrazení modalu
-    setTimeout(() => {
-      const qrContainer = document.getElementById('qrPlatbaContainer');
-      if (qrContainer && window.QRCode) {
-        qrContainer.innerHTML = '';
-        new QRCode(qrContainer, {
-          text: data.qr_string,
-          width: 220,
-          height: 220,
-          colorDark: '#000000',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.L
-        });
-      }
-    }, 100);
+    // Vygenerovat QR kód po zobrazení modalu (pokud je částka > 0)
+    if (initialCastka > 0) {
+      setTimeout(() => regenerovatQrKod(), 100);
+    }
 
   } catch (error) {
     logger.error('QR platba - chyba:', error);
@@ -1139,6 +1150,55 @@ async function showQrPlatbaModal(reklamaceId) {
     `;
     ModalManager.show(errorContent);
   }
+}
+
+// Funkce pro regeneraci QR kódu při změně částky
+let qrRegenerateTimeout = null;
+function regenerovatQrKod() {
+  // Debounce - počkat 300ms po posledním stisku
+  clearTimeout(qrRegenerateTimeout);
+  qrRegenerateTimeout = setTimeout(() => {
+    const input = document.getElementById('qrCastkaInput');
+    const container = document.getElementById('qrPlatbaContainer');
+
+    if (!input || !container || !QR_PLATBA_DATA) return;
+
+    const castka = parseFloat(input.value) || 0;
+
+    if (castka <= 0) {
+      container.innerHTML = '<div style="color: #666; font-size: 0.9rem;">Zadejte částku pro vygenerování QR kódu</div>';
+      return;
+    }
+
+    // Generovat SPD string
+    const spdString = generujSpdString(QR_PLATBA_DATA.iban, castka, QR_PLATBA_DATA.vs);
+
+    // Vygenerovat QR kód
+    container.innerHTML = '';
+    if (window.QRCode) {
+      new QRCode(container, {
+        text: spdString,
+        width: 220,
+        height: 220,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L
+      });
+    }
+  }, 300);
+}
+
+// Generování SPD stringu pro QR platbu (český standard)
+function generujSpdString(iban, castka, vs) {
+  let spd = 'SPD*1.0';
+  spd += '*ACC:' + iban;
+  spd += '*AM:' + castka.toFixed(2);
+  spd += '*CC:CZK';
+  if (vs) {
+    spd += '*X-VS:' + vs;
+  }
+  spd += '*MSG:WGS servis - zakazka ' + vs;
+  return spd;
 }
 
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
