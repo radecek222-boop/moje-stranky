@@ -2179,6 +2179,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'showQrPlatbaModal':
+        if (id && typeof showQrPlatbaModal === 'function') {
+          console.log('[EMERGENCY] Oteviram QR platbu pro ID:', id);
+          showQrPlatbaModal(id);
+        } else {
+          console.error('[EMERGENCY] showQrPlatbaModal funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
       case 'showNotes':
         if (id && typeof showNotes === 'function') {
           console.log('[EMERGENCY] Oteviram poznamky pro ID:', id);

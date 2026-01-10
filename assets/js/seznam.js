@@ -957,6 +957,7 @@ async function showDetail(recordOrId) {
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     buttonsHtml = `
@@ -983,6 +984,161 @@ async function showDetail(recordOrId) {
 
 function closeDetail() {
   ModalManager.close();
+}
+
+// === QR PLATBA MODAL ===
+let qrLibraryPromise = null;
+
+async function ensureQrLibraryLoaded() {
+  if (qrLibraryPromise) return qrLibraryPromise;
+
+  qrLibraryPromise = new Promise((resolve, reject) => {
+    const src = 'assets/js/qrcode.min.js';
+    const existing = document.querySelector('script[data-qr-lib]') ||
+      Array.from(document.scripts).find(s => (s.src || '').includes(src));
+
+    if (existing && window.QRCode && typeof window.QRCode === 'function') {
+      resolve(window.QRCode);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = '/' + src;
+    script.setAttribute('data-qr-lib', 'true');
+    script.onload = () => {
+      if (window.QRCode && typeof window.QRCode === 'function') {
+        resolve(window.QRCode);
+      } else {
+        reject(new Error('QRCode knihovna se nenačetla správně'));
+      }
+    };
+    script.onerror = () => reject(new Error('Nepodařilo se načíst QR knihovnu'));
+    document.head.appendChild(script);
+  });
+
+  return qrLibraryPromise;
+}
+
+async function showQrPlatbaModal(reklamaceId) {
+  if (!reklamaceId && CURRENT_RECORD) {
+    reklamaceId = CURRENT_RECORD.id;
+  }
+
+  if (!reklamaceId) {
+    wgsToast.error('Chybí ID reklamace');
+    return;
+  }
+
+  // Zobrazit loading modal
+  const loadingContent = `
+    ${createCustomerHeader()}
+    <div class="modal-body" style="text-align: center; padding: 3rem;">
+      <div style="font-size: 1.2rem; color: #888;">Načítám QR platební data...</div>
+    </div>
+  `;
+  ModalManager.show(loadingContent);
+
+  try {
+    // Načíst QR data z API
+    const response = await fetch(`/api/qr_platba_api.php?id=${reklamaceId}`);
+    const result = await response.json();
+
+    if (result.status === 'error') {
+      throw new Error(result.message || 'Chyba při načítání dat');
+    }
+
+    const data = result.data;
+
+    // Načíst QR knihovnu
+    await ensureQrLibraryLoaded();
+
+    // Vytvořit modal s QR kódem
+    const content = `
+      ${createCustomerHeader()}
+
+      <div class="modal-body" style="padding: 1.5rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <h3 style="color: #39ff14; margin: 0 0 0.5rem 0; font-size: 1.2rem;">QR kód pro platbu</h3>
+          <p style="color: #888; margin: 0; font-size: 0.85rem;">Naskenujte QR kód bankovní aplikací</p>
+        </div>
+
+        <!-- QR kód -->
+        <div id="qrPlatbaContainer" style="
+          display: flex;
+          justify-content: center;
+          margin: 1.5rem 0;
+          padding: 1rem;
+          background: #fff;
+          border-radius: 8px;
+        "></div>
+
+        <!-- Platební údaje -->
+        <div style="
+          background: #1a1a1a;
+          border: 1px solid #333;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+        ">
+          <div style="display: grid; gap: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+              <span style="color: #888;">Číslo účtu (IBAN):</span>
+              <span style="color: #fff; font-family: monospace; font-size: 0.85rem;">${Utils.escapeHtml(data.iban_formatovany)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+              <span style="color: #888;">Částka:</span>
+              <span style="color: #39ff14; font-weight: bold; font-size: 1.1rem;">${Utils.escapeHtml(data.castka_formatovana)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+              <span style="color: #888;">Variabilní symbol:</span>
+              <span style="color: #fff; font-family: monospace;">${Utils.escapeHtml(data.vs)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #888;">Splatnost:</span>
+              <span style="color: #fff;">Ihned</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tlačítka -->
+        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+          <button class="btn" style="flex: 1; padding: 0.75rem; background: #333; color: #fff;" data-action="showDetail" data-id="${reklamaceId}">Zpět</button>
+        </div>
+      </div>
+    `;
+
+    ModalManager.show(content);
+
+    // Vygenerovat QR kód po zobrazení modalu
+    setTimeout(() => {
+      const qrContainer = document.getElementById('qrPlatbaContainer');
+      if (qrContainer && window.QRCode) {
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+          text: data.qr_string,
+          width: 220,
+          height: 220,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.L
+        });
+      }
+    }, 100);
+
+  } catch (error) {
+    logger.error('QR platba - chyba:', error);
+
+    const errorContent = `
+      ${createCustomerHeader()}
+      <div class="modal-body" style="padding: 2rem; text-align: center;">
+        <div style="color: #ff4444; font-size: 1.1rem; margin-bottom: 1rem;">
+          ${Utils.escapeHtml(error.message)}
+        </div>
+        <button class="btn" style="padding: 0.75rem 2rem; background: #333; color: #fff;" data-action="showDetail" data-id="${reklamaceId}">Zpět</button>
+      </div>
+    `;
+    ModalManager.show(errorContent);
+  }
 }
 
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
@@ -3831,7 +3987,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'openPDF', 'openKnihovnaPDF', 'startVisit', 'showCalendar', 'vytvorCenovouNabidku',
       'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace',
       'showDetailById', 'showDetail', 'showNotes', 'closeNotesModal', 'deleteNote',
-      'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate',
+      'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate', 'showQrPlatbaModal',
       'previousMonth', 'nextMonth', 'showBookingDetail', 'showCalendarBack',
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
