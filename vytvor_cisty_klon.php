@@ -173,7 +173,7 @@ if (!isset($_GET['execute'])) {
     echo "<li><strong>Složka archiv/</strong> - 160 souborů, 1.55 MB</li>";
     echo "<li><strong>Migrační skripty</strong> (pridej_*, oprav_*) - 27 souborů</li>";
     echo "<li><strong>Testovací skripty</strong> (test_*, diagnostika_*) - 6 souborů</li>";
-    echo "<li><strong>Nepoužívané stránky</strong> (cookies.php, gdpr.php, hry.php, atd.)</li>";
+    echo "<li><strong>Nepoužívané stránky</strong> (cookies.php, onas.php, nasesluzby.php, atd.)</li>";
     echo "<li><strong>Source JS/CSS</strong> (ponechány pouze .min verze)</li>";
     echo "<li><strong>Složka migrations/</strong></li>";
     echo "</ul>";

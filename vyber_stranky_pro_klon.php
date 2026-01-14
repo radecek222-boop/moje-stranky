@@ -211,7 +211,7 @@ foreach ($soubory as $soubor) {
 echo "</table>";
 
 // Skrytý formulář
-echo "<form id='generate-form' method='post' action='generuj_konfiguraci_klonu.php'>";
+echo "<form id='generate-form' method='POST' action='generuj_konfiguraci_klonu.php'>";
 echo "<input type='hidden' name='selected_files' id='selected-files'>";
 echo "</form>";
 
