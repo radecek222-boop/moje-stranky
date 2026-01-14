@@ -132,16 +132,23 @@ try {
     if (isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0) {
         try {
             $stmtUser = $pdo->prepare("
-                SELECT telefon, phone
+                SELECT phone
                 FROM wgs_users
-                WHERE id = :user_id OR user_id = :user_id
+                WHERE user_id = :user_id
                 LIMIT 1
             ");
             $stmtUser->execute(['user_id' => $_SESSION['user_id']]);
             $userInfo = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
-            if ($userInfo) {
-                $technicianPhone = $userInfo['telefon'] ?: $userInfo['phone'] ?: $technicianPhone;
+            if ($userInfo && !empty($userInfo['phone'])) {
+                $technicianPhone = $userInfo['phone'];
+
+                // Přidat předvolbu +420 pokud tam není
+                $technicianPhone = trim($technicianPhone);
+                if (!preg_match('/^\+/', $technicianPhone)) {
+                    // Telefon nezačína na +, přidat +420
+                    $technicianPhone = '+420 ' . ltrim($technicianPhone, '0');
+                }
             }
         } catch (PDOException $e) {
             // Pokud telefon nelze načíst, použije se výchozí firemní telefon
