@@ -1830,19 +1830,56 @@ body.pdf-export-mode #signature-pad {
     left: 50%;
     margin-top: calc(-50vw);
     margin-left: calc(-50vh);
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-kontejner {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-header {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .fullscreen-podpis-footer {
+    padding: 6px 10px;
+  }
+
+  .btn-smazat-podpis,
+  .btn-potvrdit-podpis {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
 
 /* Landscape mód - normální zobrazení */
 @media (max-width: 768px) and (orientation: landscape) {
+  .fullscreen-podpis-overlay.aktivni {
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-kontejner {
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-header {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
   .fullscreen-podpis-footer {
-    padding: 10px 15px;
+    padding: 6px 10px;
   }
 
   .btn-smazat-podpis,
   .btn-potvrdit-podpis {
-    padding: 12px 15px;
-    font-size: 1rem;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
 
