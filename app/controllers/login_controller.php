@@ -215,7 +215,16 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
-    $_SESSION['user_phone'] = $user['phone'] ?? '';  // Telefon uzivatele pro notifikace
+
+    // Formátovat telefon s předvolbou +420 pokud tam není
+    $telefon = $user['phone'] ?? '';
+    if (!empty($telefon)) {
+        $telefon = trim($telefon);
+        if (!preg_match('/^\+/', $telefon)) {
+            $telefon = '+420 ' . ltrim($telefon, '0');
+        }
+    }
+    $_SESSION['user_phone'] = $telefon;  // Telefon uzivatele pro notifikace
 
     // FIX 6: Inactivity timeout - nastavit initial timestamps při login
     $_SESSION['last_activity'] = time();
