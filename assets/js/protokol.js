@@ -1036,6 +1036,24 @@ async function generateProtocolPDF() {
     logger.log('Tlacitko "Podepsat protokol" odstraneno z PDF');
   }
 
+  // Odstranit overlay s tlacitkem PODEPSAT
+  const podpisOverlay = clone.querySelector('.podpis-overlay');
+  if (podpisOverlay) {
+    podpisOverlay.remove();
+    logger.log('Podpis overlay (tlacitko PODEPSAT) odstranen z PDF');
+  }
+
+  // Odstranit ramecek z podpis kontejneru a canvasu pro PDF
+  const podpisKontejner = clone.querySelector('.podpis-kontejner');
+  if (podpisKontejner) {
+    podpisKontejner.style.border = 'none';
+    podpisKontejner.style.background = 'transparent';
+  }
+  const signatureCanvas = clone.querySelector('#signature-pad');
+  if (signatureCanvas) {
+    signatureCanvas.style.border = 'none';
+  }
+
   // Odstranit dolní tlačítka (Export, Odeslat, Zpět)
   const btnsContainer = clone.querySelector('.btns');
   if (btnsContainer) {
@@ -1071,11 +1089,19 @@ async function generateProtocolPDF() {
   const cloneCanvas = clone.querySelector('#signature-pad');
   if (originalCanvas && cloneCanvas) {
     try {
+      // Nastavit rozměry clone canvasu podle originalu
+      cloneCanvas.width = originalCanvas.width;
+      cloneCanvas.height = originalCanvas.height;
+
       const ctx = cloneCanvas.getContext('2d');
+      // Vyplnit bilou barvou
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, cloneCanvas.width, cloneCanvas.height);
+      // Nakreslit original
       ctx.drawImage(originalCanvas, 0, 0);
-      logger.log('Signature pad zkopírován do clone');
+      logger.log('Signature pad zkopirovan do clone:', originalCanvas.width, 'x', originalCanvas.height);
     } catch (e) {
-      logger.warn('Nepodařilo se zkopírovat signature pad:', e);
+      logger.warn('Nepodarilo se zkopirovat signature pad:', e);
     }
   }
 
