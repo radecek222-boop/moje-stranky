@@ -87,7 +87,16 @@ $aktivniStranky = [
     'manifest.json',
     'sw.php',
     'offline.php',
-    'health.php'
+    'health.php',
+    // Nutné stránky (dle požadavku)
+    'gdpr.php',
+    'gdpr-zadost.php',
+    'hry.php',
+    'transport.php',
+    'qr-kontakt.php',
+    'photocustomer.php',
+    'potvrzeni-nabidky.php',
+    'nova_aktualita.php'
 ];
 
 $kritickeAPI = [
@@ -114,7 +123,21 @@ $kritickeAPI = [
     'analytics_api.php',
     'heartbeat.php',
     'log_js_error.php',
-    'track_pageview.php'
+    'track_pageview.php',
+    // API pro gdpr, hry, transport
+    'gdpr_zadost.php',
+    'hry_api.php',
+    'transport_events_api.php',
+    'transport_sync.php',
+    'flight_api.php',
+    'qr_platba_api.php',
+    'documents_api.php',
+    'get_original_documents.php',
+    'nacti_aktualitu.php',
+    'generuj_aktuality_nove.php',
+    'uprav_celou_aktualitu.php',
+    'vytvor_aktualitu.php',
+    'preloz_aktualitu.php'
 ];
 
 $slozkyKeKopirovani = [
