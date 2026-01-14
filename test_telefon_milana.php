@@ -64,7 +64,7 @@ try {
     $stmtUser = $pdo->prepare("
         SELECT id, user_id, name, email, phone
         FROM wgs_users
-        WHERE id = :user_id OR user_id = :user_id
+        WHERE user_id = :user_id
         LIMIT 1
     ");
     $stmtUser->execute(['user_id' => $userId]);

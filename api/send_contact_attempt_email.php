@@ -134,7 +134,7 @@ try {
             $stmtUser = $pdo->prepare("
                 SELECT phone
                 FROM wgs_users
-                WHERE id = :user_id OR user_id = :user_id
+                WHERE user_id = :user_id
                 LIMIT 1
             ");
             $stmtUser->execute(['user_id' => $_SESSION['user_id']]);
