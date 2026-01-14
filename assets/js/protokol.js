@@ -273,7 +273,330 @@ function initSignaturePad() {
 
   // Export do window pro globální funkci clearSignaturePad() (Step 110)
   window.signaturePad = signaturePad;
+
+  // Inicializace fullscreen podpisu
+  inicializovatFullscreenPodpis();
 }
+
+// ============================================================================
+// FULLSCREEN PODPIS - Funkce pro landscape podpis na mobilu
+// ============================================================================
+
+let fullscreenSignaturePad = null;
+
+function inicializovatFullscreenPodpis() {
+  const btnPodepsat = document.getElementById('btnPodepsatFullscreen');
+  const overlay = document.getElementById('fullscreenPodpisOverlay');
+  const canvas = document.getElementById('fullscreen-signature-pad');
+  const btnSmazat = document.getElementById('btnSmazatFullscreen');
+  const btnPotvrdit = document.getElementById('btnPotvrdirFullscreen');
+
+  if (!btnPodepsat || !overlay || !canvas) {
+    logger.warn('[FullscreenPodpis] Elementy nenalezeny');
+    return;
+  }
+
+  // Otevřít fullscreen podpis
+  btnPodepsat.addEventListener('click', () => {
+    otevritFullscreenPodpis();
+  });
+
+  // Smazat podpis
+  btnSmazat?.addEventListener('click', () => {
+    if (fullscreenSignaturePad) {
+      fullscreenSignaturePad.clear();
+    }
+  });
+
+  // Potvrdit podpis
+  btnPotvrdit?.addEventListener('click', () => {
+    potvrdirFullscreenPodpis();
+  });
+
+  logger.log('[FullscreenPodpis] Inicializace dokoncena');
+}
+
+function otevritFullscreenPodpis() {
+  const overlay = document.getElementById('fullscreenPodpisOverlay');
+  const canvas = document.getElementById('fullscreen-signature-pad');
+
+  if (!overlay || !canvas) return;
+
+  // Zobrazit overlay
+  overlay.classList.add('aktivni');
+
+  // Zamknout scroll na body
+  document.body.style.overflow = 'hidden';
+
+  // Inicializovat canvas s malým zpožděním (po zobrazení)
+  setTimeout(() => {
+    inicializovatFullscreenCanvas(canvas);
+  }, 50);
+
+  logger.log('[FullscreenPodpis] Otevren');
+}
+
+function zavritFullscreenPodpis() {
+  const overlay = document.getElementById('fullscreenPodpisOverlay');
+
+  if (!overlay) return;
+
+  overlay.classList.remove('aktivni');
+  document.body.style.overflow = '';
+
+  // Vyčistit canvas
+  if (fullscreenSignaturePad) {
+    fullscreenSignaturePad.clear();
+  }
+
+  logger.log('[FullscreenPodpis] Zavren');
+}
+
+function inicializovatFullscreenCanvas(canvas) {
+  if (!canvas) return;
+
+  // Získat rozměry kontejneru
+  const kontejner = canvas.parentElement;
+  const rect = kontejner.getBoundingClientRect();
+
+  // Nastavit rozměry canvasu - plná šířka, výška = zbytek po header a footer
+  const header = kontejner.querySelector('.fullscreen-podpis-header');
+  const footer = kontejner.querySelector('.fullscreen-podpis-footer');
+
+  const headerVyska = header ? header.offsetHeight : 0;
+  const footerVyska = footer ? footer.offsetHeight : 0;
+
+  // Canvas výška = kontejner - header - footer
+  const canvasVyska = kontejner.offsetHeight - headerVyska - footerVyska;
+  const canvasSirka = kontejner.offsetWidth;
+
+  // Nastavit velikost
+  canvas.width = canvasSirka;
+  canvas.height = canvasVyska;
+  canvas.style.width = canvasSirka + 'px';
+  canvas.style.height = canvasVyska + 'px';
+
+  const ctx = canvas.getContext('2d');
+
+  // Vyplnit bílou
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Vytvořit signature pad objekt
+  fullscreenSignaturePad = {
+    canvas: canvas,
+    ctx: ctx,
+    isDrawing: false,
+    lastX: 0,
+    lastY: 0,
+
+    clear: function() {
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+
+    isEmpty: function() {
+      const pixelData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+      for (let i = 0; i < pixelData.length; i += 4) {
+        if (pixelData[i] !== 255 || pixelData[i+1] !== 255 || pixelData[i+2] !== 255) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+    toDataURL: function() {
+      return this.canvas.toDataURL('image/png');
+    }
+  };
+
+  // Nastavit styl čáry
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Získat souřadnice (s podporou rotace)
+  const ziskejSouradnice = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const overlay = document.getElementById('fullscreenPodpisOverlay');
+    const jeRotovany = overlay.classList.contains('aktivni') &&
+                       window.innerHeight > window.innerWidth &&
+                       window.innerWidth <= 768;
+
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    if (jeRotovany) {
+      // Při rotaci 90° musíme přepočítat souřadnice
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Relativní pozice od středu obrazovky
+      const relX = clientX - centerX;
+      const relY = clientY - centerY;
+
+      // Rotace o -90° (opačně k CSS rotaci)
+      const rotX = relY;
+      const rotY = -relX;
+
+      // Přepočítat na canvas souřadnice
+      const canvasCenterX = rect.width / 2;
+      const canvasCenterY = rect.height / 2;
+
+      return {
+        x: canvasCenterX + rotX,
+        y: canvasCenterY + rotY
+      };
+    } else {
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+  };
+
+  const zacitKreslit = (e) => {
+    e.preventDefault();
+    fullscreenSignaturePad.isDrawing = true;
+    const coords = ziskejSouradnice(e);
+    fullscreenSignaturePad.lastX = coords.x;
+    fullscreenSignaturePad.lastY = coords.y;
+  };
+
+  const kreslit = (e) => {
+    if (!fullscreenSignaturePad.isDrawing) return;
+    e.preventDefault();
+    const coords = ziskejSouradnice(e);
+
+    ctx.beginPath();
+    ctx.moveTo(fullscreenSignaturePad.lastX, fullscreenSignaturePad.lastY);
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+
+    fullscreenSignaturePad.lastX = coords.x;
+    fullscreenSignaturePad.lastY = coords.y;
+  };
+
+  const ukoncitKresleni = () => {
+    fullscreenSignaturePad.isDrawing = false;
+  };
+
+  // Odstranit staré event listenery (pokud existují)
+  canvas.onmousedown = null;
+  canvas.onmousemove = null;
+  canvas.onmouseup = null;
+  canvas.onmouseout = null;
+  canvas.ontouchstart = null;
+  canvas.ontouchmove = null;
+  canvas.ontouchend = null;
+
+  // Mouse events
+  canvas.addEventListener('mousedown', zacitKreslit);
+  canvas.addEventListener('mousemove', kreslit);
+  canvas.addEventListener('mouseup', ukoncitKresleni);
+  canvas.addEventListener('mouseout', ukoncitKresleni);
+
+  // Touch events
+  canvas.addEventListener('touchstart', zacitKreslit, { passive: false });
+  canvas.addEventListener('touchmove', kreslit, { passive: false });
+  canvas.addEventListener('touchend', ukoncitKresleni);
+  canvas.addEventListener('touchcancel', ukoncitKresleni);
+
+  logger.log('[FullscreenPodpis] Canvas inicializovan:', canvasSirka, 'x', canvasVyska);
+}
+
+function potvrdirFullscreenPodpis() {
+  if (!fullscreenSignaturePad || fullscreenSignaturePad.isEmpty()) {
+    if (typeof wgsToast !== 'undefined') {
+      wgsToast.warning('Prosim podepiste se pred potvrzenim');
+    } else {
+      alert('Prosim podepiste se pred potvrzenim');
+    }
+    return;
+  }
+
+  // Přenést podpis do hlavního canvasu
+  const mainCanvas = document.getElementById('signature-pad');
+  if (!mainCanvas) {
+    logger.error('[FullscreenPodpis] Hlavni canvas nenalezen');
+    return;
+  }
+
+  // Získat podpis jako obrázek
+  const signatureDataURL = fullscreenSignaturePad.toDataURL();
+  const img = new Image();
+
+  img.onload = () => {
+    const ctx = mainCanvas.getContext('2d');
+
+    // Reset transformace
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // Vyčistit canvas bílou barvou
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+    // Vypočítat škálování - zachovat poměr stran
+    const canvasW = mainCanvas.width;
+    const canvasH = mainCanvas.height;
+    const imgAspect = img.width / img.height;
+    const canvasAspect = canvasW / canvasH;
+
+    let drawWidth, drawHeight, drawX, drawY;
+
+    if (imgAspect > canvasAspect) {
+      // Obrázek je širší - omezit šířkou
+      drawWidth = canvasW * 0.9;
+      drawHeight = drawWidth / imgAspect;
+    } else {
+      // Obrázek je vyšší - omezit výškou
+      drawHeight = canvasH * 0.9;
+      drawWidth = drawHeight * imgAspect;
+    }
+
+    // Centrovat
+    drawX = (canvasW - drawWidth) / 2;
+    drawY = (canvasH - drawHeight) / 2;
+
+    // Nakreslit podpis
+    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+    // Označit kontejner že má podpis (skryje tlačítko PODEPSAT)
+    const kontejner = document.getElementById('podpisKontejner');
+    if (kontejner) {
+      kontejner.classList.add('ma-podpis');
+    }
+
+    // Toast notifikace
+    if (typeof WGSToast !== 'undefined') {
+      WGSToast.zobrazit('Podpis byl pridan do protokolu', { titulek: 'WGS' });
+    } else if (typeof wgsToast !== 'undefined') {
+      wgsToast.success('Podpis byl pridan do protokolu');
+    }
+
+    // Zavřít fullscreen
+    zavritFullscreenPodpis();
+
+    logger.log('[FullscreenPodpis] Podpis prenesen do hlavniho canvasu');
+  };
+
+  img.onerror = () => {
+    logger.error('[FullscreenPodpis] Chyba nacteni podpisu');
+    zavritFullscreenPodpis();
+  };
+
+  img.src = signatureDataURL;
+}
+
+// Globální funkce pro zavření (pokud by bylo potřeba)
+window.zavritFullscreenPodpis = zavritFullscreenPodpis;
 
 async function loadPhotosFromDatabase(customerId) {
   try {

@@ -343,11 +343,27 @@ if ($initialBootstrapData) {
 
   <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
 
-  <!-- Tlačítko pro otevření modalu se souhrnem pro zákazníka -->
-  <button type="button" class="btn-podepsat-protokol" id="btnPodepsatProtokol" data-lang-cs="Podepsat protokol" data-lang-en="Sign protocol" data-lang-it="Firma protocollo">Podepsat protokol</button>
+  <!-- Kontejner pro podpis s tlačítkem PODEPSAT uprostřed -->
+  <div class="podpis-kontejner" id="podpisKontejner">
+    <canvas id="signature-pad" class="signature-display"></canvas>
+    <div class="podpis-overlay" id="podpisOverlay">
+      <button type="button" class="btn-podepsat-fullscreen" id="btnPodepsatFullscreen" data-lang-cs="PODEPSAT" data-lang-en="SIGN" data-lang-it="FIRMA">PODEPSAT</button>
+    </div>
+  </div>
 
-  <!-- Pouze zobrazení podpisu (read-only) -->
-  <canvas id="signature-pad" class="signature-display"></canvas>
+  <!-- Fullscreen overlay pro podpis na mobilu -->
+  <div class="fullscreen-podpis-overlay" id="fullscreenPodpisOverlay">
+    <div class="fullscreen-podpis-kontejner">
+      <div class="fullscreen-podpis-header">
+        <span data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka</span>
+      </div>
+      <canvas id="fullscreen-signature-pad"></canvas>
+      <div class="fullscreen-podpis-footer">
+        <button type="button" class="btn-smazat-podpis" id="btnSmazatFullscreen" data-lang-cs="Smazat" data-lang-en="Clear" data-lang-it="Cancella">Smazat</button>
+        <button type="button" class="btn-potvrdit-podpis" id="btnPotvrdirFullscreen" data-lang-cs="Potvrdit" data-lang-en="Confirm" data-lang-it="Conferma">Potvrdit</button>
+      </div>
+    </div>
+  </div>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
     <span data-lang-cs="Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem." data-lang-en="By signing, I confirm that I have been informed of the content." data-lang-it="Con la firma confermo di essere stato informato del contenuto.">Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem.</span>
     <!-- Text prodloužení lhůty - zobrazí se po potvrzení podpisu s checkboxem -->
