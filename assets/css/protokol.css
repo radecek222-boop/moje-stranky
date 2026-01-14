@@ -1745,12 +1745,15 @@ body.pdf-export-mode #signature-pad {
 .fullscreen-podpis-header {
   background: #000;
   color: #fff;
-  padding: 12px 20px;
-  font-size: 1.1rem;
+  padding: 8px 15px;
+  font-size: 0.9rem;
   font-weight: 600;
   text-align: center;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   flex-shrink: 0;
+  min-height: 32px;
+  max-height: 44px;
+  box-sizing: border-box;
 }
 
 /* Canvas pro podpis - zabere zbytek prostoru */
@@ -1766,24 +1769,29 @@ body.pdf-export-mode #signature-pad {
 .fullscreen-podpis-footer {
   display: flex;
   justify-content: space-between;
-  padding: 8px 15px;
+  padding: 5px 10px;
+  padding-bottom: max(5px, env(safe-area-inset-bottom));
   background: #f5f5f5;
   border-top: 1px solid #ccc;
   flex-shrink: 0;
+  min-height: 36px;
+  max-height: 50px;
+  box-sizing: border-box;
 }
 
 /* Tlačítko Smazat - vlevo */
 .btn-smazat-podpis {
-  padding: 8px 20px;
-  font-size: 0.9rem;
+  padding: 5px 15px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   border: 1px solid #dc3545;
   background: transparent;
   color: #dc3545;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-smazat-podpis:hover,
@@ -1794,16 +1802,17 @@ body.pdf-export-mode #signature-pad {
 
 /* Tlačítko Potvrdit - vpravo */
 .btn-potvrdit-podpis {
-  padding: 8px 20px;
-  font-size: 0.9rem;
+  padding: 5px 15px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   border: none;
   background: #28a745;
   color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-potvrdit-podpis:hover,
@@ -1830,19 +1839,80 @@ body.pdf-export-mode #signature-pad {
     left: 50%;
     margin-top: calc(-50vw);
     margin-left: calc(-50vh);
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-kontejner {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fullscreen-podpis-header {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-height: 24px;
+    max-height: 32px;
+  }
+
+  .fullscreen-podpis-footer {
+    padding: 4px 8px;
+    min-height: 32px;
+    max-height: 40px;
+  }
+
+  .btn-smazat-podpis,
+  .btn-potvrdit-podpis {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+  }
+
+  #fullscreen-signature-pad {
+    flex: 1;
+    min-height: 0;
   }
 }
 
 /* Landscape mód - normální zobrazení */
 @media (max-width: 768px) and (orientation: landscape) {
+  .fullscreen-podpis-overlay.aktivni {
+    overflow: hidden;
+  }
+
+  .fullscreen-podpis-kontejner {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fullscreen-podpis-header {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-height: 24px;
+    max-height: 32px;
+  }
+
   .fullscreen-podpis-footer {
-    padding: 10px 15px;
+    padding: 4px 8px;
+    min-height: 32px;
+    max-height: 40px;
   }
 
   .btn-smazat-podpis,
   .btn-potvrdit-podpis {
-    padding: 12px 15px;
-    font-size: 1rem;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+  }
+
+  #fullscreen-signature-pad {
+    flex: 1;
+    min-height: 0;
   }
 }
 

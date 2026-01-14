@@ -1276,6 +1276,22 @@ async function generateProtocolPDF() {
   });
   logger.log('Select elementy nahrazeny DIV elementy pro PDF');
 
+  // Zjistit pozice sekcí pro inteligentní stránkování
+  const cloneRect = clone.getBoundingClientRect();
+  const sectionTitles = clone.querySelectorAll('.section-title');
+  const breakPoints = [0]; // Začátek
+
+  sectionTitles.forEach(title => {
+    const titleRect = title.getBoundingClientRect();
+    // Relativní pozice od začátku clone
+    const relativeTop = titleRect.top - cloneRect.top;
+    if (relativeTop > 0) {
+      breakPoints.push(relativeTop);
+    }
+  });
+
+  logger.log('[PDF] Nalezeno break points:', breakPoints.length);
+
   logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
   const canvas = await html2canvas(clone, {
@@ -1302,6 +1318,15 @@ async function generateProtocolPDF() {
   // Výška obrázku podle poměru stran
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+  // Poměr pro převod CSS pixelů na canvas pixely
+  const cssToCanvasRatio = canvas.height / cloneRect.height;
+
+  // Převést break points na canvas pixely
+  const canvasBreakPoints = breakPoints.map(bp => Math.round(bp * cssToCanvasRatio));
+  canvasBreakPoints.push(canvas.height); // Konec
+
+  logger.log('[PDF] Canvas break points:', canvasBreakPoints);
+
   // Pokud je obsah vyšší než jedna stránka, rozdělit na více stránek
   if (imgHeight > availableHeight) {
     logger.log(`[Doc] Obsah je vyšší než A4 (${imgHeight.toFixed(0)}mm vs ${availableHeight}mm), generuji více stránek...`);
@@ -1309,13 +1334,34 @@ async function generateProtocolPDF() {
     // Výška jedné stránky v pixelech canvasu
     const pageHeightInCanvasPixels = (availableHeight / imgHeight) * canvas.height;
 
-    let remainingHeight = canvas.height;
     let currentY = 0;
     let pageNum = 1;
 
-    while (remainingHeight > 0) {
-      // Výška části pro tuto stránku
-      const sliceHeight = Math.min(pageHeightInCanvasPixels, remainingHeight);
+    while (currentY < canvas.height) {
+      // Najít nejlepší bod pro konec stránky
+      let idealEndY = currentY + pageHeightInCanvasPixels;
+
+      // Pokud přesahujeme canvas, použít konec
+      if (idealEndY >= canvas.height) {
+        idealEndY = canvas.height;
+      } else {
+        // Najít nejbližší break point PŘED idealEndY
+        let bestBreakPoint = currentY;
+        for (const bp of canvasBreakPoints) {
+          if (bp > currentY && bp <= idealEndY) {
+            bestBreakPoint = bp;
+          }
+        }
+
+        // Pokud jsme našli vhodný break point, použít ho
+        // (ale jen pokud není moc blízko začátku - min 30% stránky)
+        const minPageFill = pageHeightInCanvasPixels * 0.3;
+        if (bestBreakPoint > currentY + minPageFill) {
+          idealEndY = bestBreakPoint;
+        }
+      }
+
+      const sliceHeight = idealEndY - currentY;
 
       // Vytvořit nový canvas pro tuto část
       const pageCanvas = document.createElement('canvas');
@@ -1345,10 +1391,9 @@ async function generateProtocolPDF() {
       const xOffset = (pageWidth - imgWidth) / 2;
       doc.addImage(pageImgData, "JPEG", xOffset, margin, imgWidth, sliceHeightMm);
 
-      logger.log(`[Doc] Stránka ${pageNum}: výška ${sliceHeightMm.toFixed(0)}mm`);
+      logger.log(`[Doc] Stránka ${pageNum}: Y=${currentY}-${idealEndY}, výška ${sliceHeightMm.toFixed(0)}mm`);
 
-      currentY += sliceHeight;
-      remainingHeight -= sliceHeight;
+      currentY = idealEndY;
       pageNum++;
     }
 
