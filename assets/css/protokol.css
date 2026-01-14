@@ -1195,8 +1195,25 @@ body.pdf-export-mode #signature-pad {
   font-size: 1.8rem !important;
 }
 
-.pdf-clone-desktop #signature-pad {
+/* Kontejner podpisu v PDF - zrusit absolutni pozicovani */
+.pdf-clone-desktop .podpis-kontejner {
+  position: relative !important;
   height: 180px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.pdf-clone-desktop .podpis-kontejner #signature-pad {
+  position: static !important;
+  width: 100% !important;
+  height: 180px !important;
+  border: none !important;
+  display: block !important;
+}
+
+/* Skryt overlay v PDF */
+.pdf-clone-desktop .podpis-overlay {
+  display: none !important;
 }
 
 /* IČO upozornění - malý text pod typem zákazníka */

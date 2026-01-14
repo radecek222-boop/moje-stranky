@@ -1087,22 +1087,37 @@ async function generateProtocolPDF() {
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
   const cloneCanvas = clone.querySelector('#signature-pad');
+  logger.log('[PDF] Original canvas:', originalCanvas ? 'nalezen' : 'NENALEZEN');
+  logger.log('[PDF] Clone canvas:', cloneCanvas ? 'nalezen' : 'NENALEZEN');
+
   if (originalCanvas && cloneCanvas) {
     try {
-      // Nastavit rozměry clone canvasu podle originalu
-      cloneCanvas.width = originalCanvas.width;
-      cloneCanvas.height = originalCanvas.height;
+      // Zjistit skutecne rozmery originalniho canvasu
+      const origWidth = originalCanvas.width;
+      const origHeight = originalCanvas.height;
+      logger.log('[PDF] Original canvas rozmery:', origWidth, 'x', origHeight);
+
+      // Nastavit pevne rozmery pro clone canvas (bez devicePixelRatio)
+      const pdfCanvasWidth = 800;
+      const pdfCanvasHeight = 160;
+      cloneCanvas.width = pdfCanvasWidth;
+      cloneCanvas.height = pdfCanvasHeight;
+      cloneCanvas.style.width = '100%';
+      cloneCanvas.style.height = '180px';
 
       const ctx = cloneCanvas.getContext('2d');
       // Vyplnit bilou barvou
       ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, cloneCanvas.width, cloneCanvas.height);
-      // Nakreslit original
-      ctx.drawImage(originalCanvas, 0, 0);
-      logger.log('Signature pad zkopirovan do clone:', originalCanvas.width, 'x', originalCanvas.height);
+      ctx.fillRect(0, 0, pdfCanvasWidth, pdfCanvasHeight);
+
+      // Nakreslit original - skalovany na nove rozmery
+      ctx.drawImage(originalCanvas, 0, 0, origWidth, origHeight, 0, 0, pdfCanvasWidth, pdfCanvasHeight);
+      logger.log('[PDF] Signature pad zkopirovan do clone:', pdfCanvasWidth, 'x', pdfCanvasHeight);
     } catch (e) {
-      logger.warn('Nepodarilo se zkopirovat signature pad:', e);
+      logger.warn('[PDF] Nepodarilo se zkopirovat signature pad:', e);
     }
+  } else {
+    logger.error('[PDF] Canvas pro podpis nenalezen!');
   }
 
   // Počkat na reflow clone (desktop layout se aplikuje)
