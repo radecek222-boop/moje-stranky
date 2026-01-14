@@ -249,30 +249,83 @@ function setupTextareaAutoResize() {
 
 function initSignaturePad() {
   const canvas = document.getElementById("signature-pad");
+
+  // Ulozeny podpis jako data URL - pro obnoveni po resize
+  let ulozenaPodpisData = null;
+
   const resize = () => {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const rect = canvas.getBoundingClientRect();
     const cssWidth = rect.width;
     const cssHeight = rect.height;
 
+    // Pred zmenou rozmeru ulozit obsah canvasu (pokud neni prazdny)
+    const ctx = canvas.getContext("2d");
+    if (!ulozenaPodpisData) {
+      // Zkontrolovat jestli canvas neni prazdny
+      const pixelData = ctx.getImageData(0, 0, canvas.width || 1, canvas.height || 1).data;
+      let maPodpis = false;
+      for (let i = 0; i < pixelData.length; i += 4) {
+        if (pixelData[i] !== 255 || pixelData[i+1] !== 255 || pixelData[i+2] !== 255) {
+          maPodpis = true;
+          break;
+        }
+      }
+      if (maPodpis) {
+        ulozenaPodpisData = canvas.toDataURL('image/png');
+      }
+    }
+
+    // Nastavit nove rozmery
     canvas.width = cssWidth * ratio;
     canvas.height = cssHeight * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
+    ctx.scale(ratio, ratio);
+
+    // Obnovit podpis pokud byl ulozen
+    if (ulozenaPodpisData) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, cssWidth, cssHeight);
+        // Nakreslit podpis zachovany pomer stran
+        const imgAspect = img.width / img.height;
+        const canvasAspect = cssWidth / cssHeight;
+        let drawW, drawH, drawX, drawY;
+        if (imgAspect > canvasAspect) {
+          drawW = cssWidth * 0.95;
+          drawH = drawW / imgAspect;
+        } else {
+          drawH = cssHeight * 0.95;
+          drawW = drawH * imgAspect;
+        }
+        drawX = (cssWidth - drawW) / 2;
+        drawY = (cssHeight - drawH) / 2;
+        ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      };
+      img.src = ulozenaPodpisData;
+    }
   };
-  window.addEventListener("resize", resize, { passive: true }); // PŘIDÁNO passive
+
+  window.addEventListener("resize", resize, { passive: true });
   resize();
+
   signaturePad = new SignaturePad(canvas, {
     minWidth: 1,
     maxWidth: 2.5,
     penColor: "black",
     backgroundColor: "white",
-    throttle: 8,               // PŘIDÁNO - throttle pro lepší performance
-    velocityFilterWeight: 0.5, // PŘIDÁNO - hladší linie
-    minDistance: 2             // PŘIDÁNO - méně bodů = méně laguje
+    throttle: 8,
+    velocityFilterWeight: 0.5,
+    minDistance: 2
   });
 
   // Export do window pro globální funkci clearSignaturePad() (Step 110)
   window.signaturePad = signaturePad;
+
+  // Funkce pro ulozeni podpisu (volano po potvrzeni z fullscreen)
+  window.ulozitPodpisData = function(dataURL) {
+    ulozenaPodpisData = dataURL;
+  };
 
   // Inicializace fullscreen podpisu
   inicializovatFullscreenPodpis();
@@ -568,6 +621,12 @@ function potvrdirFullscreenPodpis() {
     // Nakreslit podpis
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
+    // Ulozit podpis pro obnoveni pri resize/rotaci displeje
+    if (typeof window.ulozitPodpisData === 'function') {
+      window.ulozitPodpisData(signatureDataURL);
+      logger.log('[FullscreenPodpis] Podpis ulozen pro resize');
+    }
+
     // Označit kontejner že má podpis (skryje tlačítko PODEPSAT)
     const kontejner = document.getElementById('podpisKontejner');
     if (kontejner) {
@@ -581,7 +640,7 @@ function potvrdirFullscreenPodpis() {
       wgsToast.success('Podpis byl pridan do protokolu');
     }
 
-    // Zavřít fullscreen
+    // Zavrit fullscreen
     zavritFullscreenPodpis();
 
     logger.log('[FullscreenPodpis] Podpis prenesen do hlavniho canvasu');
@@ -1087,22 +1146,37 @@ async function generateProtocolPDF() {
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
   const cloneCanvas = clone.querySelector('#signature-pad');
+  logger.log('[PDF] Original canvas:', originalCanvas ? 'nalezen' : 'NENALEZEN');
+  logger.log('[PDF] Clone canvas:', cloneCanvas ? 'nalezen' : 'NENALEZEN');
+
   if (originalCanvas && cloneCanvas) {
     try {
-      // Nastavit rozměry clone canvasu podle originalu
-      cloneCanvas.width = originalCanvas.width;
-      cloneCanvas.height = originalCanvas.height;
+      // Zjistit skutecne rozmery originalniho canvasu
+      const origWidth = originalCanvas.width;
+      const origHeight = originalCanvas.height;
+      logger.log('[PDF] Original canvas rozmery:', origWidth, 'x', origHeight);
+
+      // Nastavit pevne rozmery pro clone canvas (bez devicePixelRatio)
+      const pdfCanvasWidth = 800;
+      const pdfCanvasHeight = 160;
+      cloneCanvas.width = pdfCanvasWidth;
+      cloneCanvas.height = pdfCanvasHeight;
+      cloneCanvas.style.width = '100%';
+      cloneCanvas.style.height = '180px';
 
       const ctx = cloneCanvas.getContext('2d');
       // Vyplnit bilou barvou
       ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, cloneCanvas.width, cloneCanvas.height);
-      // Nakreslit original
-      ctx.drawImage(originalCanvas, 0, 0);
-      logger.log('Signature pad zkopirovan do clone:', originalCanvas.width, 'x', originalCanvas.height);
+      ctx.fillRect(0, 0, pdfCanvasWidth, pdfCanvasHeight);
+
+      // Nakreslit original - skalovany na nove rozmery
+      ctx.drawImage(originalCanvas, 0, 0, origWidth, origHeight, 0, 0, pdfCanvasWidth, pdfCanvasHeight);
+      logger.log('[PDF] Signature pad zkopirovan do clone:', pdfCanvasWidth, 'x', pdfCanvasHeight);
     } catch (e) {
-      logger.warn('Nepodarilo se zkopirovat signature pad:', e);
+      logger.warn('[PDF] Nepodarilo se zkopirovat signature pad:', e);
     }
+  } else {
+    logger.error('[PDF] Canvas pro podpis nenalezen!');
   }
 
   // Počkat na reflow clone (desktop layout se aplikuje)
