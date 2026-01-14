@@ -1748,26 +1748,25 @@ body.pdf-export-mode #signature-pad {
 /* Footer s tlačítky */
 .fullscreen-podpis-footer {
   display: flex;
-  gap: 15px;
-  padding: 15px 20px;
+  justify-content: space-between;
+  padding: 8px 15px;
   background: #f5f5f5;
-  border-top: 2px solid #000;
+  border-top: 1px solid #ccc;
   flex-shrink: 0;
 }
 
-/* Tlačítko Smazat */
+/* Tlačítko Smazat - vlevo */
 .btn-smazat-podpis {
-  flex: 1;
-  padding: 16px 20px;
-  font-size: 1.1rem;
+  padding: 8px 20px;
+  font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border: 2px solid #dc3545;
+  letter-spacing: 0.05em;
+  border: 1px solid #dc3545;
   background: transparent;
   color: #dc3545;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-smazat-podpis:hover,
@@ -1776,14 +1775,13 @@ body.pdf-export-mode #signature-pad {
   color: #fff;
 }
 
-/* Tlačítko Potvrdit */
+/* Tlačítko Potvrdit - vpravo */
 .btn-potvrdit-podpis {
-  flex: 1;
-  padding: 16px 20px;
-  font-size: 1.1rem;
+  padding: 8px 20px;
+  font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   border: none;
   background: #28a745;
   color: #fff;
