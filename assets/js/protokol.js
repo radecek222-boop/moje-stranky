@@ -1301,7 +1301,9 @@ async function generateProtocolPDF() {
     logging: false,
     imageTimeout: 0,
     allowTaint: true,
-    letterRendering: true
+    letterRendering: true,
+    windowWidth: 900,  // FIX: Fixní šířka pro desktop layout (ignoruje mobilní media queries)
+    windowHeight: clone.scrollHeight
   });
 
   const imgData = canvas.toDataURL("image/jpeg", 0.98);
