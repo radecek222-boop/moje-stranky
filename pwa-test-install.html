@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff0000">
+    <title>PWA Test - Instalace</title>
+
+    <!-- TESTOVACÍ MANIFEST -->
+    <link rel="manifest" href="./manifest-test.json">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .box {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: white;
+            color: #ff6b6b;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 10px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        ol {
+            text-align: left;
+            line-height: 1.8;
+        }
+        .important {
+            background: rgba(255,255,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 PWA TEST - Instalace</h1>
+
+    <div class="box important">
+        <h2>⚠️ DŮLEŽITÉ</h2>
+        <p>Toto je <strong>TESTOVACÍ</strong> verze PWA</p>
+        <p>Používá <code>pwa-splash-test.php</code> BEZ <code>init.php</code></p>
+        <p>Theme color je ČERVENÁ (ne černá)</p>
+    </div>
+
+    <div class="box">
+        <h3>📱 Instalace na iOS:</h3>
+        <ol>
+            <li>Klikni na tlačítko "Sdílet" (čtverec se šipkou)</li>
+            <li>Roluj dolů a vyber "Přidat na plochu"</li>
+            <li>Potvrď "Přidat"</li>
+            <li>Ikona se objeví na ploše s názvem "WGS Test"</li>
+            <li><strong>Otevři z ikony!</strong></li>
+        </ol>
+    </div>
+
+    <div class="box">
+        <h3>🤖 Instalace na Android:</h3>
+        <ol>
+            <li>Klikni na menu (tři tečky)</li>
+            <li>Vyber "Přidat na plochu" nebo "Install app"</li>
+            <li>Potvrď</li>
+            <li>Ikona se objeví na ploše</li>
+            <li><strong>Otevři z ikony!</strong></li>
+        </ol>
+    </div>
+
+    <div class="box">
+        <h3>✅ Co testujeme:</h3>
+        <p>Pokud PWA TEST funguje (zobrazí se splash s WGS):<br>
+        → Problém JE v <code>init.php</code></p>
+        <p>Pokud PWA TEST nefunguje (bílá stránka):<br>
+        → Problém JE jinde (manifest, SW, iOS bug)</p>
+    </div>
+
+    <button class="btn" onclick="testInstall()">📥 Zkusit instalaci</button>
+    <a href="pwa-splash-test.php" class="btn">👁️ Zobrazit splash</a>
+    <a href="pwa-diagnostika.html" class="btn">🔍 Diagnostika</a>
+
+    <script>
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('✅ beforeinstallprompt event zachycen');
+        });
+
+        async function testInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User ${outcome} instalaci`);
+                deferredPrompt = null;
+            } else {
+                alert('❌ Instalace PWA není k dispozici.\n\nPoužij menu prohlížeče:\niOS: Sdílet → Přidat na plochu\nAndroid: Menu → Přidat na plochu');
+            }
+        }
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                console.log('✅ SW registered:', reg.scope);
+            }).catch(err => {
+                console.error('❌ SW registration failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>

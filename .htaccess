@@ -42,6 +42,8 @@
     RewriteCond %{REQUEST_URI} !^/photocustomer\.php$ [NC]
     # ✅ FIX: Exclude sw.php - Service Workers CANNOT be redirected
     RewriteCond %{REQUEST_URI} !^/sw\.php$ [NC]
+    # ✅ FIX: Exclude pwa-splash.php - PWA entry point CANNOT be redirected
+    RewriteCond %{REQUEST_URI} !^/pwa-splash\.php$ [NC]
     RewriteRule ^(.+)\.php$ /$1 [R=301,L]
 
     # Serve .php files for extensionless URLs
