@@ -1627,6 +1627,33 @@ body.pdf-export-mode #signature-pad {
   background: #218838;
 }
 
+/* Červené tlačítko POTŘEBA DÍL K OPRAVĚ - hlavní protokol */
+.btn-potreba-dil {
+  background: #dc3545;
+  color: #fff;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.btn-potreba-dil:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-potreba-dil:active {
+  transform: translateY(0);
+}
+
 /* Tlačítka v footeru */
 .footer-tlacitka {
   display: flex;

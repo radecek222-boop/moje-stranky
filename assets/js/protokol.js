@@ -367,6 +367,110 @@ function inicializovatFullscreenPodpis() {
   });
 
   logger.log('[FullscreenPodpis] Inicializace dokoncena');
+
+  // Inicializovat červené tlačítko POTŘEBA DÍL
+  inicializovatPotrebaDilButton();
+}
+
+// ============================================================================
+// ČERVENÉ TLAČÍTKO - POTŘEBA DÍL K OPRAVĚ
+// ============================================================================
+function inicializovatPotrebaDilButton() {
+  const btnPotrebaDil = document.getElementById('btnPotrebaDil');
+  const potrebaDilContainer = document.getElementById('potrebaDilContainer');
+  const btnSouhlasim = document.getElementById('btnSouhlasim');
+  const btnNesouhlasim = document.getElementById('btnNesouhlasim');
+  const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
+
+  if (!btnPotrebaDil || !potrebaDilContainer) {
+    logger.warn('[PotrebaDil] Tlačítko nenalezeno');
+    return;
+  }
+
+  // Zkontrolovat typ zákazníka a zobrazit/skrýt tlačítko
+  const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
+
+  // Zobrazit pouze pro fyzické osoby (NENÍ firma/IČO)
+  const jeFirma = typZakaznika.toLowerCase().includes('ičo') ||
+                 typZakaznika.toLowerCase().includes('ico') ||
+                 typZakaznika.toLowerCase().includes('firma') ||
+                 typZakaznika.toLowerCase().includes('company');
+
+  const jeFyzickaOsoba = !jeFirma;
+
+  if (jeFyzickaOsoba) {
+    potrebaDilContainer.style.display = 'block';
+    logger.log('[PotrebaDil] Tlačítko zobrazeno (fyzická osoba)');
+  } else {
+    potrebaDilContainer.style.display = 'none';
+    logger.log('[PotrebaDil] Tlačítko skryto (firma/IČO)');
+  }
+
+  // Globální proměnná pro uložení textu souhlasu
+  window.textProdlouzeniLhutyGlobal = '';
+
+  // Klik na červené tlačítko → zobrazit modal se souhlasem
+  btnPotrebaDil.addEventListener('click', () => {
+    logger.log('[PotrebaDil] Zobrazuji modal se souhlasem');
+    if (souhlasDilOverlay) {
+      souhlasDilOverlay.style.display = 'flex';
+    }
+  });
+
+  // Klik na "SOUHLASÍM" → uložit text a otevřít fullscreen podpis
+  if (btnSouhlasim) {
+    btnSouhlasim.addEventListener('click', () => {
+      const textSouhlas = 'Zákazník souhlasí s prodloužením lhůty pro vyřízení reklamace za účelem objednání náhradních dílů od výrobce. Dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Servis se zavazuje provést opravu bez zbytečného odkladu po doručení dílů.';
+
+      window.textProdlouzeniLhutyGlobal = textSouhlas;
+      logger.log('[PotrebaDil] Zákazník souhlasí - text uložen');
+
+      // Zobrazit text v hlavním protokolu (GDPR sekce)
+      const prodlouzeniLhutyHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+      if (prodlouzeniLhutyHlavni) {
+        prodlouzeniLhutyHlavni.style.display = 'block';
+      }
+
+      // Schovat modal
+      if (souhlasDilOverlay) {
+        souhlasDilOverlay.style.display = 'none';
+      }
+
+      // Otevřít fullscreen podpis
+      setTimeout(() => {
+        otevritFullscreenPodpis();
+      }, 300);
+    });
+  }
+
+  // Klik na "NESOUHLASÍM" → uložit text nespolupráce a otevřít fullscreen podpis
+  if (btnNesouhlasim) {
+    btnNesouhlasim.addEventListener('click', () => {
+      const textNesouhlas = 'Zákazník nesouhlasí s prodloužením lhůty za účelem objednání dílu. Tento postoj je považován za nespolupráci se servisem.';
+
+      window.textProdlouzeniLhutyGlobal = textNesouhlas;
+      logger.log('[PotrebaDil] Zákazník NEsouhlasí - text uložen');
+
+      // Zobrazit text v hlavním protokolu
+      const prodlouzeniLhutyHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+      if (prodlouzeniLhutyHlavni) {
+        prodlouzeniLhutyHlavni.innerHTML = textNesouhlas;
+        prodlouzeniLhutyHlavni.style.display = 'block';
+      }
+
+      // Schovat modal
+      if (souhlasDilOverlay) {
+        souhlasDilOverlay.style.display = 'none';
+      }
+
+      // Otevřít fullscreen podpis
+      setTimeout(() => {
+        otevritFullscreenPodpis();
+      }, 300);
+    });
+  }
+
+  logger.log('[PotrebaDil] Inicializace dokončena');
 }
 
 function otevritFullscreenPodpis() {

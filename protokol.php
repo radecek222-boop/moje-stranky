@@ -344,6 +344,13 @@ if ($initialBootstrapData) {
 
   <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
 
+  <!-- NOVÉ: Červené tlačítko pro prodloužení lhůty - zobrazí se jen pro fyzické osoby -->
+  <div id="potrebaDilContainer" style="display: none; margin-bottom: 15px;">
+    <button type="button" class="btn-potreba-dil" id="btnPotrebaDil" data-lang-cs="POTŘEBA DÍL K OPRAVĚ" data-lang-en="PART NEEDED FOR REPAIR" data-lang-it="PEZZO NECESSARIO PER RIPARAZIONE">
+      POTŘEBA DÍL K OPRAVĚ
+    </button>
+  </div>
+
   <!-- Kontejner pro podpis s tlačítkem PODEPSAT uprostřed -->
   <div class="podpis-kontejner" id="podpisKontejner">
     <canvas id="signature-pad" class="signature-display"></canvas>
