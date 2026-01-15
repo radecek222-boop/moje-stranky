@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PWA Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #666;
+        }
+        .test.success { border-color: #4CAF50; background: #f1f8f4; }
+        .test.error { border-color: #f44336; background: #fef1f1; }
+        .test.pending { border-color: #ff9800; }
+        h1 { color: #333; }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test PWA Fix</h1>
+
+    <div id="results"></div>
+
+    <button class="btn" onclick="runTests()">▶️ Spustit testy</button>
+    <a href="pwa-diagnostika.html" class="btn">🔍 Plná diagnostika</a>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addTest(title, status, details) {
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+
+            const statusIcon = {
+                'success': '✅',
+                'error': '❌',
+                'pending': '⏳'
+            }[status] || '❓';
+
+            div.innerHTML = `
+                <h3>${statusIcon} ${title}</h3>
+                <pre>${JSON.stringify(details, null, 2)}</pre>
+            `;
+            results.appendChild(div);
+        }
+
+        async function runTests() {
+            results.innerHTML = '';
+
+            // Test 1: pwa-splash.php dostupnost
+            addTest('Test 1: Kontrola pwa-splash.php', 'pending', 'Načítám...');
+
+            try {
+                const response = await fetch('/pwa-splash.php', { method: 'HEAD' });
+
+                if (response.status === 200) {
+                    addTest('Test 1: pwa-splash.php', 'success', {
+                        status: response.status,
+                        statusText: response.statusText || 'OK',
+                        contentType: response.headers.get('content-type'),
+                        message: '✅ Soubor je dostupný! .htaccess fix funguje!'
+                    });
+                } else if (response.status === 404) {
+                    addTest('Test 1: pwa-splash.php', 'error', {
+                        status: 404,
+                        message: '❌ Soubor stále vrací 404! .htaccess fix NENÍ aplikován na serveru.',
+                        action: 'Potřebuješ MERGNOU PR do main branch!'
+                    });
+                } else if (response.status === 301 || response.status === 302) {
+                    addTest('Test 1: pwa-splash.php', 'error', {
+                        status: response.status,
+                        redirectTo: response.headers.get('location'),
+                        message: '❌ Soubor je redirectován! .htaccess fix NENÍ aplikován.',
+                        action: 'Potřebuješ MERGNOU PR do main branch!'
+                    });
+                } else {
+                    addTest('Test 1: pwa-splash.php', 'error', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        message: '❌ Neočekávaný status!'
+                    });
+                }
+            } catch (e) {
+                addTest('Test 1: pwa-splash.php', 'error', {
+                    error: e.message
+                });
+            }
+
+            // Test 2: Manifest
+            try {
+                const manifestResponse = await fetch('/manifest.json');
+                const manifest = await manifestResponse.json();
+
+                addTest('Test 2: Manifest start_url',
+                    manifest.start_url ? 'success' : 'error',
+                    {
+                        start_url: manifest.start_url,
+                        expected: '/pwa-splash.php?source=pwa'
+                    }
+                );
+            } catch (e) {
+                addTest('Test 2: Manifest', 'error', { error: e.message });
+            }
+
+            // Test 3: Service Worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+
+                    if (registrations.length > 0) {
+                        const reg = registrations[0];
+                        const swUrl = reg.active?.scriptURL || 'unknown';
+
+                        addTest('Test 3: Service Worker', 'success', {
+                            count: registrations.length,
+                            scope: reg.scope,
+                            scriptURL: swUrl,
+                            state: reg.active?.state,
+                            action: 'Service Worker je registrovaný. Pokud PWA nefunguje, odinstaluj a reinstaluj PWA!'
+                        });
+                    } else {
+                        addTest('Test 3: Service Worker', 'error', {
+                            message: 'Žádný Service Worker není registrován!'
+                        });
+                    }
+                } catch (e) {
+                    addTest('Test 3: Service Worker', 'error', { error: e.message });
+                }
+            }
+
+            // Test 4: Cache
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    const oldCache = cacheNames.find(n => n.includes('2026.01.12'));
+
+                    if (oldCache) {
+                        addTest('Test 4: Cache', 'error', {
+                            message: '❌ STARÝ CACHE DETEKOVÁN!',
+                            cacheNames: cacheNames,
+                            action: 'Otevři vycisti-pwa-cache.html a vyčisti cache! Nebo odinstaluj PWA a reinstaluj!'
+                        });
+                    } else {
+                        addTest('Test 4: Cache', 'success', {
+                            cacheNames: cacheNames,
+                            message: '✅ Cache vypadá aktuálně'
+                        });
+                    }
+                } catch (e) {
+                    addTest('Test 4: Cache', 'error', { error: e.message });
+                }
+            }
+
+            // Test 5: Aktuální branch na serveru
+            try {
+                const response = await fetch('/test-pwa-fix.html', { method: 'HEAD' });
+                addTest('Test 5: Deploy status', 'success', {
+                    message: response.ok ?
+                        '✅ Tento testovací soubor existuje - nejnovější kód je nasazen' :
+                        '❌ Soubor nenalezen - možná starší verze'
+                });
+            } catch (e) {
+                addTest('Test 5: Deploy', 'error', { error: e.message });
+            }
+
+            // ZÁVĚR
+            results.innerHTML += `
+                <div class="test" style="border-color: #2196F3; background: #e3f2fd;">
+                    <h3>📋 SHRNUTÍ A NEXT STEPS:</h3>
+                    <ol>
+                        <li><strong>Pokud Test 1 vrací 404:</strong> Musíš MERGNOU PR #?? do main branch na GitHubu</li>
+                        <li><strong>Pokud Test 1 vrací 200:</strong> Fix je aplikován! Problém je v PWA cache.</li>
+                        <li><strong>Pokud Test 4 ukazuje starý cache:</strong> Odinstaluj PWA a reinstaluj!</li>
+                        <li><strong>Jak reinstalovat PWA:</strong>
+                            <ul>
+                                <li>iOS: Dlouze stiskni ikonu → Odstranit aplikaci</li>
+                                <li>Otevři Safari → wgs-service.cz</li>
+                                <li>Sdílet → Přidat na plochu</li>
+                                <li>Otevři z ikony</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            `;
+        }
+
+        // Auto-run
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>
