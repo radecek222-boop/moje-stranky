@@ -2830,64 +2830,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPouzePodpis = document.getElementById('btnPouzePodpis');
     const btnSouhlasim = document.getElementById('btnSouhlasim');
     const btnNesouhlasim = document.getElementById('btnNesouhlasim');
-    const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
-    const zakaznikVolbaPodpisu = document.getElementById('zakaznikVolbaPodpisu');
-    const zakaznikPodpisSekce = document.getElementById('zakaznikPodpisSekce');
-    const prodlouzeniLhutyInfo = document.getElementById('prodlouzeniLhutyInfo');
-    const prodlouzeniLhutyInfoText = document.getElementById('prodlouzeniLhutyInfoText');
 
     // Globální proměnná pro text prodloužení lhůty
-    let textProdlouzeniLhuty = '';
+    window.textProdlouzeniLhuty = '';
 
-    // Klik na "NUTNO OBJEDNAT DÍL" → zobrazit modal se souhlasem
-    btnNutnoObjednatDil?.addEventListener('click', () => {
-      if (souhlasDilOverlay) {
-        souhlasDilOverlay.style.display = 'flex';
-      }
-    });
+    // Funkce pro zobrazení podpisové sekce (globální)
+    window.zobrazitPodpisSekci = function(infoText) {
+      const zakaznikVolbaPodpisu = document.getElementById('zakaznikVolbaPodpisu');
+      const zakaznikPodpisSekce = document.getElementById('zakaznikPodpisSekce');
+      const prodlouzeniLhutyInfo = document.getElementById('prodlouzeniLhutyInfo');
+      const prodlouzeniLhutyInfoText = document.getElementById('prodlouzeniLhutyInfoText');
+      const canvas = document.getElementById('zakaznikSchvaleniPad');
 
-    // Klik na "PODPIS" → rovnou zobrazit canvas (bez souhlasu)
-    btnPouzePodpis?.addEventListener('click', () => {
-      zobrazitPodpisSekci('');
-    });
+      logger.log('[Podpis] zobrazitPodpisSekci volána s textem:', infoText);
 
-    // Klik na "SOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o souhlasu
-    btnSouhlasim?.addEventListener('click', () => {
-      const textSouhlas = 'Zákazník souhlasí s prodloužením lhůty pro vyřízení reklamace za účelem objednání náhradních dílů od výrobce. Dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Servis se zavazuje provést opravu bez zbytečného odkladu po doručení dílů.';
-      zobrazitPodpisSekci(textSouhlas);
-      if (souhlasDilOverlay) {
-        souhlasDilOverlay.style.display = 'none';
-      }
-    });
-
-    // Klik na "NESOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o nespolupráci
-    btnNesouhlasim?.addEventListener('click', () => {
-      const textNesouhlas = 'Zákazník nesouhlasí s prodloužením lhůty za účelem objednání dílu. Tento postoj je považován za nespolupráci se servisem.';
-      zobrazitPodpisSekci(textNesouhlas);
-      if (souhlasDilOverlay) {
-        souhlasDilOverlay.style.display = 'none';
-      }
-    });
-
-    // Funkce pro zobrazení podpisové sekce
-    function zobrazitPodpisSekci(infoText) {
       // Schovat volbu typu podpisu
       if (zakaznikVolbaPodpisu) {
         zakaznikVolbaPodpisu.style.display = 'none';
+        logger.log('[Podpis] Volba podpisu schována');
       }
 
       // Zobrazit podpisovou sekci
       if (zakaznikPodpisSekce) {
         zakaznikPodpisSekce.style.display = 'block';
+        logger.log('[Podpis] Sekce podpisu zobrazena');
       }
 
       // Uložit text pro pozdější použití při generování PDF
-      textProdlouzeniLhuty = infoText;
+      window.textProdlouzeniLhuty = infoText;
 
       // Zobrazit info text pokud existuje
       if (infoText && prodlouzeniLhutyInfo && prodlouzeniLhutyInfoText) {
         prodlouzeniLhutyInfoText.textContent = infoText;
         prodlouzeniLhutyInfo.style.display = 'block';
+        logger.log('[Podpis] Info text zobrazen');
       } else if (prodlouzeniLhutyInfo) {
         prodlouzeniLhutyInfo.style.display = 'none';
       }
@@ -2895,9 +2871,60 @@ document.addEventListener('DOMContentLoaded', () => {
       // Inicializovat canvas
       setTimeout(() => {
         if (canvas) {
+          logger.log('[Podpis] Inicializuji canvas...');
           inicializovatZakaznikPad(canvas);
+        } else {
+          logger.error('[Podpis] Canvas nenalezen!');
         }
       }, 100);
+    };
+
+    // Klik na "NUTNO OBJEDNAT DÍL" → zobrazit modal se souhlasem
+    if (btnNutnoObjednatDil) {
+      btnNutnoObjednatDil.addEventListener('click', () => {
+        const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
+        logger.log('[Podpis] Kliknuto na NUTNO OBJEDNAT DÍL');
+        if (souhlasDilOverlay) {
+          souhlasDilOverlay.style.display = 'flex';
+          logger.log('[Podpis] Modal souhlasu zobrazen');
+        }
+      });
+    }
+
+    // Klik na "PODPIS" → rovnou zobrazit canvas (bez souhlasu)
+    if (btnPouzePodpis) {
+      btnPouzePodpis.addEventListener('click', () => {
+        logger.log('[Podpis] Kliknuto na PODPIS');
+        window.zobrazitPodpisSekci('');
+      });
+    }
+
+    // Klik na "SOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o souhlasu
+    if (btnSouhlasim) {
+      btnSouhlasim.addEventListener('click', () => {
+        const textSouhlas = 'Zákazník souhlasí s prodloužením lhůty pro vyřízení reklamace za účelem objednání náhradních dílů od výrobce. Dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Servis se zavazuje provést opravu bez zbytečného odkladu po doručení dílů.';
+        logger.log('[Podpis] Kliknuto na SOUHLASÍM');
+        window.zobrazitPodpisSekci(textSouhlas);
+        const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
+        if (souhlasDilOverlay) {
+          souhlasDilOverlay.style.display = 'none';
+          logger.log('[Podpis] Modal souhlasu schován');
+        }
+      });
+    }
+
+    // Klik na "NESOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o nespolupráci
+    if (btnNesouhlasim) {
+      btnNesouhlasim.addEventListener('click', () => {
+        const textNesouhlas = 'Zákazník nesouhlasí s prodloužením lhůty za účelem objednání dílu. Tento postoj je považován za nespolupráci se servisem.';
+        logger.log('[Podpis] Kliknuto na NESOUHLASÍM');
+        window.zobrazitPodpisSekci(textNesouhlas);
+        const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
+        if (souhlasDilOverlay) {
+          souhlasDilOverlay.style.display = 'none';
+          logger.log('[Podpis] Modal souhlasu schován');
+        }
+      });
     }
   });
 
