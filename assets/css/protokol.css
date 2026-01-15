@@ -1428,19 +1428,203 @@ body.pdf-export-mode #signature-pad {
   border-top: 1px solid #333;
 }
 
-/* Sekce s checkboxem v footeru */
-.footer-checkbox-sekce {
-  width: 100%;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #333;
+/* Volba typu podpisu */
+.zakaznik-volba-podpisu {
+  text-align: center;
+}
+
+.zakaznik-volba-podpisu label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.volba-podpisu-tlacitka {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.btn-volba-podpisu {
+  padding: 1.25rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: 2px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-nutno-objednat-dil {
+  background: #444;
+  color: #fff;
+}
+
+.btn-nutno-objednat-dil:hover {
+  background: #555;
+  border-color: #666;
+}
+
+.btn-pouze-podpis {
+  background: #333;
+  color: #fff;
+}
+
+.btn-pouze-podpis:hover {
+  background: #444;
+  border-color: #555;
+}
+
+/* Info text o prodloužení lhůty */
+.prodlouzeni-lhuty-info {
+  background: #fff5f5;
+  border: 2px solid #cc0000;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prodlouzeni-lhuty-info span {
+  color: #cc0000;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: block;
 }
 
 .footer-checkbox-sekce .checkbox-prodlouzeni-lhuty {
   color: #fff;
+  display: flex !important;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.footer-checkbox-sekce .checkbox-prodlouzeni-lhuty input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: #666;
+  flex-shrink: 0;
 }
 
 .footer-checkbox-sekce .checkbox-prodlouzeni-lhuty span {
   color: #fff;
+  flex: 1;
+}
+
+/* Modal pro souhlas s objednáním dílu */
+.souhlas-dil-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  padding: 1rem;
+}
+
+.souhlas-dil-container {
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.souhlas-dil-header {
+  background: #333;
+  color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.souhlas-dil-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.souhlas-dil-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.souhlas-dil-text {
+  color: #ccc;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+.souhlas-dil-text p {
+  margin-bottom: 1rem;
+}
+
+.souhlas-dil-otazka {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.souhlas-dil-otazka h3 {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.souhlas-dil-footer {
+  background: #222;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  border-radius: 0 0 12px 12px;
+  border-top: 1px solid #333;
+}
+
+.btn-nesouhlas,
+.btn-souhlas {
+  flex: 1;
+  padding: 1.25rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-nesouhlas {
+  background: #dc3545;
+  color: #fff;
+}
+
+.btn-nesouhlas:hover {
+  background: #c82333;
+}
+
+.btn-souhlas {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn-souhlas:hover {
+  background: #218838;
 }
 
 /* Tlačítka v footeru */
@@ -1669,6 +1853,39 @@ body.pdf-export-mode #signature-pad {
   .zakaznik-schvaleni-tabulka td {
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Volba typu podpisu - mobily */
+  .btn-volba-podpisu {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Modal souhlasu - mobily */
+  .souhlas-dil-container {
+    max-width: 95%;
+  }
+
+  .souhlas-dil-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .souhlas-dil-body {
+    padding: 1.5rem;
+  }
+
+  .souhlas-dil-text {
+    font-size: 0.95rem;
+  }
+
+  .souhlas-dil-otazka h3 {
+    font-size: 1.1rem;
+  }
+
+  .btn-nesouhlas,
+  .btn-souhlas {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
   }
 
   .btn-podepsat-protokol {
@@ -2316,6 +2533,36 @@ body.pdf-export-mode #signature-pad {
   .btn-pouzit {
     padding: 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Volba podpisu - velmi malé displeje */
+  .btn-volba-podpisu {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  /* Modal souhlasu - velmi malé displeje */
+  .souhlas-dil-container {
+    max-width: 98%;
+  }
+
+  .souhlas-dil-header,
+  .souhlas-dil-footer {
+    padding: 1rem;
+  }
+
+  .souhlas-dil-body {
+    padding: 1rem;
+  }
+
+  .souhlas-dil-text {
+    font-size: 0.9rem;
+  }
+
+  .btn-nesouhlas,
+  .btn-souhlas {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
   }
 }
 

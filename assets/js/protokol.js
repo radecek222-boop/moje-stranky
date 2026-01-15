@@ -2825,18 +2825,79 @@ document.addEventListener('DOMContentLoaded', () => {
       potvrditPodpis();
     });
 
-    // Checkbox prodloužení lhůty - zobrazit/skrýt text v modalu
-    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
-    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+    // Volba typu podpisu
+    const btnNutnoObjednatDil = document.getElementById('btnNutnoObjednatDil');
+    const btnPouzePodpis = document.getElementById('btnPouzePodpis');
+    const btnSouhlasim = document.getElementById('btnSouhlasim');
+    const btnNesouhlasim = document.getElementById('btnNesouhlasim');
+    const souhlasDilOverlay = document.getElementById('souhlasDilOverlay');
+    const zakaznikVolbaPodpisu = document.getElementById('zakaznikVolbaPodpisu');
+    const zakaznikPodpisSekce = document.getElementById('zakaznikPodpisSekce');
+    const prodlouzeniLhutyInfo = document.getElementById('prodlouzeniLhutyInfo');
+    const prodlouzeniLhutyInfoText = document.getElementById('prodlouzeniLhutyInfoText');
 
-    if (checkboxProdlouzeni && textProdlouzeniModal) {
-      checkboxProdlouzeni.addEventListener('change', () => {
-        if (checkboxProdlouzeni.checked) {
-          textProdlouzeniModal.style.display = 'block';
-        } else {
-          textProdlouzeniModal.style.display = 'none';
+    // Globální proměnná pro text prodloužení lhůty
+    let textProdlouzeniLhuty = '';
+
+    // Klik na "NUTNO OBJEDNAT DÍL" → zobrazit modal se souhlasem
+    btnNutnoObjednatDil?.addEventListener('click', () => {
+      if (souhlasDilOverlay) {
+        souhlasDilOverlay.style.display = 'flex';
+      }
+    });
+
+    // Klik na "PODPIS" → rovnou zobrazit canvas (bez souhlasu)
+    btnPouzePodpis?.addEventListener('click', () => {
+      zobrazitPodpisSekci('');
+    });
+
+    // Klik na "SOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o souhlasu
+    btnSouhlasim?.addEventListener('click', () => {
+      const textSouhlas = 'Zákazník souhlasí s prodloužením lhůty pro vyřízení reklamace za účelem objednání náhradních dílů od výrobce. Dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Servis se zavazuje provést opravu bez zbytečného odkladu po doručení dílů.';
+      zobrazitPodpisSekci(textSouhlas);
+      if (souhlasDilOverlay) {
+        souhlasDilOverlay.style.display = 'none';
+      }
+    });
+
+    // Klik na "NESOUHLASÍM" → schovat modal, zobrazit canvas, vyplnit text o nespolupráci
+    btnNesouhlasim?.addEventListener('click', () => {
+      const textNesouhlas = 'Zákazník nesouhlasí s prodloužením lhůty za účelem objednání dílu. Tento postoj je považován za nespolupráci se servisem.';
+      zobrazitPodpisSekci(textNesouhlas);
+      if (souhlasDilOverlay) {
+        souhlasDilOverlay.style.display = 'none';
+      }
+    });
+
+    // Funkce pro zobrazení podpisové sekce
+    function zobrazitPodpisSekci(infoText) {
+      // Schovat volbu typu podpisu
+      if (zakaznikVolbaPodpisu) {
+        zakaznikVolbaPodpisu.style.display = 'none';
+      }
+
+      // Zobrazit podpisovou sekci
+      if (zakaznikPodpisSekce) {
+        zakaznikPodpisSekce.style.display = 'block';
+      }
+
+      // Uložit text pro pozdější použití při generování PDF
+      textProdlouzeniLhuty = infoText;
+
+      // Zobrazit info text pokud existuje
+      if (infoText && prodlouzeniLhutyInfo && prodlouzeniLhutyInfoText) {
+        prodlouzeniLhutyInfoText.textContent = infoText;
+        prodlouzeniLhutyInfo.style.display = 'block';
+      } else if (prodlouzeniLhutyInfo) {
+        prodlouzeniLhutyInfo.style.display = 'none';
+      }
+
+      // Inicializovat canvas
+      setTimeout(() => {
+        if (canvas) {
+          inicializovatZakaznikPad(canvas);
         }
-      });
+      }, 100);
     }
   });
 
@@ -2869,30 +2930,51 @@ document.addEventListener('DOMContentLoaded', () => {
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
 
-    // Zobrazit/skrýt checkbox prodloužení lhůty podle typu zákazníka
-    // Checkbox se zobrazí pouze pro fyzické osoby (ne pro IČO)
+    // Zobrazit/skrýt tlačítko "NUTNO OBJEDNAT DÍL" podle typu zákazníka
+    // Tlačítko se zobrazí pouze pro fyzické osoby (ne pro IČO)
     const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
+    const btnNutnoObjednatDilElement = document.getElementById('btnNutnoObjednatDil');
+
+    // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
+    const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
+                          typZakaznika.toLowerCase().includes('fyzicka') ||
+                          typZakaznika === 'Fyzická osoba';
+
+    if (btnNutnoObjednatDilElement) {
+      if (jeFyzickaOsoba) {
+        btnNutnoObjednatDilElement.style.display = 'block';
+      } else {
+        btnNutnoObjednatDilElement.style.display = 'none';
+      }
+    }
+
+    // Reset stavu modalu - zobrazit volbu, schovat canvas
+    const zakaznikVolbaPodpisuElement = document.getElementById('zakaznikVolbaPodpisu');
+    const zakaznikPodpisSekceElement = document.getElementById('zakaznikPodpisSekce');
+
+    if (zakaznikVolbaPodpisuElement) {
+      zakaznikVolbaPodpisuElement.style.display = 'block';
+    }
+    if (zakaznikPodpisSekceElement) {
+      zakaznikPodpisSekceElement.style.display = 'none';
+    }
+
+    // Vyčistit info text
+    const prodlouzeniLhutyInfoElement = document.getElementById('prodlouzeniLhutyInfo');
+    if (prodlouzeniLhutyInfoElement) {
+      prodlouzeniLhutyInfoElement.style.display = 'none';
+    }
+
+    // Starý kód pro checkbox - odstraněno
+    /*
     const checkboxRow = document.querySelector('.tabulka-checkbox-row');
     const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
     const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
 
     if (checkboxRow) {
-      // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
-      const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
-                            typZakaznika.toLowerCase().includes('fyzicka') ||
-                            typZakaznika === 'Fyzická osoba';
+    */
 
-      if (jeFyzickaOsoba) {
-        checkboxRow.style.display = '';
-        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty zobrazen (fyzická osoba)');
-      } else {
-        checkboxRow.style.display = 'none';
-        // Resetovat checkbox a skrýt text
-        if (checkboxProdlouzeni) checkboxProdlouzeni.checked = false;
-        if (textProdlouzeniModal) textProdlouzeniModal.style.display = 'none';
-        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty skryt (IČO:', typZakaznika, ')');
-      }
-    }
+    logger.log('[ZakaznikSchvaleni] Fyzická osoba:', jeFyzickaOsoba, '| Typ:', typZakaznika);
 
     // Step 39: Zobrazit modal přes Alpine.js API (scroll lock je v Alpine komponentě)
     if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.open) {
@@ -2908,10 +2990,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Inicializovat signature pad (po zobrazení, aby měl správné rozměry)
-    setTimeout(() => {
-      inicializovatZakaznikPad(canvas);
-    }, 100);
+    // NEBUDEME inicializovat canvas hned - pouze po výběru typu podpisu
+    // Inicializace je v zobrazitPodpisSekci()
   }
 
   function zavritZakaznikModal() {
@@ -2932,6 +3012,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vyčistit signature pad
     if (zakaznikSignaturePad) {
       zakaznikSignaturePad.clear();
+    }
+
+    // Reset stavu - zobrazit volbu, schovat canvas a modal souhlasu
+    const zakaznikVolbaPodpisuElement = document.getElementById('zakaznikVolbaPodpisu');
+    const zakaznikPodpisSekceElement = document.getElementById('zakaznikPodpisSekce');
+    const souhlasDilOverlayElement = document.getElementById('souhlasDilOverlay');
+    const prodlouzeniLhutyInfoElement = document.getElementById('prodlouzeniLhutyInfo');
+
+    if (zakaznikVolbaPodpisuElement) {
+      zakaznikVolbaPodpisuElement.style.display = 'block';
+    }
+    if (zakaznikPodpisSekceElement) {
+      zakaznikPodpisSekceElement.style.display = 'none';
+    }
+    if (souhlasDilOverlayElement) {
+      souhlasDilOverlayElement.style.display = 'none';
+    }
+    if (prodlouzeniLhutyInfoElement) {
+      prodlouzeniLhutyInfoElement.style.display = 'none';
     }
   }
 
