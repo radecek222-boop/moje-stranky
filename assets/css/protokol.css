@@ -1423,9 +1423,31 @@ body.pdf-export-mode #signature-pad {
   background: #222;
   padding: 1rem 1.5rem;
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid #333;
+}
+
+/* Sekce s checkboxem v footeru */
+.footer-checkbox-sekce {
+  width: 100%;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.footer-checkbox-sekce .checkbox-prodlouzeni-lhuty {
+  color: #fff;
+}
+
+.footer-checkbox-sekce .checkbox-prodlouzeni-lhuty span {
+  color: #fff;
+}
+
+/* Tlačítka v footeru */
+.footer-tlacitka {
+  display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  border-top: 1px solid #333;
 }
 
 .btn-zrusit {
@@ -1606,7 +1628,17 @@ body.pdf-export-mode #signature-pad {
   }
 
   .zakaznik-schvaleni-footer {
-    flex-direction: row;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .footer-checkbox-sekce {
+    padding-bottom: 0.75rem;
+  }
+
+  .footer-tlacitka {
+    gap: 0.75rem;
   }
 
   .btn-zrusit,
