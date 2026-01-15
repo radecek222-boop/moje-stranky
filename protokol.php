@@ -462,6 +462,21 @@ if ($initialBootstrapData) {
             </label>
           </div>
 
+          <!-- Vlastní cena - pouze pro přihlášené (protokol vždy vyžaduje přihlášení) -->
+          <div class="form-group vlastni-cena-wrapper" style="margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 1px dashed #ccc;">
+            <label class="checkbox-container" style="margin-bottom: 10px;">
+              <input type="checkbox" id="vlastni-cena-checkbox">
+              <span class="checkbox-label" data-lang-cs="Zadat vlastní cenu (přeskočit kalkulaci)" data-lang-en="Enter custom price (skip calculation)" data-lang-it="Inserisci prezzo personalizzato (salta calcolo)">Zadat vlastní cenu (přeskočit kalkulaci)</span>
+            </label>
+            <div id="vlastni-cena-input-wrapper" style="display: none; margin-top: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="number" id="vlastni-cena-input" min="0" step="0.01" placeholder="0.00" style="width: 150px; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px;">
+                <span style="font-size: 18px; font-weight: bold;">€</span>
+              </div>
+              <p style="font-size: 12px; color: #666; margin-top: 8px;" data-lang-cs="Zadejte celkovou cenu včetně všech služeb" data-lang-en="Enter total price including all services" data-lang-it="Inserisci il prezzo totale inclusi tutti i servizi">Zadejte celkovou cenu včetně všech služeb</p>
+            </div>
+          </div>
+
           <div id="distance-result" class="calc-result" style="display: none;">
             <div class="result-box">
               <p><strong data-lang-cs="Vzdálenost z dílny:" data-lang-en="Distance from workshop:" data-lang-it="Distanza dall'officina:">Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
