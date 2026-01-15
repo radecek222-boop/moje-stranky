@@ -705,6 +705,10 @@ try {
                 // Pripravit data pro sablonu
                 $createdBy = $_SESSION['user_name'] ?? 'Online formulář';
 
+                // KRITICKÉ: Použít cislo (zadané uživatelem) místo reklamace_id (automaticky generované)
+                // Příklad: cislo = "MO17-00001653-05/CZ880-2025" vs reklamace_id = "WGS/2026/15-01/00001"
+                $orderNumber = $cislo ?: $identifierForClient;
+
                 $notifSubject = str_replace([
                     '{{customer_name}}',
                     '{{order_id}}',
@@ -714,7 +718,7 @@ try {
                     '{{created_by}}'
                 ], [
                     $jmeno,
-                    $identifierForClient,
+                    $orderNumber,
                     $model ?: 'Nabytek Natuzzi',
                     date('d.m.Y'),
                     date('d.m.Y H:i'),
@@ -736,7 +740,7 @@ try {
                     '{{company_phone}}'
                 ], [
                     $jmeno,
-                    $identifierForClient,
+                    $orderNumber,
                     $model ?: 'Nabytek Natuzzi',
                     date('d.m.Y'),
                     date('d.m.Y H:i'),
@@ -762,7 +766,7 @@ try {
                     ]
                 );
 
-                error_log("[Notifikace] Email o nove reklamaci pridan do fronty: {$email}, Zakazka: {$identifierForClient}");
+                error_log("[Notifikace] Email o nove reklamaci pridan do fronty: {$email}, Zakazka: {$orderNumber}");
             }
         } catch (Exception $notifError) {
             // Chyba notifikace nesmí rozbít celý request
@@ -777,14 +781,18 @@ try {
 
             $webPush = new WGSWebPush($pdo);
 
+            // KRITICKÉ: Použít cislo (zadané uživatelem) místo reklamace_id
+            $orderNumber = $cislo ?: $identifierForClient;
+
             $notifikacePayload = [
                 'title' => 'Nová zakázka v systému',
-                'body' => "Do systému byla přidána nová objednávka s číslem {$identifierForClient} - {$jmeno}",
+                'body' => "Do systému byla přidána nová objednávka s číslem {$orderNumber} - {$jmeno}",
                 'icon' => '/assets/img/logo.png',
                 'url' => "/seznam.php?id={$primaryId}",
                 'data' => [
                     'zakazka_id' => $primaryId,
                     'reklamace_id' => $identifierForClient,
+                    'cislo' => $orderNumber,
                     'jmeno' => $jmeno,
                     'typ' => 'nova_zakazka'
                 ]
@@ -793,7 +801,7 @@ try {
             $vysledek = $webPush->odeslatTechnikumAAdminum($notifikacePayload);
 
             if ($vysledek['uspech']) {
-                error_log("[Push Notifikace] Notifikace o nove zakazce odeslana technikum/adminum: {$identifierForClient}, Odeslano: " . ($vysledek['odeslano'] ?? 0));
+                error_log("[Push Notifikace] Notifikace o nove zakazce odeslana technikum/adminum: {$orderNumber}, Odeslano: " . ($vysledek['odeslano'] ?? 0));
             } else {
                 error_log("[Push Notifikace] Chyba pri odesilani: " . ($vysledek['zprava'] ?? 'Neznama chyba'));
             }
