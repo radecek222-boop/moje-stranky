@@ -1574,16 +1574,17 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-text {
-  color: #fff;  /* Změněno z #ccc na #fff pro lepší čitelnost */
-  line-height: 1.8;
-  margin-bottom: 2rem;
-  font-size: 1.05rem;  /* Zvětšeno pro lepší čitelnost */
-  font-weight: 400;
+  color: #fff !important;  /* !important aby se nepřepsalo jinými CSS */
+  line-height: 1.8 !important;
+  margin-bottom: 2rem !important;
+  font-size: 1.05rem !important;  /* Zvětšeno pro lepší čitelnost */
+  font-weight: 400 !important;
 }
 
 .souhlas-dil-text p {
-  margin-bottom: 1.5rem;  /* Větší mezera mezi odstavci */
-  text-align: justify;
+  margin-bottom: 1.5rem !important;  /* Větší mezera mezi odstavci */
+  text-align: justify !important;
+  color: #fff !important;
 }
 
 .souhlas-dil-otazka {
@@ -1640,29 +1641,29 @@ body.pdf-export-mode #signature-pad {
 
 /* Červené tlačítko POTŘEBA DÍL K OPRAVĚ - hlavní protokol */
 .btn-potreba-dil {
-  background: #dc3545;
-  color: #fff;
-  padding: 0.5rem 1.5rem;  /* Poloviční výška - sníženo z 1rem na 0.5rem */
-  font-size: 1rem;  /* Sníženo z 1.1rem */
-  font-weight: 700;
-  border: none;
-  border-radius: 6px;
-  width: 100%;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
-  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+  background: #dc3545 !important;
+  color: #fff !important;
+  padding: 0.5rem 1.5rem !important;  /* Poloviční výška */
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s !important;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3) !important;
 }
 
 .btn-potreba-dil:hover {
-  background: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+  background: #c82333 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4) !important;
 }
 
 .btn-potreba-dil:active {
-  transform: translateY(0);
+  transform: translateY(0) !important;
 }
 
 /* Tlačítka v footeru */

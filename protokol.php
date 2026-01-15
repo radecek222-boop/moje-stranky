@@ -216,12 +216,12 @@ if ($initialBootstrapData) {
   <?php $cssVersion = time(); ?>
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/protokol.min.css?v=<?= $cssVersion ?>" as="style">
+  <link rel="preload" href="assets/css/protokol.css?v=<?= $cssVersion ?>" as="style">
 
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/protokol.min.css?v=<?= $cssVersion ?>">
+  <link rel="stylesheet" href="assets/css/protokol.css?v=<?= $cssVersion ?>">
   <!-- protokol-mobile-fixes.css sloučen do protokol.min.css (Step 48) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
