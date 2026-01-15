@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>PWA Test - Simple</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 1s ease;
+        }
+        p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            opacity: 0.9;
+        }
+        .status {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.3);
+            font-size: 0.9rem;
+            max-width: 500px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #console {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-width: 600px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-line {
+            margin: 5px 0;
+            padding: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ PWA FUNGUJE!</h1>
+
+    <div class="status success">
+        <p><strong>Tato stránka se zobrazuje správně</strong></p>
+        <p>Pokud vidíš toto, PWA základní funkcionalita pracuje</p>
+    </div>
+
+    <div id="pwaStatus" class="status"></div>
+
+    <div class="info">
+        <p><strong>URL:</strong> <span id="url"></span></p>
+        <p><strong>Režim:</strong> <span id="mode"></span></p>
+        <p><strong>User Agent:</strong> <span id="ua"></span></p>
+    </div>
+
+    <a href="login.php" class="btn">➡️ Přejít na Login</a>
+    <a href="pwa-diagnostika.html" class="btn">🔍 Diagnostika</a>
+    <a href="index.php" class="btn">🏠 Homepage</a>
+
+    <div id="console"></div>
+
+    <script>
+        const consoleDiv = document.getElementById('console');
+
+        function log(message, type = 'info') {
+            console.log(message);
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        // Detekce PWA
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                      window.navigator.standalone === true;
+
+        const statusDiv = document.getElementById('pwaStatus');
+        if (isPWA) {
+            statusDiv.className = 'status success';
+            statusDiv.innerHTML = '<p>🎉 <strong>SPUŠTĚNO JAKO PWA</strong></p>';
+            log('✅ PWA režim detekován');
+        } else {
+            statusDiv.className = 'status info';
+            statusDiv.innerHTML = '<p>ℹ️ <strong>Spuštěno v prohlížeči</strong> (ne jako PWA)</p>';
+            log('ℹ️ Běží v normálním prohlížeči');
+        }
+
+        // Zobrazit info
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('mode').textContent = isPWA ? 'PWA (standalone)' : 'Prohlížeč (browser)';
+        document.getElementById('ua').textContent = navigator.userAgent.substring(0, 50) + '...';
+
+        log(`URL: ${window.location.pathname}`);
+        log(`Display mode: ${isPWA ? 'standalone' : 'browser'}`);
+
+        // Test Service Worker
+        if ('serviceWorker' in navigator) {
+            log('✅ Service Worker API podporováno');
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                log(`Počet SW registrací: ${regs.length}`);
+                regs.forEach((reg, i) => {
+                    log(`SW ${i+1}: ${reg.scope}`);
+                });
+            });
+        } else {
+            log('❌ Service Worker není podporován');
+        }
+
+        // Test Cache
+        if ('caches' in window) {
+            log('✅ Cache API podporováno');
+            caches.keys().then(names => {
+                log(`Počet cache: ${names.length}`);
+                names.forEach(name => log(`Cache: ${name}`));
+            });
+        } else {
+            log('❌ Cache API není podporováno');
+        }
+
+        log('--- Inicializace dokončena ---');
+    </script>
+</body>
+</html>
