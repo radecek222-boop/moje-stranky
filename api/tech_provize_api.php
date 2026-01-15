@@ -42,10 +42,11 @@ try {
 
     // FIX: Převést textové user_id na numerické id z wgs_users
     // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
-    $stmtGetId = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtGetId->execute([':user_id' => $userId]);
     $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
     $numericUserId = $userRow['id'] ?? null;
+    $userName = trim($userRow['full_name'] ?? '');
 
     if (!$numericUserId) {
         // Fallback - zkusit jestli userId není už numerické
@@ -129,6 +130,7 @@ try {
           AND YEAR({$datumSloupec}) = :rok
           AND MONTH({$datumSloupec}) = :mesic
           AND r.stav = 'done'
+          AND (r.created_by IS NOT NULL AND r.created_by != '')
     ");
 
     $stmt->execute($params);
