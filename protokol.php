@@ -213,14 +213,15 @@ if ($initialBootstrapData) {
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+  <?php $cssVersion = time(); ?>
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/protokol.min.css?v=<?= time() ?>" as="style">
+  <link rel="preload" href="assets/css/protokol.min.css?v=<?= $cssVersion ?>" as="style">
 
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/protokol.min.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="assets/css/protokol.min.css?v=<?= $cssVersion ?>">
   <!-- protokol-mobile-fixes.css sloučen do protokol.min.css (Step 48) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
@@ -721,6 +722,15 @@ if ($initialBootstrapData) {
         </div>
       </div>
 
+      <!-- Volba typu podpisu - PŘESUNUTO NAHORU PRO LEPŠÍ VIDITELNOST -->
+      <div class="zakaznik-schvaleni-sekce zakaznik-volba-podpisu" id="zakaznikVolbaPodpisu">
+        <label data-lang-cs="Vyberte typ podpisu:" data-lang-en="Select signature type:" data-lang-it="Seleziona tipo di firma:">Vyberte typ podpisu:</label>
+        <div class="volba-podpisu-tlacitka">
+          <button type="button" class="btn-volba-podpisu btn-nutno-objednat-dil" id="btnNutnoObjednatDil" data-lang-cs="NUTNO OBJEDNAT DÍL" data-lang-en="PART ORDER REQUIRED" data-lang-it="ORDINE PEZZO NECESSARIO">NUTNO OBJEDNAT DÍL</button>
+          <button type="button" class="btn-volba-podpisu btn-pouze-podpis" id="btnPouzePodpis" data-lang-cs="PODPIS" data-lang-en="SIGNATURE" data-lang-it="FIRMA">PODPIS</button>
+        </div>
+      </div>
+
       <!-- Souhrn důležitých informací -->
       <div class="zakaznik-schvaleni-sekce">
         <label data-lang-cs="Informace o servisu:" data-lang-en="Service information:" data-lang-it="Informazioni servizio:">Informace o servisu:</label>
@@ -746,15 +756,6 @@ if ($initialBootstrapData) {
             <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
           </tr>
         </table>
-      </div>
-
-      <!-- Volba typu podpisu -->
-      <div class="zakaznik-schvaleni-sekce zakaznik-volba-podpisu" id="zakaznikVolbaPodpisu">
-        <label data-lang-cs="Vyberte typ podpisu:" data-lang-en="Select signature type:" data-lang-it="Seleziona tipo di firma:">Vyberte typ podpisu:</label>
-        <div class="volba-podpisu-tlacitka">
-          <button type="button" class="btn-volba-podpisu btn-nutno-objednat-dil" id="btnNutnoObjednatDil" data-lang-cs="NUTNO OBJEDNAT DÍL" data-lang-en="PART ORDER REQUIRED" data-lang-it="ORDINE PEZZO NECESSARIO">NUTNO OBJEDNAT DÍL</button>
-          <button type="button" class="btn-volba-podpisu btn-pouze-podpis" id="btnPouzePodpis" data-lang-cs="PODPIS" data-lang-en="SIGNATURE" data-lang-it="FIRMA">PODPIS</button>
-        </div>
       </div>
 
       <!-- Podpisové pole (zobrazí se po výběru) -->
