@@ -2964,16 +2964,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
     const btnNutnoObjednatDilElement = document.getElementById('btnNutnoObjednatDil');
 
-    // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
-    const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
-                          typZakaznika.toLowerCase().includes('fyzicka') ||
-                          typZakaznika === 'Fyzická osoba';
+    // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo NENÍ IČO/firma)
+    // Robustnější detekce - zobrazit pokud NENÍ firma/IČO
+    const jeFirma = typZakaznika.toLowerCase().includes('ičo') ||
+                   typZakaznika.toLowerCase().includes('ico') ||
+                   typZakaznika.toLowerCase().includes('firma') ||
+                   typZakaznika.toLowerCase().includes('company');
+
+    const jeFyzickaOsoba = !jeFirma;  // Pokud není firma, je fyzická osoba
+
+    logger.log('[Podpis] Typ zákazníka:', typZakaznika, '| Je fyzická osoba:', jeFyzickaOsoba);
 
     if (btnNutnoObjednatDilElement) {
       if (jeFyzickaOsoba) {
         btnNutnoObjednatDilElement.style.display = 'block';
+        logger.log('[Podpis] Tlačítko NUTNO OBJEDNAT DÍL zobrazeno (fyzická osoba)');
       } else {
         btnNutnoObjednatDilElement.style.display = 'none';
+        logger.log('[Podpis] Tlačítko NUTNO OBJEDNAT DÍL skryto (firma/IČO)');
       }
     }
 
