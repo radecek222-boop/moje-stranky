@@ -215,12 +215,12 @@ if ($initialBootstrapData) {
 
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/protokol.min.css" as="style">
+  <link rel="preload" href="assets/css/protokol.min.css?v=<?= time() ?>" as="style">
 
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/protokol.min.css">
+  <link rel="stylesheet" href="assets/css/protokol.min.css?v=<?= time() ?>">
   <!-- protokol-mobile-fixes.css sloučen do protokol.min.css (Step 48) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
@@ -840,7 +840,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
 <script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
-<script src="assets/js/protokol.js?v=20251202" defer></script>
+<script src="assets/js/protokol.js?v=<?= time() ?>" defer></script>
 <!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->
 <!-- protokol-buttons-fix.js odstraněn - handlery jsou již v protokol.js (Step 109) -->
 <!-- Překlady pro kalkulačku -->
