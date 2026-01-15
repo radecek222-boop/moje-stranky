@@ -1327,82 +1327,25 @@ async function generateProtocolPDF() {
 
   logger.log('[PDF] Canvas break points:', canvasBreakPoints);
 
-  // Pokud je obsah vyšší než jedna stránka, rozdělit na více stránek
+  // VŽDY JEDNA STRÁNKA A4: Pokud je obsah vyšší než A4, proporcionálně zmenšit
   if (imgHeight > availableHeight) {
-    logger.log(`[Doc] Obsah je vyšší než A4 (${imgHeight.toFixed(0)}mm vs ${availableHeight}mm), generuji více stránek...`);
+    // NOVÝ PŘÍSTUP: Proporcionální zmenšení na A4
+    const scale = availableHeight / imgHeight;
+    const scaledWidth = imgWidth * scale;
+    const scaledHeight = availableHeight;  // Maximální výška A4
 
-    // Výška jedné stránky v pixelech canvasu
-    const pageHeightInCanvasPixels = (availableHeight / imgHeight) * canvas.height;
+    // Vycentrovat horizontálně
+    const xOffset = (pageWidth - scaledWidth) / 2;
 
-    let currentY = 0;
-    let pageNum = 1;
+    // Přidat celý protokol jako JEDEN obrázek zmenšený proporcionálně
+    doc.addImage(imgData, "JPEG", xOffset, margin, scaledWidth, scaledHeight);
 
-    while (currentY < canvas.height) {
-      // Najít nejlepší bod pro konec stránky
-      let idealEndY = currentY + pageHeightInCanvasPixels;
-
-      // Pokud přesahujeme canvas, použít konec
-      if (idealEndY >= canvas.height) {
-        idealEndY = canvas.height;
-      } else {
-        // Najít nejbližší break point PŘED idealEndY
-        let bestBreakPoint = currentY;
-        for (const bp of canvasBreakPoints) {
-          if (bp > currentY && bp <= idealEndY) {
-            bestBreakPoint = bp;
-          }
-        }
-
-        // Pokud jsme našli vhodný break point, použít ho
-        // (ale jen pokud není moc blízko začátku - min 30% stránky)
-        const minPageFill = pageHeightInCanvasPixels * 0.3;
-        if (bestBreakPoint > currentY + minPageFill) {
-          idealEndY = bestBreakPoint;
-        }
-      }
-
-      const sliceHeight = idealEndY - currentY;
-
-      // Vytvořit nový canvas pro tuto část
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = sliceHeight;
-
-      const ctx = pageCanvas.getContext('2d');
-      ctx.drawImage(
-        canvas,
-        0, currentY,                    // Zdrojová pozice
-        canvas.width, sliceHeight,      // Zdrojová velikost
-        0, 0,                           // Cílová pozice
-        canvas.width, sliceHeight       // Cílová velikost
-      );
-
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.98);
-
-      // Přidat novou stránku (kromě první)
-      if (pageNum > 1) {
-        doc.addPage();
-      }
-
-      // Výška této části v mm
-      const sliceHeightMm = (sliceHeight / canvas.height) * imgHeight;
-
-      // Přidat obrázek na stránku
-      const xOffset = (pageWidth - imgWidth) / 2;
-      doc.addImage(pageImgData, "JPEG", xOffset, margin, imgWidth, sliceHeightMm);
-
-      logger.log(`[Doc] Stránka ${pageNum}: Y=${currentY}-${idealEndY}, výška ${sliceHeightMm.toFixed(0)}mm`);
-
-      currentY = idealEndY;
-      pageNum++;
-    }
-
-    logger.log(`[Doc] PDF má celkem ${pageNum - 1} stránek`);
+    logger.log(`[Doc] Obsah zmenšen proporcionálně na 1 stránku A4: ${imgHeight.toFixed(0)}mm → ${scaledHeight.toFixed(0)}mm (scale: ${(scale * 100).toFixed(1)}%)`);
   } else {
-    // Obsah se vejde na jednu stránku
+    // Obsah se vejde na jednu stránku bez změny
     const xOffset = (pageWidth - imgWidth) / 2;
     doc.addImage(imgData, "JPEG", xOffset, margin, imgWidth, imgHeight);
-    logger.log('[Doc] PDF má 1 stránku');
+    logger.log('[Doc] PDF má 1 stránku (obsah se vejde bez zmenšení)');
   }
 
   // ❗ Odstranit clone z DOM
