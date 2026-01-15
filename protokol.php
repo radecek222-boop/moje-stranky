@@ -745,19 +745,7 @@ if ($initialBootstrapData) {
             <td class="tabulka-label" data-lang-cs="Poškození technikem?" data-lang-en="Damage by technician?" data-lang-it="Danno tecnico?">Poškození technikem?</td>
             <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
           </tr>
-          <tr>
-            <td colspan="2" class="tabulka-checkbox-row">
-              <label class="checkbox-prodlouzeni-lhuty">
-                <input type="checkbox" id="checkboxProdlouzeniLhuty">
-                <span data-lang-cs="Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace" data-lang-en="I agree to the stated extension of the complaint resolution deadline" data-lang-it="Accetto la proroga indicata del termine per la risoluzione del reclamo">Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace</span>
-              </label>
-            </td>
-          </tr>
         </table>
-        <!-- Text prodloužení lhůty - zobrazí se při zaškrtnutí checkboxu -->
-        <div class="prodlouzeni-lhuty-text" id="prodlouzeniLhutyText" style="display: none;">
-          <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
-        </div>
       </div>
 
       <!-- Podpisové pole -->
@@ -772,8 +760,23 @@ if ($initialBootstrapData) {
     </div>
 
     <div class="zakaznik-schvaleni-footer">
-      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" @click="close" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
-      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
+      <!-- Checkbox prodloužení lhůty - mezi tlačítky -->
+      <div class="footer-checkbox-sekce tabulka-checkbox-row">
+        <label class="checkbox-prodlouzeni-lhuty">
+          <input type="checkbox" id="checkboxProdlouzeniLhuty">
+          <span data-lang-cs="Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace" data-lang-en="I agree to the stated extension of the complaint resolution deadline" data-lang-it="Accetto la proroga indicata del termine per la risoluzione del reclamo">Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace</span>
+        </label>
+        <!-- Text prodloužení lhůty - zobrazí se při zaškrtnutí checkboxu -->
+        <div class="prodlouzeni-lhuty-text" id="prodlouzeniLhutyText" style="display: none; margin-top: 10px;">
+          <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
+        </div>
+      </div>
+
+      <!-- Tlačítka -->
+      <div class="footer-tlacitka">
+        <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" @click="close" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+        <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
+      </div>
     </div>
   </div>
 </div>
