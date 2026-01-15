@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vyčistit PWA Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d32f2f;
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 10px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #d32f2f;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px 10px 0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #b71c1c;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .log {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Vyčistit PWA Cache</h1>
+
+        <div class="info">
+            <strong>Tento nástroj vyčistí PWA cache a service worker.</strong>
+            <p>Použij toto pokud:</p>
+            <ul>
+                <li>PWA zobrazuje bílou stránku</li>
+                <li>Aplikace nefunguje po aktualizaci</li>
+                <li>Jsou problémy s cachováním</li>
+            </ul>
+        </div>
+
+        <button class="btn" onclick="vycistit()">🗑️ VYČISTIT CACHE</button>
+        <button class="btn" onclick="location.reload()">🔄 OBNOVIT STRÁNKU</button>
+
+        <div id="status"></div>
+        <div id="log" class="log" style="display: none;"></div>
+    </div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        const statusDiv = document.getElementById('status');
+
+        function log(message) {
+            console.log(message);
+            logDiv.style.display = 'block';
+            logDiv.innerHTML += message + '<br>';
+        }
+
+        async function vycistit() {
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'info';
+            statusDiv.innerHTML = '<strong>⏳ Čištění probíhá...</strong>';
+            logDiv.innerHTML = '';
+
+            try {
+                // 1. Unregisterovat všechny service workers
+                if ('serviceWorker' in navigator) {
+                    log('🔍 Hledám service workers...');
+
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log(`✅ Nalezeno: ${registrations.length} service workers`);
+
+                    for (let registration of registrations) {
+                        log(`🗑️ Odstraňuji SW: ${registration.scope}`);
+                        await registration.unregister();
+                        log('✅ Service worker odstraněn');
+                    }
+                } else {
+                    log('⚠️ Service Worker není podporován v tomto prohlížeči');
+                }
+
+                // 2. Smazat všechny cache
+                if ('caches' in window) {
+                    log('🔍 Hledám cache...');
+
+                    const cacheNames = await caches.keys();
+                    log(`✅ Nalezeno: ${cacheNames.length} cache`);
+
+                    for (let cacheName of cacheNames) {
+                        log(`🗑️ Mažu cache: ${cacheName}`);
+                        await caches.delete(cacheName);
+                        log('✅ Cache smazána');
+                    }
+                } else {
+                    log('⚠️ Cache API není podporováno v tomto prohlížeči');
+                }
+
+                // 3. Vyčistit localStorage
+                log('🧹 Čistím localStorage...');
+                const lsKeys = Object.keys(localStorage).filter(key =>
+                    key.startsWith('wgs-') || key.includes('pwa') || key.includes('sw')
+                );
+                lsKeys.forEach(key => {
+                    log(`🗑️ Mažu localStorage: ${key}`);
+                    localStorage.removeItem(key);
+                });
+                log('✅ localStorage vyčištěn');
+
+                // 4. Vyčistit sessionStorage
+                log('🧹 Čistím sessionStorage...');
+                const ssKeys = Object.keys(sessionStorage).filter(key =>
+                    key.startsWith('wgs-') || key.includes('pwa') || key.includes('sw')
+                );
+                ssKeys.forEach(key => {
+                    log(`🗑️ Mažu sessionStorage: ${key}`);
+                    sessionStorage.removeItem(key);
+                });
+                log('✅ sessionStorage vyčištěn');
+
+                // HOTOVO
+                statusDiv.className = 'success';
+                statusDiv.innerHTML = `
+                    <strong>✅ CACHE VYČIŠTĚNA!</strong>
+                    <p>Service workers a cache byly úspěšně odstraněny.</p>
+                    <p><strong>DŮLEŽITÉ:</strong> Nyní <strong>zavři VŠECHNY záložky</strong> aplikace a otevři ji znovu.</p>
+                    <p>Nebo klikni na tlačítko "OBNOVIT STRÁNKU" výše.</p>
+                `;
+
+                log('');
+                log('🎉 ČIŠTĚNÍ DOKONČENO!');
+                log('💡 Zavři všechny záložky a otevři aplikaci znovu.');
+
+            } catch (error) {
+                console.error('Chyba při čištění:', error);
+                statusDiv.className = 'error';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.borderColor = '#f5c6cb';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerHTML = `
+                    <strong>❌ CHYBA</strong>
+                    <p>${error.message}</p>
+                `;
+                log(`❌ CHYBA: ${error.message}`);
+            }
+        }
+
+        // Automaticky zobrazit info o aktuálních SW
+        window.addEventListener('load', async () => {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    if (registrations.length > 0) {
+                        log('ℹ️ Aktuální service workers:');
+                        registrations.forEach(reg => {
+                            log(`  - ${reg.scope}`);
+                        });
+                    }
+                }
+
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    if (cacheNames.length > 0) {
+                        log('ℹ️ Aktuální cache:');
+                        cacheNames.forEach(name => {
+                            log(`  - ${name}`);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Chyba při načítání info:', e);
+            }
+        });
+    </script>
+</body>
+</html>

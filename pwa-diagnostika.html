@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Diagnostika</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .box {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #ff9800; }
+        .info { border-left: 4px solid #2196F3; }
+        h1 { color: #333; }
+        h3 { margin: 0 0 10px 0; color: #555; }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: #1976D2; }
+    </style>
+</head>
+<body>
+    <h1>🔍 PWA Diagnostika</h1>
+
+    <div id="results"></div>
+
+    <button class="btn" onclick="runDiagnostics()">🔄 Spustit diagnostiku</button>
+    <button class="btn" onclick="testFiles()">📁 Testovat soubory</button>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function log(title, content, type = 'info') {
+            const box = document.createElement('div');
+            box.className = `box ${type}`;
+            box.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(content, null, 2)}</pre>`;
+            results.appendChild(box);
+        }
+
+        async function runDiagnostics() {
+            results.innerHTML = '<div class="box info"><h3>⏳ Spouštím diagnostiku...</h3></div>';
+
+            // 1. Detekce PWA režimu
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                          window.navigator.standalone === true;
+            log('PWA Režim', { isPWA, displayMode: window.matchMedia('(display-mode: standalone)').matches }, isPWA ? 'success' : 'warning');
+
+            // 2. Service Worker status
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log('Service Workers', {
+                        count: registrations.length,
+                        scopes: registrations.map(r => r.scope),
+                        active: registrations.map(r => r.active?.state)
+                    }, registrations.length > 0 ? 'success' : 'warning');
+                } catch (e) {
+                    log('Service Workers', { error: e.message }, 'error');
+                }
+            } else {
+                log('Service Workers', 'Nepodporováno', 'warning');
+            }
+
+            // 3. Cache status
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    const cacheDetails = {};
+                    for (const name of cacheNames) {
+                        const cache = await caches.open(name);
+                        const keys = await cache.keys();
+                        cacheDetails[name] = keys.map(req => req.url);
+                    }
+                    log('Cache', {
+                        count: cacheNames.length,
+                        names: cacheNames,
+                        details: cacheDetails
+                    }, cacheNames.length > 0 ? 'info' : 'warning');
+                } catch (e) {
+                    log('Cache', { error: e.message }, 'error');
+                }
+            } else {
+                log('Cache', 'Nepodporováno', 'warning');
+            }
+
+            // 4. Manifest
+            try {
+                const manifestLink = document.querySelector('link[rel="manifest"]');
+                if (manifestLink) {
+                    const response = await fetch(manifestLink.href);
+                    const manifest = await response.json();
+                    log('Manifest', manifest, 'success');
+                } else {
+                    log('Manifest', 'Link nenalezen', 'error');
+                }
+            } catch (e) {
+                log('Manifest', { error: e.message }, 'error');
+            }
+
+            // 5. Informace o prohlížeči
+            log('Prohlížeč', {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                online: navigator.onLine,
+                cookieEnabled: navigator.cookieEnabled
+            }, 'info');
+
+            // 6. Storage
+            log('Storage', {
+                localStorage: Object.keys(localStorage).length,
+                sessionStorage: Object.keys(sessionStorage).length,
+                localStorageKeys: Object.keys(localStorage).filter(k => k.includes('wgs') || k.includes('pwa'))
+            }, 'info');
+
+            // 7. Current location
+            log('Location', {
+                href: window.location.href,
+                pathname: window.location.pathname,
+                search: window.location.search,
+                hash: window.location.hash
+            }, 'info');
+        }
+
+        async function testFiles() {
+            results.innerHTML = '<div class="box info"><h3>⏳ Testuji soubory...</h3></div>';
+
+            const filesToTest = [
+                '/',
+                '/index.php',
+                '/login.php',
+                '/pwa-splash.php',
+                '/manifest.json',
+                '/sw.js',
+                '/sw.php',
+                '/offline.php',
+                '/init.php',
+                '/assets/css/main.min.css',
+                '/assets/js/seznam.min.js'
+            ];
+
+            for (const file of filesToTest) {
+                try {
+                    const response = await fetch(file, { method: 'HEAD' });
+                    log(`${file}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        contentType: response.headers.get('content-type'),
+                        contentLength: response.headers.get('content-length')
+                    }, response.ok ? 'success' : 'error');
+                } catch (e) {
+                    log(`${file}`, { error: e.message }, 'error');
+                }
+            }
+        }
+
+        // Auto-run při načtení
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 500);
+        });
+    </script>
+</body>
+</html>

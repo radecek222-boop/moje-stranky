@@ -117,9 +117,9 @@ function getSummaryStatistiky($pdo) {
     $totalAll = (int)($stmtAll->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Částka celkem VŠECH
-    // FIX: Použít pouze sloupec cena (cena_celkem neexistuje v databázi)
+    // FIX: Použít sloupec cena_celkem (zde se ukládá částka z protokolu)
     $stmtRevenueAll = $pdo->query("
-        SELECT SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as total
+        SELECT SUM(CAST(COALESCE(cena_celkem, 0) AS DECIMAL(10,2))) as total
         FROM wgs_reklamace
     ");
     $revenueAll = (float)($stmtRevenueAll->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
@@ -133,9 +133,9 @@ function getSummaryStatistiky($pdo) {
     $totalMonth = (int)($stmtMonth->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Částka v měsíci (filtrované)
-    // FIX: Použít pouze sloupec cena
+    // FIX: Použít sloupec cena_celkem (zde se ukládá částka z protokolu)
     $stmtRevenueMonth = $pdo->prepare("
-        SELECT SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as total
+        SELECT SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as total
         FROM wgs_reklamace r
         $where
     ");
@@ -241,8 +241,8 @@ function getZakazky($pdo) {
             " . ($hasDokoncenokym ? "r.dokonceno_kym as dokonceno_kym_raw," : "") . "
             COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
-            CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2)) as castka_celkem,
-            CAST(COALESCE(r.cena, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
+            CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) as castka_celkem,
+            CAST(COALESCE(r.cena_celkem, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
             UPPER(COALESCE(r.fakturace_firma, 'cz')) as zeme,
             DATE_FORMAT({$datumSloupec}, '%d.%m.%Y') as datum,
             {$datumSloupec} as datum_raw
@@ -326,7 +326,7 @@ function getCharty($pdo) {
         SELECT
             COALESCE(u.name, 'Mimozáruční servis') as prodejce,
             COUNT(*) as pocet,
-            SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
         $where
@@ -350,8 +350,8 @@ function getCharty($pdo) {
         SELECT
             COALESCE(u.name, r.technik, '-') as technik,
             COUNT(*) as pocet,
-            SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as celkem,
-            SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem,
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
         FROM wgs_reklamace r
         $technikJoinChart
         $where

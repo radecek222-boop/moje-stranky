@@ -8,7 +8,7 @@
  * @version MIGRATION-2025.12.03
  */
 
-const SW_VERSION = 'MIGRATION-2025.12.03';
+const SW_VERSION = 'EMERGENCY-FIX-2026.01.15';
 const CACHE_NAME = `wgs-migration-${SW_VERSION}`;
 
 console.log(`[SW ${SW_VERSION}] Migrační SW - přesměrování na sw.php`);
