@@ -761,7 +761,7 @@ if ($initialBootstrapData) {
 
     <div class="zakaznik-schvaleni-footer">
       <!-- Checkbox prodloužení lhůty - mezi tlačítky -->
-      <div class="footer-checkbox-sekce tabulka-checkbox-row">
+      <div class="footer-checkbox-sekce">
         <label class="checkbox-prodlouzeni-lhuty">
           <input type="checkbox" id="checkboxProdlouzeniLhuty">
           <span data-lang-cs="Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace" data-lang-en="I agree to the stated extension of the complaint resolution deadline" data-lang-it="Accetto la proroga indicata del termine per la risoluzione del reclamo">Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace</span>
