@@ -1216,6 +1216,11 @@ body.pdf-export-mode #signature-pad {
   display: none !important;
 }
 
+/* Skrýt červené tlačítko POTŘEBA DÍL v PDF */
+.pdf-clone-desktop #potrebaDilContainer {
+  display: none !important;
+}
+
 /* IČO upozornění - malý text pod typem zákazníka */
 .ico-upozorneni {
   font-size: 7.5px !important;  /* Zmenšeno o 25% z 10px */
@@ -1534,29 +1539,32 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-container {
-  background: #1a1a1a;
+  background: #2a2a2a;  /* Změněno z #1a1a1a na světlejší pro lepší kontrast textu */
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  border: 1px solid #333;
+  border: 2px solid #555;  /* Výraznější border */
   max-height: 90vh;
   display: flex;
   flex-direction: column;
 }
 
 .souhlas-dil-header {
-  background: #333;
+  background: #dc3545;  /* Červené pozadí pro důležitost */
   color: #fff;
   padding: 1.5rem;
   border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
 }
 
 .souhlas-dil-header h2 {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.4rem;  /* Zvětšeno */
+  font-weight: 700;  /* Tučnější */
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .souhlas-dil-body {
@@ -1566,13 +1574,16 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-text {
-  color: #ccc;
+  color: #fff;  /* Změněno z #ccc na #fff pro lepší čitelnost */
   line-height: 1.8;
   margin-bottom: 2rem;
+  font-size: 1.05rem;  /* Zvětšeno pro lepší čitelnost */
+  font-weight: 400;
 }
 
 .souhlas-dil-text p {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;  /* Větší mezera mezi odstavci */
+  text-align: justify;
 }
 
 .souhlas-dil-otazka {
@@ -1631,11 +1642,11 @@ body.pdf-export-mode #signature-pad {
 .btn-potreba-dil {
   background: #dc3545;
   color: #fff;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
+  padding: 0.5rem 1.5rem;  /* Poloviční výška - sníženo z 1rem na 0.5rem */
+  font-size: 1rem;  /* Sníženo z 1.1rem */
   font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   width: 100%;
   cursor: pointer;
   text-transform: uppercase;
