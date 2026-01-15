@@ -1,11 +1,3 @@
-<?php
-/**
- * PWA Splash Screen
- * Úvodní obrazovka pro PWA aplikaci
- * Zobrazí se pouze při spuštění z PWA ikony na mobilním zařízení
- */
-require_once "init.php";
-?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -20,11 +12,6 @@ require_once "init.php";
   <!-- PWA Manifest -->
   <link rel="manifest" href="./manifest.json">
 
-  <!-- Google Fonts - Poppins (stejný jako zbytek aplikace) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     * {
       margin: 0;
@@ -33,7 +20,7 @@ require_once "init.php";
     }
 
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: #000000;
       color: #ffffff;
       width: 100vw;
@@ -181,6 +168,10 @@ require_once "init.php";
   </div>
 
   <script>
+    console.log('[PWA Splash] Načten - verze 2026.01.15');
+    console.log('[PWA Splash] URL:', window.location.href);
+    console.log('[PWA Splash] User Agent:', navigator.userAgent);
+
     // Přesměrování na login stránku
     function presmerujNaLogin() {
       // Plynulý fade out před přesměrováním
