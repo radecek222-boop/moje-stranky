@@ -71,14 +71,14 @@ try {
                 ];
             }
 
-            // Globální chat (posledních 10) s likes
+            // Globální chat (posledních 200) s likes
             $stmtChat = $pdo->query("
                 SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
                        COALESCE(c.likes_count, 0) as likes_count
                 FROM wgs_hry_chat c
                 WHERE c.mistnost_id IS NULL
                 ORDER BY c.id DESC
-                LIMIT 10
+                LIMIT 200
             ");
             $chat = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
