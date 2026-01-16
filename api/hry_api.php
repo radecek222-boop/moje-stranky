@@ -71,15 +71,29 @@ try {
                 ];
             }
 
-            // Globální chat (posledních 10)
+            // Globální chat (posledních 10) s likes
             $stmtChat = $pdo->query("
-                SELECT id, username, zprava, DATE_FORMAT(cas, '%H:%i') as cas
-                FROM wgs_hry_chat
-                WHERE mistnost_id IS NULL
-                ORDER BY id DESC
+                SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
+                       COALESCE(c.likes_count, 0) as likes_count
+                FROM wgs_hry_chat c
+                WHERE c.mistnost_id IS NULL
+                ORDER BY c.id DESC
                 LIMIT 10
             ");
             $chat = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
+
+            // Načíst jména kdo dal like ke každé zprávě
+            foreach ($chat as &$zprava) {
+                $stmt = $pdo->prepare("
+                    SELECT u.name
+                    FROM wgs_hry_chat_likes l
+                    LEFT JOIN wgs_users u ON l.user_id = u.user_id
+                    WHERE l.zprava_id = :zprava_id
+                    ORDER BY l.created_at ASC
+                ");
+                $stmt->execute(['zprava_id' => $zprava['id']]);
+                $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            }
 
             sendJsonSuccess('OK', ['online' => $online, 'chat' => $chat]);
             break;
@@ -89,14 +103,28 @@ try {
             $posledniId = (int)($_GET['posledni_id'] ?? 0);
 
             $stmt = $pdo->prepare("
-                SELECT id, username, zprava, DATE_FORMAT(cas, '%H:%i') as cas
-                FROM wgs_hry_chat
-                WHERE mistnost_id IS NULL AND id > :posledni_id
-                ORDER BY id ASC
+                SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
+                       COALESCE(c.likes_count, 0) as likes_count
+                FROM wgs_hry_chat c
+                WHERE c.mistnost_id IS NULL AND c.id > :posledni_id
+                ORDER BY c.id ASC
                 LIMIT 10
             ");
             $stmt->execute(['posledni_id' => $posledniId]);
             $chat = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Načíst jména kdo dal like
+            foreach ($chat as &$zprava) {
+                $stmt = $pdo->prepare("
+                    SELECT u.name
+                    FROM wgs_hry_chat_likes l
+                    LEFT JOIN wgs_users u ON l.user_id = u.user_id
+                    WHERE l.zprava_id = :zprava_id
+                    ORDER BY l.created_at ASC
+                ");
+                $stmt->execute(['zprava_id' => $zprava['id']]);
+                $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            }
 
             sendJsonSuccess('OK', ['chat' => $chat]);
             break;
@@ -129,7 +157,76 @@ try {
                 'id' => $pdo->lastInsertId(),
                 'username' => $username,
                 'zprava' => $zprava,
-                'cas' => date('H:i')
+                'cas' => date('j.n.Y H:i'),
+                'likes_count' => 0,
+                'liked_by' => []
+            ]);
+            break;
+
+        // ===== CHAT LIKE - přidat/odebrat like =====
+        case 'chat_like':
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $zpravaId = (int)($_POST['zprava_id'] ?? 0);
+
+            if ($zpravaId <= 0) {
+                sendJsonError('Neplatné ID zprávy');
+            }
+
+            // Zkontrolovat zda zpráva existuje
+            $stmt = $pdo->prepare("SELECT id FROM wgs_hry_chat WHERE id = :id");
+            $stmt->execute(['id' => $zpravaId]);
+            if (!$stmt->fetch()) {
+                sendJsonError('Zpráva neexistuje');
+            }
+
+            // Zkontrolovat zda už uživatel dal like
+            $stmt = $pdo->prepare("SELECT id FROM wgs_hry_chat_likes WHERE zprava_id = :zprava_id AND user_id = :user_id");
+            $stmt->execute(['zprava_id' => $zpravaId, 'user_id' => $userId]);
+            $jizDalLike = $stmt->fetch() !== false;
+
+            if ($jizDalLike) {
+                // Odebrat like
+                $stmt = $pdo->prepare("DELETE FROM wgs_hry_chat_likes WHERE zprava_id = :zprava_id AND user_id = :user_id");
+                $stmt->execute(['zprava_id' => $zpravaId, 'user_id' => $userId]);
+
+                // Aktualizovat počet likes
+                $pdo->exec("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = $zpravaId) WHERE id = $zpravaId");
+
+                $akce = 'unlike';
+            } else {
+                // Přidat like
+                $stmt = $pdo->prepare("INSERT INTO wgs_hry_chat_likes (zprava_id, user_id) VALUES (:zprava_id, :user_id)");
+                $stmt->execute(['zprava_id' => $zpravaId, 'user_id' => $userId]);
+
+                // Aktualizovat počet likes
+                $pdo->exec("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = $zpravaId) WHERE id = $zpravaId");
+
+                $akce = 'like';
+            }
+
+            // Načíst aktuální počet a jména
+            $stmt = $pdo->prepare("SELECT likes_count FROM wgs_hry_chat WHERE id = :id");
+            $stmt->execute(['id' => $zpravaId]);
+            $likesCount = (int)$stmt->fetchColumn();
+
+            $stmt = $pdo->prepare("
+                SELECT u.name
+                FROM wgs_hry_chat_likes l
+                LEFT JOIN wgs_users u ON l.user_id = u.user_id
+                WHERE l.zprava_id = :zprava_id
+                ORDER BY l.created_at ASC
+            ");
+            $stmt->execute(['zprava_id' => $zpravaId]);
+            $likedBy = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            sendJsonSuccess($akce === 'like' ? 'Like přidán' : 'Like odebrán', [
+                'zprava_id' => $zpravaId,
+                'akce' => $akce,
+                'likes_count' => $likesCount,
+                'liked_by' => $likedBy
             ]);
             break;
 
@@ -330,16 +427,30 @@ try {
             $stmt->execute(['mistnost_id' => $mistnostId]);
             $hraci = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Chat místnosti
+            // Chat místnosti s likes
             $stmt = $pdo->prepare("
-                SELECT id, username, zprava, DATE_FORMAT(cas, '%H:%i') as cas
-                FROM wgs_hry_chat
-                WHERE mistnost_id = :mistnost_id
-                ORDER BY id DESC
+                SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
+                       COALESCE(c.likes_count, 0) as likes_count
+                FROM wgs_hry_chat c
+                WHERE c.mistnost_id = :mistnost_id
+                ORDER BY c.id DESC
                 LIMIT 50
             ");
             $stmt->execute(['mistnost_id' => $mistnostId]);
             $chat = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+            // Načíst jména kdo dal like
+            foreach ($chat as &$zprava) {
+                $stmt = $pdo->prepare("
+                    SELECT u.name
+                    FROM wgs_hry_chat_likes l
+                    LEFT JOIN wgs_users u ON l.user_id = u.user_id
+                    WHERE l.zprava_id = :zprava_id
+                    ORDER BY l.created_at ASC
+                ");
+                $stmt->execute(['zprava_id' => $zprava['id']]);
+                $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            }
 
             sendJsonSuccess('OK', [
                 'mistnost' => $mistnost,

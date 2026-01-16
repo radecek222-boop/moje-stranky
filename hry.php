@@ -40,15 +40,29 @@ try {
     $stmtOnline = $pdo->query("SELECT user_id, username, aktualni_hra FROM wgs_hry_online ORDER BY posledni_aktivita DESC");
     $onlineHraci = $stmtOnline->fetchAll(PDO::FETCH_ASSOC);
 
-    // Načíst posledních 10 chat zpráv (globální chat)
+    // Načíst posledních 10 chat zpráv (globální chat) s likes
     $stmtChat = $pdo->query("
-        SELECT id, username, zprava, cas
-        FROM wgs_hry_chat
-        WHERE mistnost_id IS NULL
-        ORDER BY cas DESC
+        SELECT c.id, c.username, c.zprava, c.cas,
+               COALESCE(c.likes_count, 0) as likes_count
+        FROM wgs_hry_chat c
+        WHERE c.mistnost_id IS NULL
+        ORDER BY c.cas DESC
         LIMIT 10
     ");
     $chatZpravy = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
+
+    // Načíst jména kdo dal like ke každé zprávě
+    foreach ($chatZpravy as &$zprava) {
+        $stmt = $pdo->prepare("
+            SELECT u.name
+            FROM wgs_hry_chat_likes l
+            LEFT JOIN wgs_users u ON l.user_id = u.user_id
+            WHERE l.zprava_id = :zprava_id
+            ORDER BY l.created_at ASC
+        ");
+        $stmt->execute(['zprava_id' => $zprava['id']]);
+        $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 
 } catch (PDOException $e) {
     $onlineHraci = [];
@@ -366,6 +380,15 @@ $dostupneHry = [
 
         .chat-zprava {
             margin-bottom: 0.75rem;
+            position: relative;
+            padding-right: 60px;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .chat-autor {
@@ -374,15 +397,68 @@ $dostupneHry = [
             font-size: 0.85rem;
         }
 
+        .chat-cas {
+            color: var(--hry-muted);
+            font-size: 0.7rem;
+        }
+
         .chat-text {
             color: var(--hry-text);
             font-size: 0.9rem;
             word-break: break-word;
+            margin-bottom: 0.25rem;
         }
 
-        .chat-cas {
+        .chat-like-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
             color: var(--hry-muted);
-            font-size: 0.7rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .chat-like-btn:hover {
+            color: #ff6b6b;
+            transform: scale(1.1);
+        }
+
+        .chat-like-btn.liked {
+            color: #ff6b6b;
+        }
+
+        .chat-like-count {
+            font-size: 0.75rem;
+            color: var(--hry-text);
+            font-weight: 600;
+        }
+
+        .chat-like-tooltip {
+            position: absolute;
+            top: -10px;
+            right: 100%;
+            background: #222;
+            color: var(--hry-text);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            border: 1px solid var(--hry-border);
+        }
+
+        .chat-like-btn:hover .chat-like-tooltip {
+            opacity: 1;
         }
 
         .chat-input-wrapper {
@@ -504,11 +580,24 @@ $dostupneHry = [
                                 <span class="chat-text" style="color: var(--hry-muted);">Zatím žádné zprávy. Napiš první!</span>
                             </div>
                             <?php else: ?>
-                                <?php foreach ($chatZpravy as $zprava): ?>
+                                <?php foreach ($chatZpravy as $zprava):
+                                    $likesCount = (int)($zprava['likes_count'] ?? 0);
+                                    $likedBy = $zprava['liked_by'] ?? [];
+                                    $tooltipText = $likesCount > 0 ? implode(', ', $likedBy) : 'Nikdo zatím nedal like';
+                                ?>
                                 <div class="chat-zprava" data-id="<?php echo (int)$zprava['id']; ?>">
-                                    <span class="chat-autor"><?php echo htmlspecialchars($zprava['username']); ?></span>
-                                    <span class="chat-cas"><?php echo date('H:i', strtotime($zprava['cas'])); ?></span>
+                                    <div class="chat-header">
+                                        <span class="chat-autor"><?php echo htmlspecialchars($zprava['username']); ?></span>
+                                        <span class="chat-cas"><?php echo date('j.n.Y H:i', strtotime($zprava['cas'])); ?></span>
+                                    </div>
                                     <div class="chat-text"><?php echo htmlspecialchars($zprava['zprava']); ?></div>
+                                    <button class="chat-like-btn" data-zprava-id="<?php echo (int)$zprava['id']; ?>" title="Dát srdíčko">
+                                        <span class="like-icon">♥</span>
+                                        <?php if ($likesCount > 0): ?>
+                                        <span class="chat-like-count"><?php echo $likesCount; ?></span>
+                                        <?php endif; ?>
+                                        <span class="chat-like-tooltip"><?php echo htmlspecialchars($tooltipText); ?></span>
+                                    </button>
                                 </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -602,13 +691,24 @@ $dostupneHry = [
                 return; // Zpráva už existuje, nepřidávat
             }
 
+            const likesCount = parseInt(data.likes_count) || 0;
+            const likedBy = data.liked_by || [];
+            const tooltipText = likesCount > 0 ? likedBy.join(', ') : 'Nikdo zatím nedal like';
+
             const div = document.createElement('div');
             div.className = 'chat-zprava';
             div.setAttribute('data-id', zpravaId);
             div.innerHTML = `
-                <span class="chat-autor">${escapeHtml(data.username)}</span>
-                <span class="chat-cas">${data.cas || ''}</span>
+                <div class="chat-header">
+                    <span class="chat-autor">${escapeHtml(data.username)}</span>
+                    <span class="chat-cas">${data.cas || ''}</span>
+                </div>
                 <div class="chat-text">${escapeHtml(data.zprava)}</div>
+                <button class="chat-like-btn" data-zprava-id="${zpravaId}" title="Dát srdíčko">
+                    <span class="like-icon">♥</span>
+                    ${likesCount > 0 ? `<span class="chat-like-count">${likesCount}</span>` : ''}
+                    <span class="chat-like-tooltip">${escapeHtml(tooltipText)}</span>
+                </button>
             `;
             chatMessages.appendChild(div);
 
@@ -637,6 +737,76 @@ $dostupneHry = [
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // Like tlačítko
+        async function datLike(zpravaId) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'chat_like');
+                formData.append('zprava_id', zpravaId);
+                formData.append('csrf_token', csrfToken);
+
+                const response = await fetch('/api/hry_api.php', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Aktualizovat UI
+                    const zpravaEl = document.querySelector(`.chat-zprava[data-id="${zpravaId}"]`);
+                    if (zpravaEl) {
+                        const likeBtn = zpravaEl.querySelector('.chat-like-btn');
+                        const likesCount = result.likes_count || 0;
+                        const likedBy = result.liked_by || [];
+                        const tooltipText = likesCount > 0 ? likedBy.join(', ') : 'Nikdo zatím nedal like';
+
+                        // Toggle liked class
+                        if (result.akce === 'like') {
+                            likeBtn.classList.add('liked');
+                        } else {
+                            likeBtn.classList.remove('liked');
+                        }
+
+                        // Aktualizovat počet
+                        const countEl = likeBtn.querySelector('.chat-like-count');
+                        if (likesCount > 0) {
+                            if (countEl) {
+                                countEl.textContent = likesCount;
+                            } else {
+                                const icon = likeBtn.querySelector('.like-icon');
+                                icon.insertAdjacentHTML('afterend', `<span class="chat-like-count">${likesCount}</span>`);
+                            }
+                        } else {
+                            if (countEl) {
+                                countEl.remove();
+                            }
+                        }
+
+                        // Aktualizovat tooltip
+                        const tooltipEl = likeBtn.querySelector('.chat-like-tooltip');
+                        if (tooltipEl) {
+                            tooltipEl.textContent = tooltipText;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Like error:', error);
+            }
+        }
+
+        // Event delegation pro like tlačítka
+        chatMessages.addEventListener('click', (e) => {
+            const likeBtn = e.target.closest('.chat-like-btn');
+            if (likeBtn) {
+                const zpravaId = parseInt(likeBtn.getAttribute('data-zprava-id'));
+                if (zpravaId) {
+                    datLike(zpravaId);
+                }
+            }
+        });
 
         // Event listenery
         chatSend.addEventListener('click', odeslatZpravu);
@@ -673,11 +843,63 @@ $dostupneHry = [
                         posledniChatId = Math.max(posledniChatId, z.id);
                     });
                 }
+
+                // Aktualizovat likes u existujících zpráv (každých 5s)
+                if (Math.floor(Date.now() / 1000) % 5 === 0) {
+                    await aktualizovatLikes();
+                }
             } catch (error) {
                 console.error('Chat polling error:', error);
             }
         }
         setInterval(obnovitChat, 1000);
+
+        // Aktualizovat likes u existujících zpráv
+        async function aktualizovatLikes() {
+            try {
+                const response = await fetch('/api/hry_api.php?action=stav', { credentials: 'include' });
+                const result = await response.json();
+
+                if (result.status === 'success' && result.chat) {
+                    result.chat.forEach(chatData => {
+                        const zpravaEl = document.querySelector(`.chat-zprava[data-id="${chatData.id}"]`);
+                        if (zpravaEl) {
+                            const likeBtn = zpravaEl.querySelector('.chat-like-btn');
+                            if (likeBtn) {
+                                const likesCount = chatData.likes_count || 0;
+                                const likedBy = chatData.liked_by || [];
+                                const tooltipText = likesCount > 0 ? likedBy.join(', ') : 'Nikdo zatím nedal like';
+
+                                // Aktualizovat počet
+                                const countEl = likeBtn.querySelector('.chat-like-count');
+                                if (likesCount > 0) {
+                                    if (countEl) {
+                                        countEl.textContent = likesCount;
+                                    } else {
+                                        const icon = likeBtn.querySelector('.like-icon');
+                                        if (icon) {
+                                            icon.insertAdjacentHTML('afterend', `<span class="chat-like-count">${likesCount}</span>`);
+                                        }
+                                    }
+                                } else {
+                                    if (countEl) {
+                                        countEl.remove();
+                                    }
+                                }
+
+                                // Aktualizovat tooltip
+                                const tooltipEl = likeBtn.querySelector('.chat-like-tooltip');
+                                if (tooltipEl) {
+                                    tooltipEl.textContent = tooltipText;
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Likes update error:', error);
+            }
+        }
 
         // Aktualizovat seznam online hráčů
         function aktualizovatOnline(hraci) {
