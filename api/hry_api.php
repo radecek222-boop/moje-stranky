@@ -73,8 +73,9 @@ try {
 
             // Globální chat (posledních 200) s likes
             $stmtChat = $pdo->query("
-                SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
-                       COALESCE(c.likes_count, 0) as likes_count
+                SELECT c.id, c.user_id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
+                       COALESCE(c.likes_count, 0) as likes_count,
+                       c.edited_at
                 FROM wgs_hry_chat c
                 WHERE c.mistnost_id IS NULL
                 ORDER BY c.id DESC
@@ -103,8 +104,9 @@ try {
             $posledniId = (int)($_GET['posledni_id'] ?? 0);
 
             $stmt = $pdo->prepare("
-                SELECT c.id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
-                       COALESCE(c.likes_count, 0) as likes_count
+                SELECT c.id, c.user_id, c.username, c.zprava, DATE_FORMAT(c.cas, '%e.%c.%Y %H:%i') as cas,
+                       COALESCE(c.likes_count, 0) as likes_count,
+                       c.edited_at
                 FROM wgs_hry_chat c
                 WHERE c.mistnost_id IS NULL AND c.id > :posledni_id
                 ORDER BY c.id ASC
@@ -155,11 +157,62 @@ try {
 
             sendJsonSuccess('Zpráva odeslána', [
                 'id' => $pdo->lastInsertId(),
+                'user_id' => $userId,
                 'username' => $username,
                 'zprava' => $zprava,
                 'cas' => date('j.n.Y H:i'),
                 'likes_count' => 0,
-                'liked_by' => []
+                'liked_by' => [],
+                'edited_at' => null
+            ]);
+            break;
+
+        // ===== CHAT EDIT - upravit zprávu =====
+        case 'chat_edit':
+            if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                sendJsonError('Neplatný CSRF token', 403);
+            }
+
+            $zpravaId = (int)($_POST['zprava_id'] ?? 0);
+            $novaZprava = trim($_POST['zprava'] ?? '');
+
+            if ($zpravaId <= 0) {
+                sendJsonError('Neplatné ID zprávy');
+            }
+
+            if (empty($novaZprava) || mb_strlen($novaZprava) > 200) {
+                sendJsonError('Neplatná zpráva (max 200 znaků)');
+            }
+
+            // Načíst zprávu a zkontrolovat vlastnictví
+            $stmt = $pdo->prepare("SELECT user_id, zprava FROM wgs_hry_chat WHERE id = :id");
+            $stmt->execute(['id' => $zpravaId]);
+            $zprava = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$zprava) {
+                sendJsonError('Zpráva neexistuje');
+            }
+
+            // Pouze autor může upravit zprávu
+            if ($zprava['user_id'] != $userId) {
+                sendJsonError('Můžete upravit pouze své zprávy', 403);
+            }
+
+            // Aktualizovat zprávu
+            $stmt = $pdo->prepare("
+                UPDATE wgs_hry_chat
+                SET zprava = :zprava, edited_at = NOW()
+                WHERE id = :id
+            ");
+            $stmt->execute([
+                'zprava' => $novaZprava,
+                'id' => $zpravaId
+            ]);
+
+            sendJsonSuccess('Zpráva upravena', [
+                'zprava_id' => $zpravaId,
+                'zprava' => $novaZprava,
+                'edited_at' => date('Y-m-d H:i:s')
             ]);
             break;
 

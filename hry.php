@@ -42,8 +42,9 @@ try {
 
     // Načíst posledních 200 chat zpráv (globální chat) s likes
     $stmtChat = $pdo->query("
-        SELECT c.id, c.username, c.zprava, c.cas,
-               COALESCE(c.likes_count, 0) as likes_count
+        SELECT c.id, c.user_id, c.username, c.zprava, c.cas,
+               COALESCE(c.likes_count, 0) as likes_count,
+               c.edited_at
         FROM wgs_hry_chat c
         WHERE c.mistnost_id IS NULL
         ORDER BY c.cas DESC
@@ -421,11 +422,68 @@ $dostupneHry = [
             font-size: 0.7rem;
         }
 
+        .chat-edited-badge {
+            color: var(--hry-muted);
+            font-size: 0.65rem;
+            font-style: italic;
+            margin-left: 0.5rem;
+        }
+
         .chat-text {
             color: var(--hry-text);
             font-size: 0.9rem;
             word-break: break-word;
             margin-bottom: 0.25rem;
+        }
+
+        .chat-text[style*="cursor: pointer"]:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+        }
+
+        .chat-edit-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid var(--hry-accent);
+            border-radius: 4px;
+            padding: 0.5rem;
+            color: var(--hry-text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        .chat-edit-input:focus {
+            outline: none;
+            border-color: #33bbff;
+        }
+
+        .chat-edit-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .chat-edit-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .chat-edit-btn.save {
+            background: var(--hry-accent);
+            color: #000;
+        }
+
+        .chat-edit-btn.cancel {
+            background: #666;
+            color: #fff;
         }
 
         .chat-like-btn {
@@ -603,13 +661,18 @@ $dostupneHry = [
                                     $likesCount = (int)($zprava['likes_count'] ?? 0);
                                     $likedBy = $zprava['liked_by'] ?? [];
                                     $tooltipText = $likesCount > 0 ? implode(', ', $likedBy) : 'Nikdo zatím nedal like';
+                                    $jeUpravena = !empty($zprava['edited_at']);
+                                    $jeMoje = ($zprava['user_id'] ?? '') == $userId;
                                 ?>
-                                <div class="chat-zprava" data-id="<?php echo (int)$zprava['id']; ?>">
+                                <div class="chat-zprava" data-id="<?php echo (int)$zprava['id']; ?>" data-user-id="<?php echo htmlspecialchars($zprava['user_id'] ?? ''); ?>">
                                     <div class="chat-header">
                                         <span class="chat-autor"><?php echo htmlspecialchars($zprava['username']); ?></span>
                                         <span class="chat-cas"><?php echo date('j.n.Y H:i', strtotime($zprava['cas'])); ?></span>
+                                        <?php if ($jeUpravena): ?>
+                                        <span class="chat-edited-badge" title="Upraveno <?php echo date('j.n.Y H:i', strtotime($zprava['edited_at'])); ?>">(upraveno)</span>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="chat-text"><?php echo htmlspecialchars($zprava['zprava']); ?></div>
+                                    <div class="chat-text" <?php if ($jeMoje): ?>style="cursor: pointer;" title="Klikněte pro úpravu"<?php endif; ?>><?php echo htmlspecialchars($zprava['zprava']); ?></div>
                                     <button class="chat-like-btn" data-zprava-id="<?php echo (int)$zprava['id']; ?>" title="Dát srdíčko">
                                         <span class="like-icon">♥</span>
                                         <?php if ($likesCount > 0): ?>
@@ -640,6 +703,7 @@ $dostupneHry = [
         const chatInput = document.getElementById('chatInput');
         const chatSend = document.getElementById('chatSend');
         const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        const currentUserId = <?php echo json_encode($userId); ?>;
 
         // Sledovat poslední ID zprávy pro polling
         let posledniChatId = 0;
@@ -720,16 +784,20 @@ $dostupneHry = [
             const likesCount = parseInt(data.likes_count) || 0;
             const likedBy = data.liked_by || [];
             const tooltipText = likesCount > 0 ? likedBy.join(', ') : 'Nikdo zatím nedal like';
+            const jeUpravena = data.edited_at ? true : false;
+            const jeMoje = (data.user_id == currentUserId);
 
             const div = document.createElement('div');
             div.className = 'chat-zprava';
             div.setAttribute('data-id', zpravaId);
+            div.setAttribute('data-user-id', data.user_id || '');
             div.innerHTML = `
                 <div class="chat-header">
                     <span class="chat-autor">${escapeHtml(data.username)}</span>
                     <span class="chat-cas">${data.cas || ''}</span>
+                    ${jeUpravena ? `<span class="chat-edited-badge" title="Upraveno">(upraveno)</span>` : ''}
                 </div>
-                <div class="chat-text">${escapeHtml(data.zprava)}</div>
+                <div class="chat-text" ${jeMoje ? 'style="cursor: pointer;" title="Klikněte pro úpravu"' : ''}>${escapeHtml(data.zprava)}</div>
                 <button class="chat-like-btn" data-zprava-id="${zpravaId}" title="Dát srdíčko">
                     <span class="like-icon">♥</span>
                     ${likesCount > 0 ? `<span class="chat-like-count">${likesCount}</span>` : ''}
@@ -814,13 +882,143 @@ $dostupneHry = [
             }
         }
 
-        // Event delegation pro like tlačítka
+        // Upravit zprávu
+        async function upravitZpravu(zpravaId, novaZprava) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'chat_edit');
+                formData.append('zprava_id', zpravaId);
+                formData.append('zprava', novaZprava);
+                formData.append('csrf_token', csrfToken);
+
+                const response = await fetch('/api/hry_api.php', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Aktualizovat UI
+                    const zpravaEl = document.querySelector(`.chat-zprava[data-id="${zpravaId}"]`);
+                    if (zpravaEl) {
+                        const textEl = zpravaEl.querySelector('.chat-text');
+                        const headerEl = zpravaEl.querySelector('.chat-header');
+
+                        // Nahradit input textem
+                        textEl.innerHTML = escapeHtml(novaZprava);
+                        textEl.style.cursor = 'pointer';
+                        textEl.title = 'Klikněte pro úpravu';
+
+                        // Přidat badge (upraveno) pokud ještě není
+                        if (!headerEl.querySelector('.chat-edited-badge')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'chat-edited-badge';
+                            badge.title = 'Upraveno';
+                            badge.textContent = '(upraveno)';
+                            headerEl.appendChild(badge);
+                        }
+                    }
+                } else {
+                    alert('Chyba: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Edit error:', error);
+                alert('Chyba při úpravě zprávy');
+            }
+        }
+
+        // Zobrazit edit input
+        function zobrazitEditInput(zpravaEl) {
+            const textEl = zpravaEl.querySelector('.chat-text');
+            const puvodniText = textEl.textContent;
+
+            // Vytvořit input
+            const input = document.createElement('textarea');
+            input.className = 'chat-edit-input';
+            input.value = puvodniText;
+            input.maxLength = 200;
+
+            // Tlačítka
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'chat-edit-buttons';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'chat-edit-btn save';
+            saveBtn.textContent = 'Uložit';
+            saveBtn.onclick = () => {
+                const novaZprava = input.value.trim();
+                if (novaZprava && novaZprava !== puvodniText) {
+                    const zpravaId = parseInt(zpravaEl.getAttribute('data-id'));
+                    upravitZpravu(zpravaId, novaZprava);
+                } else {
+                    // Zrušit edit
+                    textEl.innerHTML = escapeHtml(puvodniText);
+                    textEl.style.display = 'block';
+                    input.remove();
+                    buttonsDiv.remove();
+                }
+            };
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'chat-edit-btn cancel';
+            cancelBtn.textContent = 'Zrušit';
+            cancelBtn.onclick = () => {
+                textEl.innerHTML = escapeHtml(puvodniText);
+                textEl.style.display = 'block';
+                input.remove();
+                buttonsDiv.remove();
+            };
+
+            buttonsDiv.appendChild(saveBtn);
+            buttonsDiv.appendChild(cancelBtn);
+
+            // Nahradit text inputem
+            textEl.style.display = 'none';
+            textEl.insertAdjacentElement('afterend', input);
+            input.insertAdjacentElement('afterend', buttonsDiv);
+
+            // Focus a select
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+
+            // Enter = uložit, Esc = zrušit
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    saveBtn.click();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelBtn.click();
+                }
+            });
+        }
+
+        // Event delegation pro like a edit
         chatMessages.addEventListener('click', (e) => {
+            // Like tlačítko
             const likeBtn = e.target.closest('.chat-like-btn');
             if (likeBtn) {
                 const zpravaId = parseInt(likeBtn.getAttribute('data-zprava-id'));
                 if (zpravaId) {
                     datLike(zpravaId);
+                }
+                return;
+            }
+
+            // Edit zprávy - klik na text
+            const textEl = e.target.closest('.chat-text');
+            if (textEl && textEl.style.cursor === 'pointer') {
+                const zpravaEl = textEl.closest('.chat-zprava');
+                const zpravaUserId = zpravaEl.getAttribute('data-user-id');
+
+                // Pouze vlastní zprávy
+                if (zpravaUserId == currentUserId) {
+                    // Pokud už není edit input (zabránit dvojitému kliku)
+                    if (!zpravaEl.querySelector('.chat-edit-input')) {
+                        zobrazitEditInput(zpravaEl);
+                    }
                 }
             }
         });
