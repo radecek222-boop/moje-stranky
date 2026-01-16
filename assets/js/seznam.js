@@ -564,21 +564,38 @@ async function renderOrders(items = null) {
   // - ČEKÁ (wait): podle data vytvoření (nejnovější první)
   // - DOMLUVENÁ (open): podle termínu návštěvy (nejbližší první)
   // - HOTOVO (done): podle data dokončení (nejnovější první)
+  // - CN (cenová nabídka): až za HOTOVO (priorita 4)
   filtered.sort((a, b) => {
     const stavA = a.stav || 'wait';
     const stavB = b.stav || 'wait';
 
-    // Pokud jsou různé stavy, seskupit podle priority: ČEKÁ > DOMLUVENÁ > HOTOVO
+    // Zkontrolovat zda má zákazník cenovou nabídku (CN)
+    const emailA = (a.email || '').toLowerCase().trim();
+    const emailB = (b.email || '').toLowerCase().trim();
+    const maCnA = emailA && EMAILS_S_CN.includes(emailA);
+    const maCnB = emailB && EMAILS_S_CN.includes(emailB);
+
+    // Pokud jsou různé stavy, seskupit podle priority: ČEKÁ > DOMLUVENÁ > HOTOVO > CN
     const priorita = { 'ČEKÁ': 1, 'wait': 1, 'DOMLUVENÁ': 2, 'open': 2, 'HOTOVO': 3, 'done': 3 };
-    const prioA = priorita[stavA] || 1;
-    const prioB = priorita[stavB] || 1;
+    let prioA = priorita[stavA] || 1;
+    let prioB = priorita[stavB] || 1;
+
+    // Zákazníci s CN mají prioritu 4 (za HOTOVO)
+    if (maCnA) prioA = 4;
+    if (maCnB) prioB = 4;
 
     if (prioA !== prioB) {
       return prioA - prioB;
     }
 
     // Stejný stav - řadit podle příslušného data
-    if (stavA === 'ČEKÁ' || stavA === 'wait') {
+    // CN zákazníci (priorita 4) se řadí podle data vytvoření (nejnovější první)
+    if (prioA === 4 && prioB === 4) {
+      // Oba mají CN - řadit podle data vytvoření (nejnovější první)
+      const dateA = new Date(a.created_at || a.datum_reklamace || 0);
+      const dateB = new Date(b.created_at || b.datum_reklamace || 0);
+      return dateB - dateA;
+    } else if (stavA === 'ČEKÁ' || stavA === 'wait') {
       // Čekající: podle data vytvoření (nejnovější první)
       const dateA = new Date(a.created_at || a.datum_reklamace || 0);
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
