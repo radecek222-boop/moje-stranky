@@ -40,14 +40,14 @@ try {
     $stmtOnline = $pdo->query("SELECT user_id, username, aktualni_hra FROM wgs_hry_online ORDER BY posledni_aktivita DESC");
     $onlineHraci = $stmtOnline->fetchAll(PDO::FETCH_ASSOC);
 
-    // Načíst posledních 10 chat zpráv (globální chat) s likes
+    // Načíst posledních 200 chat zpráv (globální chat) s likes
     $stmtChat = $pdo->query("
         SELECT c.id, c.username, c.zprava, c.cas,
                COALESCE(c.likes_count, 0) as likes_count
         FROM wgs_hry_chat c
         WHERE c.mistnost_id IS NULL
         ORDER BY c.cas DESC
-        LIMIT 10
+        LIMIT 200
     ");
     $chatZpravy = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
@@ -376,6 +376,25 @@ $dostupneHry = [
             flex: 1;
             overflow-y: auto;
             padding: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--hry-border);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--hry-muted);
         }
 
         .chat-zprava {
@@ -635,11 +654,16 @@ $dostupneHry = [
             }
         });
 
-        // Scroll chat dolů
-        function scrollChatDolu() {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Scroll chat dolů - jen pokud uživatel je už dole
+        function scrollChatDolu(force = false) {
+            // Zjistit zda je uživatel na konci (tolerance 100px)
+            const jeNaKonci = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+
+            if (force || jeNaKonci) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         }
-        scrollChatDolu();
+        scrollChatDolu(true); // Force scroll při načtení stránky
 
         // Odeslat zprávu
         async function odeslatZpravu() {
@@ -667,6 +691,8 @@ $dostupneHry = [
                     chatInput.value = '';
                     // Přidat zprávu do chatu
                     pridatZpravu(result);
+                    // Force scroll dolů po odeslání vlastní zprávy
+                    scrollChatDolu(true);
                 } else {
                     console.error('Chat error:', result.message);
                 }
@@ -718,16 +744,7 @@ $dostupneHry = [
                 posledniChatId = Math.max(posledniChatId, zpravaId);
             }
 
-            // Odstranit staré zprávy (max 10)
-            while (chatMessages.children.length > 10) {
-                const stara = chatMessages.firstChild;
-                const stareId = parseInt(stara.getAttribute('data-id')) || 0;
-                if (stareId > 0) {
-                    zobrazeneZpravyIds.delete(stareId);
-                }
-                chatMessages.removeChild(stara);
-            }
-
+            // Auto-scroll dolů (jen pokud uživatel je už dole)
             scrollChatDolu();
         }
 
