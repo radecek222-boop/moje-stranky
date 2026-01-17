@@ -57,7 +57,7 @@ try {
         $stmt = $pdo->prepare("
             SELECT u.name
             FROM wgs_hry_chat_likes l
-            LEFT JOIN wgs_users u ON l.user_id = u.user_id
+            LEFT JOIN wgs_users u ON l.user_id COLLATE utf8mb4_czech_ci = u.user_id
             WHERE l.zprava_id = :zprava_id
             ORDER BY l.created_at ASC
         ");
