@@ -439,7 +439,7 @@ $dostupneHry = [
         .chat-delete-btn {
             background: transparent;
             border: none;
-            color: #999;
+            color: #dc3545;
             cursor: pointer;
             font-size: 1.5rem;
             line-height: 1;
@@ -449,7 +449,7 @@ $dostupneHry = [
         }
 
         .chat-delete-btn:hover {
-            color: #ff4444;
+            color: #c82333;
             transform: scale(1.2);
         }
 
@@ -849,7 +849,13 @@ $dostupneHry = [
 
         // Smazat zprávu
         async function smazatZpravu(zpravaId) {
-            if (!confirm('Opravdu chcete smazat tuto zprávu?')) {
+            const potvrdit = await wgsConfirm('Opravdu chcete smazat tuto zprávu?', {
+                titulek: 'Smazat zprávu',
+                btnPotvrdit: 'Smazat',
+                nebezpecne: true
+            });
+
+            if (!potvrdit) {
                 return;
             }
 
@@ -874,11 +880,11 @@ $dostupneHry = [
                         zpravaEl.remove();
                     }
                 } else {
-                    alert('Chyba: ' + result.message);
+                    wgsToast.error('Chyba: ' + result.message);
                 }
             } catch (error) {
                 console.error('Delete error:', error);
-                alert('Chyba při mazání zprávy');
+                wgsToast.error('Chyba při mazání zprávy');
             }
         }
 
