@@ -167,25 +167,20 @@ try {
             ]);
             break;
 
-        // ===== CHAT EDIT - upravit zprávu =====
-        case 'chat_edit':
+        // ===== CHAT DELETE - smazat zprávu =====
+        case 'chat_delete':
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
                 sendJsonError('Neplatný CSRF token', 403);
             }
 
             $zpravaId = (int)($_POST['zprava_id'] ?? 0);
-            $novaZprava = trim($_POST['zprava'] ?? '');
 
             if ($zpravaId <= 0) {
                 sendJsonError('Neplatné ID zprávy');
             }
 
-            if (empty($novaZprava) || mb_strlen($novaZprava) > 200) {
-                sendJsonError('Neplatná zpráva (max 200 znaků)');
-            }
-
             // Načíst zprávu a zkontrolovat vlastnictví
-            $stmt = $pdo->prepare("SELECT user_id, zprava FROM wgs_hry_chat WHERE id = :id");
+            $stmt = $pdo->prepare("SELECT user_id FROM wgs_hry_chat WHERE id = :id");
             $stmt->execute(['id' => $zpravaId]);
             $zprava = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -193,27 +188,32 @@ try {
                 sendJsonError('Zpráva neexistuje');
             }
 
-            // Pouze autor může upravit zprávu
+            // Pouze autor může smazat zprávu
             if ($zprava['user_id'] != $userId) {
-                sendJsonError('Můžete upravit pouze své zprávy', 403);
+                sendJsonError('Můžete smazat pouze své zprávy', 403);
             }
 
-            // Aktualizovat zprávu
-            $stmt = $pdo->prepare("
-                UPDATE wgs_hry_chat
-                SET zprava = :zprava, edited_at = NOW()
-                WHERE id = :id
-            ");
-            $stmt->execute([
-                'zprava' => $novaZprava,
-                'id' => $zpravaId
-            ]);
+            // Smazat zprávu a její likes
+            $pdo->beginTransaction();
+            try {
+                // Nejdřív smazat likes
+                $stmt = $pdo->prepare("DELETE FROM wgs_hry_chat_likes WHERE zprava_id = :zprava_id");
+                $stmt->execute(['zprava_id' => $zpravaId]);
 
-            sendJsonSuccess('Zpráva upravena', [
-                'zprava_id' => $zpravaId,
-                'zprava' => $novaZprava,
-                'edited_at' => date('Y-m-d H:i:s')
-            ]);
+                // Pak smazat zprávu
+                $stmt = $pdo->prepare("DELETE FROM wgs_hry_chat WHERE id = :id");
+                $stmt->execute(['id' => $zpravaId]);
+
+                $pdo->commit();
+
+                sendJsonSuccess('Zpráva smazána', [
+                    'zprava_id' => $zpravaId
+                ]);
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                error_log("Chat delete error: " . $e->getMessage());
+                sendJsonError('Chyba při mazání zprávy');
+            }
             break;
 
         // ===== CHAT LIKE - přidat/odebrat like =====
