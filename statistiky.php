@@ -791,9 +791,15 @@ body {
     </div>
 
     <div class="filter-actions">
-      <div style="display: flex; align-items: center; gap: 10px; margin-right: auto;">
-        <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
-        <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
+      <div style="display: flex; align-items: center; gap: 20px; margin-right: auto; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
+          <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor: pointer;">
+          <label for="zobrazitMimozarucni" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit mimozáruční servisy</label>
+        </div>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
