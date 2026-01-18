@@ -155,7 +155,7 @@ function getSummaryStatistiky($pdo) {
 
 /**
  * Načíst seznam prodejců pro multi-select
- * Včetně "Mimozáruční servis" (created_by IS NULL)
+ * POZN: "Mimozáruční servis" je nyní samostatný checkbox, ne v tomto filtru
  */
 function loadProdejci($pdo) {
     // FIX: Vracet user_id jako id, protože created_by v reklamacích obsahuje user_id
@@ -167,12 +167,6 @@ function loadProdejci($pdo) {
     ");
 
     $prodejci = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Přidat "Mimozáruční servis" na začátek
-    array_unshift($prodejci, [
-        'id' => 'mimozarucni',
-        'name' => 'Mimozáruční servis'
-    ]);
 
     echo json_encode([
         'status' => 'success',
@@ -406,20 +400,22 @@ function buildFilterWhere() {
         $params[':mesic'] = (int)$_GET['mesic'];
     }
 
+    // Checkbox "Zobrazit mimozáruční servisy"
+    // Pokud NENÍ zaškrtnutý, vyfiltrovat záznamy s prázdným created_by
+    $zobrazitMimozarucni = isset($_GET['zobrazit_mimozarucni']) && $_GET['zobrazit_mimozarucni'] === '1';
+    if (!$zobrazitMimozarucni) {
+        $conditions[] = "(r.created_by IS NOT NULL AND r.created_by != '')";
+    }
+
     // Prodejci (multi-select) - může být pole
     if (!empty($_GET['prodejci'])) {
         $prodejci = is_array($_GET['prodejci']) ? $_GET['prodejci'] : [$_GET['prodejci']];
 
         $prodejciConditions = [];
         foreach ($prodejci as $idx => $prodejce) {
-            if ($prodejce === 'mimozarucni') {
-                // Mimozáruční = prázdné created_by (zákazník bez přihlášení)
-                $prodejciConditions[] = "(r.created_by IS NULL OR r.created_by = '')";
-            } else {
-                $key = ":prodejce_$idx";
-                $prodejciConditions[] = "r.created_by = $key";
-                $params[$key] = $prodejce;  // VARCHAR, ne INT
-            }
+            $key = ":prodejce_$idx";
+            $prodejciConditions[] = "r.created_by = $key";
+            $params[$key] = $prodejce;  // VARCHAR, ne INT
         }
 
         if (!empty($prodejciConditions)) {

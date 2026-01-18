@@ -119,6 +119,15 @@ function inicializujMultiselect() {
         }
     });
 
+    // Checkbox Zobrazit mimozáruční servisy - listener
+    const mimozarucniCheckbox = document.getElementById('zobrazitMimozarucni');
+    if (mimozarucniCheckbox) {
+        mimozarucniCheckbox.addEventListener('change', () => {
+            aktualniStranka = 1;
+            aplikovatFiltry();
+        });
+    }
+
     // Země checkboxy - listener
     document.querySelectorAll('#zeme-dropdown input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
@@ -308,6 +317,12 @@ function getFilterParams() {
 
     // Multi-select země
     vybraneZeme.forEach(z => params.append('zeme[]', z));
+
+    // Checkbox mimozáruční servisy
+    const mimozarucniCheckbox = document.getElementById('zobrazitMimozarucni');
+    if (mimozarucniCheckbox && mimozarucniCheckbox.checked) {
+        params.append('zobrazit_mimozarucni', '1');
+    }
 
     return params.toString();
 }
@@ -577,6 +592,12 @@ function resetovitFiltry() {
     });
     vybraneZeme = ['cz', 'sk'];
     document.getElementById('zeme-label').textContent = 'Všechny';
+
+    // Reset checkboxu mimozáruční servisy na checked
+    const mimozarucniCheckbox = document.getElementById('zobrazitMimozarucni');
+    if (mimozarucniCheckbox) {
+        mimozarucniCheckbox.checked = true;
+    }
 
     aktualniStranka = 1;
     aplikovatFiltry();
