@@ -112,7 +112,7 @@ let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
-const WGS_COORDS = { lat: 50.0472, lng: 14.5881 };
+const WGS_COORDS = { lat: 50.08028448017454, lng: 14.598156697482635 };
 
 let DISTANCE_CACHE = {};
 
@@ -1807,7 +1807,17 @@ async function showDayBookingsWithDistances(date) {
     rec.termin === date && rec.id !== CURRENT_RECORD?.id
   );
 
-  // Seřadit podle času
+  // Pokud je vybraný čas, vložit CURRENT_RECORD do seznamu bookings na správné místo
+  if (SELECTED_TIME) {
+    const currentBooking = {
+      ...CURRENT_RECORD,
+      cas_navstevy: SELECTED_TIME,
+      isNew: true  // Označit jako nový záznam
+    };
+    bookings.push(currentBooking);
+  }
+
+  // Seřadit podle času (včetně nového zákazníka)
   bookings.sort((a, b) => {
     const timeA = a.cas_navstevy || '00:00';
     const timeB = b.cas_navstevy || '00:00';
@@ -1878,19 +1888,17 @@ async function showDayBookingsWithDistances(date) {
   
   const distancePairs = [];
   let fromAddr = WGS_ADDRESS;
-  
+
   for (let i = 0; i < bookings.length; i++) {
     const booking = bookings[i];
     let toAddr = Utils.getAddress(booking);
-    
+
     if (!toAddr || toAddr === '—') continue;
     toAddr = Utils.addCountryToAddress(toAddr);
-    
-    distancePairs.push({ from: fromAddr, to: toAddr, booking: booking });
+
+    distancePairs.push({ from: fromAddr, to: toAddr, booking: booking, isNew: booking.isNew || false });
     fromAddr = toAddr;
   }
-  
-  distancePairs.push({ from: fromAddr, to: currentAddress, booking: null, isNew: true });
   
   const distances = await getDistancesBatch(distancePairs.map(p => ({ from: p.from, to: p.to })));
   
@@ -1900,15 +1908,15 @@ async function showDayBookingsWithDistances(date) {
   for (let i = 0; i < distancePairs.length; i++) {
     const pair = distancePairs[i];
     const dist = distances[i];
-    
+
     if (!dist) continue;
-    
+
     totalKm += parseFloat(dist.km);
-    
+
     const fromName = i === 0 ? 'WGS Sídlo' : Utils.getCustomerName(distancePairs[i-1].booking);
-    const toName = pair.isNew ? Utils.getCustomerName(CURRENT_RECORD) : Utils.getCustomerName(pair.booking);
-    const time = pair.isNew ? (SELECTED_TIME || '—') : (pair.booking?.cas_navstevy || '—');
-    
+    const toName = Utils.getCustomerName(pair.booking);
+    const time = pair.booking?.cas_navstevy || '—';
+
     routes.push({
       from: fromName,
       to: toName,
@@ -1939,7 +1947,7 @@ async function showDayBookingsWithDistances(date) {
         </div>
         <div class="distance-stat">
           <div class="distance-stat-label">Počet návštěv</div>
-          <div class="distance-stat-value">${bookings.length + 1}</div>
+          <div class="distance-stat-value">${bookings.length}</div>
         </div>
       </div>
       <div class="route-info">
@@ -1948,9 +1956,12 @@ async function showDayBookingsWithDistances(date) {
     </div>
   `;
   
-  if (bookings.length > 0) {
+  // Zobrazit existující termíny (bez nového zákazníka)
+  const existingBookings = bookings.filter(b => !b.isNew);
+
+  if (existingBookings.length > 0) {
     let html = '<div class="day-bookings" style="margin-top: 0.5rem;"><h4>Termíny v tento den:</h4>';
-    bookings.forEach(b => {
+    existingBookings.forEach(b => {
       const customerName = Utils.getCustomerName(b);
       html += `
         <div class="booking-item" data-action="showBookingDetail" data-id="${b.id}">
