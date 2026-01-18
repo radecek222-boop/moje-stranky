@@ -293,7 +293,7 @@ body {
 .stats-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .stats-table thead {
@@ -302,18 +302,24 @@ body {
 }
 
 .stats-table th {
-    padding: 0.75rem;
+    padding: 0.5rem 0.4rem;
     text-align: left;
     font-weight: 600;
     color: #333333;
     text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.5px;
+    font-size: 0.65rem;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 .stats-table td {
-    padding: 0.75rem;
+    padding: 0.5rem 0.4rem;
     border-bottom: 1px solid #f0f0f0;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
 }
 
 .stats-table tbody tr:hover {

@@ -391,6 +391,7 @@ function renderTabulka(data) {
         rows += `
             <tr>
                 <td>${z.cislo_reklamace || '-'}</td>
+                <td>${z.jmeno_zakaznika || '-'}</td>
                 <td>${z.adresa || '-'}</td>
                 <td>${z.model || '-'}</td>
                 <td>${z.technik}</td>
@@ -407,13 +408,14 @@ function renderTabulka(data) {
         <table class="stats-table">
             <thead>
                 <tr>
-                    <th>Reklamace ID</th>
+                    <th>ID</th>
+                    <th>Jméno</th>
                     <th>Adresa</th>
                     <th>Model</th>
                     <th>Technik</th>
                     <th>Prodejce</th>
-                    <th>Částka celkem</th>
-                    <th>Výdělek technika (33%)</th>
+                    <th>Částka</th>
+                    <th>Výdělek</th>
                     <th>Země</th>
                     <th>Datum</th>
                 </tr>
@@ -650,32 +652,34 @@ async function exportovatPDF() {
                 <h1 style="color: #333; font-size: 18px; margin: 0 0 8px 0; font-weight: 700;">Statistiky a reporty - WGS</h1>
                 <p style="color: #666; font-size: 11px; margin: 0;">Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek</p>
             </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 8px;">
                 <thead>
                     <tr style="background: #f0f0f0; color: #333;">
-                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Reklamace ID</th>
-                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Adresa</th>
-                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Model</th>
-                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Technik</th>
-                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Prodejce</th>
-                        <th style="padding: 5px; text-align: right; border: 1px solid #999;">Částka</th>
-                        ${zobrazitOdmenu ? '<th style="padding: 5px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>' : ''}
-                        <th style="padding: 5px; text-align: center; border: 1px solid #999;">Země</th>
-                        <th style="padding: 5px; text-align: center; border: 1px solid #999;">Datum</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">ID</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">Jméno</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">Adresa</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">Model</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">Technik</th>
+                        <th style="padding: 4px; text-align: left; border: 1px solid #999; font-size: 7px;">Prodejce</th>
+                        <th style="padding: 4px; text-align: right; border: 1px solid #999; font-size: 7px;">Částka</th>
+                        ${zobrazitOdmenu ? '<th style="padding: 4px; text-align: right; border: 1px solid #999; font-size: 7px;">Výdělek</th>' : ''}
+                        <th style="padding: 4px; text-align: center; border: 1px solid #999; font-size: 7px;">Země</th>
+                        <th style="padding: 4px; text-align: center; border: 1px solid #999; font-size: 7px;">Datum</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${zakazky.map((z, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f5f5f5'};">
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.cislo_reklamace || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.model || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.technik || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
-                            ${zobrazitOdmenu ? `<td style="padding: 4px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.cislo_reklamace || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.jmeno_zakaznika || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.adresa || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.model || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.technik || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.prodejce || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; text-align: right; font-size: 8px;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
+                            ${zobrazitOdmenu ? `<td style="padding: 3px; border: 1px solid #ddd; text-align: right; font-size: 8px;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
+                            <td style="padding: 3px; border: 1px solid #ddd; text-align: center; font-size: 8px;">${z.zeme || '-'}</td>
+                            <td style="padding: 3px; border: 1px solid #ddd; text-align: center; font-size: 8px;">${z.datum || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>

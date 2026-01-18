@@ -230,6 +230,7 @@ function getZakazky($pdo) {
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
+            r.jmeno as jmeno_zakaznika,
             r.adresa,
             r.model,
             r.assigned_to as assigned_to_raw,
