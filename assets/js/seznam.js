@@ -112,7 +112,7 @@ let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
-const WGS_COORDS = { lat: 50.0472, lng: 14.5881 };
+const WGS_COORDS = { lat: 50.08028448017454, lng: 14.598156697482635 };
 
 let DISTANCE_CACHE = {};
 
