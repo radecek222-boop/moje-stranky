@@ -1873,14 +1873,14 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn active" data-filter="all" data-lang-cs="Všechny" data-lang-en="All" data-lang-it="Tutti">
       Všechny <span id="count-all" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="wait" data-lang-cs="Čekající" data-lang-en="Waiting" data-lang-it="In Attesa">
-      Čekající <span id="count-wait" style="opacity: 0.7;"></span>
+    <button class="filter-btn" data-filter="wait" data-lang-cs="NOVÁ" data-lang-en="New" data-lang-it="Nuovo">
+      NOVÁ <span id="count-wait" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="open" data-lang-cs="V řešení" data-lang-en="In Progress" data-lang-it="In Corso">
-      V řešení <span id="count-open" style="opacity: 0.7;"></span>
+    <button class="filter-btn" data-filter="open" data-lang-cs="DOMLUVENO" data-lang-en="Scheduled" data-lang-it="Programmato">
+      DOMLUVENO <span id="count-open" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="done" data-lang-cs="Vyřízené" data-lang-en="Completed" data-lang-it="Completato">
-      Vyřízené <span id="count-done" style="opacity: 0.7;"></span>
+    <button class="filter-btn" data-filter="done" data-lang-cs="HOTOVO" data-lang-en="Completed" data-lang-it="Completato">
+      HOTOVO <span id="count-done" style="opacity: 0.7;"></span>
     </button>
     <?php
     $userRole = strtolower($_SESSION['role'] ?? '');
