@@ -13,7 +13,7 @@ header('Content-Type: application/json');
 header('Cache-Control: private, max-age=300'); // 5 minut
 
 /**
- * Převede adresu na GPS souřadnice pomocí Geoapify geocoding
+ * Převede adresu na GPS souřadnice pomocí Nominatim (OpenStreetMap)
  * PERFORMANCE FIX: Přidán APCu cache (TTL 24h)
  * @param string $address Adresa k převodu
  * @return array|null ['lat' => float, 'lon' => float] nebo null při chybě
@@ -21,10 +21,8 @@ header('Cache-Control: private, max-age=300'); // 5 minut
 function geocodeAddress($address) {
     try {
         // CACHE: Kontrola APCu cache (TTL 24 hodin)
-        // Adresy se nemění, takže můžeme cachovat dlouho
         $cacheKey = 'geocode_' . md5(strtolower(trim($address)));
 
-        // Pokud je APCu dostupné, zkus načíst z cache
         if (function_exists('apcu_fetch')) {
             $cached = apcu_fetch($cacheKey);
             if ($cached !== false) {
@@ -35,32 +33,44 @@ function geocodeAddress($address) {
 
         error_log("🌐 Cache MISS - Fetching geocoding for: $address");
 
-        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
-               '://' . $_SERVER['HTTP_HOST'] .
-               '/api/geocode_proxy.php?action=search&address=' . urlencode($address);
+        // FIX: Přímo volat Nominatim API místo proxy
+        $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
+            'q' => $address,
+            'format' => 'geojson',
+            'limit' => 1,
+            'addressdetails' => 1,
+            'countrycodes' => 'cz,sk',
+            'email' => 'reklamace@wgs-service.cz',
+            'accept-language' => 'cs'
+        ]);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Pro lokální requesty
-
-        // Přenos session cookies pro autentizaci
-        if (isset($_COOKIE[session_name()])) {
-            curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . $_COOKIE[session_name()]);
-        }
+        curl_setopt($ch, CURLOPT_USERAGENT, 'WGS Service/1.0 (contact: reklamace@wgs-service.cz)');
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
+        if ($response === false) {
+            error_log("cURL error for geocoding {$address}: {$curlError}");
+            return null;
+        }
+
         if ($httpCode !== 200) {
+            error_log("HTTP {$httpCode} error for geocoding {$address}");
             return null;
         }
 
         $data = json_decode($response, true);
 
         if (!$data || !isset($data['features']) || empty($data['features'])) {
+            error_log("No geocoding results for: {$address}");
             return null;
         }
 
@@ -76,7 +86,7 @@ function geocodeAddress($address) {
         // CACHE: Uložit do APCu cache (TTL 24 hodin = 86400 sekund)
         if (function_exists('apcu_store')) {
             apcu_store($cacheKey, $result, 86400);
-            error_log("💾 Cached geocoding result for: $address");
+            error_log("💾 Cached geocoding result for: {$address} -> {$result['lat']}, {$result['lon']}");
         }
 
         return $result;
@@ -88,65 +98,54 @@ function geocodeAddress($address) {
 }
 
 /**
- * Vypočítá trasu mezi dvěma body pomocí Geoapify routing
+ * Vypočítá trasu mezi dvěma body pomocí OSRM (Open Source Routing Machine)
  * @param float $startLat Začátek - zeměpisná šířka
  * @param float $startLon Začátek - zeměpisná délka
  * @param float $endLat Konec - zeměpisná šířka
  * @param float $endLon Konec - zeměpisná délka
  * @return array|null ['distance' => int (metry), 'time' => int (sekundy)] nebo null
  */
-/**
- * CalculateRoute
- *
- * @param mixed $startLat StartLat
- * @param mixed $startLon StartLon
- * @param mixed $endLat EndLat
- * @param mixed $endLon EndLon
- */
 function calculateRoute($startLat, $startLon, $endLat, $endLon) {
     try {
-        // FIX: Použití action=routing místo action=route
-        // routing akce používá OSRM (open-source) ZDARMA, nepotřebuje API klíč
-        // route akce vyžaduje Geoapify API klíč
-        $waypoints = "{$startLat},{$startLon}|{$endLat},{$endLon}";
-
-        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
-               '://' . $_SERVER['HTTP_HOST'] .
-               '/api/geocode_proxy.php?action=routing&' .
-               'waypoints=' . urlencode($waypoints) .
-               '&mode=drive';
+        // FIX: Přímo volat OSRM API místo proxy
+        // OSRM je open-source routing engine (ZDARMA, bez API klíče)
+        $osrmUrl = "https://router.project-osrm.org/route/v1/driving/{$startLon},{$startLat};{$endLon},{$endLat}?overview=false";
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_URL, $osrmUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        // Přenos session cookies
-        if (isset($_COOKIE[session_name()])) {
-            curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . $_COOKIE[session_name()]);
-        }
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'WGS Service/1.0');
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
+        if ($response === false) {
+            error_log("cURL error for routing: {$curlError}");
+            return null;
+        }
+
         if ($httpCode !== 200) {
+            error_log("HTTP {$httpCode} error for routing");
             return null;
         }
 
         $data = json_decode($response, true);
 
-        if (!$data || !isset($data['features']) || empty($data['features'])) {
+        if (!$data || !isset($data['code']) || $data['code'] !== 'Ok' || !isset($data['routes'][0])) {
+            error_log("Invalid OSRM response or no route found");
             return null;
         }
 
-        $feature = $data['features'][0];
-        $properties = $feature['properties'];
+        $route = $data['routes'][0];
 
         return [
-            'distance' => (int)$properties['distance'], // metry
-            'time' => (int)$properties['time'] // sekundy
+            'distance' => (int)$route['distance'], // metry
+            'time' => (int)$route['duration'] // sekundy
         ];
 
     } catch (Exception $e) {
