@@ -5,10 +5,74 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Přístup odepřen - pouze admin');
+}
+
+$deleted = 0;
+$total = 0;
+$keys = [];
+$wasExecuted = false;
+
+// CSRF ochrana - vymazat pouze při POST requestu s platným tokenem
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Neplatný CSRF token');
+    }
+
+    $wasExecuted = true;
+
+    if (!function_exists('apcu_cache_info')) {
+        // APCu není dostupné
+    } else {
+        try {
+            $info = apcu_cache_info(true);
+
+            if ($info) {
+                // Získat seznam všech klíčů v cache
+                foreach ($info['cache_list'] as $entry) {
+                    $key = $entry['info'] ?? '';
+
+                    // Mazat pouze geocoding cache (klíče začínající na 'geocode_')
+                    if (strpos($key, 'geocode_') === 0) {
+                        $total++;
+                        if (apcu_delete($key)) {
+                            $deleted++;
+                            $keys[] = ['key' => $key, 'status' => 'success'];
+                        } else {
+                            $keys[] = ['key' => $key, 'status' => 'error'];
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // Error handling below
+        }
+    }
+}
+
+// Získat preview (seznam klíčů bez mazání)
+$previewKeys = [];
+$previewTotal = 0;
+
+if (!$wasExecuted && function_exists('apcu_cache_info')) {
+    try {
+        $info = apcu_cache_info(true);
+        if ($info) {
+            foreach ($info['cache_list'] as $entry) {
+                $key = $entry['info'] ?? '';
+                if (strpos($key, 'geocode_') === 0) {
+                    $previewTotal++;
+                    $previewKeys[] = $key;
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // Ignore
+    }
 }
 
 ?>
@@ -24,86 +88,87 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
         .success { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 10px 0; }
         .error { background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; }
         .info { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; }
         .result { font-size: 1.2rem; font-weight: bold; color: #2D5016; margin: 20px 0; }
         .key-list { background: #f8f8f8; padding: 10px; margin: 10px 0; max-height: 400px; overflow-y: auto; }
         .key-item { padding: 5px; border-bottom: 1px solid #ddd; font-size: 0.85rem; }
-        .btn { display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; border: none; cursor: pointer; font-size: 1rem; }
         .btn:hover { background: #1a300d; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
     </style>
 </head>
 <body>
 <div class='container'>
     <h1>🧹 Vymazání Geocoding Cache</h1>
 
-<?php
+<?php if (!function_exists('apcu_cache_info')): ?>
+    <div class='error'>❌ APCu není dostupné na tomto serveru</div>
+    <div class='info'>Cache není aktivní nebo server nepodporuje APCu.</div>
 
-if (!function_exists('apcu_cache_info')) {
-    echo "<div class='error'>❌ APCu není dostupné na tomto serveru</div>";
-    echo "<div class='info'>Cache není aktivní nebo server nepodporuje APCu.</div>";
-    echo "</div></body></html>";
-    exit;
-}
+<?php elseif ($wasExecuted): ?>
+    <!-- VÝSLEDEK MAZÁNÍ -->
+    <div class='result'>
+        📊 Výsledek:<br>
+        Celkem geocoding klíčů: <strong><?= $total ?></strong><br>
+        Smazáno: <strong><?= $deleted ?></strong>
+    </div>
 
-try {
-    $info = apcu_cache_info(true);
+    <?php if ($deleted > 0): ?>
+        <div class='success'>✅ Cache byla úspěšně vymazána!</div>
 
-    if (!$info) {
-        echo "<div class='error'>❌ Nelze získat informace o APCu cache</div>";
-        echo "</div></body></html>";
-        exit;
-    }
+        <?php if (!empty($keys)): ?>
+            <div class='info'>Smazané klíče:</div>
+            <div class='key-list'>
+                <?php foreach ($keys as $item): ?>
+                    <?php
+                    $icon = $item['status'] === 'success' ? '✓' : '✗';
+                    $color = $item['status'] === 'success' ? '#28a745' : '#dc3545';
+                    ?>
+                    <div class='key-item' style='color: <?= $color ?>;'><?= $icon ?> <?= htmlspecialchars($item['key']) ?></div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    <?php else: ?>
+        <div class='info'>ℹ️ Žádné geocoding klíče nebyly nalezeny v cache.</div>
+    <?php endif; ?>
 
-    $deleted = 0;
-    $total = 0;
-    $keys = [];
+<?php else: ?>
+    <!-- PREVIEW A POTVRZENÍ -->
+    <div class='info'>
+        <strong>ℹ️ Co se stane?</strong><br>
+        Tato akce vymaže všechny geocoding cache záznamy z APCu.<br>
+        Frontend pak bude muset znovu vypočítat všechny vzdálenosti.
+    </div>
 
-    // Získat seznam všech klíčů v cache
-    foreach ($info['cache_list'] as $entry) {
-        $key = $entry['info'] ?? '';
+    <?php if ($previewTotal > 0): ?>
+        <div class='warning'>
+            <strong>⚠️ Nalezeno <?= $previewTotal ?> geocoding záznamů</strong>
+        </div>
 
-        // Mazat pouze geocoding cache (klíče začínající na 'geocode_')
-        if (strpos($key, 'geocode_') === 0) {
-            $total++;
-            if (apcu_delete($key)) {
-                $deleted++;
-                $keys[] = ['key' => $key, 'status' => 'success'];
-            } else {
-                $keys[] = ['key' => $key, 'status' => 'error'];
-            }
-        }
-    }
+        <?php if (!empty($previewKeys)): ?>
+            <div class='info'>Klíče, které budou smazány:</div>
+            <div class='key-list'>
+                <?php foreach ($previewKeys as $key): ?>
+                    <div class='key-item'><?= htmlspecialchars($key) ?></div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-    echo "<div class='result'>";
-    echo "📊 Výsledek:<br>";
-    echo "Celkem geocoding klíčů: <strong>{$total}</strong><br>";
-    echo "Smazáno: <strong>{$deleted}</strong>";
-    echo "</div>";
+        <form method='POST' style='margin: 20px 0;'>
+            <input type='hidden' name='csrf_token' value='<?= htmlspecialchars(generateCSRFToken()) ?>'>
+            <button type='submit' class='btn btn-danger'>🗑️ VYMAZAT CACHE</button>
+            <a href='admin.php' class='btn'>← Zrušit</a>
+        </form>
+    <?php else: ?>
+        <div class='info'>ℹ️ Cache je prázdná - nic k vymazání.</div>
+    <?php endif; ?>
 
-    if ($deleted > 0) {
-        echo "<div class='success'>✅ Cache byla úspěšně vymazána!</div>";
-
-        if (!empty($keys)) {
-            echo "<div class='info'>Smazané klíče:</div>";
-            echo "<div class='key-list'>";
-            foreach ($keys as $item) {
-                $icon = $item['status'] === 'success' ? '✓' : '✗';
-                $color = $item['status'] === 'success' ? '#28a745' : '#dc3545';
-                echo "<div class='key-item' style='color: {$color};'>{$icon} {$item['key']}</div>";
-            }
-            echo "</div>";
-        }
-    } else {
-        echo "<div class='info'>ℹ️ Žádné geocoding klíče nebyly nalezeny v cache.</div>";
-    }
-
-} catch (Exception $e) {
-    echo "<div class='error'>❌ Chyba: " . htmlspecialchars($e->getMessage()) . "</div>";
-}
-
-?>
+<?php endif; ?>
 
     <div style="margin-top: 2rem;">
         <a href="debug_geocoding.php" class="btn">🔍 Otestovat Geocoding</a>
+        <a href="debug_distance_cache.php" class="btn">🔍 Frontend Cache</a>
         <a href="admin.php" class="btn">← Zpět na Admin</a>
     </div>
 </div>
