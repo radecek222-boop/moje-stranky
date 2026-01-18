@@ -18,12 +18,40 @@
  */
 function auditLog($action, $details = [], $userId = null) {
     try {
+        // Určit user_id
+        $effectiveUserId = $userId ?? $_SESSION['user_id'] ?? 'anonymous';
+
+        // Získat user_name
+        $userName = $_SESSION['user_name'] ?? null;
+
+        // Pokud user_name není v session, ale máme user_id, načíst z databáze
+        if (!$userName && $effectiveUserId && $effectiveUserId !== 'anonymous') {
+            try {
+                $pdo = getDbConnection();
+                $stmt = $pdo->prepare("SELECT jmeno, prijmeni FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+                $stmt->execute(['user_id' => $effectiveUserId]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($user) {
+                    $userName = trim(($user['jmeno'] ?? '') . ' ' . ($user['prijmeni'] ?? ''));
+                }
+            } catch (Exception $e) {
+                // Pokud selže DB dotaz, použít fallback
+                error_log("Audit log DB error: " . $e->getMessage());
+            }
+        }
+
+        // Fallback pokud stále nemáme jméno
+        if (!$userName) {
+            $userName = 'Unknown';
+        }
+
         // Sestavení audit záznamu
         $logEntry = [
             'timestamp' => date('Y-m-d H:i:s'),
             'action' => $action,
-            'user_id' => $userId ?? $_SESSION['user_id'] ?? 'anonymous',
-            'user_name' => $_SESSION['user_name'] ?? 'Unknown',
+            'user_id' => $effectiveUserId,
+            'user_name' => $userName,
             'is_admin' => isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true,
             'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
