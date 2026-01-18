@@ -518,8 +518,9 @@ async function renderOrders(items = null) {
         }
 
         if (filterType === 'cn') {
-          // CN: má odeslanou cenovou nabídku
-          if (email && EMAILS_S_CN.includes(email)) return true;
+          // CN: má odeslanou cenovou nabídku A NENÍ hotovo
+          const isDone = stav === 'HOTOVO' || stav === 'done';
+          if (email && EMAILS_S_CN.includes(email) && !isDone) return true;
         }
 
         if (filterType === 'poz') {
@@ -588,12 +589,14 @@ async function renderOrders(items = null) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
   }
 
-  // Aktualizovat počet CN
+  // Aktualizovat počet CN (pouze zákazníci s CN, kteří NEJSOU hotovo)
   const countCnEl = document.getElementById('count-cn');
   if (countCnEl) {
     const countCn = items.filter(r => {
       const email = (r.email || '').toLowerCase().trim();
-      return email && EMAILS_S_CN.includes(email);
+      const stav = r.stav || 'wait';
+      const isDone = stav === 'HOTOVO' || stav === 'done';
+      return email && EMAILS_S_CN.includes(email) && !isDone;
     }).length;
     countCnEl.textContent = `(${countCn})`;
   }
