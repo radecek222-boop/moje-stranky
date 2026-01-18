@@ -658,12 +658,12 @@ async function renderOrders(items = null) {
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
       return dateB - dateA;
     } else if (stavA === 'ČEKÁ' || stavA === 'wait') {
-      // Čekající: podle data vytvoření (nejnovější první)
+      // NOVÁ: podle data vytvoření (nejnovější první)
       const dateA = new Date(a.created_at || a.datum_reklamace || 0);
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
       return dateB - dateA;
     } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
-      // Domluvená: podle termínu + času návštěvy (nejbližší první)
+      // DOMLUVENO: podle termínu + času návštěvy (nejbližší první)
       const getTerminDate = (rec) => {
         if (!rec.termin) return new Date('9999-12-31');
 

@@ -156,17 +156,17 @@ try {
                 <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'all' ? '#fff' : '#000' ?>;"><?= $stats['all'] ?></span>
                 <span style="font-size: 0.7rem; color: <?= $filterStav === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Celkem</span>
             </div>
-            <div data-action="filterReklamace" data-filter="wait" style="background: <?= $filterStav === 'wait' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
-                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'wait' ? '#fff' : '#000' ?>;"><?= $stats['wait'] ?></span>
-                <span style="font-size: 0.7rem; color: <?= $filterStav === 'wait' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Čekající</span>
+            <div data-action="filterReklamace" data-filter="wait" style="background: <?= $filterStav === 'wait' ? '#ffeb3b' : '#fff' ?>; border: 2px solid #ffeb3b; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $stats['wait'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'wait' ? '#000' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">NOVÁ</span>
             </div>
-            <div data-action="filterReklamace" data-filter="open" style="background: <?= $filterStav === 'open' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
-                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'open' ? '#fff' : '#000' ?>;"><?= $stats['open'] ?></span>
-                <span style="font-size: 0.7rem; color: <?= $filterStav === 'open' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">V řešení</span>
+            <div data-action="filterReklamace" data-filter="open" style="background: <?= $filterStav === 'open' ? '#2196f3' : '#fff' ?>; border: 2px solid #2196f3; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'open' ? '#fff' : '#2196f3' ?>;"><?= $stats['open'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'open' ? '#fff' : '#2196f3' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">DOMLUVENO</span>
             </div>
-            <div data-action="filterReklamace" data-filter="done" style="background: <?= $filterStav === 'done' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
-                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'done' ? '#fff' : '#000' ?>;"><?= $stats['done'] ?></span>
-                <span style="font-size: 0.7rem; color: <?= $filterStav === 'done' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Vyřízené</span>
+            <div data-action="filterReklamace" data-filter="done" style="background: <?= $filterStav === 'done' ? '#4caf50' : '#fff' ?>; border: 2px solid #4caf50; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'done' ? '#fff' : '#4caf50' ?>;"><?= $stats['done'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'done' ? '#fff' : '#4caf50' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">HOTOVO</span>
             </div>
         </div>
 
