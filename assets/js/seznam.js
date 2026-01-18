@@ -1917,7 +1917,17 @@ async function showDayBookingsWithDistances(date) {
     distancePairs.push({ from: fromAddr, to: toAddr, booking: booking, isNew: booking.isNew || false });
     fromAddr = toAddr;
   }
-  
+
+  // Přidat zpáteční cestu do WGS sídla z poslední adresy
+  if (distancePairs.length > 0) {
+    distancePairs.push({
+      from: fromAddr, // Poslední adresa
+      to: WGS_ADDRESS,
+      booking: null,
+      isReturn: true
+    });
+  }
+
   const distances = await getDistancesBatch(distancePairs.map(p => ({ from: p.from, to: p.to })));
   
   let totalKm = 0;
@@ -1931,25 +1941,36 @@ async function showDayBookingsWithDistances(date) {
 
     totalKm += parseFloat(dist.km);
 
-    const fromName = i === 0 ? 'WGS Sídlo' : Utils.getCustomerName(distancePairs[i-1].booking);
-    const toName = Utils.getCustomerName(pair.booking);
-    const time = pair.booking?.cas_navstevy || '—';
+    let fromName, toName, time;
+
+    if (pair.isReturn) {
+      // Zpáteční cesta do WGS sídla
+      fromName = Utils.getCustomerName(distancePairs[i-1].booking);
+      toName = 'WGS Sídlo';
+      time = '—';
+    } else {
+      // Normální úsek trasy
+      fromName = i === 0 ? 'WGS Sídlo' : Utils.getCustomerName(distancePairs[i-1].booking);
+      toName = Utils.getCustomerName(pair.booking);
+      time = pair.booking?.cas_navstevy || '—';
+    }
 
     routes.push({
       from: fromName,
       to: toName,
       time: time,
       km: dist.km,
-      isNew: pair.isNew
+      isNew: pair.isNew,
+      isReturn: pair.isReturn || false
     });
   }
   
   let routesHtml = routes.map(r => `
-    <div class="route-item ${r.isNew ? 'new-customer' : ''}">
+    <div class="route-item ${r.isNew ? 'new-customer' : ''} ${r.isReturn ? 'return-route' : ''}">
       <div class="route-item-left">
         <span>${r.from}</span>
         <span class="route-arrow">→</span>
-        <span>${r.to} ${r.time !== '—' ? '(' + r.time + ')' : ''}</span>
+        <span>${r.to}${r.isReturn ? ' (zpět)' : ''} ${r.time !== '—' ? '(' + r.time + ')' : ''}</span>
       </div>
       <span class="route-distance">${r.km} km</span>
     </div>

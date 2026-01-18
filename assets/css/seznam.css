@@ -858,6 +858,17 @@ body {
   color: var(--c-black);
   font-size: 0.85rem;
 }
+.route-item.return-route {
+  opacity: 0.7;
+  font-style: italic;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+.route-item.return-route .route-distance {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--c-grey);
+}
 .route-distance {
   font-weight: 600;
   background: var(--c-white);
