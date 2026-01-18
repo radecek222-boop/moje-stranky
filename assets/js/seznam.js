@@ -148,10 +148,28 @@ const Utils = {
   
   addCountryToAddress: (address) => {
     if (!address) return address;
-    if (!address.toLowerCase().includes('česk')) {
-      return address + ', Česká republika';
+
+    const lowerAddr = address.toLowerCase();
+
+    // Pokud už obsahuje název země, nepřidávat
+    if (lowerAddr.includes('česk') || lowerAddr.includes('slovak') ||
+        lowerAddr.includes('czech') || lowerAddr.includes('republic')) {
+      return address;
     }
-    return address;
+
+    // Detekce slovenské adresy podle:
+    // 1. Slovenské PSČ (formát: XXX XX, např. "010 04")
+    // 2. Slovenská města
+    const slovenskaMesta = ['žilina', 'bratislava', 'košice', 'prešov', 'nitra', 'banská bystrica', 'trnava', 'martin', 'trenčín', 'poprad'];
+    const jeSlovenskoMesto = slovenskaMesta.some(mesto => lowerAddr.includes(mesto));
+    const jeSlovenskePSC = /\d{3}\s?\d{2}/.test(address) && (jeSlovenskoMesto || lowerAddr.includes('sk-'));
+
+    if (jeSlovenskoMesto || jeSlovenskePSC) {
+      return address + ', Slovenská republika';
+    }
+
+    // Výchozí: Česká republika
+    return address + ', Česká republika';
   },
   
   filterByUserRole: (items) => {
