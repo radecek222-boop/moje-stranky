@@ -95,7 +95,7 @@ function showToast(message, type = 'info') {
 
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let WGS_DATA_CACHE = [];
-let ACTIVE_FILTER = 'all';
+let ACTIVE_FILTERS = new Set(); // Může být více filtrů najednou (toggle)
 let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
@@ -358,12 +358,35 @@ function matchesSearch(record, query) {
 function initFilters() {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      ACTIVE_FILTER = btn.dataset.filter;
+      const filterType = btn.dataset.filter;
+
+      // Tlačítko "VŠECHNY" - vypne všechny ostatní filtry
+      if (filterType === 'all') {
+        ACTIVE_FILTERS.clear();
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else {
+        // Toggle filtr (zapnout/vypnout)
+        if (ACTIVE_FILTERS.has(filterType)) {
+          ACTIVE_FILTERS.delete(filterType);
+          btn.classList.remove('active');
+        } else {
+          ACTIVE_FILTERS.add(filterType);
+          btn.classList.add('active');
+        }
+
+        // Pokud je nějaký filtr aktivní, vypnout "VŠECHNY"
+        const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+        if (ACTIVE_FILTERS.size > 0) {
+          allBtn?.classList.remove('active');
+        } else {
+          // Pokud nejsou žádné filtry, aktivovat "VŠECHNY"
+          allBtn?.classList.add('active');
+        }
+      }
 
       let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    renderOrders(userItems);
+      renderOrders(userItems);
     });
   });
 }
@@ -468,26 +491,46 @@ async function renderOrders(items = null) {
 
   let filtered = items;
 
-  if (ACTIVE_FILTER !== 'all' && ACTIVE_FILTER !== 'cn' && ACTIVE_FILTER !== 'poz') {
-    const statusMap = {
-      'wait': ['ČEKÁ', 'wait'],
-      'open': ['DOMLUVENÁ', 'open'],
-      'done': ['HOTOVO', 'done']
-    };
-
+  // Pokud jsou aktivní nějaké filtry, aplikovat je (OR logika - zobrazit pokud splňuje alespoň jeden filtr)
+  if (ACTIVE_FILTERS.size > 0) {
     filtered = items.filter(r => {
       const stav = r.stav || 'wait';
-      const matchesStatus = statusMap[ACTIVE_FILTER]?.includes(stav);
+      const email = (r.email || '').toLowerCase().trim();
+      const createdBy = (r.created_by || '').trim();
 
-      // V záložce ČEKAJÍCÍ vyloučit zakázky s poslanou CN
-      if (ACTIVE_FILTER === 'wait' && matchesStatus) {
-        const email = (r.email || '').toLowerCase().trim();
-        if (email && EMAILS_S_CN.includes(email)) {
-          return false; // Zakázka má CN - nezobrazovat v ČEKAJÍCÍ
+      // Kontrolovat každý aktivní filtr
+      for (const filterType of ACTIVE_FILTERS) {
+        if (filterType === 'wait') {
+          // ČEKAJÍCÍ: stav je wait A nemá CN
+          const isWait = stav === 'ČEKÁ' || stav === 'wait';
+          const hasNoCn = !(email && EMAILS_S_CN.includes(email));
+          if (isWait && hasNoCn) return true;
+        }
+
+        if (filterType === 'open') {
+          // V ŘEŠENÍ: stav je open
+          if (stav === 'DOMLUVENÁ' || stav === 'open') return true;
+        }
+
+        if (filterType === 'done') {
+          // VYŘÍZENÉ: stav je done
+          if (stav === 'HOTOVO' || stav === 'done') return true;
+        }
+
+        if (filterType === 'cn') {
+          // CN: má odeslanou cenovou nabídku A NENÍ hotovo
+          const isDone = stav === 'HOTOVO' || stav === 'done';
+          if (email && EMAILS_S_CN.includes(email) && !isDone) return true;
+        }
+
+        if (filterType === 'poz') {
+          // POZ: mimozáruční oprava (created_by je prázdné)
+          if (!createdBy) return true;
         }
       }
 
-      return matchesStatus;
+      // Záznam nesplňuje žádný z aktivních filtrů
+      return false;
     });
   }
 
@@ -546,12 +589,14 @@ async function renderOrders(items = null) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
   }
 
-  // Aktualizovat počet CN
+  // Aktualizovat počet CN (pouze zákazníci s CN, kteří NEJSOU hotovo)
   const countCnEl = document.getElementById('count-cn');
   if (countCnEl) {
     const countCn = items.filter(r => {
       const email = (r.email || '').toLowerCase().trim();
-      return email && EMAILS_S_CN.includes(email);
+      const stav = r.stav || 'wait';
+      const isDone = stav === 'HOTOVO' || stav === 'done';
+      return email && EMAILS_S_CN.includes(email) && !isDone;
     }).length;
     countCnEl.textContent = `(${countCn})`;
   }
@@ -578,22 +623,6 @@ async function renderOrders(items = null) {
       return true;
     }).length;
     countWaitEl.textContent = `(${countWait})`;
-  }
-
-  // Filtr pro CN - zobrazit pouze reklamace s odeslanou cenovou nabídkou
-  if (ACTIVE_FILTER === 'cn') {
-    filtered = filtered.filter(r => {
-      const email = (r.email || '').toLowerCase().trim();
-      return email && EMAILS_S_CN.includes(email);
-    });
-  }
-
-  // Filtr pro POZ - zobrazit pouze mimozáruční opravy (created_by je prázdné)
-  if (ACTIVE_FILTER === 'poz') {
-    filtered = filtered.filter(r => {
-      const createdBy = (r.created_by || '').trim();
-      return !createdBy; // Prázdné created_by = mimozáruční oprava
-    });
   }
 
   // Řazení podle stavu:
@@ -632,12 +661,12 @@ async function renderOrders(items = null) {
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
       return dateB - dateA;
     } else if (stavA === 'ČEKÁ' || stavA === 'wait') {
-      // Čekající: podle data vytvoření (nejnovější první)
+      // NOVÁ: podle data vytvoření (nejnovější první)
       const dateA = new Date(a.created_at || a.datum_reklamace || 0);
       const dateB = new Date(b.created_at || b.datum_reklamace || 0);
       return dateB - dateA;
     } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
-      // Domluvená: podle termínu + času návštěvy (nejbližší první)
+      // DOMLUVENO: podle termínu + času návštěvy (nejbližší první)
       const getTerminDate = (rec) => {
         if (!rec.termin) return new Date('9999-12-31');
 

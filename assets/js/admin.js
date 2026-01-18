@@ -956,15 +956,15 @@ function loadClaimsModal() {
         <div class="cc-mini-stats">
             <div class="cc-mini-stat">
                 <div class="cc-mini-stat-value" id="adminClaimsWait">-</div>
-                <div class="cc-mini-stat-label">Čekající</div>
+                <div class="cc-mini-stat-label">NOVÁ</div>
             </div>
             <div class="cc-mini-stat">
                 <div class="cc-mini-stat-value" id="adminClaimsOpen">-</div>
-                <div class="cc-mini-stat-label">Otevřené</div>
+                <div class="cc-mini-stat-label">DOMLUVENO</div>
             </div>
             <div class="cc-mini-stat">
                 <div class="cc-mini-stat-value" id="adminClaimsDone">-</div>
-                <div class="cc-mini-stat-label">Dokončené</div>
+                <div class="cc-mini-stat-label">HOTOVO</div>
             </div>
             <div class="cc-mini-stat">
                 <div class="cc-mini-stat-value" id="adminClaimsTotal"><?= $totalClaims ?></div>
