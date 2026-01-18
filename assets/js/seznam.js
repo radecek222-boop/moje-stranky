@@ -602,13 +602,35 @@ async function renderOrders(items = null) {
       return dateB - dateA;
     } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
       // Domluvená: podle termínu + času návštěvy (nejbližší první)
-      // Kombinujeme termin (YYYY-MM-DD) s cas_navstevy (HH:MM)
       const getTerminDate = (rec) => {
         if (!rec.termin) return new Date('9999-12-31');
-        // Formát: termin = '2025-01-08', cas_navstevy = '09:00'
+
         const datumStr = rec.termin;
         const casStr = rec.cas_navstevy || '00:00';
-        return new Date(`${datumStr}T${casStr}:00`);
+
+        // Rozpoznat formát data (DD.MM.YYYY nebo YYYY-MM-DD)
+        let date;
+        if (datumStr.includes('.')) {
+          // Formát DD.MM.YYYY
+          const parts = datumStr.split('.');
+          if (parts.length === 3) {
+            const den = parseInt(parts[0], 10);
+            const mesic = parseInt(parts[1], 10);
+            const rok = parseInt(parts[2], 10);
+            // Vytvořit Date s časem
+            const [hodiny, minuty] = casStr.split(':').map(x => parseInt(x, 10) || 0);
+            date = new Date(rok, mesic - 1, den, hodiny, minuty, 0);
+          } else {
+            return new Date('9999-12-31');
+          }
+        } else if (datumStr.includes('-')) {
+          // Formát YYYY-MM-DD (ISO)
+          date = new Date(`${datumStr}T${casStr}:00`);
+        } else {
+          return new Date('9999-12-31');
+        }
+
+        return date;
       };
       const terminA = getTerminDate(a);
       const terminB = getTerminDate(b);
