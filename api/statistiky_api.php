@@ -156,13 +156,14 @@ function getSummaryStatistiky($pdo) {
 /**
  * Načíst seznam prodejců pro multi-select
  * POZN: "Mimozáruční servis" je nyní samostatný checkbox, ne v tomto filtru
+ * Pouze uživatelé s rolí 'prodejce' (ne technici, ne admin)
  */
 function loadProdejci($pdo) {
     // FIX: Vracet user_id jako id, protože created_by v reklamacích obsahuje user_id
     $stmt = $pdo->query("
         SELECT DISTINCT u.user_id as id, u.name
         FROM wgs_users u
-        WHERE u.is_active = 1
+        WHERE u.is_active = 1 AND u.role = 'prodejce'
         ORDER BY u.name ASC
     ");
 
@@ -229,6 +230,7 @@ function getZakazky($pdo) {
     $sql = "
         SELECT
             r.cislo as cislo_reklamace,
+            r.jmeno as jmeno_zakaznika,
             r.adresa,
             r.model,
             r.assigned_to as assigned_to_raw,
