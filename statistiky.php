@@ -806,6 +806,10 @@ body {
           <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor: pointer;">
           <label for="zobrazitMimozarucni" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit mimozáruční servisy</label>
         </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor: pointer;">
+          <label for="zobrazitPouzeDokoncene" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit pouze dokončené</label>
+        </div>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>

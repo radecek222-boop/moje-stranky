@@ -409,6 +409,13 @@ function buildFilterWhere() {
         $conditions[] = "(r.created_by IS NOT NULL AND r.created_by != '')";
     }
 
+    // Checkbox "Zobrazit pouze dokončené"
+    // Pokud je zaškrtnutý, zobrazit pouze záznamy se stavem 'done'
+    $pouzeDokoncene = isset($_GET['pouze_dokoncene']) && $_GET['pouze_dokoncene'] === '1';
+    if ($pouzeDokoncene) {
+        $conditions[] = "r.stav = 'done'";
+    }
+
     // Prodejci (multi-select) - může být pole
     if (!empty($_GET['prodejci'])) {
         $prodejci = is_array($_GET['prodejci']) ? $_GET['prodejci'] : [$_GET['prodejci']];

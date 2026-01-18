@@ -128,6 +128,15 @@ function inicializujMultiselect() {
         });
     }
 
+    // Checkbox Zobrazit pouze dokončené - listener
+    const pouzeDokonceneCheckbox = document.getElementById('zobrazitPouzeDokoncene');
+    if (pouzeDokonceneCheckbox) {
+        pouzeDokonceneCheckbox.addEventListener('change', () => {
+            aktualniStranka = 1;
+            aplikovatFiltry();
+        });
+    }
+
     // Země checkboxy - listener
     document.querySelectorAll('#zeme-dropdown input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
@@ -322,6 +331,12 @@ function getFilterParams() {
     const mimozarucniCheckbox = document.getElementById('zobrazitMimozarucni');
     if (mimozarucniCheckbox && mimozarucniCheckbox.checked) {
         params.append('zobrazit_mimozarucni', '1');
+    }
+
+    // Checkbox pouze dokončené
+    const pouzeDokonceneCheckbox = document.getElementById('zobrazitPouzeDokoncene');
+    if (pouzeDokonceneCheckbox && pouzeDokonceneCheckbox.checked) {
+        params.append('pouze_dokoncene', '1');
     }
 
     return params.toString();
