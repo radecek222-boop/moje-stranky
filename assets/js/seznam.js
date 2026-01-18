@@ -468,7 +468,7 @@ async function renderOrders(items = null) {
 
   let filtered = items;
 
-  if (ACTIVE_FILTER !== 'all' && ACTIVE_FILTER !== 'cn') {
+  if (ACTIVE_FILTER !== 'all' && ACTIVE_FILTER !== 'cn' && ACTIVE_FILTER !== 'poz') {
     const statusMap = {
       'wait': ['ČEKÁ', 'wait'],
       'open': ['DOMLUVENÁ', 'open'],
@@ -556,6 +556,16 @@ async function renderOrders(items = null) {
     countCnEl.textContent = `(${countCn})`;
   }
 
+  // Aktualizovat počet POZ (mimozáruční opravy)
+  const countPozEl = document.getElementById('count-poz');
+  if (countPozEl) {
+    const countPoz = items.filter(r => {
+      const createdBy = (r.created_by || '').trim();
+      return !createdBy; // Prázdné created_by = mimozáruční oprava
+    }).length;
+    countPozEl.textContent = `(${countPoz})`;
+  }
+
   // Aktualizovat počet ČEKAJÍCÍ (vyloučit zakázky s CN)
   const countWaitEl = document.getElementById('count-wait');
   if (countWaitEl) {
@@ -575,6 +585,14 @@ async function renderOrders(items = null) {
     filtered = filtered.filter(r => {
       const email = (r.email || '').toLowerCase().trim();
       return email && EMAILS_S_CN.includes(email);
+    });
+  }
+
+  // Filtr pro POZ - zobrazit pouze mimozáruční opravy (created_by je prázdné)
+  if (ACTIVE_FILTER === 'poz') {
+    filtered = filtered.filter(r => {
+      const createdBy = (r.created_by || '').trim();
+      return !createdBy; // Prázdné created_by = mimozáruční oprava
     });
   }
 
@@ -3034,7 +3052,7 @@ async function zobrazKnihovnuPDF(claimId) {
       modal.style.cssText = `
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7); display: flex;
-        align-items: center; justify-content: center; z-index: 10001;
+        align-items: center; justify-content: center; z-index: 10011;
       `;
 
       // Vytvořit dialog HTML

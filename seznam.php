@@ -1210,6 +1210,18 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #ff9800 !important;
 }
 
+/* Filtr tlačítko pro POZ (mimozáruční) - modrá barva */
+.filter-btn-poz {
+  border-color: #0099ff !important;
+  color: #0099ff !important;
+}
+.filter-btn-poz:hover,
+.filter-btn-poz.active {
+  background: #0099ff !important;
+  color: #fff !important;
+  border-color: #0099ff !important;
+}
+
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
   /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */
@@ -1878,6 +1890,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
       CN <span id="count-cn" style="opacity: 0.7;"></span>
     </button>
     <?php endif; ?>
+    <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="Mimozáruční" data-lang-en="Out of Warranty" data-lang-it="Fuori Garanzia">
+      POZ <span id="count-poz" style="opacity: 0.7;"></span>
+    </button>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
