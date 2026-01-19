@@ -72,7 +72,7 @@ try {
 
     // Krok 2: Najít uživatele
     echo "<h2>3. Údaje technika</h2>";
-    $stmtUser = $pdo->prepare("SELECT id, user_id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, role, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtUser = $pdo->prepare("SELECT id, user_id, name as full_name, role, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtUser->execute([':user_id' => $userId]);
     $userRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
 

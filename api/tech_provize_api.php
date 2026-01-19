@@ -44,7 +44,7 @@ try {
     // FIX: Převést textové user_id na numerické id z wgs_users
     // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
     // TAKÉ načíst provizi technika (reklamace a POZ)
-    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtGetId = $pdo->prepare("SELECT id, name as full_name, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtGetId->execute([':user_id' => $userId]);
     $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
     $numericUserId = $userRow['id'] ?? null;
