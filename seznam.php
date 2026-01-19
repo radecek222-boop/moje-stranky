@@ -1200,62 +1200,72 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 
 /* Filtr tlačítko pro NOVÁ (wait) - žlutá barva */
 .filter-btn-wait {
-  border-color: #ffeb3b !important;
-  color: #ffeb3b !important;
-}
-.filter-btn-wait:hover,
-.filter-btn-wait.active {
   background: #ffeb3b !important;
   color: #000 !important;
-  border-color: #ffeb3b !important;
+  border: 2px solid #ffeb3b !important;
+}
+.filter-btn-wait:hover {
+  background: #fdd835 !important;
+  border-color: #fdd835 !important;
+}
+.filter-btn-wait.active {
+  box-shadow: 0 0 10px rgba(255, 235, 59, 0.6) !important;
 }
 
 /* Filtr tlačítko pro DOMLUVENO (open) - modrá barva */
 .filter-btn-open {
-  border-color: #2196f3 !important;
-  color: #2196f3 !important;
-}
-.filter-btn-open:hover,
-.filter-btn-open.active {
   background: #2196f3 !important;
-  color: #fff !important;
-  border-color: #2196f3 !important;
+  color: #000 !important;
+  border: 2px solid #2196f3 !important;
+}
+.filter-btn-open:hover {
+  background: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+.filter-btn-open.active {
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.6) !important;
 }
 
 /* Filtr tlačítko pro HOTOVO (done) - zelená barva */
 .filter-btn-done {
-  border-color: #4caf50 !important;
-  color: #4caf50 !important;
-}
-.filter-btn-done:hover,
-.filter-btn-done.active {
   background: #4caf50 !important;
-  color: #fff !important;
-  border-color: #4caf50 !important;
+  color: #000 !important;
+  border: 2px solid #4caf50 !important;
+}
+.filter-btn-done:hover {
+  background: #388e3c !important;
+  border-color: #388e3c !important;
+}
+.filter-btn-done.active {
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.6) !important;
 }
 
 /* Filtr tlačítko pro CN - oranžová barva */
 .filter-btn-cn {
-  border-color: #ff9800 !important;
-  color: #ff9800 !important;
-}
-.filter-btn-cn:hover,
-.filter-btn-cn.active {
   background: #ff9800 !important;
   color: #000 !important;
-  border-color: #ff9800 !important;
+  border: 2px solid #ff9800 !important;
+}
+.filter-btn-cn:hover {
+  background: #f57c00 !important;
+  border-color: #f57c00 !important;
+}
+.filter-btn-cn.active {
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.6) !important;
 }
 
 /* Filtr tlačítko pro POZ (mimozáruční) - modrá barva */
 .filter-btn-poz {
-  border-color: #0099ff !important;
-  color: #0099ff !important;
-}
-.filter-btn-poz:hover,
-.filter-btn-poz.active {
   background: #0099ff !important;
-  color: #fff !important;
-  border-color: #0099ff !important;
+  color: #000 !important;
+  border: 2px solid #0099ff !important;
+}
+.filter-btn-poz:hover {
+  background: #0077cc !important;
+  border-color: #0077cc !important;
+}
+.filter-btn-poz.active {
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.6) !important;
 }
 
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
