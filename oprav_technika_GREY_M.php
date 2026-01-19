@@ -101,13 +101,13 @@ try {
     echo "name: <code>{$milanKolin['name']}</code>";
     echo "</div>";
 
-    // Najít prodejce PRO2025198EB502
-    $stmt = $pdo->prepare("SELECT user_id, name, email FROM wgs_users WHERE user_id = :user_id LIMIT 1");
-    $stmt->execute(['user_id' => 'PRO2025198EB502']);
+    // Najít prodejce podle emailu soho@natuzzi.cz
+    $stmt = $pdo->prepare("SELECT user_id, name, email FROM wgs_users WHERE email = :email LIMIT 1");
+    $stmt->execute(['email' => 'soho@natuzzi.cz']);
     $prodejce = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$prodejce) {
-        echo "<div class='error'><strong>CHYBA:</strong> Prodejce 'PRO2025198EB502' nebyl nalezen v databázi wgs_users.</div>";
+        echo "<div class='error'><strong>CHYBA:</strong> Prodejce se s emailem 'soho@natuzzi.cz' nebyl nalezen v databázi wgs_users.</div>";
         echo "</div></body></html>";
         exit;
     }
