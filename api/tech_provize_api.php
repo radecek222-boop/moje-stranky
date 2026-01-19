@@ -103,36 +103,33 @@ try {
     $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.updated_at)' : 'r.updated_at';
 
     // JOIN podmínka pro technika - STEJNÁ LOGIKA JAKO STATISTIKY
-    // Priorita: dokonceno_kym (kdo dokončil), pak assigned_to
-    // NEPOUŽÍVAT r.technik LIKE - to je jen pro zobrazení
+    // Používá LEFT JOIN a filtruje podle textového jména (COALESCE(u.name, r.technik))
+    // protože statistiky děláJÍ GROUP BY podle textového jména, ne podle ID
     if ($hasDokoncenokym) {
         // Nový systém - podle kdo dokončil
-        $technikJoin = "INNER JOIN wgs_users u ON (r.dokonceno_kym = u.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = u.id)) AND u.role = 'technik'";
-        $whereCondition = "u.id = :numeric_id";
-        $params = [
-            'numeric_id' => $numericUserId,
-            'rok' => $aktualniRok,
-            'mesic' => $aktualniMesic
-        ];
+        $technikJoin = "LEFT JOIN wgs_users u ON (r.dokonceno_kym = u.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = u.id)) AND u.role = 'technik'";
     } else {
         // Starý systém - fallback
-        $technikJoin = "INNER JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'";
-        $whereCondition = "u.id = :numeric_id";
-        $params = [
-            'numeric_id' => $numericUserId,
-            'rok' => $aktualniRok,
-            'mesic' => $aktualniMesic
-        ];
+        $technikJoin = "LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'";
     }
 
-    // === 1. REKLAMACE (s created_by) - individuální provize technika ===
-    $provizeKoeficient = $provizeProcent / 100;
+    // Filtrovat podle textového jména (STEJNĚ JAKO STATISTIKY)
+    // COALESCE(u.name, r.technik) = jméno technika z DB nebo fallback na textový sloupec
+    $whereCondition = "COALESCE(u.name, r.technik) = :user_name";
+    $params = [
+        'user_name' => $userName,
+        'rok' => $aktualniRok,
+        'mesic' => $aktualniMesic
+    ];
 
+    // === 1. REKLAMACE (s created_by) - individuální provize technika ===
+    // DŮLEŽITÉ: Používat u.provize_procent z JOIN (každá zakázka může mít jinou provizi)
+    // stejně jako statistiky, ne pevně zadanou hodnotu!
     $stmtReklamace = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_procent, 33) / 100)) as provize_celkem
         FROM wgs_reklamace r
         {$technikJoin}
         WHERE {$whereCondition}
@@ -142,9 +139,7 @@ try {
           AND (r.created_by IS NOT NULL AND r.created_by != '')
     ");
 
-    $paramsReklamace = $params;
-    $paramsReklamace['provize_koeficient'] = $provizeKoeficient;
-    $stmtReklamace->execute($paramsReklamace);
+    $stmtReklamace->execute($params);
     $vysledekReklamace = $stmtReklamace->fetch(PDO::FETCH_ASSOC);
 
     $pocetReklamace = (int)($vysledekReklamace['pocet_zakazek'] ?? 0);
@@ -152,12 +147,13 @@ try {
     $provizeReklamace = (float)($vysledekReklamace['provize_celkem'] ?? 0);
 
     // === 2. POZ (bez created_by) - individuální provize POZ ===
-    $provizePozKoeficient = $provizePozProcent / 100;
+    // DŮLEŽITÉ: Používat u.provize_poz_procent z JOIN (každá zakázka může mít jinou provizi)
+    // stejně jako statistiky, ne pevně zadanou hodnotu!
     $stmtPoz = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_poz_procent, 50) / 100)) as provize_celkem
         FROM wgs_reklamace r
         {$technikJoin}
         WHERE {$whereCondition}
@@ -167,8 +163,7 @@ try {
           AND (r.created_by IS NULL OR r.created_by = '')
     ");
 
-    $paramsPoz = array_merge($params, ['provize_poz_koeficient' => $provizePozKoeficient]);
-    $stmtPoz->execute($paramsPoz);
+    $stmtPoz->execute($params);
     $vysledekPoz = $stmtPoz->fetch(PDO::FETCH_ASSOC);
 
     $pocetPoz = (int)($vysledekPoz['pocet_zakazek'] ?? 0);
