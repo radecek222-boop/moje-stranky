@@ -356,6 +356,20 @@ function matchesSearch(record, query) {
 
 // === FILTRY ===
 function initFilters() {
+  // Pro techniky nastavit výchozí filtry NOVÁ + DOMLUVENO
+  const isTechnik = CURRENT_USER && (CURRENT_USER.role === 'technik' || CURRENT_USER.role === 'technician');
+  if (isTechnik) {
+    ACTIVE_FILTERS.add('wait');
+    ACTIVE_FILTERS.add('open');
+
+    // Aktivovat tlačítka NOVÁ a DOMLUVENO
+    document.querySelector('.filter-btn[data-filter="wait"]')?.classList.add('active');
+    document.querySelector('.filter-btn[data-filter="open"]')?.classList.add('active');
+
+    // Deaktivovat tlačítko VŠECHNY
+    document.querySelector('.filter-btn[data-filter="all"]')?.classList.remove('active');
+  }
+
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const filterType = btn.dataset.filter;
