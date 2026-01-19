@@ -99,8 +99,8 @@ try {
     $stmtColumns2 = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'datum_dokonceni'");
     $hasDatumDokonceni = $stmtColumns2->rowCount() > 0;
 
-    // Použít datum_dokonceni pokud existuje, jinak updated_at
-    $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.updated_at)' : 'r.updated_at';
+    // Použít datum_dokonceni pokud existuje, jinak created_at (STEJNĚ JAKO STATISTIKY!)
+    $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.created_at)' : 'r.created_at';
 
     // JOIN podmínka pro technika - STEJNÁ LOGIKA JAKO STATISTIKY
     // Používá LEFT JOIN a filtruje podle textového jména (COALESCE(u.name, r.technik))
