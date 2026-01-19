@@ -347,7 +347,7 @@ function getCharty($pdo) {
             COALESCE(u.name, r.technik, '-') as technik,
             COUNT(*) as pocet,
             SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem,
-            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_procent, 33) / 100)) as vydelek
         FROM wgs_reklamace r
         $technikJoinChart
         $where
