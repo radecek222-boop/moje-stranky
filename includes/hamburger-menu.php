@@ -74,12 +74,18 @@ if ($isAdmin) {
     ?>
       <?php if ($isTechnik): ?>
         <!-- Provize technika - Alpine.js komponenta (Step 34) -->
-        <a
+        <div
           x-data="techProvize"
           x-init="load()"
-          class="tech-provize-link"
-          style="cursor: default; pointer-events: none;"
-        >PROVIZE / <span x-text="mesic"></span> / <span x-text="castka"></span> €</a>
+          style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid #333;"
+        >
+          <a class="tech-provize-link" style="cursor: default; pointer-events: none;">
+            REKLAMACE / <span x-text="mesic"></span> / <span x-text="reklamace"></span> €
+          </a>
+          <a class="tech-provize-link tech-provize-poz" style="cursor: default; pointer-events: none;">
+            POZ / <span x-text="mesic"></span> / <span x-text="poz"></span> €
+          </a>
+        </div>
       <?php endif; ?>
       <a href="/novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="/seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
@@ -643,10 +649,12 @@ document.addEventListener('alpine:init', () => {
   /**
    * Tech Provize - Alpine.js komponenta (Step 34)
    * Načítá provize technika z API a zobrazuje v navigaci
+   * Rozděleno na REKLAMACE (s individuální provizí) a POZ (s 50% provizí)
    */
   Alpine.data('techProvize', () => ({
     mesic: '...',
-    castka: '...',
+    reklamace: '...',
+    poz: '...',
 
     init() {
       // Automaticky načíst provize při inicializaci komponenty
@@ -660,7 +668,8 @@ document.addEventListener('alpine:init', () => {
 
         if (result.status === 'success') {
           this.mesic = result.mesic || '---';
-          this.castka = result.provize_celkem || '0.00';
+          this.reklamace = result.provize_reklamace || '0.00';
+          this.poz = result.provize_poz || '0.00';
           console.log('[TechProvize] Načteno (Alpine.js):', result);
         } else {
           console.warn('[TechProvize] Chyba:', result.message);

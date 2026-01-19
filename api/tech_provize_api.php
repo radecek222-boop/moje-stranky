@@ -123,10 +123,10 @@ try {
         ];
     }
 
-    // Vypočítat koeficient provize (např. 33% = 0.33)
+    // === 1. REKLAMACE (s created_by) - individuální provize technika ===
     $provizeKoeficient = $provizeProcent / 100;
 
-    $stmt = $pdo->prepare("
+    $stmtReklamace = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
@@ -139,24 +139,53 @@ try {
           AND (r.created_by IS NOT NULL AND r.created_by != '')
     ");
 
-    // Přidat provizi koeficient do parametrů
-    $params['provize_koeficient'] = $provizeKoeficient;
+    $paramsReklamace = $params;
+    $paramsReklamace['provize_koeficient'] = $provizeKoeficient;
+    $stmtReklamace->execute($paramsReklamace);
+    $vysledekReklamace = $stmtReklamace->fetch(PDO::FETCH_ASSOC);
 
-    $stmt->execute($params);
+    $pocetReklamace = (int)($vysledekReklamace['pocet_zakazek'] ?? 0);
+    $castkaReklamace = (float)($vysledekReklamace['celkem_castka'] ?? 0);
+    $provizeReklamace = (float)($vysledekReklamace['provize_celkem'] ?? 0);
 
-    $vysledek = $stmt->fetch(PDO::FETCH_ASSOC);
+    // === 2. POZ (bez created_by) - fixní 50% provize ===
+    $stmtPoz = $pdo->prepare("
+        SELECT
+            COUNT(*) as pocet_zakazek,
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.5 as provize_celkem
+        FROM wgs_reklamace r
+        WHERE {$whereCondition}
+          AND YEAR({$datumSloupec}) = :rok
+          AND MONTH({$datumSloupec}) = :mesic
+          AND r.stav = 'done'
+          AND (r.created_by IS NULL OR r.created_by = '')
+    ");
 
-    $pocetZakazek = (int)($vysledek['pocet_zakazek'] ?? 0);
-    $celkemCastka = (float)($vysledek['celkem_castka'] ?? 0);
-    $provizeCelkem = (float)($vysledek['provize_celkem'] ?? 0);
+    $stmtPoz->execute($params);
+    $vysledekPoz = $stmtPoz->fetch(PDO::FETCH_ASSOC);
+
+    $pocetPoz = (int)($vysledekPoz['pocet_zakazek'] ?? 0);
+    $castkaPoz = (float)($vysledekPoz['celkem_castka'] ?? 0);
+    $provizePoz = (float)($vysledekPoz['provize_celkem'] ?? 0);
+
+    // === CELKEM ===
+    $pocetCelkem = $pocetReklamace + $pocetPoz;
+    $castkaCelkem = $castkaReklamace + $castkaPoz;
+    $provizeCelkem = $provizeReklamace + $provizePoz;
 
     echo json_encode([
         'status' => 'success',
         'mesic' => $nazevMesice,
         'rok' => $aktualniRok,
-        'pocet_zakazek' => $pocetZakazek,
-        'celkem_castka' => number_format($celkemCastka, 2, '.', ''),
-        'provize_celkem' => number_format($provizeCelkem, 2, '.', '')
+        'pocet_zakazek' => $pocetCelkem,
+        'celkem_castka' => number_format($castkaCelkem, 2, '.', ''),
+        'provize_celkem' => number_format($provizeCelkem, 2, '.', ''),
+        // Nové - oddělené hodnoty
+        'provize_reklamace' => number_format($provizeReklamace, 2, '.', ''),
+        'provize_poz' => number_format($provizePoz, 2, '.', ''),
+        'pocet_reklamace' => $pocetReklamace,
+        'pocet_poz' => $pocetPoz
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (PDOException $e) {
