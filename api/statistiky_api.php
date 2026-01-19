@@ -238,7 +238,7 @@ function getZakazky($pdo) {
             COALESCE(technik.name, r.technik, '-') as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) as castka_celkem,
-            CAST(COALESCE(r.cena_celkem, 0) * 0.33 AS DECIMAL(10,2)) as vydelek_technika,
+            CAST(COALESCE(r.cena_celkem, 0) * (COALESCE(technik.provize_procent, 33) / 100) AS DECIMAL(10,2)) as vydelek_technika,
             UPPER(COALESCE(r.fakturace_firma, 'cz')) as zeme,
             DATE_FORMAT({$datumSloupec}, '%d.%m.%Y') as datum,
             {$datumSloupec} as datum_raw

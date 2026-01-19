@@ -338,7 +338,7 @@ try {
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = array_intersect([
             'id', 'user_id', 'name', 'email', 'phone', 'address', 'role',
-            'status', 'is_active', 'created_at', 'updated_at', 'last_login'
+            'provize_procent', 'status', 'is_active', 'created_at', 'updated_at', 'last_login'
         ], $existingColumns);
 
         if (empty($selectColumns)) {
@@ -391,6 +391,7 @@ try {
         $phone = $data['phone'] ?? '';
         $address = $data['address'] ?? '';
         $role = $data['role'] ?? '';
+        $provizeProcent = isset($data['provize_procent']) ? $data['provize_procent'] : null;
 
         if (!$userId || !is_numeric($userId)) {
             throw new Exception('Neplatné ID uživatele');
@@ -426,6 +427,13 @@ try {
         $allowedRoles = ['prodejce', 'technik', 'admin'];
         if ($role && !in_array($role, $allowedRoles)) {
             throw new Exception('Neplatná role');
+        }
+
+        // Validace provize (pouze pro techniky)
+        if ($provizeProcent !== null) {
+            if (!is_numeric($provizeProcent) || $provizeProcent < 0 || $provizeProcent > 100) {
+                throw new Exception('Provize musí být číslo mezi 0 a 100');
+            }
         }
 
         // Sestavit UPDATE pouze pro existující sloupce
@@ -464,6 +472,10 @@ try {
         if ($role && in_array('role', $existingColumns)) {
             $updateParts[] = "role = :role";
             $params[':role'] = $role;
+        }
+        if ($provizeProcent !== null && in_array('provize_procent', $existingColumns)) {
+            $updateParts[] = "provize_procent = :provize_procent";
+            $params[':provize_procent'] = $provizeProcent;
         }
         if (in_array('updated_at', $existingColumns)) {
             $updateParts[] = "updated_at = NOW()";

@@ -3,7 +3,8 @@
  * API endpoint pro načtení provizí technika
  *
  * Vrací provize aktuálně přihlášeného technika za aktuální měsíc
- * Provize = 33% z celkové ceny zakázky
+ * Provize = individuální % (dle nastavení technika) z celkové ceny zakázky
+ * Výchozí hodnota: 33%
  */
 
 require_once __DIR__ . '/../init.php';
@@ -42,11 +43,13 @@ try {
 
     // FIX: Převést textové user_id na numerické id z wgs_users
     // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
-    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    // TAKÉ načíst provizi technika
+    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, COALESCE(provize_procent, 33) as provize_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtGetId->execute([':user_id' => $userId]);
     $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
     $numericUserId = $userRow['id'] ?? null;
     $userName = trim($userRow['full_name'] ?? '');
+    $provizeProcent = (float)($userRow['provize_procent'] ?? 33);
 
     if (!$numericUserId) {
         // Fallback - zkusit jestli userId není už numerické
@@ -120,11 +123,14 @@ try {
         ];
     }
 
+    // Vypočítat koeficient provize (např. 33% = 0.33)
+    $provizeKoeficient = $provizeProcent / 100;
+
     $stmt = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
         FROM wgs_reklamace r
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
@@ -132,6 +138,9 @@ try {
           AND r.stav = 'done'
           AND (r.created_by IS NOT NULL AND r.created_by != '')
     ");
+
+    // Přidat provizi koeficient do parametrů
+    $params['provize_koeficient'] = $provizeKoeficient;
 
     $stmt->execute($params);
 
