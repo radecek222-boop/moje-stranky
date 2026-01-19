@@ -656,25 +656,43 @@ document.addEventListener('alpine:init', () => {
     poz: '...',
 
     init() {
+      console.log('[TechProvize] Komponenta inicializována');
+      console.log('[TechProvize] Výchozí hodnoty - mesic:', this.mesic, 'reklamace:', this.reklamace, 'poz:', this.poz);
       // Automaticky načíst provize při inicializaci komponenty
       this.load();
     },
 
     async load() {
+      console.log('[TechProvize] Začínám načítat data z API...');
       try {
         const response = await fetch('/api/tech_provize_api.php');
+        console.log('[TechProvize] Response status:', response.status);
+
         const result = await response.json();
+        console.log('[TechProvize] API response:', result);
 
         if (result.status === 'success') {
+          console.log('[TechProvize] Nastavuji hodnoty...');
+          console.log('[TechProvize] mesic:', result.mesic);
+          console.log('[TechProvize] provize_reklamace:', result.provize_reklamace);
+          console.log('[TechProvize] provize_poz:', result.provize_poz);
+
           this.mesic = result.mesic || '---';
           this.reklamace = result.provize_reklamace || '0.00';
           this.poz = result.provize_poz || '0.00';
-          console.log('[TechProvize] Načteno (Alpine.js):', result);
+
+          console.log('[TechProvize] Hodnoty nastaveny - mesic:', this.mesic, 'reklamace:', this.reklamace, 'poz:', this.poz);
         } else {
-          console.warn('[TechProvize] Chyba:', result.message);
+          console.warn('[TechProvize] API vrátilo chybu:', result.message);
+          this.mesic = 'CHYBA';
+          this.reklamace = '0.00';
+          this.poz = '0.00';
         }
       } catch (e) {
         console.error('[TechProvize] Chyba při načítání:', e);
+        this.mesic = 'ERROR';
+        this.reklamace = '0.00';
+        this.poz = '0.00';
       }
     }
   }));
