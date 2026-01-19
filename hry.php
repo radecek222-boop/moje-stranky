@@ -661,6 +661,11 @@ $dostupneHry = [
         </div>
     </main>
 
+    <!-- Základní utility (nutné načíst před inline skriptem) -->
+    <script src="assets/js/logger.min.js"></script>
+    <script src="assets/js/utils.min.js"></script>
+    <script src="assets/js/wgs-toast.js"></script>
+
     <script>
     (function() {
         'use strict';
