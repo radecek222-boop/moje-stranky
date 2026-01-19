@@ -44,7 +44,7 @@ try {
     // FIX: Převést textové user_id na numerické id z wgs_users
     // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
     // TAKÉ načíst provizi technika (reklamace a POZ)
-    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmtGetId = $pdo->prepare("SELECT id, name as full_name, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtGetId->execute([':user_id' => $userId]);
     $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
     $numericUserId = $userRow['id'] ?? null;
@@ -102,23 +102,24 @@ try {
     // Použít datum_dokonceni pokud existuje, jinak updated_at
     $datumSloupec = $hasDatumDokonceni ? 'COALESCE(r.datum_dokonceni, r.updated_at)' : 'r.updated_at';
 
-    // Podmínka pro technika - priorita: dokonceno_kym, pak assigned_to, pak technik text
+    // JOIN podmínka pro technika - STEJNÁ LOGIKA JAKO STATISTIKY
+    // Priorita: dokonceno_kym (kdo dokončil), pak assigned_to
+    // NEPOUŽÍVAT r.technik LIKE - to je jen pro zobrazení
     if ($hasDokoncenokym) {
         // Nový systém - podle kdo dokončil
-        $whereCondition = "(r.dokonceno_kym = :numeric_id OR (r.dokonceno_kym IS NULL AND (r.assigned_to = :numeric_id2 OR r.technik LIKE :user_name)))";
+        $technikJoin = "INNER JOIN wgs_users u ON (r.dokonceno_kym = u.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = u.id)) AND u.role = 'technik'";
+        $whereCondition = "u.id = :numeric_id";
         $params = [
             'numeric_id' => $numericUserId,
-            'numeric_id2' => $numericUserId,
-            'user_name' => '%' . $userName . '%',
             'rok' => $aktualniRok,
             'mesic' => $aktualniMesic
         ];
     } else {
         // Starý systém - fallback
-        $whereCondition = "(r.assigned_to = :numeric_id OR r.technik LIKE :user_name)";
+        $technikJoin = "INNER JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'";
+        $whereCondition = "u.id = :numeric_id";
         $params = [
             'numeric_id' => $numericUserId,
-            'user_name' => '%' . $userName . '%',
             'rok' => $aktualniRok,
             'mesic' => $aktualniMesic
         ];
@@ -130,9 +131,10 @@ try {
     $stmtReklamace = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
         FROM wgs_reklamace r
+        {$technikJoin}
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
           AND MONTH({$datumSloupec}) = :mesic
@@ -154,9 +156,10 @@ try {
     $stmtPoz = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
         FROM wgs_reklamace r
+        {$technikJoin}
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
           AND MONTH({$datumSloupec}) = :mesic

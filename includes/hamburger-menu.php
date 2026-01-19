@@ -656,26 +656,48 @@ document.addEventListener('alpine:init', () => {
     poz: '...',
 
     init() {
+      console.log('[TechProvize] Komponenta inicializována');
+      console.log('[TechProvize] Výchozí hodnoty - mesic:', this.mesic, 'reklamace:', this.reklamace, 'poz:', this.poz);
       // Automaticky načíst provize při inicializaci komponenty
       this.load();
     },
 
-    async load() {
-      try {
-        const response = await fetch('/api/tech_provize_api.php');
-        const result = await response.json();
+    load() {
+      console.log('[TechProvize] Začínám načítat data z API...');
+      const self = this;
 
-        if (result.status === 'success') {
-          this.mesic = result.mesic || '---';
-          this.reklamace = result.provize_reklamace || '0.00';
-          this.poz = result.provize_poz || '0.00';
-          console.log('[TechProvize] Načteno (Alpine.js):', result);
-        } else {
-          console.warn('[TechProvize] Chyba:', result.message);
-        }
-      } catch (e) {
-        console.error('[TechProvize] Chyba při načítání:', e);
-      }
+      fetch('/api/tech_provize_api.php')
+        .then(function(response) {
+          console.log('[TechProvize] Response status:', response.status);
+          return response.json();
+        })
+        .then(function(result) {
+          console.log('[TechProvize] API response:', result);
+
+          if (result.status === 'success') {
+            console.log('[TechProvize] Nastavuji hodnoty...');
+            console.log('[TechProvize] mesic:', result.mesic);
+            console.log('[TechProvize] provize_reklamace:', result.provize_reklamace);
+            console.log('[TechProvize] provize_poz:', result.provize_poz);
+
+            self.mesic = result.mesic || '---';
+            self.reklamace = result.provize_reklamace || '0.00';
+            self.poz = result.provize_poz || '0.00';
+
+            console.log('[TechProvize] Hodnoty nastaveny - mesic:', self.mesic, 'reklamace:', self.reklamace, 'poz:', self.poz);
+          } else {
+            console.warn('[TechProvize] API vrátilo chybu:', result.message);
+            self.mesic = result.message || 'CHYBA';
+            self.reklamace = '0.00';
+            self.poz = '0.00';
+          }
+        })
+        .catch(function(e) {
+          console.error('[TechProvize] Chyba při načítání:', e);
+          self.mesic = 'ERROR';
+          self.reklamace = '0.00';
+          self.poz = '0.00';
+        });
     }
   }));
 
