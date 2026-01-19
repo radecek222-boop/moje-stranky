@@ -719,10 +719,10 @@ body {
       <div class="filter-group">
         <label class="filter-label" for="filter-year">Rok</label>
         <select class="filter-select" id="filter-year">
-          <option value="" selected>Všechny</option>
+          <option value="">Všechny</option>
           <option value="2024">2024</option>
           <option value="2025">2025</option>
-          <option value="2026">2026</option>
+          <option value="2026" <?php echo (date('Y') == '2026') ? 'selected' : ''; ?>>2026</option>
         </select>
       </div>
 
@@ -730,19 +730,19 @@ body {
       <div class="filter-group">
         <label class="filter-label" for="filter-month">Měsíc</label>
         <select class="filter-select" id="filter-month">
-          <option value="" selected>Všechny</option>
-          <option value="1">Leden</option>
-          <option value="2">Únor</option>
-          <option value="3">Březen</option>
-          <option value="4">Duben</option>
-          <option value="5">Květen</option>
-          <option value="6">Červen</option>
-          <option value="7">Červenec</option>
-          <option value="8">Srpen</option>
-          <option value="9">Září</option>
-          <option value="10">Říjen</option>
-          <option value="11">Listopad</option>
-          <option value="12">Prosinec</option>
+          <option value="">Všechny</option>
+          <option value="1" <?php echo (date('n') == 1) ? 'selected' : ''; ?>>Leden</option>
+          <option value="2" <?php echo (date('n') == 2) ? 'selected' : ''; ?>>Únor</option>
+          <option value="3" <?php echo (date('n') == 3) ? 'selected' : ''; ?>>Březen</option>
+          <option value="4" <?php echo (date('n') == 4) ? 'selected' : ''; ?>>Duben</option>
+          <option value="5" <?php echo (date('n') == 5) ? 'selected' : ''; ?>>Květen</option>
+          <option value="6" <?php echo (date('n') == 6) ? 'selected' : ''; ?>>Červen</option>
+          <option value="7" <?php echo (date('n') == 7) ? 'selected' : ''; ?>>Červenec</option>
+          <option value="8" <?php echo (date('n') == 8) ? 'selected' : ''; ?>>Srpen</option>
+          <option value="9" <?php echo (date('n') == 9) ? 'selected' : ''; ?>>Září</option>
+          <option value="10" <?php echo (date('n') == 10) ? 'selected' : ''; ?>>Říjen</option>
+          <option value="11" <?php echo (date('n') == 11) ? 'selected' : ''; ?>>Listopad</option>
+          <option value="12" <?php echo (date('n') == 12) ? 'selected' : ''; ?>>Prosinec</option>
         </select>
       </div>
 
