@@ -76,7 +76,6 @@ if ($isAdmin) {
         <!-- Provize technika - Alpine.js komponenta (Step 34) -->
         <div
           x-data="techProvize"
-          x-init="load()"
           style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid #333;"
         >
           <a class="tech-provize-link" style="cursor: default; pointer-events: none;">
