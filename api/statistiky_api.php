@@ -235,10 +235,16 @@ function getZakazky($pdo) {
             r.model,
             r.assigned_to as assigned_to_raw,
             " . ($hasDokoncenokym ? "r.dokonceno_kym as dokonceno_kym_raw," : "") . "
-            COALESCE(technik.name, r.technik, '-') as technik,
+            CASE
+                WHEN r.stav = 'done' THEN COALESCE(technik.name, r.technik, '-')
+                ELSE '-'
+            END as technik,
             COALESCE(prodejce.name, 'Mimozáruční servis') as prodejce,
             CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) as castka_celkem,
-            CAST(COALESCE(r.cena_celkem, 0) * (COALESCE(technik.provize_procent, 33) / 100) AS DECIMAL(10,2)) as vydelek_technika,
+            CASE
+                WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, 0) * (COALESCE(technik.provize_procent, 33) / 100) AS DECIMAL(10,2))
+                ELSE 0.00
+            END as vydelek_technika,
             UPPER(COALESCE(r.fakturace_firma, 'cz')) as zeme,
             DATE_FORMAT({$datumSloupec}, '%d.%m.%Y') as datum,
             {$datumSloupec} as datum_raw
@@ -344,14 +350,18 @@ function getCharty($pdo) {
 
     $stmtTechnici = $pdo->prepare("
         SELECT
-            COALESCE(u.name, r.technik, '-') as technik,
-            COUNT(*) as pocet,
-            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem,
-            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_procent, 33) / 100)) as vydelek
+            CASE
+                WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-')
+                ELSE '-'
+            END as technik,
+            COUNT(CASE WHEN r.stav = 'done' THEN 1 END) as pocet,
+            SUM(CASE WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) ELSE 0 END) as celkem,
+            SUM(CASE WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_procent, 33) / 100) ELSE 0 END) as vydelek
         FROM wgs_reklamace r
         $technikJoinChart
         $where
-        GROUP BY COALESCE(u.name, r.technik, '-')
+        GROUP BY CASE WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-') ELSE '-' END
+        HAVING COUNT(CASE WHEN r.stav = 'done' THEN 1 END) > 0
         ORDER BY pocet DESC
         LIMIT 10
     ");
