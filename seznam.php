@@ -1198,6 +1198,42 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #999 !important;
 }
 
+/* Filtr tlačítko pro NOVÁ (wait) - žlutá barva */
+.filter-btn-wait {
+  border-color: #ffeb3b !important;
+  color: #ffeb3b !important;
+}
+.filter-btn-wait:hover,
+.filter-btn-wait.active {
+  background: #ffeb3b !important;
+  color: #000 !important;
+  border-color: #ffeb3b !important;
+}
+
+/* Filtr tlačítko pro DOMLUVENO (open) - modrá barva */
+.filter-btn-open {
+  border-color: #2196f3 !important;
+  color: #2196f3 !important;
+}
+.filter-btn-open:hover,
+.filter-btn-open.active {
+  background: #2196f3 !important;
+  color: #fff !important;
+  border-color: #2196f3 !important;
+}
+
+/* Filtr tlačítko pro HOTOVO (done) - zelená barva */
+.filter-btn-done {
+  border-color: #4caf50 !important;
+  color: #4caf50 !important;
+}
+.filter-btn-done:hover,
+.filter-btn-done.active {
+  background: #4caf50 !important;
+  color: #fff !important;
+  border-color: #4caf50 !important;
+}
+
 /* Filtr tlačítko pro CN - oranžová barva */
 .filter-btn-cn {
   border-color: #ff9800 !important;
@@ -1873,13 +1909,13 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn active" data-filter="all" data-lang-cs="Všechny" data-lang-en="All" data-lang-it="Tutti">
       Všechny <span id="count-all" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="wait" data-lang-cs="NOVÁ" data-lang-en="New" data-lang-it="Nuovo">
+    <button class="filter-btn filter-btn-wait" data-filter="wait" data-lang-cs="NOVÁ" data-lang-en="New" data-lang-it="Nuovo">
       NOVÁ <span id="count-wait" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="open" data-lang-cs="DOMLUVENO" data-lang-en="Scheduled" data-lang-it="Programmato">
+    <button class="filter-btn filter-btn-open" data-filter="open" data-lang-cs="DOMLUVENO" data-lang-en="Scheduled" data-lang-it="Programmato">
       DOMLUVENO <span id="count-open" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="done" data-lang-cs="HOTOVO" data-lang-en="Completed" data-lang-it="Completato">
+    <button class="filter-btn filter-btn-done" data-filter="done" data-lang-cs="HOTOVO" data-lang-en="Completed" data-lang-it="Completato">
       HOTOVO <span id="count-done" style="opacity: 0.7;"></span>
     </button>
     <?php
