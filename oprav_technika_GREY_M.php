@@ -84,8 +84,8 @@ try {
     echo "<tr><td>Prodejce (created_by)</td><td>" . ($zaznam['created_by'] ?? 'NULL') . "</td></tr>";
     echo "</table>";
 
-    // Najít user_id pro Milan Kolín
-    $stmt = $pdo->prepare("SELECT user_id, name FROM wgs_users WHERE name LIKE :name LIMIT 1");
+    // Najít Milan Kolín - potřebujeme číselné ID pro assigned_to
+    $stmt = $pdo->prepare("SELECT id, user_id, name FROM wgs_users WHERE name LIKE :name LIMIT 1");
     $stmt->execute(['name' => '%Milan%Kolín%']);
     $milanKolin = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -97,7 +97,8 @@ try {
 
     echo "<div class='info'>";
     echo "<strong>Milan Kolín v databázi:</strong><br>";
-    echo "user_id: <code>{$milanKolin['user_id']}</code><br>";
+    echo "id (INTEGER): <code>{$milanKolin['id']}</code><br>";
+    echo "user_id (VARCHAR): <code>{$milanKolin['user_id']}</code><br>";
     echo "name: <code>{$milanKolin['name']}</code>";
     echo "</div>";
 
@@ -132,9 +133,9 @@ try {
         ");
 
         $vysledek = $stmt->execute([
-            'technik_id' => $milanKolin['user_id'],
+            'technik_id' => $milanKolin['id'],  // INTEGER - číselné ID uživatele
             'technik_name' => $milanKolin['name'],
-            'prodejce_id' => $prodejce['user_id'],
+            'prodejce_id' => $prodejce['user_id'],  // VARCHAR - user_id prodejce
             'cislo' => $zaznam['cislo']
         ]);
 
