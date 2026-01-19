@@ -101,6 +101,24 @@ try {
     echo "name: <code>{$milanKolin['name']}</code>";
     echo "</div>";
 
+    // Najít prodejce PRO2025198EB502
+    $stmt = $pdo->prepare("SELECT user_id, name, email FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    $stmt->execute(['user_id' => 'PRO2025198EB502']);
+    $prodejce = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$prodejce) {
+        echo "<div class='error'><strong>CHYBA:</strong> Prodejce 'PRO2025198EB502' nebyl nalezen v databázi wgs_users.</div>";
+        echo "</div></body></html>";
+        exit;
+    }
+
+    echo "<div class='info'>";
+    echo "<strong>Prodejce v databázi:</strong><br>";
+    echo "user_id: <code>{$prodejce['user_id']}</code><br>";
+    echo "name: <code>{$prodejce['name']}</code><br>";
+    echo "email: <code>{$prodejce['email']}</code>";
+    echo "</div>";
+
     // Pokud je execute=1, provést opravu
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='info'><strong>SPOUŠTÍM OPRAVU...</strong></div>";
@@ -108,31 +126,36 @@ try {
         $stmt = $pdo->prepare("
             UPDATE wgs_reklamace
             SET assigned_to = :technik_id,
-                technik = :technik_name
+                technik = :technik_name,
+                created_by = :prodejce_id
             WHERE cislo = :cislo
         ");
 
         $vysledek = $stmt->execute([
             'technik_id' => $milanKolin['user_id'],
             'technik_name' => $milanKolin['name'],
+            'prodejce_id' => $prodejce['user_id'],
             'cislo' => $zaznam['cislo']
         ]);
 
         if ($vysledek) {
             echo "<div class='success'>";
-            echo "<strong>✓ TECHNIK ÚSPĚŠNĚ ZMĚNĚN</strong><br>";
-            echo "Zakázka <strong>{$zaznam['cislo']}</strong> (Pelikán Martin) byla přiřazena technikovi <strong>Milan Kolín</strong>";
+            echo "<strong>✓ ZAKÁZKA ÚSPĚŠNĚ OPRAVENA</strong><br>";
+            echo "Zakázka <strong>{$zaznam['cislo']}</strong> (Pelikán Martin):<br>";
+            echo "- Technik změněn na: <strong>Milan Kolín</strong><br>";
+            echo "- Zadavatel (prodejce) nastaven na: <strong>{$prodejce['user_id']}</strong> ({$prodejce['email']})";
             echo "</div>";
 
             // Zobrazit nový stav
-            $stmt = $pdo->prepare("SELECT assigned_to, technik FROM wgs_reklamace WHERE cislo = :cislo");
+            $stmt = $pdo->prepare("SELECT assigned_to, technik, created_by FROM wgs_reklamace WHERE cislo = :cislo");
             $stmt->execute(['cislo' => $zaznam['cislo']]);
             $novy = $stmt->fetch(PDO::FETCH_ASSOC);
 
             echo "<div class='info'>";
             echo "<strong>NOVÝ STAV:</strong><br>";
             echo "assigned_to: <strong>{$novy['assigned_to']}</strong><br>";
-            echo "technik: <strong>{$novy['technik']}</strong>";
+            echo "technik: <strong>{$novy['technik']}</strong><br>";
+            echo "created_by: <strong>{$novy['created_by']}</strong>";
             echo "</div>";
 
             echo "<p><a href='https://www.wgs-service.cz/statistiky.php' class='btn'>Otevřít statistiky</a></p>";
@@ -142,7 +165,7 @@ try {
     } else {
         echo "<form method='get'>";
         echo "<input type='hidden' name='execute' value='1'>";
-        echo "<button type='submit' class='btn'>PROVÉST ZMĚNU (přiřadit Milanovi Kolínovi)</button>";
+        echo "<button type='submit' class='btn'>PROVÉST OPRAVU (technik + prodejce)</button>";
         echo "</form>";
     }
 
