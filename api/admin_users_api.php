@@ -338,7 +338,7 @@ try {
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = array_intersect([
             'id', 'user_id', 'name', 'email', 'phone', 'address', 'role',
-            'provize_procent', 'status', 'is_active', 'created_at', 'updated_at', 'last_login'
+            'provize_procent', 'provize_poz_procent', 'status', 'is_active', 'created_at', 'updated_at', 'last_login'
         ], $existingColumns);
 
         if (empty($selectColumns)) {
@@ -392,6 +392,7 @@ try {
         $address = $data['address'] ?? '';
         $role = $data['role'] ?? '';
         $provizeProcent = isset($data['provize_procent']) ? $data['provize_procent'] : null;
+        $provizePozProcent = isset($data['provize_poz_procent']) ? $data['provize_poz_procent'] : null;
 
         if (!$userId || !is_numeric($userId)) {
             throw new Exception('Neplatné ID uživatele');
@@ -436,6 +437,13 @@ try {
             }
         }
 
+        // Validace provize POZ (pouze pro techniky)
+        if ($provizePozProcent !== null) {
+            if (!is_numeric($provizePozProcent) || $provizePozProcent < 0 || $provizePozProcent > 100) {
+                throw new Exception('Provize POZ musí být číslo mezi 0 a 100');
+            }
+        }
+
         // Sestavit UPDATE pouze pro existující sloupce
         $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
         $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -476,6 +484,10 @@ try {
         if ($provizeProcent !== null && in_array('provize_procent', $existingColumns)) {
             $updateParts[] = "provize_procent = :provize_procent";
             $params[':provize_procent'] = $provizeProcent;
+        }
+        if ($provizePozProcent !== null && in_array('provize_poz_procent', $existingColumns)) {
+            $updateParts[] = "provize_poz_procent = :provize_poz_procent";
+            $params[':provize_poz_procent'] = $provizePozProcent;
         }
         if (in_array('updated_at', $existingColumns)) {
             $updateParts[] = "updated_at = NOW()";
