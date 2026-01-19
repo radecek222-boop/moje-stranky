@@ -1650,6 +1650,18 @@ async function zobrazDetailUzivatele(userId) {
                 </select>
               </div>
 
+              <!-- Provize (pouze pro techniky) -->
+              <div id="provize-container" style="margin-bottom: 1rem; display: ${user.role === 'technik' ? 'block' : 'none'}; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">
+                  Provize technika (%)
+                  <span style="color: #666; font-weight: 400; font-size: 0.8rem;"> – procento z ceny zakázky</span>
+                </label>
+                <input type="number" id="edit-user-provize" value="${user.provize_procent || 33}" min="0" max="100" step="0.01" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #1a1a1a; color: #fff;">
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #888;">
+                  Výchozí hodnota: 33% | Rozsah: 0-100%
+                </div>
+              </div>
+
               <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Uložit změny
               </button>
@@ -1724,6 +1736,19 @@ async function zobrazDetailUzivatele(userId) {
     modalContainer.innerHTML = modalHTML;
     document.body.appendChild(modalContainer);
 
+    // Event listener pro změnu role - zobrazit/skrýt pole provize
+    const roleSelect = document.getElementById('edit-user-role');
+    const provizeContainer = document.getElementById('provize-container');
+    if (roleSelect && provizeContainer) {
+      roleSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'technik') {
+          provizeContainer.style.display = 'block';
+        } else {
+          provizeContainer.style.display = 'none';
+        }
+      });
+    }
+
   } catch (error) {
     logger.error('Chyba při načítání detailu uživatele:', error);
     alert('Chyba při načítání detailu: ' + error.message);
@@ -1750,10 +1775,21 @@ async function ulozitZmenyUzivatele(userId) {
     const phone = document.getElementById('edit-user-phone').value.trim();
     const address = document.getElementById('edit-user-address').value.trim();
     const role = document.getElementById('edit-user-role').value;
+    const provizeProcent = document.getElementById('edit-user-provize') ?
+                          document.getElementById('edit-user-provize').value : null;
 
     if (!name || !email) {
       alert('Jméno a email jsou povinné');
       return;
+    }
+
+    // Validace provize (pouze pokud je pole viditelné a vyplněné)
+    if (role === 'technik' && provizeProcent !== null) {
+      const provizeNum = parseFloat(provizeProcent);
+      if (isNaN(provizeNum) || provizeNum < 0 || provizeNum > 100) {
+        alert('Provize musí být číslo mezi 0 a 100');
+        return;
+      }
     }
 
     const csrfToken = await getCSRFToken();
@@ -1761,19 +1797,26 @@ async function ulozitZmenyUzivatele(userId) {
       throw new Error('CSRF token není k dispozici');
     }
 
+    const payload = {
+      user_id: userId,
+      name,
+      email,
+      phone,
+      address,
+      role,
+      csrf_token: csrfToken
+    };
+
+    // Přidat provizi pouze pokud je role technik a hodnota je zadána
+    if (role === 'technik' && provizeProcent !== null) {
+      payload.provize_procent = provizeProcent;
+    }
+
     const response = await fetch('/api/admin_users_api.php?action=update', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        user_id: userId,
-        name,
-        email,
-        phone,
-        address,
-        role,
-        csrf_token: csrfToken
-      })
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
