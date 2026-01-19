@@ -130,8 +130,8 @@ try {
     $stmtReklamace = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_koeficient as provize_celkem
         FROM wgs_reklamace r
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
@@ -154,8 +154,8 @@ try {
     $stmtPoz = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
         FROM wgs_reklamace r
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
