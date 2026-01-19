@@ -1654,11 +1654,23 @@ async function zobrazDetailUzivatele(userId) {
               <div id="provize-container" style="margin-bottom: 1rem; display: ${user.role === 'technik' ? 'block' : 'none'}; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
                 <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">
                   Provize technika (%)
-                  <span style="color: #666; font-weight: 400; font-size: 0.8rem;"> – procento z ceny zakázky</span>
+                  <span style="color: #666; font-weight: 400; font-size: 0.8rem;"> – procento z ceny reklamace</span>
                 </label>
                 <input type="number" id="edit-user-provize" value="${user.provize_procent || 33}" min="0" max="100" step="0.01" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #1a1a1a; color: #fff;">
                 <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #888;">
                   Výchozí hodnota: 33% | Rozsah: 0-100%
+                </div>
+              </div>
+
+              <!-- Provize POZ (pouze pro techniky) -->
+              <div id="provize-poz-container" style="margin-bottom: 1rem; display: ${user.role === 'technik' ? 'block' : 'none'}; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">
+                  Provize POZ (%)
+                  <span style="color: #666; font-weight: 400; font-size: 0.8rem;"> – procento z mimozáručních servisů</span>
+                </label>
+                <input type="number" id="edit-user-provize-poz" value="${user.provize_poz_procent || 50}" min="0" max="100" step="0.01" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #1a1a1a; color: #fff;">
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #888;">
+                  Výchozí hodnota: 50% | Rozsah: 0-100%
                 </div>
               </div>
 
@@ -1739,12 +1751,15 @@ async function zobrazDetailUzivatele(userId) {
     // Event listener pro změnu role - zobrazit/skrýt pole provize
     const roleSelect = document.getElementById('edit-user-role');
     const provizeContainer = document.getElementById('provize-container');
-    if (roleSelect && provizeContainer) {
+    const provizePozContainer = document.getElementById('provize-poz-container');
+    if (roleSelect && provizeContainer && provizePozContainer) {
       roleSelect.addEventListener('change', (e) => {
         if (e.target.value === 'technik') {
           provizeContainer.style.display = 'block';
+          provizePozContainer.style.display = 'block';
         } else {
           provizeContainer.style.display = 'none';
+          provizePozContainer.style.display = 'none';
         }
       });
     }
@@ -1777,6 +1792,8 @@ async function ulozitZmenyUzivatele(userId) {
     const role = document.getElementById('edit-user-role').value;
     const provizeProcent = document.getElementById('edit-user-provize') ?
                           document.getElementById('edit-user-provize').value : null;
+    const provizePozProcent = document.getElementById('edit-user-provize-poz') ?
+                          document.getElementById('edit-user-provize-poz').value : null;
 
     if (!name || !email) {
       alert('Jméno a email jsou povinné');
@@ -1788,6 +1805,15 @@ async function ulozitZmenyUzivatele(userId) {
       const provizeNum = parseFloat(provizeProcent);
       if (isNaN(provizeNum) || provizeNum < 0 || provizeNum > 100) {
         alert('Provize musí být číslo mezi 0 a 100');
+        return;
+      }
+    }
+
+    // Validace provize POZ (pouze pokud je pole viditelné a vyplněné)
+    if (role === 'technik' && provizePozProcent !== null) {
+      const provizePozNum = parseFloat(provizePozProcent);
+      if (isNaN(provizePozNum) || provizePozNum < 0 || provizePozNum > 100) {
+        alert('Provize POZ musí být číslo mezi 0 a 100');
         return;
       }
     }
@@ -1810,6 +1836,11 @@ async function ulozitZmenyUzivatele(userId) {
     // Přidat provizi pouze pokud je role technik a hodnota je zadána
     if (role === 'technik' && provizeProcent !== null) {
       payload.provize_procent = provizeProcent;
+    }
+
+    // Přidat provizi POZ pouze pokud je role technik a hodnota je zadána
+    if (role === 'technik' && provizePozProcent !== null) {
+      payload.provize_poz_procent = provizePozProcent;
     }
 
     const response = await fetch('/api/admin_users_api.php?action=update', {

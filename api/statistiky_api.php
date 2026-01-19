@@ -339,7 +339,7 @@ function getCharty($pdo) {
     $stmtProdejci->execute($params);
     $prodejci = $stmtProdejci->fetchAll(PDO::FETCH_ASSOC);
 
-    // 4. Statistiky techniků
+    // 4. Statistiky techniků - ROZDĚLENO NA REKLAMACE A POZ
     // Technik: priorita dokonceno_kym (kdo dokončil), pak assigned_to, pak textový sloupec technik
     $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
 
@@ -348,7 +348,8 @@ function getCharty($pdo) {
         ? "LEFT JOIN wgs_users u ON (r.dokonceno_kym = u.id OR (r.dokonceno_kym IS NULL AND r.assigned_to = u.id)) AND u.role = 'technik'"
         : "LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'";
 
-    $stmtTechnici = $pdo->prepare("
+    // 4a. REKLAMACE (s prodejcem - created_by vyplněno) - individuální provize
+    $stmtTechniciReklamace = $pdo->prepare("
         SELECT
             CASE
                 WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-')
@@ -360,19 +361,46 @@ function getCharty($pdo) {
         FROM wgs_reklamace r
         $technikJoinChart
         $where
+        AND (r.created_by IS NOT NULL AND r.created_by != '')
         GROUP BY CASE WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-') ELSE '-' END
         HAVING COUNT(CASE WHEN r.stav = 'done' THEN 1 END) > 0
         ORDER BY pocet DESC
         LIMIT 10
     ");
-    $stmtTechnici->execute($params);
-    $technici = $stmtTechnici->fetchAll(PDO::FETCH_ASSOC);
+    $stmtTechniciReklamace->execute($params);
+    $techniciReklamace = $stmtTechniciReklamace->fetchAll(PDO::FETCH_ASSOC);
+
+    // 4b. POZ (bez prodejce - created_by prázdné) - individuální provize POZ
+    $stmtTechniciPoz = $pdo->prepare("
+        SELECT
+            CASE
+                WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-')
+                ELSE '-'
+            END as technik,
+            COUNT(CASE WHEN r.stav = 'done' THEN 1 END) as pocet,
+            SUM(CASE WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) ELSE 0 END) as celkem,
+            SUM(CASE WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) * (COALESCE(u.provize_poz_procent, 50) / 100) ELSE 0 END) as vydelek
+        FROM wgs_reklamace r
+        $technikJoinChart
+        $where
+        AND (r.created_by IS NULL OR r.created_by = '')
+        GROUP BY CASE WHEN r.stav = 'done' THEN COALESCE(u.name, r.technik, '-') ELSE '-' END
+        HAVING COUNT(CASE WHEN r.stav = 'done' THEN 1 END) > 0
+        ORDER BY pocet DESC
+        LIMIT 10
+    ");
+    $stmtTechniciPoz->execute($params);
+    $techniciPoz = $stmtTechniciPoz->fetchAll(PDO::FETCH_ASSOC);
 
     // Zaokrouhlit částky
     foreach ($prodejci as &$p) {
         $p['celkem'] = round((float)$p['celkem'], 2);
     }
-    foreach ($technici as &$t) {
+    foreach ($techniciReklamace as &$t) {
+        $t['celkem'] = round((float)$t['celkem'], 2);
+        $t['vydelek'] = round((float)$t['vydelek'], 2);
+    }
+    foreach ($techniciPoz as &$t) {
         $t['celkem'] = round((float)$t['celkem'], 2);
         $t['vydelek'] = round((float)$t['vydelek'], 2);
     }
@@ -383,7 +411,8 @@ function getCharty($pdo) {
             'modely' => $modely,
             'mesta' => $mesta,
             'prodejci' => $prodejci,
-            'technici' => $technici
+            'techniciReklamace' => $techniciReklamace,
+            'techniciPoz' => $techniciPoz
         ]
     ]);
 }

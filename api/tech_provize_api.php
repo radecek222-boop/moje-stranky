@@ -43,13 +43,14 @@ try {
 
     // FIX: Převést textové user_id na numerické id z wgs_users
     // assigned_to obsahuje wgs_users.id (numerické), ne user_id (textové)
-    // TAKÉ načíst provizi technika
-    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, COALESCE(provize_procent, 33) as provize_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+    // TAKÉ načíst provizi technika (reklamace a POZ)
+    $stmtGetId = $pdo->prepare("SELECT id, CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as full_name, COALESCE(provize_procent, 33) as provize_procent, COALESCE(provize_poz_procent, 50) as provize_poz_procent FROM wgs_users WHERE user_id = :user_id LIMIT 1");
     $stmtGetId->execute([':user_id' => $userId]);
     $userRow = $stmtGetId->fetch(PDO::FETCH_ASSOC);
     $numericUserId = $userRow['id'] ?? null;
     $userName = trim($userRow['full_name'] ?? '');
     $provizeProcent = (float)($userRow['provize_procent'] ?? 33);
+    $provizePozProcent = (float)($userRow['provize_poz_procent'] ?? 50);
 
     if (!$numericUserId) {
         // Fallback - zkusit jestli userId není už numerické
@@ -148,12 +149,13 @@ try {
     $castkaReklamace = (float)($vysledekReklamace['celkem_castka'] ?? 0);
     $provizeReklamace = (float)($vysledekReklamace['provize_celkem'] ?? 0);
 
-    // === 2. POZ (bez created_by) - fixní 50% provize ===
+    // === 2. POZ (bez created_by) - individuální provize POZ ===
+    $provizePozKoeficient = $provizePozProcent / 100;
     $stmtPoz = $pdo->prepare("
         SELECT
             COUNT(*) as pocet_zakazek,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
-            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.5 as provize_celkem
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * :provize_poz_koeficient as provize_celkem
         FROM wgs_reklamace r
         WHERE {$whereCondition}
           AND YEAR({$datumSloupec}) = :rok
@@ -162,7 +164,8 @@ try {
           AND (r.created_by IS NULL OR r.created_by = '')
     ");
 
-    $stmtPoz->execute($params);
+    $paramsPoz = array_merge($params, ['provize_poz_koeficient' => $provizePozKoeficient]);
+    $stmtPoz->execute($paramsPoz);
     $vysledekPoz = $stmtPoz->fetch(PDO::FETCH_ASSOC);
 
     $pocetPoz = (int)($vysledekPoz['pocet_zakazek'] ?? 0);
