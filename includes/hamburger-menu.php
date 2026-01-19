@@ -687,7 +687,7 @@ document.addEventListener('alpine:init', () => {
             console.log('[TechProvize] Hodnoty nastaveny - mesic:', self.mesic, 'reklamace:', self.reklamace, 'poz:', self.poz);
           } else {
             console.warn('[TechProvize] API vrátilo chybu:', result.message);
-            self.mesic = 'CHYBA';
+            self.mesic = result.message || 'CHYBA';
             self.reklamace = '0.00';
             self.poz = '0.00';
           }
