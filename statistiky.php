@@ -861,10 +861,18 @@ body {
       </div>
     </div>
 
-    <!-- Statistiky techniků -->
+    <!-- Statistiky techniků - REKLAMACE -->
     <div class="chart-card">
-      <div class="chart-title">Statistiky techniků</div>
-      <div class="chart-content" id="chart-technicians" aria-live="polite">
+      <div class="chart-title">Statistiky techniků - REKLAMACE</div>
+      <div class="chart-content" id="chart-technicians-reklamace" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
+      </div>
+    </div>
+
+    <!-- Statistiky techniků - POZ -->
+    <div class="chart-card">
+      <div class="chart-title">Statistiky techniků - POZ</div>
+      <div class="chart-content" id="chart-technicians-poz" aria-live="polite">
         <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
