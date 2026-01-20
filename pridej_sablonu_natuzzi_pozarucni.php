@@ -115,6 +115,7 @@ Navštivte naše webové stránky [www.wgs-service.cz](https://www.wgs-service.c
             try {
                 $stmt = $pdo->prepare("
                     INSERT INTO wgs_notifications (
+                        id,
                         name,
                         description,
                         trigger_event,
@@ -126,6 +127,7 @@ Navštivte naše webové stránky [www.wgs-service.cz](https://www.wgs-service.c
                         active,
                         created_at
                     ) VALUES (
+                        :id,
                         :name,
                         :description,
                         :trigger_event,
@@ -140,6 +142,7 @@ Navštivte naše webové stránky [www.wgs-service.cz](https://www.wgs-service.c
                 ");
 
                 $stmt->execute([
+                    'id' => 'marketing_natuzzi_pozarucni',
                     'name' => 'Natuzzi - Pozáruční servis (Marketing)',
                     'description' => 'Marketingový email pro existující zákazníky Natuzzi informující o dostupnosti pozáručních služeb',
                     'trigger_event' => 'marketing_natuzzi_pozarucni',
@@ -151,7 +154,7 @@ Navštivte naše webové stránky [www.wgs-service.cz](https://www.wgs-service.c
                     'active' => 1
                 ]);
 
-                $novyId = $pdo->lastInsertId();
+                $novyId = 'marketing_natuzzi_pozarucni';
 
                 $pdo->commit();
 
