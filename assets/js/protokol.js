@@ -796,13 +796,15 @@ async function loadPhotosFromDatabase(customerId) {
       'damage_part': 'DAMAGE PART',
       'new_part': 'NEW PART',
       'repair': 'REPAIR',
-      'after': 'AFTER'
+      'after': 'AFTER',
+      'photocustomer': 'CUSTOMER PHOTO',
+      'pricelist': 'PRICELIST'
     };
 
     let totalPhotos = 0;
     let totalVideos = 0;
 
-    const orderedSections = ['before', 'id', 'problem', 'damage_part', 'new_part', 'repair', 'after'];
+    const orderedSections = ['before', 'id', 'problem', 'damage_part', 'new_part', 'repair', 'after', 'photocustomer', 'pricelist'];
 
     orderedSections.forEach(sectionKey => {
       const sectionItems = sections[sectionKey];
