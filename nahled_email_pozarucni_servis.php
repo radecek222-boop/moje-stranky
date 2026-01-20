@@ -43,8 +43,12 @@ $htmlEmail = "<!DOCTYPE html>
                             <div style='padding: 20px 30px 15px 30px;'>
                                 <p style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>Vážená paní, vážený pane,</p>
 
+                                <p style='margin: 0 0 10px 0; font-size: 13px; color: #666; line-height: 1.6; font-style: italic;'>
+                                    Dovolujeme si Vás kontaktovat, protože Váš email máme z naší předchozí spolupráce – ať už z doručení nábytku Natuzzi nebo z poskytnutého servisu.
+                                </p>
+
                                 <p style='margin: 0 0 10px 0; font-size: 14px; color: #555; line-height: 1.6;'>
-                                    rádi bychom Vás informovali, že pro společnost <strong>Natuzzi</strong> poskytujeme komplexní <strong>pozáruční servisní služby</strong>.
+                                    Rádi bychom Vás informovali, že pro společnost <strong>Natuzzi</strong> poskytujeme komplexní <strong>pozáruční servisní služby</strong>.
                                 </p>
 
                                 <p style='margin: 0 0 10px 0; font-size: 14px; color: #555; line-height: 1.6;'>
