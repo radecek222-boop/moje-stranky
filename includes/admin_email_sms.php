@@ -153,13 +153,42 @@ try {
 
 // Load email queue for management tab
 $filterStatus = $_GET['filter'] ?? 'all';
+$strankaAktualni = isset($_GET['stranka']) ? max(1, (int)$_GET['stranka']) : 1;
+$razeni = $_GET['razeni'] ?? 'DESC'; // DESC = nejnovější, ASC = nejstarší
+$naStrankuPolozkek = 50;
+
 $emaily = [];
+$celkemEmailu = 0;
+$celkemStranek = 1;
+
 try {
     $whereClause = '';
+    $params = [];
     if ($filterStatus !== 'all') {
         $whereClause = "WHERE eq.status = :status";
+        $params['status'] = $filterStatus;
     }
 
+    // Nejdříve spočítat celkový počet emailů pro pagination
+    $sqlCount = "
+        SELECT COUNT(*) as total
+        FROM wgs_email_queue eq
+        $whereClause
+    ";
+    $stmtCount = $pdo->prepare($sqlCount);
+    $stmtCount->execute($params);
+    $celkemEmailu = (int)$stmtCount->fetchColumn();
+    $celkemStranek = max(1, ceil($celkemEmailu / $naStrankuPolozkek));
+
+    // Kontrola aby aktuální stránka nebyla větší než celkový počet
+    if ($strankaAktualni > $celkemStranek) {
+        $strankaAktualni = $celkemStranek;
+    }
+
+    $offset = ($strankaAktualni - 1) * $naStrankuPolozkek;
+
+    // Sestavit SQL s dynamickým řazením a LIMIT/OFFSET
+    $orderDirection = ($razeni === 'ASC') ? 'ASC' : 'DESC';
     $sql = "
         SELECT
             eq.id, eq.recipient_email, eq.recipient_name, eq.subject, eq.body,
@@ -171,19 +200,22 @@ try {
         FROM wgs_email_queue eq
         LEFT JOIN wgs_notifications n ON eq.notification_id = n.id
         $whereClause
-        ORDER BY eq.created_at DESC
-        LIMIT 100
+        ORDER BY eq.created_at $orderDirection
+        LIMIT :limit OFFSET :offset
     ";
 
     $stmt = $pdo->prepare($sql);
-    if ($filterStatus !== 'all') {
-        $stmt->execute(['status' => $filterStatus]);
-    } else {
-        $stmt->execute();
+    foreach ($params as $key => $value) {
+        $stmt->bindValue(":$key", $value);
     }
+    $stmt->bindValue(':limit', $naStrankuPolozkek, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $emaily = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $emaily = [];
+    $celkemEmailu = 0;
+    $celkemStranek = 1;
 }
 ?>
 
@@ -654,6 +686,65 @@ try {
                 <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">-</div>
                 <h3 style="font-family: 'Poppins', sans-serif; font-size: 1rem; color: #666; margin-bottom: 0.5rem;">Žádné emaily nenalezeny</h3>
                 <p style="font-size: 0.85rem; color: #999;">Pro vybraný filtr neexistují žádné emaily.</p>
+            </div>
+            <?php endif; ?>
+
+            <!-- Pagination Controls -->
+            <?php if ($celkemEmailu > 0): ?>
+            <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
+                <!-- Informace o zobrazení -->
+                <div style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;">
+                    <?php
+                        $odPolozkaCislo = ($strankaAktualni - 1) * $naStrankuPolozkek + 1;
+                        $doPolozkaCislo = min($strankaAktualni * $naStrankuPolozkek, $celkemEmailu);
+                    ?>
+                    Zobrazeno <strong><?= $odPolozkaCislo ?> - <?= $doPolozkaCislo ?></strong> z <strong><?= $celkemEmailu ?></strong> emailů
+                </div>
+
+                <!-- Řazení -->
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;">Řazení:</span>
+                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=DESC"
+                       style="padding: 0.4rem 0.8rem; background: <?= $razeni === 'DESC' ? '#000' : '#fff' ?>; color: <?= $razeni === 'DESC' ? '#fff' : '#000' ?>; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        Nejnovější
+                    </a>
+                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=ASC"
+                       style="padding: 0.4rem 0.8rem; background: <?= $razeni === 'ASC' ? '#000' : '#fff' ?>; color: <?= $razeni === 'ASC' ? '#fff' : '#000' ?>; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        Nejstarší
+                    </a>
+                </div>
+
+                <!-- Navigace stránek -->
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <!-- Předchozí stránka -->
+                    <?php if ($strankaAktualni > 1): ?>
+                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni - 1 ?>&razeni=<?= urlencode($razeni) ?>"
+                       style="padding: 0.4rem 0.8rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        ‹ Předchozí
+                    </a>
+                    <?php else: ?>
+                    <span style="padding: 0.4rem 0.8rem; background: #ccc; color: #888; border: 1px solid #ccc; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: not-allowed;">
+                        ‹ Předchozí
+                    </span>
+                    <?php endif; ?>
+
+                    <!-- Čísla stránek -->
+                    <span style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666; font-weight: 600;">
+                        Stránka <?= $strankaAktualni ?> / <?= $celkemStranek ?>
+                    </span>
+
+                    <!-- Následující stránka -->
+                    <?php if ($strankaAktualni < $celkemStranek): ?>
+                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni + 1 ?>&razeni=<?= urlencode($razeni) ?>"
+                       style="padding: 0.4rem 0.8rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        Následující ›
+                    </a>
+                    <?php else: ?>
+                    <span style="padding: 0.4rem 0.8rem; background: #ccc; color: #888; border: 1px solid #ccc; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: not-allowed;">
+                        Následující ›
+                    </span>
+                    <?php endif; ?>
+                </div>
             </div>
             <?php endif; ?>
 
