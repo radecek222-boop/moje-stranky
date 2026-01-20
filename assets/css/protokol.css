@@ -860,28 +860,25 @@ button.btn:hover {
     margin-top: 2px;
   }
 
-  /* SPLIT SECTION - Plná šířka textareas */
+  /* SPLIT SECTION - ZACHOVAT DVOUSLOUPCOVÝ LAYOUT I NA MOBILU */
   .split-section {
-    display: block;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-bottom: 15px;
   }
 
-  /* Skrýt anglické překladové pole na mobilu (druhé textarea) */
-  .split-section textarea:nth-child(2) {
-    display: none;
+  /* Zmenšit font v textareas na mobilu pro lepší čitelnost */
+  .split-section textarea {
+    font-size: 12px;
+    min-height: 60px;
   }
 
-  /* České pole na plnou šířku */
-  .split-section textarea:nth-child(1) {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100%;
-    box-sizing: border-box !important;
-  }
-
-  /* Skrýt translate tlačítko na mobilu */
+  /* Zachovat translate tlačítko, ale zmenšit */
   .translate-btn {
-    display: none;
+    display: block;
+    font-size: 10px;
+    padding: 4px 8px;
   }
 
   /* H2 nadpisy menší */
