@@ -635,6 +635,9 @@ async function saveToProtocol() {
     const result = await response.json();
 
     if (result.success) {
+      // ✅ SMAZAT FOTKY Z INDEXEDDB PO ÚSPĚŠNÉM ODESLÁNÍ
+      await deleteFromServer();
+
       // ⏳ ZOBRAZIT PŘESÝPACÍ HODINY S TEXTEM "PŘESMĚROVÁNÍ NA PROTOKOL"
       showWaitDialog(true, 'Přesměrování na protokol...');
 
@@ -656,17 +659,50 @@ async function saveToProtocol() {
 }
 
 async function saveToServer() {
-  logger.log('[Save] Fotky uloženy lokálně (server-side temp storage vypnut)');
+  // Uložit fotky do IndexedDB pro perzistenci
+  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+    try {
+      await window.PhotoStorageDB.save(currentCustomerData.reklamace_id, sections);
+      logger.log('[IndexedDB] Fotky automaticky uloženy');
+      return { success: true };
+    } catch (error) {
+      logger.error('[IndexedDB] Chyba při ukládání:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  logger.log('[Save] PhotoStorageDB není k dispozici');
   return { success: true };
 }
 
 async function loadFromServer() {
-  logger.log('📂 Lokální úložiště (server-side temp storage vypnut)');
+  // Načíst fotky z IndexedDB
+  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+    try {
+      const savedSections = await window.PhotoStorageDB.load(currentCustomerData.reklamace_id);
+      if (savedSections) {
+        logger.log('📂 Fotky obnoveny z IndexedDB');
+        return savedSections;
+      }
+    } catch (error) {
+      logger.error('[IndexedDB] Chyba při načítání:', error);
+    }
+  }
+
+  logger.log('📂 Žádné uložené fotky v IndexedDB');
   return null;
 }
 
 async function deleteFromServer() {
-  logger.log('🗑️ Lokální úložiště vymazáno (server-side temp storage vypnut)');
+  // Smazat fotky z IndexedDB po úspěšném odeslání
+  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+    try {
+      await window.PhotoStorageDB.delete(currentCustomerData.reklamace_id);
+      logger.log('🗑️ Fotky smazány z IndexedDB');
+    } catch (error) {
+      logger.error('[IndexedDB] Chyba při mazání:', error);
+    }
+  }
 }
 
 function showWaitDialog(show, message = 'Čekejte...') {
