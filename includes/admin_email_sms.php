@@ -157,6 +157,10 @@ $strankaAktualni = isset($_GET['stranka']) ? max(1, (int)$_GET['stranka']) : 1;
 $razeni = $_GET['razeni'] ?? 'DESC'; // DESC = nejnovější, ASC = nejstarší
 $naStrankuPolozkek = 50;
 
+// Zachovat tab parametr pro pagination odkazy
+$tabParam = isset($_GET['tab']) ? '&tab=' . urlencode($_GET['tab']) : '';
+$baseUrl = $directAccess ? '?' : '?tab=notifications&';
+
 $emaily = [];
 $celkemEmailu = 0;
 $celkemStranek = 1;
@@ -704,11 +708,11 @@ try {
                 <!-- Řazení -->
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <span style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;">Řazení:</span>
-                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=DESC"
+                    <a href="<?= $baseUrl ?>filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=DESC"
                        style="padding: 0.4rem 0.8rem; background: <?= $razeni === 'DESC' ? '#000' : '#fff' ?>; color: <?= $razeni === 'DESC' ? '#fff' : '#000' ?>; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                         Nejnovější
                     </a>
-                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=ASC"
+                    <a href="<?= $baseUrl ?>filter=<?= urlencode($filterStatus) ?>&stranka=1&razeni=ASC"
                        style="padding: 0.4rem 0.8rem; background: <?= $razeni === 'ASC' ? '#000' : '#fff' ?>; color: <?= $razeni === 'ASC' ? '#fff' : '#000' ?>; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                         Nejstarší
                     </a>
@@ -718,7 +722,7 @@ try {
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <!-- Předchozí stránka -->
                     <?php if ($strankaAktualni > 1): ?>
-                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni - 1 ?>&razeni=<?= urlencode($razeni) ?>"
+                    <a href="<?= $baseUrl ?>filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni - 1 ?>&razeni=<?= urlencode($razeni) ?>"
                        style="padding: 0.4rem 0.8rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                         ‹ Předchozí
                     </a>
@@ -735,7 +739,7 @@ try {
 
                     <!-- Následující stránka -->
                     <?php if ($strankaAktualni < $celkemStranek): ?>
-                    <a href="?filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni + 1 ?>&razeni=<?= urlencode($razeni) ?>"
+                    <a href="<?= $baseUrl ?>filter=<?= urlencode($filterStatus) ?>&stranka=<?= $strankaAktualni + 1 ?>&razeni=<?= urlencode($razeni) ?>"
                        style="padding: 0.4rem 0.8rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                         Následující ›
                     </a>
@@ -1177,6 +1181,11 @@ function filterEmaily(status) {
     const url = new URL(window.location);
     url.searchParams.set('filter', status);
     url.searchParams.set('section', 'management');
+    url.searchParams.set('stranka', '1'); // Reset na stránku 1 při změně filtru
+    // Zachovat řazení pokud existuje
+    if (!url.searchParams.has('razeni')) {
+        url.searchParams.set('razeni', 'DESC');
+    }
     window.location.href = url.toString();
 }
 
