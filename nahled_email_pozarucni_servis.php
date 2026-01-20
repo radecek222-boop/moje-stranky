@@ -56,12 +56,16 @@ $htmlEmail = "<!DOCTYPE html>
                                 </h3>
 
                                 <ul style='margin: 0 0 12px 0; padding-left: 20px; font-size: 14px; color: #555; line-height: 1.5;'>
-                                    <li style='margin-bottom: 4px;'><strong>Opravy elektrických prvků</strong> – ovládání polohování, LED osvětlení, USB nabíječky</li>
-                                    <li style='margin-bottom: 4px;'><strong>Opravy mechanismů</strong> – výsuvné mechanismy, polohování, otočné hlavy</li>
                                     <li style='margin-bottom: 4px;'><strong>Řešení vad prosezení</strong> – obnova komfortu sedacích ploch</li>
                                     <li style='margin-bottom: 4px;'><strong>Profesionální přečalounění</strong> – včetně výběru kvalitních materiálů</li>
+                                    <li style='margin-bottom: 4px;'><strong>Opravy elektrických prvků</strong> – ovládání polohování, LED osvětlení, USB nabíječky</li>
+                                    <li style='margin-bottom: 4px;'><strong>Opravy mechanismů</strong> – výsuvné mechanismy, polohování, otočné hlavy</li>
                                     <li style='margin-bottom: 4px;'><strong>Čištění kožených sedaček</strong> – výhradně originálními prostředky Natuzzi</li>
                                 </ul>
+
+                                <p style='margin: 12px 0; font-size: 14px; color: #333; line-height: 1.6; background: #f8f9fa; padding: 12px 15px; border-left: 3px solid #333; border-radius: 4px;'>
+                                    <strong>Prosezení sedačky není vada, se kterou se musíte smířit!</strong> Většinu problémů vyřešíme během jediné návštěvy přímo u Vás doma – <strong>bez nutnosti odvážet nábytek</strong>. Nemusíte mít obavu z přepravy ani z toho, že byste zůstali bez místa k sezení. Přes 90 % našich oprav lze provést na místě a Vaše sedačka bude vypadat a fungovat jako nová.
+                                </p>
 
                                 <p style='margin: 0; font-size: 14px; color: #555; line-height: 1.6;'>
                                     Pro čištění používáme <strong>pouze produkty Natuzzi</strong>, které jsou chemicky sladěné s impregnací a povrchovou úpravou Vašeho nábytku. Tím zajišťujeme maximální péči a dlouhou životnost sedacích souprav.
