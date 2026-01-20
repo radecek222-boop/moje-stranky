@@ -105,6 +105,10 @@ try {
     $sent = 0;
     $failed = 0;
 
+    // DŮLEŽITÉ: Atomický SELECT s FOR UPDATE zámkem
+    // Zabraňuje race condition když běží více instancí cronu
+    $pdo->beginTransaction();
+
     $stmt = $pdo->prepare("
         SELECT * FROM wgs_email_queue
         WHERE status = 'pending'
@@ -112,16 +116,23 @@ try {
         AND attempts < max_attempts
         ORDER BY priority DESC, scheduled_at ASC
         LIMIT ?
+        FOR UPDATE SKIP LOCKED
     ");
     $stmt->execute([$limit]);
     $emails = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Okamžitě označit všechny vybrané emaily jako 'sending'
+    if (!empty($emails)) {
+        $ids = array_column($emails, 'id');
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $pdo->prepare("UPDATE wgs_email_queue SET status = 'sending' WHERE id IN ($placeholders)")
+            ->execute($ids);
+    }
+
+    $pdo->commit();
+
     foreach ($emails as $email) {
         logMessage("Zpracovávám email #{$email['id']} pro {$email['recipient_email']}");
-
-        // Označit jako odesílající se
-        $pdo->prepare("UPDATE wgs_email_queue SET status = 'sending' WHERE id = ?")
-            ->execute([$email['id']]);
 
         // Pokus o odeslání
         $result = $queue->sendEmail($email);

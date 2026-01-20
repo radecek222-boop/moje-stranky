@@ -546,7 +546,9 @@ function sendWithPHPMail($queueItem, $settings) {
      * @param mixed $limit Limit
      */
 function processQueue($limit = 10) {
-        // Získat pending emaily
+        // CRITICAL: Atomický SELECT s FOR UPDATE zamezuje race condition
+        $this->pdo->beginTransaction();
+
         $stmt = $this->pdo->prepare("
             SELECT * FROM wgs_email_queue
             WHERE status = 'pending'
@@ -554,9 +556,20 @@ function processQueue($limit = 10) {
               AND attempts < max_attempts
             ORDER BY priority DESC, created_at ASC
             LIMIT ?
+            FOR UPDATE SKIP LOCKED
         ");
         $stmt->execute([$limit]);
         $emails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Okamžitě označit všechny jako 'sending' aby je jiné procesy nepřevzaly
+        if (!empty($emails)) {
+            $ids = array_column($emails, 'id');
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $this->pdo->prepare("UPDATE wgs_email_queue SET status = 'sending' WHERE id IN ($placeholders)")
+                ->execute($ids);
+        }
+
+        $this->pdo->commit();
 
         $results = [
             'processed' => 0,
@@ -571,9 +584,6 @@ function processQueue($limit = 10) {
             try {
                 // CRITICAL FIX: Začít transakci pro všechny DB operace
                 $this->pdo->beginTransaction();
-
-                // Označit jako "sending"
-                $this->updateStatus($email['id'], 'sending');
 
                 // CRITICAL FIX: COMMIT transakce před odesláním emailu
                 // (nemůžeme rollbackovat skutečné odeslání emailu, jen DB operace)
