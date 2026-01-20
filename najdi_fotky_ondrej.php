@@ -57,7 +57,8 @@ try {
             jmeno,
             adresa,
             stav,
-            termin_navstevy,
+            termin,
+            cas_navstevy,
             created_at,
             updated_at
         FROM wgs_reklamace
@@ -112,7 +113,12 @@ try {
             echo "<td><strong>" . htmlspecialchars($zakazka['cislo'] ?? $zakazka['reklamace_id']) . "</strong></td>";
             echo "<td>" . htmlspecialchars($zakazka['jmeno']) . "</td>";
             echo "<td>" . htmlspecialchars($zakazka['stav']) . "</td>";
-            echo "<td>" . ($zakazka['termin_navstevy'] ?? '-') . "</td>";
+
+            $termin = $zakazka['termin'] ?? null;
+            $cas = $zakazka['cas_navstevy'] ?? null;
+            $terminText = $termin ? ($termin . ($cas ? ' ' . $cas : '')) : '-';
+            echo "<td>" . htmlspecialchars($terminText) . "</td>";
+
             echo "<td>" . $zakazka['updated_at'] . "</td>";
             echo "<td style='text-align: center;'><strong>" . $photoCount . "</strong></td>";
             echo "<td style='text-align: center;'><strong>" . $filesOnDisk . "</strong>";
