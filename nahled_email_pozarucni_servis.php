@@ -41,18 +41,14 @@ $htmlEmail = "<!DOCTYPE html>
 
                             <!-- Oslovení a obsah -->
                             <div style='padding: 20px 30px 15px 30px;'>
-                                <p style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>Vážená paní, vážený pane,</p>
+                                <p style='margin: 0 0 18px 0; font-size: 15px; color: #333;'>Vážená paní, vážený pane,</p>
 
-                                <p style='margin: 0 0 10px 0; font-size: 13px; color: #666; line-height: 1.6; font-style: italic;'>
+                                <p style='margin: 0 0 18px 0; font-size: 13px; color: #666; line-height: 1.6; font-style: italic;'>
                                     Dovolujeme si Vás kontaktovat, protože Váš email máme z naší předchozí spolupráce – ať už z doručení nábytku Natuzzi nebo z poskytnutého servisu.
                                 </p>
 
-                                <p style='margin: 0 0 10px 0; font-size: 14px; color: #555; line-height: 1.6;'>
-                                    Rádi bychom Vás informovali, že pro společnost <strong>Natuzzi</strong> poskytujeme komplexní <strong>pozáruční servisní služby</strong>.
-                                </p>
-
-                                <p style='margin: 0 0 10px 0; font-size: 14px; color: #555; line-height: 1.6;'>
-                                    Jelikož jsme u Vás již v minulosti byli (ať už při doručení nábytku, řešení reklamace nebo pozáručního servisu), rádi bychom Vám připomněli, že jsme tu pro Vás i nadále.
+                                <p style='margin: 0 0 18px 0; font-size: 14px; color: #555; line-height: 1.6;'>
+                                    Rádi bychom Vás informovali, že pro společnost <strong>Natuzzi</strong> poskytujeme komplexní <strong>pozáruční servisní služby</strong> a jsme tu pro Vás i nadále.
                                 </p>
 
                                 <h3 style='margin: 15px 0 8px 0; font-size: 15px; font-weight: 600; color: #333;'>
