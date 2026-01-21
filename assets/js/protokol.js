@@ -127,8 +127,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (currentReklamaceId) {
     logger.log('ID nalezeno v URL');
     await loadReklamace(currentReklamaceId);
-    loadPhotosFromDatabase(currentReklamaceId);
-    loadKalkulaceFromDatabase(currentReklamaceId);
+    // KRITICKÉ: Čekat na načtení fotek a kalkulace před pokračováním!
+    // Bez await může uživatel kliknout na Export PDF dříve, než se fotky načtou
+    await loadPhotosFromDatabase(currentReklamaceId);
+    await loadKalkulaceFromDatabase(currentReklamaceId);
   } else {
     logger.warn('Chybí ID v URL - zkusím načíst z localStorage');
     await loadReklamace(null);
@@ -136,8 +138,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (currentReklamace && currentReklamace.id) {
       logger.log('ID nalezeno v načtených datech:', currentReklamace.id);
       currentReklamaceId = currentReklamace.id;
-      loadPhotosFromDatabase(currentReklamaceId);
-      loadKalkulaceFromDatabase(currentReklamaceId);
+      // KRITICKÉ: Čekat na načtení fotek a kalkulace!
+      await loadPhotosFromDatabase(currentReklamaceId);
+      await loadKalkulaceFromDatabase(currentReklamaceId);
     } else {
       logger.error('ID se nepodařilo najít!');
     }
@@ -1298,8 +1301,8 @@ async function generateProtocolPDF() {
     if (cloneTextarea) {
       const div = document.createElement('div');
       // Pevné styly pro PDF - nezávislé na computed styles
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout split-section!
       div.style.cssText = `
-        width: 100%;
         min-height: 60px;
         padding: 4px 8px;
         border: 1px solid #999;
@@ -1330,9 +1333,9 @@ async function generateProtocolPDF() {
     if (cloneInput) {
       const div = document.createElement('div');
       // Pevné styly pro PDF
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
       div.style.cssText = `
         display: block;
-        width: 100%;
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
@@ -1361,9 +1364,9 @@ async function generateProtocolPDF() {
     const cloneSelect = cloneSelects[index];
     if (cloneSelect) {
       const div = document.createElement('div');
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
       div.style.cssText = `
         display: block;
-        width: 100%;
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
