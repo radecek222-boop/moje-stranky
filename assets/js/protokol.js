@@ -127,8 +127,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (currentReklamaceId) {
     logger.log('ID nalezeno v URL');
     await loadReklamace(currentReklamaceId);
-    loadPhotosFromDatabase(currentReklamaceId);
-    loadKalkulaceFromDatabase(currentReklamaceId);
+    // KRITICKÉ: Čekat na načtení fotek a kalkulace před pokračováním!
+    // Bez await může uživatel kliknout na Export PDF dříve, než se fotky načtou
+    await loadPhotosFromDatabase(currentReklamaceId);
+    await loadKalkulaceFromDatabase(currentReklamaceId);
   } else {
     logger.warn('Chybí ID v URL - zkusím načíst z localStorage');
     await loadReklamace(null);
@@ -136,8 +138,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (currentReklamace && currentReklamace.id) {
       logger.log('ID nalezeno v načtených datech:', currentReklamace.id);
       currentReklamaceId = currentReklamace.id;
-      loadPhotosFromDatabase(currentReklamaceId);
-      loadKalkulaceFromDatabase(currentReklamaceId);
+      // KRITICKÉ: Čekat na načtení fotek a kalkulace!
+      await loadPhotosFromDatabase(currentReklamaceId);
+      await loadKalkulaceFromDatabase(currentReklamaceId);
     } else {
       logger.error('ID se nepodařilo najít!');
     }
