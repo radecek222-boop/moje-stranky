@@ -1298,8 +1298,8 @@ async function generateProtocolPDF() {
     if (cloneTextarea) {
       const div = document.createElement('div');
       // Pevné styly pro PDF - nezávislé na computed styles
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout split-section!
       div.style.cssText = `
-        width: 100%;
         min-height: 60px;
         padding: 4px 8px;
         border: 1px solid #999;
@@ -1330,9 +1330,9 @@ async function generateProtocolPDF() {
     if (cloneInput) {
       const div = document.createElement('div');
       // Pevné styly pro PDF
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
       div.style.cssText = `
         display: block;
-        width: 100%;
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
@@ -1361,9 +1361,9 @@ async function generateProtocolPDF() {
     const cloneSelect = cloneSelects[index];
     if (cloneSelect) {
       const div = document.createElement('div');
+      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
       div.style.cssText = `
         display: block;
-        width: 100%;
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
