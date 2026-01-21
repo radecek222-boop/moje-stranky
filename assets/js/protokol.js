@@ -1351,10 +1351,16 @@ async function generateProtocolPDF() {
     const cloneInput = cloneInputs[index];
     if (cloneInput) {
       const div = document.createElement('div');
+
+      // KRITICKÉ: Detekovat jestli je input v tabulce nebo v gridu!
+      // V TABULCE (two-col-table) POTŘEBUJEME width: 100%
+      // V GRIDU (split-section) NESMÍME použít width: 100%
+      const jeVTabulce = cloneInput.closest('table') !== null;
+
       // Pevné styly pro PDF
-      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
       div.style.cssText = `
         display: block;
+        ${jeVTabulce ? 'width: 100%;' : ''}
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
@@ -1383,9 +1389,15 @@ async function generateProtocolPDF() {
     const cloneSelect = cloneSelects[index];
     if (cloneSelect) {
       const div = document.createElement('div');
-      // KRITICKÉ: Nepoužívat width: 100% - rozbíjí grid layout!
+
+      // KRITICKÉ: Detekovat jestli je select v tabulce nebo v gridu!
+      // V TABULCE (two-col-table) POTŘEBUJEME width: 100%
+      // V GRIDU (split-section) NESMÍME použít width: 100%
+      const jeVTabulce = cloneSelect.closest('table') !== null;
+
       div.style.cssText = `
         display: block;
+        ${jeVTabulce ? 'width: 100%;' : ''}
         padding: 4px 8px;
         border: 1px solid #999;
         background: #fff;
