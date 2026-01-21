@@ -2741,11 +2741,15 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
 
   // === PDF NÁHLED (zabere zbytek místa) ===
   const pdfContainer = document.createElement('div');
-  pdfContainer.style.cssText = 'flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 16px;';
+  // Na mobilu menší padding pro maximální využití obrazovky
+  const isMobile = window.innerWidth < 768;
+  const padding = isMobile ? '4px' : '16px';
+  pdfContainer.style.cssText = `flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: ${padding};`;
 
   const iframe = document.createElement('iframe');
   iframe.src = pdfUrl;
-  iframe.style.cssText = 'width: 100%; height: 100%; max-width: 900px; border: none; background: white; border-radius: 8px;';
+  // Na mobilu i desktopu zobrazit PDF na plnou šířku bez omezení
+  iframe.style.cssText = 'width: 100%; height: 100%; border: none; background: white; border-radius: 8px;';
   pdfContainer.appendChild(iframe);
 
   // === PATIČKA S TLAČÍTKY (fixní dole) ===
