@@ -3472,4 +3472,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // EXPORT FUNKCÍ DO WINDOW (pro data-action tlačítka)
+  // ═══════════════════════════════════════════════════════════
+  window.sendToCustomer = sendToCustomer;
+  window.exportBothPDFs = exportBothPDFs;
+  window.attachPhotos = attachPhotos;
 })();
