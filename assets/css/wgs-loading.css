@@ -1,0 +1,168 @@
+/**
+ * WGS Loading Dialog
+ *
+ * Hezký loading dialog s přesýpacími hodinami v neonově zeleném stylu.
+ * Používá se při exportu PDF a odesílání emailů.
+ */
+
+/* Overlay přes celou obrazovku */
+.wgs-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10005;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wgs-loading-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* Hlavní loading box */
+.wgs-loading-box {
+  background: #1a1a1a;
+  border: 2px solid #39ff14;
+  border-radius: 12px;
+  padding: 40px 50px;
+  box-shadow:
+    0 0 20px rgba(57, 255, 20, 0.4),
+    0 0 40px rgba(57, 255, 20, 0.2),
+    0 0 60px rgba(57, 255, 20, 0.1);
+  animation: wgs-loading-pulse 2s ease-in-out infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  max-width: 90%;
+  text-align: center;
+}
+
+/* Pulzující animace rámečku */
+@keyframes wgs-loading-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(57, 255, 20, 0.4),
+      0 0 40px rgba(57, 255, 20, 0.2),
+      0 0 60px rgba(57, 255, 20, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(57, 255, 20, 0.6),
+      0 0 60px rgba(57, 255, 20, 0.4),
+      0 0 90px rgba(57, 255, 20, 0.2);
+  }
+}
+
+/* Kontejner pro přesýpací hodiny */
+.wgs-loading-hourglass {
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+/* SVG přesýpací hodiny */
+.wgs-hourglass-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Animace otáčení přesýpacích hodin */
+@keyframes wgs-hourglass-rotate {
+  0%, 90% {
+    transform: rotate(0deg);
+  }
+  95%, 100% {
+    transform: rotate(180deg);
+  }
+}
+
+.wgs-loading-hourglass {
+  animation: wgs-hourglass-rotate 3s ease-in-out infinite;
+}
+
+/* Animace padajícího písku */
+@keyframes wgs-sand-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+.wgs-sand-particle {
+  animation: wgs-sand-fall 1.5s linear infinite;
+}
+
+.wgs-sand-particle:nth-child(1) { animation-delay: 0s; }
+.wgs-sand-particle:nth-child(2) { animation-delay: 0.3s; }
+.wgs-sand-particle:nth-child(3) { animation-delay: 0.6s; }
+.wgs-sand-particle:nth-child(4) { animation-delay: 0.9s; }
+.wgs-sand-particle:nth-child(5) { animation-delay: 1.2s; }
+
+/* Text zprávy */
+.wgs-loading-message {
+  color: #39ff14;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+  letter-spacing: 0.5px;
+}
+
+/* Sekundární text (volitelný) */
+.wgs-loading-submessage {
+  color: #999;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Poppins', sans-serif;
+  margin-top: -10px;
+}
+
+/* Mobilní responsive */
+@media (max-width: 768px) {
+  .wgs-loading-box {
+    padding: 30px 35px;
+    gap: 20px;
+  }
+
+  .wgs-loading-hourglass {
+    width: 60px;
+    height: 60px;
+  }
+
+  .wgs-loading-message {
+    font-size: 16px;
+  }
+
+  .wgs-loading-submessage {
+    font-size: 12px;
+  }
+}
+
+/* Extra malé obrazovky */
+@media (max-width: 480px) {
+  .wgs-loading-box {
+    padding: 25px 30px;
+    gap: 15px;
+  }
+
+  .wgs-loading-hourglass {
+    width: 50px;
+    height: 50px;
+  }
+
+  .wgs-loading-message {
+    font-size: 14px;
+  }
+}

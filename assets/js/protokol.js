@@ -1051,16 +1051,35 @@ function showLoading(show) {
   document.getElementById("loadingOverlay").classList.toggle("show", show);
 }
 
-function showLoadingWithMessage(show, message = 'Načítání...') {
+/**
+ * Zobrazí WGS loading dialog s přesýpacími hodinami
+ * @param {boolean} show - Zobrazit/skrýt dialog
+ * @param {string} message - Hlavní zpráva (např. "Připravuji fotky...")
+ * @param {string} submessage - Volitelná sekundární zpráva (např. "15 fotografií")
+ */
+function showLoadingWithMessage(show, message = 'Načítání...', submessage = '') {
   const overlay = document.getElementById("loadingOverlay");
   const textElement = document.getElementById("loadingText");
+  const subtextElement = document.getElementById("loadingSubtext");
 
   if (show) {
-    // Odebrat inline style (z EMERGENCY DIAGNOSTIC) aby CSS fungoval
+    // Odebrat inline style aby CSS fungoval
     overlay.style.display = '';
     overlay.classList.add("show");
+
+    // Nastavit hlavní zprávu
     if (textElement) {
       textElement.textContent = message;
+    }
+
+    // Nastavit sekundární zprávu (pokud existuje)
+    if (subtextElement) {
+      if (submessage) {
+        subtextElement.textContent = submessage;
+        subtextElement.style.display = 'block';
+      } else {
+        subtextElement.style.display = 'none';
+      }
     }
   } else {
     overlay.classList.remove("show");
@@ -1754,7 +1773,8 @@ async function generatePricelistPDF() {
 
 async function exportBothPDFs() {
   try {
-    showLoading(true);
+    // Zobrazit WGS loading dialog
+    showLoadingWithMessage(true, 'Připravuji protokol...', 'Prosím čekejte');
 
     logger.log('[List] Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
     logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
@@ -1764,6 +1784,7 @@ async function exportBothPDFs() {
 
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
+      showLoadingWithMessage(true, 'Přidávám pricelist...', `Celková cena: ${kalkulaceData.celkovaCena.toFixed(2)} €`);
       logger.log('Kalkulace nalezena - přidávám PRICELIST...');
       logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
@@ -1903,6 +1924,7 @@ async function exportBothPDFs() {
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu
     if (attachedPhotos.length > 0) {
+      showLoadingWithMessage(true, 'Přidávám fotografie...', `${attachedPhotos.length} fotografií`);
       logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -2089,6 +2111,7 @@ async function exportBothPDFs() {
     }
 
     // Uložit PDF do databáze (stejně jako při odeslání emailem)
+    showLoadingWithMessage(true, 'Ukládám do knihovny...', 'PDF bude dostupné v knihovně');
     logger.log('[Save] Ukládám PDF do databáze...');
     try {
       const csrfToken = await fetchCsrfToken();
@@ -2175,7 +2198,7 @@ async function exportBothPDFs() {
 async function sendToCustomer() {
   try {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
-    showLoadingWithMessage(true, 'Generuji protokol... Prosím čekejte');
+    showLoadingWithMessage(true, 'Připravuji protokol...', 'Prosím čekejte');
     logger.log('[List] Generuji kompletní PDF pro náhled před odesláním...');
     logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
@@ -2184,7 +2207,7 @@ async function sendToCustomer() {
 
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
-      showLoadingWithMessage(true, `Přidávám PRICELIST (${kalkulaceData.celkovaCena.toFixed(2)} €)... Prosím čekejte`);
+      showLoadingWithMessage(true, 'Přidávám pricelist...', `Celková cena: ${kalkulaceData.celkovaCena.toFixed(2)} €`);
       logger.log('Kalkulace nalezena - přidávám PRICELIST...');
       logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
@@ -2321,7 +2344,7 @@ async function sendToCustomer() {
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
-      showLoadingWithMessage(true, `Přidávám ${attachedPhotos.length} fotografií... Prosím čekejte`);
+      showLoadingWithMessage(true, 'Přidávám fotografie...', `${attachedPhotos.length} fotografií`);
       logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -2524,7 +2547,7 @@ async function potvrditAOdeslat() {
 
   try {
     // PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
-    showLoadingWithMessage(true, 'Odesílám email zákazníkovi... Prosím čekejte');
+    showLoadingWithMessage(true, 'Odesílám email...', 'Zákazníkovi se odesílá kompletní PDF');
     logger.log('📧 Odesílám PDF zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
