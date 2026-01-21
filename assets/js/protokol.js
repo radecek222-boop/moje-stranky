@@ -2196,13 +2196,6 @@ async function exportBothPDFs() {
 }
 
 async function sendToCustomer() {
-  logger.log('═════════════════════════════════════════════');
-  logger.log('🚀 sendToCustomer() SPUŠTĚNA');
-  logger.log('═════════════════════════════════════════════');
-  logger.log('currentReklamaceId:', currentReklamaceId);
-  logger.log('attachedPhotos.length:', attachedPhotos.length);
-  logger.log('kalkulaceData:', kalkulaceData);
-
   try {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
     showLoadingWithMessage(true, 'Připravuji protokol...', 'Prosím čekejte');
@@ -2536,22 +2529,9 @@ async function sendToCustomer() {
     await potvrditAOdeslat();
 
   } catch (error) {
-    logger.error('KRITICKÁ CHYBA v sendToCustomer():', error);
-    logger.error('Stack trace:', error.stack);
-    showNotif("error", "Chyba při vytváření PDF: " + error.message);
+    logger.error('Chyba při generování PDF:', error);
+    showNotif("error", "Chyba při vytváření PDF");
     showLoadingWithMessage(false);
-
-    // Zobrazit detailní chybovou zprávu pomocí wgsConfirm
-    if (typeof wgsConfirm === 'function') {
-      await wgsConfirm(
-        `Chyba při odesílání:\n\n${error.message}\n\nKonzole obsahuje detailní informace.`,
-        {
-          titulek: 'Chyba odesílání',
-          btnPotvrdit: 'OK',
-          btnZrusit: null
-        }
-      );
-    }
   }
 }
 
@@ -2560,14 +2540,7 @@ async function sendToCustomer() {
  * Volá se ROVNOU z sendToCustomer() bez preview modalu
  */
 async function potvrditAOdeslat() {
-  logger.log('═════════════════════════════════════════════');
-  logger.log('📧 potvrditAOdeslat() SPUŠTĚNA');
-  logger.log('═════════════════════════════════════════════');
-  logger.log('cachedPdfBase64 exists:', !!cachedPdfBase64);
-  logger.log('cachedPdfBase64 length:', cachedPdfBase64 ? cachedPdfBase64.length : 0);
-
   if (!cachedPdfBase64) {
-    logger.error('❌ PDF není dostupné - cachedPdfBase64 je prázdný!');
     showNotif("error", "PDF není dostupné");
     return;
   }
@@ -2576,16 +2549,8 @@ async function potvrditAOdeslat() {
     // PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
     showLoadingWithMessage(true, 'Odesílám email...', 'Zákazníkovi se odesílá kompletní PDF');
     logger.log('📧 Odesílám PDF zákazníkovi...');
-    logger.log('currentReklamaceId:', currentReklamaceId);
 
-    logger.log('🔑 Získávám CSRF token...');
     const csrfToken = await fetchCsrfToken();
-    logger.log('✅ CSRF token získán:', csrfToken ? 'ANO' : 'NE');
-
-    logger.log('🌐 Odesílám fetch() na api/protokol_api.php...');
-    logger.log('   Action: send_email');
-    logger.log('   Reklamace ID:', currentReklamaceId);
-    logger.log('   PDF velikost:', cachedPdfBase64.length, 'znaků');
 
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
@@ -2597,8 +2562,6 @@ async function potvrditAOdeslat() {
         csrf_token: csrfToken
       })
     });
-
-    logger.log('📥 Response přijata:', response.status, response.statusText);
 
     // Detailní výpis chyby pokud response není OK
     if (!response.ok) {
@@ -2614,23 +2577,17 @@ async function potvrditAOdeslat() {
     }
 
     const result = await response.json();
-    logger.log('📦 JSON parsed:', result);
 
     if (result.status === 'success') {
-      logger.log('✅ Email ÚSPĚŠNĚ odeslán!');
-
       // Neonový toast pro odeslání emailu
       if (typeof WGSToast !== 'undefined') {
         WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
       } else {
         showNotif("success", "Email odeslán zákazníkovi");
       }
-
-      logger.log('💾 Ukládám protokol do DB...');
       await saveProtokolToDB();
-      logger.log('✅ Protokol uložen');
 
-      logger.log('✅ [List] Označuji reklamaci jako hotovou...');
+      logger.log('[List] Označuji reklamaci jako hotovou...');
       const markResponse = await fetch('app/controllers/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -2643,12 +2600,11 @@ async function potvrditAOdeslat() {
       });
 
       const markResult = await markResponse.json();
-      logger.log('📦 Mark result:', markResult);
 
       if (markResult.status === 'success') {
-        logger.log('✅ Reklamace označena jako hotová');
+        logger.log('Reklamace označena jako hotová');
       } else {
-        logger.warn('⚠️ Nepodařilo se označit jako hotovou:', markResult.message);
+        logger.warn('Nepodařilo se označit jako hotovou:', markResult.message);
       }
 
       if (currentReklamaceId) {
@@ -2658,30 +2614,21 @@ async function potvrditAOdeslat() {
         localStorage.removeItem(pdfKey);
         localStorage.removeItem('photosReadyForProtocol');
         localStorage.removeItem('photosCustomerId');
-        logger.log('🗑️ Fotky a PDF vymazány z localStorage');
+        logger.log('Fotky a PDF vymazány z localStorage');
       }
 
-      logger.log('🔄 Přesměrovávám na seznam.php za 2 sekundy...');
       setTimeout(() => {
-        logger.log('🔄 REDIRECT: window.location.href = "seznam.php"');
         window.location.href = 'seznam.php';
       }, 2000);
 
     } else {
-      logger.error('❌ API vrátilo chybu:', result.message);
       showNotif("error", result.message || "Chyba odesílání");
     }
 
   } catch (error) {
-    logger.error('═════════════════════════════════════════════');
-    logger.error('❌ KRITICKÁ CHYBA v potvrditAOdeslat()');
-    logger.error('═════════════════════════════════════════════');
-    logger.error('Error:', error);
-    logger.error('Message:', error.message);
-    logger.error('Stack:', error.stack);
+    logger.error(error);
     showNotif("error", "Chyba odesílání: " + error.message);
   } finally {
-    logger.log('🔚 potvrditAOdeslat() KONČÍ (finally block)');
     showLoadingWithMessage(false);
   }
 }
@@ -3525,4 +3472,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // EXPORT FUNKCÍ DO WINDOW (pro data-action tlačítka)
+  // ═══════════════════════════════════════════════════════════
+  window.sendToCustomer = sendToCustomer;
+  window.exportBothPDFs = exportBothPDFs;
+  window.attachPhotos = attachPhotos;
 })();
