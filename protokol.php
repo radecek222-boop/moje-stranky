@@ -230,6 +230,8 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
   <!-- Oprava kalkulacky - musi byt posledni -->
   <link rel="stylesheet" href="assets/css/cenik-wizard-fix.css">
+  <!-- WGS Loading Dialog - hezký loading s přesýpacími hodinami -->
+  <link rel="stylesheet" href="assets/css/wgs-loading.min.css">
   <!-- mobile-responsive.css odstraněn - protokol.min.css má vlastní mobilní styly -->
 </head>
 
@@ -841,9 +843,39 @@ if ($initialBootstrapData) {
   </div>
 </div>
 
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner" aria-hidden="true"></div>
-  <div class="loading-text" id="loadingText">Načítání...</div>
+<!-- WGS Loading Dialog - Hezký loading s přesýpacími hodinami -->
+<div class="wgs-loading-overlay" id="loadingOverlay">
+  <div class="wgs-loading-box">
+    <!-- Animované přesýpací hodiny (zelené) -->
+    <div class="wgs-loading-hourglass">
+      <svg class="wgs-hourglass-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Obrys přesýpacích hodin -->
+        <path d="M20,10 L80,10 L80,20 L60,45 L60,55 L80,80 L80,90 L20,90 L20,80 L40,55 L40,45 L20,20 Z"
+              fill="none" stroke="#39ff14" stroke-width="3" stroke-linejoin="round"/>
+
+        <!-- Horní komora - písek -->
+        <path d="M25,15 L75,15 L75,20 L57,42 L43,42 L25,20 Z"
+              fill="#39ff14" opacity="0.6"/>
+
+        <!-- Dolní komora - písek -->
+        <path d="M25,85 L75,85 L75,80 L57,58 L43,58 L25,80 Z"
+              fill="#39ff14" opacity="0.3"/>
+
+        <!-- Padající částice písku (animované) -->
+        <circle class="wgs-sand-particle" cx="50" cy="45" r="1.5" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="48" cy="43" r="1.2" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="52" cy="44" r="1.3" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="49" cy="46" r="1.1" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="51" cy="45" r="1.4" fill="#39ff14"/>
+      </svg>
+    </div>
+
+    <!-- Hlavní zpráva -->
+    <div class="wgs-loading-message" id="loadingText">Načítání...</div>
+
+    <!-- Sekundární zpráva (volitelná) -->
+    <div class="wgs-loading-submessage" id="loadingSubtext" style="display: none;"></div>
+  </div>
 </div>
 </main>
 
