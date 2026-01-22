@@ -83,15 +83,18 @@ try {
 
     if (empty($reklamaceId)) {
         // Formulář pro zadání zakázky
-        echo "<h2>1. Zadejte ID zakázky</h2>";
+        echo "<h2>1. Vyhledat zakázku</h2>";
         echo "<form method='get'>";
-        echo "<label for='reklamace_id'><strong>Reklamace ID:</strong></label><br>";
-        echo "<input type='text' name='reklamace_id' id='reklamace_id' placeholder='NCE25-00002370-34' required>";
+        echo "<label for='reklamace_id'><strong>Reklamace ID, jméno zákazníka nebo adresa:</strong></label><br>";
+        echo "<input type='text' name='reklamace_id' id='reklamace_id' placeholder='NCE25-00002370-34 nebo Nádvorník' required style='width: 400px;'>";
         echo "<button type='submit' class='btn'>Vyhledat</button>";
         echo "</form>";
 
         echo "<div class='info'>";
-        echo "<strong>💡 PŘÍKLAD:</strong> NCE25-00002370-34";
+        echo "<strong>💡 PŘÍKLADY:</strong><br>";
+        echo "• Podle ID: <code>NCE25-00002370-34</code><br>";
+        echo "• Podle jména: <code>Nádvorník</code><br>";
+        echo "• Podle adresy: <code>Micikova</code>";
         echo "</div>";
 
     } else {
@@ -105,7 +108,7 @@ try {
                 r.model,
                 r.assigned_to,
                 r.stav,
-                r.datum_vytvoreni,
+                r.created_at as datum_vytvoreni,
                 u.name as technik_jmeno,
                 u.email as technik_email
             FROM wgs_reklamace r
@@ -116,10 +119,67 @@ try {
         $zakazka = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$zakazka) {
-            echo "<div class='error'>";
-            echo "<strong>❌ NENALEZENO:</strong> Zakázka s ID <code>$reklamaceId</code> nebyla nalezena v databázi.";
+            echo "<div class='warning'>";
+            echo "<strong>⚠️ NENALEZENO:</strong> Zakázka s přesným ID <code>$reklamaceId</code> nebyla nalezena.";
             echo "</div>";
-            echo "<a href='?" class='btn'>← Zpět</a>";
+
+            // Zkusit vyhledat podle částečné shody
+            echo "<h2>🔍 Vyhledávání podobných zakázek</h2>";
+
+            $stmt = $pdo->prepare("
+                SELECT
+                    r.id,
+                    r.reklamace_id,
+                    r.jmeno as zakaznik,
+                    r.adresa,
+                    r.model,
+                    r.assigned_to,
+                    r.stav,
+                    r.created_at as datum_vytvoreni,
+                    u.name as technik_jmeno
+                FROM wgs_reklamace r
+                LEFT JOIN wgs_users u ON r.assigned_to = u.id
+                WHERE r.reklamace_id LIKE :search
+                   OR r.jmeno LIKE :search
+                   OR r.adresa LIKE :search
+                ORDER BY r.created_at DESC
+                LIMIT 20
+            ");
+            $searchTerm = '%' . $reklamaceId . '%';
+            $stmt->execute(['search' => $searchTerm]);
+            $podobne = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($podobne)) {
+                echo "<div class='error'>";
+                echo "<strong>❌ Žádné zakázky nenalezeny</strong> obsahující \"$reklamaceId\"";
+                echo "</div>";
+            } else {
+                echo "<div class='info'>";
+                echo "<strong>Nalezeno " . count($podobne) . " zakázek obsahujících:</strong> \"$reklamaceId\"";
+                echo "</div>";
+
+                echo "<table>";
+                echo "<thead><tr>";
+                echo "<th>Reklamace ID</th><th>Zákazník</th><th>Adresa</th><th>Model</th><th>Technik</th><th>Akce</th>";
+                echo "</tr></thead>";
+                echo "<tbody>";
+
+                foreach ($podobne as $z) {
+                    echo "<tr>";
+                    echo "<td><strong>{$z['reklamace_id']}</strong></td>";
+                    echo "<td>{$z['zakaznik']}</td>";
+                    echo "<td>" . (strlen($z['adresa']) > 50 ? substr($z['adresa'], 0, 50) . '...' : $z['adresa']) . "</td>";
+                    echo "<td>{$z['model']}</td>";
+                    echo "<td>" . ($z['technik_jmeno'] ?: '<em>Nepřiřazeno</em>') . "</td>";
+                    echo "<td><a href='?reklamace_id=" . urlencode($z['reklamace_id']) . "' class='btn'>Vybrat</a></td>";
+                    echo "</tr>";
+                }
+
+                echo "</tbody>";
+                echo "</table>";
+            }
+
+            echo "<a href='?' class='btn'>← Zkusit jiné hledání</a>";
         } else {
             // Zobrazit zakázku
             echo "<h2>📋 Zakázka nalezena</h2>";
