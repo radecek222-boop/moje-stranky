@@ -105,7 +105,7 @@ try {
                 r.model,
                 r.assigned_to,
                 r.stav,
-                r.datum_vytvoreni,
+                r.created_at as datum_vytvoreni,
                 u.name as technik_jmeno,
                 u.email as technik_email
             FROM wgs_reklamace r
