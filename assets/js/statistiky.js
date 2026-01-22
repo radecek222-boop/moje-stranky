@@ -416,7 +416,7 @@ function renderTabulka(data) {
                 <td>${z.zeme}</td>
                 <td>${z.datum}</td>
                 <td>
-                    <button class="btn-upravit-zakazku" data-id="${z.id}" data-reklamace="${z.cislo_reklamace}" style="
+                    <button data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}" style="
                         padding: 6px 12px; font-size: 0.85rem; font-weight: 600;
                         background: #555; color: white; border: none;
                         border-radius: 4px; cursor: pointer;
@@ -448,15 +448,6 @@ function renderTabulka(data) {
             </tbody>
         </table>
     `;
-
-    // Přidat event listenery na tlačítka Upravit
-    container.querySelectorAll('.btn-upravit-zakazku').forEach(btn => {
-        btn.onclick = async () => {
-            const zakazkaId = btn.getAttribute('data-id');
-            const reklamaceId = btn.getAttribute('data-reklamace');
-            await otevritEditaciZakazky(zakazkaId, reklamaceId);
-        };
-    });
 }
 
 /**
@@ -1038,5 +1029,11 @@ if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
 
     window.Utils.registerAction('dalsiStranka', () => {
         dalsiStranka();
+    });
+
+    window.Utils.registerAction('upravitZakazku', (element) => {
+        const zakazkaId = element.getAttribute('data-zakazka-id');
+        const reklamaceId = element.getAttribute('data-reklamace-id');
+        otevritEditaciZakazky(zakazkaId, reklamaceId);
     });
 }
