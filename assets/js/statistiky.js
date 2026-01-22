@@ -981,7 +981,7 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
                     wgsToast.success('Zakázka úspěšně upravena');
                     modal.remove();
                     // Reload dat
-                    nactiData();
+                    nactiZakazky();
                 } else {
                     wgsToast.error(result.message || 'Chyba při ukládání');
                 }

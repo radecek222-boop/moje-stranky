@@ -649,7 +649,7 @@ function upravitZakazku($pdo) {
             SET
                 assigned_to = :assigned_to,
                 created_by = :created_by,
-                faktura_zeme = :faktura_zeme,
+                fakturace_firma = :faktura_zeme,
                 updated_at = NOW()
             WHERE id = :id
         ");
