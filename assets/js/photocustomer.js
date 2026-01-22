@@ -204,9 +204,10 @@ async function handleMediaSelect(e) {
           size: compressed.size
         });
 
-        // POZNÁMKA: Originální fotka je již automaticky uložena v galerii telefonu
-        // Nativní fotoaparát (capture="environment") ukládá originály do galerie automaticky
-        // Komprimovaná verze je uložena v IndexedDB pro upload do systému
+        // POZNÁMKA:
+        // - Pokud technik pořídí novou fotku fotoaparátem -> originál automaticky v galerii
+        // - Pokud technik vybere fotku z galerie -> originál už v galerii je
+        // - Komprimovaná verze je vždy uložena v IndexedDB pro upload do systému
         logger.log(`[Photo] Fotka zpracována - originál v galerii, komprimovaná verze v IndexedDB`);
       }
     } catch (error) {
@@ -667,11 +668,12 @@ async function saveToProtocol() {
  * @deprecated NEPOUŽÍVÁ SE - Originály jsou automaticky v galerii
  *
  * Původně mělo stahovat fotky do galerie, ale:
- * - Nativní fotoaparát (capture="environment") AUTOMATICKY ukládá originály do galerie
+ * - Při pořízení fotky fotoaparátem: originál AUTOMATICKY v galerii (OS telefonu)
+ * - Při výběru z galerie: originál už v galerii JE
  * - Prohlížeče neumožňují automatické ukládání bez souhlasu uživatele (bezpečnost)
  * - <a download> ukládá do Downloads, ne do galerie fotek
  *
- * ŘEŠENÍ: Používáme nativní fotoaparát, který ukládá originály automaticky.
+ * ŘEŠENÍ: Technik může fotit NEBO vybrat z galerie. Originály jsou vždy dostupné.
  * Komprimované verze jsou v IndexedDB pro upload.
  *
  * @param {string} imageData - Base64 data URL fotky
