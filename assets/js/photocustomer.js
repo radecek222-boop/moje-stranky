@@ -203,6 +203,9 @@ async function handleMediaSelect(e) {
           data: imageData,
           size: compressed.size
         });
+
+        // KRITICKÉ: Automaticky stáhnout fotku do galerie zařízení (záložní kopie)
+        await downloadToGallery(imageData, currentSection, sections[currentSection].length);
       }
     } catch (error) {
       logger.error('Chyba zpracování:', error);
@@ -655,6 +658,54 @@ async function saveToProtocol() {
     showAlert('Chyba při odesílání: ' + error.message, 'error');
   } finally {
     showWaitDialog(false);
+  }
+}
+
+/**
+ * KRITICKÉ: Automaticky stáhnout fotku do galerie zařízení
+ * Záložní kopie pro případ ztráty session nebo selhání uploadu
+ *
+ * @param {string} imageData - Base64 data URL fotky
+ * @param {string} section - Sekce (before, id, detail, damage_part, new_part, repair, after)
+ * @param {number} index - Pořadí fotky v sekci
+ */
+async function downloadToGallery(imageData, section, index) {
+  try {
+    // Sestavit název souboru podle sekce a reklamace
+    const reklamaceId = currentCustomerData?.reklamace_id || 'unknown';
+    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+
+    // Překlad sekce do lidsky čitelného názvu
+    const sectionNames = {
+      'before': 'PRED',
+      'id': 'ID',
+      'detail': 'DETAIL',
+      'damage_part': 'POSKOZENY_DIL',
+      'new_part': 'NOVY_DIL',
+      'repair': 'OPRAVA',
+      'after': 'PO'
+    };
+
+    const sectionName = sectionNames[section] || section.toUpperCase();
+    const filename = `WGS_${reklamaceId}_${sectionName}_${index}_${timestamp}.jpg`;
+
+    // Vytvořit download link
+    const link = document.createElement('a');
+    link.href = imageData;
+    link.download = filename;
+    link.style.display = 'none';
+
+    // Přidat do DOM, kliknout, odstranit
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    logger.log(`[Gallery] ✓ Fotka automaticky stažena: ${filename}`);
+
+  } catch (error) {
+    // Neselhání pořízení fotky kvůli chybě stahování
+    logger.error('[Gallery] Chyba při stahování do galerie:', error);
+    // Neblokovat pokračování - fotka je stejně uložena v IndexedDB
   }
 }
 

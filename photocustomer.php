@@ -214,6 +214,10 @@ if (!$isAdmin && !$isTechnik) {
 <script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/photo-storage-db.js" defer></script>
 <script src="assets/js/photocustomer.min.js" defer></script>
+
+<!-- Session Keep-Alive - KRITICKÉ: Brání vypršení session při pořizování fotek -->
+<script src="assets/js/session-keepalive.js?v=<?= time() ?>" defer></script>
+
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>
