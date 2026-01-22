@@ -552,13 +552,13 @@ function getDetailZakazky($pdo) {
     $stmt = $pdo->prepare("
         SELECT
             r.id,
-            r.reklamace_id,
+            r.cislo as reklamace_id,
             r.jmeno as jmeno_zakaznika,
             r.adresa,
             r.model,
             r.assigned_to,
             r.created_by,
-            r.faktura_zeme
+            r.fakturace_firma as faktura_zeme
         FROM wgs_reklamace r
         WHERE r.id = :id
     ");
