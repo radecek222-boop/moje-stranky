@@ -57,10 +57,8 @@ const CACHE_NAME = `wgs-cache-${SW_VERSION}`;
 
 console.log(`[SW ${SW_VERSION}] Service Worker načten (auto-versioning)`);
 
-// Soubory k cachování (základní offline shell)
+// Soubory k cachování (ikony pro PWA)
 const STATIC_ASSETS = [
-  '/offline.php',
-  '/assets/css/offline.css',
   '/icon192.png',
   '/icon512.png'
 ];
@@ -155,10 +153,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
-          if (url.pathname.endsWith('.php')) {
-            return caches.match('/offline.php');
-          }
-          return new Response('Offline', { status: 503 });
+          // Bez offline fallbacku - vrátit HTTP 503
+          return new Response('Aplikace vyžaduje internetové připojení.', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
         })
     );
     return;
@@ -179,8 +179,16 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
+          // Zkusit cache, pokud není - vrátit HTTP 503
           return caches.match(event.request)
-            .then((cached) => cached || caches.match('/offline.php'));
+            .then((cached) => {
+              if (cached) return cached;
+              return new Response('Aplikace vyžaduje internetové připojení.', {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+              });
+            });
         })
     );
     return;

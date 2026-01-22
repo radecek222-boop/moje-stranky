@@ -105,7 +105,6 @@
             'manifest.json',
             'sw.js',
             'sw.php',
-            'offline.php',
             'login.php'
         ];
         foreach ($files as $file) {
