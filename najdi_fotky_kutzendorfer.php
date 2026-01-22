@@ -17,10 +17,10 @@ try {
 
     // Hledat reklamace
     $stmt = $pdo->prepare("
-        SELECT reklamace_id, jmeno, telefon, email, datum_vytvoreni, stav, typ
+        SELECT reklamace_id, jmeno, telefon, email, created_at, stav, typ
         FROM wgs_reklamace
         WHERE jmeno LIKE :jmeno1 OR jmeno LIKE :jmeno2
-        ORDER BY datum_vytvoreni DESC
+        ORDER BY created_at DESC
         LIMIT 10
     ");
     $stmt->execute([
@@ -42,7 +42,7 @@ try {
         echo "Jméno: {$r['jmeno']}<br>";
         echo "Email: {$r['email']}<br>";
         echo "Telefon: {$r['telefon']}<br>";
-        echo "Vytvořeno: {$r['datum_vytvoreni']}<br>";
+        echo "Vytvořeno: {$r['created_at']}<br>";
         echo "Stav: {$r['stav']}<br>";
         echo "Typ: {$r['typ']}<br>";
 
