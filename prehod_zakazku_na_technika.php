@@ -119,7 +119,7 @@ try {
             echo "<div class='error'>";
             echo "<strong>❌ NENALEZENO:</strong> Zakázka s ID <code>$reklamaceId</code> nebyla nalezena v databázi.";
             echo "</div>";
-            echo "<a href='?" class='btn'>← Zpět</a>";
+            echo "<a href='?' class='btn'>← Zpět</a>";
         } else {
             // Zobrazit zakázku
             echo "<h2>📋 Zakázka nalezena</h2>";
