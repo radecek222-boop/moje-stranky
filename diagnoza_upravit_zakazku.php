@@ -150,7 +150,7 @@ try {
     echo "<h2>4️⃣ Načtení seznamu techniků a prodejců</h2>";
 
     $stmtTech = $pdo->query("
-        SELECT user_id, name, email, role
+        SELECT id, user_id, name, email, role
         FROM wgs_users
         WHERE role LIKE '%technik%' OR role LIKE '%technician%'
         ORDER BY name ASC
@@ -166,7 +166,7 @@ try {
     echo "</div>";
 
     $stmtProd = $pdo->query("
-        SELECT user_id, name, email, role
+        SELECT id, user_id, name, email, role
         FROM wgs_users
         WHERE role = 'prodejce'
         ORDER BY name ASC
@@ -187,15 +187,20 @@ try {
     echo "<h2>5️⃣ Simulace UPDATE dotazu (DRY RUN)</h2>";
 
     if ($testId && count($technici) > 0 && count($prodejci) > 0) {
-        $testTechnikId = $technici[0]['user_id'];
+        // DŮLEŽITÉ: assigned_to je INT(11), musíme použít numeric id, ne user_id!
+        $testTechnikId = $technici[0]['id'] ?? $technici[0]['user_id'];
+        // created_by je VARCHAR(50), můžeme použít user_id
         $testProdejceId = $prodejci[0]['user_id'];
         $testZeme = 'CZ';
 
         echo "<div class='info'>";
         echo "<strong>Test parametry:</strong><br>";
         echo "• ID zakázky: <code>$testId</code><br>";
-        echo "• Technik: <code>$testTechnikId</code> ({$technici[0]['name']})<br>";
-        echo "• Prodejce: <code>$testProdejceId</code> ({$prodejci[0]['name']})<br>";
+        echo "• Technik ID (numeric): <code>$testTechnikId</code><br>";
+        echo "• Technik user_id (string): <code>{$technici[0]['user_id']}</code><br>";
+        echo "• Technik jméno: {$technici[0]['name']}<br>";
+        echo "• Prodejce ID: <code>$testProdejceId</code><br>";
+        echo "• Prodejce jméno: {$prodejci[0]['name']}<br>";
         echo "• Země: <code>$testZeme</code><br>";
         echo "</div>";
 
