@@ -46,7 +46,10 @@ if (!$isAdmin) {
 // Audit 2025-11-24: Long-running statistiky queries blokují ostatní requesty
 session_write_close();
 
-$action = $_GET['action'] ?? '';
+// Rozlišit podle HTTP metody
+$action = ($_SERVER['REQUEST_METHOD'] === 'POST')
+    ? ($_POST['action'] ?? '')
+    : ($_GET['action'] ?? '');
 
 try {
     $pdo = getDbConnection();
@@ -552,13 +555,13 @@ function getDetailZakazky($pdo) {
     $stmt = $pdo->prepare("
         SELECT
             r.id,
-            r.reklamace_id,
+            r.cislo as reklamace_id,
             r.jmeno as jmeno_zakaznika,
             r.adresa,
             r.model,
             r.assigned_to,
             r.created_by,
-            r.faktura_zeme
+            r.fakturace_firma as faktura_zeme
         FROM wgs_reklamace r
         WHERE r.id = :id
     ");
