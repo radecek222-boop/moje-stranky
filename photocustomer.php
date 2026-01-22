@@ -191,8 +191,8 @@ if (!$isAdmin && !$isTechnik) {
 <div class="alert" id="alert" role="alert" aria-live="assertive"></div>
 
 <!-- HIDDEN FILE INPUT -->
-<!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->
-<input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
+<!-- Umožňuje fotit I vybrat z galerie (bez capture="environment") -->
+<input type="file" id="mediaInput" accept="image/*,video/*" multiple>
 
 <!-- HIDDEN VIDEO INPUT - pro videotéku -->
 <input type="file" id="videoInput" accept="video/*" capture="environment">
