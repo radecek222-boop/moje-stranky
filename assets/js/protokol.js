@@ -38,6 +38,18 @@ if (typeof debounce === 'undefined') {
   };
 }
 
+// === CENÍK SLUŽEB (synchronizováno s cenik-calculator.js) ===
+const CENY = {
+    diagnostika: 110, // Inspekce/diagnostika
+    prvniDil: 205, // První díl čalounění
+    dalsiDil: 70, // Každý další díl
+    zakladniSazba: 165, // Základní servisní sazba (mechanické opravy)
+    mechanismusPriplatek: 45, // Příplatek za mechanismus (relax, výsuv)
+    druhaOsoba: 95, // Druhá osoba pro těžký nábytek nad 50kg
+    material: 50, // Materiál (alternativní výplně)
+    vyzvednutiSklad: 10 // Vyzvednutí dílu pro reklamaci na skladě
+};
+
 // === KONTROLA PDF KNIHOVEN ===
 async function zkontrolujPdfKnihovny() {
   const maxPokusy = 50; // Max 5 sekund (50 * 100ms)
@@ -1736,13 +1748,13 @@ async function generatePricelistPDF() {
   // Příplatky
   if (kalkulaceData.tezkyNabytek) {
     pdf.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
-    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    pdf.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
     yPos += 7;
   }
 
   if (kalkulaceData.druhaOsoba) {
     pdf.text('Priplatek: Druha osoba', margin, yPos);
-    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    pdf.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
     yPos += 7;
   }
 
@@ -1901,13 +1913,13 @@ async function exportBothPDFs() {
       // Příplatky
       if (kalkulaceData.tezkyNabytek) {
         doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
-        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        doc.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
         yPos += 7;
       }
 
       if (kalkulaceData.druhaOsoba) {
         doc.text('Priplatek: Druha osoba', margin, yPos);
-        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        doc.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
         yPos += 7;
       }
 
@@ -2324,13 +2336,13 @@ async function sendToCustomer() {
       // Příplatky
       if (kalkulaceData.tezkyNabytek) {
         doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
-        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        doc.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
         yPos += 7;
       }
 
       if (kalkulaceData.druhaOsoba) {
         doc.text('Priplatek: Druha osoba', margin, yPos);
-        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        doc.text(`${CENY.druhaOsoba.toFixed(2)} EUR`, pageWidth - margin - 30, yPos);
         yPos += 7;
       }
 
