@@ -654,12 +654,20 @@ function upravitZakazku($pdo) {
                 UPDATE wgs_reklamace
                 SET
                     assigned_to = :assigned_to,
-                    dokonceno_kym = :assigned_to,
+                    dokonceno_kym = :dokonceno_kym,
                     created_by = :created_by,
                     fakturace_firma = :faktura_zeme,
                     updated_at = NOW()
                 WHERE id = :id
             ");
+
+            $stmt->execute([
+                'assigned_to' => $assignedTo ?: null,
+                'dokonceno_kym' => $assignedTo ?: null,
+                'created_by' => $createdBy ?: null,
+                'faktura_zeme' => $fakturaZeme,
+                'id' => $id
+            ]);
         } else {
             $stmt = $pdo->prepare("
                 UPDATE wgs_reklamace
@@ -670,14 +678,14 @@ function upravitZakazku($pdo) {
                     updated_at = NOW()
                 WHERE id = :id
             ");
-        }
 
-        $stmt->execute([
-            'assigned_to' => $assignedTo ?: null,
-            'created_by' => $createdBy ?: null,
-            'faktura_zeme' => $fakturaZeme,
-            'id' => $id
-        ]);
+            $stmt->execute([
+                'assigned_to' => $assignedTo ?: null,
+                'created_by' => $createdBy ?: null,
+                'faktura_zeme' => $fakturaZeme,
+                'id' => $id
+            ]);
+        }
 
         $pdo->commit();
 
