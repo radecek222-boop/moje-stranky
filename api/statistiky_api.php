@@ -245,6 +245,7 @@ function getZakazky($pdo) {
 
     $sql = "
         SELECT
+            r.id,
             r.cislo as cislo_reklamace,
             r.jmeno as jmeno_zakaznika,
             r.adresa,
