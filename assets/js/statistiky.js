@@ -450,8 +450,13 @@ function renderTabulka(data) {
     `;
 
     // Přidat event listenery na tlačítka Upravit
-    container.querySelectorAll('.btn-upravit-zakazku').forEach(btn => {
+    const btns = container.querySelectorAll('.btn-upravit-zakazku');
+    console.log('[Statistiky] Nalezeno tlačítek Upravit:', btns.length);
+
+    btns.forEach((btn, index) => {
+        console.log('[Statistiky] Připojuji listener na tlačítko', index, btn);
         btn.onclick = async () => {
+            console.log('[Statistiky] Kliknuto na Upravit, ID:', btn.getAttribute('data-id'));
             const zakazkaId = btn.getAttribute('data-id');
             const reklamaceId = btn.getAttribute('data-reklamace');
             await otevritEditaciZakazky(zakazkaId, reklamaceId);
