@@ -46,7 +46,10 @@ if (!$isAdmin) {
 // Audit 2025-11-24: Long-running statistiky queries blokují ostatní requesty
 session_write_close();
 
-$action = $_REQUEST['action'] ?? '';
+// Rozlišit podle HTTP metody
+$action = ($_SERVER['REQUEST_METHOD'] === 'POST')
+    ? ($_POST['action'] ?? '')
+    : ($_GET['action'] ?? '');
 
 try {
     $pdo = getDbConnection();
