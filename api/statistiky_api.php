@@ -645,16 +645,32 @@ function upravitZakazku($pdo) {
     try {
         $pdo->beginTransaction();
 
-        // UPDATE zakázky
-        $stmt = $pdo->prepare("
-            UPDATE wgs_reklamace
-            SET
-                assigned_to = :assigned_to,
-                created_by = :created_by,
-                fakturace_firma = :faktura_zeme,
-                updated_at = NOW()
-            WHERE id = :id
-        ");
+        // Zjistit zda existuje sloupec dokonceno_kym
+        $hasDokoncenokym = $GLOBALS['hasDokoncenokym'] ?? false;
+
+        // UPDATE zakázky - pokud existuje dokonceno_kym, updatovat i ten
+        if ($hasDokoncenokym) {
+            $stmt = $pdo->prepare("
+                UPDATE wgs_reklamace
+                SET
+                    assigned_to = :assigned_to,
+                    dokonceno_kym = :assigned_to,
+                    created_by = :created_by,
+                    fakturace_firma = :faktura_zeme,
+                    updated_at = NOW()
+                WHERE id = :id
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                UPDATE wgs_reklamace
+                SET
+                    assigned_to = :assigned_to,
+                    created_by = :created_by,
+                    fakturace_firma = :faktura_zeme,
+                    updated_at = NOW()
+                WHERE id = :id
+            ");
+        }
 
         $stmt->execute([
             'assigned_to' => $assignedTo ?: null,
