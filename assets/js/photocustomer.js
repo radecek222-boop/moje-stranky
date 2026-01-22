@@ -204,8 +204,10 @@ async function handleMediaSelect(e) {
           size: compressed.size
         });
 
-        // KRITICKÉ: Automaticky stáhnout fotku do galerie zařízení (záložní kopie)
-        await downloadToGallery(imageData, currentSection, sections[currentSection].length);
+        // POZNÁMKA: Originální fotka je již automaticky uložena v galerii telefonu
+        // Nativní fotoaparát (capture="environment") ukládá originály do galerie automaticky
+        // Komprimovaná verze je uložena v IndexedDB pro upload do systému
+        logger.log(`[Photo] Fotka zpracována - originál v galerii, komprimovaná verze v IndexedDB`);
       }
     } catch (error) {
       logger.error('Chyba zpracování:', error);
@@ -662,8 +664,15 @@ async function saveToProtocol() {
 }
 
 /**
- * KRITICKÉ: Automaticky stáhnout fotku do galerie zařízení
- * Záložní kopie pro případ ztráty session nebo selhání uploadu
+ * @deprecated NEPOUŽÍVÁ SE - Originály jsou automaticky v galerii
+ *
+ * Původně mělo stahovat fotky do galerie, ale:
+ * - Nativní fotoaparát (capture="environment") AUTOMATICKY ukládá originály do galerie
+ * - Prohlížeče neumožňují automatické ukládání bez souhlasu uživatele (bezpečnost)
+ * - <a download> ukládá do Downloads, ne do galerie fotek
+ *
+ * ŘEŠENÍ: Používáme nativní fotoaparát, který ukládá originály automaticky.
+ * Komprimované verze jsou v IndexedDB pro upload.
  *
  * @param {string} imageData - Base64 data URL fotky
  * @param {string} section - Sekce (before, id, detail, damage_part, new_part, repair, after)
@@ -683,11 +692,15 @@ async function downloadToGallery(imageData, section, index) {
       'damage_part': 'POSKOZENY_DIL',
       'new_part': 'NOVY_DIL',
       'repair': 'OPRAVA',
-      'after': 'PO'
+      'after': 'PO',
+      'problem': 'DETAIL_BUG'
     };
 
     const sectionName = sectionNames[section] || section.toUpperCase();
     const filename = `WGS_${reklamaceId}_${sectionName}_${index}_${timestamp}.jpg`;
+
+    logger.log(`[Gallery] 🔽 Startuji download: ${filename}`);
+    logger.log(`[Gallery] 📱 User Agent: ${navigator.userAgent.includes('iPhone') ? 'iOS' : navigator.userAgent.includes('Android') ? 'Android' : 'Desktop'}`);
 
     // Vytvořit download link
     const link = document.createElement('a');
@@ -695,17 +708,47 @@ async function downloadToGallery(imageData, section, index) {
     link.download = filename;
     link.style.display = 'none';
 
-    // Přidat do DOM, kliknout, odstranit
+    // KRITICKÉ: Přidat do DOM PŘED kliknutím (iOS fix)
     document.body.appendChild(link);
+
+    // Malý delay pro iOS Safari (má problémy s okamžitým kliknutím)
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Kliknout na link
     link.click();
+
+    logger.log(`[Gallery] 👆 Klik na download link proveden`);
+
+    // KRITICKÉ: Počkat 500ms před odstraněním (iOS potřebuje čas zpracovat download)
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Odstranit link z DOM
     document.body.removeChild(link);
 
-    logger.log(`[Gallery] ✓ Fotka automaticky stažena: ${filename}`);
+    logger.log(`[Gallery] ✅ Fotka automaticky stažena: ${filename}`);
+
+    // VIZUÁLNÍ FEEDBACK: Neonový toast pro každou staženou fotku
+    if (typeof WGSToast !== 'undefined') {
+      WGSToast.zobrazit(`Fotka uložena do galerie: ${sectionName}`, {
+        titulek: 'WGS',
+        trvani: 2000
+      });
+    }
+
+    return true;
 
   } catch (error) {
     // Neselhání pořízení fotky kvůli chybě stahování
-    logger.error('[Gallery] Chyba při stahování do galerie:', error);
+    logger.error('[Gallery] ❌ Chyba při stahování do galerie:', error);
+    logger.error('[Gallery] Stack:', error.stack);
+
+    // VAROVÁNÍ: Upozornit uživatele, ale neblokovat pokračování
+    if (typeof wgsToast !== 'undefined') {
+      wgsToast.error('Nepodařilo se uložit fotku do galerie. Fotka je stále uložena v aplikaci.');
+    }
+
     // Neblokovat pokračování - fotka je stejně uložena v IndexedDB
+    return false;
   }
 }
 
