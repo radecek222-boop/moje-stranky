@@ -88,6 +88,22 @@ try {
             getCharty($pdo);
             break;
 
+        case 'detail_zakazky':
+            getDetailZakazky($pdo);
+            break;
+
+        case 'seznam_techniku':
+            getSeznamTechniku($pdo);
+            break;
+
+        case 'seznam_prodejcu':
+            getSeznamProdejcu($pdo);
+            break;
+
+        case 'upravit_zakazku':
+            upravitZakazku($pdo);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode([
@@ -519,4 +535,141 @@ function buildFilterWhere() {
     $where = empty($conditions) ? '' : 'WHERE ' . implode(' AND ', $conditions);
 
     return [$where, $params];
+}
+
+/**
+ * Detail zakázky pro editaci
+ */
+function getDetailZakazky($pdo) {
+    $id = $_GET['id'] ?? '';
+
+    if (empty($id)) {
+        echo json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']);
+        return;
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT
+            r.id,
+            r.reklamace_id,
+            r.jmeno as jmeno_zakaznika,
+            r.adresa,
+            r.model,
+            r.assigned_to,
+            r.created_by,
+            r.faktura_zeme
+        FROM wgs_reklamace r
+        WHERE r.id = :id
+    ");
+
+    $stmt->execute(['id' => $id]);
+    $zakazka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$zakazka) {
+        echo json_encode(['status' => 'error', 'message' => 'Zakázka nenalezena']);
+        return;
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'zakazka' => $zakazka
+    ]);
+}
+
+/**
+ * Seznam techniků pro select
+ */
+function getSeznamTechniku($pdo) {
+    $stmt = $pdo->query("
+        SELECT user_id, name, email
+        FROM wgs_users
+        WHERE role LIKE '%technik%' OR role LIKE '%technician%'
+        ORDER BY name ASC
+    ");
+
+    $technici = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        'status' => 'success',
+        'technici' => $technici
+    ]);
+}
+
+/**
+ * Seznam prodejců pro select
+ */
+function getSeznamProdejcu($pdo) {
+    $stmt = $pdo->query("
+        SELECT user_id, name, email
+        FROM wgs_users
+        WHERE role = 'prodejce'
+        ORDER BY name ASC
+    ");
+
+    $prodejci = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        'status' => 'success',
+        'prodejci' => $prodejci
+    ]);
+}
+
+/**
+ * Upravit zakázku - změnit technika, prodejce, zemi
+ */
+function upravitZakazku($pdo) {
+    // CSRF kontrola
+    require_once __DIR__ . '/../includes/csrf_helper.php';
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']);
+        return;
+    }
+
+    $id = $_POST['id'] ?? '';
+    $assignedTo = $_POST['assigned_to'] ?? null;
+    $createdBy = $_POST['created_by'] ?? null;
+    $fakturaZeme = $_POST['faktura_zeme'] ?? 'CZ';
+
+    if (empty($id)) {
+        echo json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']);
+        return;
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        // UPDATE zakázky
+        $stmt = $pdo->prepare("
+            UPDATE wgs_reklamace
+            SET
+                assigned_to = :assigned_to,
+                created_by = :created_by,
+                faktura_zeme = :faktura_zeme,
+                updated_at = NOW()
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            'assigned_to' => $assignedTo ?: null,
+            'created_by' => $createdBy ?: null,
+            'faktura_zeme' => $fakturaZeme,
+            'id' => $id
+        ]);
+
+        $pdo->commit();
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Zakázka úspěšně upravena'
+        ]);
+
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log("Chyba při úpravě zakázky: " . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Chyba při ukládání změn'
+        ]);
+    }
 }
