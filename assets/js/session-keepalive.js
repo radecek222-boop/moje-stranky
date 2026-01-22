@@ -1,8 +1,9 @@
 /**
- * Session Keep-Alive pro protokol.php
+ * Session Keep-Alive pro protokol.php a photocustomer.php
  *
- * KRITICKÉ: Brání vypršení session při vyplňování protokolu
- * - Ping každých 5 minut (30min timeout / 6 = bezpečná rezerva)
+ * KRITICKÉ: Brání vypršení session při vyplňování protokolu nebo focení
+ * - Ping každých 5 minut (protokol)
+ * - Ping každou 1 minutu (photocustomer - agresivnější kvůli dlouhému focení)
  * - Automatický restart při selhání
  * - Vizuální indikátor pro debugging
  */
@@ -10,7 +11,9 @@
 (function() {
     'use strict';
 
-    const PING_INTERVAL = 5 * 60 * 1000; // 5 minut v milisekundách
+    // Detekce photocustomer stránky - potřebuje agresivnější keep-alive
+    const isPhotocustomer = window.location.pathname.includes('photocustomer');
+    const PING_INTERVAL = isPhotocustomer ? (1 * 60 * 1000) : (5 * 60 * 1000); // 1 min vs 5 min
     const ENDPOINT = '/api/session_keepalive.php';
 
     let intervalId = null;
@@ -108,7 +111,9 @@
         // Nastavit interval pro další pingy
         intervalId = setInterval(pingSession, PING_INTERVAL);
 
-        console.log(`[Session Keep-Alive] ✓ Spuštěno - Ping každých ${PING_INTERVAL / 1000 / 60} minut`);
+        const intervalMinutes = PING_INTERVAL / 1000 / 60;
+        const mode = isPhotocustomer ? 'PHOTOCUSTOMER (agresivní)' : 'PROTOKOL (standard)';
+        console.log(`[Session Keep-Alive] ✓ Spuštěno - ${mode} - Ping každých ${intervalMinutes} minut`);
 
         // Ping také při focus okna (pokud uživatel přepíná mezi taby)
         window.addEventListener('focus', () => {
