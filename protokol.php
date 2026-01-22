@@ -906,6 +906,10 @@ if ($initialBootstrapData) {
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.js?v=<?= time() ?>" defer></script>
 <script src="assets/js/protokol-calculator-integration.js?v=<?= time() ?>" defer></script>
+
+<!-- Session Keep-Alive - KRITICKÉ: Brání vypršení session při práci -->
+<script src="assets/js/session-keepalive.js?v=<?= time() ?>" defer></script>
+
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>
