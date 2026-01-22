@@ -900,8 +900,8 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
                             <select id="edit-technik" name="technik" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
                                 <option value="">-- Nepřiřazeno --</option>
                                 ${technici.map(t => `
-                                    <option value="${t.user_id}" ${zakazka.assigned_to == t.user_id ? 'selected' : ''}>
-                                        ${t.name}
+                                    <option value="${t.id}" ${zakazka.assigned_to == t.id ? 'selected' : ''}>
+                                        ${t.name} (${t.user_id})
                                     </option>
                                 `).join('')}
                             </select>

@@ -582,10 +582,11 @@ function getDetailZakazky($pdo) {
 
 /**
  * Seznam techniků pro select
+ * DŮLEŽITÉ: assigned_to je INT(11), musíme vracet numeric id!
  */
 function getSeznamTechniku($pdo) {
     $stmt = $pdo->query("
-        SELECT user_id, name, email
+        SELECT id, name, email, user_id
         FROM wgs_users
         WHERE role LIKE '%technik%' OR role LIKE '%technician%'
         ORDER BY name ASC
@@ -601,10 +602,11 @@ function getSeznamTechniku($pdo) {
 
 /**
  * Seznam prodejců pro select
+ * POZNÁMKA: created_by je VARCHAR(50), můžeme použít user_id
  */
 function getSeznamProdejcu($pdo) {
     $stmt = $pdo->query("
-        SELECT user_id, name, email
+        SELECT id, user_id, name, email
         FROM wgs_users
         WHERE role = 'prodejce'
         ORDER BY name ASC
