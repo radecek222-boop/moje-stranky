@@ -24,7 +24,32 @@ if (!defined('ADMIN_PHP_LOADED')) {
 
     <!-- Grid s kartami -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        
+
+        <!-- Interaktivní audit - NEJNOVĚJŠÍ -->
+        <div style="background: white; border: 3px solid #6f42c1; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(111,66,193,0.2); position: relative;">
+            <div style="position: absolute; top: 10px; right: 10px; background: #6f42c1; color: white; padding: 4px 8px; border-radius: 3px; font-size: 0.7rem; font-weight: 700;">
+                NEJNOVĚJŠÍ
+            </div>
+            <h3 style="color: #6f42c1; margin-top: 0; font-size: 1.3rem;">
+                🎯 Interaktivní audit
+            </h3>
+            <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
+                <strong>Nejpokročilejší nástroj:</strong><br>
+                📊 Třídění podle posledního použití<br>
+                🖱️ Klikni na řádek → zobrazí závislosti<br>
+                🔍 Vidíš kdo soubor includuje<br>
+                📈 Statistiky: 90+ dní, 30-90 dní, < 30 dní<br>
+                🎨 Barevné značení stáří
+            </p>
+            <p style="color: #666; font-size: 0.85rem; margin: 10px 0;">
+                <strong>Pro:</strong> Laiky i pokročilé - hezky grafické!
+            </p>
+            <a href="audit_interactive.php" target="_blank"
+               style="display: inline-block; background: #6f42c1; color: white; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: 700; margin-top: 10px; box-shadow: 0 2px 6px rgba(111,66,193,0.3);">
+                🚀 Spustit interaktivní audit
+            </a>
+        </div>
+
         <!-- Audit v2 - Vylepšená kategorizace -->
         <div style="background: white; border: 2px solid #17a2b8; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <h3 style="color: #17a2b8; margin-top: 0; font-size: 1.2rem;">
