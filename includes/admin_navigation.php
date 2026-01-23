@@ -112,6 +112,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Konzole',
                 'tab' => 'admin_console',
             ],
+            'maintenance' => [
+                'href' => 'admin.php?tab=maintenance',
+                'tab_label' => 'Údržba systému',
+                'tab' => 'maintenance',
+            ],
             'transport' => [
                 'href' => 'transport.php',
                 'tab_label' => 'Transport',

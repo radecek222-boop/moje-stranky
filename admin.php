@@ -991,6 +991,11 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_transport.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'maintenance'): ?>
+  <!-- TAB: ÚDRŽBA SYSTÉMU -->
+  <?php require_once __DIR__ . '/includes/admin_maintenance.php'; ?>
+  <?php endif; ?>
+
 </div>
 </main>
 <?php endif; // Konec MAIN (pokud není dashboard) ?>
