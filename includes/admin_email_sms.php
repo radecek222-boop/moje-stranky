@@ -1383,8 +1383,14 @@ async function otevritNotifikace(sablonaId) {
                     <label class="editor-label">Hlavní obsah emailu:</label>
                     <textarea id="sablona-obsah" rows="10" class="editor-textarea"
                               placeholder="Text emailu... Můžete použít HTML značky.">${escapeHtml(templateData.obsah || '')}</textarea>
-                    <div style="margin-top: 0.25rem; font-size: 0.7rem; color: #888;">
-                        Proměnné: {{customer_name}}, {{order_id}}, {{date}}, {{time}}, {{address}}, {{product}}
+                    <div style="margin-top: 0.25rem; font-size: 0.7rem; color: #888; line-height: 1.5;">
+                        <strong>Dostupné proměnné:</strong><br>
+                        Zákazník: {{customer_name}}, {{customer_email}}, {{customer_phone}}<br>
+                        Zakázka: {{order_id}}, {{date}}, {{time}}, {{address}}, {{product}}, {{description}}<br>
+                        Technik: {{technician_name}}, {{technician_email}}, {{technician_phone}}<br>
+                        Prodejce: {{seller_name}}, {{seller_email}}<br>
+                        Datum: {{created_at}}, {{completed_at}}<br>
+                        Firma: {{company_email}}, {{company_phone}}
                     </div>
                 </div>
 
