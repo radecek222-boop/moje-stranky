@@ -74,7 +74,7 @@ try {
     echo "<h2>1. Kontrola databáze - posledních 10 zakázek</h2>";
 
     $stmt = $pdo->query("
-        SELECT 
+        SELECT
             r.reklamace_id,
             r.cislo,
             r.jmeno as customer_name,
@@ -84,10 +84,10 @@ try {
             u.name as created_by_name,
             u.email as created_by_email,
             r.stav,
-            r.datum_vytvoreni
+            r.created_at
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
-        ORDER BY r.datum_vytvoreni DESC
+        ORDER BY r.created_at DESC
         LIMIT 10
     ");
     $zakazky = $stmt->fetchAll(PDO::FETCH_ASSOC);
