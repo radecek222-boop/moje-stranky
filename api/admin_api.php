@@ -1101,18 +1101,82 @@ function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
         }
     }
 
-    // Uložit do databáze jako JSON
+    // Uložit do databáze jako JSON (pro nový formát)
     $recipientsJson = json_encode($validatedRecipients, JSON_UNESCAPED_UNICODE);
 
+    // FIX: Rozdělit příjemce na TO/CC/BCC podle typu (pro kompatibilitu s notification_sender.php)
+    $toRecipients = [];
+    $ccRecipients = [];
+    $bccRecipients = [];
+    $ccEmails = [];
+    $bccEmails = [];
+
+    // Role-based příjemci (customer, seller, technician)
+    foreach (['customer', 'seller', 'technician'] as $role) {
+        if ($validatedRecipients[$role]['enabled']) {
+            $typ = $validatedRecipients[$role]['type'];
+            if ($typ === 'to') {
+                $toRecipients[] = $role;
+            } elseif ($typ === 'cc') {
+                $ccRecipients[] = $role;
+            } elseif ($typ === 'bcc') {
+                $bccRecipients[] = $role;
+            }
+        }
+    }
+
+    // Explicitní emaily (importer, other)
+    if ($validatedRecipients['importer']['enabled'] && !empty($validatedRecipients['importer']['email'])) {
+        $typ = $validatedRecipients['importer']['type'];
+        $email = $validatedRecipients['importer']['email'];
+        if ($typ === 'cc') {
+            $ccEmails[] = $email;
+        } elseif ($typ === 'bcc') {
+            $bccEmails[] = $email;
+        } elseif ($typ === 'to') {
+            $toRecipients[] = 'importer'; // Přidat jako roli pro zpracování
+            $ccEmails[] = $email; // A zároveň jako explicitní email
+        }
+    }
+
+    if ($validatedRecipients['other']['enabled'] && !empty($validatedRecipients['other']['email'])) {
+        $typ = $validatedRecipients['other']['type'];
+        $email = $validatedRecipients['other']['email'];
+        if ($typ === 'cc') {
+            $ccEmails[] = $email;
+        } elseif ($typ === 'bcc') {
+            $bccEmails[] = $email;
+        } elseif ($typ === 'to') {
+            $toRecipients[] = 'other'; // Přidat jako roli
+            $ccEmails[] = $email; // A zároveň jako explicitní email
+        }
+    }
+
+    // Určit recipient_type pro zpětnou kompatibilitu (první TO role)
+    $recipientType = !empty($toRecipients) ? $toRecipients[0] : 'customer';
+
+    // Uložit do databáze
     $stmt = $pdo->prepare("
         UPDATE wgs_notifications
         SET recipients = :recipients,
+            recipient_type = :recipient_type,
+            to_recipients = :to_recipients,
+            cc_recipients = :cc_recipients,
+            bcc_recipients = :bcc_recipients,
+            cc_emails = :cc_emails,
+            bcc_emails = :bcc_emails,
             updated_at = NOW()
         WHERE id = :id
     ");
 
     $stmt->execute([
         'recipients' => $recipientsJson,
+        'recipient_type' => $recipientType,
+        'to_recipients' => json_encode($toRecipients),
+        'cc_recipients' => json_encode($ccRecipients),
+        'bcc_recipients' => json_encode($bccRecipients),
+        'cc_emails' => json_encode($ccEmails),
+        'bcc_emails' => json_encode($bccEmails),
         'id' => $templateId
     ]);
 
@@ -1123,7 +1187,12 @@ function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
     respondSuccess([
         'message' => 'Příjemci byli úspěšně aktualizováni',
         'template_id' => $templateId,
-        'recipients' => $validatedRecipients
+        'recipients' => $validatedRecipients,
+        'to_recipients' => $toRecipients,
+        'cc_recipients' => $ccRecipients,
+        'bcc_recipients' => $bccRecipients,
+        'cc_emails' => $ccEmails,
+        'bcc_emails' => $bccEmails
     ]);
 }
 
