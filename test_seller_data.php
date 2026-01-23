@@ -143,11 +143,26 @@ try {
     echo "<h2>2. Simulace načtení pro email notifikaci</h2>";
 
     if (!empty($zakazky)) {
-        $testZakazka = $zakazky[0];
-        
+        // Najít první zakázku S prodejcem pro korektní test
+        $testZakazka = null;
+        foreach ($zakazky as $z) {
+            if (!empty($z['created_by_email'])) {
+                $testZakazka = $z;
+                break;
+            }
+        }
+
+        // Pokud žádná zakázka nemá prodejce, vezmi první (bude varování)
+        if (!$testZakazka) {
+            $testZakazka = $zakazky[0];
+        }
+
         echo "<div class='info'>";
         echo "<strong>Testujeme zakázku:</strong> {$testZakazka['cislo']}<br>";
         echo "<strong>Zákazník:</strong> {$testZakazka['customer_name']}<br>";
+        if (!empty($testZakazka['created_by_email'])) {
+            echo "<strong>Prodejce:</strong> {$testZakazka['created_by_name']} ({$testZakazka['created_by_email']})<br>";
+        }
         echo "</div>";
 
         // Příprava dat stejně jako v protokol_api.php
