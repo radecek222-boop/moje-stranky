@@ -188,10 +188,15 @@ function savePdfOnly($data) {
 
     $pdo = getDbConnection();
 
-    // Načtení reklamace
+    // Načtení reklamace (s JOIN pro získání emailu prodejce)
     $stmt = $pdo->prepare("
-        SELECT * FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        SELECT
+            r.*,
+            u.email as created_by_email,
+            u.name as created_by_name
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
+        WHERE r.reklamace_id = :reklamace_id OR r.cislo = :cislo
         LIMIT 1
     ");
     $stmt->execute([
@@ -414,10 +419,15 @@ function loadReklamace($data) {
 
     $pdo = getDbConnection();
 
-    // Načtení reklamace
+    // Načtení reklamace (s JOIN pro získání emailu prodejce)
     $stmt = $pdo->prepare("
-        SELECT * FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id
+        SELECT
+            r.*,
+            u.email as created_by_email,
+            u.name as created_by_name
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
+        WHERE r.reklamace_id = :reklamace_id OR r.cislo = :cislo OR r.id = :id
         LIMIT 1
     ");
     $stmt->execute([
@@ -653,10 +663,15 @@ function sendEmailToCustomer($data) {
 
     $pdo = getDbConnection();
 
-    // Načtení reklamace a zákazníka
+    // Načtení reklamace a zákazníka (s JOIN pro získání emailu prodejce)
     $stmt = $pdo->prepare("
-        SELECT * FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        SELECT
+            r.*,
+            u.email as created_by_email,
+            u.name as created_by_name
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
+        WHERE r.reklamace_id = :reklamace_id OR r.cislo = :cislo
         LIMIT 1
     ");
     $stmt->execute([
@@ -751,7 +766,8 @@ function sendEmailToCustomer($data) {
                 }
                 return null;
             case 'seller':
-                return $reklamace['email_prodejce'] ?? null;
+                // FIX: Použít created_by_email (z JOIN s wgs_users) místo neexistujícího email_prodejce
+                return $reklamace['created_by_email'] ?? null;
             default:
                 return null;
         }
