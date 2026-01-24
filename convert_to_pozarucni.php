@@ -53,11 +53,54 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    $puvodniId = 'NCE25-00000523-49';
-
     echo "<h1>🔄 Konverze reklamace na pozáruční servis</h1>";
 
-    // Načíst původní reklamaci
+    // Nejdřív vyhledat všechny reklamace pro zákazníka "Dominik Tvrz" nebo "Tvrzová"
+    $searchStmt = $pdo->prepare("SELECT reklamace_id, jmeno, typ, model_vyrobku, stav, datum_vytvoreni
+                                  FROM wgs_reklamace
+                                  WHERE jmeno LIKE :jmeno1 OR jmeno LIKE :jmeno2
+                                  ORDER BY datum_vytvoreni DESC");
+    $searchStmt->execute([
+        'jmeno1' => '%Dominik%Tvrz%',
+        'jmeno2' => '%Tvrzová%'
+    ]);
+    $nalezene = $searchStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($nalezene)) {
+        echo "<div class='error'><strong>CHYBA:</strong> Žádná reklamace pro zákazníka 'Dominik Tvrz' nebo 'Tvrzová' nebyla nalezena.</div>";
+        echo "</div></body></html>";
+        exit;
+    }
+
+    // Zobrazit všechny nalezené reklamace
+    echo "<div class='info'>";
+    echo "<strong>Nalezené reklamace pro zákazníka Dominik Tvrz (Tvrzová):</strong>";
+    echo "</div>";
+    echo "<table class='data-table'>";
+    echo "<tr><th>ID</th><th>Jméno</th><th>Typ</th><th>Model</th><th>Stav</th><th>Vytvořeno</th><th>Akce</th></tr>";
+    foreach ($nalezene as $rek) {
+        echo "<tr>";
+        echo "<td><strong>{$rek['reklamace_id']}</strong></td>";
+        echo "<td>{$rek['jmeno']}</td>";
+        echo "<td>{$rek['typ']}</td>";
+        echo "<td>{$rek['model_vyrobku']}</td>";
+        echo "<td>{$rek['stav']}</td>";
+        echo "<td>" . date('Y-m-d H:i', strtotime($rek['datum_vytvoreni'])) . "</td>";
+        echo "<td><a href='?id={$rek['reklamace_id']}' class='btn' style='padding: 5px 10px; font-size: 12px;'>Vybrat</a></td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+
+    // Pokud není vybráno ID, ukončit
+    if (!isset($_GET['id'])) {
+        echo "<p style='color: #666; margin-top: 20px;'>👆 Vyberte reklamaci, kterou chcete konvertovat na pozáruční servis.</p>";
+        echo "</div></body></html>";
+        exit;
+    }
+
+    $puvodniId = $_GET['id'];
+
+    // Načíst vybranou reklamaci
     $stmt = $pdo->prepare("SELECT * FROM wgs_reklamace WHERE reklamace_id = :id");
     $stmt->execute(['id' => $puvodniId]);
     $puvodni = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -163,6 +206,7 @@ try {
         echo "</div>";
 
         echo "<form method='GET'>";
+        echo "<input type='hidden' name='id' value='{$puvodniId}'>";
         echo "<input type='hidden' name='execute' value='1'>";
         echo "<button type='submit' class='btn' onclick='return confirm(\"Opravdu vytvořit novou pozáruční reklamaci?\")'>
                 🚀 SPUSTIT KONVERZI
