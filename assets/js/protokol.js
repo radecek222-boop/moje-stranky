@@ -81,49 +81,30 @@ async function zkontrolujPdfKnihovny() {
 
 // === PDF UTF-8 HELPER ===
 // Helper pro bezpečný výpis textu s českými znaky v PDF
-// WORKAROUND: jsPDF má problém s UTF-8, použijeme character replacement
+// ŘEŠENÍ: jsPDF 2.5.1 NEPODPORUJE UTF-8 → použijeme ASCII transliteraci
 window.pdfTextSafe = function(pdfObj, text, x, y, options = {}) {
   let safeText = String(text || '');
 
-  // HACK: Pokusit se použít addFont s unicode support
-  // Pokud custom font není dostupný, použít ASCII approximation
-  try {
-    // Zkusit nastavit font na courier (má lepší charset než helvetica)
-    const currentFont = pdfObj.internal.getFont().fontName;
-    if (currentFont === 'helvetica') {
-      pdfObj.setFont('courier');
-    }
-  } catch (e) {
-    // Ignore
+  // Mapa českých znaků → ASCII (bez diakritiky)
+  const czechMap = {
+    'Č': 'C', 'č': 'c', 'Ď': 'D', 'ď': 'd',
+    'Ě': 'E', 'ě': 'e', 'Ň': 'N', 'ň': 'n',
+    'Ř': 'R', 'ř': 'r', 'Š': 'S', 'š': 's',
+    'Ť': 'T', 'ť': 't', 'Ů': 'U', 'ů': 'u',
+    'Ý': 'Y', 'ý': 'y', 'Ž': 'Z', 'ž': 'z',
+    'Á': 'A', 'á': 'a', 'É': 'E', 'é': 'e',
+    'Í': 'I', 'í': 'i', 'Ó': 'O', 'ó': 'o',
+    'Ú': 'U', 'ú': 'u'
+  };
+
+  // Převést všechny české znaky na ASCII
+  let asciiText = safeText;
+  for (const [czech, ascii] of Object.entries(czechMap)) {
+    asciiText = asciiText.replace(new RegExp(czech, 'g'), ascii);
   }
 
-  // Normalizovat text
-  safeText = safeText.normalize('NFC');
-
-  // Pokusit se zobrazit text přímo
-  try {
-    pdfObj.text(safeText, x, y, options);
-  } catch (e) {
-    // Fallback: ASCII aproximace
-    const czechMap = {
-      'Č': 'C', 'č': 'c', 'Ď': 'D', 'ď': 'd',
-      'Ě': 'E', 'ě': 'e', 'Ň': 'N', 'ň': 'n',
-      'Ř': 'R', 'ř': 'r', 'Š': 'S', 'š': 's',
-      'Ť': 'T', 'ť': 't', 'Ů': 'U', 'ů': 'u',
-      'Ý': 'Y', 'ý': 'y', 'Ž': 'Z', 'ž': 'z',
-      'Á': 'A', 'á': 'a', 'É': 'E', 'é': 'e',
-      'Í': 'I', 'í': 'i', 'Ó': 'O', 'ó': 'o',
-      'Ú': 'U', 'ú': 'u'
-    };
-
-    let asciiText = safeText;
-    for (const [czech, ascii] of Object.entries(czechMap)) {
-      asciiText = asciiText.replace(new RegExp(czech, 'g'), ascii);
-    }
-
-    pdfObj.text(asciiText, x, y, options);
-    console.warn('PDF: Použita ASCII aproximace pro text:', safeText, '->', asciiText);
-  }
+  // Zobrazit bez diakritiky
+  pdfObj.text(asciiText, x, y, options);
 };
 
 // === NOTIFIKACE ===
