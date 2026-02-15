@@ -86,11 +86,11 @@ try {
                 INSERT INTO wgs_reklamace (
                     reklamace_id, jmeno, telefon, email, adresa, model, typ,
                     popis_problemu, stav, created_by, created_by_role, fakturace_firma,
-                    nazev_produktu, created_at
+                    created_at
                 ) VALUES (
                     :reklamace_id, :jmeno, :telefon, :email, :adresa, :model, :typ,
                     :popis_problemu, 'wait', :created_by, :created_by_role, :fakturace_firma,
-                    :nazev_produktu, NOW()
+                    NOW()
                 )
             ");
 
@@ -105,8 +105,7 @@ try {
                 ':popis_problemu' => $puvodni['popis_problemu'],
                 ':created_by' => $userId,
                 ':created_by_role' => $_SESSION['role'] ?? 'guest',
-                ':fakturace_firma' => $puvodni['fakturace_firma'] ?? 'cz',
-                ':nazev_produktu' => $puvodni['nazev_produktu']
+                ':fakturace_firma' => $puvodni['fakturace_firma'] ?? 'cz'
             ]);
 
             $noveId = $pdo->lastInsertId();
