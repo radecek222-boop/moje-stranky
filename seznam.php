@@ -250,37 +250,9 @@ body.modal-open {
   100% { transform: rotate(360deg); }
 }
 
-/* PAGINATION FIX: Load More Button */
+/* PAGINATION FIX: Load More Button - skryto */
 .load-more-btn {
-  display: block;
-  margin: 2rem auto;
-  padding: 1rem 2rem;
-  background: #333333;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.load-more-btn:hover {
-  background: #3d6b1f;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.load-more-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.load-more-btn:disabled {
-  background: #666;
-  cursor: not-allowed;
-  opacity: 0.6;
+  display: none !important; /* Všechny karty se načítají najednou */
 }
 
 /* MINIATURY FOTEK v detailu */

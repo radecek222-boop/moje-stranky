@@ -152,7 +152,7 @@ try {
 
     // PERFORMANCE: Pagination - načíst jen stránku záznamu
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-    $perPage = isset($_GET['per_page']) ? min(200, max(10, (int)$_GET['per_page'])) : 50;
+    $perPage = isset($_GET['per_page']) ? min(9999, max(10, (int)$_GET['per_page'])) : 9999;
     $offset = ($page - 1) * $perPage;
 
     // Spočítat celkový počet záznamů
