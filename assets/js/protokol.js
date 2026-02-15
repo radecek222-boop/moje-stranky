@@ -1929,7 +1929,11 @@ async function generatePricelistPDF() {
   }
 
   // Služby - DETAILNÍ ROZPIS
+  logger.log('🖨️ Vykreslování SLUŽBY:', kalkulaceData.sluzby);
+  logger.log('🖨️ Vykreslování DÍLY:', kalkulaceData.dilyPrace);
+
   if (kalkulaceData.sluzby && kalkulaceData.sluzby.length > 0) {
+    logger.log('✅ Vykresluju SLUŽBY (počet:', kalkulaceData.sluzby.length + ')');
     yPos += 3;
     pdf.setFont('Roboto', 'normal');
     pdfText('Služby:', margin, yPos);
@@ -1960,10 +1964,13 @@ async function generatePricelistPDF() {
     });
 
     yPos += 3;
+  } else {
+    logger.warn('❌ SLUŽBY nejsou vykresleny (prázdné pole nebo neexistuje)');
   }
 
   // Díly a práce - DETAILNÍ ROZPIS
   if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+    logger.log('✅ Vykresluju DÍLY A PRÁCE (počet:', kalkulaceData.dilyPrace.length + ')');
     yPos += 3;
     pdf.setFont('Roboto', 'normal');
     pdfText('Díly a práce:', margin, yPos);
@@ -1988,6 +1995,8 @@ async function generatePricelistPDF() {
     });
 
     yPos += 3;
+  } else {
+    logger.warn('❌ DÍLY A PRÁCE nejsou vykresleny (prázdné pole nebo neexistuje)');
   }
 
   // Příplatky
