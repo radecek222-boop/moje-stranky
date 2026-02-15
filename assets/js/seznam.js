@@ -969,6 +969,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="detail-btn detail-btn-warning" style="background: #ffeb3b; color: #000; border: 2px solid #000; font-weight: 700;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
@@ -6022,3 +6023,76 @@ async function komprimovatVideo(videoFile, progressCallback) {
 // POZOR: Tento listener je DEAKTIVOVÁN - event handling se provádí v seznam.php (EMERGENCY event delegation V6)
 // Důvod: Duplicitní event listenery způsobovaly vícenásobné volání funkcí
 // Pokud EMERGENCY listener selže, můžete tento listener znovu aktivovat
+
+// ============================================================================
+// ZALOŽIT ZNOVU - Klonování dokončené karty
+// ============================================================================
+async function zalozitZnovu(reklamaceId) {
+  if (!reklamaceId && CURRENT_RECORD) {
+    reklamaceId = CURRENT_RECORD.id;
+  }
+
+  if (!reklamaceId) {
+    wgsToast.error('Chybí ID reklamace');
+    return;
+  }
+
+  // Najít původní reklamaci
+  const puvodni = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+  if (!puvodni) {
+    wgsToast.error('Reklamace nenalezena');
+    return;
+  }
+
+  // Potvrzovací dialog
+  const potvrdit = await wgsConfirm(
+    `Opravdu chcete vytvořit novou kartu pro zákazníka ${puvodni.jmeno || 'N/A'}? Vytvoří se nová žlutá karta se všemi údaji.`,
+    {
+      titulek: 'Založit znovu',
+      btnPotvrdit: 'Ano, založit',
+      btnZrusit: 'Zrušit'
+    }
+  );
+
+  if (!potvrdit) return;
+
+  try {
+    // Zobrazit loading
+    wgsToast.info('Zakládám novou kartu...');
+
+    // Zavolat API pro klonování
+    const formData = new FormData();
+    formData.append('csrf_token', document.querySelector('[name="csrf_token"]').value);
+    formData.append('action', 'klonovat');
+    formData.append('puvodni_id', reklamaceId);
+
+    const response = await fetch('/api/klonovani_api.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      WGSToast.zobrazit(`Nová karta úspěšně vytvořena: ${data.nova_reklamace_cislo}`, {
+        titulek: 'Úspěch',
+        trvani: 5000,
+        claimId: data.nova_reklamace_id
+      });
+
+      // Zavřít detail
+      closeDetail();
+
+      // Obnovit seznam
+      await loadAll('all');
+    } else {
+      wgsToast.error(data.message || 'Chyba při zakládání nové karty');
+    }
+  } catch (error) {
+    logger.error('Chyba při zakládání znovu:', error);
+    wgsToast.error('Chyba při zakládání nové karty');
+  }
+}
+
+// Export do window
+window.zalozitZnovu = zalozitZnovu;
