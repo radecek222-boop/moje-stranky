@@ -85,11 +85,11 @@ try {
             $insertStmt = $pdo->prepare("
                 INSERT INTO wgs_reklamace (
                     reklamace_id, jmeno, telefon, email, adresa, model, typ,
-                    popis_problemu, stav, created_by, created_by_role, typ_faktury,
+                    popis_problemu, stav, created_by, created_by_role, fakturace_firma,
                     nazev_produktu, created_at
                 ) VALUES (
                     :reklamace_id, :jmeno, :telefon, :email, :adresa, :model, :typ,
-                    :popis_problemu, 'wait', :created_by, :created_by_role, :typ_faktury,
+                    :popis_problemu, 'wait', :created_by, :created_by_role, :fakturace_firma,
                     :nazev_produktu, NOW()
                 )
             ");
@@ -105,7 +105,7 @@ try {
                 ':popis_problemu' => $puvodni['popis_problemu'],
                 ':created_by' => $userId,
                 ':created_by_role' => $_SESSION['role'] ?? 'guest',
-                ':typ_faktury' => $puvodni['typ_faktury'],
+                ':fakturace_firma' => $puvodni['fakturace_firma'] ?? 'cz',
                 ':nazev_produktu' => $puvodni['nazev_produktu']
             ]);
 
