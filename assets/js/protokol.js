@@ -1713,9 +1713,11 @@ async function generatePricelistPDF() {
   }
 
   logger.log('Generuji PDF PRICELIST...');
+  logger.log('📊 DEBUG: kalkulaceData =', JSON.stringify(kalkulaceData, null, 2));
 
   // OPRAVA: Převést data z rozpis struktury do pole služeb a dílů
   if (kalkulaceData.rozpis && (!kalkulaceData.sluzby || !kalkulaceData.dilyPrace)) {
+    logger.log('✅ Převádím rozpis data do služeb a dílů...');
     kalkulaceData.sluzby = [];
     kalkulaceData.dilyPrace = [];
 
