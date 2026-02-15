@@ -196,7 +196,7 @@ $zemeNazvy = [
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
     <title>Analytics | WGS Service</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">

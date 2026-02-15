@@ -75,7 +75,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#1a1a1a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
@@ -1722,10 +1722,61 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
     line-height: 1.15 !important;
   }
 
-  /* Input fields v inline stylu - ultra kompaktní */
+  /* Input fields - min 16px font-size zabrání auto-zoom na mobilu */
+  /* Input fields - min 16px font-size zabrání auto-zoom na mobilu */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="url"],
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
   .modal-body input[style*="padding"] {
-    padding: 0.15rem 0.2rem !important;
-    font-size: 0.6rem !important;
+    padding: 0.3rem 0.4rem !important;
+    font-size: 16px !important; /* Min 16px zabrání auto-zoom */
+    min-height: 38px !important;
+  }
+  /* Input fields - min 16px font-size zabrání auto-zoom na mobilu */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="url"],
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
+  .modal-body input[style*="padding"] {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 16px !important; /* Min 16px zabrání auto-zoom */
+    min-height: 38px !important;
+  }
+  /* Input fields - min 16px font-size zabrání auto-zoom na mobilu */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="url"],
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
+  .modal-body input[style*="padding"] {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 16px !important; /* Min 16px zabrání auto-zoom */
+    min-height: 38px !important;
+  }
+  /* Input fields - min 16px font-size zabrání auto-zoom na mobilu */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="url"],
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
+  .modal-body input[style*="padding"] {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 16px !important; /* Min 16px zabrání auto-zoom */
+    min-height: 38px !important;
+  }
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
+  .modal-body input[style*="padding"] {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 16px !important; /* Min 16px zabrání auto-zoom */
+    min-height: 38px !important;
   }
 
   .modal-body textarea[style*="padding"] {
@@ -1861,6 +1912,24 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
     min-height: 20px !important;
   }
 }
+/* FIX: Zabránění auto-zoom při kliknutí na input fieldy */
+@media (max-width: 768px) {
+  /* Min 16px font-size zabrání automatickému zoomu mobilních prohlížečů */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="url"],
+  .modal-body input[type="date"],
+  .modal-body input[type="time"],
+  .modal-body input,
+  .modal-body select,
+  .modal-body textarea {
+    font-size: 16px !important;
+    padding: 0.3rem 0.4rem !important;
+    min-height: 38px !important;
+  }
+}
+
 </style>
 
 <!-- Current User Data for JavaScript -->

@@ -3,7 +3,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Obchodní podmínky společnosti White Glove Service pro poskytování servisních služeb prémiového nábytku Natuzzi.">
   <title>Obchodní podmínky | White Glove Service</title>

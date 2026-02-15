@@ -3,7 +3,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Zpracování osobních údajů ve společnosti White Glove Service, s.r.o. Informace o účelech, právním základu, době uchování a právech subjektů údajů.">
   <title>GDPR | White Glove Service</title>

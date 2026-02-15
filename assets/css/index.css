@@ -40,6 +40,7 @@ h6 {
   top: 0;
   z-index: var(--z-topbar, 100);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #ffffff;
 }
 .logo {
   color: var(--c-white);
@@ -131,14 +132,7 @@ h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-image: url("../img/natuzzi-hero.webp");
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-.no-webp .hero {
-  background-image: url("../img/natuzzi-hero.webp");
+  background: #000000;
 }
 .hero::after {
   content: "";
@@ -147,7 +141,7 @@ h6 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: transparent;
   z-index: var(--z-background, 1);
   pointer-events: none;
 }
@@ -207,9 +201,9 @@ h6 {
 .hero-description,
 .hero .hero-description,
 .hero p.hero-description {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #ffffff !important;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto 5rem;
   line-height: 1.8;
   text-shadow:
@@ -511,10 +505,9 @@ h6 {
     height: auto;
     min-height: 95vh;
     padding: 3rem 0;
-    background-attachment: scroll;
   }
   .hero::after {
-    background: rgba(0, 0, 0, 0.4);
+    background: transparent;
   }
   .hero-content {
     padding: 2rem 1rem;

@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -32,7 +32,6 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
   <link rel="preload" href="assets/css/index.min.css" as="style">
-  <link rel="preload" href="assets/img/natuzzi-hero.webp" as="image" type="image/webp" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style - OPTIMIZED with font-display: optional -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,11 +61,11 @@ require_once __DIR__ . '/includes/seo_meta.php';
       
       <div class="hero-subtitle">White Glove Service</div>
       
-      <p class="hero-description" 
-         data-lang-cs="Prémiový servis pro luxusní nábytek Natuzzi. Profesionální montáž, údržba a opravy s maximální péčí o každý detail."
-         data-lang-en="Premium service for Natuzzi luxury furniture. Professional assembly, maintenance, and repairs with maximum attention to every detail."
-         data-lang-it="Servizio premium per mobili di lusso Natuzzi. Montaggio, manutenzione e riparazioni professionali con la massima cura per ogni dettaglio.">
-        Prémiový servis pro luxusní nábytek Natuzzi. Profesionální montáž, údržba a opravy s maximální péčí o každý detail.
+      <p class="hero-description"
+         data-lang-cs="Prémiový servis pro luxusní nábytek.<br>Profesionální montáž, údržba a opravy s maximální péčí o každý detail."
+         data-lang-en="Premium service for luxury furniture.<br>Professional assembly, maintenance, and repairs with maximum attention to every detail."
+         data-lang-it="Servizio premium per mobili di lusso.<br>Montaggio, manutenzione e riparazioni professionali con la massima cura per ogni dettaglio.">
+        Prémiový servis pro luxusní nábytek.<br>Profesionální montáž, údržba a opravy s maximální péčí o každý detail.
       </p>
       
       <a href="novareklamace.php" class="cta-button"
@@ -157,10 +156,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
       <div class="footer-column">
         <h2 class="footer-title">White Glove Service</h2>
         <p class="footer-text"
-           data-lang-cs="Specializovaný servis Natuzzi."
-           data-lang-en="Natuzzi specialized service."
-           data-lang-it="Servizio specializzato Natuzzi.">
-          Specializovaný servis Natuzzi.
+           data-lang-cs="Prémiový servis pro luxusní nábytek"
+           data-lang-en="Premium service for luxury furniture"
+           data-lang-it="Servizio premium per mobili di lusso">
+          Prémiový servis pro luxusní nábytek
         </p>
       </div>
 

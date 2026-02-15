@@ -3,7 +3,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Zásady používání cookies na webu White Glove Service.">
   <title>Cookies | White Glove Service</title>
