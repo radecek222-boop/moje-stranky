@@ -639,88 +639,10 @@ async function renderOrders(items = null) {
     countWaitEl.textContent = `(${countWait})`;
   }
 
-  // Řazení podle stavu:
-  // - ČEKÁ (wait): podle data vytvoření (nejnovější první)
-  // - DOMLUVENÁ (open): podle termínu návštěvy (nejbližší první)
-  // - HOTOVO (done): podle data dokončení (nejnovější první)
-  // - CN (cenová nabídka): až za HOTOVO (priorita 4)
-  filtered.sort((a, b) => {
-    const stavA = a.stav || 'wait';
-    const stavB = b.stav || 'wait';
-
-    // Zkontrolovat zda má zákazník cenovou nabídku (CN)
-    const emailA = (a.email || '').toLowerCase().trim();
-    const emailB = (b.email || '').toLowerCase().trim();
-    const maCnA = emailA && EMAILS_S_CN.includes(emailA);
-    const maCnB = emailB && EMAILS_S_CN.includes(emailB);
-
-    // Pokud jsou různé stavy, seskupit podle priority: ČEKÁ > DOMLUVENÁ > HOTOVO > CN
-    const priorita = { 'ČEKÁ': 1, 'wait': 1, 'DOMLUVENÁ': 2, 'open': 2, 'HOTOVO': 3, 'done': 3 };
-    let prioA = priorita[stavA] || 1;
-    let prioB = priorita[stavB] || 1;
-
-    // Zákazníci s CN mají prioritu 4 (za HOTOVO)
-    if (maCnA) prioA = 4;
-    if (maCnB) prioB = 4;
-
-    if (prioA !== prioB) {
-      return prioA - prioB;
-    }
-
-    // Stejný stav - řadit podle příslušného data
-    // CN zákazníci (priorita 4) se řadí podle data vytvoření (nejnovější první)
-    if (prioA === 4 && prioB === 4) {
-      // Oba mají CN - řadit podle data vytvoření (nejnovější první)
-      const dateA = new Date(a.created_at || a.datum_reklamace || 0);
-      const dateB = new Date(b.created_at || b.datum_reklamace || 0);
-      return dateB - dateA;
-    } else if (stavA === 'ČEKÁ' || stavA === 'wait') {
-      // NOVÁ: podle data vytvoření (nejnovější první)
-      const dateA = new Date(a.created_at || a.datum_reklamace || 0);
-      const dateB = new Date(b.created_at || b.datum_reklamace || 0);
-      return dateB - dateA;
-    } else if (stavA === 'DOMLUVENÁ' || stavA === 'open') {
-      // DOMLUVENO: podle termínu + času návštěvy (nejbližší první)
-      const getTerminDate = (rec) => {
-        if (!rec.termin) return new Date('9999-12-31');
-
-        const datumStr = rec.termin;
-        const casStr = rec.cas_navstevy || '00:00';
-
-        // Rozpoznat formát data (DD.MM.YYYY nebo YYYY-MM-DD)
-        let date;
-        if (datumStr.includes('.')) {
-          // Formát DD.MM.YYYY
-          const parts = datumStr.split('.');
-          if (parts.length === 3) {
-            const den = parseInt(parts[0], 10);
-            const mesic = parseInt(parts[1], 10);
-            const rok = parseInt(parts[2], 10);
-            // Vytvořit Date s časem
-            const [hodiny, minuty] = casStr.split(':').map(x => parseInt(x, 10) || 0);
-            date = new Date(rok, mesic - 1, den, hodiny, minuty, 0);
-          } else {
-            return new Date('9999-12-31');
-          }
-        } else if (datumStr.includes('-')) {
-          // Formát YYYY-MM-DD (ISO)
-          date = new Date(`${datumStr}T${casStr}:00`);
-        } else {
-          return new Date('9999-12-31');
-        }
-
-        return date;
-      };
-      const terminA = getTerminDate(a);
-      const terminB = getTerminDate(b);
-      return terminA - terminB;
-    } else {
-      // Hotovo: podle data dokončení (nejnovější první)
-      const doneA = new Date(a.datum_dokonceni || a.completed_at || a.updated_at || a.created_at || 0);
-      const doneB = new Date(b.datum_dokonceni || b.completed_at || b.updated_at || b.created_at || 0);
-      return doneB - doneA;
-    }
-  });
+  // ŘAZENÍ: Nechat backendové řazení (load.php)
+  // Backend řadí chronologicky podle termínu (ASC) pro všechny karty
+  // Frontend už NEŘADÍ - používá pořadí z backendu
+  // (Komentář: Původní složité frontendové řazení bylo odstraněno)
 
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
