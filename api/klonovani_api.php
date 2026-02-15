@@ -155,7 +155,8 @@ try {
         } catch (PDOException $e) {
             $pdo->rollBack();
             error_log("Chyba při klonování reklamace: " . $e->getMessage());
-            sendJsonError('Chyba při vytváření nové karty');
+            // DEBUG: Vrátit detailní chybu pro diagnostiku
+            sendJsonError('Databázová chyba: ' . $e->getMessage());
         }
 
     } else {
