@@ -65,55 +65,102 @@ echo "<h1>🔍 DEBUG: Kalkulace pro reklamaci #{$reklamaceId}</h1>";
 try {
     $pdo = getDbConnection();
 
-    // Načíst kalkulaci z databáze
+    // Načíst reklamaci z databáze (kalkulace je v JSON sloupci kalkulace_data)
     $stmt = $pdo->prepare("
-        SELECT * FROM wgs_kalkulace
-        WHERE reklamace_id = :id
+        SELECT
+            id,
+            reklamace_id,
+            cislo,
+            jmeno,
+            adresa,
+            telefon,
+            email,
+            kalkulace_data,
+            created_at
+        FROM wgs_reklamace
+        WHERE reklamace_id = :rek_id OR cislo = :cislo OR id = :id
+        LIMIT 1
     ");
-    $stmt->execute(['id' => $reklamaceId]);
-    $kalkulace = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute([
+        ':rek_id' => $reklamaceId,
+        ':cislo' => $reklamaceId,
+        ':id' => is_numeric($reklamaceId) ? intval($reklamaceId) : 0
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$kalkulace) {
-        echo "<h2 class='error'>❌ KALKULACE NEEXISTUJE</h2>";
-        echo "<p class='warning'>Pro tuto reklamaci nebyla vytvořena kalkulace.</p>";
+    if (!$reklamace) {
+        echo "<h2 class='error'>❌ REKLAMACE NEEXISTUJE</h2>";
+        echo "<p class='warning'>Reklamace s ID #{$reklamaceId} nebyla nalezena.</p>";
         echo "<a href='?'>← Zkusit jiné ID</a>";
+        echo "</div></body></html>";
+        exit;
+    }
+
+    if (empty($reklamace['kalkulace_data'])) {
+        echo "<h2 class='warning'>⚠️ KALKULACE NEEXISTUJE</h2>";
+        echo "<p class='warning'>Pro tuto reklamaci nebyla vytvořena kalkulace (sloupec kalkulace_data je prázdný).</p>";
+        echo "<a href='?'>← Zkusit jiné ID</a>";
+        echo "</div></body></html>";
+        exit;
+    }
+
+    // Dekódovat JSON kalkulaci
+    $kalkulace = json_decode($reklamace['kalkulace_data'], true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo "<h2 class='error'>❌ CHYBA: JSON kalkulace je POŠKOZENÝ</h2>";
+        echo "<p class='error'>JSON error: " . json_last_error_msg() . "</p>";
+        echo "<pre>" . htmlspecialchars($reklamace['kalkulace_data']) . "</pre>";
         echo "</div></body></html>";
         exit;
     }
 
     echo "<h2 class='success'>✅ KALKULACE NALEZENA</h2>";
 
-    // Zobrazit základní údaje
+    // Zobrazit základní údaje reklamace
     echo "<table>";
-    echo "<tr><th colspan='2'>ZÁKLADNÍ ÚDAJE</th></tr>";
-    echo "<tr><td class='label'>ID kalkulace</td><td class='value'>{$kalkulace['id']}</td></tr>";
-    echo "<tr><td class='label'>ID reklamace</td><td class='value'>{$kalkulace['reklamace_id']}</td></tr>";
-    echo "<tr><td class='label'>Celková cena</td><td class='value'>{$kalkulace['celkova_cena']} EUR</td></tr>";
-    echo "<tr><td class='label'>Dopravné</td><td class='value'>{$kalkulace['dopravne']} EUR</td></tr>";
-    echo "<tr><td class='label'>Vzdálenost</td><td class='value'>{$kalkulace['vzdalenost']} km</td></tr>";
-    echo "<tr><td class='label'>Adresa</td><td class='value'>" . htmlspecialchars($kalkulace['adresa']) . "</td></tr>";
-    echo "<tr><td class='label'>Typ servisu</td><td class='value'>" . htmlspecialchars($kalkulace['typ_servisu'] ?? 'N/A') . "</td></tr>";
-    echo "<tr><td class='label'>Těžký nábytek</td><td class='value'>" . ($kalkulace['tezky_nabytek'] ? 'ANO' : 'NE') . "</td></tr>";
-    echo "<tr><td class='label'>Druhá osoba</td><td class='value'>" . ($kalkulace['druha_osoba'] ? 'ANO' : 'NE') . "</td></tr>";
-    echo "<tr><td class='label'>Vytvořeno</td><td class='value'>{$kalkulace['created_at']}</td></tr>";
+    echo "<tr><th colspan='2'>REKLAMACE</th></tr>";
+    echo "<tr><td class='label'>ID reklamace (DB)</td><td class='value'>{$reklamace['id']}</td></tr>";
+    echo "<tr><td class='label'>Reklamace ID</td><td class='value'>{$reklamace['reklamace_id']}</td></tr>";
+    echo "<tr><td class='label'>Číslo</td><td class='value'>{$reklamace['cislo']}</td></tr>";
+    echo "<tr><td class='label'>Zákazník</td><td class='value'>" . htmlspecialchars($reklamace['jmeno']) . "</td></tr>";
+    echo "<tr><td class='label'>Adresa</td><td class='value'>" . htmlspecialchars($reklamace['adresa']) . "</td></tr>";
+    echo "<tr><td class='label'>Vytvořeno</td><td class='value'>{$reklamace['created_at']}</td></tr>";
     echo "</table>";
 
-    // KRITICKÉ: Dekódovat rozpis JSON
-    $rozpis = null;
-    if (!empty($kalkulace['rozpis'])) {
-        $rozpis = json_decode($kalkulace['rozpis'], true);
+    // Zobrazit základní údaje kalkulace
+    echo "<table>";
+    echo "<tr><th colspan='2'>KALKULACE</th></tr>";
+    echo "<tr><td class='label'>Celková cena</td><td class='value'>" . ($kalkulace['celkovaCena'] ?? 'N/A') . " EUR</td></tr>";
+    echo "<tr><td class='label'>Dopravné</td><td class='value'>" . ($kalkulace['dopravne'] ?? 'N/A') . " EUR</td></tr>";
+    echo "<tr><td class='label'>Vzdálenost</td><td class='value'>" . ($kalkulace['vzdalenost'] ?? 'N/A') . " km</td></tr>";
+    echo "<tr><td class='label'>Adresa kalkulace</td><td class='value'>" . htmlspecialchars($kalkulace['adresa'] ?? 'N/A') . "</td></tr>";
+    echo "<tr><td class='label'>Typ servisu</td><td class='value'>" . htmlspecialchars($kalkulace['typServisu'] ?? 'N/A') . "</td></tr>";
+    echo "<tr><td class='label'>Těžký nábytek</td><td class='value'>" . (($kalkulace['tezkyNabytek'] ?? false) ? 'ANO' : 'NE') . "</td></tr>";
+    echo "<tr><td class='label'>Druhá osoba</td><td class='value'>" . (($kalkulace['druhaOsoba'] ?? false) ? 'ANO' : 'NE') . "</td></tr>";
+    echo "<tr><td class='label'>Reklamace bez dopravy</td><td class='value'>" . (($kalkulace['reklamaceBezDopravy'] ?? false) ? 'ANO' : 'NE') . "</td></tr>";
+    echo "</table>";
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            echo "<h2 class='error'>❌ CHYBA: JSON rozpis je POŠKOZENÝ</h2>";
-            echo "<p class='error'>JSON error: " . json_last_error_msg() . "</p>";
-            echo "<pre>" . htmlspecialchars($kalkulace['rozpis']) . "</pre>";
-        } else {
-            echo "<h2 class='success'>✅ ROZPIS JSON (dekódováno)</h2>";
-            echo "<pre>" . htmlspecialchars(json_encode($rozpis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
-        }
+    // KRITICKÉ: Získat rozpis
+    $rozpis = $kalkulace['rozpis'] ?? null;
+
+    if ($rozpis) {
+        echo "<h2 class='success'>✅ ROZPIS (z kalkulace_data)</h2>";
+        echo "<pre>" . htmlspecialchars(json_encode($rozpis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
     } else {
         echo "<h2 class='warning'>⚠️ ROZPIS JE PRÁZDNÝ</h2>";
-        echo "<p class='warning'>Pole 'rozpis' v databázi je NULL nebo prázdné.</p>";
+        echo "<p class='warning'>Pole 'rozpis' v kalkulaci je NULL nebo prázdné.</p>";
+    }
+
+    // Zkontrolovat jestli jsou služby/díly přímo v kalkulaci
+    if (isset($kalkulace['sluzby']) && is_array($kalkulace['sluzby'])) {
+        echo "<h2 class='info'>📋 SLUŽBY (přímo v kalkulaci)</h2>";
+        echo "<pre>" . htmlspecialchars(json_encode($kalkulace['sluzby'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
+    }
+
+    if (isset($kalkulace['dilyPrace']) && is_array($kalkulace['dilyPrace'])) {
+        echo "<h2 class='info'>🔧 DÍLY A PRÁCE (přímo v kalkulaci)</h2>";
+        echo "<pre>" . htmlspecialchars(json_encode($kalkulace['dilyPrace'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
     }
 
     // Analýza co MĚLO být v rozpisu
@@ -172,13 +219,13 @@ try {
             $dopl = $rozpis['doplnky'];
 
             if ($dopl['material'] ?? false) {
-                echo "<p class='success'>✅ Materiál od WGS: ANO</p>";
+                echo "<p class='success'>✅ Materiál od WGS: ANO (50 EUR)</p>";
             } else {
                 echo "<p class='warning'>⚠️ Materiál od WGS: NE</p>";
             }
 
             if ($dopl['vyzvednutiSklad'] ?? false) {
-                echo "<p class='success'>✅ Vyzvednutí na skladě: ANO</p>";
+                echo "<p class='success'>✅ Vyzvednutí na skladě: ANO (10 EUR)</p>";
             } else {
                 echo "<p class='warning'>⚠️ Vyzvednutí na skladě: NE</p>";
             }
@@ -250,7 +297,10 @@ try {
     }
 
     // RAW data
-    echo "<h2 class='info'>📄 RAW DATA Z DATABÁZE</h2>";
+    echo "<h2 class='info'>📄 RAW DATA - REKLAMACE</h2>";
+    echo "<pre>" . htmlspecialchars(json_encode($reklamace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
+
+    echo "<h2 class='info'>📄 RAW DATA - KALKULACE (JSON dekódováno)</h2>";
     echo "<pre>" . htmlspecialchars(json_encode($kalkulace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
 
     echo "<a href='?' class='btn'>← Načíst jiné ID</a>";
