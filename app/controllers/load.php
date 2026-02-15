@@ -184,8 +184,24 @@ try {
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
         $whereClause
         ORDER BY
-            r.termin IS NULL,
-            STR_TO_DATE(r.termin, '%d.%m.%Y') ASC,
+            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=POZ, 5=zelené)
+            CASE
+                WHEN r.stav = 'wait' THEN 1
+                WHEN r.stav = 'open' THEN 2
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN 3
+                WHEN r.stav = 'done' THEN 5
+                ELSE 6
+            END ASC,
+            -- Pro DOMLUVENÁ a POZ: řadit podle termínu (nejbližší první)
+            CASE
+                WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
+                    CASE
+                        WHEN r.termin IS NULL THEN '9999-12-31'
+                        ELSE DATE(STR_TO_DATE(r.termin, '%d.%m.%Y'))
+                    END
+                ELSE NULL
+            END ASC,
+            -- Pro ČEKÁ a HOTOVO: řadit podle data vytvoření (nejnovější první)
             r.created_at DESC
         LIMIT :limit OFFSET :offset
     ";
