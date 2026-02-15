@@ -1244,6 +1244,19 @@ async function generateProtocolPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
+  // OPRAVA: Použít custom font s UTF-8 podporou pro české znaky
+  try {
+    if (window.vfs && window.vfs.Roboto_Regular_normal) {
+      doc.addFileToVFS("Roboto-Regular.ttf", window.vfs.Roboto_Regular_normal);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto");
+    } else {
+      doc.setFont("courier");
+    }
+  } catch (e) {
+    doc.setFont("courier");
+  }
+
   const wrapper = document.querySelector(".wrapper");
 
   logger.log('[Doc] Vytvářím desktop clone pro PDF generování...');
@@ -1779,8 +1792,22 @@ async function generatePricelistPDF() {
     compress: true
   });
 
-  // OPRAVA: Nastavit UTF-8 encoding pro správné zobrazení háčků a čárek
-  pdf.setLanguage("cs");
+  // OPRAVA: Použít custom font s UTF-8 podporou pro české znaky
+  try {
+    if (window.vfs && window.vfs.Roboto_Regular_normal) {
+      pdf.addFileToVFS("Roboto-Regular.ttf", window.vfs.Roboto_Regular_normal);
+      pdf.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      pdf.setFont("Roboto");
+      logger.log('PDF: Použit Roboto font s UTF-8 podporou');
+    } else {
+      // Fallback: courier má lepší UTF-8 support než helvetica
+      pdf.setFont("courier");
+      logger.log('PDF: Použit Courier jako fallback');
+    }
+  } catch (e) {
+    logger.warn('PDF: Chyba při nastavení fontu, použit výchozí:', e);
+    pdf.setFont("courier");
+  }
 
   // Helper pro bezpečný výpis textu s českými znaky
   const pdfText = (text, x, y, options = {}) => window.pdfTextSafe(pdf, text, x, y, options);
