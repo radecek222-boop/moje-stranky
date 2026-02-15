@@ -161,9 +161,9 @@ body {
 }
 .filter-btn {
   padding: 0.6rem 1.2rem;
-  background: var(--c-white);
-  border: 1px solid var(--c-border);
-  color: var(--c-grey);
+  background: #ccc; /* Šedé pozadí pro neaktivní filtry */
+  border: 2px solid #999; /* Šedý rámeček */
+  color: #000; /* Černý text */
   cursor: pointer;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -172,15 +172,18 @@ body {
   text-align: center;
   flex: 1;
   min-width: 120px;
+  font-weight: 500; /* Normální font */
 }
 .filter-btn:hover {
-  border-color: var(--c-black);
-  color: var(--c-black);
+  background: #bbb; /* Tmavší šedá na hover */
+  border-color: #888;
+  color: #000;
 }
 .filter-btn.active {
-  background: var(--c-black);
-  color: var(--c-white);
-  border-color: var(--c-black);
+  background: #000; /* Černé pozadí pro aktivní "Všechny" */
+  color: #fff; /* Bílý text */
+  border: 3px solid #000; /* Tlustší rámeček */
+  font-weight: 700; /* Tučný font */
 }
 .order-grid {
   display: grid;

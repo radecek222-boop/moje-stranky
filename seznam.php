@@ -1170,74 +1170,89 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #999 !important;
 }
 
-/* Filtr tlačítko pro NOVÁ (wait) - žlutá barva */
-.filter-btn-wait {
+/* === FILTRY - NEAKTIVNÍ (šedé) vs AKTIVNÍ (barevné) === */
+
+/* NEAKTIVNÍ filtry - šedé pozadí pro jasné rozlišení */
+.filter-btn-wait,
+.filter-btn-open,
+.filter-btn-done,
+.filter-btn-cn,
+.filter-btn-poz {
+  background: #ccc !important;
+  color: #000 !important;
+  border: 2px solid #999 !important;
+  font-weight: 500 !important;
+}
+
+.filter-btn-wait:hover,
+.filter-btn-open:hover,
+.filter-btn-done:hover,
+.filter-btn-cn:hover,
+.filter-btn-poz:hover {
+  background: #bbb !important;
+  border-color: #888 !important;
+}
+
+/* AKTIVNÍ filtry - barevné pozadí s výrazným rámečkem */
+
+/* Filtr NOVÁ (wait) - AKTIVNÍ žlutá */
+.filter-btn-wait.active {
   background: #ffeb3b !important;
   color: #000 !important;
-  border: 2px solid #ffeb3b !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
 }
-.filter-btn-wait:hover {
+.filter-btn-wait.active:hover {
   background: #fdd835 !important;
-  border-color: #fdd835 !important;
-}
-.filter-btn-wait.active {
-  box-shadow: 0 0 10px rgba(255, 235, 59, 0.6) !important;
+  border-color: #000 !important;
 }
 
-/* Filtr tlačítko pro DOMLUVENO (open) - modrá barva */
-.filter-btn-open {
-  background: #2196f3 !important;
-  color: #000 !important;
-  border: 2px solid #2196f3 !important;
-}
-.filter-btn-open:hover {
-  background: #1976d2 !important;
-  border-color: #1976d2 !important;
-}
+/* Filtr DOMLUVENO (open) - AKTIVNÍ modrá */
 .filter-btn-open.active {
-  box-shadow: 0 0 10px rgba(33, 150, 243, 0.6) !important;
+  background: #2196f3 !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+.filter-btn-open.active:hover {
+  background: #1976d2 !important;
+  border-color: #000 !important;
 }
 
-/* Filtr tlačítko pro HOTOVO (done) - zelená barva */
-.filter-btn-done {
-  background: #4caf50 !important;
-  color: #000 !important;
-  border: 2px solid #4caf50 !important;
-}
-.filter-btn-done:hover {
-  background: #388e3c !important;
-  border-color: #388e3c !important;
-}
+/* Filtr HOTOVO (done) - AKTIVNÍ zelená */
 .filter-btn-done.active {
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.6) !important;
+  background: #4caf50 !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+.filter-btn-done.active:hover {
+  background: #388e3c !important;
+  border-color: #000 !important;
 }
 
-/* Filtr tlačítko pro CN - oranžová barva */
-.filter-btn-cn {
+/* Filtr CN - AKTIVNÍ oranžová */
+.filter-btn-cn.active {
   background: #ff9800 !important;
   color: #000 !important;
-  border: 2px solid #ff9800 !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
 }
-.filter-btn-cn:hover {
+.filter-btn-cn.active:hover {
   background: #f57c00 !important;
-  border-color: #f57c00 !important;
-}
-.filter-btn-cn.active {
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.6) !important;
+  border-color: #000 !important;
 }
 
-/* Filtr tlačítko pro POZ (mimozáruční) - modrá barva */
-.filter-btn-poz {
-  background: #0099ff !important;
-  color: #000 !important;
-  border: 2px solid #0099ff !important;
-}
-.filter-btn-poz:hover {
-  background: #0077cc !important;
-  border-color: #0077cc !important;
-}
+/* Filtr POZ (mimozáruční) - AKTIVNÍ modrá */
 .filter-btn-poz.active {
-  box-shadow: 0 0 10px rgba(0, 153, 255, 0.6) !important;
+  background: #0099ff !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+.filter-btn-poz.active:hover {
+  background: #0077cc !important;
+  border-color: #000 !important;
 }
 
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
@@ -1352,12 +1367,12 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
     font-size: 0.7rem !important;
     line-height: 1.2 !important;
     min-height: 36px !important;
-    border-width: 1px !important;
+    border-width: 2px !important; /* Šedý rámeček pro neaktivní */
     border-radius: 6px !important;
   }
 
   .filter-btn.active {
-    border-width: 2px !important;
+    border-width: 3px !important; /* Tlustší černý rámeček pro aktivní */
   }
 }
 
