@@ -381,6 +381,35 @@ function inicializovatFullscreenPodpis() {
     potvrdirFullscreenPodpis();
   });
 
+  // FIX: Přeinicializovat canvas při změně orientace mobilu
+  const handleOrientationChange = () => {
+    // Pouze pokud je overlay aktivní
+    if (overlay.classList.contains('aktivni')) {
+      logger.log('[FullscreenPodpis] Změna orientace - reinicializuji canvas');
+
+      // Počkat na dokončení rotace
+      setTimeout(() => {
+        inicializovatFullscreenCanvas(canvas);
+      }, 100);
+    }
+  };
+
+  // Listener pro změnu orientace (pro mobily)
+  window.addEventListener('orientationchange', handleOrientationChange);
+
+  // Listener pro resize (fallback pro desktop a některé mobily)
+  let resizeTimeout;
+  const handleResize = () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (overlay.classList.contains('aktivni')) {
+        logger.log('[FullscreenPodpis] Resize - reinicializuji canvas');
+        inicializovatFullscreenCanvas(canvas);
+      }
+    }, 200);
+  };
+  window.addEventListener('resize', handleResize);
+
   logger.log('[FullscreenPodpis] Inicializace dokoncena');
 
   // Inicializovat červené tlačítko POTŘEBA DÍL
