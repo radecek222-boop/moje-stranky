@@ -32,7 +32,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
   <link rel="preload" href="assets/css/index.min.css" as="style">
-  <link rel="preload" href="assets/img/natuzzi-hero.webp" as="image" type="image/webp" fetchpriority="high">
+  <link rel="preload" href="assets/img/index-new-desktop.webp" as="image" type="image/webp" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style - OPTIMIZED with font-display: optional -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
