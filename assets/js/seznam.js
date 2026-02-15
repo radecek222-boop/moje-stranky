@@ -4260,7 +4260,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typeof window[action] === 'function') {
-      window[action]();
+      const id = target.getAttribute('data-id');
+      window[action](id);
     }
   });
 
