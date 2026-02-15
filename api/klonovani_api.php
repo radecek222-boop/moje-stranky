@@ -82,27 +82,40 @@ try {
             $noveReklamaceId = "{$typ}/{$rok}-{$mesic}/{$noveCislo}";
 
             // Vytvořit novou reklamaci (naklonovat všechny údaje kromě ID, stavu, termínu)
+            // DŮLEŽITÉ: cislo (ručně zadané) zůstává stejné, reklamace_id (automatické) je nové
             $insertStmt = $pdo->prepare("
                 INSERT INTO wgs_reklamace (
-                    reklamace_id, jmeno, telefon, email, adresa, model, typ,
-                    popis_problemu, stav, created_by, created_by_role, fakturace_firma,
-                    created_at
+                    reklamace_id, cislo, jmeno, telefon, email, adresa, ulice, mesto, psc,
+                    model, provedeni, barva, typ, popis_problemu, doplnujici_info,
+                    datum_prodeje, datum_reklamace, typ_zakaznika,
+                    stav, created_by, created_by_role, fakturace_firma, created_at
                 ) VALUES (
-                    :reklamace_id, :jmeno, :telefon, :email, :adresa, :model, :typ,
-                    :popis_problemu, 'wait', :created_by, :created_by_role, :fakturace_firma,
-                    NOW()
+                    :reklamace_id, :cislo, :jmeno, :telefon, :email, :adresa, :ulice, :mesto, :psc,
+                    :model, :provedeni, :barva, :typ, :popis_problemu, :doplnujici_info,
+                    :datum_prodeje, :datum_reklamace, :typ_zakaznika,
+                    'wait', :created_by, :created_by_role, :fakturace_firma, NOW()
                 )
             ");
 
             $insertStmt->execute([
                 ':reklamace_id' => $noveReklamaceId,
+                ':cislo' => $puvodni['cislo'], // ZACHOVAT původní číslo
                 ':jmeno' => $puvodni['jmeno'],
                 ':telefon' => $puvodni['telefon'],
                 ':email' => $puvodni['email'],
                 ':adresa' => $puvodni['adresa'],
+                ':ulice' => $puvodni['ulice'],
+                ':mesto' => $puvodni['mesto'],
+                ':psc' => $puvodni['psc'],
                 ':model' => $puvodni['model'],
+                ':provedeni' => $puvodni['provedeni'],
+                ':barva' => $puvodni['barva'],
                 ':typ' => $puvodni['typ'] ?? 'REK',
                 ':popis_problemu' => $puvodni['popis_problemu'],
+                ':doplnujici_info' => $puvodni['doplnujici_info'],
+                ':datum_prodeje' => $puvodni['datum_prodeje'],
+                ':datum_reklamace' => $puvodni['datum_reklamace'],
+                ':typ_zakaznika' => $puvodni['typ_zakaznika'],
                 ':created_by' => $userId,
                 ':created_by_role' => $_SESSION['role'] ?? 'guest',
                 ':fakturace_firma' => $puvodni['fakturace_firma'] ?? 'cz'
