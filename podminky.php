@@ -364,41 +364,4 @@
   </section>
 </main>
 
-<footer class="footer">
-  <div class="footer-container">
-    <div class="footer-grid">
-      <div class="footer-column">
-        <h2 class="footer-title">White Glove Service</h2>
-        <p class="footer-text">Specializovaný servis Natuzzi.</p>
-      </div>
-      <div class="footer-column">
-        <h2 class="footer-title">Kontakt</h2>
-        <p class="footer-text">
-          <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
-          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
-        </p>
-      </div>
-      <div class="footer-column">
-        <h2 class="footer-title">Adresa</h2>
-        <p class="footer-text">Do Dubče 364, Běchovice 190 11 CZ</p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>
-        &copy; 2025 White Glove Service. Všechna práva vyhrazena.
-        <span aria-hidden="true"> • </span>
-        <a href="gdpr.php" class="footer-link">GDPR</a>
-        <span aria-hidden="true"> • </span>
-        <a href="cookies.php" class="footer-link">Cookies</a>
-        <span aria-hidden="true"> • </span>
-        <a href="podminky.php" class="footer-link">Obchodní podmínky</a>
-      </p>
-    </div>
-  </div>
-</footer>
-
-<script src="assets/js/logger.min.js" defer></script>
-<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
-<?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
-</body>
-</html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
