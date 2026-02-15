@@ -35,7 +35,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="description" content="Přihlášení do klientského portálu White Glove Service. Správa reklamací Natuzzi, sledování servisních zásahů a přístup k dokumentům.">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
