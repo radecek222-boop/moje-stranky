@@ -25,11 +25,12 @@ if (!$userId && !$isAdmin) {
     sendJsonError('Uživatel není přihlášen', 401);
 }
 
-// Rate limiting
-$rateLimiter = new RateLimiter($pdo);
-if (!$rateLimiter->checkLimit('save_kalkulace', $_SERVER['REMOTE_ADDR'], 30, 3600)) {
-    sendJsonError('Příliš mnoho požadavků', 429);
-}
+// Rate limiting - DOČASNĚ VYPNUTO PRO TESTOVÁNÍ
+// TODO: Zapnout po testování!
+// $rateLimiter = new RateLimiter($pdo);
+// if (!$rateLimiter->checkLimit('save_kalkulace', $_SERVER['REMOTE_ADDR'], 30, 3600)) {
+//     sendJsonError('Příliš mnoho požadavků', 429);
+// }
 
 try {
     $pdo = getDbConnection();
