@@ -183,7 +183,10 @@ try {
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
         $whereClause
-        ORDER BY r.created_at DESC
+        ORDER BY
+            r.termin IS NULL,
+            STR_TO_DATE(r.termin, '%d.%m.%Y') ASC,
+            r.created_at DESC
         LIMIT :limit OFFSET :offset
     ";
 
