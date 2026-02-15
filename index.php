@@ -61,11 +61,11 @@ require_once __DIR__ . '/includes/seo_meta.php';
       
       <div class="hero-subtitle">White Glove Service</div>
       
-      <p class="hero-description" 
-         data-lang-cs="Prémiový servis pro luxusní nábytek Natuzzi. Profesionální montáž, údržba a opravy s maximální péčí o každý detail."
-         data-lang-en="Premium service for Natuzzi luxury furniture. Professional assembly, maintenance, and repairs with maximum attention to every detail."
-         data-lang-it="Servizio premium per mobili di lusso Natuzzi. Montaggio, manutenzione e riparazioni professionali con la massima cura per ogni dettaglio.">
-        Prémiový servis pro luxusní nábytek Natuzzi. Profesionální montáž, údržba a opravy s maximální péčí o každý detail.
+      <p class="hero-description"
+         data-lang-cs="Prémiový servis pro luxusní nábytek.<br>Profesionální montáž, údržba a opravy s maximální péčí o každý detail."
+         data-lang-en="Premium service for luxury furniture.<br>Professional assembly, maintenance, and repairs with maximum attention to every detail."
+         data-lang-it="Servizio premium per mobili di lusso.<br>Montaggio, manutenzione e riparazioni professionali con la massima cura per ogni dettaglio.">
+        Prémiový servis pro luxusní nábytek.<br>Profesionální montáž, údržba a opravy s maximální péčí o každý detail.
       </p>
       
       <a href="novareklamace.php" class="cta-button"
