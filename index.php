@@ -156,10 +156,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
       <div class="footer-column">
         <h2 class="footer-title">White Glove Service</h2>
         <p class="footer-text"
-           data-lang-cs="Specializovaný servis Natuzzi."
-           data-lang-en="Natuzzi specialized service."
-           data-lang-it="Servizio specializzato Natuzzi.">
-          Specializovaný servis Natuzzi.
+           data-lang-cs="Prémiový servis pro luxusní nábytek"
+           data-lang-en="Premium service for luxury furniture"
+           data-lang-it="Servizio premium per mobili di lusso">
+          Prémiový servis pro luxusní nábytek
         </p>
       </div>
 
