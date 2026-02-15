@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST: PDF Rozpis Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px 5px; cursor: pointer; }
+        .btn-primary { background: #333; color: white; border: none; }
+        .output { background: #f5f5f5; padding: 15px; border: 1px solid #ccc; margin-top: 20px; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>TEST: PDF Rozpis Generator</h1>
+    <p>Tento soubor testuje generování PDF s rozpisem OFFLINE - bez ovlivnění produkce.</p>
+
+    <button class="btn-primary" onclick="testPDFRozpis()">🔬 Vygenerovat TEST PDF</button>
+    <button class="btn-primary" onclick="testDataTransform()">📊 Test Transformace Dat</button>
+
+    <div id="output" class="output"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-customfonts@latest/dist/default_vfs.js"></script>
+
+    <script>
+        // TESTOVACÍ DATA - simuluje kalkulaci z kalkulátoru
+        const testKalkulaceData = {
+            celkovaCena: 642.80,
+            adresa: "Do Dubče 364, Hlavní město Praha, Česko",
+            vzdalenost: 5,
+            dopravne: 2.80,
+            reklamaceBezDopravy: false,
+            vyzvednutiSklad: true,
+            typServisu: 'calouneni',
+            tezkyNabytek: true,
+            druhaOsoba: true,
+            material: true,
+            rozpis: {
+                diagnostika: 0,
+                calouneni: {
+                    pocetProduktu: 1,
+                    sedaky: 1,
+                    operky: 2,
+                    podrucky: 1,
+                    panely: 1
+                },
+                mechanika: {
+                    relax: 0,
+                    vysuv: 0
+                },
+                doplnky: {
+                    tezkyNabytek: true,
+                    material: true,
+                    vyzvednutiSklad: true
+                }
+            }
+        };
+
+        function log(msg, type = 'info') {
+            const output = document.getElementById('output');
+            const color = type === 'success' ? 'green' : type === 'error' ? 'red' : 'black';
+            output.innerHTML += `<div style="color: ${color}">${msg}</div>`;
+        }
+
+        function testDataTransform() {
+            document.getElementById('output').innerHTML = '';
+            log('=== TEST TRANSFORMACE DAT ===', 'info');
+            log('Původní data:', 'info');
+            log(JSON.stringify(testKalkulaceData, null, 2), 'info');
+
+            // Simulovat transformaci
+            const kalkulaceData = JSON.parse(JSON.stringify(testKalkulaceData));
+
+            if (kalkulaceData.rozpis && (!kalkulaceData.sluzby || !kalkulaceData.dilyPrace)) {
+                log('\n✅ Podmínka splněna - provádím transformaci...', 'success');
+                kalkulaceData.sluzby = [];
+                kalkulaceData.dilyPrace = [];
+
+                const rozpis = kalkulaceData.rozpis;
+                const CENY = {
+                    diagnostika: 110,
+                    prvniDil: 205,
+                    dalsiDil: 70,
+                    zakladniSazba: 165,
+                    mechanismusPriplatek: 45,
+                    druhaOsoba: 95,
+                    material: 50,
+                    vyzvednutiSklad: 10
+                };
+
+                // Čalounické práce
+                if (rozpis.calouneni) {
+                    const { sedaky, operky, podrucky, panely, pocetProduktu } = rozpis.calouneni;
+                    const celkemDilu = (sedaky || 0) + (operky || 0) + (podrucky || 0) + (panely || 0);
+
+                    if (celkemDilu > 0) {
+                        const skutecnyPocetProduktu = Math.min(pocetProduktu || 1, celkemDilu || 1);
+                        let cenaDilu = skutecnyPocetProduktu === 1 ?
+                            (celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil) :
+                            (skutecnyPocetProduktu * CENY.prvniDil) + ((celkemDilu - skutecnyPocetProduktu) * CENY.dalsiDil);
+
+                        kalkulaceData.dilyPrace.push({
+                            nazev: `Čalounické práce (${celkemDilu} dílů)`,
+                            cena: cenaDilu,
+                            pocet: celkemDilu
+                        });
+                    }
+                }
+
+                // Doplňky
+                if (rozpis.doplnky) {
+                    if (rozpis.doplnky.material) {
+                        kalkulaceData.sluzby.push({ nazev: 'Materiál dodán od WGS', cena: CENY.material, pocet: 1 });
+                    }
+                    if (rozpis.doplnky.vyzvednutiSklad) {
+                        kalkulaceData.sluzby.push({ nazev: 'Vyzvednutí dílu na skladě', cena: CENY.vyzvednutiSklad, pocet: 1 });
+                    }
+                }
+
+                log('\n📋 VÝSLEDEK TRANSFORMACE:', 'success');
+                log('Služby: ' + JSON.stringify(kalkulaceData.sluzby, null, 2), 'success');
+                log('Díly a práce: ' + JSON.stringify(kalkulaceData.dilyPrace, null, 2), 'success');
+
+            } else {
+                log('❌ Podmínka NESPLNĚNA', 'error');
+                log('kalkulaceData.rozpis existuje: ' + !!kalkulaceData.rozpis, 'error');
+                log('kalkulaceData.sluzby existuje: ' + !!kalkulaceData.sluzby, 'error');
+                log('kalkulaceData.dilyPrace existuje: ' + !!kalkulaceData.dilyPrace, 'error');
+            }
+        }
+
+        async function testPDFRozpis() {
+            document.getElementById('output').innerHTML = '';
+            log('=== GENEROVÁNÍ TEST PDF ===', 'info');
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF("p", "mm", "a4");
+
+                // Zkusit nastavit custom font
+                try {
+                    if (window.vfs && window.vfs.Roboto_Regular_normal) {
+                        pdf.addFileToVFS("Roboto-Regular.ttf", window.vfs.Roboto_Regular_normal);
+                        pdf.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+                        pdf.setFont("Roboto");
+                        log('✅ Použit Roboto font', 'success');
+                    } else {
+                        pdf.setFont("courier");
+                        log('⚠️ Roboto nedostupný, použit Courier', 'info');
+                    }
+                } catch (e) {
+                    pdf.setFont("courier");
+                    log('❌ Chyba při nastavení fontu: ' + e.message, 'error');
+                }
+
+                // Transformovat data
+                const kalkulaceData = JSON.parse(JSON.stringify(testKalkulaceData));
+                if (kalkulaceData.rozpis) {
+                    kalkulaceData.sluzby = [];
+                    kalkulaceData.dilyPrace = [];
+
+                    // (zkrácená verze transformace)
+                    const rozpis = kalkulaceData.rozpis;
+                    const CENY = { material: 50, vyzvednutiSklad: 10, prvniDil: 205, dalsiDil: 70 };
+
+                    if (rozpis.calouneni) {
+                        const celkemDilu = 5;
+                        const cenaDilu = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                        kalkulaceData.dilyPrace.push({ nazev: 'Čalounické práce (5 dílů)', cena: cenaDilu, pocet: celkemDilu });
+                    }
+
+                    if (rozpis.doplnky.material) {
+                        kalkulaceData.sluzby.push({ nazev: 'Materiál dodán od WGS', cena: CENY.material, pocet: 1 });
+                    }
+
+                    if (rozpis.doplnky.vyzvednutiSklad) {
+                        kalkulaceData.sluzby.push({ nazev: 'Vyzvednutí dílu na skladě', cena: CENY.vyzvednutiSklad, pocet: 1 });
+                    }
+                }
+
+                // Vygenerovat PDF
+                pdf.setFontSize(20);
+                pdf.text('TEST PRICELIST', 105, 20, { align: 'center' });
+
+                pdf.setFontSize(12);
+                let y = 40;
+                pdf.text('Číslo reklamace: TEST-2026-001', 15, y); y += 10;
+                pdf.text('Zákazník: Test Zákazník', 15, y); y += 10;
+                pdf.text('Adresa: ' + kalkulaceData.adresa, 15, y); y += 15;
+
+                pdf.text('Rozpis cen:', 15, y); y += 10;
+                pdf.text(`Dopravné (${kalkulaceData.vzdalenost} km): ${kalkulaceData.dopravne.toFixed(2)} EUR`, 15, y); y += 10;
+
+                // Služby
+                if (kalkulaceData.sluzby && kalkulaceData.sluzby.length > 0) {
+                    kalkulaceData.sluzby.forEach(sluzba => {
+                        pdf.text(`${sluzba.nazev}: ${sluzba.cena.toFixed(2)} EUR`, 15, y);
+                        y += 8;
+                    });
+                }
+
+                // Díly
+                if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+                    kalkulaceData.dilyPrace.forEach(dil => {
+                        pdf.text(`${dil.nazev}: ${dil.cena.toFixed(2)} EUR`, 15, y);
+                        y += 8;
+                    });
+                }
+
+                pdf.text('Příplatek: Těžký nábytek: 95.00 EUR', 15, y); y += 15;
+                pdf.setFontSize(14);
+                pdf.text(`CELKEM: ${kalkulaceData.celkovaCena.toFixed(2)} EUR`, 15, y);
+
+                // Stáhnout PDF
+                pdf.save('TEST-pricelist-rozpis.pdf');
+
+                log('\n✅ PDF vygenerováno a staženo!', 'success');
+                log('Zkontroluj stažené PDF a podívej se jestli:', 'info');
+                log('1. České znaky jsou správně (Číslo, Příplatek)', 'info');
+                log('2. Všechny položky jsou zobrazeny', 'info');
+
+            } catch (error) {
+                log('❌ CHYBA: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -884,7 +884,8 @@ if ($initialBootstrapData) {
 <!-- protokol-signature-fix.js odstraněn - window.signaturePad je nyní v protokol.js (Step 110) -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-<!-- Custom font pro české znaky -->
+<!-- Custom font pro české znaky - SPRÁVNÉ POŘADÍ -->
+<script src="https://unpkg.com/jspdf-customfonts@latest/dist/jspdf.customfonts.min.js" defer></script>
 <script src="https://unpkg.com/jspdf-customfonts@latest/dist/default_vfs.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>

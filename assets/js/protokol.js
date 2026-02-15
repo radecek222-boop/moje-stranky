@@ -81,10 +81,49 @@ async function zkontrolujPdfKnihovny() {
 
 // === PDF UTF-8 HELPER ===
 // Helper pro bezpečný výpis textu s českými znaky v PDF
+// WORKAROUND: jsPDF má problém s UTF-8, použijeme character replacement
 window.pdfTextSafe = function(pdfObj, text, x, y, options = {}) {
-  // Zajistit správné UTF-8 encoding pro háčky a čárky
-  const safeText = String(text || '').normalize('NFC');
-  pdfObj.text(safeText, x, y, options);
+  let safeText = String(text || '');
+
+  // HACK: Pokusit se použít addFont s unicode support
+  // Pokud custom font není dostupný, použít ASCII approximation
+  try {
+    // Zkusit nastavit font na courier (má lepší charset než helvetica)
+    const currentFont = pdfObj.internal.getFont().fontName;
+    if (currentFont === 'helvetica') {
+      pdfObj.setFont('courier');
+    }
+  } catch (e) {
+    // Ignore
+  }
+
+  // Normalizovat text
+  safeText = safeText.normalize('NFC');
+
+  // Pokusit se zobrazit text přímo
+  try {
+    pdfObj.text(safeText, x, y, options);
+  } catch (e) {
+    // Fallback: ASCII aproximace
+    const czechMap = {
+      'Č': 'C', 'č': 'c', 'Ď': 'D', 'ď': 'd',
+      'Ě': 'E', 'ě': 'e', 'Ň': 'N', 'ň': 'n',
+      'Ř': 'R', 'ř': 'r', 'Š': 'S', 'š': 's',
+      'Ť': 'T', 'ť': 't', 'Ů': 'U', 'ů': 'u',
+      'Ý': 'Y', 'ý': 'y', 'Ž': 'Z', 'ž': 'z',
+      'Á': 'A', 'á': 'a', 'É': 'E', 'é': 'e',
+      'Í': 'I', 'í': 'i', 'Ó': 'O', 'ó': 'o',
+      'Ú': 'U', 'ú': 'u'
+    };
+
+    let asciiText = safeText;
+    for (const [czech, ascii] of Object.entries(czechMap)) {
+      asciiText = asciiText.replace(new RegExp(czech, 'g'), ascii);
+    }
+
+    pdfObj.text(asciiText, x, y, options);
+    console.warn('PDF: Použita ASCII aproximace pro text:', safeText, '->', asciiText);
+  }
 };
 
 // === NOTIFIKACE ===
@@ -1638,7 +1677,7 @@ async function generatePhotosPDF() {
       // Label přesně nad fotkou (ne nad buňkou)
       if (photoLabel) {
         pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont('Roboto', 'normal');
         pdf.setTextColor(0, 0, 0);
         pdf.text(photoLabel, x + offsetX, photoY + offsetY - 2);
       }
@@ -1653,7 +1692,7 @@ async function generatePhotosPDF() {
       // Fallback: label ve středu buňky
       if (photoLabel) {
         pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont('Roboto', 'normal');
         pdf.setTextColor(0, 0, 0);
         pdf.text(photoLabel, x, photoY - 2);
       }
@@ -1674,9 +1713,15 @@ async function generatePricelistPDF() {
   }
 
   logger.log('Generuji PDF PRICELIST...');
+  logger.log('📊 DEBUG: kalkulaceData =', JSON.stringify(kalkulaceData, null, 2));
 
   // OPRAVA: Převést data z rozpis struktury do pole služeb a dílů
-  if (kalkulaceData.rozpis && (!kalkulaceData.sluzby || !kalkulaceData.dilyPrace)) {
+  const needsTransform = !!kalkulaceData.rozpis &&
+    (!Array.isArray(kalkulaceData.sluzby) || kalkulaceData.sluzby.length === 0 ||
+     !Array.isArray(kalkulaceData.dilyPrace) || kalkulaceData.dilyPrace.length === 0);
+
+  if (needsTransform) {
+    logger.log('✅ Převádím rozpis data do služeb a dílů...');
     kalkulaceData.sluzby = [];
     kalkulaceData.dilyPrace = [];
 
@@ -1797,17 +1842,31 @@ async function generatePricelistPDF() {
     if (window.vfs && window.vfs.Roboto_Regular_normal) {
       pdf.addFileToVFS("Roboto-Regular.ttf", window.vfs.Roboto_Regular_normal);
       pdf.addFont("Roboto-Regular.ttf", "Roboto", "normal");
-      pdf.setFont("Roboto");
-      logger.log('PDF: Použit Roboto font s UTF-8 podporou');
+      pdf.setFont("Roboto", "normal");
+      logger.log('✅ PDF: Použit Roboto font s UTF-8 podporou');
     } else {
-      // Fallback: courier má lepší UTF-8 support než helvetica
+      logger.warn('⚠️ PDF: window.vfs.Roboto_Regular_normal NENÍ dostupný!');
+      logger.log('window.vfs existuje:', !!window.vfs);
+      if (window.vfs) {
+        logger.log('window.vfs klíče:', Object.keys(window.vfs));
+      }
       pdf.setFont("courier");
       logger.log('PDF: Použit Courier jako fallback');
     }
   } catch (e) {
-    logger.warn('PDF: Chyba při nastavení fontu, použit výchozí:', e);
+    logger.error('❌ PDF: Chyba při nastavení fontu:', e);
     pdf.setFont("courier");
   }
+
+  // DEBUG: Zobrazit dostupné fonty
+  if (pdf.getFontList) {
+    logger.log('📝 Dostupné fonty v PDF:', pdf.getFontList());
+  } else {
+    logger.warn('⚠️ getFontList() není dostupná');
+  }
+
+  // Nastavit font PŘED vykreslováním
+  pdf.setFont("Roboto", "normal");
 
   // Helper pro bezpečný výpis textu s českými znaky
   const pdfText = (text, x, y, options = {}) => window.pdfTextSafe(pdf, text, x, y, options);
@@ -1819,7 +1878,7 @@ async function generatePricelistPDF() {
 
   // === HLAVIČKA ===
   pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('Roboto', 'normal');
   pdf.setTextColor(0, 0, 0); // Černá
   pdfText('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
   yPos += 15;
@@ -1832,7 +1891,7 @@ async function generatePricelistPDF() {
   const reklamaceCislo = document.getElementById('claim-number')?.value || '';
 
   pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('Roboto', 'normal');
   pdf.setTextColor(0, 0, 0);
 
   if (reklamaceCislo) {
@@ -1840,11 +1899,11 @@ async function generatePricelistPDF() {
     yPos += 6;
   }
 
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('Roboto', 'normal');
   pdfText(`Zákazník: ${zakaznikJmeno}`, margin, yPos);
   yPos += 6;
 
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('Roboto', 'normal');
   pdfText(`Adresa: ${zakaznikAdresa}`, margin, yPos);
   yPos += 6;
 
@@ -1868,12 +1927,12 @@ async function generatePricelistPDF() {
 
   // === CENOTVORBA ===
   pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('Roboto', 'normal');
   pdfText('Rozpis cen', margin, yPos);
   yPos += 10;
 
   pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('Roboto', 'normal');
 
   // Dopravné
   if (!kalkulaceData.reklamaceBezDopravy) {
@@ -1891,11 +1950,11 @@ async function generatePricelistPDF() {
   // Služby - DETAILNÍ ROZPIS
   if (kalkulaceData.sluzby && kalkulaceData.sluzby.length > 0) {
     yPos += 3;
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('Roboto', 'normal');
     pdfText('Služby:', margin, yPos);
     yPos += 7;
 
-    pdf.setFont('helvetica', 'normal');
+    pdf.setFont('Roboto', 'normal');
     kalkulaceData.sluzby.forEach(sluzba => {
       // Název služby
       pdfText(`  ${sluzba.nazev}`, margin, yPos);
@@ -1906,11 +1965,11 @@ async function generatePricelistPDF() {
         const jednotkovaCena = (sluzba.cena / sluzba.pocet).toFixed(2);
         const celkovaCena = sluzba.cena.toFixed(2);
         const detail = `    ${sluzba.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
-        pdf.setFont('helvetica', 'italic');
+        pdf.setFont('Roboto', 'normal');
         pdf.setFontSize(9);
         pdfText(detail, margin + 5, yPos);
         pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont('Roboto', 'normal');
         yPos += 7;
       } else {
         const cena = sluzba.cena.toFixed(2);
@@ -1925,11 +1984,11 @@ async function generatePricelistPDF() {
   // Díly a práce - DETAILNÍ ROZPIS
   if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
     yPos += 3;
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('Roboto', 'normal');
     pdfText('Díly a práce:', margin, yPos);
     yPos += 7;
 
-    pdf.setFont('helvetica', 'normal');
+    pdf.setFont('Roboto', 'normal');
     kalkulaceData.dilyPrace.forEach(polozka => {
       // Název položky
       pdfText(`  ${polozka.nazev}`, margin, yPos);
@@ -1939,11 +1998,11 @@ async function generatePricelistPDF() {
       const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
       const celkovaCena = polozka.cena.toFixed(2);
       const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
-      pdf.setFont('helvetica', 'italic');
+      pdf.setFont('Roboto', 'normal');
       pdf.setFontSize(9);
       pdfText(detail, margin + 5, yPos);
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('Roboto', 'normal');
       yPos += 7;
     });
 
@@ -1972,7 +2031,7 @@ async function generatePricelistPDF() {
 
   // === CELKOVÁ CENA ===
   pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('Roboto', 'normal');
   pdf.setTextColor(0, 0, 0); // Černá
   pdfText('CELKEM:', margin, yPos);
   pdfText(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
@@ -1982,11 +2041,11 @@ async function generatePricelistPDF() {
   if (kalkulaceData.poznamka) {
     yPos += 5;
     pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'italic');
+    pdf.setFont('Roboto', 'normal');
     pdf.setTextColor(100, 100, 100);
     pdf.text('Poznámka:', margin, yPos);
     yPos += 6;
-    pdf.setFont('helvetica', 'normal');
+    pdf.setFont('Roboto', 'normal');
 
     const lines = pdf.splitTextToSize(kalkulaceData.poznamka, pageWidth - 2 * margin);
     lines.forEach(line => {
@@ -2018,7 +2077,7 @@ async function exportBothPDFs() {
       logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
       // OPRAVA: Převést data z rozpis struktury do pole služeb a dílů
-      if (kalkulaceData.rozpis && (!kalkulaceData.sluzby || !kalkulaceData.dilyPrace)) {
+      const needsTransform2 = !!kalkulaceData.rozpis && (!Array.isArray(kalkulaceData.sluzby) || kalkulaceData.sluzby.length === 0 || !Array.isArray(kalkulaceData.dilyPrace) || kalkulaceData.dilyPrace.length === 0); if (needsTransform2) {
         kalkulaceData.sluzby = [];
         kalkulaceData.dilyPrace = [];
         const rozpis = kalkulaceData.rozpis;
@@ -2058,7 +2117,7 @@ async function exportBothPDFs() {
 
       // === HLAVIČKA ===
       doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
       pdfText('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
       yPos += 15;
@@ -2071,7 +2130,7 @@ async function exportBothPDFs() {
       const reklamaceCislo = document.getElementById('claim-number')?.value || '';
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
 
       if (reklamaceCislo) {
@@ -2079,11 +2138,11 @@ async function exportBothPDFs() {
         yPos += 6;
       }
 
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       pdfText(`Zákazník: ${zakaznikJmeno}`, margin, yPos);
       yPos += 6;
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       pdfText(`Adresa: ${zakaznikAdresa}`, margin, yPos);
       yPos += 6;
 
@@ -2107,12 +2166,12 @@ async function exportBothPDFs() {
 
       // === CENOTVORBA ===
       doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       pdfText('Rozpis cen', margin, yPos);
       yPos += 10;
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       // Dopravné
       if (!kalkulaceData.reklamaceBezDopravy) {
@@ -2130,11 +2189,11 @@ async function exportBothPDFs() {
       // Díly a práce - DETAILNÍ ROZPIS
       if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
         yPos += 3;
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('Roboto', 'normal');
         pdfText('Díly a práce:', margin, yPos);
         yPos += 7;
 
-        doc.setFont('helvetica', 'normal');
+        doc.setFont('Roboto', 'normal');
         kalkulaceData.dilyPrace.forEach(polozka => {
           // Název položky
           pdfText(`  ${polozka.nazev}`, margin, yPos);
@@ -2144,11 +2203,11 @@ async function exportBothPDFs() {
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
           const celkovaCena = polozka.cena.toFixed(2);
           const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
-          doc.setFont('helvetica', 'italic');
+          doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
           doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
+          doc.setFont('Roboto', 'normal');
           yPos += 7;
         });
 
@@ -2177,7 +2236,7 @@ async function exportBothPDFs() {
 
       // === CELKOVÁ CENA ===
       doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
       pdfText('CELKEM:', margin, yPos);
       pdfText(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
@@ -2205,14 +2264,14 @@ async function exportBothPDFs() {
 
       // Hlavička fotodokumentace
       doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       pdfText('FOTODOKUMENTACE', pageWidth / 2, 20, { align: 'center' });
 
       let yPos = 35;
 
       // Informace o zákazníkovi
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
@@ -2233,13 +2292,13 @@ async function exportBothPDFs() {
 
       // Nadpis indexu
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.text('INDEX PHOTO', margin, yPos);
       yPos += 8;
 
       // Index fotek - miniaturní náhledy
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       const thumbSize = 25;
       const thumbGap = 5;
@@ -2338,7 +2397,7 @@ async function exportBothPDFs() {
           // Label přesně nad fotkou (ne nad buňkou)
           if (photoLabel) {
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('Roboto', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
           }
@@ -2353,7 +2412,7 @@ async function exportBothPDFs() {
           // Fallback: label ve středu buňky
           if (photoLabel) {
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('Roboto', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text(photoLabel, x, photoY - 2);
           }
@@ -2481,7 +2540,7 @@ async function sendToCustomer() {
       logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
       // OPRAVA: Převést data z rozpis struktury do pole služeb a dílů
-      if (kalkulaceData.rozpis && (!kalkulaceData.sluzby || !kalkulaceData.dilyPrace)) {
+      const needsTransform3 = !!kalkulaceData.rozpis && (!Array.isArray(kalkulaceData.sluzby) || kalkulaceData.sluzby.length === 0 || !Array.isArray(kalkulaceData.dilyPrace) || kalkulaceData.dilyPrace.length === 0); if (needsTransform3) {
         kalkulaceData.sluzby = [];
         kalkulaceData.dilyPrace = [];
         const rozpis = kalkulaceData.rozpis;
@@ -2521,7 +2580,7 @@ async function sendToCustomer() {
 
       // === HLAVIČKA ===
       doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
       pdfText('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
       yPos += 15;
@@ -2534,7 +2593,7 @@ async function sendToCustomer() {
       const reklamaceCislo = document.getElementById('claim-number')?.value || '';
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
 
       if (reklamaceCislo) {
@@ -2542,11 +2601,11 @@ async function sendToCustomer() {
         yPos += 6;
       }
 
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       pdfText(`Zákazník: ${zakaznikJmeno}`, margin, yPos);
       yPos += 6;
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       pdfText(`Adresa: ${zakaznikAdresa}`, margin, yPos);
       yPos += 6;
 
@@ -2570,12 +2629,12 @@ async function sendToCustomer() {
 
       // === CENOTVORBA ===
       doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       pdfText('Rozpis cen', margin, yPos);
       yPos += 10;
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       // Dopravné
       if (!kalkulaceData.reklamaceBezDopravy) {
@@ -2593,11 +2652,11 @@ async function sendToCustomer() {
       // Díly a práce - DETAILNÍ ROZPIS
       if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
         yPos += 3;
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('Roboto', 'normal');
         pdfText('Díly a práce:', margin, yPos);
         yPos += 7;
 
-        doc.setFont('helvetica', 'normal');
+        doc.setFont('Roboto', 'normal');
         kalkulaceData.dilyPrace.forEach(polozka => {
           // Název položky
           pdfText(`  ${polozka.nazev}`, margin, yPos);
@@ -2607,11 +2666,11 @@ async function sendToCustomer() {
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
           const celkovaCena = polozka.cena.toFixed(2);
           const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
-          doc.setFont('helvetica', 'italic');
+          doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
           doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
+          doc.setFont('Roboto', 'normal');
           yPos += 7;
         });
 
@@ -2640,7 +2699,7 @@ async function sendToCustomer() {
 
       // === CELKOVÁ CENA ===
       doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.setTextColor(0, 0, 0);
       pdfText('CELKEM:', margin, yPos);
       pdfText(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
@@ -2665,14 +2724,14 @@ async function sendToCustomer() {
 
       // Hlavička fotodokumentace
       doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.text('FOTODOKUMENTACE', pageWidth / 2, 20, { align: 'center' });
 
       let yPos = 35;
 
       // Informace o zákazníkovi
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
@@ -2693,13 +2752,13 @@ async function sendToCustomer() {
 
       // Nadpis indexu
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'normal');
       doc.text('INDEX PHOTO', margin, yPos);
       yPos += 8;
 
       // Index fotek - miniaturní náhledy
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
 
       const thumbSize = 25;
       const thumbGap = 5;
@@ -2798,7 +2857,7 @@ async function sendToCustomer() {
           // Label přesně nad fotkou (ne nad buňkou)
           if (photoLabel) {
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('Roboto', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
           }
@@ -2813,7 +2872,7 @@ async function sendToCustomer() {
           // Fallback: label ve středu buňky
           if (photoLabel) {
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('Roboto', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text(photoLabel, x, photoY - 2);
           }
