@@ -131,14 +131,7 @@ h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-image: url("../img/index-new-desktop.webp");
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-.no-webp .hero {
-  background-image: url("../img/index-new-desktop.webp");
+  background: #000000;
 }
 .hero::after {
   content: "";
@@ -147,7 +140,7 @@ h6 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: transparent;
   z-index: var(--z-background, 1);
   pointer-events: none;
 }
@@ -511,11 +504,9 @@ h6 {
     height: auto;
     min-height: 95vh;
     padding: 3rem 0;
-    background-attachment: scroll;
-    background-image: url("../img/index-new-tablet.webp");
   }
   .hero::after {
-    background: rgba(0, 0, 0, 0.4);
+    background: transparent;
   }
   .hero-content {
     padding: 2rem 1rem;
@@ -524,9 +515,6 @@ h6 {
 @media (max-width: 480px) {
   .logo {
     font-size: 1.4rem;
-  }
-  .hero {
-    background-image: url("../img/index-new-mobile.webp");
   }
   .hero-tagline {
     font-size: 1.2rem;
