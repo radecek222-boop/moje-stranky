@@ -201,6 +201,15 @@ try {
                     END
                 ELSE NULL
             END ASC,
+            -- Pro DOMLUVENÁ: řadit také podle času návštěvy (nejdřívější první)
+            CASE
+                WHEN r.stav = 'open' THEN
+                    CASE
+                        WHEN r.cas_navstevy IS NULL OR r.cas_navstevy = '' THEN '23:59'
+                        ELSE r.cas_navstevy
+                    END
+                ELSE NULL
+            END ASC,
             -- Pro ČEKÁ a HOTOVO: řadit podle data vytvoření (nejnovější první)
             r.created_at DESC
         LIMIT :limit OFFSET :offset
