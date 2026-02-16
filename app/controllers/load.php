@@ -192,9 +192,9 @@ try {
                 WHEN r.stav = 'done' THEN 5
                 ELSE 6
             END ASC,
-            -- Pro DOMLUVENÁ a POZ: řadit podle termínu (nejbližší první)
+            -- Pro DOMLUVENÁ: řadit podle termínu (nejbližší první)
             CASE
-                WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
+                WHEN r.stav = 'open' THEN
                     CASE
                         WHEN r.termin IS NULL THEN '9999-12-31'
                         ELSE DATE(STR_TO_DATE(r.termin, '%d.%m.%Y'))
@@ -210,12 +210,17 @@ try {
                     END
                 ELSE NULL
             END ASC,
+            -- Pro POZ: řadit podle data vytvoření (nejnovější první)
+            CASE
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN r.created_at
+                ELSE NULL
+            END DESC,
             -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
-            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
             CASE
                 WHEN r.stav = 'wait' THEN r.created_at
                 ELSE NULL
             END DESC,
+            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
             CASE
                 WHEN r.stav = 'done' THEN r.created_at
                 ELSE NULL
