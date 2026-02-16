@@ -2022,14 +2022,15 @@ async function generatePricelistPDF() {
 
     pdf.setFont('Roboto', 'normal');
     window.kalkulaceData.dilyPrace.forEach(polozka => {
-      // Název položky
+      // Název položky + cena vpravo
+      const celkovaCena = polozka.cena.toFixed(2);
       pdfText(`  ${polozka.nazev}`, margin, yPos);
+      pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
       yPos += 6;
 
-      // Detailní rozpis: počet x jednotková cena = celková cena
+      // Detailní rozpis (menším písmem, bez celkové ceny)
       const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-      const celkovaCena = polozka.cena.toFixed(2);
-      const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+      const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
       pdf.setFont('Roboto', 'normal');
       pdf.setFontSize(9);
       pdfText(detail, margin + 5, yPos);
@@ -2270,14 +2271,15 @@ async function exportBothPDFs() {
 
         doc.setFont('Roboto', 'normal');
         window.kalkulaceData.dilyPrace.forEach(polozka => {
-          // Název položky
+          // Název položky + cena vpravo
+          const celkovaCena = polozka.cena.toFixed(2);
           pdfText(`  ${polozka.nazev}`, margin, yPos);
+          pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
           yPos += 6;
 
-          // Detailní rozpis: počet x jednotková cena = celková cena
+          // Detailní rozpis (menším písmem, bez celkové ceny)
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-          const celkovaCena = polozka.cena.toFixed(2);
-          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
           doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
@@ -2808,14 +2810,15 @@ async function sendToCustomer() {
 
         doc.setFont('Roboto', 'normal');
         window.kalkulaceData.dilyPrace.forEach(polozka => {
-          // Název položky
+          // Název položky + cena vpravo
+          const celkovaCena = polozka.cena.toFixed(2);
           pdfText(`  ${polozka.nazev}`, margin, yPos);
+          pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
           yPos += 6;
 
-          // Detailní rozpis: počet x jednotková cena = celková cena
+          // Detailní rozpis (menším písmem, bez celkové ceny)
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-          const celkovaCena = polozka.cena.toFixed(2);
-          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
           doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
