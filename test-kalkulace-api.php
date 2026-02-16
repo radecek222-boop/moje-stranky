@@ -145,10 +145,14 @@ try {
     $stmt = $pdo->prepare("
         SELECT reklamace_id, cislo, id, jmeno, email, stav, typ
         FROM wgs_reklamace
-        WHERE reklamace_id = :id OR cislo = :id OR id = :id
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id
         LIMIT 1
     ");
-    $stmt->execute([':id' => $reklamaceId]);
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId,
+        ':id' => $reklamaceId
+    ]);
     $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$reklamace) {
