@@ -178,23 +178,27 @@ try {
             u.email as created_by_email,
             t.name as technik_jmeno,
             t.email as technik_email,
-            t.phone as technik_telefon
+            t.phone as technik_telefon,
+            n.odeslano_at as cn_odeslano_at
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
+        LEFT JOIN wgs_nabidky n ON LOWER(TRIM(r.email)) = LOWER(TRIM(n.zakaznik_email))
+            AND n.stav IN ('odeslana', 'potvrzena')
         $whereClause
         ORDER BY
-            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=POZ, 5=zelené)
+            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=CN, 4=POZ, 5=zelené)
             CASE
-                WHEN r.stav = 'wait' THEN 1
+                WHEN r.stav = 'wait' AND (n.odeslano_at IS NULL) THEN 1
                 WHEN r.stav = 'open' THEN 2
-                WHEN r.created_by IS NULL OR r.created_by = '' THEN 3
+                WHEN n.odeslano_at IS NOT NULL AND r.stav != 'done' THEN 3
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN 4
                 WHEN r.stav = 'done' THEN 5
                 ELSE 6
             END ASC,
-            -- Pro DOMLUVENÁ a POZ: řadit podle termínu (nejbližší první)
+            -- Pro DOMLUVENÁ: řadit podle termínu (nejbližší první)
             CASE
-                WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
+                WHEN r.stav = 'open' THEN
                     CASE
                         WHEN r.termin IS NULL THEN '9999-12-31'
                         ELSE DATE(STR_TO_DATE(r.termin, '%d.%m.%Y'))
@@ -210,12 +214,22 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
-            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
+            -- Pro CN: řadit podle data odeslání CN (nejnovější první)
             CASE
-                WHEN r.stav = 'wait' THEN r.created_at
+                WHEN n.odeslano_at IS NOT NULL AND r.stav != 'done' THEN n.odeslano_at
                 ELSE NULL
             END DESC,
+            -- Pro POZ: řadit podle data vytvoření (nejnovější první)
+            CASE
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN r.created_at
+                ELSE NULL
+            END DESC,
+            -- Pro ČEKÁ (bez CN): řadit podle data zadání (nejnovější první)
+            CASE
+                WHEN r.stav = 'wait' AND (n.odeslano_at IS NULL) THEN r.created_at
+                ELSE NULL
+            END DESC,
+            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
             CASE
                 WHEN r.stav = 'done' THEN r.created_at
                 ELSE NULL
