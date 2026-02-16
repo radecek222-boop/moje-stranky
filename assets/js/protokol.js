@@ -2176,8 +2176,49 @@ async function exportBothPDFs() {
         yPos += 7;
       }
 
+      // Služby - DETAILNÍ ROZPIS
+      logger.log('🖨️ Vykreslování SLUŽBY:', window.kalkulaceData.sluzby);
+      logger.log('🖨️ Vykreslování DÍLY:', window.kalkulaceData.dilyPrace);
+
+      if (window.kalkulaceData.sluzby && window.kalkulaceData.sluzby.length > 0) {
+        logger.log('✅ Vykresluju SLUŽBY (počet:', window.kalkulaceData.sluzby.length + ')');
+        yPos += 3;
+        doc.setFont('Roboto', 'normal');
+        pdfText('Služby:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('Roboto', 'normal');
+        window.kalkulaceData.sluzby.forEach(sluzba => {
+          // Název služby
+          pdfText(`  ${sluzba.nazev}`, margin, yPos);
+          yPos += 6;
+
+          // Detailní rozpis pokud má počet
+          if (sluzba.pocet && sluzba.pocet > 1) {
+            const jednotkovaCena = (sluzba.cena / sluzba.pocet).toFixed(2);
+            const celkovaCena = sluzba.cena.toFixed(2);
+            const detail = `    ${sluzba.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+            doc.setFont('Roboto', 'normal');
+            doc.setFontSize(9);
+            pdfText(detail, margin + 5, yPos);
+            doc.setFontSize(10);
+            doc.setFont('Roboto', 'normal');
+            yPos += 7;
+          } else {
+            const cena = sluzba.cena.toFixed(2);
+            pdfText(`${cena} EUR`, pageWidth - margin - 30, yPos - 6);
+            yPos += 1;
+          }
+        });
+
+        yPos += 3;
+      } else {
+        logger.warn('❌ SLUŽBY nejsou vykresleny (prázdné pole nebo neexistuje)');
+      }
+
       // Díly a práce - DETAILNÍ ROZPIS
       if (window.kalkulaceData.dilyPrace && window.kalkulaceData.dilyPrace.length > 0) {
+        logger.log('✅ Vykresluju DÍLY A PRÁCE (počet:', window.kalkulaceData.dilyPrace.length + ')');
         yPos += 3;
         doc.setFont('Roboto', 'normal');
         pdfText('Díly a práce:', margin, yPos);
@@ -2202,6 +2243,8 @@ async function exportBothPDFs() {
         });
 
         yPos += 3;
+      } else {
+        logger.warn('❌ DÍLY A PRÁCE nejsou vykresleny (prázdné pole nebo neexistuje)');
       }
 
       // Příplatky
@@ -2639,8 +2682,49 @@ async function sendToCustomer() {
         yPos += 7;
       }
 
+      // Služby - DETAILNÍ ROZPIS
+      logger.log('🖨️ Vykreslování SLUŽBY:', window.kalkulaceData.sluzby);
+      logger.log('🖨️ Vykreslování DÍLY:', window.kalkulaceData.dilyPrace);
+
+      if (window.kalkulaceData.sluzby && window.kalkulaceData.sluzby.length > 0) {
+        logger.log('✅ Vykresluju SLUŽBY (počet:', window.kalkulaceData.sluzby.length + ')');
+        yPos += 3;
+        doc.setFont('Roboto', 'normal');
+        pdfText('Služby:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('Roboto', 'normal');
+        window.kalkulaceData.sluzby.forEach(sluzba => {
+          // Název služby
+          pdfText(`  ${sluzba.nazev}`, margin, yPos);
+          yPos += 6;
+
+          // Detailní rozpis pokud má počet
+          if (sluzba.pocet && sluzba.pocet > 1) {
+            const jednotkovaCena = (sluzba.cena / sluzba.pocet).toFixed(2);
+            const celkovaCena = sluzba.cena.toFixed(2);
+            const detail = `    ${sluzba.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+            doc.setFont('Roboto', 'normal');
+            doc.setFontSize(9);
+            pdfText(detail, margin + 5, yPos);
+            doc.setFontSize(10);
+            doc.setFont('Roboto', 'normal');
+            yPos += 7;
+          } else {
+            const cena = sluzba.cena.toFixed(2);
+            pdfText(`${cena} EUR`, pageWidth - margin - 30, yPos - 6);
+            yPos += 1;
+          }
+        });
+
+        yPos += 3;
+      } else {
+        logger.warn('❌ SLUŽBY nejsou vykresleny (prázdné pole nebo neexistuje)');
+      }
+
       // Díly a práce - DETAILNÍ ROZPIS
       if (window.kalkulaceData.dilyPrace && window.kalkulaceData.dilyPrace.length > 0) {
+        logger.log('✅ Vykresluju DÍLY A PRÁCE (počet:', window.kalkulaceData.dilyPrace.length + ')');
         yPos += 3;
         doc.setFont('Roboto', 'normal');
         pdfText('Díly a práce:', margin, yPos);
@@ -2665,6 +2749,8 @@ async function sendToCustomer() {
         });
 
         yPos += 3;
+      } else {
+        logger.warn('❌ DÍLY A PRÁCE nejsou vykresleny (prázdné pole nebo neexistuje)');
       }
 
       // Příplatky
