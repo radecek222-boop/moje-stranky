@@ -210,12 +210,12 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro ČEKÁ: řadit podle data zadání (nejstarší první)
+            -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
             -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
             CASE
                 WHEN r.stav = 'wait' THEN r.created_at
                 ELSE NULL
-            END ASC,
+            END DESC,
             CASE
                 WHEN r.stav = 'done' THEN r.created_at
                 ELSE NULL
