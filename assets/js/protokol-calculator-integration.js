@@ -522,10 +522,21 @@
                 vyzvednutiSklad: window.stav.vyzvednutiSklad || false,
                 typServisu: window.stav.typServisu || 'calouneni',
                 tezkyNabytek: window.stav.tezkyNabytek || false,
+                druhaOsoba: window.stav.druhaOsoba || false,
                 material: window.stav.material || false,
+                // KRITICKÉ: Přidat rozpis objekt pro transformaci v sendToCustomer()
+                rozpis: {
+                    diagnostika: window.stav.diagnostika || 0,
+                    calouneni: window.stav.calouneni || null,
+                    mechanika: window.stav.mechanika || null,
+                    doplnky: window.stav.doplnky || null
+                },
                 dilyPrace: [],
                 sluzby: []
             };
+
+            console.log('[Protokol-Kalkulačka] ✅ Kalkulace data vytvořena s rozpis objektem');
+            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
         }
 
         // Přenést cenu do protokolu
