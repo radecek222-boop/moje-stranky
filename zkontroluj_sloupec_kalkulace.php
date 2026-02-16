@@ -64,7 +64,7 @@ try {
             INSERT INTO wgs_reklamace
             (reklamace_id, jmeno, telefon, email, adresa, stav, typ, created_by, created_at, updated_at)
             VALUES
-            (:rek_id, 'Test Kalkulace', '123456789', 'test@test.cz', 'Testovací adresa', 'wait', 'upholstery', 1, NOW(), NOW())
+            (:rek_id, 'Test Kalkulace', '123456789', 'test@test.cz', 'Testovací adresa', 'wait', 'reklamace', 1, NOW(), NOW())
         ");
         $stmt->execute([':rek_id' => $testReklamaceId]);
 
