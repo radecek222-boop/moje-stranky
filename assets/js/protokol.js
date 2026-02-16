@@ -3923,4 +3923,50 @@ document.addEventListener('DOMContentLoaded', () => {
   window.sendToCustomer = sendToCustomer;
   window.exportBothPDFs = exportBothPDFs;
   window.attachPhotos = attachPhotos;
+
+  // ═══════════════════════════════════════════════════════════
+  // DEBUG FUNKCE - Zobrazí kalkulaci bez konzole
+  // ═══════════════════════════════════════════════════════════
+  window.debugKalkulace = function() {
+    if (!window.kalkulaceData) {
+      alert('❌ KALKULACE NEBYLA VYTVOŘENA!\n\nNejdřív vyplň kalkulátor (tlačítko s kalkulačkou).');
+      return;
+    }
+
+    const data = window.kalkulaceData;
+    const sluzby = data.sluzby || [];
+    const dily = data.dilyPrace || [];
+
+    let info = '📊 KALKULACE DATA:\n\n';
+    info += `💰 Celková cena: ${data.celkovaCena ? data.celkovaCena.toFixed(2) : 'N/A'} EUR\n\n`;
+    info += `🚗 Dopravné: ${data.dopravne ? data.dopravne.toFixed(2) : 'N/A'} EUR (${data.vzdalenost || 0} km)\n`;
+    info += `📦 Typ servisu: ${data.typServisu || 'N/A'}\n\n`;
+
+    if (sluzby.length > 0) {
+      info += `✅ SLUŽBY (${sluzby.length}):\n`;
+      sluzby.forEach(s => {
+        info += `  - ${s.nazev}: ${s.cena.toFixed(2)} EUR × ${s.pocet || 1} ks\n`;
+      });
+    } else {
+      info += `❌ SLUŽBY: PRÁZDNÉ!\n`;
+    }
+
+    info += `\n`;
+
+    if (dily.length > 0) {
+      info += `✅ DÍLY (${dily.length}):\n`;
+      dily.forEach(d => {
+        info += `  - ${d.nazev}: ${d.cena.toFixed(2)} EUR × ${d.pocet || 1} ks\n`;
+      });
+    } else {
+      info += `❌ DÍLY: PRÁZDNÉ!\n`;
+    }
+
+    info += `\n`;
+    info += `📝 Reklamace bez dopravy: ${data.reklamaceBezDopravy ? 'ANO' : 'NE'}\n`;
+    info += `🏋️ Těžký nábytek: ${data.tezkyNabytek ? 'ANO' : 'NE'}\n`;
+    info += `👥 Druhá osoba: ${data.druhaOsoba ? 'ANO' : 'NE'}\n`;
+
+    alert(info);
+  };
 })();
