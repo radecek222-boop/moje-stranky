@@ -1718,8 +1718,51 @@ async function generatePricelistPDF() {
       vyzvednutiSklad: 10
     };
 
-    // Diagnostika
-    if (rozpis.diagnostika && rozpis.diagnostika > 0) {
+    // FALLBACK: Kontrola jestli rozpis je prázdný
+    const maPrazdnyRozpis =
+      (!rozpis.diagnostika || rozpis.diagnostika === 0) &&
+      (!rozpis.calouneni || (typeof rozpis.calouneni === 'object' &&
+        ((rozpis.calouneni.sedaky || 0) + (rozpis.calouneni.operky || 0) +
+         (rozpis.calouneni.podrucky || 0) + (rozpis.calouneni.panely || 0)) === 0)) &&
+      (!rozpis.mechanika || (typeof rozpis.mechanika === 'object' &&
+        ((rozpis.mechanika.relax || 0) + (rozpis.mechanika.vysuv || 0)) === 0)) &&
+      (!rozpis.doplnky || (typeof rozpis.doplnky === 'object' &&
+        !rozpis.doplnky.material && !rozpis.doplnky.vyzvednutiSklad));
+
+    if (maPrazdnyRozpis) {
+      // FALLBACK: Rozpis je prázdný → vytvořit obecnou položku
+      logger.log('⚠️ Rozpis je prázdný - vytvářím obecnou položku');
+
+      const cenaBezDopravy = window.kalkulaceData.celkovaCena - (window.kalkulaceData.dopravne || 0);
+      const typServisuText = {
+        'calouneni': 'Servis čalounění',
+        'mechanika': 'Servis mechaniky',
+        'doplnky': 'Další služby'
+      }[window.kalkulaceData.typServisu] || 'Servisní práce';
+
+      if (cenaBezDopravy > 0) {
+        window.kalkulaceData.sluzby.push({
+          nazev: typServisuText,
+          cena: cenaBezDopravy,
+          pocet: 1
+        });
+      }
+
+      // Dopravné
+      if (window.kalkulaceData.dopravne > 0) {
+        window.kalkulaceData.sluzby.push({
+          nazev: `Doprava (${window.kalkulaceData.vzdalenost || 0} km)`,
+          cena: window.kalkulaceData.dopravne,
+          pocet: 1
+        });
+      }
+
+      logger.log('✅ Fallback položka vytvořena:', window.kalkulaceData.sluzby);
+    } else {
+      // Normální transformace z rozpisu
+
+      // Diagnostika
+      if (rozpis.diagnostika && rozpis.diagnostika > 0) {
       window.kalkulaceData.sluzby.push({
         nazev: 'Inspekce / diagnostika',
         cena: rozpis.diagnostika,
@@ -1799,6 +1842,7 @@ async function generatePricelistPDF() {
         });
       }
     }
+    } // Konec normální transformace (else blok)
 
     logger.log('Převedena data z rozpis struktury:', {
       sluzby: window.kalkulaceData.sluzby,
