@@ -201,10 +201,33 @@ try {
     // 3. KONTROLA NABÍDKY V wgs_nabidky
     echo "<h2>3️⃣ Kontrola tabulky wgs_nabidky</h2>";
 
+    // Nejdřív zobrazit strukturu tabulky
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky");
+    $sloupce = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo "<div class='info'><strong>📋 Struktura tabulky wgs_nabidky:</strong></div>";
+    echo "<pre>";
+    foreach ($sloupce as $sloupec) {
+        echo $sloupec['Field'] . " (" . $sloupec['Type'] . ")\n";
+    }
+    echo "</pre>";
+
+    // Zjistit správný sloupec pro časové řazení
+    $sloupceNames = array_column($sloupce, 'Field');
+    $casovySloupec = null;
+    foreach (['created_at', 'created', 'datum_vytvoreni', 'timestamp', 'id'] as $moznySloupec) {
+        if (in_array($moznySloupec, $sloupceNames)) {
+            $casovySloupec = $moznySloupec;
+            break;
+        }
+    }
+
+    $orderBy = $casovySloupec ? "ORDER BY {$casovySloupec} DESC" : "";
+
     $stmt = $pdo->prepare("
         SELECT * FROM wgs_nabidky
         WHERE reklamace_id = :reklamace_id
-        ORDER BY created_at DESC
+        {$orderBy}
         LIMIT 1
     ");
     $stmt->execute([':reklamace_id' => $reklamace['reklamace_id']]);
