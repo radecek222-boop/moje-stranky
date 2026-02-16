@@ -446,7 +446,7 @@ function loadReklamace($data) {
     $stmt = $pdo->prepare("
         SELECT * FROM wgs_nabidky
         WHERE reklamace_id = :reklamace_id
-        ORDER BY created_at DESC
+        ORDER BY id DESC
         LIMIT 1
     ");
     $stmt->execute([':reklamace_id' => $reklamace['reklamace_id']]);
