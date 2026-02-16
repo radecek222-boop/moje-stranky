@@ -717,7 +717,7 @@ function sendEmailToCustomer($data) {
     if ($videaCount > 0) {
         // Vytvorit token pro stahovani videi
         $videoToken = bin2hex(random_bytes(32)); // 64 znaku
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
 
         $stmt = $pdo->prepare("
             INSERT INTO wgs_video_tokens (token, claim_id, expires_at, customer_email)
