@@ -3965,7 +3965,36 @@ document.addEventListener('DOMContentLoaded', () => {
     info += `\n`;
     info += `📝 Reklamace bez dopravy: ${data.reklamaceBezDopravy ? 'ANO' : 'NE'}\n`;
     info += `🏋️ Těžký nábytek: ${data.tezkyNabytek ? 'ANO' : 'NE'}\n`;
-    info += `👥 Druhá osoba: ${data.druhaOsoba ? 'ANO' : 'NE'}\n`;
+    info += `👥 Druhá osoba: ${data.druhaOsoba ? 'ANO' : 'NE'}\n\n`;
+
+    // ROZŠÍŘENÉ DEBUG - ukázat ROZPIS objekt
+    if (data.rozpis) {
+      info += `\n🔍 ROZPIS OBJEKT EXISTUJE!\n\n`;
+      if (data.rozpis.diagnostika) info += `  Diagnostika: ${data.rozpis.diagnostika} EUR\n`;
+      if (data.rozpis.calouneni) {
+        const c = data.rozpis.calouneni;
+        info += `  Čalounění:\n`;
+        info += `    - Sedáky: ${c.sedaky || 0}\n`;
+        info += `    - Opěrky: ${c.operky || 0}\n`;
+        info += `    - Područky: ${c.podrucky || 0}\n`;
+        info += `    - Panely: ${c.panely || 0}\n`;
+        info += `    - Počet produktů: ${c.pocetProduktu || 0}\n`;
+      }
+      if (data.rozpis.mechanika) {
+        const m = data.rozpis.mechanika;
+        info += `  Mechanika:\n`;
+        info += `    - Relax: ${m.relax || 0}\n`;
+        info += `    - Výsuv: ${m.vysuv || 0}\n`;
+      }
+      if (data.rozpis.doplnky) {
+        const d = data.rozpis.doplnky;
+        info += `  Doplňky:\n`;
+        info += `    - Materiál: ${d.material ? 'ANO' : 'NE'}\n`;
+        info += `    - Vyzvednutí: ${d.vyzvednutiSklad ? 'ANO' : 'NE'}\n`;
+      }
+    } else {
+      info += `\n❌ ROZPIS OBJEKT NEEXISTUJE!\n`;
+    }
 
     alert(info);
   };
