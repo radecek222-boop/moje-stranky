@@ -161,6 +161,26 @@ try {
     $countStmt->execute($params);
     $totalRecords = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
+    // Kontrola existence tabulky wgs_nabidky (pro CN nabídky)
+    $hasNabidkyTable = false;
+    try {
+        $checkTableStmt = $pdo->query("SHOW TABLES LIKE 'wgs_nabidky'");
+        $hasNabidkyTable = $checkTableStmt->rowCount() > 0;
+    } catch (Exception $e) {
+        // Tabulka neexistuje - pokračovat bez CN nabídek
+        error_log("Varování: Tabulka wgs_nabidky neexistuje - " . $e->getMessage());
+    }
+
+    // Sestavit SQL dotaz - s nebo bez JOIN na wgs_nabidky
+    $nabidkyJoin = '';
+    $nabidkySelect = 'NULL as cn_odeslano_at';
+
+    if ($hasNabidkyTable) {
+        $nabidkyJoin = "LEFT JOIN wgs_nabidky n ON LOWER(TRIM(r.email)) = LOWER(TRIM(n.zakaznik_email))
+            AND n.stav IN ('odeslana', 'potvrzena')";
+        $nabidkySelect = 'n.odeslano_at as cn_odeslano_at';
+    }
+
     $sql = "
         SELECT
             r.*,
@@ -179,19 +199,17 @@ try {
             t.name as technik_jmeno,
             t.email as technik_email,
             t.phone as technik_telefon,
-            n.odeslano_at as cn_odeslano_at
+            {$nabidkySelect}
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
-        LEFT JOIN wgs_nabidky n ON LOWER(TRIM(r.email)) = LOWER(TRIM(n.zakaznik_email))
-            AND n.stav IN ('odeslana', 'potvrzena')
+        {$nabidkyJoin}
         $whereClause
         ORDER BY
             -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=CN, 4=POZ, 5=zelené)
             CASE
-                WHEN r.stav = 'wait' AND (n.odeslano_at IS NULL) THEN 1
+                WHEN r.stav = 'wait' THEN 1
                 WHEN r.stav = 'open' THEN 2
-                WHEN n.odeslano_at IS NOT NULL AND r.stav != 'done' THEN 3
                 WHEN r.created_by IS NULL OR r.created_by = '' THEN 4
                 WHEN r.stav = 'done' THEN 5
                 ELSE 6
@@ -214,19 +232,14 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro CN: řadit podle data odeslání CN (nejnovější první)
-            CASE
-                WHEN n.odeslano_at IS NOT NULL AND r.stav != 'done' THEN n.odeslano_at
-                ELSE NULL
-            END DESC,
             -- Pro POZ: řadit podle data vytvoření (nejnovější první)
             CASE
                 WHEN r.created_by IS NULL OR r.created_by = '' THEN r.created_at
                 ELSE NULL
             END DESC,
-            -- Pro ČEKÁ (bez CN): řadit podle data zadání (nejnovější první)
+            -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
             CASE
-                WHEN r.stav = 'wait' AND (n.odeslano_at IS NULL) THEN r.created_at
+                WHEN r.stav = 'wait' THEN r.created_at
                 ELSE NULL
             END DESC,
             -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
