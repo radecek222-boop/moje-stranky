@@ -441,58 +441,16 @@ function loadReklamace($data) {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Načtení kalkulace z wgs_kalkulace (pokud existuje)
-    $stmt = $pdo->prepare("
-        SELECT * FROM wgs_kalkulace
-        WHERE reklamace_id = :reklamace_id
-        LIMIT 1
-    ");
-    $stmt->execute([':reklamace_id' => $reklamace['reklamace_id']]);
-    $kalkulaceRaw = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    // Načtení kalkulace z wgs_reklamace.kalkulace_data (JSON)
     $kalkulace = null;
-    if ($kalkulaceRaw && !empty($kalkulaceRaw['rozpis_json'])) {
-        $kalkulace = json_decode($kalkulaceRaw['rozpis_json'], true);
 
-        // Přidat ID kalkulace
-        if ($kalkulace) {
-            $kalkulace['kalkulace_id'] = $kalkulaceRaw['id'];
-        }
-    }
+    if (!empty($reklamace['kalkulace_data'])) {
+        // Parsovat JSON z kalkulace_data sloupce
+        $kalkulace = json_decode($reklamace['kalkulace_data'], true);
 
-    // Pokud kalkulace neexistuje, zkusit načíst nabídku z wgs_nabidky
-    if (!$kalkulace) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM wgs_nabidky
-            WHERE reklamace_id = :reklamace_id
-            ORDER BY created_at DESC
-            LIMIT 1
-        ");
-        $stmt->execute([':reklamace_id' => $reklamace['reklamace_id']]);
-        $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($nabidka) {
-            // Převést nabídku do formátu kalkulace
-            $kalkulace = [
-                'nabidka_id' => $nabidka['id'],
-                'celkovaCena' => (float)$nabidka['total_price'],
-                'hlavniSluzba' => $nabidka['service_name'],
-                'hlavniCena' => (float)$nabidka['base_price'],
-                'dopravne' => (float)$nabidka['transport_cost'],
-                'vzdalenost' => (float)$nabidka['distance'],
-                'reklamaceBezDopravy' => false,
-                'tezkyNabytek' => ($nabidka['heavy_furniture'] == 1),
-                'druhaOsoba' => false,
-                'sluzby' => [
-                    [
-                        'nazev' => $nabidka['service_name'],
-                        'cena' => (float)$nabidka['base_price'],
-                        'pocet' => 1
-                    ]
-                ],
-                'dilyPrace' => [],
-                'poznamka' => $nabidka['notes'] ?? ''
-            ];
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("Chyba při parsování kalkulace_data: " . json_last_error_msg());
+            $kalkulace = null;
         }
     }
 

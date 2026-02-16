@@ -495,6 +495,31 @@
 
     // Jednoduchá verze započítání (čte přímo z DOM)
     function zapocitatDoProtokolu() {
+        console.log('[Protokol-Kalkulačka] zapocitatDoProtokolu() - ZAČÁTEK');
+        console.log('[Protokol-Kalkulačka] window.kalkulaceData existuje:', !!window.kalkulaceData);
+        console.log('[Protokol-Kalkulačka] window.stav existuje:', !!window.stav);
+
+        // PRIORITA 1: Použít data z zpracovatVysledek() (z kalkulátoru)
+        if (window.kalkulaceData && window.kalkulaceData.celkovaCena && window.kalkulaceData.rozpis) {
+            console.log('[Protokol-Kalkulačka] ✅ Používám existující window.kalkulaceData z kalkulátoru');
+            console.log('[Protokol-Kalkulačka] Celková cena:', window.kalkulaceData.celkovaCena);
+            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
+
+            // Přenést cenu do protokolu
+            const priceTotalInput = document.getElementById('price-total');
+            if (priceTotalInput) {
+                priceTotalInput.value = window.kalkulaceData.celkovaCena.toFixed(2) + ' €';
+                zobrazitZpravu('Cena ' + window.kalkulaceData.celkovaCena.toFixed(2) + ' € byla započítána', 'success');
+            }
+
+            // Zavřít modal
+            zavritModal();
+            return; // HOTOVO!
+        }
+
+        // FALLBACK: Pokud window.kalkulaceData neexistuje, vytvořit z DOM
+        console.log('[Protokol-Kalkulačka] ⚠️ window.kalkulaceData neexistuje - vytvářím z DOM');
+
         const grandTotalElement = document.getElementById('grand-total');
 
         if (!grandTotalElement) {
@@ -522,10 +547,34 @@
                 vyzvednutiSklad: window.stav.vyzvednutiSklad || false,
                 typServisu: window.stav.typServisu || 'calouneni',
                 tezkyNabytek: window.stav.tezkyNabytek || false,
+                druhaOsoba: window.stav.druhaOsoba || false,
                 material: window.stav.material || false,
+                // KRITICKÉ: Přidat rozpis objekt pro transformaci v sendToCustomer()
+                rozpis: {
+                    diagnostika: window.stav.typServisu === 'diagnostika' ? 110 : 0,
+                    calouneni: {
+                        pocetProduktu: window.stav.pocetProduktu || 1,
+                        sedaky: window.stav.sedaky || 0,
+                        operky: window.stav.operky || 0,
+                        podrucky: window.stav.podrucky || 0,
+                        panely: window.stav.panely || 0
+                    },
+                    mechanika: {
+                        relax: window.stav.relax || 0,
+                        vysuv: window.stav.vysuv || 0
+                    },
+                    doplnky: {
+                        tezkyNabytek: window.stav.tezkyNabytek || false,
+                        material: window.stav.material || false,
+                        vyzvednutiSklad: window.stav.vyzvednutiSklad || false
+                    }
+                },
                 dilyPrace: [],
                 sluzby: []
             };
+
+            console.log('[Protokol-Kalkulačka] ✅ Kalkulace data vytvořena s rozpis objektem (fallback)');
+            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
         }
 
         // Přenést cenu do protokolu

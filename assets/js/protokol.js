@@ -1718,8 +1718,51 @@ async function generatePricelistPDF() {
       vyzvednutiSklad: 10
     };
 
-    // Diagnostika
-    if (rozpis.diagnostika && rozpis.diagnostika > 0) {
+    // FALLBACK: Kontrola jestli rozpis je prázdný
+    const maPrazdnyRozpis =
+      (!rozpis.diagnostika || rozpis.diagnostika === 0) &&
+      (!rozpis.calouneni || (typeof rozpis.calouneni === 'object' &&
+        ((rozpis.calouneni.sedaky || 0) + (rozpis.calouneni.operky || 0) +
+         (rozpis.calouneni.podrucky || 0) + (rozpis.calouneni.panely || 0)) === 0)) &&
+      (!rozpis.mechanika || (typeof rozpis.mechanika === 'object' &&
+        ((rozpis.mechanika.relax || 0) + (rozpis.mechanika.vysuv || 0)) === 0)) &&
+      (!rozpis.doplnky || (typeof rozpis.doplnky === 'object' &&
+        !rozpis.doplnky.material && !rozpis.doplnky.vyzvednutiSklad));
+
+    if (maPrazdnyRozpis) {
+      // FALLBACK: Rozpis je prázdný → vytvořit obecnou položku
+      logger.log('⚠️ Rozpis je prázdný - vytvářím obecnou položku');
+
+      const cenaBezDopravy = window.kalkulaceData.celkovaCena - (window.kalkulaceData.dopravne || 0);
+      const typServisuText = {
+        'calouneni': 'Servis čalounění',
+        'mechanika': 'Servis mechaniky',
+        'doplnky': 'Další služby'
+      }[window.kalkulaceData.typServisu] || 'Servisní práce';
+
+      if (cenaBezDopravy > 0) {
+        window.kalkulaceData.sluzby.push({
+          nazev: typServisuText,
+          cena: cenaBezDopravy,
+          pocet: 1
+        });
+      }
+
+      // Dopravné
+      if (window.kalkulaceData.dopravne > 0) {
+        window.kalkulaceData.sluzby.push({
+          nazev: `Doprava (${window.kalkulaceData.vzdalenost || 0} km)`,
+          cena: window.kalkulaceData.dopravne,
+          pocet: 1
+        });
+      }
+
+      logger.log('✅ Fallback položka vytvořena:', window.kalkulaceData.sluzby);
+    } else {
+      // Normální transformace z rozpisu
+
+      // Diagnostika
+      if (rozpis.diagnostika && rozpis.diagnostika > 0) {
       window.kalkulaceData.sluzby.push({
         nazev: 'Inspekce / diagnostika',
         cena: rozpis.diagnostika,
@@ -1799,6 +1842,7 @@ async function generatePricelistPDF() {
         });
       }
     }
+    } // Konec normální transformace (else blok)
 
     logger.log('Převedena data z rozpis struktury:', {
       sluzby: window.kalkulaceData.sluzby,
@@ -1978,14 +2022,15 @@ async function generatePricelistPDF() {
 
     pdf.setFont('Roboto', 'normal');
     window.kalkulaceData.dilyPrace.forEach(polozka => {
-      // Název položky
+      // Název položky + cena vpravo
+      const celkovaCena = polozka.cena.toFixed(2);
       pdfText(`  ${polozka.nazev}`, margin, yPos);
+      pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
       yPos += 6;
 
-      // Detailní rozpis: počet x jednotková cena = celková cena
+      // Detailní rozpis (menším písmem, bez celkové ceny)
       const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-      const celkovaCena = polozka.cena.toFixed(2);
-      const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+      const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
       pdf.setFont('Roboto', 'normal');
       pdf.setFontSize(9);
       pdfText(detail, margin + 5, yPos);
@@ -2226,14 +2271,15 @@ async function exportBothPDFs() {
 
         doc.setFont('Roboto', 'normal');
         window.kalkulaceData.dilyPrace.forEach(polozka => {
-          // Název položky
+          // Název položky + cena vpravo
+          const celkovaCena = polozka.cena.toFixed(2);
           pdfText(`  ${polozka.nazev}`, margin, yPos);
+          pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
           yPos += 6;
 
-          // Detailní rozpis: počet x jednotková cena = celková cena
+          // Detailní rozpis (menším písmem, bez celkové ceny)
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-          const celkovaCena = polozka.cena.toFixed(2);
-          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
           doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
@@ -2578,25 +2624,57 @@ async function sendToCustomer() {
         window.kalkulaceData.dilyPrace = [];
         const rozpis = window.kalkulaceData.rozpis;
         const CENY = { diagnostika: 110, prvniDil: 205, dalsiDil: 70, zakladniSazba: 165, mechanismusPriplatek: 45, druhaOsoba: 95, material: 50, vyzvednutiSklad: 10 };
-        if (rozpis.diagnostika && rozpis.diagnostika > 0) { window.kalkulaceData.sluzby.push({ nazev: 'Inspekce / diagnostika', cena: rozpis.diagnostika, pocet: 1 }); }
-        if (rozpis.calouneni) {
-          const { sedaky, operky, podrucky, panely, pocetProduktu } = rozpis.calouneni;
-          const celkemDilu = (sedaky || 0) + (operky || 0) + (podrucky || 0) + (panely || 0);
-          if (celkemDilu > 0) {
-            const skutecnyPocetProduktu = Math.min(pocetProduktu || 1, celkemDilu || 1);
-            let cenaDilu = skutecnyPocetProduktu === 1 ? (celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil) : (skutecnyPocetProduktu * CENY.prvniDil) + ((celkemDilu - skutecnyPocetProduktu) * CENY.dalsiDil);
-            window.kalkulaceData.dilyPrace.push({ nazev: `Čalounické práce (${celkemDilu} ${celkemDilu === 1 ? 'díl' : celkemDilu <= 4 ? 'díly' : 'dílů'})`, cena: cenaDilu, pocet: celkemDilu });
+
+        // FALLBACK: Kontrola jestli rozpis je prázdný
+        const maPrazdnyRozpis =
+          (!rozpis.diagnostika || rozpis.diagnostika === 0) &&
+          (!rozpis.calouneni || (typeof rozpis.calouneni === 'object' &&
+            ((rozpis.calouneni.sedaky || 0) + (rozpis.calouneni.operky || 0) +
+             (rozpis.calouneni.podrucky || 0) + (rozpis.calouneni.panely || 0)) === 0)) &&
+          (!rozpis.mechanika || (typeof rozpis.mechanika === 'object' &&
+            ((rozpis.mechanika.relax || 0) + (rozpis.mechanika.vysuv || 0)) === 0)) &&
+          (!rozpis.doplnky || (typeof rozpis.doplnky === 'object' &&
+            !rozpis.doplnky.material && !rozpis.doplnky.vyzvednutiSklad));
+
+        if (maPrazdnyRozpis) {
+          // Rozpis je prázdný → vytvořit obecnou položku
+          logger.log('⚠️ Rozpis je prázdný v sendToCustomer() - vytvářím obecnou položku');
+          const cenaBezDopravy = window.kalkulaceData.celkovaCena - (window.kalkulaceData.dopravne || 0);
+          const typServisuText = {
+            'calouneni': 'Servis čalounění',
+            'mechanika': 'Servis mechaniky',
+            'doplnky': 'Další služby'
+          }[window.kalkulaceData.typServisu] || 'Servisní práce';
+
+          if (cenaBezDopravy > 0) {
+            window.kalkulaceData.sluzby.push({
+              nazev: typServisuText,
+              cena: cenaBezDopravy,
+              pocet: 1
+            });
           }
-        }
-        if (rozpis.mechanika) {
-          const { relax, vysuv } = rozpis.mechanika;
-          const celkemMechanismu = (relax || 0) + (vysuv || 0);
-          if (celkemMechanismu > 0) { window.kalkulaceData.dilyPrace.push({ nazev: `Mechanické opravy (${celkemMechanismu} ${celkemMechanismu === 1 ? 'mechanismus' : 'mechanismů'})`, cena: celkemMechanismu * CENY.mechanismusPriplatek, pocet: celkemMechanismu }); }
-          if (celkemMechanismu > 0 && window.kalkulaceData.typServisu === 'mechanika') { window.kalkulaceData.sluzby.push({ nazev: 'Základní servisní sazba', cena: CENY.zakladniSazba, pocet: 1 }); }
-        }
-        if (rozpis.doplnky) {
-          if (rozpis.doplnky.material) { window.kalkulaceData.sluzby.push({ nazev: 'Materiál dodán od WGS', cena: CENY.material, pocet: 1 }); }
-          if (rozpis.doplnky.vyzvednutiSklad) { window.kalkulaceData.sluzby.push({ nazev: 'Vyzvednutí dílu na skladě', cena: CENY.vyzvednutiSklad, pocet: 1 }); }
+        } else {
+          // Normální transformace z rozpisu
+          if (rozpis.diagnostika && rozpis.diagnostika > 0) { window.kalkulaceData.sluzby.push({ nazev: 'Inspekce / diagnostika', cena: rozpis.diagnostika, pocet: 1 }); }
+          if (rozpis.calouneni) {
+            const { sedaky, operky, podrucky, panely, pocetProduktu } = rozpis.calouneni;
+            const celkemDilu = (sedaky || 0) + (operky || 0) + (podrucky || 0) + (panely || 0);
+            if (celkemDilu > 0) {
+              const skutecnyPocetProduktu = Math.min(pocetProduktu || 1, celkemDilu || 1);
+              let cenaDilu = skutecnyPocetProduktu === 1 ? (celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil) : (skutecnyPocetProduktu * CENY.prvniDil) + ((celkemDilu - skutecnyPocetProduktu) * CENY.dalsiDil);
+              window.kalkulaceData.dilyPrace.push({ nazev: `Čalounické práce (${celkemDilu} ${celkemDilu === 1 ? 'díl' : celkemDilu <= 4 ? 'díly' : 'dílů'})`, cena: cenaDilu, pocet: celkemDilu });
+            }
+          }
+          if (rozpis.mechanika) {
+            const { relax, vysuv } = rozpis.mechanika;
+            const celkemMechanismu = (relax || 0) + (vysuv || 0);
+            if (celkemMechanismu > 0) { window.kalkulaceData.dilyPrace.push({ nazev: `Mechanické opravy (${celkemMechanismu} ${celkemMechanismu === 1 ? 'mechanismus' : 'mechanismů'})`, cena: celkemMechanismu * CENY.mechanismusPriplatek, pocet: celkemMechanismu }); }
+            if (celkemMechanismu > 0 && window.kalkulaceData.typServisu === 'mechanika') { window.kalkulaceData.sluzby.push({ nazev: 'Základní servisní sazba', cena: CENY.zakladniSazba, pocet: 1 }); }
+          }
+          if (rozpis.doplnky) {
+            if (rozpis.doplnky.material) { window.kalkulaceData.sluzby.push({ nazev: 'Materiál dodán od WGS', cena: CENY.material, pocet: 1 }); }
+            if (rozpis.doplnky.vyzvednutiSklad) { window.kalkulaceData.sluzby.push({ nazev: 'Vyzvednutí dílu na skladě', cena: CENY.vyzvednutiSklad, pocet: 1 }); }
+          }
         }
       }
 
@@ -2732,14 +2810,15 @@ async function sendToCustomer() {
 
         doc.setFont('Roboto', 'normal');
         window.kalkulaceData.dilyPrace.forEach(polozka => {
-          // Název položky
+          // Název položky + cena vpravo
+          const celkovaCena = polozka.cena.toFixed(2);
           pdfText(`  ${polozka.nazev}`, margin, yPos);
+          pdfText(`${celkovaCena} EUR`, pageWidth - margin - 30, yPos);
           yPos += 6;
 
-          // Detailní rozpis: počet x jednotková cena = celková cena
+          // Detailní rozpis (menším písmem, bez celkové ceny)
           const jednotkovaCena = polozka.pocet > 1 ? (polozka.cena / polozka.pocet).toFixed(2) : polozka.cena.toFixed(2);
-          const celkovaCena = polozka.cena.toFixed(2);
-          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR = ${celkovaCena} EUR`;
+          const detail = `    ${polozka.pocet} ks × ${jednotkovaCena} EUR`;
           doc.setFont('Roboto', 'normal');
           doc.setFontSize(9);
           pdfText(detail, margin + 5, yPos);
@@ -3923,4 +4002,79 @@ document.addEventListener('DOMContentLoaded', () => {
   window.sendToCustomer = sendToCustomer;
   window.exportBothPDFs = exportBothPDFs;
   window.attachPhotos = attachPhotos;
+
+  // ═══════════════════════════════════════════════════════════
+  // DEBUG FUNKCE - Zobrazí kalkulaci bez konzole
+  // ═══════════════════════════════════════════════════════════
+  window.debugKalkulace = function() {
+    if (!window.kalkulaceData) {
+      alert('❌ KALKULACE NEBYLA VYTVOŘENA!\n\nNejdřív vyplň kalkulátor (tlačítko s kalkulačkou).');
+      return;
+    }
+
+    const data = window.kalkulaceData;
+    const sluzby = data.sluzby || [];
+    const dily = data.dilyPrace || [];
+
+    let info = '📊 KALKULACE DATA:\n\n';
+    info += `💰 Celková cena: ${data.celkovaCena ? data.celkovaCena.toFixed(2) : 'N/A'} EUR\n\n`;
+    info += `🚗 Dopravné: ${data.dopravne ? data.dopravne.toFixed(2) : 'N/A'} EUR (${data.vzdalenost || 0} km)\n`;
+    info += `📦 Typ servisu: ${data.typServisu || 'N/A'}\n\n`;
+
+    if (sluzby.length > 0) {
+      info += `✅ SLUŽBY (${sluzby.length}):\n`;
+      sluzby.forEach(s => {
+        info += `  - ${s.nazev}: ${s.cena.toFixed(2)} EUR × ${s.pocet || 1} ks\n`;
+      });
+    } else {
+      info += `❌ SLUŽBY: PRÁZDNÉ!\n`;
+    }
+
+    info += `\n`;
+
+    if (dily.length > 0) {
+      info += `✅ DÍLY (${dily.length}):\n`;
+      dily.forEach(d => {
+        info += `  - ${d.nazev}: ${d.cena.toFixed(2)} EUR × ${d.pocet || 1} ks\n`;
+      });
+    } else {
+      info += `❌ DÍLY: PRÁZDNÉ!\n`;
+    }
+
+    info += `\n`;
+    info += `📝 Reklamace bez dopravy: ${data.reklamaceBezDopravy ? 'ANO' : 'NE'}\n`;
+    info += `🏋️ Těžký nábytek: ${data.tezkyNabytek ? 'ANO' : 'NE'}\n`;
+    info += `👥 Druhá osoba: ${data.druhaOsoba ? 'ANO' : 'NE'}\n\n`;
+
+    // ROZŠÍŘENÉ DEBUG - ukázat ROZPIS objekt
+    if (data.rozpis) {
+      info += `\n🔍 ROZPIS OBJEKT EXISTUJE!\n\n`;
+      if (data.rozpis.diagnostika) info += `  Diagnostika: ${data.rozpis.diagnostika} EUR\n`;
+      if (data.rozpis.calouneni) {
+        const c = data.rozpis.calouneni;
+        info += `  Čalounění:\n`;
+        info += `    - Sedáky: ${c.sedaky || 0}\n`;
+        info += `    - Opěrky: ${c.operky || 0}\n`;
+        info += `    - Područky: ${c.podrucky || 0}\n`;
+        info += `    - Panely: ${c.panely || 0}\n`;
+        info += `    - Počet produktů: ${c.pocetProduktu || 0}\n`;
+      }
+      if (data.rozpis.mechanika) {
+        const m = data.rozpis.mechanika;
+        info += `  Mechanika:\n`;
+        info += `    - Relax: ${m.relax || 0}\n`;
+        info += `    - Výsuv: ${m.vysuv || 0}\n`;
+      }
+      if (data.rozpis.doplnky) {
+        const d = data.rozpis.doplnky;
+        info += `  Doplňky:\n`;
+        info += `    - Materiál: ${d.material ? 'ANO' : 'NE'}\n`;
+        info += `    - Vyzvednutí: ${d.vyzvednutiSklad ? 'ANO' : 'NE'}\n`;
+      }
+    } else {
+      info += `\n❌ ROZPIS OBJEKT NEEXISTUJE!\n`;
+    }
+
+    alert(info);
+  };
 })();

@@ -388,6 +388,7 @@ if ($initialBootstrapData) {
     <button class="btn btn-primary" data-action="attachPhotos" data-lang-cs="Přidat fotky" data-lang-en="Add photos" data-lang-it="Aggiungi foto">Přidat fotky</button>
     <button class="btn btn-primary" data-action="exportBothPDFs" data-lang-cs="Export do PDF" data-lang-en="Export to PDF" data-lang-it="Esporta in PDF">Export do PDF</button>
     <button class="btn btn-primary" data-action="sendToCustomer" data-lang-cs="Odeslat zákazníkovi" data-lang-en="Send to customer" data-lang-it="Invia al cliente">Odeslat zákazníkovi</button>
+    <button class="btn" style="background:#ff9900;color:#fff;font-weight:600" onclick="debugKalkulace()">DEBUG KALKULACE</button>
     <button class="btn btn-primary" data-navigate="seznam.php" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
   </div>
 
