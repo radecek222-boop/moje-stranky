@@ -428,7 +428,7 @@
     }
 
     // Zpracovat výsledek kalkulace (voláno z cenik-calculator.js)
-    function zpracovatVysledek(data) {
+    async function zpracovatVysledek(data) {
         // Uložit data kalkulace do globální proměnné pro PDF export
         window.kalkulaceData = data;
 
@@ -441,8 +441,56 @@
             console.error('[Protokol-Kalkulačka] Chyba: data nebo celkovaCena chybí');
         }
 
+        // KRITICKÉ: Uložit kalkulaci do databáze
+        await ulozitKalkulaciDoDb(data);
+
         // Zavřít modal
         zavritModal();
+    }
+
+    // Uložit kalkulaci do databáze
+    async function ulozitKalkulaciDoDb(kalkulaceData) {
+        try {
+            // Získat ID reklamace
+            const claimNumber = document.getElementById('claim-number');
+            if (!claimNumber || !claimNumber.value.trim()) {
+                console.warn('[Protokol-Kalkulačka] Číslo reklamace není vyplněno - kalkulace nebude uložena do DB');
+                return;
+            }
+
+            const reklamaceId = claimNumber.value.trim();
+            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+
+            if (!csrfToken) {
+                console.error('[Protokol-Kalkulačka] CSRF token nenalezen!');
+                return;
+            }
+
+            // Připravit data
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('reklamace_id', reklamaceId);
+            formData.append('kalkulace_data', JSON.stringify(kalkulaceData));
+
+            console.log('[Protokol-Kalkulačka] Ukládám kalkulaci do DB:', reklamaceId);
+
+            // Odeslat na server
+            const response = await fetch('/api/save_kalkulace_api.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                console.log('[Protokol-Kalkulačka] ✅ Kalkulace uložena do databáze');
+            } else {
+                console.error('[Protokol-Kalkulačka] ❌ Chyba při ukládání kalkulace:', result.message);
+            }
+
+        } catch (error) {
+            console.error('[Protokol-Kalkulačka] ❌ Síťová chyba při ukládání kalkulace:', error);
+        }
     }
 
     // Jednoduchá verze započítání (čte přímo z DOM)

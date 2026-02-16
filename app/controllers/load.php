@@ -210,8 +210,16 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro ČEKÁ a HOTOVO: řadit podle data vytvoření (nejnovější první)
-            r.created_at DESC
+            -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
+            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
+            CASE
+                WHEN r.stav = 'wait' THEN r.created_at
+                ELSE NULL
+            END DESC,
+            CASE
+                WHEN r.stav = 'done' THEN r.created_at
+                ELSE NULL
+            END DESC
         LIMIT :limit OFFSET :offset
     ";
 
