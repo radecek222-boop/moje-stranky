@@ -495,6 +495,31 @@
 
     // Jednoduchá verze započítání (čte přímo z DOM)
     function zapocitatDoProtokolu() {
+        console.log('[Protokol-Kalkulačka] zapocitatDoProtokolu() - ZAČÁTEK');
+        console.log('[Protokol-Kalkulačka] window.kalkulaceData existuje:', !!window.kalkulaceData);
+        console.log('[Protokol-Kalkulačka] window.stav existuje:', !!window.stav);
+
+        // PRIORITA 1: Použít data z zpracovatVysledek() (z kalkulátoru)
+        if (window.kalkulaceData && window.kalkulaceData.celkovaCena && window.kalkulaceData.rozpis) {
+            console.log('[Protokol-Kalkulačka] ✅ Používám existující window.kalkulaceData z kalkulátoru');
+            console.log('[Protokol-Kalkulačka] Celková cena:', window.kalkulaceData.celkovaCena);
+            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
+
+            // Přenést cenu do protokolu
+            const priceTotalInput = document.getElementById('price-total');
+            if (priceTotalInput) {
+                priceTotalInput.value = window.kalkulaceData.celkovaCena.toFixed(2) + ' €';
+                zobrazitZpravu('Cena ' + window.kalkulaceData.celkovaCena.toFixed(2) + ' € byla započítána', 'success');
+            }
+
+            // Zavřít modal
+            zavritModal();
+            return; // HOTOVO!
+        }
+
+        // FALLBACK: Pokud window.kalkulaceData neexistuje, vytvořit z DOM
+        console.log('[Protokol-Kalkulačka] ⚠️ window.kalkulaceData neexistuje - vytvářím z DOM');
+
         const grandTotalElement = document.getElementById('grand-total');
 
         if (!grandTotalElement) {
@@ -535,7 +560,7 @@
                 sluzby: []
             };
 
-            console.log('[Protokol-Kalkulačka] ✅ Kalkulace data vytvořena s rozpis objektem');
+            console.log('[Protokol-Kalkulačka] ✅ Kalkulace data vytvořena s rozpis objektem (fallback)');
             console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
         }
 
