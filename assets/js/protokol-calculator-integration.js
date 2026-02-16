@@ -551,10 +551,23 @@
                 material: window.stav.material || false,
                 // KRITICKÉ: Přidat rozpis objekt pro transformaci v sendToCustomer()
                 rozpis: {
-                    diagnostika: window.stav.diagnostika || 0,
-                    calouneni: window.stav.calouneni || null,
-                    mechanika: window.stav.mechanika || null,
-                    doplnky: window.stav.doplnky || null
+                    diagnostika: window.stav.typServisu === 'diagnostika' ? 110 : 0,
+                    calouneni: {
+                        pocetProduktu: window.stav.pocetProduktu || 1,
+                        sedaky: window.stav.sedaky || 0,
+                        operky: window.stav.operky || 0,
+                        podrucky: window.stav.podrucky || 0,
+                        panely: window.stav.panely || 0
+                    },
+                    mechanika: {
+                        relax: window.stav.relax || 0,
+                        vysuv: window.stav.vysuv || 0
+                    },
+                    doplnky: {
+                        tezkyNabytek: window.stav.tezkyNabytek || false,
+                        material: window.stav.material || false,
+                        vyzvednutiSklad: window.stav.vyzvednutiSklad || false
+                    }
                 },
                 dilyPrace: [],
                 sluzby: []
