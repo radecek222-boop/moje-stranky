@@ -161,26 +161,6 @@ try {
     $countStmt->execute($params);
     $totalRecords = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // Kontrola existence tabulky wgs_nabidky (pro CN nabídky)
-    $hasNabidkyTable = false;
-    try {
-        $checkTableStmt = $pdo->query("SHOW TABLES LIKE 'wgs_nabidky'");
-        $hasNabidkyTable = $checkTableStmt->rowCount() > 0;
-    } catch (Exception $e) {
-        // Tabulka neexistuje - pokračovat bez CN nabídek
-        error_log("Varování: Tabulka wgs_nabidky neexistuje - " . $e->getMessage());
-    }
-
-    // Sestavit SQL dotaz - s nebo bez JOIN na wgs_nabidky
-    $nabidkyJoin = '';
-    $nabidkySelect = 'NULL as cn_odeslano_at';
-
-    if ($hasNabidkyTable) {
-        $nabidkyJoin = "LEFT JOIN wgs_nabidky n ON LOWER(TRIM(r.email)) = LOWER(TRIM(n.zakaznik_email))
-            AND n.stav IN ('odeslana', 'potvrzena')";
-        $nabidkySelect = 'n.odeslano_at as cn_odeslano_at';
-    }
-
     $sql = "
         SELECT
             r.*,
@@ -198,55 +178,31 @@ try {
             u.email as created_by_email,
             t.name as technik_jmeno,
             t.email as technik_email,
-            t.phone as technik_telefon,
-            {$nabidkySelect}
+            t.phone as technik_telefon
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.user_id
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
-        {$nabidkyJoin}
         $whereClause
         ORDER BY
-            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=CN, 4=POZ, 5=zelené)
+            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=POZ, 5=zelené)
             CASE
                 WHEN r.stav = 'wait' THEN 1
                 WHEN r.stav = 'open' THEN 2
-                WHEN r.created_by IS NULL OR r.created_by = '' THEN 4
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN 3
                 WHEN r.stav = 'done' THEN 5
                 ELSE 6
             END ASC,
-            -- Pro DOMLUVENÁ: řadit podle termínu (nejbližší první)
+            -- Pro DOMLUVENÁ a POZ: řadit podle termínu (nejbližší první)
             CASE
-                WHEN r.stav = 'open' THEN
+                WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
                     CASE
                         WHEN r.termin IS NULL THEN '9999-12-31'
                         ELSE DATE(STR_TO_DATE(r.termin, '%d.%m.%Y'))
                     END
                 ELSE NULL
             END ASC,
-            -- Pro DOMLUVENÁ: řadit také podle času návštěvy (nejdřívější první)
-            CASE
-                WHEN r.stav = 'open' THEN
-                    CASE
-                        WHEN r.cas_navstevy IS NULL OR r.cas_navstevy = '' THEN '23:59'
-                        ELSE r.cas_navstevy
-                    END
-                ELSE NULL
-            END ASC,
-            -- Pro POZ: řadit podle data vytvoření (nejnovější první)
-            CASE
-                WHEN r.created_by IS NULL OR r.created_by = '' THEN r.created_at
-                ELSE NULL
-            END DESC,
-            -- Pro ČEKÁ: řadit podle data zadání (nejnovější první)
-            CASE
-                WHEN r.stav = 'wait' THEN r.created_at
-                ELSE NULL
-            END DESC,
-            -- Pro HOTOVO: řadit podle data vytvoření (nejnovější první)
-            CASE
-                WHEN r.stav = 'done' THEN r.created_at
-                ELSE NULL
-            END DESC
+            -- Pro ČEKÁ a HOTOVO: řadit podle data vytvoření (nejnovější první)
+            r.created_at DESC
         LIMIT :limit OFFSET :offset
     ";
 
