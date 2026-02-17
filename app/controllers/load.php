@@ -205,7 +205,13 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro ČEKÁ a HOTOVO: řadit podle data vytvoření (nejnovější první)
+            -- Pro HOTOVO (done): řadit podle data dokončení (nejnovější první)
+            CASE
+                WHEN r.stav = 'done' THEN
+                    COALESCE(r.completed_at, r.updated_at, r.created_at)
+                ELSE NULL
+            END DESC,
+            -- Pro ČEKÁ: řadit podle data vytvoření (nejnovější první)
             r.created_at DESC
         LIMIT :limit OFFSET :offset
     ";
