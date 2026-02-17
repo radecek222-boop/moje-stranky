@@ -194,8 +194,8 @@ if (!$isAdmin && !$isTechnik) {
 <!-- Umožňuje fotit I vybrat z galerie (bez capture="environment") -->
 <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
 
-<!-- HIDDEN VIDEO INPUT - pro videotéku -->
-<input type="file" id="videoInput" accept="video/*" capture="environment">
+<!-- HIDDEN VIDEO INPUT - pro videotéku (bez capture - umožní výběr z galerie i kamery) -->
+<input type="file" id="videoInput" accept="video/*">
 
 <!-- VIDEO PLAYBACK MODAL -->
 <div class="video-modal-overlay" id="videoModalOverlay">
