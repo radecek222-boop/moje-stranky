@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/email_domain_validator.php';
 require_once __DIR__ . '/../../includes/rate_limiter.php';
 require_once __DIR__ . '/../../includes/audit_logger.php';
+require_once __DIR__ . '/../../includes/notifikace_helper.php';
 
 // Helper pro timing logy - pouze v development rezimu
 function logTiming(string $message): void {
@@ -392,6 +393,23 @@ function handleUpdate(PDO $pdo, array $input): array
             'updated_fields' => array_keys($updateData),
             'is_admin' => $isAdmin
         ]);
+
+        // === EMAILOVÉ NOTIFIKACE (dle šablony) ===
+        // Pouze pokud se skutečně mění stav - šablona definuje příjemce
+        if ($markAsCompleted) {
+            // Dokončení zakázky → šablona order_completed
+            // Zjistit numerické ID záznamu
+            $notifId = ($identifierColumn === 'id')
+                ? (int)$identifier
+                : (function() use ($pdo, $identifier, $identifierColumn) {
+                    $s = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE `{$identifierColumn}` = ? LIMIT 1");
+                    $s->execute([$identifier]);
+                    return (int)$s->fetchColumn();
+                })();
+            if ($notifId > 0) {
+                odeslat_notifikaci_zakazky($pdo, $notifId, 'order_completed');
+            }
+        }
 
         return [
             'status' => 'success',
