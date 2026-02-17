@@ -196,8 +196,12 @@ try {
             CASE
                 WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
                     CASE
-                        WHEN r.termin IS NULL THEN '9999-12-31'
-                        ELSE DATE(STR_TO_DATE(r.termin, '%d.%m.%Y'))
+                        WHEN r.termin IS NULL THEN '9999-12-31 23:59:59'
+                        ELSE CONCAT(
+                            DATE(STR_TO_DATE(r.termin, '%d.%m.%Y')),
+                            ' ',
+                            COALESCE(r.cas_navstevy, '00:00:00')
+                        )
                     END
                 ELSE NULL
             END ASC,
