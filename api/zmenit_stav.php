@@ -15,6 +15,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/db_metadata.php';
+require_once __DIR__ . '/../includes/notifikace_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -196,6 +197,18 @@ try {
     }
 
     $pdo->commit();
+
+    // === ODESLÁNÍ EMAILOVÉ NOTIFIKACE (dle šablony) ===
+    // Šablona v wgs_notifications definuje kdo dostane email (zákazník, prodejce, admin...)
+    if (!$jeCnStav && $puvodniStav !== $novyStav) {
+        if ($novyStav === 'done') {
+            // Dokončení zakázky → šablona order_completed
+            odeslat_notifikaci_zakazky($pdo, $reklamaceId, 'order_completed');
+        } elseif ($novyStav === 'open') {
+            // Domluvení termínu → šablona appointment_confirmed
+            odeslat_notifikaci_zakazky($pdo, $reklamaceId, 'appointment_confirmed');
+        }
+    }
 
     // Mapování pro odpověď
     $stavyMap = [
