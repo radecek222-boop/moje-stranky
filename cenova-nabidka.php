@@ -1065,6 +1065,11 @@ if ($reklamaceId > 0) {
     (function() {
         'use strict';
 
+        // Převod kódu měny na zobrazovaný symbol
+        function ziskejSymbolMeny(kodMeny) {
+            return kodMeny === 'CZK' ? 'Kč' : kodMeny;
+        }
+
         // State
         let kalkulaceData = null;
         let dodatecnePolozky = [];
@@ -1563,7 +1568,7 @@ if ($reklamaceId > 0) {
                 celkem += p.cena * p.pocet;
             });
 
-            celkovaCenaEl.textContent = celkem.toFixed(2).replace('.', ',') + ' ' + mena;
+            celkovaCenaEl.textContent = celkem.toFixed(2).replace('.', ',') + ' ' + ziskejSymbolMeny(mena);
         }
 
         document.getElementById('mena').addEventListener('change', aktualizovatCelkovouCenu);
@@ -1841,6 +1846,7 @@ if ($reklamaceId > 0) {
 
             const datum = new Date().toLocaleDateString('cs-CZ');
             const platnostDo = new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('cs-CZ');
+            const symbolMeny = ziskejSymbolMeny(data.mena);
 
             // Seskupit položky pro PDF
             const skupinyNazvy = {
@@ -1886,14 +1892,14 @@ if ($reklamaceId > 0) {
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${p.nazev}</td>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 13px;">${p.pocet} ks</td>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; color: #666;">-</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${data.mena}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${symbolMeny}</td>
                         </tr>`;
                     });
 
                     // Mezisoučet skupiny
                     polozkyHtml += `<tr>
                         <td colspan="3" style="padding: 8px 10px; text-align: right; font-size: 12px; color: #666; border-bottom: 2px solid #ddd;">Mezisoučet ${sk.nazev.toLowerCase()}:</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${data.mena}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${symbolMeny}</td>
                     </tr>`;
                 }
             });
@@ -1935,7 +1941,7 @@ if ($reklamaceId > 0) {
                     <tfoot>
                         <tr style="background: #f8f8f8; border-top: 2px solid #333;">
                             <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; color: #333;">CELKOVÁ CENA (bez DPH):</td>
-                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${data.mena}</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${symbolMeny}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -2003,6 +2009,7 @@ if ($reklamaceId > 0) {
 
             const datum = new Date().toLocaleDateString('cs-CZ');
             const platnostDo = new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('cs-CZ');
+            const symbolMeny = ziskejSymbolMeny(data.mena);
 
             // Seskupit polozky pro PDF
             const skupinyNazvy = {
@@ -2043,12 +2050,12 @@ if ($reklamaceId > 0) {
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${p.nazev}</td>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 13px;">${p.pocet} ks</td>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; color: #666;">-</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${data.mena}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-size: 13px; font-weight: 500;">${celkemPol} ${symbolMeny}</td>
                         </tr>`;
                     });
                     polozkyHtml += `<tr>
                         <td colspan="3" style="padding: 8px 10px; text-align: right; font-size: 12px; color: #666; border-bottom: 2px solid #ddd;">Mezisoucet ${sk.nazev.toLowerCase()}:</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${data.mena}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; font-weight: bold; border-bottom: 2px solid #ddd;">${sk.celkem.toFixed(2)} ${symbolMeny}</td>
                     </tr>`;
                 }
             });
@@ -2088,7 +2095,7 @@ if ($reklamaceId > 0) {
                     <tfoot>
                         <tr style="background: #f8f8f8; border-top: 2px solid #333;">
                             <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; font-size: 14px; color: #333;">CELKOVA CENA (bez DPH):</td>
-                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${data.mena}</td>
+                            <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px; color: #000;">${data.celkem.toFixed(2)} ${symbolMeny}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -2179,7 +2186,7 @@ if ($reklamaceId > 0) {
                 html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
                     <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
                     <td>${n.zakaznik_jmeno}</td>
-                    <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${n.mena}</td>
+                    <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${ziskejSymbolMeny(n.mena)}</td>
                     <td>
                         <div class="workflow-container">
                             <!-- Automatické kroky -->
@@ -2456,8 +2463,8 @@ if ($reklamaceId > 0) {
                         polozkyHtml += `<tr>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
                             <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${ziskejSymbolMeny(nabidka.mena)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${ziskejSymbolMeny(nabidka.mena)}</td>
                         </tr>`;
                     });
                 }
@@ -2470,8 +2477,8 @@ if ($reklamaceId > 0) {
                     polozkyHtml += `<tr>
                         <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${p.nazev}</td>
                         <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${p.pocet || 1}</td>
-                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${nabidka.mena}</td>
-                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${nabidka.mena}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${parseFloat(p.cena).toFixed(2)} ${ziskejSymbolMeny(nabidka.mena)}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${celkem} ${ziskejSymbolMeny(nabidka.mena)}</td>
                     </tr>`;
                 });
             }
@@ -2515,7 +2522,7 @@ if ($reklamaceId > 0) {
                         <tfoot>
                             <tr style="background: #1a1a1a;">
                                 <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; color: #fff;">CELKEM (bez DPH):</td>
-                                <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #39ff14;">${parseFloat(nabidka.celkova_cena).toFixed(2)} ${nabidka.mena}</td>
+                                <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #39ff14;">${parseFloat(nabidka.celkova_cena).toFixed(2)} ${ziskejSymbolMeny(nabidka.mena)}</td>
                             </tr>
                         </tfoot>
                     </table>
