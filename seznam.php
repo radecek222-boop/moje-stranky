@@ -1101,6 +1101,16 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   background: rgba(76, 175, 80, 0.12) !important;
 }
 
+/* Fialová nádech - ODLOŽENÁ */
+.order-box.status-bg-odlozena {
+  background: rgba(156, 39, 176, 0.08) !important;
+  border-color: #9c27b0 !important;
+}
+
+.order-box.status-bg-odlozena:hover {
+  background: rgba(156, 39, 176, 0.14) !important;
+}
+
 /* ============================================
    ORANŽOVÝ RÁMEČEK - Zákazníci s cenovou nabídkou (CN)
    Toto je PÁTÁ schválená barevná výjimka v projektu.

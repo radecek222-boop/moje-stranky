@@ -685,8 +685,10 @@ async function renderOrders(items = null) {
     const highlightedOrderId = SEARCH_QUERY ? highlightText(orderId, SEARCH_QUERY) : orderId;
 
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
-    // Přidat barevný nádech podle stavu
-    const statusBgClass = `status-bg-${status.class}`;
+    // Přidat barevný nádech podle stavu (odložené mají fialový rámeček)
+    const statusBgClass = (rec.je_odlozena == 1 || rec.je_odlozena === true)
+      ? 'status-bg-odlozena'
+      : `status-bg-${status.class}`;
     // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
     // Zelený rámeček pro odsouhlasené nabídky
     // Šedý rámeček pro "Čekáme ND"
