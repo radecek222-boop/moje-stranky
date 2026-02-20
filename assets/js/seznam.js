@@ -541,6 +541,11 @@ async function renderOrders(items = null) {
           // POZ: mimozáruční oprava (created_by je prázdné)
           if (!createdBy) return true;
         }
+
+        if (filterType === 'odlozene') {
+          // ODLOŽENÉ: reklamace označena jako odložená (je_odlozena === 1)
+          if (r.je_odlozena == 1 || r.je_odlozena === true) return true;
+        }
       }
 
       // Záznam nesplňuje žádný z aktivních filtrů
@@ -623,6 +628,13 @@ async function renderOrders(items = null) {
       return !createdBy; // Prázdné created_by = mimozáruční oprava
     }).length;
     countPozEl.textContent = `(${countPoz})`;
+  }
+
+  // Aktualizovat počet ODLOŽENÝCH
+  const countOdlozeneEl = document.getElementById('count-odlozene');
+  if (countOdlozeneEl) {
+    const countOdlozene = items.filter(r => r.je_odlozena == 1 || r.je_odlozena === true).length;
+    countOdlozeneEl.textContent = `(${countOdlozene})`;
   }
 
   // Aktualizovat počet ČEKAJÍCÍ (vyloučit zakázky s CN)

@@ -1177,7 +1177,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-open,
 .filter-btn-done,
 .filter-btn-cn,
-.filter-btn-poz {
+.filter-btn-poz,
+.filter-btn-odlozene {
   background: #ccc !important;
   color: #000 !important;
   border: 2px solid #999 !important;
@@ -1188,7 +1189,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-open:hover,
 .filter-btn-done:hover,
 .filter-btn-cn:hover,
-.filter-btn-poz:hover {
+.filter-btn-poz:hover,
+.filter-btn-odlozene:hover {
   background: #bbb !important;
   border-color: #888 !important;
 }
@@ -1253,6 +1255,36 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-poz.active:hover {
   background: #0077cc !important;
   border-color: #000 !important;
+}
+
+/* Filtr ODLOŽENÉ - AKTIVNÍ fialová */
+.filter-btn-odlozene.active {
+  background: #9c27b0 !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+.filter-btn-odlozene.active:hover {
+  background: #7b1fa2 !important;
+  border-color: #000 !important;
+}
+
+/* DESKTOP OPTIMALIZACE FILTER TLAČÍTEK - všechna vedle sebe */
+@media (min-width: 769px) {
+  .filter-bar {
+    flex-wrap: nowrap !important;
+    gap: 0.3rem !important;
+    margin-bottom: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  .filter-btn {
+    min-width: auto !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    flex: 1 1 0 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.03em !important;
+  }
 }
 
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
@@ -1994,6 +2026,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <?php endif; ?>
     <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="Mimozáruční" data-lang-en="Out of Warranty" data-lang-it="Fuori Garanzia">
       POZ <span id="count-poz" style="opacity: 0.7;"></span>
+    </button>
+    <button class="filter-btn filter-btn-odlozene" data-filter="odlozene" data-lang-cs="Odložené" data-lang-en="Postponed" data-lang-it="Rimandati">
+      ODLOŽENÉ <span id="count-odlozene" style="opacity: 0.7;"></span>
     </button>
   </div>
 
