@@ -890,8 +890,11 @@ function createCustomerHeader() {
                         CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
                         CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' : 'wait';
 
-  // Pokud má CN a není HOTOVO, zobrazit CN stav
-  if (maCN && aktualniHodnota !== 'done' && cnStav) {
+  // Odložená má přednost před CN stavy (ale ne před HOTOVO)
+  if ((CURRENT_RECORD.je_odlozena == 1 || CURRENT_RECORD.je_odlozena === true) && aktualniHodnota !== 'done') {
+    aktualniHodnota = 'odlozena';
+  } else if (maCN && aktualniHodnota !== 'done' && cnStav) {
+    // Pokud má CN a není HOTOVO, zobrazit CN stav
     if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
     else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
     else aktualniHodnota = 'cn_poslana';
@@ -903,6 +906,7 @@ function createCustomerHeader() {
         <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
         <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
         <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
+        <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
       </optgroup>
       <optgroup label="CN workflow">
         <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
@@ -1000,7 +1004,6 @@ async function showDetail(recordOrId) {
         ${technickaFunkce}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        ${CURRENT_USER && CURRENT_USER.is_admin ? `<button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: ${record.je_odlozena ? '#9c27b0' : '#555'}; color: white;" data-action="prepnoutOdlozeni" data-id="${record.id}" data-odlozena="${record.je_odlozena ? '1' : '0'}">${record.je_odlozena ? 'Zrušit odložení' : 'Odložit'}</button>` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
@@ -4314,6 +4317,7 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
     'wait': 'NOVÁ',
     'open': 'DOMLUVENÁ',
     'done': 'HOTOVO',
+    'odlozena': 'Odložená',
     'cn_poslana': 'Poslána CN',
     'cn_odsouhlasena': 'Odsouhlasena',
     'cn_cekame_nd': 'Čekáme ND'
@@ -4322,11 +4326,49 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
   // Rozpoznat CN stavy
   const jeCnStav = novyStav.startsWith('cn_');
 
-  try {
-    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
+  const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                    document.querySelector('meta[name="csrf-token"]')?.content;
 
-    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
-                      document.querySelector('meta[name="csrf-token"]')?.content;
+  // Pomocná funkce pro volání odloz API
+  const volajOdlozApi = async (hodnota) => {
+    const params = new URLSearchParams();
+    params.append('reklamace_id', reklamaceId);
+    params.append('hodnota', hodnota);
+    params.append('csrf_token', csrfToken);
+    const resp = await fetch('/api/odloz_reklamaci.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+    return resp.json();
+  };
+
+  try {
+    // Speciální případ: výběr "Odložená"
+    if (novyStav === 'odlozena') {
+      const d = await volajOdlozApi(1);
+      if (d.status === 'success') {
+        if (CURRENT_RECORD) CURRENT_RECORD.je_odlozena = 1;
+        const zaz = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+        if (zaz) zaz.je_odlozena = 1;
+        if (window.WGSToast) WGSToast.zobrazit('Reklamace odložena');
+        await loadAll();
+        showDetail(reklamaceId);
+      } else {
+        wgsToast.error(d.message || 'Chyba při odložení');
+      }
+      return;
+    }
+
+    // Pokud se přechází Z odložené, nejdřív zrušit příznak
+    if (CURRENT_RECORD && (CURRENT_RECORD.je_odlozena == 1 || CURRENT_RECORD.je_odlozena === true)) {
+      await volajOdlozApi(0);
+      if (CURRENT_RECORD) CURRENT_RECORD.je_odlozena = 0;
+      const zaz = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+      if (zaz) zaz.je_odlozena = 0;
+    }
+
+    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
 
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
