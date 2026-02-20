@@ -987,6 +987,7 @@ async function showDetail(recordOrId) {
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn" style="background: ${record.je_odlozena ? '#9c27b0' : '#555'}; color: #fff; border: none;" data-action="prepnoutOdlozeni" data-id="${record.id}" data-odlozena="${record.je_odlozena ? '1' : '0'}">${record.je_odlozena ? 'Zrušit odložení' : 'Odložit'}</button>
       </div>
     `;
   } else {
@@ -1012,6 +1013,7 @@ async function showDetail(recordOrId) {
         ${technickaFunkce}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: ${record.je_odlozena ? '#9c27b0' : '#555'}; color: white;" data-action="prepnoutOdlozeni" data-id="${record.id}" data-odlozena="${record.je_odlozena ? '1' : '0'}">${record.je_odlozena ? 'Zrušit odložení' : 'Odložit'}</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;

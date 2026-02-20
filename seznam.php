@@ -2379,6 +2379,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'prepnoutOdlozeni':
+        if (id) {
+          const aktualniHodnota = parseInt(button.getAttribute('data-odlozena') || '0');
+          const novaHodnota = aktualniHodnota ? 0 : 1;
+          prepnoutOdlozeni(id, novaHodnota);
+        }
+        break;
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }
@@ -2490,6 +2498,43 @@ async function smazatPoznamkuOkamzite(noteId, orderId, btn) {
   }
 }
 console.log('[INLINE] potvrditSmazaniPoznamky - verze 20251203-04 (dva-klikove potvrzeni)');
+
+// Přepnutí odložení reklamace
+async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const params = new URLSearchParams();
+    params.append('reklamace_id', reklamaceId);
+    params.append('hodnota', novaHodnota);
+    params.append('csrf_token', csrfToken);
+
+    const response = await fetch('/api/odloz_reklamaci.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      if (window.WGSToast) WGSToast.zobrazit(data.message || 'Uloženo');
+
+      // Aktualizovat cache a překreslit detail
+      if (window.WGS_DATA_CACHE && Array.isArray(window.WGS_DATA_CACHE)) {
+        const zaznam = window.WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+        if (zaznam) zaznam.je_odlozena = novaHodnota;
+      }
+      if (typeof loadAll === 'function') await loadAll();
+      if (typeof showDetail === 'function') showDetail(reklamaceId);
+    } else {
+      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit'));
+    }
+  } catch (chyba) {
+    console.error('[prepnoutOdlozeni] Chyba:', chyba);
+    alert('Chyba při komunikaci se serverem');
+  }
+}
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
