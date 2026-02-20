@@ -493,6 +493,59 @@ async function loadAll(status = 'all', append = false) {
 }
 
 // === VYKRESLENÍ OBJEDNÁVEK ===
+// Prioritní číslo záznamu pro řazení
+function prioritaZaznamu(r) {
+  const stav = r.stav || 'wait';
+  const email = (r.email || '').toLowerCase().trim();
+  const jeOdlozena = r.je_odlozena == 1 || r.je_odlozena === true;
+  const isDone = stav === 'HOTOVO' || stav === 'done';
+  const isWait = stav === 'ČEKÁ' || stav === 'wait';
+  const isOpen = stav === 'DOMLUVENÁ' || stav === 'open';
+  const maCN = email && EMAILS_S_CN && EMAILS_S_CN.includes(email);
+  const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
+
+  if (isDone) return 6;                              // HOTOVO
+  if (jeOdlozena) return 3;                          // ODLOŽENÁ
+  if (isOpen) return 2;                              // DOMLUVENÁ
+  if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
+  if (maCN && cnStav === 'potvrzena') return 4;      // CN odsouhlasena
+  return 5;                                          // CN poslána / Čekáme ND
+}
+
+// Pomocná funkce pro parse termínu na timestamp
+function parseTermin(r) {
+  if (!r.termin) return Infinity;
+  const parts = r.termin.split('.');
+  if (parts.length === 3) {
+    const dateStr = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}T${r.cas_navstevy || '00:00:00'}`;
+    const ts = new Date(dateStr).getTime();
+    return isNaN(ts) ? Infinity : ts;
+  }
+  return Infinity;
+}
+
+// Seřadit záznamy dle definované priority
+function seraditZaznamy(zaznamy) {
+  return [...zaznamy].sort((a, b) => {
+    const pa = prioritaZaznamu(a);
+    const pb = prioritaZaznamu(b);
+    if (pa !== pb) return pa - pb;
+
+    // V rámci stejné skupiny: subsort
+    if (pa === 1) {
+      // NOVÁ: nejnovější zadaný první (created_at DESC)
+      const ta = new Date(a.created_at || 0).getTime();
+      const tb = new Date(b.created_at || 0).getTime();
+      return tb - ta;
+    }
+    if (pa === 2) {
+      // DOMLUVENÁ: nejbližší termín a čas první (ASC)
+      return parseTermin(a) - parseTermin(b);
+    }
+    return 0;
+  });
+}
+
 async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
@@ -548,6 +601,9 @@ async function renderOrders(items = null) {
       return false;
     });
   }
+
+  // Client-side řazení: doladí pořadí s CN podskupinami (CN data jsou k dispozici až po načtení)
+  filtered = seraditZaznamy(filtered);
 
   const totalBeforeSearch = filtered.length;
   if (SEARCH_QUERY) {
