@@ -15,9 +15,9 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     sendJsonError('Neplatný CSRF token', 403);
 }
 
-// Kontrola přihlášení
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['is_admin'])) {
-    sendJsonError('Uživatel není přihlášen', 401);
+// Pouze admin může odložit
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    sendJsonError('Přístup odepřen – pouze administrátor', 403);
 }
 
 // Validace vstupních dat
@@ -39,10 +39,14 @@ try {
         sendJsonError('Reklamace nenalezena', 404);
     }
 
+    // Zjistit sloupce tabulky (updated_at nemusí existovat)
+    $sloupce = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'updated_at'")->fetch();
+    $updatedAtSql = $sloupce ? ', updated_at = NOW()' : '';
+
     // Aktualizovat příznak odložení
     $stmt = $pdo->prepare("
         UPDATE wgs_reklamace
-        SET je_odlozena = :hodnota, updated_at = NOW()
+        SET je_odlozena = :hodnota{$updatedAtSql}
         WHERE id = :id
     ");
     $stmt->execute([

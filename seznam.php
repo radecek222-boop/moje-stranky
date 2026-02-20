@@ -2480,7 +2480,15 @@ console.log('[INLINE] potvrditSmazaniPoznamky - verze 20251203-04 (dva-klikove p
 // Přepnutí odložení reklamace
 async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
   try {
-    const csrfToken = await getCSRFToken();
+    // CSRF token přímo z DOM - spolehlivé, bez závislosti na defer skriptech
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                   || document.querySelector('input[name="csrf_token"]')?.value
+                   || '';
+
+    if (!csrfToken) {
+      alert('Chyba: CSRF token nenalezen, obnovte stránku');
+      return;
+    }
 
     const params = new URLSearchParams();
     params.append('reklamace_id', reklamaceId);
@@ -2497,12 +2505,7 @@ async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
 
     if (data.status === 'success') {
       if (window.WGSToast) WGSToast.zobrazit(data.message || 'Uloženo');
-
-      // Aktualizovat cache a překreslit detail
-      if (window.WGS_DATA_CACHE && Array.isArray(window.WGS_DATA_CACHE)) {
-        const zaznam = window.WGS_DATA_CACHE.find(r => r.id == reklamaceId);
-        if (zaznam) zaznam.je_odlozena = novaHodnota;
-      }
+      // Obnovit seznam a znovu otevřít detail s aktuálními daty
       if (typeof loadAll === 'function') await loadAll();
       if (typeof showDetail === 'function') showDetail(reklamaceId);
     } else {
