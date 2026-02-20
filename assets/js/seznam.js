@@ -602,9 +602,6 @@ async function renderOrders(items = null) {
     });
   }
 
-  // Client-side řazení: doladí pořadí s CN podskupinami (CN data jsou k dispozici až po načtení)
-  filtered = seraditZaznamy(filtered);
-
   const totalBeforeSearch = filtered.length;
   if (SEARCH_QUERY) {
     filtered = filtered.filter(r => matchesSearch(r, SEARCH_QUERY));
@@ -695,10 +692,8 @@ async function renderOrders(items = null) {
     countWaitEl.textContent = `(${countWait})`;
   }
 
-  // ŘAZENÍ: Nechat backendové řazení (load.php)
-  // Backend řadí chronologicky podle termínu (ASC) pro všechny karty
-  // Frontend už NEŘADÍ - používá pořadí z backendu
-  // (Komentář: Původní složité frontendové řazení bylo odstraněno)
+  // Seřadit až TEĎ — EMAILS_S_CN a STAVY_NABIDEK jsou již načteny výše
+  filtered = seraditZaznamy(filtered);
 
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
