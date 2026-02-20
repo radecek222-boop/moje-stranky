@@ -1176,7 +1176,6 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-wait,
 .filter-btn-open,
 .filter-btn-done,
-.filter-btn-cn,
 .filter-btn-poz,
 .filter-btn-odlozene {
   background: #ccc !important;
@@ -1188,7 +1187,6 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-wait:hover,
 .filter-btn-open:hover,
 .filter-btn-done:hover,
-.filter-btn-cn:hover,
 .filter-btn-poz:hover,
 .filter-btn-odlozene:hover {
   background: #bbb !important;
@@ -1233,27 +1231,15 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #000 !important;
 }
 
-/* Filtr CN - AKTIVNÍ oranžová */
-.filter-btn-cn.active {
+/* Filtr POZ (CN + mimozáruční) - AKTIVNÍ oranžová */
+.filter-btn-poz.active {
   background: #ff9800 !important;
   color: #000 !important;
   border: 3px solid #000 !important;
   font-weight: 700 !important;
 }
-.filter-btn-cn.active:hover {
-  background: #f57c00 !important;
-  border-color: #000 !important;
-}
-
-/* Filtr POZ (mimozáruční) - AKTIVNÍ modrá */
-.filter-btn-poz.active {
-  background: #0099ff !important;
-  color: #fff !important;
-  border: 3px solid #000 !important;
-  font-weight: 700 !important;
-}
 .filter-btn-poz.active:hover {
-  background: #0077cc !important;
+  background: #f57c00 !important;
   border-color: #000 !important;
 }
 
@@ -2016,15 +2002,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn filter-btn-done" data-filter="done" data-lang-cs="HOTOVO" data-lang-en="Completed" data-lang-it="Completato">
       HOTOVO <span id="count-done" style="opacity: 0.7;"></span>
     </button>
-    <?php
-    $userRole = strtolower($_SESSION['role'] ?? '');
-    $canSeeCN = $isAdmin || $userRole === 'technik' || $userRole === 'technician';
-    if ($canSeeCN): ?>
-    <button class="filter-btn filter-btn-cn" data-filter="cn" data-lang-cs="Cenové nabídky" data-lang-en="Price Quotes" data-lang-it="Preventivi">
-      CN <span id="count-cn" style="opacity: 0.7;"></span>
-    </button>
-    <?php endif; ?>
-    <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="Mimozáruční" data-lang-en="Out of Warranty" data-lang-it="Fuori Garanzia">
+    <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="POZ" data-lang-en="POZ" data-lang-it="POZ">
       POZ <span id="count-poz" style="opacity: 0.7;"></span>
     </button>
     <button class="filter-btn filter-btn-odlozene" data-filter="odlozene" data-lang-cs="Odložené" data-lang-en="Postponed" data-lang-it="Rimandati">
