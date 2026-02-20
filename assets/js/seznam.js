@@ -493,6 +493,59 @@ async function loadAll(status = 'all', append = false) {
 }
 
 // === VYKRESLENÍ OBJEDNÁVEK ===
+// Prioritní číslo záznamu pro řazení
+function prioritaZaznamu(r) {
+  const stav = r.stav || 'wait';
+  const email = (r.email || '').toLowerCase().trim();
+  const jeOdlozena = r.je_odlozena == 1 || r.je_odlozena === true;
+  const isDone = stav === 'HOTOVO' || stav === 'done';
+  const isWait = stav === 'ČEKÁ' || stav === 'wait';
+  const isOpen = stav === 'DOMLUVENÁ' || stav === 'open';
+  const maCN = email && EMAILS_S_CN && EMAILS_S_CN.includes(email);
+  const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
+
+  if (isDone) return 6;                              // HOTOVO
+  if (jeOdlozena) return 3;                          // ODLOŽENÁ
+  if (isOpen) return 2;                              // DOMLUVENÁ
+  if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
+  if (maCN && cnStav === 'potvrzena') return 4;      // CN odsouhlasena
+  return 5;                                          // CN poslána / Čekáme ND
+}
+
+// Pomocná funkce pro parse termínu na timestamp
+function parseTermin(r) {
+  if (!r.termin) return Infinity;
+  const parts = r.termin.split('.');
+  if (parts.length === 3) {
+    const dateStr = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}T${r.cas_navstevy || '00:00:00'}`;
+    const ts = new Date(dateStr).getTime();
+    return isNaN(ts) ? Infinity : ts;
+  }
+  return Infinity;
+}
+
+// Seřadit záznamy dle definované priority
+function seraditZaznamy(zaznamy) {
+  return [...zaznamy].sort((a, b) => {
+    const pa = prioritaZaznamu(a);
+    const pb = prioritaZaznamu(b);
+    if (pa !== pb) return pa - pb;
+
+    // V rámci stejné skupiny: subsort
+    if (pa === 1) {
+      // NOVÁ: nejnovější zadaný první (created_at DESC)
+      const ta = new Date(a.created_at || 0).getTime();
+      const tb = new Date(b.created_at || 0).getTime();
+      return tb - ta;
+    }
+    if (pa === 2) {
+      // DOMLUVENÁ: nejbližší termín a čas první (ASC)
+      return parseTermin(a) - parseTermin(b);
+    }
+    return 0;
+  });
+}
+
 async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
@@ -531,15 +584,16 @@ async function renderOrders(items = null) {
           if (stav === 'HOTOVO' || stav === 'done') return true;
         }
 
-        if (filterType === 'cn') {
-          // CN: má odeslanou cenovou nabídku A NENÍ hotovo
+        if (filterType === 'poz') {
+          // POZ: mimozáruční oprava (created_by je prázdné) NEBO zákazník s CN
+          if (!createdBy) return true;
           const isDone = stav === 'HOTOVO' || stav === 'done';
           if (email && EMAILS_S_CN.includes(email) && !isDone) return true;
         }
 
-        if (filterType === 'poz') {
-          // POZ: mimozáruční oprava (created_by je prázdné)
-          if (!createdBy) return true;
+        if (filterType === 'odlozene') {
+          // ODLOŽENÉ: reklamace označena jako odložená (je_odlozena === 1)
+          if (r.je_odlozena == 1 || r.je_odlozena === true) return true;
         }
       }
 
@@ -603,26 +657,25 @@ async function renderOrders(items = null) {
     logger.warn('Nepodařilo se načíst emaily s CN:', e);
   }
 
-  // Aktualizovat počet CN (pouze zákazníci s CN, kteří NEJSOU hotovo)
-  const countCnEl = document.getElementById('count-cn');
-  if (countCnEl) {
-    const countCn = items.filter(r => {
+  // Aktualizovat počet POZ (mimozáruční opravy + zákazníci s CN)
+  const countPozEl = document.getElementById('count-poz');
+  if (countPozEl) {
+    const countPoz = items.filter(r => {
+      const createdBy = (r.created_by || '').trim();
+      if (!createdBy) return true;
       const email = (r.email || '').toLowerCase().trim();
       const stav = r.stav || 'wait';
       const isDone = stav === 'HOTOVO' || stav === 'done';
       return email && EMAILS_S_CN.includes(email) && !isDone;
     }).length;
-    countCnEl.textContent = `(${countCn})`;
+    countPozEl.textContent = `(${countPoz})`;
   }
 
-  // Aktualizovat počet POZ (mimozáruční opravy)
-  const countPozEl = document.getElementById('count-poz');
-  if (countPozEl) {
-    const countPoz = items.filter(r => {
-      const createdBy = (r.created_by || '').trim();
-      return !createdBy; // Prázdné created_by = mimozáruční oprava
-    }).length;
-    countPozEl.textContent = `(${countPoz})`;
+  // Aktualizovat počet ODLOŽENÝCH
+  const countOdlozeneEl = document.getElementById('count-odlozene');
+  if (countOdlozeneEl) {
+    const countOdlozene = items.filter(r => r.je_odlozena == 1 || r.je_odlozena === true).length;
+    countOdlozeneEl.textContent = `(${countOdlozene})`;
   }
 
   // Aktualizovat počet ČEKAJÍCÍ (vyloučit zakázky s CN)
@@ -639,10 +692,8 @@ async function renderOrders(items = null) {
     countWaitEl.textContent = `(${countWait})`;
   }
 
-  // ŘAZENÍ: Nechat backendové řazení (load.php)
-  // Backend řadí chronologicky podle termínu (ASC) pro všechny karty
-  // Frontend už NEŘADÍ - používá pořadí z backendu
-  // (Komentář: Původní složité frontendové řazení bylo odstraněno)
+  // Seřadit až TEĎ — EMAILS_S_CN a STAVY_NABIDEK jsou již načteny výše
+  filtered = seraditZaznamy(filtered);
 
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
@@ -685,8 +736,10 @@ async function renderOrders(items = null) {
     const highlightedOrderId = SEARCH_QUERY ? highlightText(orderId, SEARCH_QUERY) : orderId;
 
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
-    // Přidat barevný nádech podle stavu
-    const statusBgClass = `status-bg-${status.class}`;
+    // Přidat barevný nádech podle stavu (odložené mají fialový rámeček)
+    const statusBgClass = (rec.je_odlozena == 1 || rec.je_odlozena === true)
+      ? 'status-bg-odlozena'
+      : `status-bg-${status.class}`;
     // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
     // Zelený rámeček pro odsouhlasené nabídky
     // Šedý rámeček pro "Čekáme ND"
@@ -890,8 +943,11 @@ function createCustomerHeader() {
                         CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
                         CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' : 'wait';
 
-  // Pokud má CN a není HOTOVO, zobrazit CN stav
-  if (maCN && aktualniHodnota !== 'done' && cnStav) {
+  // Odložená má přednost před CN stavy (ale ne před HOTOVO)
+  if ((CURRENT_RECORD.je_odlozena == 1 || CURRENT_RECORD.je_odlozena === true) && aktualniHodnota !== 'done') {
+    aktualniHodnota = 'odlozena';
+  } else if (maCN && aktualniHodnota !== 'done' && cnStav) {
+    // Pokud má CN a není HOTOVO, zobrazit CN stav
     if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
     else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
     else aktualniHodnota = 'cn_poslana';
@@ -903,6 +959,7 @@ function createCustomerHeader() {
         <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
         <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
         <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
+        <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
       </optgroup>
       <optgroup label="CN workflow">
         <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
@@ -4313,6 +4370,7 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
     'wait': 'NOVÁ',
     'open': 'DOMLUVENÁ',
     'done': 'HOTOVO',
+    'odlozena': 'Odložená',
     'cn_poslana': 'Poslána CN',
     'cn_odsouhlasena': 'Odsouhlasena',
     'cn_cekame_nd': 'Čekáme ND'
@@ -4321,11 +4379,49 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
   // Rozpoznat CN stavy
   const jeCnStav = novyStav.startsWith('cn_');
 
-  try {
-    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
+  const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                    document.querySelector('meta[name="csrf-token"]')?.content;
 
-    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
-                      document.querySelector('meta[name="csrf-token"]')?.content;
+  // Pomocná funkce pro volání odloz API
+  const volajOdlozApi = async (hodnota) => {
+    const params = new URLSearchParams();
+    params.append('reklamace_id', reklamaceId);
+    params.append('hodnota', hodnota);
+    params.append('csrf_token', csrfToken);
+    const resp = await fetch('/api/odloz_reklamaci.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+    return resp.json();
+  };
+
+  try {
+    // Speciální případ: výběr "Odložená"
+    if (novyStav === 'odlozena') {
+      const d = await volajOdlozApi(1);
+      if (d.status === 'success') {
+        if (CURRENT_RECORD) CURRENT_RECORD.je_odlozena = 1;
+        const zaz = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+        if (zaz) zaz.je_odlozena = 1;
+        if (window.WGSToast) WGSToast.zobrazit('Reklamace odložena');
+        await loadAll();
+        showDetail(reklamaceId);
+      } else {
+        wgsToast.error(d.message || 'Chyba při odložení');
+      }
+      return;
+    }
+
+    // Pokud se přechází Z odložené, nejdřív zrušit příznak
+    if (CURRENT_RECORD && (CURRENT_RECORD.je_odlozena == 1 || CURRENT_RECORD.je_odlozena === true)) {
+      await volajOdlozApi(0);
+      if (CURRENT_RECORD) CURRENT_RECORD.je_odlozena = 0;
+      const zaz = WGS_DATA_CACHE.find(r => r.id == reklamaceId);
+      if (zaz) zaz.je_odlozena = 0;
+    }
+
+    logger.log(`[Admin] Měním stav zakázky ${reklamaceId} na ${novyStav}` + (jeCnStav ? ` (CN workflow)` : ''));
 
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);

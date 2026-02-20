@@ -184,17 +184,22 @@ try {
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
         $whereClause
         ORDER BY
-            -- Priorita podle stavu/typu (1=žluté, 2=modré, 3=POZ, 5=zelené)
+            -- Priorita skupin:
+            -- 1 = NOVÁ (wait, neodložená)
+            -- 2 = DOMLUVENÁ (open, neodložená)
+            -- 3 = ODLOŽENÁ (je_odlozena=1, ne hotovo)
+            -- 4 = CN workflow (client-side doladí odsouhlasena vs. poslána CN)
+            -- 5 = HOTOVO
             CASE
-                WHEN r.stav = 'wait' THEN 1
-                WHEN r.stav = 'open' THEN 2
-                WHEN r.created_by IS NULL OR r.created_by = '' THEN 3
+                WHEN COALESCE(r.je_odlozena, 0) = 0 AND r.stav = 'wait' THEN 1
+                WHEN COALESCE(r.je_odlozena, 0) = 0 AND r.stav = 'open' THEN 2
+                WHEN COALESCE(r.je_odlozena, 0) = 1 AND r.stav != 'done' THEN 3
                 WHEN r.stav = 'done' THEN 5
-                ELSE 6
+                ELSE 4
             END ASC,
-            -- Pro DOMLUVENÁ a POZ: řadit podle termínu (nejbližší první)
+            -- DOMLUVENÁ: nejbližší termín a čas první
             CASE
-                WHEN r.stav = 'open' OR (r.created_by IS NULL OR r.created_by = '') THEN
+                WHEN COALESCE(r.je_odlozena, 0) = 0 AND r.stav = 'open' THEN
                     CASE
                         WHEN r.termin IS NULL THEN '9999-12-31 23:59:59'
                         ELSE CONCAT(
@@ -205,13 +210,13 @@ try {
                     END
                 ELSE NULL
             END ASC,
-            -- Pro HOTOVO (done): řadit podle data dokončení (nejnovější první)
+            -- HOTOVO: nejnovější dokončení první
             CASE
                 WHEN r.stav = 'done' THEN
                     COALESCE(r.datum_dokonceni, r.updated_at, r.created_at)
                 ELSE NULL
             END DESC,
-            -- Pro ČEKÁ: řadit podle data vytvoření (nejnovější první)
+            -- NOVÁ: nejnovější zadaný první
             r.created_at DESC
         LIMIT :limit OFFSET :offset
     ";

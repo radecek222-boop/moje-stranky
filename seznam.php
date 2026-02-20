@@ -1101,6 +1101,16 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   background: rgba(76, 175, 80, 0.12) !important;
 }
 
+/* Fialová nádech - ODLOŽENÁ */
+.order-box.status-bg-odlozena {
+  background: rgba(156, 39, 176, 0.08) !important;
+  border-color: #9c27b0 !important;
+}
+
+.order-box.status-bg-odlozena:hover {
+  background: rgba(156, 39, 176, 0.14) !important;
+}
+
 /* ============================================
    ORANŽOVÝ RÁMEČEK - Zákazníci s cenovou nabídkou (CN)
    Toto je PÁTÁ schválená barevná výjimka v projektu.
@@ -1176,8 +1186,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-wait,
 .filter-btn-open,
 .filter-btn-done,
-.filter-btn-cn,
-.filter-btn-poz {
+.filter-btn-poz,
+.filter-btn-odlozene {
   background: #ccc !important;
   color: #000 !important;
   border: 2px solid #999 !important;
@@ -1187,8 +1197,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-wait:hover,
 .filter-btn-open:hover,
 .filter-btn-done:hover,
-.filter-btn-cn:hover,
-.filter-btn-poz:hover {
+.filter-btn-poz:hover,
+.filter-btn-odlozene:hover {
   background: #bbb !important;
   border-color: #888 !important;
 }
@@ -1231,28 +1241,46 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #000 !important;
 }
 
-/* Filtr CN - AKTIVNÍ oranžová */
-.filter-btn-cn.active {
+/* Filtr POZ (CN + mimozáruční) - AKTIVNÍ oranžová */
+.filter-btn-poz.active {
   background: #ff9800 !important;
   color: #000 !important;
   border: 3px solid #000 !important;
   font-weight: 700 !important;
 }
-.filter-btn-cn.active:hover {
+.filter-btn-poz.active:hover {
   background: #f57c00 !important;
   border-color: #000 !important;
 }
 
-/* Filtr POZ (mimozáruční) - AKTIVNÍ modrá */
-.filter-btn-poz.active {
-  background: #0099ff !important;
+/* Filtr ODLOŽENÉ - AKTIVNÍ fialová */
+.filter-btn-odlozene.active {
+  background: #9c27b0 !important;
   color: #fff !important;
   border: 3px solid #000 !important;
   font-weight: 700 !important;
 }
-.filter-btn-poz.active:hover {
-  background: #0077cc !important;
+.filter-btn-odlozene.active:hover {
+  background: #7b1fa2 !important;
   border-color: #000 !important;
+}
+
+/* DESKTOP OPTIMALIZACE FILTER TLAČÍTEK - všechna vedle sebe */
+@media (min-width: 769px) {
+  .filter-bar {
+    flex-wrap: nowrap !important;
+    gap: 0.3rem !important;
+    margin-bottom: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  .filter-btn {
+    min-width: auto !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    flex: 1 1 0 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.03em !important;
+  }
 }
 
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
@@ -1984,16 +2012,11 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn filter-btn-done" data-filter="done" data-lang-cs="HOTOVO" data-lang-en="Completed" data-lang-it="Completato">
       HOTOVO <span id="count-done" style="opacity: 0.7;"></span>
     </button>
-    <?php
-    $userRole = strtolower($_SESSION['role'] ?? '');
-    $canSeeCN = $isAdmin || $userRole === 'technik' || $userRole === 'technician';
-    if ($canSeeCN): ?>
-    <button class="filter-btn filter-btn-cn" data-filter="cn" data-lang-cs="Cenové nabídky" data-lang-en="Price Quotes" data-lang-it="Preventivi">
-      CN <span id="count-cn" style="opacity: 0.7;"></span>
-    </button>
-    <?php endif; ?>
-    <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="Mimozáruční" data-lang-en="Out of Warranty" data-lang-it="Fuori Garanzia">
+    <button class="filter-btn filter-btn-poz" data-filter="poz" data-lang-cs="POZ" data-lang-en="POZ" data-lang-it="POZ">
       POZ <span id="count-poz" style="opacity: 0.7;"></span>
+    </button>
+    <button class="filter-btn filter-btn-odlozene" data-filter="odlozene" data-lang-cs="Odložené" data-lang-en="Postponed" data-lang-it="Rimandati">
+      ODLOŽENÉ <span id="count-odlozene" style="opacity: 0.7;"></span>
     </button>
   </div>
 
@@ -2344,6 +2367,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'prepnoutOdlozeni':
+        if (id) {
+          const aktualniHodnota = parseInt(button.getAttribute('data-odlozena') || '0');
+          const novaHodnota = aktualniHodnota ? 0 : 1;
+          prepnoutOdlozeni(id, novaHodnota);
+        }
+        break;
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }
@@ -2455,6 +2486,46 @@ async function smazatPoznamkuOkamzite(noteId, orderId, btn) {
   }
 }
 console.log('[INLINE] potvrditSmazaniPoznamky - verze 20251203-04 (dva-klikove potvrzeni)');
+
+// Přepnutí odložení reklamace
+async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
+  try {
+    // CSRF token přímo z DOM - spolehlivé, bez závislosti na defer skriptech
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                   || document.querySelector('input[name="csrf_token"]')?.value
+                   || '';
+
+    if (!csrfToken) {
+      alert('Chyba: CSRF token nenalezen, obnovte stránku');
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('reklamace_id', reklamaceId);
+    params.append('hodnota', novaHodnota);
+    params.append('csrf_token', csrfToken);
+
+    const response = await fetch('/api/odloz_reklamaci.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      if (window.WGSToast) WGSToast.zobrazit(data.message || 'Uloženo');
+      // Obnovit seznam a znovu otevřít detail s aktuálními daty
+      if (typeof loadAll === 'function') await loadAll();
+      if (typeof showDetail === 'function') showDetail(reklamaceId);
+    } else {
+      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit'));
+    }
+  } catch (chyba) {
+    console.error('[prepnoutOdlozeni] Chyba:', chyba);
+    alert('Chyba při komunikaci se serverem');
+  }
+}
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
