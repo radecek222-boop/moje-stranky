@@ -561,7 +561,8 @@ function getDetailZakazky($pdo) {
             r.model,
             r.assigned_to,
             r.created_by,
-            r.fakturace_firma as faktura_zeme
+            r.fakturace_firma as faktura_zeme,
+            CAST(COALESCE(r.cena_celkem, 0) AS DECIMAL(10,2)) as cena_celkem
         FROM wgs_reklamace r
         WHERE r.id = :id
     ");
@@ -636,9 +637,15 @@ function upravitZakazku($pdo) {
     $assignedTo = $_POST['assigned_to'] ?? null;
     $createdBy = $_POST['created_by'] ?? null;
     $fakturaZeme = $_POST['faktura_zeme'] ?? 'CZ';
+    $cenaCelkem = isset($_POST['cena_celkem']) && $_POST['cena_celkem'] !== '' ? floatval($_POST['cena_celkem']) : null;
 
     if (empty($id)) {
         echo json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']);
+        return;
+    }
+
+    if ($cenaCelkem !== null && $cenaCelkem < 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Cena nemůže být záporná']);
         return;
     }
 
@@ -657,6 +664,7 @@ function upravitZakazku($pdo) {
                     dokonceno_kym = :dokonceno_kym,
                     created_by = :created_by,
                     fakturace_firma = :faktura_zeme,
+                    cena_celkem = :cena_celkem,
                     updated_at = NOW()
                 WHERE id = :id
             ");
@@ -666,6 +674,7 @@ function upravitZakazku($pdo) {
                 'dokonceno_kym' => $assignedTo ?: null,
                 'created_by' => $createdBy ?: null,
                 'faktura_zeme' => $fakturaZeme,
+                'cena_celkem' => $cenaCelkem,
                 'id' => $id
             ]);
         } else {
@@ -675,6 +684,7 @@ function upravitZakazku($pdo) {
                     assigned_to = :assigned_to,
                     created_by = :created_by,
                     fakturace_firma = :faktura_zeme,
+                    cena_celkem = :cena_celkem,
                     updated_at = NOW()
                 WHERE id = :id
             ");
@@ -683,6 +693,7 @@ function upravitZakazku($pdo) {
                 'assigned_to' => $assignedTo ?: null,
                 'created_by' => $createdBy ?: null,
                 'faktura_zeme' => $fakturaZeme,
+                'cena_celkem' => $cenaCelkem,
                 'id' => $id
             ]);
         }

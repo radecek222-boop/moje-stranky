@@ -927,6 +927,13 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
                             </select>
                         </div>
 
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Cena celkem (€):</label>
+                            <input type="number" id="edit-cena-celkem" name="cena_celkem" min="0" step="0.01"
+                                value="${parseFloat(zakazka.cena_celkem || 0).toFixed(2)}"
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                        </div>
+
                         <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
                             <button type="button" id="cancel-edit-zakazka" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">
                                 Zrušit
@@ -958,6 +965,7 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
             const technikId = document.getElementById('edit-technik').value;
             const prodejceId = document.getElementById('edit-prodejce').value;
             const zeme = document.getElementById('edit-zeme').value;
+            const cenaCelkem = document.getElementById('edit-cena-celkem').value;
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -968,6 +976,7 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
                 formData.append('assigned_to', technikId);
                 formData.append('created_by', prodejceId);
                 formData.append('faktura_zeme', zeme);
+                formData.append('cena_celkem', cenaCelkem);
                 formData.append('csrf_token', csrfToken);
 
                 const response = await fetch('/api/statistiky_api.php', {
