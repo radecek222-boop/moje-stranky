@@ -8,6 +8,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/email_template_base.php';
 
 header('Content-Type: application/json');
 // PERFORMANCE: Cache-Control header (10 minut)
@@ -900,15 +901,12 @@ function sendEmailToCustomer($data) {
             $message = str_replace('{{video_section}}', '', $message);
         }
 
-        // Pokud šablona nemá HTML strukturu, zabalit
+        // Pokud šablona nemá HTML strukturu, zabalit do grafické šablony WGS
         if (strpos($message, '<html') === false && strpos($message, '<body') === false) {
-            $message = "<!DOCTYPE html>
-<html lang='cs'>
-<head><meta charset='UTF-8'></head>
-<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
-{$message}
-</body>
-</html>";
+            $message = renderujGrafickyEmail([
+                'nadpis' => 'Servisní protokol',
+                'obsah' => $message,
+            ]);
         }
 
         // Odstranit duplicity
@@ -943,33 +941,21 @@ function sendEmailToCustomer($data) {
 ";
         }
 
-        $message = "
-<!DOCTYPE html>
-<html lang='cs'>
-<head>
-    <meta charset='UTF-8'>
-</head>
-<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
-    <p>Dobrý den {$customerName},</p>
-
-    <p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$cisloReklamace}</strong>.</p>
-
-    <p><strong>V příloze naleznete:</strong></p>
-    <ul>
-        <li>Servisní protokol s fotodokumentací (PDF)</li>
-    </ul>
-    {$videoSection}
-    <p>V případě dotazů nás prosím kontaktujte.</p>
-
-    <p style='margin-top: 30px;'>
-        S pozdravem,<br>
-        <strong>White Glove Service</strong><br>
-        <a href='mailto:reklamace@wgs-service.cz' style='color: #333;'>reklamace@wgs-service.cz</a><br>
-        +420 725 965 826
-    </p>
-</body>
-</html>
+        $obsahEmail = "
+<p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$cisloReklamace}</strong>.</p>
+<p><strong>V příloze naleznete:</strong></p>
+<ul style='margin: 0 0 15px 0; padding-left: 20px;'>
+    <li>Servisní protokol s fotodokumentací (PDF)</li>
+</ul>
+{$videoSection}
+<p>V případě dotazů nás prosím kontaktujte.</p>
 ";
+        $message = renderujGrafickyEmail([
+            'nadpis'   => 'Servisní protokol',
+            'osloveni' => "Dobrý den <strong>{$customerName}</strong>,",
+            'obsah'    => $obsahEmail,
+            'infobox'  => 'Reklamace č. ' . $cisloReklamace . ' | White Glove Service',
+        ]);
     }
 
     // Textová verze pro klienty bez HTML (vždy generovat)
