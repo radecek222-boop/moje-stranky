@@ -323,6 +323,7 @@ body {
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.05em;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -332,6 +333,7 @@ body {
 }
 .order-notes-badge.has-unread {
   background: var(--c-error);
+  color: #fff;
   animation: notes-pulse 2s ease-in-out infinite;
 }
 @keyframes notes-pulse {
