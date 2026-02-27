@@ -719,6 +719,7 @@ try {
 
             if ($notifSablona && !empty($email)) {
                 require_once __DIR__ . '/../../includes/EmailQueue.php';
+                require_once __DIR__ . '/../../includes/email_template_base.php';
 
                 // Pripravit data pro sablonu
                 $createdBy = $_SESSION['user_name'] ?? 'Online formulář';
@@ -727,49 +728,36 @@ try {
                 // Příklad: cislo = "MO17-00001653-05/CZ880-2025" vs reklamace_id = "WGS/2026/15-01/00001"
                 $orderNumber = $cislo ?: $identifierForClient;
 
-                $notifSubject = str_replace([
-                    '{{customer_name}}',
-                    '{{order_id}}',
-                    '{{product}}',
-                    '{{date}}',
-                    '{{created_at}}',
-                    '{{created_by}}'
-                ], [
-                    $jmeno,
-                    $orderNumber,
-                    $model ?: 'Nabytek Natuzzi',
-                    date('d.m.Y'),
-                    date('d.m.Y H:i'),
-                    $createdBy
-                ], $notifSablona['subject']);
+                $promenneEmails = [
+                    'customer_name'  => $jmeno,
+                    'order_id'       => $orderNumber,
+                    'product'        => $model ?: 'Nabytek Natuzzi',
+                    'date'           => date('d.m.Y'),
+                    'created_at'     => date('d.m.Y H:i'),
+                    'created_by'     => $createdBy,
+                    'address'        => $adresa ?: 'Neuvedena',
+                    'description'    => $popisProblemu,
+                    'customer_email' => $email,
+                    'customer_phone' => $telefon,
+                    'company_email'  => 'reklamace@wgs-service.cz',
+                    'company_phone'  => '+420 725 965 826',
+                ];
 
-                $notifBody = str_replace([
-                    '{{customer_name}}',
-                    '{{order_id}}',
-                    '{{product}}',
-                    '{{date}}',
-                    '{{created_at}}',
-                    '{{created_by}}',
-                    '{{address}}',
-                    '{{description}}',
-                    '{{customer_email}}',
-                    '{{customer_phone}}',
-                    '{{company_email}}',
-                    '{{company_phone}}'
-                ], [
-                    $jmeno,
-                    $orderNumber,
-                    $model ?: 'Nabytek Natuzzi',
-                    date('d.m.Y'),
-                    date('d.m.Y H:i'),
-                    $createdBy,
-                    $adresa ?: 'Neuvedena',
-                    $popisProblemu,
-                    $email,
-                    $telefon,
-                    'reklamace@wgs-service.cz',
-                    '+420 725 965 826'
-                ], $notifSablona['template']);
+                $notifSubject = nahradPromenne($notifSablona['subject'] ?? '', $promenneEmails);
+
+                // Grafická šablona WGS - preferovat template_data, fallback na template
+                if (!empty($notifSablona['template_data'])) {
+                    $notifBody = renderujEmailZeSablony($notifSablona, $promenneEmails);
+                } else {
+                    $notifText = nahradPromenne($notifSablona['template'] ?? '', $promenneEmails);
+                    if (strip_tags($notifText) === $notifText) {
+                        $notifBody = renderujGrafickyEmail([
+                            'obsah' => '<p>' . nl2br(htmlspecialchars($notifText)) . '</p>'
+                        ]);
+                    } else {
+                        $notifBody = $notifText;
+                    }
+                }
 
                 // Pridat email do fronty
                 $emailQueue = new EmailQueue($pdo);
