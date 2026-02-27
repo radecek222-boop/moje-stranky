@@ -803,9 +803,10 @@ try {
             $orderNumber = $cislo ?: $identifierForClient;
 
             $notifikacePayload = [
-                'title' => 'Nová zakázka v systému',
+                'title' => 'WGS | Nová zakázka v systému',
                 'body' => "Do systému byla přidána nová objednávka s číslem {$orderNumber} - {$jmeno}",
-                'icon' => '/assets/img/logo.png',
+                'icon' => '/icon192.png',
+                'badge' => '/icon192.png',
                 'url' => "/seznam.php?id={$primaryId}",
                 'data' => [
                     'zakazka_id' => $primaryId,
