@@ -249,18 +249,22 @@ if ($isAdmin) {
   text-shadow: none;
 }
 
-.hamburger-nav a:hover,
-.hamburger-nav a.active {
+.hamburger-nav a:hover {
   opacity: 0.7;
+}
+
+.hamburger-nav a.active {
+  opacity: 1;
+  font-weight: 600;
 }
 
 .hamburger-nav a.active::after {
   content: '';
   position: absolute;
-  bottom: -0.2rem;
+  bottom: -0.35rem;
   left: 0;
   width: 100%;
-  height: 1px;
+  height: 2px;
   background: var(--c-nav-text, #fff);
 }
 

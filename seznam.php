@@ -101,10 +101,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20251207-03" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20260227-01" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251207-03">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260227-01">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
