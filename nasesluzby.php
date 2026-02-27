@@ -207,6 +207,75 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
 </main>
 
+<!-- SEKCE ODKAZŮ NA KONKRÉTNÍ SLUŽBY -->
+<section class="sluzby-odkazy-sekce">
+  <div class="sluzby-odkazy-kontejner">
+
+    <h2 class="sluzby-odkazy-titulek"
+        data-lang-cs="Konkretni sluzby"
+        data-lang-en="Specific Services"
+        data-lang-it="Servizi Specifici">Konkretni sluzby</h2>
+
+    <div class="sluzby-odkazy-mrizka">
+
+      <a href="oprava-sedacky.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Oprava sedacky"
+            data-lang-en="Sofa Repair"
+            data-lang-it="Riparazione Divano">Oprava sedacky</h3>
+        <p data-lang-cs="Profesionalni opravy sedacek, gaucu a pohovek. Kozene i latkove."
+           data-lang-en="Professional sofa, couch and settee repairs. Leather and fabric."
+           data-lang-it="Riparazioni professionali di divani e sofà. Pelle e tessuto.">Profesionalni opravy sedacek, gaucu a pohovek. Kozene i latkove.</p>
+      </a>
+
+      <a href="oprava-kresla.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Oprava kresla"
+            data-lang-en="Armchair Repair"
+            data-lang-it="Riparazione Poltrona">Oprava kresla</h3>
+        <p data-lang-cs="Servis relaxacnich a klasickych kresel. Oprava mechanismu."
+           data-lang-en="Service for recliners and classic armchairs. Mechanism repair."
+           data-lang-it="Servizio per poltrone relax e classiche. Riparazione meccanismo.">Servis relaxacnich a klasickych kresel. Oprava mechanismu.</p>
+      </a>
+
+      <a href="servis-natuzzi.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Servis Natuzzi"
+            data-lang-en="Natuzzi Service"
+            data-lang-it="Servizio Natuzzi">Servis Natuzzi</h3>
+        <p data-lang-cs="Autorizovany servis Natuzzi. Reklamace, opravy, originalni dily."
+           data-lang-en="Authorized Natuzzi service. Warranty claims, repairs, original parts."
+           data-lang-it="Servizio Natuzzi autorizzato. Reclami, riparazioni, ricambi originali.">Autorizovany servis Natuzzi. Reklamace, opravy, originalni dily.</p>
+      </a>
+
+      <a href="pozarucni-servis.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Pozarucni servis"
+            data-lang-en="Out-of-Warranty Service"
+            data-lang-it="Servizio Fuori Garanzia">Pozarucni servis</h3>
+        <p data-lang-cs="Opravime vas nabytek i po skonceni zaruky. Fer ceny."
+           data-lang-en="We repair your furniture even after the warranty expires. Fair prices."
+           data-lang-it="Ripariamo i vostri mobili anche dopo la scadenza della garanzia. Prezzi equi.">Opravime vas nabytek i po skonceni zaruky. Fer ceny.</p>
+      </a>
+
+      <a href="neuznana-reklamace.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Zamitnuta reklamace?"
+            data-lang-en="Claim Not Covered?"
+            data-lang-it="Reclamo Non Coperto?">Zamitnuta reklamace?</h3>
+        <p data-lang-cs="Nabizime cenove vyhodnou opravu jako alternativu. Pomuzeme vam."
+           data-lang-en="We offer affordable repair as an alternative. We can help."
+           data-lang-it="Offriamo riparazione conveniente come alternativa. Possiamo aiutarti.">Nabizime cenove vyhodnou opravu jako alternativu. Pomuzeme vam.</p>
+      </a>
+
+      <a href="cenik.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Cenik sluzeb"
+            data-lang-en="Price List"
+            data-lang-it="Listino Prezzi">Cenik sluzeb</h3>
+        <p data-lang-cs="Prehled cen a online kalkulacka ceny opravy."
+           data-lang-en="Price overview and online repair cost calculator."
+           data-lang-it="Panoramica prezzi e calcolatore online del costo di riparazione.">Prehled cen a online kalkulacka ceny opravy.</p>
+      </a>
+
+    </div>
+  </div>
+</section>
+
 <!-- CTA SEKCE -->
 <section class="cta-section">
   <div class="container">

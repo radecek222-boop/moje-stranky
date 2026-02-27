@@ -350,6 +350,103 @@ h6 {
   line-height: 1.5;
   margin: 0;
 }
+/* ========== SEKCE ODKAZŮ NA SLUŽBY ========== */
+.sluzby-odkazy-sekce {
+  background: #f8f8f8;
+  padding: 3rem 1.5rem;
+}
+
+.sluzby-odkazy-kontejner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sluzby-odkazy-titulek {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #000;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sluzby-odkazy-mrizka {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.sluzba-odkaz-karta {
+  background: #fff;
+  padding: 1.25rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.sluzba-odkaz-karta:hover {
+  border-color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sluzba-odkaz-karta h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: #000;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sluzba-odkaz-karta p {
+  color: #666;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .sluzby-odkazy-sekce {
+    padding: 2.5rem 1rem;
+  }
+
+  .sluzby-odkazy-mrizka {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .sluzba-odkaz-karta {
+    padding: 1rem 0.75rem;
+  }
+
+  .sluzba-odkaz-karta h3 {
+    font-size: 0.8rem;
+  }
+
+  .sluzba-odkaz-karta p {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sluzby-odkazy-sekce {
+    padding: 2rem 1rem;
+  }
+
+  .sluzby-odkazy-mrizka {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .sluzba-odkaz-karta {
+    padding: 0.875rem 1rem;
+  }
+}
+
 .cta-section {
   background: var(--c-black);
   color: var(--c-white);
