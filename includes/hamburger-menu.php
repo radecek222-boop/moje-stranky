@@ -222,9 +222,9 @@ if ($isAdmin) {
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 400;
-  transition: opacity 0.2s ease;
-  position: relative;
-  padding-bottom: 0.2rem;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid transparent;
   white-space: nowrap;
 }
 
@@ -239,9 +239,9 @@ if ($isAdmin) {
   text-shadow: 0 0 15px rgba(57, 255, 20, 0.7);
 }
 
-.hamburger-nav.admin-nav-active a.active::after {
-  background: #39ff14;
-  box-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+.hamburger-nav.admin-nav-active a.active {
+  border-bottom-color: #39ff14;
+  box-shadow: 0 2px 6px rgba(57, 255, 20, 0.4);
 }
 
 .hamburger-nav.admin-nav-active .hamburger-logout {
@@ -256,16 +256,7 @@ if ($isAdmin) {
 .hamburger-nav a.active {
   opacity: 1;
   font-weight: 600;
-}
-
-.hamburger-nav a.active::after {
-  content: '';
-  position: absolute;
-  bottom: -0.35rem;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--c-nav-text, #fff);
+  border-bottom-color: var(--c-nav-text, #fff);
 }
 
 .hamburger-logout {
@@ -362,9 +353,8 @@ if ($isAdmin) {
   text-shadow: 0 0 15px rgba(0, 153, 255, 0.7);
 }
 
-.hamburger-nav a.play-link.active::after {
-  background: #0099ff;
-  box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+.hamburger-nav a.play-link.active {
+  border-bottom-color: #0099ff !important;
 }
 
 .play-badge {
@@ -483,8 +473,7 @@ if ($isAdmin) {
   }
 
   .hamburger-nav a:hover { background: rgba(255, 255, 255, 0.05); }
-  .hamburger-nav a.active { background: rgba(255, 255, 255, 0.1); }
-  .hamburger-nav a.active::after { display: none; }
+  .hamburger-nav a.active { background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 
   .hamburger-lang-switcher {
     padding: 1rem 1.5rem;
