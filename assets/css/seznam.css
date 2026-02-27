@@ -1607,8 +1607,8 @@ body {
 }
 
 .order-status-text.status-odlozena {
-  background: rgba(155, 89, 182, 0.15);
-  color: #7d3c98;
+  background: #ead5f5;
+  color: #6c3483;
 }
 
 /* Button Text Fit */
