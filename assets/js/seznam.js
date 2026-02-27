@@ -773,8 +773,8 @@ async function renderOrders(items = null) {
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Poznámky'}">
-              <span class="notes-icon">✎</span>${unreadCount > 0 ? unreadCount : ''}
+            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">
+              CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}
             </div>
             <div class="order-status status-${status.class}"></div>
           </div>
@@ -790,9 +790,11 @@ async function renderOrders(items = null) {
             <div class="order-detail-right">
               ${appointmentText
                 ? `<span class="order-appointment">${appointmentText}</span>`
-                : (maCenovouNabidku && !jeHotovo
-                    ? `<span class="${cnTextClass}">${cnText}</span>`
-                    : `<span class="order-status-text status-${status.class}">${status.text}</span>`)}
+                : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+                    ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+                    : (maCenovouNabidku && !jeHotovo
+                        ? `<span class="${cnTextClass}">${cnText}</span>`
+                        : `<span class="order-status-text status-${status.class}">${status.text}</span>`))}
             </div>
           </div>
         </div>
