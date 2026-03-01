@@ -1585,71 +1585,56 @@ body {
   text-align: right;
 }
 
-/* Sdílená základna pro všechny status badges */
+/* =====================================================
+   STATUS BADGES – jednotná základna
+   Všechny badge typy identické: font, velikost, padding
+   ===================================================== */
 .order-appointment,
 .order-status-text,
 .order-cn-text {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  padding: 0.15rem 0.45rem;
   border-radius: 3px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   white-space: nowrap;
   display: inline-block;
+  line-height: 1.4;
 }
 
-/* Termín (datum návštěvy) */
+/* Termín návštěvy */
 .order-appointment {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #bbb;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  background: #e8e8e8;
+  color: #444;
 }
 
 /* Stavy reklamace */
 .order-status-text.status-wait {
-  background: #eee;
-  color: #666;
-  border: 1px solid #ccc;
+  background: #e8e8e8;
+  color: #555;
 }
-
 .order-status-text.status-open {
   background: #444;
   color: #fff;
 }
-
 .order-status-text.status-done {
   background: #111;
   color: #fff;
 }
-
 .order-status-text.status-odlozena {
   background: #888;
   color: #fff;
 }
-
 .order-status-text.status-cekame-na-dily {
-  background: #777;
+  background: #666;
   color: #fff;
 }
 
 /* CN badge varianty */
-.order-cn-text {
-  background: #333;
-  color: #fff;
-}
-
-.order-cn-text.cekame-nd {
-  background: #777;
-  color: #fff;
-}
-
-.order-cn-text.odsouhlasena {
-  background: #222;
-  color: #fff;
-}
+.order-cn-text          { background: #444; color: #fff; }
+.order-cn-text.cekame-nd    { background: #666; color: #fff; }
+.order-cn-text.odsouhlasena { background: #222; color: #fff; }
 
 /* Button Text Fit */
 .btn,
@@ -2075,12 +2060,10 @@ a.detail-btn-primary:active {
 .order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
 .order-row-chat    { }
 
-/* Badge v radkovem zobrazeni - stejna sirka, centrovany text */
+/* Badge v radkovem zobrazeni – vyplní sloupec, centrovaný text */
 .order-row .order-status-text,
 .order-row .order-cn-text,
 .order-row .order-appointment {
-  font-size: 0.65rem;
-  padding: 0.15rem 0.25rem;
   display: block;
   width: 100%;
   text-align: center;
