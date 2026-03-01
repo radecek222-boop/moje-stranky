@@ -2616,6 +2616,7 @@ async function showCustomerDetail(id) {
                 <img src='${photoPath}'
                      style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
                      alt='Fotka ${i+1}'
+                     loading="lazy"
                      data-action="showPhotoFullscreen"
                      data-url="${escapedUrl}">
                 ${photoId ? `
@@ -5002,6 +5003,7 @@ async function aktualizujFototekaGrid(reklamaceId) {
             <img src='${photoPath}'
                  style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
                  alt='Fotka ${i+1}'
+                 loading="lazy"
                  data-action="showPhotoFullscreen"
                  data-url="${escapedUrl}">
             ${photoId ? `
