@@ -72,7 +72,8 @@ $sablony = [
                 "**Adresa:** {{address}}\n" .
                 "**Zakázka č.:** {{order_id}}\n\n" .
                 "**Technik:** {{technician_name}}\n" .
-                "**Telefon technika:** {{technician_phone}}",
+                "**Telefon technika:** {{technician_phone}}\n\n" .
+                "Uvedený čas příjezdu je přibližný a závisí na aktuálních dopravních podmínkách. Prosíme, počítejte s příjezdem technika v rozmezí 60 minut před nebo po uvedeném čase. Pokud by se technik dostal mimo tento časový horizont, budete o tom předem informováni prostřednictvím SMS zprávy nebo telefonátu přímo od technika.",
             'upozorneni' => $upozorneniTermin,
             'gdpr'       => $gdprText,
         ],
@@ -94,7 +95,8 @@ $sablony = [
                 "**Adresa:** {{address}}\n" .
                 "**Zakázka č.:** {{order_id}}\n\n" .
                 "**Technik:** {{technician_name}}\n" .
-                "**Telefon technika:** {{technician_phone}}",
+                "**Telefon technika:** {{technician_phone}}\n\n" .
+                "Uvedený čas příjezdu je přibližný a závisí na aktuálních dopravních podmínkách. Prosíme, počítejte s příjezdem technika v rozmezí 60 minut před nebo po uvedeném čase. Pokud by se technik dostal mimo tento časový horizont, budete o tom předem informováni prostřednictvím SMS zprávy nebo telefonátu přímo od technika.",
             'upozorneni' => $upozorneniTermin,
             'gdpr'       => $gdprText,
         ],
