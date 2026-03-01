@@ -34,6 +34,8 @@ function renderujGrafickyEmail(array $data): string {
     $tlacitko = $data['tlacitko'] ?? null;
     $infobox = nl2br(markdownNaHtml($data['infobox'] ?? ''));
     $upozorneni = nl2br(markdownNaHtml($data['upozorneni'] ?? ''));
+    // GDPR se renderuje jako HTML (podpora odkazu), bez markdown zpracování
+    $gdpr = $data['gdpr'] ?? '';
 
     // Sestavení sekcí
     $nadpisHtml = '';
@@ -145,6 +147,14 @@ function renderujGrafickyEmail(array $data): string {
                             </p>
                         </td>
                     </tr>
+
+                    <!-- GDPR – pod patičkou, velmi malé písmo -->
+                    " . (!empty($gdpr) ? "
+                    <tr>
+                        <td style='padding: 14px 40px 4px 40px; text-align: center;'>
+                            <p style='margin: 0; font-size: 10px; color: #aaa; line-height: 1.5;'>{$gdpr}</p>
+                        </td>
+                    </tr>" : "") . "
 
                 </table>
             </td>

@@ -28,11 +28,13 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 // DEFINICE ŠABLON
 // ============================================================
 
-$gdprText = 'Zpracování Vašich osobních údajů probíhá v souladu s nařízením GDPR výhradně za účelem zajištění servisního zásahu. Podrobnosti na wgs-service.cz/gdpr.php';
+$gdprText = 'Zpracování Vašich osobních údajů probíhá v souladu s nařízením GDPR výhradně za účelem zajištění servisního zásahu. Podrobnosti: <a href="https://www.wgs-service.cz/gdpr.php" style="color:#aaa;text-decoration:underline;">wgs-service.cz/gdpr.php</a>';
 
-$wifiText = 'Přístup k internetu: Prosíme o umožnění přístupu k Vaší WiFi síti pro technika. Pracujeme výhradně s online protokoly a v některých lokalitách není dostupné mobilní pokrytí. Bez internetu nelze dokončit a odeslat protokol o servisním zásahu.';
-
-$pripravaNabytku = 'Prosíme, připravte nábytek před příchodem technika – odstraňte z něj osobní věci a lůžkoviny, aby mohl servisní zásah proběhnout bez komplikací.';
+$upozorneniTermin =
+    "Prosíme o přípravu před příchodem technika:\n\n" .
+    "1. Odstraňte z nábytku veškeré lůžkoviny, polštáře a osobní věci, aby mohl servisní zásah proběhnout bez komplikací.\n\n" .
+    "2. Zajistěte prosím bezplatné a bezpečné parkování pro technika v blízkosti Vaší adresy.\n\n" .
+    "3. Umožněte technikovi přístup k Vaší WiFi síti – pracujeme výhradně s online protokoly a v některých lokalitách není dostupné mobilní pokrytí.";
 
 $sablony = [
 
@@ -50,7 +52,7 @@ $sablony = [
                 "**Číslo zakázky:** {{order_id}}\n" .
                 "**Datum přijetí:** {{created_at}}\n\n" .
                 "Náš technik nyní prostuduje Vaši žádost a v nejbližší době Vás kontaktujeme s návrhem termínu návštěvy. Prosíme o trpělivost – každou žádost řešíme s maximální péčí.",
-            'infobox'   => $gdprText,
+            'gdpr'      => $gdprText,
         ],
     ],
 
@@ -61,9 +63,9 @@ $sablony = [
         'trigger_event'  => ['appointment_confirmed'],
         'subject'        => 'Potvrzení termínu návštěvy – {{date}} v {{time}} | WGS Service č. {{order_id}}',
         'template_data'  => [
-            'nadpis'      => 'Termín návštěvy technika potvrzen',
-            'osloveni'    => 'Vážený/á {{customer_name}},',
-            'obsah'       =>
+            'nadpis'     => 'Termín návštěvy technika potvrzen',
+            'osloveni'   => 'Vážený/á {{customer_name}},',
+            'obsah'      =>
                 "rádi Vám potvrzujeme sjednaný termín návštěvy technika WGS Service.\n\n" .
                 "**Datum:** {{date}}\n" .
                 "**Čas:** {{time}}\n" .
@@ -71,8 +73,8 @@ $sablony = [
                 "**Zakázka č.:** {{order_id}}\n\n" .
                 "**Technik:** {{technician_name}}\n" .
                 "**Telefon technika:** {{technician_phone}}",
-            'upozorneni'  => $pripravaNabytku,
-            'infobox'     => $wifiText . "\n\n" . $gdprText,
+            'upozorneni' => $upozorneniTermin,
+            'gdpr'       => $gdprText,
         ],
     ],
 
@@ -83,9 +85,9 @@ $sablony = [
         'trigger_event'  => ['appointment_reminder'],
         'subject'        => 'Připomínka: Zítřejší návštěva technika – {{date}} v {{time}} | WGS Service',
         'template_data'  => [
-            'nadpis'      => 'Připomínka zítřejší návštěvy technika',
-            'osloveni'    => 'Vážený/á {{customer_name}},',
-            'obsah'       =>
+            'nadpis'     => 'Připomínka zítřejší návštěvy technika',
+            'osloveni'   => 'Vážený/á {{customer_name}},',
+            'obsah'      =>
                 "připomínáme Vám zítřejší návštěvu technika WGS Service.\n\n" .
                 "**Datum:** {{date}}\n" .
                 "**Čas:** {{time}}\n" .
@@ -93,8 +95,8 @@ $sablony = [
                 "**Zakázka č.:** {{order_id}}\n\n" .
                 "**Technik:** {{technician_name}}\n" .
                 "**Telefon technika:** {{technician_phone}}",
-            'upozorneni'  => $pripravaNabytku,
-            'infobox'     => $wifiText . "\n\n" . $gdprText,
+            'upozorneni' => $upozorneniTermin,
+            'gdpr'       => $gdprText,
         ],
     ],
 
@@ -112,7 +114,7 @@ $sablony = [
                 "**Zakázka č.:** {{order_id}}\n" .
                 "**Datum dokončení:** {{completed_at}}\n\n" .
                 "Děkujeme za Vaši důvěru. Těšíme se na případnou další spolupráci.",
-            'infobox'   => $gdprText,
+            'gdpr'      => $gdprText,
         ],
     ],
 
@@ -129,7 +131,7 @@ $sablony = [
                 "dne **{{date}}** jsme se pokoušeli spojit s Vámi telefonicky ohledně servisní zakázky č. **{{order_id}}**.\n\n" .
                 "Bohužel se nám nepodařilo Vás zastihnout. V brzké době se pokusíme kontaktovat Vás znovu.\n\n" .
                 "Pokud nás chcete kontaktovat sami, technik **{{technician_name}}** je k dispozici na tel. **{{technician_phone}}**.",
-            'infobox'   => $gdprText,
+            'gdpr'      => $gdprText,
         ],
     ],
 
