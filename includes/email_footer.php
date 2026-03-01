@@ -54,6 +54,10 @@ function pridatEmailFooter($body, $email = '', $html = false) {
         $footer .= '
 </div>';
 
+        // Vlozit footer pred </body> - ne az za </html> (neplatne HTML by zlomilo renderovani)
+        if (stripos($body, '</body>') !== false) {
+            return str_ireplace('</body>', $footer . '</body>', $body);
+        }
         return $body . $footer;
     } else {
         // Plain text formát

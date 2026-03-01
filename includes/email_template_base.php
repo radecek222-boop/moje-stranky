@@ -81,12 +81,29 @@ function renderujGrafickyEmail(array $data): string {
     }
 
     return "<!DOCTYPE html>
-<html lang='cs'>
+<html lang='cs' xmlns='http://www.w3.org/1999/xhtml' xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office'>
 <head>
     <meta charset='UTF-8'>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta name='x-apple-disable-message-reformatting'>
+    <meta name='format-detection' content='telephone=no,address=no,email=no,date=no'>
     <title>White Glove Service</title>
-    <link rel='icon' href='data:,'>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
+    <style type='text/css'>
+        body { margin: 0 !important; padding: 0 !important; background-color: #f4f4f4 !important; }
+        table { border-collapse: collapse; }
+        img { border: 0; outline: none; text-decoration: none; }
+        @media only screen and (max-width: 620px) {
+            .email-wrapper { width: 100% !important; }
+            .email-body td { padding-left: 20px !important; padding-right: 20px !important; }
+            .email-header td { padding-left: 20px !important; padding-right: 20px !important; }
+            .email-footer td { padding-left: 20px !important; padding-right: 20px !important; }
+            h1 { font-size: 22px !important; }
+        }
+    </style>
 </head>
 <body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;'>
 
@@ -94,19 +111,19 @@ function renderujGrafickyEmail(array $data): string {
     <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%' style='background-color: #f4f4f4;'>
         <tr>
             <td style='padding: 30px 20px;'>
-                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
+                <table class='email-wrapper' role='presentation' cellspacing='0' cellpadding='0' border='0' width='600' style='margin: 0 auto; max-width: 600px;'>
 
                     <!-- HEADER -->
-                    <tr>
-                        <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
+                    <tr class='email-header'>
+                        <td class='email-header' style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
                             <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
                             <p style='margin: 8px 0 0 0; font-size: 12px; color: #bbb; text-transform: uppercase; letter-spacing: 1px;'>Premium Furniture Care</p>
                         </td>
                     </tr>
 
                     <!-- HLAVNÍ OBSAH -->
-                    <tr>
-                        <td style='background: #ffffff; padding: 0;'>
+                    <tr class='email-body'>
+                        <td class='email-body' style='background: #ffffff; padding: 0;'>
 
                             {$nadpisHtml}
 
@@ -134,8 +151,8 @@ function renderujGrafickyEmail(array $data): string {
                     </tr>
 
                     <!-- FOOTER -->
-                    <tr>
-                        <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
+                    <tr class='email-footer'>
+                        <td class='email-footer' style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
                             <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
                             <p style='margin: 8px 0 0 0; font-size: 13px; color: #aaa;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
                             <p style='margin: 8px 0 0 0; font-size: 13px; color: #aaa;'>
