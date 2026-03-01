@@ -312,7 +312,9 @@ function handleUpdate(PDO $pdo, array $input): array
                     'DOMLUVENÁ' => 'open',
                     'open' => 'open',
                     'HOTOVO' => 'done',
-                    'done' => 'done'
+                    'done' => 'done',
+                    'ČEKÁME NA DÍLY' => 'cekame_na_dily',
+                    'cekame_na_dily' => 'cekame_na_dily'
                 ];
 
                 if ($stavValue !== '' && isset($stavMapping[$stavValue])) {

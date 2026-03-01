@@ -501,12 +501,14 @@ function prioritaZaznamu(r) {
   const isDone = stav === 'HOTOVO' || stav === 'done';
   const isWait = stav === 'ČEKÁ' || stav === 'wait';
   const isOpen = stav === 'DOMLUVENÁ' || stav === 'open';
+  const isCekameNaDily = stav === 'ČEKÁME NA DÍLY' || stav === 'cekame_na_dily';
   const maCN = email && EMAILS_S_CN && EMAILS_S_CN.includes(email);
   const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
 
   if (isDone) return 6;                              // HOTOVO
   if (jeOdlozena) return 3;                          // ODLOŽENÁ
   if (isOpen) return 2;                              // DOMLUVENÁ
+  if (isCekameNaDily) return 2;                      // ČEKÁME NA DÍLY (stejná priorita jako DOMLUVENÁ)
   if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
   if (maCN && cnStav === 'potvrzena') return 4;      // CN odsouhlasena
   return 5;                                          // CN poslána / Čekáme ND
@@ -595,6 +597,12 @@ async function renderOrders(items = null) {
           // ODLOŽENÉ: reklamace označena jako odložená (je_odlozena === 1)
           if (r.je_odlozena == 1 || r.je_odlozena === true) return true;
         }
+
+        if (filterType === 'cekame-na-dily') {
+          // ČEKÁME NA DÍLY: stav je cekame_na_dily
+          const stavR = r.stav || 'wait';
+          if (stavR === 'ČEKÁME NA DÍLY' || stavR === 'cekame_na_dily') return true;
+        }
       }
 
       // Záznam nesplňuje žádný z aktivních filtrů
@@ -676,6 +684,13 @@ async function renderOrders(items = null) {
   if (countOdlozeneEl) {
     const countOdlozene = items.filter(r => r.je_odlozena == 1 || r.je_odlozena === true).length;
     countOdlozeneEl.textContent = `(${countOdlozene})`;
+  }
+
+  // Aktualizovat počet ČEKÁME NA DÍLY
+  const countCekamedDilyEl = document.getElementById('count-cekame-na-dily');
+  if (countCekamedDilyEl) {
+    const countCekameDily = items.filter(r => r.stav === 'cekame_na_dily' || r.stav === 'ČEKÁME NA DÍLY').length;
+    countCekamedDilyEl.textContent = `(${countCekameDily})`;
   }
 
   // Aktualizovat počet ČEKAJÍCÍ (vyloučit zakázky s CN)
@@ -943,12 +958,13 @@ function createCustomerHeader() {
   // Určit aktuálně vybranou hodnotu
   let aktualniHodnota = CURRENT_RECORD.stav === 'wait' || CURRENT_RECORD.stav === 'ČEKÁ' ? 'wait' :
                         CURRENT_RECORD.stav === 'open' || CURRENT_RECORD.stav === 'DOMLUVENÁ' ? 'open' :
-                        CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' : 'wait';
+                        CURRENT_RECORD.stav === 'done' || CURRENT_RECORD.stav === 'HOTOVO' ? 'done' :
+                        CURRENT_RECORD.stav === 'cekame_na_dily' || CURRENT_RECORD.stav === 'ČEKÁME NA DÍLY' ? 'cekame_na_dily' : 'wait';
 
   // Odložená má přednost před CN stavy (ale ne před HOTOVO)
   if ((CURRENT_RECORD.je_odlozena == 1 || CURRENT_RECORD.je_odlozena === true) && aktualniHodnota !== 'done') {
     aktualniHodnota = 'odlozena';
-  } else if (maCN && aktualniHodnota !== 'done' && cnStav) {
+  } else if (maCN && aktualniHodnota !== 'done' && aktualniHodnota !== 'cekame_na_dily' && cnStav) {
     // Pokud má CN a není HOTOVO, zobrazit CN stav
     if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
     else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
@@ -960,6 +976,7 @@ function createCustomerHeader() {
       <optgroup label="Základní stavy">
         <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
         <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
+        <option value="cekame_na_dily" ${aktualniHodnota === 'cekame_na_dily' ? 'selected' : ''}>ČEKÁME NA DÍLY</option>
         <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
         <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
       </optgroup>
@@ -4246,9 +4263,11 @@ function getStatus(stav) {
     'DOMLUVENÁ': { class: 'open', text: 'DOMLUVENÁ' },
     'open': { class: 'open', text: 'DOMLUVENÁ' },
     'HOTOVO': { class: 'done', text: 'HOTOVO' },
-    'done': { class: 'done', text: 'HOTOVO' }
+    'done': { class: 'done', text: 'HOTOVO' },
+    'ČEKÁME NA DÍLY': { class: 'cekame-na-dily', text: 'ČEKÁME NA DÍLY' },
+    'cekame_na_dily': { class: 'cekame-na-dily', text: 'ČEKÁME NA DÍLY' }
   };
-  
+
   return statusMap[stav] || { class: 'wait', text: 'NOVÁ' };
 }
 
@@ -4373,10 +4392,11 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
     'wait': 'NOVÁ',
     'open': 'DOMLUVENÁ',
     'done': 'HOTOVO',
+    'cekame_na_dily': 'ČEKÁME NA DÍLY',
     'odlozena': 'Odložená',
     'cn_poslana': 'Poslána CN',
     'cn_odsouhlasena': 'Odsouhlasena',
-    'cn_cekame_nd': 'Čekáme ND'
+    'cn_cekame_nd': 'ČEKÁME NA DÍLY'
   };
 
   // Rozpoznat CN stavy

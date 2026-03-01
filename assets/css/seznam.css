@@ -220,6 +220,10 @@ body {
   border: 2px solid #9b59b6;
   box-shadow: 0 0 6px rgba(155, 89, 182, 0.4);
 }
+.order-box.status-bg-cekame-na-dily {
+  border: 2px solid #999;
+  box-shadow: 0 0 6px rgba(153, 153, 153, 0.4);
+}
 .order-box:hover {
   background: #ffffff;
   transform: translateY(-2px);
@@ -235,6 +239,9 @@ body {
 }
 .order-box.status-bg-odlozena:hover {
   box-shadow: 0 0 12px rgba(155, 89, 182, 0.6);
+}
+.order-box.status-bg-cekame-na-dily:hover {
+  box-shadow: 0 0 12px rgba(153, 153, 153, 0.6);
 }
 .order-box.search-match {
   border-color: var(--c-neon-blue);
@@ -281,6 +288,9 @@ body {
 }
 .status-done {
   background: var(--c-neon-green);
+}
+.status-cekame-na-dily {
+  background: #999;
 }
 .order-body {
   flex: 1;
@@ -1613,6 +1623,11 @@ body {
   color: #6c3483;
 }
 
+.order-status-text.status-cekame-na-dily {
+  background: #ddd;
+  color: #333;
+}
+
 /* Button Text Fit */
 .btn,
 button,
@@ -1696,6 +1711,10 @@ button,
 
 .order-status.status-done {
   box-shadow: 0 0 6px 2px rgba(57, 255, 20, 0.8);
+}
+
+.order-status.status-cekame-na-dily {
+  box-shadow: 0 0 6px 2px rgba(153, 153, 153, 0.8);
 }
 
 /* ============================================

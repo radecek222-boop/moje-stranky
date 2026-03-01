@@ -49,7 +49,7 @@ if (!$reklamaceId) {
 }
 
 // Povolené stavy
-$zakladniStavy = ['wait', 'open', 'done'];
+$zakladniStavy = ['wait', 'open', 'done', 'cekame_na_dily'];
 $cnStavy = ['cn_poslana', 'cn_odsouhlasena', 'cn_cekame_nd'];
 $vsechnyStavy = array_merge($zakladniStavy, $cnStavy);
 
@@ -215,9 +215,10 @@ try {
         'wait' => 'NOVÁ',
         'open' => 'DOMLUVENÁ',
         'done' => 'HOTOVO',
+        'cekame_na_dily' => 'ČEKÁME NA DÍLY',
         'cn_poslana' => 'Poslána CN',
         'cn_odsouhlasena' => 'Odsouhlasena',
-        'cn_cekame_nd' => 'Čekáme ND'
+        'cn_cekame_nd' => 'ČEKÁME NA DÍLY'
     ];
 
     sendJsonSuccess("Stav změněn na: {$stavyMap[$novyStav]}", [
