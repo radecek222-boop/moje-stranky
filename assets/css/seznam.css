@@ -2052,17 +2052,21 @@ a.detail-btn-primary:active {
 .order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
-.order-row-badge   { text-align: right; }
+.order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
 .order-row-chat    { }
 
-/* Mensi badge v radkovem zobrazeni */
+/* Badge v radkovem zobrazeni - stejna sirka, centrovany text */
 .order-row .order-status-text,
 .order-row .order-cn-text,
 .order-row .order-appointment {
   font-size: 0.58rem;
-  padding: 0.08rem 0.25rem;
+  padding: 0.1rem 0;
   white-space: nowrap;
-  display: inline-block;
+  display: block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 3px;
 }
 
 /* Na mobilu vždy karty */

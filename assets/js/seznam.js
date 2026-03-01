@@ -111,6 +111,7 @@ let CAL_MONTH = new Date().getMonth();
 let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
 let VIEW_MODE = localStorage.getItem('wgs-seznam-view') || 'radky';
+let ADMIN_PRODEJCE_FILTER = null; // null = vsichni, jinak created_by id vybrane ho prodejce
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
 const WGS_COORDS = { lat: 50.08028448017454, lng: 14.598156697482635 };
@@ -485,6 +486,7 @@ async function loadAll(status = 'all', append = false) {
 
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
 
+    sestavAdminProdejceBox();
     updateCounts(userItems);
     renderOrders(userItems);
 
@@ -561,6 +563,65 @@ function seraditZaznamy(zaznamy) {
   });
 }
 
+function sestavAdminProdejceBox() {
+  if (!CURRENT_USER || !CURRENT_USER.is_admin) return;
+  const box = document.getElementById('adminProdejceBox');
+  if (!box) return;
+  box.style.display = 'flex';
+
+  // Sestavit mapu unikatnich prodejcu z nactenych dat
+  const prodejceMap = new Map();
+  (WGS_DATA_CACHE || []).forEach(r => {
+    const id = String(r.created_by || '').trim();
+    if (!id) return;
+    const jmeno = r.zadavatel_jmeno || r.created_by_name || id;
+    if (!prodejceMap.has(id)) {
+      prodejceMap.set(id, jmeno);
+    }
+  });
+
+  const seznam = document.getElementById('adminProdejceList');
+  seznam.innerHTML = '';
+
+  // Tlacitko "Vse"
+  const btnVse = document.createElement('button');
+  btnVse.className = 'admin-prodejce-btn' + (ADMIN_PRODEJCE_FILTER === null ? ' active' : '');
+  btnVse.dataset.prodejceId = '';
+  const celkemPocet = (WGS_DATA_CACHE || []).length;
+  btnVse.textContent = `Vše (${celkemPocet})`;
+  seznam.appendChild(btnVse);
+
+  // Tlacitka pro jednotlive prodejce - serazene podle poctu zakazek (sestupne)
+  const prodejceSeznam = [...prodejceMap.entries()].map(([id, jmeno]) => ({
+    id,
+    jmeno,
+    pocet: (WGS_DATA_CACHE || []).filter(r => String(r.created_by || '') === id).length
+  })).sort((a, b) => b.pocet - a.pocet);
+
+  prodejceSeznam.forEach(({ id, jmeno, pocet }) => {
+    const btn = document.createElement('button');
+    btn.className = 'admin-prodejce-btn' + (ADMIN_PRODEJCE_FILTER === id ? ' active' : '');
+    btn.dataset.prodejceId = id;
+    btn.textContent = `${jmeno} (${pocet})`;
+    seznam.appendChild(btn);
+  });
+
+  // Odebrat stare listenery nahrazenim uzlu (klon)
+  const novySeznam = seznam.cloneNode(true);
+  seznam.parentNode.replaceChild(novySeznam, seznam);
+
+  novySeznam.addEventListener('click', (e) => {
+    const btn = e.target.closest('.admin-prodejce-btn');
+    if (!btn) return;
+    const id = btn.dataset.prodejceId;
+    ADMIN_PRODEJCE_FILTER = id || null;
+    novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
+  });
+}
+
 async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
@@ -570,6 +631,11 @@ async function renderOrders(items = null) {
   }
 
   if (!Array.isArray(items)) items = [];
+
+  // Admin filtr podle prodejce
+  if (CURRENT_USER && CURRENT_USER.is_admin && ADMIN_PRODEJCE_FILTER !== null) {
+    items = items.filter(r => String(r.created_by || '') === ADMIN_PRODEJCE_FILTER);
+  }
 
   let filtered = items;
 

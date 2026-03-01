@@ -1297,6 +1297,55 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 }
 
+/* ADMIN BOX - Filtr podle prodejce */
+#adminProdejceBox {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 0.4rem 0.7rem;
+  margin-bottom: 0.5rem;
+}
+.admin-prodejce-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding-right: 0.3rem;
+  border-right: 1px solid #333;
+}
+.admin-prodejce-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.admin-prodejce-btn {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.45rem;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #888;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.admin-prodejce-btn:hover {
+  border-color: #777;
+  color: #ddd;
+}
+.admin-prodejce-btn.active {
+  background: #222;
+  border-color: #ccc;
+  color: #fff;
+  font-weight: 600;
+}
+
 /* PŘEPÍNAČ ZOBRAZENÍ KARTY / ŘÁDKY */
 .view-toggle-wrapper {
   display: flex;
@@ -2067,6 +2116,16 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
       Čeká na díly <span id="count-cekame-na-dily" style="opacity: 0.7;"></span>
     </button>
   </div>
+
+  <!-- ADMIN: Filtr podle prodejce -->
+  <?php if ($isAdmin): ?>
+  <div id="adminProdejceBox">
+    <span class="admin-prodejce-label">WGS</span>
+    <div class="admin-prodejce-list" id="adminProdejceList">
+      <button class="admin-prodejce-btn active" data-prodejce-id="">Vše</button>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <!-- PŘEPÍNAČ ZOBRAZENÍ - pouze desktop -->
   <div class="view-toggle-wrapper">
