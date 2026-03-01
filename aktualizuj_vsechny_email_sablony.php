@@ -28,7 +28,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 // DEFINICE ŠABLON
 // ============================================================
 
-$gdprText = 'Zpracování Vašich osobních údajů probíhá v souladu s nařízením GDPR výhradně za účelem zajištění servisního zásahu. Podrobnosti: <a href="https://www.wgs-service.cz/gdpr.php" style="color:#aaa;text-decoration:underline;">wgs-service.cz/gdpr.php</a>';
+$gdprText = 'Zpracování Vašich osobních údajů probíhá v souladu s nařízením GDPR výhradně za účelem zajištění servisního zásahu. Podrobnosti: <a href="https://www.wgs-service.cz/gdpr.php" style="color:#666;text-decoration:underline;">wgs-service.cz/gdpr.php</a>';
 
 $upozorneniTermin =
     "Prosíme o přípravu před příchodem technika:\n\n" .
