@@ -505,13 +505,13 @@ function prioritaZaznamu(r) {
   const maCN = email && EMAILS_S_CN && EMAILS_S_CN.includes(email);
   const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
 
-  if (isDone) return 6;                              // HOTOVO
-  if (jeOdlozena) return 3;                          // ODLOŽENÁ
+  if (isDone) return 7;                              // HOTOVO
+  if (jeOdlozena) return 4;                          // ODLOŽENÁ
+  if (isCekameNaDily) return 3;                      // ČEKÁME NA DÍLY (za DOMLUVENÁ)
   if (isOpen) return 2;                              // DOMLUVENÁ
-  if (isCekameNaDily) return 2;                      // ČEKÁME NA DÍLY (stejná priorita jako DOMLUVENÁ)
   if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
-  if (maCN && cnStav === 'potvrzena') return 4;      // CN odsouhlasena
-  return 5;                                          // CN poslána / Čekáme ND
+  if (maCN && cnStav === 'potvrzena') return 5;      // CN odsouhlasena
+  return 6;                                          // CN poslána / Čekáme ND
 }
 
 // Pomocná funkce pro parse termínu na timestamp
