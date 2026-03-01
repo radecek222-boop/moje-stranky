@@ -33,6 +33,7 @@ function odeslat_notifikaci_zakazky(PDO $pdo, int $zakazkaId, string $triggerEve
               AND active = 1
             LIMIT 1
         ");
+        // Grafická šablona se načte níže při sestavování těla emailu
         $stmtSablona->execute(['trigger' => $triggerEvent]);
         $sablona = $stmtSablona->fetch(PDO::FETCH_ASSOC);
 
@@ -202,13 +203,28 @@ function odeslat_notifikaci_zakazky(PDO $pdo, int $zakazkaId, string $triggerEve
 
         // === 5. NÁHRADA PROMĚNNÝCH V ŠABLONĚ ===
         $predmet = str_replace(array_keys($promenne), array_values($promenne), $sablona['subject'] ?? '');
-        $telo    = str_replace(array_keys($promenne), array_values($promenne), $sablona['template'] ?? '');
 
-        // Pokud šablona nemá HTML, zabalit do základního HTML
-        if ($telo && strip_tags($telo) === $telo) {
-            $telo = '<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;">'
-                  . nl2br(htmlspecialchars($telo))
-                  . '</div>';
+        // Pokud šablona má grafická data (template_data JSON), použít grafický renderer
+        if (!empty($sablona['template_data'])) {
+            require_once __DIR__ . '/email_template_base.php';
+            // Pro renderujEmailZeSablony potřebujeme proměnné bez {{ }}
+            $promenneHolne = [];
+            foreach ($promenne as $klic => $hodnota) {
+                $holnyKlic = trim($klic, '{}');
+                $promenneHolne[$holnyKlic] = $hodnota;
+            }
+            $telo = renderujEmailZeSablony($sablona, $promenneHolne);
+        } else {
+            $telo = str_replace(array_keys($promenne), array_values($promenne), $sablona['template'] ?? '');
+            // Pokud šablona nemá HTML, zabalit do grafické šablony
+            if ($telo) {
+                require_once __DIR__ . '/email_template_base.php';
+                if (strip_tags($telo) === $telo) {
+                    $telo = renderujGrafickyEmail([
+                        'obsah' => '<p>' . nl2br(htmlspecialchars($telo)) . '</p>',
+                    ]);
+                }
+            }
         }
 
         // === 6. PŘIDAT DO FRONTY ===
