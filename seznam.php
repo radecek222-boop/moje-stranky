@@ -101,10 +101,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20260227-02" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20260301-01" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260227-02">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260301-01">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -1187,7 +1187,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-open,
 .filter-btn-done,
 .filter-btn-poz,
-.filter-btn-odlozene {
+.filter-btn-odlozene,
+.filter-btn-cekame-na-dily {
   background: #ccc !important;
   color: #000 !important;
   border: 2px solid #999 !important;
@@ -1198,7 +1199,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 .filter-btn-open:hover,
 .filter-btn-done:hover,
 .filter-btn-poz:hover,
-.filter-btn-odlozene:hover {
+.filter-btn-odlozene:hover,
+.filter-btn-cekame-na-dily:hover {
   background: #bbb !important;
   border-color: #888 !important;
 }
@@ -1262,6 +1264,18 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 }
 .filter-btn-odlozene.active:hover {
   background: #7b1fa2 !important;
+  border-color: #000 !important;
+}
+
+/* Filtr ČEKÁME NA DÍLY - AKTIVNÍ tmavě šedá */
+.filter-btn-cekame-na-dily.active {
+  background: #555 !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+.filter-btn-cekame-na-dily.active:hover {
+  background: #333 !important;
   border-color: #000 !important;
 }
 
@@ -2000,9 +2014,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
   <!-- FILTERS -->
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all" data-lang-cs="Všechny" data-lang-en="All" data-lang-it="Tutti">
-      Všechny <span id="count-all" style="opacity: 0.7;"></span>
-    </button>
     <button class="filter-btn filter-btn-wait" data-filter="wait" data-lang-cs="NOVÁ" data-lang-en="New" data-lang-it="Nuovo">
       NOVÁ <span id="count-wait" style="opacity: 0.7;"></span>
     </button>
@@ -2017,6 +2028,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     </button>
     <button class="filter-btn filter-btn-odlozene" data-filter="odlozene" data-lang-cs="Odložené" data-lang-en="Postponed" data-lang-it="Rimandati">
       ODLOŽENÉ <span id="count-odlozene" style="opacity: 0.7;"></span>
+    </button>
+    <button class="filter-btn filter-btn-cekame-na-dily" data-filter="cekame-na-dily" data-lang-cs="Čeká na díly" data-lang-en="Waiting parts" data-lang-it="Attesa parti">
+      Čeká na díly <span id="count-cekame-na-dily" style="opacity: 0.7;"></span>
     </button>
   </div>
 
