@@ -99,8 +99,8 @@ try {
     if (!$template) {
         logMessage("Sablona 'appointment_reminder' neni v databazi - pouzivam fallback");
         $template = [
-            'subject' => 'Pripominka: Zitrejsi navsteva technika - WGS Service',
-            'template' => "Dobry den {{customer_name}},\n\npripominame Vam zitrejsi navstevu technika WGS Service.\n\nTermin: {{date}} v {{time}}\nAdresa: {{address}}\nTechnik: {{technician_name}}, tel. {{technician_phone}}\n\nDULEZITE: Prosime, pripravte nabytek pred prichodem technika. Odstrante z nej vsechny osobni veci a luzkoviny, aby technik mohl bez prekazek provest servisni zasah.\n\nV pripade potreby zmeny terminu nas kontaktujte.\n\nS pozdravem,\nWGS Service\nTel: +420 725 965 826\nEmail: reklamace@wgs-service.cz"
+            'subject' => 'Připomínka: Zítřejší návštěva technika - WGS Service',
+            'template' => "Dobrý den {{customer_name}},\n\npřipomínáme Vám zítřejší návštěvu technika WGS Service.\n\nTermín: {{date}} v {{time}}\nAdresa: {{address}}\nTechnik: {{technician_name}}, tel. {{technician_phone}}\n\nDŮLEŽITÉ: Prosíme, připravte nábytek před příchodem technika. Odstraňte z něj všechny osobní věci a lůžkoviny, aby technik mohl bez překážek provést servisní zásah.\n\nPŘÍSTUP K INTERNETU:\nProsíme Vás o umožnění přístupu k Vaší WiFi síti pro technika během servisního zásahu. Pracujeme výhradně s online protokoly a v některých lokalitách není dostupné mobilní pokrytí sítě. Bez přístupu k internetu nelze řádně dokončit a odeslat protokol o servisním zásahu. Děkujeme za pochopení.\n\nV případě potřeby změny termínu nás kontaktujte.\n\nS pozdravem,\nWGS Service\nTel: +420 725 965 826\nEmail: reklamace@wgs-service.cz"
         ];
     }
 
