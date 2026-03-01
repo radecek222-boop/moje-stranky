@@ -1308,42 +1308,47 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-radius: 4px;
   padding: 0.4rem 0.7rem;
   margin-bottom: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 .admin-prodejce-label {
   font-size: 0.6rem;
   font-weight: 700;
-  color: #555;
+  color: #888;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   flex-shrink: 0;
-  padding-right: 0.3rem;
-  border-right: 1px solid #333;
+  padding-right: 0.5rem;
+  border-right: 1px solid #444;
 }
 .admin-prodejce-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
+  flex: 1;
 }
 .admin-prodejce-btn {
-  font-size: 0.62rem;
-  padding: 0.15rem 0.45rem;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.18rem 0.55rem;
+  background: #222;
+  border: 1px solid #555;
   border-radius: 3px;
-  color: #888;
+  color: #ccc;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
   white-space: nowrap;
 }
 .admin-prodejce-btn:hover {
-  border-color: #777;
-  color: #ddd;
+  background: #2a2a2a;
+  border-color: #999;
+  color: #fff;
 }
 .admin-prodejce-btn.active {
-  background: #222;
-  border-color: #ccc;
+  background: #333;
+  border-color: #fff;
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* PŘEPÍNAČ ZOBRAZENÍ KARTY / ŘÁDKY */
