@@ -2030,7 +2030,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
       ODLOŽENÉ <span id="count-odlozene" style="opacity: 0.7;"></span>
     </button>
     <button class="filter-btn filter-btn-cekame-na-dily" data-filter="cekame-na-dily" data-lang-cs="Čeká na díly" data-lang-en="Waiting parts" data-lang-it="Attesa parti">
-      ČEKÁ NA DÍLY <span id="count-cekame-na-dily" style="opacity: 0.7;"></span>
+      Čeká na díly <span id="count-cekame-na-dily" style="opacity: 0.7;"></span>
     </button>
   </div>
 

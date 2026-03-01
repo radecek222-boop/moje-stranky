@@ -409,7 +409,6 @@ function initFilters() {
 function updateCounts(items) {
   if (!Array.isArray(items)) return;
 
-  const countAll = items.length;
   const countWait = items.filter(r => {
     const stav = r.stav || 'wait';
     const isWait = stav === 'ČEKÁ' || stav === 'wait';
@@ -428,7 +427,6 @@ function updateCounts(items) {
     return stav === 'HOTOVO' || stav === 'done';
   }).length;
   
-  document.getElementById('count-all').textContent = `(${countAll})`;
   document.getElementById('count-wait').textContent = `(${countWait})`;
   document.getElementById('count-open').textContent = `(${countOpen})`;
   document.getElementById('count-done').textContent = `(${countDone})`;
@@ -506,13 +504,13 @@ function prioritaZaznamu(r) {
   const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
 
   if (isDone) return 7;                              // HOTOVO
-  if (isCekameNaDily) return 6;                      // ČEKÁME NA DÍLY (= CN Čekáme ND)
-  if (maCN && cnStav === 'cekame_nd') return 6;      // CN Čekáme ND (stejná pozice)
-  if (jeOdlozena) return 5;                          // ODLOŽENÁ
+  if (isCekameNaDily) return 5;                      // Čekáme na díly (= CN Čekáme ND)
+  if (maCN && cnStav === 'cekame_nd') return 5;      // CN Čekáme ND (stejná pozice)
+  if (jeOdlozena) return 4;                          // ODLOŽENÁ
   if (isOpen) return 3;                              // DOMLUVENÁ
   if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
   if (maCN && cnStav === 'potvrzena') return 2;      // CN Odsouhlasena (hned za NOVÁ)
-  return 4;                                          // CN poslána
+  return 6;                                          // CN Poslána (za Čekáme na díly)
 }
 
 // Pomocná funkce pro parse termínu na timestamp
@@ -780,7 +778,7 @@ async function renderOrders(items = null) {
     let cnText = 'Poslána CN';
     let cnTextClass = 'order-cn-text';
     if (jeCekameNd) {
-      cnText = 'ČEKÁME NA DÍLY';
+      cnText = 'Čekáme na díly';
       cnTextClass = 'order-cn-text cekame-nd';
     } else if (jeOdsouhlasena) {
       cnText = 'Odsouhlasena';
@@ -812,7 +810,7 @@ async function renderOrders(items = null) {
                 : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
                     ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
                     : (status.class === 'cekame-na-dily'
-                        ? `<span class="order-cn-text cekame-nd">ČEKÁME NA DÍLY</span>`
+                        ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
                         : (maCenovouNabidku && !jeHotovo
                             ? `<span class="${cnTextClass}">${cnText}</span>`
                             : `<span class="order-status-text status-${status.class}">${status.text}</span>`)))}
@@ -982,7 +980,7 @@ function createCustomerHeader() {
       <optgroup label="Základní stavy">
         <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
         <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
-        <option value="cekame_na_dily" ${aktualniHodnota === 'cekame_na_dily' ? 'selected' : ''}>ČEKÁME NA DÍLY</option>
+        <option value="cekame_na_dily" ${aktualniHodnota === 'cekame_na_dily' ? 'selected' : ''}>Čekáme na díly</option>
         <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
         <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
       </optgroup>
@@ -4270,8 +4268,8 @@ function getStatus(stav) {
     'open': { class: 'open', text: 'DOMLUVENÁ' },
     'HOTOVO': { class: 'done', text: 'HOTOVO' },
     'done': { class: 'done', text: 'HOTOVO' },
-    'ČEKÁME NA DÍLY': { class: 'cekame-na-dily', text: 'ČEKÁME NA DÍLY' },
-    'cekame_na_dily': { class: 'cekame-na-dily', text: 'ČEKÁME NA DÍLY' }
+    'ČEKÁME NA DÍLY': { class: 'cekame-na-dily', text: 'Čekáme na díly' },
+    'cekame_na_dily': { class: 'cekame-na-dily', text: 'Čekáme na díly' }
   };
 
   return statusMap[stav] || { class: 'wait', text: 'NOVÁ' };
@@ -4398,11 +4396,11 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
     'wait': 'NOVÁ',
     'open': 'DOMLUVENÁ',
     'done': 'HOTOVO',
-    'cekame_na_dily': 'ČEKÁME NA DÍLY',
+    'cekame_na_dily': 'Čekáme na díly',
     'odlozena': 'Odložená',
     'cn_poslana': 'Poslána CN',
     'cn_odsouhlasena': 'Odsouhlasena',
-    'cn_cekame_nd': 'ČEKÁME NA DÍLY'
+    'cn_cekame_nd': 'Čekáme na díly'
   };
 
   // Rozpoznat CN stavy

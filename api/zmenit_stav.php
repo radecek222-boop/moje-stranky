@@ -215,10 +215,10 @@ try {
         'wait' => 'NOVÁ',
         'open' => 'DOMLUVENÁ',
         'done' => 'HOTOVO',
-        'cekame_na_dily' => 'ČEKÁME NA DÍLY',
+        'cekame_na_dily' => 'Čekáme na díly',
         'cn_poslana' => 'Poslána CN',
         'cn_odsouhlasena' => 'Odsouhlasena',
-        'cn_cekame_nd' => 'ČEKÁME NA DÍLY'
+        'cn_cekame_nd' => 'Čekáme na díly'
     ];
 
     sendJsonSuccess("Stav změněn na: {$stavyMap[$novyStav]}", [
