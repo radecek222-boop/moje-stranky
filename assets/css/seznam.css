@@ -294,6 +294,8 @@ body {
 }
 .order-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .order-customer {
   font-size: 0.85rem;
@@ -1570,6 +1572,7 @@ body {
   justify-content: space-between;
   align-items: flex-end;
   gap: 0.5rem;
+  margin-top: auto;
 }
 
 .order-detail-left {
