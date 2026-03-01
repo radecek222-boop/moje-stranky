@@ -2010,9 +2010,10 @@ a.detail-btn-primary:active {
 }
 
 .order-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 16px 130px 2fr 2fr 1fr 72px 115px 40px;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   padding: 0.35rem 0.6rem;
   background: #f8f8f8;
   border: 1px solid #ddd;
@@ -2045,14 +2046,24 @@ a.detail-btn-primary:active {
 .order-row.ma-cenovou-nabidku:hover { background: rgba(255, 140, 0, 0.2);  box-shadow: 0 0 12px rgba(255, 140, 0, 0.7); }
 .order-row.cn-odsouhlasena:hover    { background: rgba(40, 167, 69, 0.2);  box-shadow: 0 0 12px rgba(40, 167, 69, 0.7); }
 
-.order-row-dot     { flex-shrink: 0; }
-.order-row-id      { font-size: 0.65rem; color: #666; width: 88px; flex-shrink: 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; flex: 2; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-address { font-size: 0.72rem; color: #555; flex: 2; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-product { font-size: 0.72rem; color: #333; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-date    { font-size: 0.65rem; color: #888; width: 72px; flex-shrink: 0; text-align: right; }
-.order-row-badge   { width: 110px; flex-shrink: 0; text-align: right; }
-.order-row-chat    { flex-shrink: 0; }
+.order-row-dot     { }
+.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
+.order-row-badge   { text-align: right; }
+.order-row-chat    { }
+
+/* Mensi badge v radkovem zobrazeni */
+.order-row .order-status-text,
+.order-row .order-cn-text,
+.order-row .order-appointment {
+  font-size: 0.58rem;
+  padding: 0.08rem 0.25rem;
+  white-space: nowrap;
+  display: inline-block;
+}
 
 /* Na mobilu vždy karty */
 @media (max-width: 768px) {
