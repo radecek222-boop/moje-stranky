@@ -1998,3 +1998,64 @@ a.detail-btn-primary:active {
     font-size: 0.85rem;
   }
 }
+
+/* ============================================
+   ŘÁDKOVÝ VÝPIS (desktop only)
+   ============================================ */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2rem;
+}
+
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.6rem;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-left: 3px solid #1a1a1a;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  min-height: 36px;
+}
+
+.order-row:hover {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-row.status-bg-wait     { border-left-color: #ffdd00; }
+.order-row.status-bg-open     { border-left-color: #00e5ff; }
+.order-row.status-bg-done     { border-left-color: #39ff14; }
+.order-row.status-bg-odlozena { border-left-color: #9b59b6; }
+.order-row.cn-cekame-nd       { border-left-color: #999; }
+.order-row.ma-cenovou-nabidku { border-left-color: #ff8c00; }
+.order-row.cn-odsouhlasena    { border-left-color: #28a745; }
+
+.order-row-dot     { flex-shrink: 0; }
+.order-row-id      { font-size: 0.65rem; color: #666; width: 88px; flex-shrink: 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; flex: 2; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-address { font-size: 0.72rem; color: #555; flex: 2; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: #333; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-date    { font-size: 0.65rem; color: #888; width: 72px; flex-shrink: 0; text-align: right; }
+.order-row-badge   { width: 110px; flex-shrink: 0; text-align: right; }
+.order-row-chat    { flex-shrink: 0; }
+
+/* Na mobilu vždy karty */
+@media (max-width: 768px) {
+  .order-list {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .order-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 50px;
+    border-left-width: 3px;
+  }
+}

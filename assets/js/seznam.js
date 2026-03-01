@@ -110,6 +110,7 @@ const PER_PAGE = 9999; // Načíst všechny karty najednou
 let CAL_MONTH = new Date().getMonth();
 let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
+let VIEW_MODE = localStorage.getItem('wgs-seznam-view') || 'karty';
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
 const WGS_COORDS = { lat: 50.08028448017454, lng: 14.598156697482635 };
@@ -399,6 +400,19 @@ function initFilters() {
         }
       }
 
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    });
+  });
+
+  // Přepínač zobrazení KARTY / ŘÁDKY
+  document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    if (btn.dataset.view === VIEW_MODE) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      VIEW_MODE = btn.dataset.view;
+      localStorage.setItem('wgs-seznam-view', VIEW_MODE);
+      document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
       renderOrders(userItems);
     });
@@ -712,6 +726,9 @@ async function renderOrders(items = null) {
   // Seřadit až TEĎ — EMAILS_S_CN a STAVY_NABIDEK jsou již načteny výše
   filtered = seraditZaznamy(filtered);
 
+  // Přepnout třídu kontejneru podle módu zobrazení
+  grid.className = VIEW_MODE === 'radky' ? 'order-list' : 'order-grid';
+
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
     const product = Utils.getProduct(rec);
@@ -785,15 +802,42 @@ async function renderOrders(items = null) {
       cnTextClass = 'order-cn-text odsouhlasena';
     }
 
+    // Sdílený badge stavu (používá se v obou šablonách)
+    const stavBadge = appointmentText
+      ? `<span class="order-appointment">${appointmentText}</span>`
+      : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+          ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+          : (status.class === 'cekame-na-dily'
+              ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
+              : (maCenovouNabidku && !jeHotovo
+                  ? `<span class="${cnTextClass}">${cnText}</span>`
+                  : `<span class="order-status-text status-${status.class}">${status.text}</span>`)));
+
+    const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
+    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
+
+    if (VIEW_MODE === 'radky') {
+      return `
+        <div class="order-row ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
+          <div class="order-row-dot">${stavDot}</div>
+          <div class="order-row-id">${highlightedOrderId}</div>
+          <div class="order-row-customer">${highlightedCustomer}</div>
+          <div class="order-row-address">${highlightedAddress}</div>
+          <div class="order-row-product">${highlightedProduct}</div>
+          <div class="order-row-date">${date}</div>
+          <div class="order-row-badge">${stavBadge}</div>
+          <div class="order-row-chat">${chatBadge}</div>
+        </div>
+      `;
+    }
+
     return `
       <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">
-              CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}
-            </div>
-            <div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>
+            ${chatBadge}
+            ${stavDot}
           </div>
         </div>
         <div class="order-body">
@@ -804,17 +848,7 @@ async function renderOrders(items = null) {
               <div class="order-detail-line">${highlightedProduct}</div>
               <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
             </div>
-            <div class="order-detail-right">
-              ${appointmentText
-                ? `<span class="order-appointment">${appointmentText}</span>`
-                : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
-                    ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-                    : (status.class === 'cekame-na-dily'
-                        ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
-                        : (maCenovouNabidku && !jeHotovo
-                            ? `<span class="${cnTextClass}">${cnText}</span>`
-                            : `<span class="order-status-text status-${status.class}">${status.text}</span>`)))}
-            </div>
+            <div class="order-detail-right">${stavBadge}</div>
           </div>
         </div>
       </div>

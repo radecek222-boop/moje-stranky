@@ -101,10 +101,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20260301-02" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20260301-03" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260301-02">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260301-03">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -1297,6 +1297,40 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 }
 
+/* PŘEPÍNAČ ZOBRAZENÍ KARTY / ŘÁDKY */
+.view-toggle-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.view-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  min-height: 0;
+  line-height: 1;
+}
+.view-toggle-btn.active {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+.view-toggle-sep {
+  font-size: 0.7rem;
+  color: #ccc;
+}
+@media (max-width: 768px) {
+  .view-toggle-wrapper { display: none; }
+}
+
 /* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
   /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */
@@ -2032,6 +2066,13 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="filter-btn filter-btn-cekame-na-dily" data-filter="cekame-na-dily" data-lang-cs="Čeká na díly" data-lang-en="Waiting parts" data-lang-it="Attesa parti">
       Čeká na díly <span id="count-cekame-na-dily" style="opacity: 0.7;"></span>
     </button>
+  </div>
+
+  <!-- PŘEPÍNAČ ZOBRAZENÍ - pouze desktop -->
+  <div class="view-toggle-wrapper">
+    <button class="view-toggle-btn" data-view="karty">KARTY</button>
+    <span class="view-toggle-sep">|</span>
+    <button class="view-toggle-btn" data-view="radky">ŘÁDKY</button>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
