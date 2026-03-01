@@ -2014,9 +2014,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
   <!-- FILTERS -->
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all" data-lang-cs="Všechny" data-lang-en="All" data-lang-it="Tutti">
-      Všechny <span id="count-all" style="opacity: 0.7;"></span>
-    </button>
     <button class="filter-btn filter-btn-wait" data-filter="wait" data-lang-cs="NOVÁ" data-lang-en="New" data-lang-it="Nuovo">
       NOVÁ <span id="count-wait" style="opacity: 0.7;"></span>
     </button>

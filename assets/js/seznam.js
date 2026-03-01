@@ -506,12 +506,13 @@ function prioritaZaznamu(r) {
   const cnStav = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
 
   if (isDone) return 7;                              // HOTOVO
-  if (jeOdlozena) return 4;                          // ODLOŽENÁ
-  if (isCekameNaDily) return 3;                      // ČEKÁME NA DÍLY (za DOMLUVENÁ)
-  if (isOpen) return 2;                              // DOMLUVENÁ
+  if (isCekameNaDily) return 6;                      // ČEKÁME NA DÍLY (= CN Čekáme ND)
+  if (maCN && cnStav === 'cekame_nd') return 6;      // CN Čekáme ND (stejná pozice)
+  if (jeOdlozena) return 5;                          // ODLOŽENÁ
+  if (isOpen) return 3;                              // DOMLUVENÁ
   if (isWait && !maCN) return 1;                     // NOVÁ (bez CN)
-  if (maCN && cnStav === 'potvrzena') return 5;      // CN odsouhlasena
-  return 6;                                          // CN poslána / Čekáme ND
+  if (maCN && cnStav === 'potvrzena') return 2;      // CN Odsouhlasena (hned za NOVÁ)
+  return 4;                                          // CN poslána
 }
 
 // Pomocná funkce pro parse termínu na timestamp
@@ -588,9 +589,11 @@ async function renderOrders(items = null) {
 
         if (filterType === 'poz') {
           // POZ: mimozáruční oprava (created_by je prázdné) NEBO zákazník s CN
-          if (!createdBy) return true;
+          // HOTOVO se zobrazí pouze pokud je aktivní i filtr HOTOVO
           const isDone = stav === 'HOTOVO' || stav === 'done';
-          if (email && EMAILS_S_CN.includes(email) && !isDone) return true;
+          if (isDone) return false;
+          if (!createdBy) return true;
+          if (email && EMAILS_S_CN.includes(email)) return true;
         }
 
         if (filterType === 'odlozene') {
@@ -669,12 +672,13 @@ async function renderOrders(items = null) {
   const countPozEl = document.getElementById('count-poz');
   if (countPozEl) {
     const countPoz = items.filter(r => {
+      const stav = r.stav || 'wait';
+      const isDone = stav === 'HOTOVO' || stav === 'done';
+      if (isDone) return false;
       const createdBy = (r.created_by || '').trim();
       if (!createdBy) return true;
       const email = (r.email || '').toLowerCase().trim();
-      const stav = r.stav || 'wait';
-      const isDone = stav === 'HOTOVO' || stav === 'done';
-      return email && EMAILS_S_CN.includes(email) && !isDone;
+      return email && EMAILS_S_CN.includes(email);
     }).length;
     countPozEl.textContent = `(${countPoz})`;
   }
@@ -751,10 +755,10 @@ async function renderOrders(items = null) {
     const highlightedOrderId = SEARCH_QUERY ? highlightText(orderId, SEARCH_QUERY) : orderId;
 
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
-    // Přidat barevný nádech podle stavu (odložené mají fialový rámeček)
+    // Přidat barevný nádech podle stavu (odložené mají fialový rámeček, čekáme na díly sdílí cn-cekame-nd třídu)
     const statusBgClass = (rec.je_odlozena == 1 || rec.je_odlozena === true)
       ? 'status-bg-odlozena'
-      : `status-bg-${status.class}`;
+      : (status.class === 'cekame-na-dily' ? 'cn-cekame-nd' : `status-bg-${status.class}`);
     // Oranžový rámeček pro zákazníky s CN (pouze pokud NEMÁ domluvený termín)
     // Zelený rámeček pro odsouhlasené nabídky
     // Šedý rámeček pro "Čekáme ND"
@@ -776,7 +780,7 @@ async function renderOrders(items = null) {
     let cnText = 'Poslána CN';
     let cnTextClass = 'order-cn-text';
     if (jeCekameNd) {
-      cnText = 'Cekame ND';
+      cnText = 'ČEKÁME NA DÍLY';
       cnTextClass = 'order-cn-text cekame-nd';
     } else if (jeOdsouhlasena) {
       cnText = 'Odsouhlasena';
@@ -791,7 +795,7 @@ async function renderOrders(items = null) {
             <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">
               CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}
             </div>
-            <div class="order-status status-${status.class}"></div>
+            <div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>
           </div>
         </div>
         <div class="order-body">
@@ -807,9 +811,11 @@ async function renderOrders(items = null) {
                 ? `<span class="order-appointment">${appointmentText}</span>`
                 : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
                     ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-                    : (maCenovouNabidku && !jeHotovo
-                        ? `<span class="${cnTextClass}">${cnText}</span>`
-                        : `<span class="order-status-text status-${status.class}">${status.text}</span>`))}
+                    : (status.class === 'cekame-na-dily'
+                        ? `<span class="order-cn-text cekame-nd">ČEKÁME NA DÍLY</span>`
+                        : (maCenovouNabidku && !jeHotovo
+                            ? `<span class="${cnTextClass}">${cnText}</span>`
+                            : `<span class="order-status-text status-${status.class}">${status.text}</span>`)))}
             </div>
           </div>
         </div>
