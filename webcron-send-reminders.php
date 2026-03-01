@@ -77,16 +77,16 @@ try {
 
     // Načíst šablonu pro připomenutí
     $stmtTemplate = $pdo->prepare("
-        SELECT subject, template
+        SELECT subject, template, template_data
         FROM wgs_notifications
-        WHERE id = 'appointment_reminder_customer'
+        WHERE trigger_event = 'appointment_reminder' AND type = 'email' AND active = 1
         LIMIT 1
     ");
     $stmtTemplate->execute();
     $template = $stmtTemplate->fetch(PDO::FETCH_ASSOC);
 
     if (!$template) {
-        throw new Exception("Šablona 'appointment_reminder_customer' nebyla nalezena v databázi!");
+        throw new Exception("Šablona 'appointment_reminder' nebyla nalezena v databázi!");
     }
 
     $uspesneOdeslano = 0;
@@ -136,9 +136,20 @@ try {
             '{{technician_phone}}' => $navsteva['technik_telefon'] ?? '+420 725 965 826'
         ];
 
-        // Nahradit proměnné v předmětu a těle emailu
+        // Nahradit proměnné v předmětu
         $predmet = str_replace(array_keys($nahradit), array_values($nahradit), $template['subject']);
-        $telo = str_replace(array_keys($nahradit), array_values($nahradit), $template['template']);
+
+        // Sestavit tělo emailu – grafická šablona nebo plain text
+        if (!empty($template['template_data'])) {
+            require_once __DIR__ . '/includes/email_template_base.php';
+            $promenneHolne = [];
+            foreach ($nahradit as $klic => $hodnota) {
+                $promenneHolne[trim($klic, '{}')] = $hodnota;
+            }
+            $telo = renderujEmailZeSablony($template, $promenneHolne);
+        } else {
+            $telo = str_replace(array_keys($nahradit), array_values($nahradit), $template['template']);
+        }
 
         // Přidat email do fronty
         try {

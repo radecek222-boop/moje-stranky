@@ -34,6 +34,8 @@ function renderujGrafickyEmail(array $data): string {
     $tlacitko = $data['tlacitko'] ?? null;
     $infobox = nl2br(markdownNaHtml($data['infobox'] ?? ''));
     $upozorneni = nl2br(markdownNaHtml($data['upozorneni'] ?? ''));
+    // GDPR se renderuje jako HTML (podpora odkazu), bez markdown zpracování
+    $gdpr = $data['gdpr'] ?? '';
 
     // Sestavení sekcí
     $nadpisHtml = '';
@@ -98,7 +100,7 @@ function renderujGrafickyEmail(array $data): string {
                     <tr>
                         <td style='background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 35px 40px; text-align: center; border-radius: 12px 12px 0 0;'>
                             <h1 style='margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 2px;'>WHITE GLOVE SERVICE</h1>
-                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;'>Premium Furniture Care</p>
+                            <p style='margin: 8px 0 0 0; font-size: 12px; color: #bbb; text-transform: uppercase; letter-spacing: 1px;'>Premium Furniture Care</p>
                         </td>
                     </tr>
 
@@ -135,16 +137,24 @@ function renderujGrafickyEmail(array $data): string {
                     <tr>
                         <td style='background: #1a1a1a; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;'>
                             <p style='margin: 0; font-size: 14px; font-weight: 600; color: #fff;'>White Glove Service, s.r.o.</p>
-                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
-                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #888;'>
-                                Tel: <a href='tel:+420725965826' style='color: #888; text-decoration: none;'>+420 725 965 826</a> |
-                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #888; text-decoration: none;'>reklamace@wgs-service.cz</a>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #aaa;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+                            <p style='margin: 8px 0 0 0; font-size: 13px; color: #aaa;'>
+                                Tel: <a href='tel:+420725965826' style='color: #aaa; text-decoration: none;'>+420 725 965 826</a> |
+                                Email: <a href='mailto:reklamace@wgs-service.cz' style='color: #aaa; text-decoration: none;'>reklamace@wgs-service.cz</a>
                             </p>
                             <p style='margin: 15px 0 0 0; font-size: 12px; color: #555;'>
                                 <a href='{$baseUrl}' style='color: #39ff14; text-decoration: none;'>www.wgs-service.cz</a>
                             </p>
                         </td>
                     </tr>
+
+                    <!-- GDPR – pod patičkou, velmi malé písmo -->
+                    " . (!empty($gdpr) ? "
+                    <tr>
+                        <td style='padding: 14px 40px 4px 40px; text-align: center;'>
+                            <p style='margin: 0; font-size: 10px; color: #666; line-height: 1.5;'>{$gdpr}</p>
+                        </td>
+                    </tr>" : "") . "
 
                 </table>
             </td>
