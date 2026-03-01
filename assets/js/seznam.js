@@ -110,6 +110,8 @@ const PER_PAGE = 9999; // Načíst všechny karty najednou
 let CAL_MONTH = new Date().getMonth();
 let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
+let VIEW_MODE = localStorage.getItem('wgs-seznam-view') || 'radky';
+let ADMIN_PRODEJCE_FILTER = null; // null = vsichni, jinak created_by id vybrane ho prodejce
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
 const WGS_COORDS = { lat: 50.08028448017454, lng: 14.598156697482635 };
@@ -403,6 +405,19 @@ function initFilters() {
       renderOrders(userItems);
     });
   });
+
+  // Přepínač zobrazení KARTY / ŘÁDKY
+  document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    if (btn.dataset.view === VIEW_MODE) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      VIEW_MODE = btn.dataset.view;
+      localStorage.setItem('wgs-seznam-view', VIEW_MODE);
+      document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    });
+  });
 }
 
 // === AKTUALIZACE POČTŮ ===
@@ -471,6 +486,7 @@ async function loadAll(status = 'all', append = false) {
 
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
 
+    sestavAdminProdejceBox();
     updateCounts(userItems);
     renderOrders(userItems);
 
@@ -547,6 +563,65 @@ function seraditZaznamy(zaznamy) {
   });
 }
 
+function sestavAdminProdejceBox() {
+  if (!CURRENT_USER || !CURRENT_USER.is_admin) return;
+  const box = document.getElementById('adminProdejceBox');
+  if (!box) return;
+  box.style.display = 'flex';
+
+  // Sestavit mapu unikatnich prodejcu z nactenych dat
+  const prodejceMap = new Map();
+  (WGS_DATA_CACHE || []).forEach(r => {
+    const id = String(r.created_by || '').trim();
+    if (!id) return;
+    const jmeno = r.zadavatel_jmeno || r.created_by_name || id;
+    if (!prodejceMap.has(id)) {
+      prodejceMap.set(id, jmeno);
+    }
+  });
+
+  const seznam = document.getElementById('adminProdejceList');
+  seznam.innerHTML = '';
+
+  // Tlacitko "Vse"
+  const btnVse = document.createElement('button');
+  btnVse.className = 'admin-prodejce-btn' + (ADMIN_PRODEJCE_FILTER === null ? ' active' : '');
+  btnVse.dataset.prodejceId = '';
+  const celkemPocet = (WGS_DATA_CACHE || []).length;
+  btnVse.textContent = `Vše (${celkemPocet})`;
+  seznam.appendChild(btnVse);
+
+  // Tlacitka pro jednotlive prodejce - serazene podle poctu zakazek (sestupne)
+  const prodejceSeznam = [...prodejceMap.entries()].map(([id, jmeno]) => ({
+    id,
+    jmeno,
+    pocet: (WGS_DATA_CACHE || []).filter(r => String(r.created_by || '') === id).length
+  })).sort((a, b) => b.pocet - a.pocet);
+
+  prodejceSeznam.forEach(({ id, jmeno, pocet }) => {
+    const btn = document.createElement('button');
+    btn.className = 'admin-prodejce-btn' + (ADMIN_PRODEJCE_FILTER === id ? ' active' : '');
+    btn.dataset.prodejceId = id;
+    btn.textContent = `${jmeno} (${pocet})`;
+    seznam.appendChild(btn);
+  });
+
+  // Odebrat stare listenery nahrazenim uzlu (klon)
+  const novySeznam = seznam.cloneNode(true);
+  seznam.parentNode.replaceChild(novySeznam, seznam);
+
+  novySeznam.addEventListener('click', (e) => {
+    const btn = e.target.closest('.admin-prodejce-btn');
+    if (!btn) return;
+    const id = btn.dataset.prodejceId;
+    ADMIN_PRODEJCE_FILTER = id || null;
+    novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
+  });
+}
+
 async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
@@ -556,6 +631,11 @@ async function renderOrders(items = null) {
   }
 
   if (!Array.isArray(items)) items = [];
+
+  // Admin filtr podle prodejce
+  if (CURRENT_USER && CURRENT_USER.is_admin && ADMIN_PRODEJCE_FILTER !== null) {
+    items = items.filter(r => String(r.created_by || '') === ADMIN_PRODEJCE_FILTER);
+  }
 
   let filtered = items;
 
@@ -712,6 +792,9 @@ async function renderOrders(items = null) {
   // Seřadit až TEĎ — EMAILS_S_CN a STAVY_NABIDEK jsou již načteny výše
   filtered = seraditZaznamy(filtered);
 
+  // Přepnout třídu kontejneru podle módu zobrazení
+  grid.className = VIEW_MODE === 'radky' ? 'order-list' : 'order-grid';
+
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
     const product = Utils.getProduct(rec);
@@ -785,15 +868,42 @@ async function renderOrders(items = null) {
       cnTextClass = 'order-cn-text odsouhlasena';
     }
 
+    // Sdílený badge stavu (používá se v obou šablonách)
+    const stavBadge = appointmentText
+      ? `<span class="order-appointment">${appointmentText}</span>`
+      : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+          ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+          : (status.class === 'cekame-na-dily'
+              ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
+              : (maCenovouNabidku && !jeHotovo
+                  ? `<span class="${cnTextClass}">${cnText}</span>`
+                  : `<span class="order-status-text status-${status.class}">${status.text}</span>`)));
+
+    const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
+    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
+
+    if (VIEW_MODE === 'radky') {
+      return `
+        <div class="order-row ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
+          <div class="order-row-dot">${stavDot}</div>
+          <div class="order-row-id">${highlightedOrderId}</div>
+          <div class="order-row-customer">${highlightedCustomer}</div>
+          <div class="order-row-address">${highlightedAddress}</div>
+          <div class="order-row-product">${highlightedProduct}</div>
+          <div class="order-row-date">${date}</div>
+          <div class="order-row-badge">${stavBadge}</div>
+          <div class="order-row-chat">${chatBadge}</div>
+        </div>
+      `;
+    }
+
     return `
       <div class="order-box ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">
-              CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}
-            </div>
-            <div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>
+            ${chatBadge}
+            ${stavDot}
           </div>
         </div>
         <div class="order-body">
@@ -804,17 +914,7 @@ async function renderOrders(items = null) {
               <div class="order-detail-line">${highlightedProduct}</div>
               <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
             </div>
-            <div class="order-detail-right">
-              ${appointmentText
-                ? `<span class="order-appointment">${appointmentText}</span>`
-                : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
-                    ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-                    : (status.class === 'cekame-na-dily'
-                        ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
-                        : (maCenovouNabidku && !jeHotovo
-                            ? `<span class="${cnTextClass}">${cnText}</span>`
-                            : `<span class="order-status-text status-${status.class}">${status.text}</span>`)))}
-            </div>
+            <div class="order-detail-right">${stavBadge}</div>
           </div>
         </div>
       </div>

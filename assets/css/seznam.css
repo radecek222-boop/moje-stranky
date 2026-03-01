@@ -1998,3 +1998,88 @@ a.detail-btn-primary:active {
     font-size: 0.85rem;
   }
 }
+
+/* ============================================
+   ŘÁDKOVÝ VÝPIS (desktop only)
+   ============================================ */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2rem;
+}
+
+.order-row {
+  display: grid;
+  grid-template-columns: 16px 130px 2fr 2fr 1fr 72px 115px 40px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  min-height: 36px;
+}
+
+.order-row:hover {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Barevna vplň radku podle stavu reklamace */
+.order-row.status-bg-wait     { background: rgba(255, 221, 0, 0.12);  border: 2px solid #ffdd00; box-shadow: 0 0 6px rgba(255, 221, 0, 0.4); }
+.order-row.status-bg-open     { background: rgba(0, 229, 255, 0.12);  border: 2px solid #00e5ff; box-shadow: 0 0 6px rgba(0, 229, 255, 0.4); }
+.order-row.status-bg-done     { background: rgba(57, 255, 20, 0.12);  border: 2px solid #39ff14; box-shadow: 0 0 6px rgba(57, 255, 20, 0.4); }
+.order-row.status-bg-odlozena { background: rgba(155, 89, 182, 0.12); border: 2px solid #9b59b6; box-shadow: 0 0 6px rgba(155, 89, 182, 0.4); }
+.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.12); border: 2px solid #999;   box-shadow: 0 0 6px rgba(153, 153, 153, 0.4); }
+.order-row.ma-cenovou-nabidku { background: rgba(255, 140, 0, 0.12);  border: 2px solid #ff8c00; box-shadow: 0 0 6px rgba(255, 140, 0, 0.4); }
+.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.12);  border: 2px solid #28a745; box-shadow: 0 0 6px rgba(40, 167, 69, 0.4); }
+
+/* Hover - intenzivnejsi zari a svetlejsi vplň */
+.order-row.status-bg-wait:hover     { background: rgba(255, 221, 0, 0.2);  box-shadow: 0 0 12px rgba(255, 221, 0, 0.7); }
+.order-row.status-bg-open:hover     { background: rgba(0, 229, 255, 0.2);  box-shadow: 0 0 12px rgba(0, 229, 255, 0.7); }
+.order-row.status-bg-done:hover     { background: rgba(57, 255, 20, 0.2);  box-shadow: 0 0 12px rgba(57, 255, 20, 0.7); }
+.order-row.status-bg-odlozena:hover { background: rgba(155, 89, 182, 0.2); box-shadow: 0 0 12px rgba(155, 89, 182, 0.7); }
+.order-row.cn-cekame-nd:hover       { background: rgba(153, 153, 153, 0.2); box-shadow: 0 0 12px rgba(153, 153, 153, 0.7); }
+.order-row.ma-cenovou-nabidku:hover { background: rgba(255, 140, 0, 0.2);  box-shadow: 0 0 12px rgba(255, 140, 0, 0.7); }
+.order-row.cn-odsouhlasena:hover    { background: rgba(40, 167, 69, 0.2);  box-shadow: 0 0 12px rgba(40, 167, 69, 0.7); }
+
+.order-row-dot     { }
+.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
+.order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
+.order-row-chat    { }
+
+/* Badge v radkovem zobrazeni - stejna sirka, centrovany text */
+.order-row .order-status-text,
+.order-row .order-cn-text,
+.order-row .order-appointment {
+  font-size: 0.58rem;
+  padding: 0.1rem 0;
+  white-space: nowrap;
+  display: block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 3px;
+}
+
+/* Na mobilu vždy karty */
+@media (max-width: 768px) {
+  .order-list {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .order-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 50px;
+    border-left-width: 3px;
+  }
+}
