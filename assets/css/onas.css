@@ -309,16 +309,12 @@ h6 {
   max-width: 220px;
   text-decoration: none;
   transition: border-color 0.2s, opacity 0.2s;
-  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 .partner-logo-polozka:hover {
   border-color: #999;
   opacity: 0.8;
-  flex: 1 1 160px;
 }
 .partner-logo-polozka.tmave-pozadi {
   background: #000;
