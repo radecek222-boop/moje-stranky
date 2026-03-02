@@ -168,6 +168,20 @@ require_once __DIR__ . '/includes/seo_meta.php';
            data-lang-en="QUALITY GUARANTEE"
            data-lang-it="GARANZIA DI QUALITÀ">GARANCE KVALITY</div>
     </div>
+    <div class="partner-loga">
+      <div class="partner-logo-polozka">
+        <img src="assets/img/partners/logo4.png" alt="Natuzzi Italia" loading="lazy">
+      </div>
+      <div class="partner-logo-polozka tmave-pozadi">
+        <img src="assets/img/partners/logo3.png" alt="Natuzzi Editions" loading="lazy">
+      </div>
+      <div class="partner-logo-polozka">
+        <img src="assets/img/partners/logo2.png" alt="Softaly" loading="lazy">
+      </div>
+      <div class="partner-logo-polozka">
+        <img src="assets/img/partners/logo1.png" alt="Phase" loading="lazy">
+      </div>
+    </div>
   </div>
 </section>
 
