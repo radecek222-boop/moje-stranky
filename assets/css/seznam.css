@@ -1638,6 +1638,27 @@ body {
 .order-cn-text          { background: #444; color: #fff; }
 .order-cn-text.cekame-nd    { background: #666; color: #fff; }
 .order-cn-text.odsouhlasena { background: #222; color: #fff; }
+.order-cn-text.zamitnuta    { background: #dc3545; color: #fff; }
+
+/* CN Zamítnuta - červený rámeček */
+.order-box.cn-zamitnuta {
+  background: rgba(220, 53, 69, 0.08);
+  border: 2px solid #dc3545;
+  box-shadow: 0 0 6px rgba(220, 53, 69, 0.25);
+}
+.order-box.cn-zamitnuta:hover {
+  background: rgba(220, 53, 69, 0.15);
+  box-shadow: 0 0 12px rgba(220, 53, 69, 0.5);
+}
+.order-row.cn-zamitnuta {
+  background: rgba(220, 53, 69, 0.08);
+  border: 2px solid #dc3545;
+  box-shadow: 0 0 6px rgba(220, 53, 69, 0.25);
+}
+.order-row.cn-zamitnuta:hover {
+  background: rgba(220, 53, 69, 0.15);
+  box-shadow: 0 0 12px rgba(220, 53, 69, 0.5);
+}
 
 /* Button Text Fit */
 .btn,

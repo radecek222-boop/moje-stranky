@@ -829,6 +829,7 @@ async function renderOrders(items = null) {
     const stavNabidky = STAVY_NABIDEK[zakaznikEmail] || null;
     const jeOdsouhlasena = stavNabidky === 'potvrzena';
     const jeCekameNd = stavNabidky === 'cekame_nd';
+    const jeZamitnuta = stavNabidky === 'zamitnuta';
 
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
@@ -852,6 +853,8 @@ async function renderOrders(items = null) {
         cnClass = 'cn-cekame-nd';
       } else if (jeOdsouhlasena) {
         cnClass = 'cn-odsouhlasena';
+      } else if (jeZamitnuta) {
+        cnClass = 'cn-zamitnuta';
       } else {
         cnClass = 'ma-cenovou-nabidku';
       }
@@ -866,6 +869,9 @@ async function renderOrders(items = null) {
     } else if (jeOdsouhlasena) {
       cnText = 'Odsouhlasena';
       cnTextClass = 'order-cn-text odsouhlasena';
+    } else if (jeZamitnuta) {
+      cnText = 'Zamítnuta';
+      cnTextClass = 'order-cn-text zamitnuta';
     }
 
     // Sdílený badge stavu (používá se v obou šablonách)
@@ -1072,6 +1078,7 @@ function createCustomerHeader() {
     // Pokud má CN a není HOTOVO, zobrazit CN stav
     if (cnStav === 'cekame_nd') aktualniHodnota = 'cn_cekame_nd';
     else if (cnStav === 'potvrzena') aktualniHodnota = 'cn_odsouhlasena';
+    else if (cnStav === 'zamitnuta') aktualniHodnota = 'cn_zamitnuta';
     else aktualniHodnota = 'cn_poslana';
   }
 
@@ -1088,6 +1095,7 @@ function createCustomerHeader() {
         <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
         <option value="cn_odsouhlasena" ${aktualniHodnota === 'cn_odsouhlasena' ? 'selected' : ''}>Odsouhlasena</option>
         <option value="cn_cekame_nd" ${aktualniHodnota === 'cn_cekame_nd' ? 'selected' : ''}>Čekáme ND</option>
+        <option value="cn_zamitnuta" ${aktualniHodnota === 'cn_zamitnuta' ? 'selected' : ''}>Zamítnuta</option>
       </optgroup>
     </select>
   ` : status.text;
@@ -4500,7 +4508,8 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
     'odlozena': 'Odložená',
     'cn_poslana': 'Poslána CN',
     'cn_odsouhlasena': 'Odsouhlasena',
-    'cn_cekame_nd': 'Čekáme na díly'
+    'cn_cekame_nd': 'Čekáme na díly',
+    'cn_zamitnuta': 'Zamítnuta'
   };
 
   // Rozpoznat CN stavy

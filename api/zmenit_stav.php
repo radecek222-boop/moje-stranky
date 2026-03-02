@@ -50,7 +50,7 @@ if (!$reklamaceId) {
 
 // Povolené stavy
 $zakladniStavy = ['wait', 'open', 'done', 'cekame_na_dily'];
-$cnStavy = ['cn_poslana', 'cn_odsouhlasena', 'cn_cekame_nd'];
+$cnStavy = ['cn_poslana', 'cn_odsouhlasena', 'cn_cekame_nd', 'cn_zamitnuta'];
 $vsechnyStavy = array_merge($zakladniStavy, $cnStavy);
 
 if (!in_array($novyStav, $vsechnyStavy)) {
@@ -160,6 +160,18 @@ try {
                     sendJsonError('Stav "Čekáme ND" vyžaduje sloupec cekame_nd_at - spusťte migraci pridej_cekame_nd_sloupec.php');
                 }
                 break;
+
+            case 'cn_zamitnuta':
+                // Admin ručně zamítne nabídku
+                $stmt = $pdo->prepare("
+                    UPDATE wgs_nabidky
+                    SET stav = 'zamitnuta', zamitnuta_at = NOW(), zamitnuto_ip = ?, zamitnuto_kym = 'admin'
+                    WHERE id = ?
+                ");
+                $stmt->execute([$_SERVER['REMOTE_ADDR'] ?? '', $nabidka['id']]);
+                $cnStavVystup = 'zamitnuta';
+                error_log("zmenit_stav.php: Admin {$_SESSION['user_id']} ručně zamítl nabídku ID {$nabidka['id']} pro {$zakaznikEmail}");
+                break;
         }
 
         // Pokud je zakázka HOTOVO a nastavujeme CN stav, změnit na ČEKÁ
@@ -218,7 +230,8 @@ try {
         'cekame_na_dily' => 'Čekáme na díly',
         'cn_poslana' => 'Poslána CN',
         'cn_odsouhlasena' => 'Odsouhlasena',
-        'cn_cekame_nd' => 'Čekáme na díly'
+        'cn_cekame_nd' => 'Čekáme na díly',
+        'cn_zamitnuta' => 'Zamítnuta'
     ];
 
     sendJsonSuccess("Stav změněn na: {$stavyMap[$novyStav]}", [

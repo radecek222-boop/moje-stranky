@@ -6,9 +6,11 @@
 require_once __DIR__ . '/init.php';
 
 $token = $_GET['token'] ?? '';
+$akce  = $_GET['akce'] ?? '';   // 'zamitnut' pro přímé odmítnutí z emailu
 $nabidka = null;
 $chyba = null;
 $potvrzeno = false;
+$zamitnuta = false;
 
 if (empty($token)) {
     $chyba = 'Chybí token nabídky';
@@ -23,6 +25,8 @@ if (empty($token)) {
             $chyba = 'Nabídka nebyla nalezena';
         } elseif ($nabidka['stav'] === 'potvrzena') {
             $potvrzeno = true;
+        } elseif ($nabidka['stav'] === 'zamitnuta') {
+            $zamitnuta = true;
         } elseif (strtotime($nabidka['platnost_do']) < time()) {
             $chyba = 'Platnost této nabídky již vypršela';
         }
@@ -263,6 +267,44 @@ if (empty($token)) {
         }
         .modal-btn-potvrdit:hover { background: #218838; }
 
+        /* Odmítnutí */
+        .btn-zamitnut {
+            display: inline-block;
+            background: transparent;
+            color: #dc3545;
+            padding: 10px 30px;
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            margin-top: 15px;
+        }
+        .btn-zamitnut:hover { background: #dc3545; color: #fff; }
+
+        /* Zamítnuta karta */
+        .zamitnuta-card {
+            background: #fff;
+            border: 2px solid #dc3545;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(220,53,69,0.15);
+            padding: 50px 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .zamitnuta-card h2 { color: #dc3545; margin-bottom: 15px; }
+        .zamitnuta-card p { color: #666; }
+
+        /* Zamítací modal */
+        .modal-btn-zamitnut {
+            background: #dc3545;
+            border: none;
+            color: #fff;
+        }
+        .modal-btn-zamitnut:hover { background: #c82333; }
+
         /* Footer */
         .footer {
             background: #1a1a1a;
@@ -285,6 +327,15 @@ if (empty($token)) {
             <div class="chyba-card">
                 <h2>Nabídka není dostupná</h2>
                 <p><?php echo htmlspecialchars($chyba); ?></p>
+            </div>
+        <?php elseif ($zamitnuta): ?>
+            <div class="zamitnuta-card">
+                <h2>Nabídka byla odmítnuta</h2>
+                <p>Tato cenová nabídka byla odmítnuta. Pokud si to rozmyslíte nebo máte zájem o novou nabídku, kontaktujte nás.</p>
+                <p style="margin-top: 20px;">
+                    <a href="mailto:reklamace@wgs-service.cz" style="color: #333;">reklamace@wgs-service.cz</a> |
+                    <a href="tel:+420725965826" style="color: #333;">+420 725 965 826</a>
+                </p>
             </div>
         <?php elseif ($potvrzeno): ?>
             <div class="uspech-card" style="margin-bottom: 20px;">
@@ -413,6 +464,12 @@ if (empty($token)) {
                     a uzavíráte tím smlouvu o dílo s White Glove Service, s.r.o. dle
                     <a href="/podminky.php" target="_blank">obchodních podmínek</a>.
                 </p>
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="font-size: 0.85rem; color: #999; margin-bottom: 10px;">Nemáte zájem o tuto nabídku?</p>
+                    <button type="button" class="btn-zamitnut" id="btn-zamitnut">
+                        Odmítnout nabídku
+                    </button>
+                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -430,6 +487,22 @@ if (empty($token)) {
             <div class="modal-btns">
                 <button type="button" class="modal-btn modal-btn-zrusit" id="btn-zrusit">Zrušit</button>
                 <button type="button" class="modal-btn modal-btn-potvrdit" id="btn-souhlasim">Souhlasím a objednávám</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pro odmítnutí nabídky -->
+    <div class="modal-overlay" id="modal-zamitnut-overlay">
+        <div class="modal">
+            <h3>Odmítnutí nabídky</h3>
+            <p>
+                Opravdu chcete odmítnout tuto cenovou nabídku?
+                <br><br>
+                Tato akce je nevratná. Pokud si to rozmyslíte, budete muset kontaktovat naši zákaznickou podporu.
+            </p>
+            <div class="modal-btns">
+                <button type="button" class="modal-btn modal-btn-zrusit" id="btn-zamitnut-zrusit">Zpět</button>
+                <button type="button" class="modal-btn modal-btn-zamitnut" id="btn-zamitnut-potvrdit">Odmítnout nabídku</button>
             </div>
         </div>
     </div>
@@ -458,6 +531,64 @@ if (empty($token)) {
         const btnZrusit = document.getElementById('btn-zrusit');
         const btnSouhlasim = document.getElementById('btn-souhlasim');
         const btnStahnoutPdf = document.getElementById('btn-stahnout-pdf');
+
+        // MODAL PRO ODMÍTNUTÍ
+        const btnZamitnut = document.getElementById('btn-zamitnut');
+        const modalZamitnutOverlay = document.getElementById('modal-zamitnut-overlay');
+        const btnZamitnutZrusit = document.getElementById('btn-zamitnut-zrusit');
+        const btnZamitnutPotvrdit = document.getElementById('btn-zamitnut-potvrdit');
+
+        if (btnZamitnut) {
+            btnZamitnut.addEventListener('click', () => {
+                modalZamitnutOverlay.classList.add('active');
+            });
+            btnZamitnutZrusit.addEventListener('click', () => {
+                modalZamitnutOverlay.classList.remove('active');
+            });
+            modalZamitnutOverlay.addEventListener('click', (e) => {
+                if (e.target === modalZamitnutOverlay) {
+                    modalZamitnutOverlay.classList.remove('active');
+                }
+            });
+            btnZamitnutPotvrdit.addEventListener('click', async () => {
+                btnZamitnutPotvrdit.disabled = true;
+                btnZamitnutPotvrdit.textContent = 'Odesílám...';
+
+                try {
+                    const token = '<?php echo htmlspecialchars($token); ?>';
+                    const formData = new FormData();
+                    formData.append('action', 'zamitnut');
+                    formData.append('token', token);
+
+                    const response = await fetch('/api/nabidka_api.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    } else {
+                        alert('Chyba: ' + data.message);
+                        btnZamitnutPotvrdit.disabled = false;
+                        btnZamitnutPotvrdit.textContent = 'Odmítnout nabídku';
+                    }
+                } catch (e) {
+                    console.error('Chyba:', e);
+                    alert('Chyba při odesílání');
+                    btnZamitnutPotvrdit.disabled = false;
+                    btnZamitnutPotvrdit.textContent = 'Odmítnout nabídku';
+                }
+            });
+        }
+
+        // Auto-odmítnutí při příchodu přes odkaz z emailu (?akce=zamitnut)
+        const akceZUrl = '<?php echo htmlspecialchars($akce); ?>';
+        if (akceZUrl === 'zamitnut' && btnZamitnut) {
+            // Zobrazit rovnou modal pro potvrzení odmítnutí
+            modalZamitnutOverlay.classList.add('active');
+        }
 
         // MODAL PRO POTVRZENÍ
         if (btnPotvrdit) {

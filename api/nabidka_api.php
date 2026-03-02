@@ -59,18 +59,19 @@ try {
             }
 
             // Načíst emaily s jejich nejvyšším stavem nabídky
-            // Priorita: cekame_nd > potvrzena > odeslana (použijeme MAX a CASE)
+            // Priorita: cekame_nd > potvrzena > zamitnuta > odeslana (použijeme MAX a CASE)
             $stmt = $pdo->query("
                 SELECT
                     LOWER(zakaznik_email) as email,
                     MAX(CASE
-                        WHEN cekame_nd_at IS NOT NULL THEN 3
-                        WHEN stav = 'potvrzena' THEN 2
+                        WHEN cekame_nd_at IS NOT NULL THEN 4
+                        WHEN stav = 'potvrzena' THEN 3
+                        WHEN stav = 'zamitnuta' THEN 2
                         WHEN stav = 'odeslana' THEN 1
                         ELSE 0
                     END) as priorita_stavu
                 FROM wgs_nabidky
-                WHERE stav IN ('potvrzena', 'odeslana')
+                WHERE stav IN ('potvrzena', 'odeslana', 'zamitnuta')
                 AND zakaznik_email IS NOT NULL
                 AND zakaznik_email != ''
                 GROUP BY LOWER(zakaznik_email)
@@ -83,10 +84,12 @@ try {
             foreach ($vysledky as $radek) {
                 $emaily[] = $radek['email'];
                 // Převést prioritu zpět na stav
-                if ($radek['priorita_stavu'] == 3) {
+                if ($radek['priorita_stavu'] == 4) {
                     $stavyNabidek[$radek['email']] = 'cekame_nd';
-                } elseif ($radek['priorita_stavu'] == 2) {
+                } elseif ($radek['priorita_stavu'] == 3) {
                     $stavyNabidek[$radek['email']] = 'potvrzena';
+                } elseif ($radek['priorita_stavu'] == 2) {
+                    $stavyNabidek[$radek['email']] = 'zamitnuta';
                 } else {
                     $stavyNabidek[$radek['email']] = 'odeslana';
                 }
@@ -363,6 +366,63 @@ try {
             sendJsonSuccess('Nabídka úspěšně potvrzena', [
                 'nabidka_id' => $nabidka['id'],
                 'potvrzeno_at' => $potvrzenoCas
+            ]);
+            break;
+
+        // ========================================
+        // ZAMITNUT - Zákazník odmítne nabídku (veřejné - token)
+        // ========================================
+        case 'zamitnut':
+            $token = $_POST['token'] ?? $_GET['token'] ?? '';
+            if (empty($token)) {
+                sendJsonError('Chybí token');
+            }
+
+            $stmt = $pdo->prepare("SELECT * FROM wgs_nabidky WHERE token = ?");
+            $stmt->execute([$token]);
+            $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nabidka) {
+                sendJsonError('Nabídka nenalezena');
+            }
+
+            if ($nabidka['stav'] === 'zamitnuta') {
+                sendJsonSuccess('Nabídka již byla odmítnuta');
+                break;
+            }
+
+            if ($nabidka['stav'] === 'potvrzena') {
+                sendJsonError('Tuto nabídku nelze odmítnout – zákazník ji již potvrdil');
+            }
+
+            $zamitnutoCas = date('Y-m-d H:i:s');
+            $zamitnutaIp  = $_SERVER['REMOTE_ADDR'] ?? '';
+
+            $stmt = $pdo->prepare("
+                UPDATE wgs_nabidky
+                SET stav = 'zamitnuta', zamitnuta_at = ?, zamitnuto_ip = ?, zamitnuto_kym = 'zakaznik'
+                WHERE id = ?
+            ");
+            $stmt->execute([$zamitnutoCas, $zamitnutaIp, $nabidka['id']]);
+
+            // Notifikace adminovi
+            require_once __DIR__ . '/../includes/EmailQueue.php';
+            $emailQueue  = new EmailQueue($pdo);
+            $cisloNabidky = $nabidka['cislo_nabidky'] ?? ('CN-' . $nabidka['id']);
+            $adminEmail  = getenv('ADMIN_EMAIL') ?: 'reklamace@wgs-service.cz';
+
+            $emailQueue->add(
+                $adminEmail,
+                'Nabídka č. ' . $cisloNabidky . ' byla odmítnuta zákazníkem',
+                "Zákazník {$nabidka['zakaznik_jmeno']} ({$nabidka['zakaznik_email']}) odmítnul cenovou nabídku č. {$cisloNabidky}.\n\nCelková cena: {$nabidka['celkova_cena']} {$nabidka['mena']}\n\nIP adresa: {$zamitnutaIp}\nČas: " . date('d.m.Y H:i:s', strtotime($zamitnutoCas)),
+                'nabidka_zamitnuta_admin_' . $nabidka['id']
+            );
+
+            error_log("nabidka_api: Nabídka {$cisloNabidky} odmítnuta zákazníkem z IP {$zamitnutaIp}");
+
+            sendJsonSuccess('Nabídka odmítnuta', [
+                'nabidka_id'  => $nabidka['id'],
+                'zamitnuta_at' => $zamitnutoCas
             ]);
             break;
 
@@ -709,12 +769,29 @@ function vytvorTabulkuNabidky($pdo) {
 
     // Přidat chybějící sloupce (pro existující tabulky)
     $sloupce = [
-        'zf_odeslana_at' => 'DATETIME NULL',
-        'zf_uhrazena_at' => 'DATETIME NULL',
-        'dokonceno_at' => 'DATETIME NULL',
-        'fa_uhrazena_at' => 'DATETIME NULL',
-        'cislo_nabidky' => 'VARCHAR(30) NULL UNIQUE AFTER id'
+        'zf_odeslana_at'   => 'DATETIME NULL',
+        'zf_uhrazena_at'   => 'DATETIME NULL',
+        'dokonceno_at'     => 'DATETIME NULL',
+        'fa_uhrazena_at'   => 'DATETIME NULL',
+        'cislo_nabidky'    => 'VARCHAR(30) NULL UNIQUE AFTER id',
+        'zamitnuta_at'     => 'DATETIME NULL',
+        'zamitnuto_ip'     => 'VARCHAR(45) NULL',
+        'zamitnuto_kym'    => "ENUM('zakaznik','admin') NULL",
+        'pripominka_7d_at' => 'DATETIME NULL',
+        'reklamace_id'     => 'INT NULL'
     ];
+
+    // Aktualizovat ENUM stav pokud neobsahuje 'zamitnuta'
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'stav'");
+        $stavSloupec = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($stavSloupec && strpos($stavSloupec['Type'], 'zamitnuta') === false) {
+            $pdo->exec("ALTER TABLE wgs_nabidky MODIFY COLUMN stav ENUM('nova','odeslana','potvrzena','zamitnuta','expirovana','zrusena') DEFAULT 'nova'");
+            error_log("nabidka_api: ENUM stav rozšířen o 'zamitnuta'");
+        }
+    } catch (PDOException $e) {
+        error_log("nabidka_api: Chyba při úpravě ENUM stav: " . $e->getMessage());
+    }
 
     foreach ($sloupce as $sloupec => $definice) {
         try {
@@ -1463,4 +1540,175 @@ function vygenerujEmailPodekovaniZaUhradu($nabidka) {
 
 </body>
 </html>";
+}
+
+/**
+ * Vygeneruje HTML email - připomínka 7 dní před expirací nabídky
+ */
+function vygenerujEmailPripominka7dni($nabidka) {
+    $polozky = json_decode($nabidka['polozky_json'], true);
+    $baseUrl = 'https://www.wgs-service.cz';
+    $potvrzeniUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']);
+    $zamitnuriUrl = $baseUrl . '/potvrzeni-nabidky.php?token=' . urlencode($nabidka['token']) . '&akce=zamitnut';
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
+    $platnostDo   = date('d.m.Y', strtotime($nabidka['platnost_do']));
+    $celkovaCena  = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+
+    $polozkyHtml = '';
+    foreach ((array)$polozky as $p) {
+        $nazev   = htmlspecialchars($p['nazev'] ?? '');
+        $pocet   = intval($p['pocet'] ?? 1);
+        $cenaKs  = floatval($p['cena'] ?? 0);
+        $cenaCelk = number_format($cenaKs * $pocet, 2, ',', ' ');
+        $polozkyHtml .= "<tr>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; font-size: 14px; color: #333;'>{$nazev}</td>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; text-align: center; font-size: 14px; color: #666;'>{$pocet}</td>
+            <td style='padding: 12px 14px; border-bottom: 1px solid #e5e5e5; text-align: right; font-size: 14px; font-weight: 600; color: #333;'>{$cenaCelk} {$nabidka['mena']}</td>
+        </tr>";
+    }
+
+    return "<!DOCTYPE html>
+<html lang='cs'>
+<head><meta charset='UTF-8'><title>Připomínka nabídky č. {$nabidkaCislo}</title></head>
+<body style='margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;'>
+<table cellspacing='0' cellpadding='0' border='0' width='100%' style='background:#f4f4f4;'>
+<tr><td style='padding:30px 20px;'>
+<table cellspacing='0' cellpadding='0' border='0' width='600' style='margin:0 auto;max-width:600px;'>
+<tr><td style='background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);padding:35px 40px;text-align:center;border-radius:12px 12px 0 0;'>
+    <h1 style='margin:0;font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;'>WHITE GLOVE SERVICE</h1>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;text-transform:uppercase;'>Připomínka cenové nabídky</p>
+</td></tr>
+<tr><td style='background:#fff;'>
+    <div style='background:#fff3cd;padding:25px 40px;border-bottom:1px solid #ffc107;'>
+        <h2 style='margin:0;font-size:18px;color:#856404;'>Vaše nabídka vyprší za 7 dní</h2>
+        <p style='margin:8px 0 0 0;font-size:14px;color:#856404;line-height:1.6;'>
+            Platnost cenové nabídky č. <strong>{$nabidkaCislo}</strong> končí dne <strong>{$platnostDo}</strong>.
+        </p>
+    </div>
+    <div style='padding:30px 40px 20px 40px;'>
+        <p style='margin:0;font-size:15px;color:#333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+        <p style='margin:15px 0 0 0;font-size:14px;color:#555;line-height:1.6;'>
+            připomínáme Vám, že Vám byla zaslána cenová nabídka, která bude brzy expirovat.
+            Prosíme, dejte nám vědět, zda máte o naše služby zájem.
+        </p>
+    </div>
+    <div style='padding:0 40px 25px 40px;'>
+        <table cellspacing='0' cellpadding='0' border='0' width='100%' style='border:1px solid #e5e5e5;border-radius:8px;'>
+            <thead><tr style='background:#f8f9fa;'>
+                <th style='padding:12px 14px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;border-bottom:2px solid #e5e5e5;'>Služba</th>
+                <th style='padding:12px 14px;text-align:center;font-size:12px;color:#666;text-transform:uppercase;border-bottom:2px solid #e5e5e5;'>Ks</th>
+                <th style='padding:12px 14px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;border-bottom:2px solid #e5e5e5;'>Cena</th>
+            </tr></thead>
+            <tbody>{$polozkyHtml}</tbody>
+            <tfoot><tr style='background:#1a1a1a;'>
+                <td colspan='2' style='padding:14px;text-align:right;font-size:13px;font-weight:600;color:#fff;'>Celková cena (bez DPH):</td>
+                <td style='padding:14px;text-align:right;font-size:18px;font-weight:700;color:#39ff14;'>{$celkovaCena} {$nabidka['mena']}</td>
+            </tr></tfoot>
+        </table>
+    </div>
+    <div style='padding:10px 40px 35px 40px;text-align:center;'>
+        <p style='margin:0 0 20px 0;font-size:14px;color:#555;'>Vyberte prosím jednu z možností:</p>
+        <table cellspacing='0' cellpadding='0' border='0' style='margin:0 auto;'>
+        <tr>
+            <td style='padding-right:15px;'>
+                <a href='{$potvrzeniUrl}' style='display:inline-block;background:linear-gradient(135deg,#28a745 0%,#218838 100%);color:#fff;padding:16px 35px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>
+                    Souhlasím s nabídkou
+                </a>
+            </td>
+            <td>
+                <a href='{$zamitnuriUrl}' style='display:inline-block;background:#dc3545;color:#fff;padding:16px 35px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>
+                    Nemám zájem
+                </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+    <div style='padding:0 40px 30px 40px;'>
+        <p style='margin:0;font-size:13px;color:#555;line-height:1.6;'>
+            Dotazy: <a href='mailto:reklamace@wgs-service.cz' style='color:#333;'>reklamace@wgs-service.cz</a>
+            | <a href='tel:+420725965826' style='color:#333;'>+420 725 965 826</a>
+        </p>
+    </div>
+</td></tr>
+<tr><td style='background:#1a1a1a;padding:25px 40px;border-radius:0 0 12px 12px;text-align:center;'>
+    <p style='margin:0;font-size:14px;font-weight:600;color:#fff;'>White Glove Service, s.r.o.</p>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;'>
+        Tel: <a href='tel:+420725965826' style='color:#888;text-decoration:none;'>+420 725 965 826</a> |
+        Email: <a href='mailto:reklamace@wgs-service.cz' style='color:#888;text-decoration:none;'>reklamace@wgs-service.cz</a>
+    </p>
+    <p style='margin:12px 0 0 0;font-size:11px;color:#555;'>
+        <a href='{$baseUrl}' style='color:#39ff14;text-decoration:none;'>www.wgs-service.cz</a>
+    </p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>";
+}
+
+/**
+ * Vygeneruje HTML email - automatická expirace nabídky (30 dní bez reakce zákazníka)
+ */
+function vygenerujEmailAutoExpirace($nabidka) {
+    $baseUrl      = 'https://www.wgs-service.cz';
+    $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
+    $platnostDo   = date('d.m.Y', strtotime($nabidka['platnost_do']));
+    $celkovaCena  = number_format(floatval($nabidka['celkova_cena']), 2, ',', ' ');
+
+    return "<!DOCTYPE html>
+<html lang='cs'>
+<head><meta charset='UTF-8'><title>Nabídka č. {$nabidkaCislo} expirovala</title></head>
+<body style='margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;'>
+<table cellspacing='0' cellpadding='0' border='0' width='100%' style='background:#f4f4f4;'>
+<tr><td style='padding:30px 20px;'>
+<table cellspacing='0' cellpadding='0' border='0' width='600' style='margin:0 auto;max-width:600px;'>
+<tr><td style='background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);padding:35px 40px;text-align:center;border-radius:12px 12px 0 0;'>
+    <h1 style='margin:0;font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;'>WHITE GLOVE SERVICE</h1>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;text-transform:uppercase;'>Informace o cenové nabídce</p>
+</td></tr>
+<tr><td style='background:#fff;'>
+    <div style='background:#f8f9fa;padding:25px 40px;border-bottom:1px solid #dee2e6;'>
+        <h2 style='margin:0;font-size:18px;font-weight:600;color:#333;'>Nabídka č. {$nabidkaCislo} expirovala</h2>
+        <p style='margin:8px 0 0 0;font-size:14px;color:#666;line-height:1.6;'>
+            Platnost Vaší cenové nabídky dne <strong>{$platnostDo}</strong> vypršela.
+        </p>
+    </div>
+    <div style='padding:30px 40px;'>
+        <p style='margin:0;font-size:15px;color:#333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
+        <p style='margin:15px 0 0 0;font-size:14px;color:#555;line-height:1.6;'>
+            cenová nabídka č. <strong>{$nabidkaCislo}</strong> na celkovou částku
+            <strong>{$celkovaCena} {$nabidka['mena']}</strong> bohužel expirovala bez Vaší odpovědi.
+        </p>
+        <p style='margin:15px 0 0 0;font-size:14px;color:#555;line-height:1.6;'>
+            Pokud máte stále zájem o naše služby, rádi Vám připravíme novou nabídku.
+        </p>
+    </div>
+    <div style='padding:0 40px 35px 40px;text-align:center;'>
+        <a href='{$baseUrl}/kontakt.php' style='display:inline-block;background:#333;color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;'>
+            Kontaktovat WGS
+        </a>
+    </div>
+    <div style='padding:0 40px 30px 40px;border-top:1px solid #e5e5e5;'>
+        <p style='margin:20px 0 0 0;font-size:13px;color:#555;line-height:1.6;'>
+            Kontakt: <a href='mailto:reklamace@wgs-service.cz' style='color:#333;'>reklamace@wgs-service.cz</a> |
+            <a href='tel:+420725965826' style='color:#333;'>+420 725 965 826</a>
+        </p>
+    </div>
+</td></tr>
+<tr><td style='background:#1a1a1a;padding:25px 40px;border-radius:0 0 12px 12px;text-align:center;'>
+    <p style='margin:0;font-size:14px;font-weight:600;color:#fff;'>White Glove Service, s.r.o.</p>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;'>Do Dubče 364, 190 11 Praha 9 – Běchovice</p>
+    <p style='margin:8px 0 0 0;font-size:12px;color:#888;'>
+        Tel: <a href='tel:+420725965826' style='color:#888;text-decoration:none;'>+420 725 965 826</a> |
+        Email: <a href='mailto:reklamace@wgs-service.cz' style='color:#888;text-decoration:none;'>reklamace@wgs-service.cz</a>
+    </p>
+    <p style='margin:12px 0 0 0;font-size:11px;color:#555;'>
+        <a href='{$baseUrl}' style='color:#39ff14;text-decoration:none;'>www.wgs-service.cz</a>
+    </p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>";
 }

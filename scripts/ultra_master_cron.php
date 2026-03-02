@@ -195,6 +195,16 @@ if (executeScript('scripts/notifikovat_neprecte_poznamky.php', 'Notifikace nepř
 sleep(1);
 
 // ========================================
+// JOB #8: CN Nabídky - připomínky a expirace (denně)
+// ========================================
+if (executeScript('scripts/nabidky_cron.php', 'CN Nabídky - připomínky a automatická expirace')) {
+    $successCount++;
+} else {
+    $errorCount++;
+}
+sleep(1);
+
+// ========================================
 // SUMMARY
 // ========================================
 $totalEndTime = microtime(true);
