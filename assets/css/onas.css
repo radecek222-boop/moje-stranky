@@ -305,8 +305,9 @@ h6 {
   padding: 1.2rem 2rem;
   background: var(--c-white);
   border: 1px solid var(--c-border);
-  min-width: 160px;
-  max-width: 220px;
+  width: 200px;
+  height: 90px;
+  flex: 0 0 200px;
   text-decoration: none;
   transition: border-color 0.2s, opacity 0.2s;
   cursor: pointer;
@@ -318,7 +319,6 @@ h6 {
 .partner-logo-polozka:hover {
   border-color: #999;
   opacity: 0.8;
-  flex: 1 1 160px;
 }
 .partner-logo-polozka.tmave-pozadi {
   background: #000;
@@ -339,7 +339,9 @@ h6 {
     gap: 1rem;
   }
   .partner-logo-polozka {
-    min-width: 130px;
+    width: 160px;
+    height: 75px;
+    flex: 0 0 160px;
     padding: 1rem 1.2rem;
   }
   .partner-logo-polozka img {
@@ -348,8 +350,9 @@ h6 {
 }
 @media (max-width: 480px) {
   .partner-logo-polozka {
-    flex: 1 1 calc(50% - 0.5rem);
-    max-width: calc(50% - 0.5rem);
+    width: calc(50% - 0.5rem);
+    height: 70px;
+    flex: 0 0 calc(50% - 0.5rem);
   }
 }
 .cta-section {
