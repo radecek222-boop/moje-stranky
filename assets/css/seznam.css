@@ -263,7 +263,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.45rem;
   gap: 0.2rem;
 }
 .order-number {
@@ -301,7 +301,7 @@ body {
   font-size: 0.85rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.03rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1579,57 +1579,65 @@ body {
   flex: 1;
   min-width: 0;
 }
+.order-detail-left .order-detail-line:first-child {
+  margin-bottom: 0.3rem;
+}
 
 .order-detail-right {
   flex-shrink: 0;
   text-align: right;
 }
 
-.order-appointment {
-  font-size: 0.75rem;
+/* =====================================================
+   STATUS BADGES – jednotná základna
+   Všechny badge typy identické: font, velikost, padding
+   ===================================================== */
+.order-appointment,
+.order-status-text,
+.order-cn-text {
+  font-size: 0.6rem;
   font-weight: 500;
-  color: #000;
-  background: #fff;
-  padding: 0.15rem 0.4rem;
-  border-radius: 3px;
-  white-space: nowrap;
-  display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-}
-
-.order-status-text {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 3px;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
   display: inline-block;
+  line-height: 1.4;
 }
 
-.order-status-text.status-wait {
-  background: #f0f0f0;
-  color: #666;
-}
-
-.order-status-text.status-open {
+/* Termín návštěvy */
+.order-appointment {
   background: #e8e8e8;
-  color: #333;
+  color: #444;
 }
 
+/* Stavy reklamace */
+.order-status-text.status-wait {
+  background: #e8e8e8;
+  color: #555;
+}
+.order-status-text.status-open {
+  background: #444;
+  color: #fff;
+}
 .order-status-text.status-done {
-  background: #d0d0d0;
-  color: #000;
+  background: #111;
+  color: #fff;
 }
-
 .order-status-text.status-odlozena {
-  background: #ead5f5;
-  color: #6c3483;
+  background: #888;
+  color: #fff;
+}
+.order-status-text.status-cekame-na-dily {
+  background: #666;
+  color: #fff;
 }
 
-.order-status-text.status-cekame-na-dily {
-  background: #ddd;
-  color: #333;
-}
+/* CN badge varianty */
+.order-cn-text          { background: #444; color: #fff; }
+.order-cn-text.cekame-nd    { background: #666; color: #fff; }
+.order-cn-text.odsouhlasena { background: #222; color: #fff; }
 
 /* Button Text Fit */
 .btn,
@@ -2047,26 +2055,22 @@ a.detail-btn-primary:active {
 .order-row.cn-odsouhlasena:hover    { background: rgba(40, 167, 69, 0.2);  box-shadow: 0 0 12px rgba(40, 167, 69, 0.7); }
 
 .order-row-dot     { }
-.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.1rem; }
 .order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
 .order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
 .order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
 .order-row-chat    { }
 
-/* Badge v radkovem zobrazeni - stejna sirka, centrovany text */
+/* Badge v radkovem zobrazeni – vyplní sloupec, centrovaný text */
 .order-row .order-status-text,
 .order-row .order-cn-text,
 .order-row .order-appointment {
-  font-size: 0.58rem;
-  padding: 0.1rem 0;
-  white-space: nowrap;
   display: block;
   width: 100%;
   text-align: center;
   box-sizing: border-box;
-  border-radius: 3px;
 }
 
 /* Na mobilu vždy karty */

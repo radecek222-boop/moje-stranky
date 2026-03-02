@@ -101,10 +101,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20260301-03" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20260302-01" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260301-03">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260302-01">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -1126,16 +1126,14 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   box-shadow: 0 0 12px rgba(255, 152, 0, 0.5) !important;
 }
 
-/* Text "Poslána CN" v kartě - šedé pole s černým ohraničením */
+/* Text "Poslána CN" v kartě */
 .order-cn-text {
-  display: inline-block;
-  background: #333 !important;
-  border: 1px solid #000 !important;
-  border-radius: 4px;
-  padding: 2px 8px;
-  color: #ff9800 !important;
-  font-weight: 600 !important;
-  font-size: 0.75rem !important;
+  background: #444 !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 0.6rem !important;
+  font-weight: 500 !important;
+  padding: 0.15rem 0.45rem !important;
 }
 
 /* ============================================
@@ -1153,10 +1151,11 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   box-shadow: 0 0 12px rgba(40, 167, 69, 0.5) !important;
 }
 
-/* Text "Odsouhlasena" v kartě - zelená varianta */
+/* Text "Odsouhlasena" v kartě */
 .order-cn-text.odsouhlasena {
-  color: #28a745 !important; /* Zelená místo oranžové */
-  border-color: #28a745 !important;
+  background: #222 !important;
+  color: #fff !important;
+  border: none !important;
 }
 
 /* ============================================
@@ -1174,10 +1173,11 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   box-shadow: 0 0 12px rgba(153, 153, 153, 0.5) !important;
 }
 
-/* Text "Čekáme ND" v kartě - šedá varianta */
+/* Text "Čekáme na díly" v kartě */
 .order-cn-text.cekame-nd {
-  color: #999 !important; /* Šedá */
-  border-color: #999 !important;
+  background: #666 !important;
+  color: #fff !important;
+  border: none !important;
 }
 
 /* === FILTRY - NEAKTIVNÍ (šedé) vs AKTIVNÍ (barevné) === */
