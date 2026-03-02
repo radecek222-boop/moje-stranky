@@ -320,57 +320,55 @@ if ($tabulkaExistuje) {
 // ============================================
 
 if ($spustitMigraci && $tabulkaExistuje) {
-    $pdo->beginTransaction();
-    $provedeno = 0;
+    // POZOR: ALTER TABLE v MySQL/MariaDB způsobuje implicitní commit.
+    // Transakce se pro DDL příkazy nepoužívá — každý příkaz se spouští samostatně.
 
-    try {
-        // 1. Přidat chybějící sloupce
-        foreach ($chybejiciSloupce as $sloupec) {
-            $definice = $pozadovaneSloupce[$sloupec];
+    // 1. Přidat chybějící sloupce
+    foreach ($chybejiciSloupce as $sloupec) {
+        $definice = $pozadovaneSloupce[$sloupec];
+        try {
             $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN {$sloupec} {$definice}");
             $zpravy[] = "Přidán sloupec: {$sloupec}";
-            $provedeno++;
+        } catch (PDOException $e) {
+            $chyby[] = "Chyba při přidávání sloupce {$sloupec}: " . $e->getMessage();
         }
+    }
 
-        // 2. Aktualizovat ENUM - přidat 'zamitnuta'
-        if (!$enumObsahujeZamitnuta) {
+    // 2. Aktualizovat ENUM - přidat 'zamitnuta'
+    if (!$enumObsahujeZamitnuta) {
+        try {
             $pdo->exec("ALTER TABLE wgs_nabidky MODIFY COLUMN stav
                 ENUM('nova','odeslana','potvrzena','zamitnuta','expirovana','zrusena')
                 DEFAULT 'nova'
                 COMMENT 'Stav cenové nabídky'
             ");
             $zpravy[] = "ENUM stav rozšířen o hodnotu 'zamitnuta'";
-            $provedeno++;
+        } catch (PDOException $e) {
+            $chyby[] = "Chyba při úpravě ENUM: " . $e->getMessage();
         }
-
-        // 3. Přidat index na reklamace_id pokud byl přidán
-        if (in_array('reklamace_id', $chybejiciSloupce)) {
-            try {
-                $pdo->exec("ALTER TABLE wgs_nabidky ADD INDEX idx_reklamace_id (reklamace_id)");
-                $zpravy[] = "Přidán index idx_reklamace_id";
-            } catch (PDOException $e) {
-                // Index možná už existuje
-            }
-        }
-
-        $pdo->commit();
-
-        // Znovu načíst stav po migraci
-        $chybejiciSloupce = [];
-        foreach (array_keys($pozadovaneSloupce) as $sloupec) {
-            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE '{$sloupec}'");
-            if (!$stmt->fetch()) {
-                $chybejiciSloupce[] = $sloupec;
-            }
-        }
-        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'stav'");
-        $stavSloupec = $stmt->fetch(PDO::FETCH_ASSOC);
-        $enumObsahujeZamitnuta = $stavSloupec && strpos($stavSloupec['Type'], 'zamitnuta') !== false;
-
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        $chyby[] = 'Chyba při migraci: ' . $e->getMessage();
     }
+
+    // 3. Přidat index na reklamace_id pokud byl přidán
+    if (in_array('reklamace_id', $chybejiciSloupce)) {
+        try {
+            $pdo->exec("ALTER TABLE wgs_nabidky ADD INDEX idx_reklamace_id (reklamace_id)");
+            $zpravy[] = "Přidán index idx_reklamace_id";
+        } catch (PDOException $e) {
+            // Index možná už existuje — ignorovat
+        }
+    }
+
+    // Znovu načíst stav po migraci
+    $chybejiciSloupce = [];
+    foreach (array_keys($pozadovaneSloupce) as $sloupec) {
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE '{$sloupec}'");
+        if (!$stmt->fetch()) {
+            $chybejiciSloupce[] = $sloupec;
+        }
+    }
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'stav'");
+    $stavSloupec = $stmt->fetch(PDO::FETCH_ASSOC);
+    $enumObsahujeZamitnuta = $stavSloupec && strpos($stavSloupec['Type'], 'zamitnuta') !== false;
 }
 
 // ============================================
