@@ -2055,10 +2055,10 @@ a.detail-btn-primary:active {
 .order-row.cn-odsouhlasena:hover    { background: rgba(40, 167, 69, 0.2);  box-shadow: 0 0 12px rgba(40, 167, 69, 0.7); }
 
 .order-row-dot     { }
-.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.1rem; }
 .order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
 .order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
 .order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
 .order-row-chat    { }
