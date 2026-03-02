@@ -72,7 +72,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title" data-lang-cs="Ceník služeb" data-lang-en="Price List" data-lang-it="Listino Prezzi">Ceník služeb</h1>
-    <div class="hero-subtitle" data-lang-cs="White Glove Service - Natuzzi servis" data-lang-en="White Glove Service - Natuzzi service" data-lang-it="White Glove Service - Servizio Natuzzi">White Glove Service - Natuzzi servis</div>
+    <div class="hero-subtitle" data-lang-cs="White Glove Service - servis luxusního nábytku" data-lang-en="White Glove Service - Luxury Furniture Service" data-lang-it="White Glove Service - Assistenza Mobili di Lusso">White Glove Service - servis luxusního nábytku</div>
   </div>
 </section>
 

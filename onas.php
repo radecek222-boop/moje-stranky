@@ -73,10 +73,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
           data-lang-it="Il Tuo Partner per il Servizio di Arredamento di Lusso">Váš partner pro servis luxusního nábytku</h2>
       
       <p class="section-text"
-         data-lang-cs="White Glove Service je autorizovaný servisní partner značky Natuzzi s více než pětiletou zkušeností v oblasti oprav, reklamací a montáží luxusního designového nábytku. Naše společnost se zaměřuje na poskytování špičkového servisu sedacích souprav značek Natuzzi, Natuzzi Italia, Natuzzi Editions a Natuzzi Softaly."
-         data-lang-en="White Glove Service is an authorized Natuzzi service partner with over five years of experience in the field of repairs, complaints and installation of luxury designer furniture. Our company focuses on providing top-notch service for Natuzzi, Natuzzi Italia, Natuzzi Editions and Natuzzi Softaly sofas."
-         data-lang-it="White Glove Service è un partner autorizzato Natuzzi con oltre cinque anni di esperienza nel campo delle riparazioni, dei reclami e dell'installazione di mobili di design di lusso. La nostra azienda si concentra sulla fornitura di un servizio di alta qualità per i divani Natuzzi, Natuzzi Italia, Natuzzi Editions e Natuzzi Softaly.">
-        White Glove Service je autorizovaný servisní partner značky Natuzzi s více než pětiletou zkušeností v oblasti oprav, reklamací a montáží luxusního designového nábytku. Naše společnost se zaměřuje na poskytování špičkového servisu sedacích souprav značek Natuzzi, Natuzzi Italia, Natuzzi Editions a Natuzzi Softaly.
+         data-lang-cs="White Glove Service je autorizovaný servisní partner předních výrobců luxusního nábytku s více než pětiletou zkušeností v oblasti oprav, reklamací a montáží. Specializujeme se na servis sedacích souprav značek Natuzzi, Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase, ale poskytujeme servis i pro další prémiové výrobce luxusního nábytku."
+         data-lang-en="White Glove Service is an authorized service partner for leading luxury furniture manufacturers with over five years of experience in repairs, complaints and installation. We specialize in servicing sofas from Natuzzi, Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly and Phase, but also provide service for other premium luxury furniture manufacturers."
+         data-lang-it="White Glove Service è un partner autorizzato dei principali produttori di mobili di lusso con oltre cinque anni di esperienza nel campo delle riparazioni, dei reclami e dell'installazione. Siamo specializzati nell'assistenza di divani di marchi Natuzzi, Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly e Phase, ma offriamo assistenza anche ad altri produttori premium di mobili di lusso.">
+        White Glove Service je autorizovaný servisní partner předních výrobců luxusního nábytku s více než pětiletou zkušeností v oblasti oprav, reklamací a montáží. Specializujeme se na servis sedacích souprav značek Natuzzi, Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase, ale poskytujeme servis i pro další prémiové výrobce luxusního nábytku.
       </p>
       
       <p class="section-text"
@@ -104,10 +104,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
             data-lang-en="Years of Experience"
             data-lang-it="Anni di Esperienza">Let zkušeností</h3>
         <p class="value-description"
-           data-lang-cs="Více než 5 let poskytujeme profesionální servis luxusního nábytku Natuzzi a dalších prémiových značek"
-           data-lang-en="For more than 5 years we have been providing professional service for luxury furniture from Natuzzi and other premium brands"
-           data-lang-it="Da oltre 5 anni forniamo un servizio professionale per mobili di lusso di Natuzzi e di altri marchi premium">
-          Více než 5 let poskytujeme profesionální servis luxusního nábytku Natuzzi a dalších prémiových značek
+           data-lang-cs="Více než 5 let poskytujeme profesionální servis luxusního nábytku – Natuzzi, Softaly, Phase a dalších prémiových značek"
+           data-lang-en="For more than 5 years we have been providing professional service for luxury furniture – Natuzzi, Softaly, Phase and other premium brands"
+           data-lang-it="Da oltre 5 anni forniamo un servizio professionale per mobili di lusso – Natuzzi, Softaly, Phase e altri marchi premium">
+          Více než 5 let poskytujeme profesionální servis luxusního nábytku – Natuzzi, Softaly, Phase a dalších prémiových značek
         </p>
       </div>
 
