@@ -277,29 +277,54 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // Výchozí akce - zobrazit zakázku (jen pokud je k dispozici ID)
+  const vychoziAkce = [];
+  if (data.data && data.data.claim_id) {
+    vychoziAkce.push({ action: 'zobrazit', title: 'Zobrazit zakázku' });
+  }
+  if (!data.data || !data.data.claim_id) {
+    vychoziAkce.push({ action: 'zobrazit', title: 'Otevřít aplikaci' });
+  }
+
   const options = {
     body: data.body,
     icon: data.icon || '/icon192.png',
     badge: data.badge || '/icon192.png',
     tag: data.tag || 'wgs-notification',
-    vibrate: [200, 100, 200],
+    vibrate: data.silent ? [] : [200, 100, 200],
     data: data.data || {},
-    actions: data.actions || [],
-    requireInteraction: false
+    actions: data.actions && data.actions.length > 0 ? data.actions : vychoziAkce,
+    requireInteraction: data.requireInteraction || false,
+    timestamp: data.timestamp || Date.now(),
+    renotify: true,
+    dir: 'ltr',
+    lang: 'cs'
   };
+
+  // Velký obrázek v notifikaci (volitelný)
+  if (data.image) {
+    options.image = data.image;
+  }
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
   );
 });
 
-// Kliknutí na notifikaci
+// Kliknutí na notifikaci nebo akční tlačítko
 self.addEventListener('notificationclick', (event) => {
-  console.log(`[SW ${SW_VERSION}] Kliknuto na notifikaci`);
+  console.log(`[SW ${SW_VERSION}] Kliknuto na notifikaci, akce: ${event.action}`);
 
   event.notification.close();
 
   let urlToOpen = '/seznam.php';
+
+  // Určit URL podle akce nebo dat notifikace
+  if (event.action === 'zaviit') {
+    // Akce "zavřít" - pouze zavřít notifikaci, neotevírat nic
+    return;
+  }
+
   if (event.notification.data?.url) {
     urlToOpen = event.notification.data.url;
   } else if (event.notification.data?.claim_id) {
@@ -309,12 +334,14 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
+        // Pokusit se fokusovat existující okno se správnou URL
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
             client.navigate(urlToOpen);
             return client.focus();
           }
         }
+        // Jinak otevřít nové okno
         if (self.clients.openWindow) {
           return self.clients.openWindow(urlToOpen);
         }
