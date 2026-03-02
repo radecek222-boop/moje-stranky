@@ -310,11 +310,8 @@ h6 {
   flex: 0 0 200px;
   text-decoration: none;
   transition: border-color 0.2s, opacity 0.2s;
-  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 .partner-logo-polozka:hover {
   border-color: #999;
