@@ -46,6 +46,13 @@ try {
         'mistnost_id' => $mistnostId,
         'mistnost_id2' => $mistnostId
     ]);
+    // Zalogovat spuštění hry
+    try {
+        $ipAdresa = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+        if ($ipAdresa) { $ipAdresa = trim(explode(',', $ipAdresa)[0]); }
+        $stmtLog = $pdo->prepare("INSERT INTO wgs_hry_logy_aktivity (user_id, username, akce, hra, ip_adresa) VALUES (:user_id, :username, 'spustil_hru', :hra, :ip)");
+        $stmtLog->execute(['user_id' => $userId, 'username' => $username, 'hra' => 'Prší', 'ip' => $ipAdresa]);
+    } catch (PDOException $eLog) {}
 } catch (PDOException $e) {
     error_log("Prsi error: " . $e->getMessage());
 }
