@@ -23,6 +23,13 @@ try {
         ON DUPLICATE KEY UPDATE aktualni_hra = 'Tetris', posledni_aktivita = NOW()
     ");
     $stmt->execute(['user_id' => $userId, 'username' => $userName]);
+    // Zalogovat spuštění hry
+    try {
+        $ipAdresa = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+        if ($ipAdresa) { $ipAdresa = trim(explode(',', $ipAdresa)[0]); }
+        $stmtLog = $pdo->prepare("INSERT INTO wgs_hry_logy_aktivity (user_id, username, akce, hra, ip_adresa) VALUES (:user_id, :username, 'spustil_hru', :hra, :ip)");
+        $stmtLog->execute(['user_id' => $userId, 'username' => $userName, 'hra' => 'Tetris', 'ip' => $ipAdresa]);
+    } catch (PDOException $eLog) {}
 } catch (PDOException $e) {
     error_log("Tetris online error: " . $e->getMessage());
 }

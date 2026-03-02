@@ -65,10 +65,80 @@ try {
         $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    // Zalogovat návštěvu herní zóny (tabulka se vytvoří migrací pridej_hry_logy.php)
+    try {
+        $ipAdresa = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+        if ($ipAdresa) {
+            $ipAdresa = trim(explode(',', $ipAdresa)[0]);
+        }
+        $stmtLog = $pdo->prepare("
+            INSERT INTO wgs_hry_logy_aktivity (user_id, username, akce, hra, ip_adresa)
+            VALUES (:user_id, :username, 'navstivil_zonu', NULL, :ip)
+        ");
+        $stmtLog->execute([
+            'user_id'  => $userId,
+            'username' => $username,
+            'ip'       => $ipAdresa
+        ]);
+    } catch (PDOException $eLog) {
+        // Tabulka ještě neexistuje – spusťte pridej_hry_logy.php
+    }
+
 } catch (PDOException $e) {
     $onlineHraci = [];
     $chatZpravy = [];
     error_log("Hry error: " . $e->getMessage());
+}
+
+// Načíst admin logy (pouze pro adminy)
+$jeAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+$adminLogy        = [];
+$adminStatsDnes   = ['celkem_navstev' => 0, 'unikatni_uzivatele' => 0, 'celkem_her' => 0];
+$adminNejHry      = [];
+
+if ($jeAdmin) {
+    try {
+        $pdo = $pdo ?? getDbConnection();
+        $dnesStr = date('Y-m-d');
+
+        // Statistiky za dnešek
+        $stmtDnes = $pdo->prepare("
+            SELECT
+                COUNT(*)                          AS celkem_navstev,
+                COUNT(DISTINCT user_id)           AS unikatni_uzivatele,
+                SUM(akce = 'spustil_hru')         AS celkem_her
+            FROM wgs_hry_logy_aktivity
+            WHERE DATE(cas) = :dnes
+        ");
+        $stmtDnes->execute(['dnes' => $dnesStr]);
+        $adminStatsDnes = $stmtDnes->fetch(PDO::FETCH_ASSOC) ?: $adminStatsDnes;
+
+        // Top hry za posledních 30 dní
+        $stmtNejHry = $pdo->query("
+            SELECT hra, COUNT(*) AS pocet
+            FROM wgs_hry_logy_aktivity
+            WHERE akce = 'spustil_hru'
+              AND hra IS NOT NULL
+              AND cas >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY hra
+            ORDER BY pocet DESC
+            LIMIT 8
+        ");
+        $adminNejHry = $stmtNejHry->fetchAll(PDO::FETCH_ASSOC);
+
+        // Posledních 200 záznamů
+        $stmtLogy = $pdo->query("
+            SELECT id, username, akce, hra, ip_adresa,
+                   DATE_FORMAT(cas, '%e.%c.%Y %H:%i:%S') AS cas_formatovany
+            FROM wgs_hry_logy_aktivity
+            ORDER BY cas DESC
+            LIMIT 200
+        ");
+        $adminLogy = $stmtLogy->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $eAdmin) {
+        // Tabulka ještě neexistuje – spusťte pridej_hry_logy.php
+    }
 }
 
 // Dostupné hry
@@ -557,6 +627,191 @@ $dostupneHry = [
                 font-size: 1.8rem;
             }
         }
+
+        /* ===== ADMIN LOGY SEKCE ===== */
+        .admin-logy-sekce {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--hry-card);
+            border: 1px solid var(--hry-border);
+            border-radius: 8px;
+        }
+
+        .admin-logy-hlavicka {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-logy-hlavicka h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin: 0;
+        }
+
+        .admin-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #000;
+            background: #ccc;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .admin-logy-obnovit {
+            margin-left: auto;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .admin-logy-obnovit:hover {
+            background: #555;
+        }
+
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-stat {
+            background: var(--hry-bg);
+            border: 1px solid var(--hry-border);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .admin-stat-cislo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .admin-stat-popis {
+            font-size: 0.75rem;
+            color: var(--hry-muted);
+            margin-top: 0.25rem;
+            letter-spacing: 0.05em;
+        }
+
+        .admin-nejhry {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-nejhra-polozka {
+            background: var(--hry-bg);
+            border: 1px solid var(--hry-border);
+            border-radius: 5px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            color: var(--hry-muted);
+        }
+
+        .admin-nejhra-polozka strong {
+            color: #fff;
+        }
+
+        .admin-logy-filtry {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .admin-filtr-input {
+            background: var(--hry-bg);
+            border: 1px solid var(--hry-border);
+            border-radius: 5px;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            width: 180px;
+        }
+
+        .admin-filtr-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .admin-filtr-info {
+            font-size: 0.8rem;
+            color: var(--hry-muted);
+            margin-left: auto;
+        }
+
+        .admin-logy-tabulka-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .admin-logy-tabulka {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .admin-logy-tabulka th {
+            position: sticky;
+            top: 0;
+            background: #222;
+            color: #ccc;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--hry-border);
+            white-space: nowrap;
+        }
+
+        .admin-logy-tabulka td {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--hry-muted);
+            white-space: nowrap;
+        }
+
+        .admin-logy-tabulka tr:hover td {
+            background: rgba(255,255,255,0.03);
+            color: #ccc;
+        }
+
+        .admin-logy-tabulka .log-akce-zona {
+            color: #888;
+        }
+
+        .admin-logy-tabulka .log-akce-hra {
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .admin-logy-tabulka .log-hra-nazev {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .admin-prazdne-logy {
+            text-align: center;
+            color: var(--hry-muted);
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -659,6 +914,141 @@ $dostupneHry = [
                 </div>
             </aside>
         </div>
+
+        <?php if ($jeAdmin): ?>
+        <!-- ===== ADMIN: LOGY AKTIVITY ===== -->
+        <section class="admin-logy-sekce" id="adminLogySekce">
+            <div class="admin-logy-hlavicka">
+                <h2>LOGY AKTIVITY – HERNÍ ZÓNA</h2>
+                <span class="admin-badge">POUZE ADMIN</span>
+                <button class="admin-logy-obnovit" onclick="location.reload()">Obnovit</button>
+            </div>
+
+            <!-- Statistiky dnes -->
+            <div class="admin-stats-grid">
+                <div class="admin-stat">
+                    <div class="admin-stat-cislo"><?php echo (int)($adminStatsDnes['celkem_navstev'] ?? 0); ?></div>
+                    <div class="admin-stat-popis">NÁVŠTĚV DNES</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-cislo"><?php echo (int)($adminStatsDnes['unikatni_uzivatele'] ?? 0); ?></div>
+                    <div class="admin-stat-popis">UNIKÁTNÍCH HRÁČŮ DNES</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-cislo"><?php echo (int)($adminStatsDnes['celkem_her'] ?? 0); ?></div>
+                    <div class="admin-stat-popis">SPUŠTĚNÝCH HER DNES</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-cislo"><?php echo count($adminLogy); ?></div>
+                    <div class="admin-stat-popis">ZOBRAZENO ZÁZNAMŮ</div>
+                </div>
+            </div>
+
+            <?php if (!empty($adminNejHry)): ?>
+            <div style="margin-bottom: 1rem;">
+                <div style="font-size:0.75rem; color:var(--hry-muted); letter-spacing:0.05em; margin-bottom:0.5rem;">NEJOBLÍBENĚJŠÍ HRY (posledních 30 dní)</div>
+                <div class="admin-nejhry">
+                    <?php foreach ($adminNejHry as $nejHra): ?>
+                    <div class="admin-nejhra-polozka">
+                        <strong><?php echo htmlspecialchars($nejHra['hra']); ?></strong>
+                        &nbsp;<?php echo (int)$nejHra['pocet']; ?>×
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Filtry -->
+            <div class="admin-logy-filtry">
+                <input
+                    type="text"
+                    class="admin-filtr-input"
+                    id="filtrUzivatel"
+                    placeholder="Filtr: uživatel"
+                    oninput="filtrujLogy()"
+                >
+                <input
+                    type="text"
+                    class="admin-filtr-input"
+                    id="filtrHra"
+                    placeholder="Filtr: hra"
+                    oninput="filtrujLogy()"
+                >
+                <span class="admin-filtr-info" id="logPocetInfo">Zobrazeno: <?php echo count($adminLogy); ?> záznamů</span>
+            </div>
+
+            <!-- Tabulka logů -->
+            <?php if (empty($adminLogy)): ?>
+            <div class="admin-prazdne-logy">
+                Žádné záznamy. Spusťte nejprve
+                <a href="pridej_hry_logy.php" style="color:#aaa;">migraci databáze</a>.
+            </div>
+            <?php else: ?>
+            <div class="admin-logy-tabulka-wrapper">
+                <table class="admin-logy-tabulka" id="adminLogyTabulka">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Čas</th>
+                            <th>Uživatel</th>
+                            <th>Akce</th>
+                            <th>Hra</th>
+                            <th>IP adresa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminLogyTelo">
+                        <?php foreach ($adminLogy as $log): ?>
+                        <tr
+                            data-uzivatel="<?php echo htmlspecialchars(mb_strtolower($log['username'])); ?>"
+                            data-hra="<?php echo htmlspecialchars(mb_strtolower($log['hra'] ?? '')); ?>"
+                        >
+                            <td style="color:#555;"><?php echo (int)$log['id']; ?></td>
+                            <td><?php echo htmlspecialchars($log['cas_formatovany']); ?></td>
+                            <td style="color:#ddd; font-weight:600;"><?php echo htmlspecialchars($log['username']); ?></td>
+                            <td>
+                                <?php if ($log['akce'] === 'navstivil_zonu'): ?>
+                                    <span class="log-akce-zona">vstup do zóny</span>
+                                <?php else: ?>
+                                    <span class="log-akce-hra">spustil hru</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($log['hra']): ?>
+                                    <span class="log-hra-nazev"><?php echo htmlspecialchars($log['hra']); ?></span>
+                                <?php else: ?>
+                                    <span style="color:#444;">—</span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="color:#555; font-family:monospace;"><?php echo htmlspecialchars($log['ip_adresa'] ?? '—'); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </section>
+
+        <script>
+        function filtrujLogy() {
+            const hledejUzivatele = document.getElementById('filtrUzivatel').value.toLowerCase().trim();
+            const hledejHru       = document.getElementById('filtrHra').value.toLowerCase().trim();
+            const radky           = document.querySelectorAll('#adminLogyTelo tr');
+            let pocet = 0;
+
+            radky.forEach(function(radek) {
+                const uzivatel = radek.getAttribute('data-uzivatel') || '';
+                const hra      = radek.getAttribute('data-hra') || '';
+                const viditelny = uzivatel.includes(hledejUzivatele) && hra.includes(hledejHru);
+                radek.style.display = viditelny ? '' : 'none';
+                if (viditelny) pocet++;
+            });
+
+            const infoEl = document.getElementById('logPocetInfo');
+            if (infoEl) infoEl.textContent = 'Zobrazeno: ' + pocet + ' záznamů';
+        }
+        </script>
+        <?php endif; ?>
+
     </main>
 
     <!-- Základní utility (nutné načíst před inline skriptem) -->
