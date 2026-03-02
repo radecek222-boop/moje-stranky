@@ -169,18 +169,18 @@ require_once __DIR__ . '/includes/seo_meta.php';
            data-lang-it="GARANZIA DI QUALITÀ">GARANCE KVALITY</div>
     </div>
     <div class="partner-loga">
-      <div class="partner-logo-polozka">
+      <a href="https://www.natuzzi.cz/kolekce-kresla-detail?logos" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo4.png" alt="Natuzzi Italia" loading="lazy">
-      </div>
-      <div class="partner-logo-polozka tmave-pozadi">
+      </a>
+      <a href="https://natuzzidesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka tmave-pozadi">
         <img src="assets/img/partners/logo3.png" alt="Natuzzi Editions" loading="lazy">
-      </div>
-      <div class="partner-logo-polozka">
+      </a>
+      <a href="https://www.italydesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo2.png" alt="Softaly" loading="lazy">
-      </div>
-      <div class="partner-logo-polozka">
+      </a>
+      <a href="https://pohodliphase.cz/?utm_source=google&utm_medium=cpc&utm_campaign=%5Bptagroup%5D%20-%20SRCH%20-%20Brand%20CZ%20(Len%20Praha)&utm_id=21517294317&gad_source=1&gad_campaignid=21517294317&gbraid=0AAAAApDVrQvLiox0FEbSo7LR8Zyi8auxu&gclid=CjwKCAiAh5XNBhAAEiwA_Bu8FTKRUDDzD5h2I0Mt_fUuLIrkP5wmcZod2X-tjgT5fcRtH2UhPaCAmhoCbeYQAvD_BwE" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo1.png" alt="Phase" loading="lazy">
-      </div>
+      </a>
     </div>
   </div>
 </section>
