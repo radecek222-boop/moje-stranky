@@ -1412,11 +1412,20 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
     height: 6px !important;
   }
 
-  .order-notes-badge {
+  .order-notes-badge,
+  .order-appointment,
+  .order-status-text,
+  .order-cn-text {
     font-size: 0.5rem !important;
-    min-width: 14px !important;
     height: 14px !important;
-    padding: 0 0.2rem !important;
+    line-height: 14px !important;
+    padding: 0 0.25rem !important;
+    border-radius: 3px !important;
+  }
+
+  .order-notes-badge {
+    min-width: 14px !important;
+    border-radius: 7px !important;
   }
 
   .order-body {

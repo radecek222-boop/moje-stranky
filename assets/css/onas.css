@@ -287,6 +287,62 @@ h6 {
     grid-template-columns: 1fr;
   }
 }
+.partner-loga {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.partner-logo-polozka {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem 2rem;
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  min-width: 160px;
+  max-width: 220px;
+  text-decoration: none;
+  transition: border-color 0.2s, opacity 0.2s;
+}
+.partner-logo-polozka:hover {
+  border-color: #999;
+  opacity: 0.8;
+  flex: 1 1 160px;
+}
+.partner-logo-polozka.tmave-pozadi {
+  background: #000;
+}
+.partner-logo-polozka img {
+  max-height: 60px;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 768px) {
+  .partner-loga {
+    gap: 1rem;
+  }
+  .partner-logo-polozka {
+    min-width: 130px;
+    padding: 1rem 1.2rem;
+  }
+  .partner-logo-polozka img {
+    max-height: 48px;
+  }
+}
+@media (max-width: 480px) {
+  .partner-logo-polozka {
+    flex: 1 1 calc(50% - 0.5rem);
+    max-width: calc(50% - 0.5rem);
+  }
+}
 .cta-section {
   background: var(--c-black);
   color: var(--c-white);

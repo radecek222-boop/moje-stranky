@@ -110,7 +110,7 @@ const PER_PAGE = 9999; // Načíst všechny karty najednou
 let CAL_MONTH = new Date().getMonth();
 let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
-let VIEW_MODE = localStorage.getItem('wgs-seznam-view') || 'radky';
+let VIEW_MODE = window.innerWidth <= 768 ? 'karty' : (localStorage.getItem('wgs-seznam-view') || 'radky');
 let ADMIN_PRODEJCE_FILTER = null; // null = vsichni, jinak created_by id vybrane ho prodejce
 
 const WGS_ADDRESS = "Dubče 364, Běchovice 190 11, Česká republika";
