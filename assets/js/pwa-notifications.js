@@ -338,6 +338,19 @@
   }
 
   /**
+   * Sestavit akce pro notifikaci podle dostupnych dat
+   */
+  function sestavitAkce(data) {
+    const akce = [];
+    if (data && data.claim_id) {
+      akce.push({ action: 'zobrazit', title: 'Zobrazit zakázku' });
+    } else {
+      akce.push({ action: 'zobrazit', title: 'Otevřít aplikaci' });
+    }
+    return akce;
+  }
+
+  /**
    * Zobrazit lokalni notifikaci
    * Na iOS PWA pouziva ServiceWorker, jinak klasicky Notification API
    */
@@ -359,30 +372,32 @@
       return;
     }
 
+    const moznosti = {
+      body: text,
+      icon: CONFIG.notificationIcon,
+      badge: CONFIG.notificationIcon,
+      tag: CONFIG.notificationTag,
+      vibrate: [200, 100, 200],
+      data: data,
+      requireInteraction: false,
+      timestamp: Date.now(),
+      renotify: true,
+      dir: 'ltr',
+      lang: 'cs'
+    };
+
     try {
       // Na iOS PWA preferujeme ServiceWorker showNotification
       if (swRegistration && (iosSupportsWebPush || isPWA)) {
-        await swRegistration.showNotification(titulek, {
-          body: text,
-          icon: CONFIG.notificationIcon,
-          badge: CONFIG.notificationIcon,
-          tag: CONFIG.notificationTag,
-          vibrate: [200, 100, 200],
-          data: data,
-          requireInteraction: false
-        });
+        // Přidat akční tlačítka pouze pokud je SW podporuje (ne iOS)
+        if (!isIOS) {
+          moznosti.actions = sestavitAkce(data);
+        }
+        await swRegistration.showNotification(titulek, moznosti);
         console.log('[Notifikace] SW notifikace zobrazena:', titulek);
       } else {
         // Fallback na klasický Notification API
-        const notification = new Notification(titulek, {
-          body: text,
-          icon: CONFIG.notificationIcon,
-          tag: CONFIG.notificationTag,
-          badge: CONFIG.notificationIcon,
-          vibrate: [200, 100, 200],
-          data: data,
-          requireInteraction: false
-        });
+        const notification = new Notification(titulek, moznosti);
 
         notification.onclick = function() {
           window.focus();

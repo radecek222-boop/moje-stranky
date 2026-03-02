@@ -130,6 +130,12 @@ class WGSWebPush {
                 'badge' => $payload['badge'] ?? '/icon192.png',
                 'tag' => $payload['tag'] ?? 'wgs-notification',
                 'data' => $payload['data'] ?? [],
+                'actions' => $payload['actions'] ?? [],
+                'timestamp' => $payload['timestamp'] ?? time() * 1000,
+                'requireInteraction' => $payload['requireInteraction'] ?? false,
+                'silent' => $payload['silent'] ?? false,
+                'renotify' => $payload['renotify'] ?? true,
+                'image' => $payload['image'] ?? null,
             ], JSON_UNESCAPED_UNICODE);
 
             // Odeslat
@@ -225,6 +231,12 @@ class WGSWebPush {
             'badge' => $payload['badge'] ?? '/icon192.png',
             'tag' => $payload['tag'] ?? 'wgs-' . time(),
             'data' => $payload['data'] ?? [],
+            'actions' => $payload['actions'] ?? [],
+            'timestamp' => $payload['timestamp'] ?? time() * 1000,
+            'requireInteraction' => $payload['requireInteraction'] ?? false,
+            'silent' => $payload['silent'] ?? false,
+            'renotify' => $payload['renotify'] ?? true,
+            'image' => $payload['image'] ?? null,
         ], JSON_UNESCAPED_UNICODE);
 
         $odeslano = 0;
