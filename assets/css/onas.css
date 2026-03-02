@@ -309,6 +309,11 @@ h6 {
   max-width: 220px;
   text-decoration: none;
   transition: border-color 0.2s, opacity 0.2s;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .partner-logo-polozka:hover {
   border-color: #999;
@@ -324,6 +329,10 @@ h6 {
   width: auto;
   object-fit: contain;
   display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 @media (max-width: 768px) {
   .partner-loga {
