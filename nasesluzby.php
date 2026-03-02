@@ -66,7 +66,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
         data-lang-cs="WHITE GLOVE SERVIS"
         data-lang-en="WHITE GLOVE SERVICE"
         data-lang-it="WHITE GLOVE SERVICE">WHITE GLOVE SERVIS</h1>
-    <p class="hero-brands">Natuzzi Italia • Natuzzi Editions • Natuzzi Softaly</p>
+    <p class="hero-brands">Natuzzi Italia • Natuzzi Editions • Natuzzi Softaly • Phase</p>
     <div class="hero-subtitle"
          data-lang-cs="Opravy • Reklamace • Montáž • Praha, Brno, Bratislava"
          data-lang-en="Repairs • Complaints • Installation • Prague, Brno, Bratislava"
@@ -80,20 +80,20 @@ require_once __DIR__ . '/includes/seo_meta.php';
     
     <div class="section-intro">
       <h2 class="section-title"
-          data-lang-cs="Servis a opravy Natuzzi"
-          data-lang-en="Natuzzi Service and Repairs"
-          data-lang-it="Assistenza e Riparazioni Natuzzi">Servis a opravy Natuzzi</h2>
+          data-lang-cs="Servis a opravy luxusního nábytku"
+          data-lang-en="Luxury Furniture Service and Repairs"
+          data-lang-it="Assistenza e Riparazioni di Mobili di Lusso">Servis a opravy luxusního nábytku</h2>
       <p class="section-description"
-         data-lang-cs="Jsme autorizovaný servisní partner pro nábytek Natuzzi s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst."
-         data-lang-en="We are an authorized service partner for Natuzzi furniture with many years of experience in repairing luxury sofas. We specialize in leather sofa repairs, complaints, renovations and professional furniture upholstery. We provide service in the Czech Republic and Slovakia, including Prague, Brno, Bratislava, Ostrava and other cities."
-         data-lang-it="Siamo un partner autorizzato per l'assistenza di mobili Natuzzi, con molti anni di esperienza nella riparazione di divani di lusso. Siamo specializzati in riparazioni, reclami, ristrutturazioni e rivestimenti professionali di divani in pelle. Offriamo assistenza in Repubblica Ceca e Slovacchia, tra cui Praga, Brno, Bratislava, Ostrava e altre città.">
-        Jsme autorizovaný servisní partner pro nábytek Natuzzi s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst.
+         data-lang-cs="Jsme autorizovaný servisní partner předních výrobců luxusního nábytku – zejména značek Natuzzi, Softaly a Phase – s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst."
+         data-lang-en="We are an authorized service partner for leading luxury furniture manufacturers – especially Natuzzi, Softaly and Phase – with many years of experience in repairing luxury sofas. We specialize in leather sofa repairs, complaints, renovations and professional furniture upholstery. We provide service in the Czech Republic and Slovakia, including Prague, Brno, Bratislava, Ostrava and other cities."
+         data-lang-it="Siamo un partner autorizzato per l'assistenza dei principali produttori di mobili di lusso – in particolare Natuzzi, Softaly e Phase – con molti anni di esperienza nella riparazione di divani di lusso. Siamo specializzati in riparazioni, reclami, ristrutturazioni e rivestimenti professionali di divani in pelle. Offriamo assistenza in Repubblica Ceca e Slovacchia, tra cui Praga, Brno, Bratislava, Ostrava e altre città.">
+        Jsme autorizovaný servisní partner předních výrobců luxusního nábytku – zejména značek Natuzzi, Softaly a Phase – s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst.
       </p>
       <p class="section-description"
-         data-lang-cs="Spolupracujeme s předními českými prodejci a výrobci nábytku Natuzzi a dalších značek luxusního designového nábytku. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav."
-         data-lang-en="We cooperate with leading Czech furniture retailers and manufacturers of Natuzzi and other luxury designer furniture brands. We provide quick complaint handling, professional damage assessment, replacement of damaged parts, upholstery renovation and complete assembly of sofas. We work with original spare parts and use top-quality materials to ensure the highest quality repairs."
-         data-lang-it="Collaboriamo con i principali rivenditori di mobili cechi e produttori di Natuzzi e di altri marchi di mobili di design di lusso. Offriamo una rapida gestione dei reclami, una valutazione professionale dei danni, la sostituzione delle parti danneggiate, il rinnovo dei rivestimenti e il montaggio completo dei divani. Utilizziamo solo ricambi originali e materiali di alta qualità per garantire riparazioni di altissima qualità.">
-        Spolupracujeme s předními českými prodejci a výrobci nábytku Natuzzi a dalších značek luxusního designového nábytku. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav.
+         data-lang-cs="Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku – Natuzzi, Softaly, Phase a dalšími préminími značkami. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav."
+         data-lang-en="We cooperate with leading Czech and Slovak luxury furniture retailers – Natuzzi, Softaly, Phase and other premium brands. We provide quick complaint handling, professional damage assessment, replacement of damaged parts, upholstery renovation and complete assembly of sofas. We work with original spare parts and use top-quality materials to ensure the highest quality repairs."
+         data-lang-it="Collaboriamo con i principali rivenditori di mobili di lusso cechi e slovacchi – Natuzzi, Softaly, Phase e altri marchi premium. Offriamo una rapida gestione dei reclami, una valutazione professionale dei danni, la sostituzione delle parti danneggiate, il rinnovo dei rivestimenti e il montaggio completo dei divani. Utilizziamo solo ricambi originali e materiali di alta qualità per garantire riparazioni di altissima qualità.">
+        Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku – Natuzzi, Softaly, Phase a dalšími préminími značkami. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav.
       </p>
     </div>
 
@@ -106,10 +106,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
             data-lang-en="Seat Repairs and Complaints"
             data-lang-it="Riparazioni e Reclami sui Sedili">Opravy a reklamace sedaček</h3>
         <p class="service-description"
-           data-lang-cs="Specializace na opravy sedacích souprav Natuzzi a dalších značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami."
-           data-lang-en="Specializing in repairs of Natuzzi sofas and other brands. We repair leather and fabric sofas, replace damaged mechanisms, renovate upholstery. We ensure quick settlement of complaints with the manufacturer and insurance companies."
-           data-lang-it="Specializzati nella riparazione di divani Natuzzi e di altre marche. Ripariamo divani in pelle e tessuto, sostituiamo meccanismi danneggiati e rinnoviamo i rivestimenti. Garantiamo una rapida risoluzione dei reclami con il produttore e le compagnie assicurative.">
-          Specializace na opravy sedacích souprav Natuzzi a dalších značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami.
+           data-lang-cs="Specializace na opravy sedacích souprav Natuzzi, Softaly, Phase a dalších luxusních značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami."
+           data-lang-en="Specializing in repairs of Natuzzi, Softaly, Phase and other luxury sofas and furniture brands. We repair leather and fabric sofas, replace damaged mechanisms, renovate upholstery. We ensure quick settlement of complaints with the manufacturer and insurance companies."
+           data-lang-it="Specializzati nella riparazione di divani e mobili Natuzzi, Softaly, Phase e di altri marchi di lusso. Ripariamo divani in pelle e tessuto, sostituiamo meccanismi danneggiati e rinnoviamo i rivestimenti. Garantiamo una rapida risoluzione dei reclami con il produttore e le compagnie assicurative.">
+          Specializace na opravy sedacích souprav Natuzzi, Softaly, Phase a dalších luxusních značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami.
         </p>
         <ul class="service-list">
           <li data-lang-cs="Oprava kožených a látkových sedaček všech značek"
@@ -140,10 +140,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
             data-lang-en="Assembly of Sofas"
             data-lang-it="Montaggio di Divani">Montáž sedacích souprav</h3>
         <p class="service-description"
-           data-lang-cs="Profesionální montáž luxusního nábytku Natuzzi s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů."
-           data-lang-en="Professional installation of luxury Natuzzi furniture with a quality guarantee. We ensure safe installation of sofas, relaxation chairs and corner sofas, including electrical mechanisms."
-           data-lang-it="Installazione professionale di mobili di lusso Natuzzi con garanzia di qualità. Garantiamo l'installazione sicura di divani, poltrone relax e divani angolari, compresi i meccanismi elettrici.">
-          Profesionální montáž luxusního nábytku Natuzzi s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů.
+           data-lang-cs="Profesionální montáž luxusního nábytku značek Natuzzi, Softaly, Phase a dalších prémiových výrobců s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů."
+           data-lang-en="Professional installation of luxury furniture from Natuzzi, Softaly, Phase and other premium manufacturers with a quality guarantee. We ensure safe installation of sofas, relaxation chairs and corner sofas, including electrical mechanisms."
+           data-lang-it="Installazione professionale di mobili di lusso di Natuzzi, Softaly, Phase e altri produttori premium con garanzia di qualità. Garantiamo l'installazione sicura di divani, poltrone relax e divani angolari, compresi i meccanismi elettrici.">
+          Profesionální montáž luxusního nábytku značek Natuzzi, Softaly, Phase a dalších prémiových výrobců s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů.
         </p>
         <ul class="service-list">
           <li data-lang-cs="Montáž sedacích souprav a rohových sedaček"
@@ -174,10 +174,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
             data-lang-en="Consulting and Expert Opinions"
             data-lang-it="Consulenza e Perizie">Poradenství a expertní posudky</h3>
         <p class="service-description"
-           data-lang-cs="Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobcem Natuzzi i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody."
-           data-lang-en="Professional assessment of furniture complaints and damages. Our expertise is recognized by insurance companies, the manufacturer Natuzzi and the courts. We will help you with the settlement of your complaint and obtaining compensation for damages."
-           data-lang-it="Valutazione professionale di reclami e danni relativi agli arredi. La nostra competenza è riconosciuta dalle compagnie assicurative, dal produttore Natuzzi e dai tribunali. Vi aiuteremo a risolvere il vostro reclamo e a ottenere il risarcimento dei danni.">
-          Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobcem Natuzzi i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody.
+           data-lang-cs="Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobci luxusního nábytku i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody."
+           data-lang-en="Professional assessment of furniture complaints and damages. Our expertise is recognized by insurance companies, luxury furniture manufacturers and the courts. We will help you with the settlement of your complaint and obtaining compensation for damages."
+           data-lang-it="Valutazione professionale di reclami e danni relativi agli arredi. La nostra competenza è riconosciuta dalle compagnie assicurative, dai produttori di mobili di lusso e dai tribunali. Vi aiuteremo a risolvere il vostro reclamo e a ottenere il risarcimento dei danni.">
+          Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobci luxusního nábytku i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody.
         </p>
         <ul class="service-list">
           <li data-lang-cs="Posouzení důvodnosti reklamace sedaček"

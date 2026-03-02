@@ -62,9 +62,9 @@ if ($isAdmin) {
         </svg>
       </a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="Česká vlajka – přepnout jazyk webu na češtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="Britská vlajka – přepnout jazyk webu na angličtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="Italská vlajka – přepnout jazyk webu na italštinu" width="24" height="16"></span>
       </div>
     <?php
     elseif ($isLoggedIn):
@@ -109,9 +109,9 @@ if ($isAdmin) {
         </svg>
       </a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="Česká vlajka – přepnout jazyk webu na češtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="Britská vlajka – přepnout jazyk webu na angličtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="Italská vlajka – přepnout jazyk webu na italštinu" width="24" height="16"></span>
       </div>
     <?php
     else:
@@ -124,9 +124,9 @@ if ($isAdmin) {
       <a href="/aktuality.php" <?php if($current == "aktuality.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="AKTUALITY" data-lang-en="NEWS" data-lang-it="NOTIZIE">AKTUALITY</a>
       <a href="/login.php" <?php if($current == "login.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="CZ" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="EN" width="24" height="16"></span>
-        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="IT" width="24" height="16"></span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="Česká vlajka – přepnout jazyk webu na češtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English"><img src="/assets/img/flags/gb.svg" alt="Britská vlajka – přepnout jazyk webu na angličtinu" width="24" height="16"></span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano"><img src="/assets/img/flags/it.svg" alt="Italská vlajka – přepnout jazyk webu na italštinu" width="24" height="16"></span>
       </div>
     <?php endif; ?>
   </nav>
