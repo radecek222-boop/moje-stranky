@@ -112,6 +112,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Konzole',
                 'tab' => 'admin_console',
             ],
+            'admin_soubory' => [
+                'href' => 'admin.php?tab=admin_soubory',
+                'tab_label' => 'ROOT Soubory',
+                'tab' => 'admin_soubory',
+            ],
             'transport' => [
                 'href' => 'transport.php',
                 'tab_label' => 'Transport',

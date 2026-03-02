@@ -986,6 +986,11 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'admin_soubory'): ?>
+  <!-- TAB: ROOT PŘEHLED SOUBORŮ -->
+  <?php require_once __DIR__ . '/includes/admin_soubory.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'transport'): ?>
   <!-- TAB: TRANSPORT EVENTS -->
   <?php require_once __DIR__ . '/includes/admin_transport.php'; ?>
