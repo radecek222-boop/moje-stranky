@@ -423,30 +423,77 @@ switch ($akce) {
         ];
 
         foreach ($vsechnySoubory as $soubor) {
-            $cesta         = $soubor['cesta'];
-            $typ           = ziskejTypSouboru($soubor['nazev']);
-            $sobZavislosti = $zavislosti[$cesta] ?? [];
-            $sobVyuzivani  = $vyuzivani[$cesta] ?? [];
+            $cesta          = $soubor['cesta'];
+            $adresar        = $soubor['adresar'];
+            $typ            = ziskejTypSouboru($soubor['nazev']);
+            $sobZavislosti  = $zavislosti[$cesta] ?? [];
+            $sobVyuzivani   = $vyuzivani[$cesta] ?? [];
             $pocetVyuzivani = count($sobVyuzivani);
-            $aktivni       = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
-            $oznaceno      = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
-            $bezpecneSmazat = $pocetVyuzivani === 0;
+            $aktivni        = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
+            $oznaceno       = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
+
+            // Kategorie souboru - klíčové pro správnou diagnostiku
+            // Stránka: PHP soubor v ROOT adresáři - přístupný přes URL přímo
+            $jeStranka = ($typ === 'php' && $adresar === '');
+
+            // API endpoint: PHP soubor v /api/ adresáři - volaný přes HTTP/fetch()
+            $jeApi = ($typ === 'php' && ($adresar === 'api' || str_starts_with($adresar, 'api/')));
+
+            // Migrační/maintenance skripty: PHP soubory v root začínající specifickými vzory
+            $jeMigrace = ($typ === 'php' && $adresar === '' && (
+                str_starts_with($soubor['nazev'], 'pridej_') ||
+                str_starts_with($soubor['nazev'], 'migrace_') ||
+                str_starts_with($soubor['nazev'], 'kontrola_') ||
+                str_starts_with($soubor['nazev'], 'vycisti_') ||
+                str_starts_with($soubor['nazev'], 'doplnit_') ||
+                str_starts_with($soubor['nazev'], 'setup_')
+            ));
+
+            // Minifikovaný soubor: .min.js nebo .min.css - generovaný automaticky
+            $jeMinifikace = str_contains($soubor['nazev'], '.min.');
+
+            // Soubor lze bezpečně smazat pouze pokud:
+            // - není stránka (přímý URL přístup)
+            // - není API endpoint (volaný přes HTTP)
+            // - má 0 referencí od jiných souborů
+            // - není minifikovaný (generovaný)
+            $bezpecneSmazat = !$jeStranka && !$jeApi && ($pocetVyuzivani === 0) && !$jeMinifikace;
+
+            // Kategorie jako string pro frontend
+            if ($jeStranka && $jeMigrace) {
+                $kategorie = 'migrace';
+            } elseif ($jeStranka) {
+                $kategorie = 'stranka';
+            } elseif ($jeApi) {
+                $kategorie = 'api';
+            } elseif ($jeMinifikace) {
+                $kategorie = 'minifikace';
+            } elseif ($pocetVyuzivani === 0 && in_array($typ, ['php', 'js', 'css'])) {
+                $kategorie = 'neuzivane';
+            } else {
+                $kategorie = 'aktivni';
+            }
 
             $polozka = [
-                'nazev'          => $soubor['nazev'],
-                'cesta'          => $cesta,
-                'adresar'        => $soubor['adresar'],
-                'typ'            => $typ,
-                'velikost'       => $soubor['velikost'],
-                'velikostText'   => formatovatVelikost($soubor['velikost']),
-                'zmeneno'        => $soubor['zmeneno'],
-                'zavislosti'     => $sobZavislosti,
-                'vyuzivani'      => $sobVyuzivani,
+                'nazev'           => $soubor['nazev'],
+                'cesta'           => $cesta,
+                'adresar'         => $adresar,
+                'typ'             => $typ,
+                'kategorie'       => $kategorie,
+                'jeStranka'       => $jeStranka,
+                'jeApi'           => $jeApi,
+                'jeMigrace'       => $jeMigrace,
+                'jeMinifikace'    => $jeMinifikace,
+                'velikost'        => $soubor['velikost'],
+                'velikostText'    => formatovatVelikost($soubor['velikost']),
+                'zmeneno'         => $soubor['zmeneno'],
+                'zavislosti'      => $sobZavislosti,
+                'vyuzivani'       => $sobVyuzivani,
                 'pocetZavislosti' => count($sobZavislosti),
-                'pocetVyuzivani' => $pocetVyuzivani,
-                'bezpecneSmazat' => $bezpecneSmazat,
-                'aktivni'        => $aktivni,
-                'oznaceno'       => $oznaceno,
+                'pocetVyuzivani'  => $pocetVyuzivani,
+                'bezpecneSmazat'  => $bezpecneSmazat,
+                'aktivni'         => $aktivni,
+                'oznaceno'        => $oznaceno,
             ];
 
             $vysledek[] = $polozka;
@@ -462,7 +509,8 @@ switch ($akce) {
                 $statistiky['ostatni']++;
             }
 
-            if ($bezpecneSmazat && in_array($typ, ['php', 'js', 'css'])) {
+            // Počítat jako "bez využití" pouze skutečně nepoužívané knihovní soubory
+            if ($bezpecneSmazat && $kategorie === 'neuzivane') {
                 $statistiky['bezVyuziti']++;
             }
             if ($oznaceno) {

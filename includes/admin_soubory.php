@@ -135,7 +135,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
 /* Záhlaví tabulky */
 .sf-table-head {
     display: grid;
-    grid-template-columns: 26px 1fr 46px 54px 54px 74px 82px;
+    grid-template-columns: 22px 1fr 44px 48px 52px 80px auto;
     align-items: center;
     padding: 0.3rem 0.6rem;
     background: #f0f0f0;
@@ -194,11 +194,11 @@ if (!defined('ADMIN_PHP_LOADED')) {
 /* Řádek souboru */
 .sf-row {
     display: grid;
-    grid-template-columns: 26px 1fr 46px 54px 54px 74px 82px;
+    grid-template-columns: 22px 1fr 44px 48px 52px 80px auto;
     align-items: center;
     padding: 0.25rem 0.6rem;
     border-bottom: 1px solid #f3f3f3;
-    gap: 0.4rem;
+    gap: 0.35rem;
     transition: background 0.08s;
     cursor: default;
 }
@@ -317,64 +317,79 @@ if (!defined('ADMIN_PHP_LOADED')) {
     border: 1px solid;
 }
 
-.sf-b-aktivni    { background: #f5f5f5; color: #666; border-color: #e0e0e0; }
-.sf-b-bezVyuz   { background: #ececec; color: #777; border-color: #ccc; font-style: italic; }
-.sf-b-oznacen   { background: #2a2a2a; color: #eee; border-color: #111; }
+/* Stav badge varianty */
+.sf-b-aktivni   { background: #f0f0f0; color: #555; border-color: #d8d8d8; }
+.sf-b-stranka   { background: #e8e8e8; color: #333; border-color: #c5c5c5; font-weight: 600; }
+.sf-b-api       { background: #e5e5e5; color: #333; border-color: #bbb; font-weight: 600; }
+.sf-b-migrace   { background: #f0f0f0; color: #666; border-color: #d5d5d5; font-style: italic; }
+.sf-b-min       { background: #f5f5f5; color: #aaa; border-color: #e5e5e5; font-size: 0.58rem; }
+.sf-b-bezVyuz   { background: #e8e8e8; color: #888; border-color: #ccc; font-style: italic; }
+.sf-b-oznacen   { background: #222; color: #fff; border-color: #000; letter-spacing: 0.02em; }
 
-/* Akce */
+/* Akce – flex kontejner */
 .sf-akce {
     display: flex;
-    gap: 0.2rem;
+    gap: 3px;
     justify-content: flex-end;
     align-items: center;
+    flex-wrap: nowrap;
 }
 
-.sf-btn-o {
-    font-size: 0.62rem;
-    padding: 0.12rem 0.4rem;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    background: #fff;
-    color: #444;
-    cursor: pointer;
+/* Základní tlačítko */
+.sf-btn-o,
+.sf-btn-smazat,
+.sf-btn-d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'Courier New', monospace;
-    transition: all 0.1s;
+    font-size: 0.62rem;
+    line-height: 1;
+    padding: 0.22rem 0.5rem;
+    border-radius: 3px;
+    border: 1px solid;
+    cursor: pointer;
     white-space: nowrap;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    letter-spacing: 0.01em;
+    min-width: 0;
 }
 
-.sf-btn-o:hover    { background: #f0f0f0; }
-.sf-btn-o.aktivni  { background: #333; color: #fff; border-color: #111; }
+/* Označit */
+.sf-btn-o {
+    background: #fff;
+    color: #555;
+    border-color: #ccc;
+}
+.sf-btn-o:hover   { background: #f2f2f2; border-color: #aaa; color: #222; }
 
-/* Červené tlačítko smazat - schválená výjimka (destruktivní akce) */
+/* Odznačit (aktivní stav) */
+.sf-btn-o.aktivni {
+    background: #222;
+    color: #fff;
+    border-color: #111;
+}
+.sf-btn-o.aktivni:hover { background: #000; }
+
+/* Smazat – červená, schválená výjimka pro destruktivní akci */
 .sf-btn-smazat {
-    font-size: 0.62rem;
-    padding: 0.12rem 0.4rem;
-    border: 1px solid #c82333;
-    border-radius: 2px;
     background: #dc3545;
     color: #fff;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
+    border-color: #b02a37;
     font-weight: 700;
-    transition: all 0.1s;
-    white-space: nowrap;
 }
+.sf-btn-smazat:hover    { background: #b02a37; border-color: #8e2230; }
+.sf-btn-smazat:disabled { background: #ccc; border-color: #bbb; color: #fff; cursor: not-allowed; }
 
-.sf-btn-smazat:hover    { background: #c82333; }
-.sf-btn-smazat:disabled { background: #999; border-color: #999; cursor: not-allowed; }
-
+/* Detail (+) */
 .sf-btn-d {
-    font-size: 0.62rem;
-    padding: 0.12rem 0.4rem;
-    border: 1px solid #e5e5e5;
-    border-radius: 2px;
     background: #fafafa;
-    color: #999;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    transition: all 0.1s;
+    color: #bbb;
+    border-color: #e8e8e8;
+    font-weight: 700;
+    width: 22px;
+    padding: 0.22rem 0;
 }
-
 .sf-btn-d:hover { background: #efefef; color: #555; border-color: #ccc; }
 
 /* ================================================================
@@ -694,7 +709,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                 case 'js':         return s.typ === 'js';
                 case 'css':        return s.typ === 'css';
                 case 'ostatni':    return ['php','js','css'].indexOf(s.typ) === -1;
-                case 'bez-vyuziti': return s.pocetVyuzivani === 0 && ['php','js','css'].indexOf(s.typ) !== -1;
+                case 'bez-vyuziti': return (s.kategorie || '') === 'neuzivane';
                 case 'oznaceno':   return s.oznaceno;
                 default:           return true;
             }
@@ -772,14 +787,27 @@ if (!defined('ADMIN_PHP_LOADED')) {
        -------------------------------------------------------- */
     function sfRadek(s, sym) {
         var id      = 'sfr_' + s.cesta.replace(/[^a-z0-9]/gi, '_');
-        var ozn     = s.oznaceno;
-        var bezVyu  = s.pocetVyuzivani === 0 && ['php','js','css'].indexOf(s.typ) !== -1;
+        var ozn    = s.oznaceno;
+        var bezVyu = (s.kategorie || '') === 'neuzivane';
 
-        // Stav badge
+        // Stav badge - priorita: označeno > kategorie
+        var kat = s.kategorie || 'aktivni';
         var stavBadge;
-        if (ozn)    { stavBadge = '<span class="sf-badge sf-b-oznacen">Ke smazání</span>'; }
-        else if (bezVyu) { stavBadge = '<span class="sf-badge sf-b-bezVyuz">Bez využití</span>'; }
-        else        { stavBadge = '<span class="sf-badge sf-b-aktivni">Aktivní</span>'; }
+        if (ozn) {
+            stavBadge = '<span class="sf-badge sf-b-oznacen">Ke smazání</span>';
+        } else if (kat === 'stranka') {
+            stavBadge = '<span class="sf-badge sf-b-stranka">Stránka</span>';
+        } else if (kat === 'api') {
+            stavBadge = '<span class="sf-badge sf-b-api">API</span>';
+        } else if (kat === 'migrace') {
+            stavBadge = '<span class="sf-badge sf-b-migrace">Migrace</span>';
+        } else if (kat === 'minifikace') {
+            stavBadge = '<span class="sf-badge sf-b-min">.min</span>';
+        } else if (kat === 'neuzivane') {
+            stavBadge = '<span class="sf-badge sf-b-bezVyuz">Bez využití</span>';
+        } else {
+            stavBadge = '<span class="sf-badge sf-b-aktivni">Aktivní</span>';
+        }
 
         // Využití
         var vu = s.pocetVyuzivani;
@@ -824,14 +852,14 @@ if (!defined('ADMIN_PHP_LOADED')) {
             + 'onclick="sfToggleDetail(\'' + esc(id) + '\')" '
             + 'title="Závisí na ' + zd + ' souborech">' + zdTxt + '</span>'
 
-            // Stav
+            // Stav (dle kategorie)
             + '<span class="sf-stav">' + stavBadge + '</span>'
 
-            // Akce: Označit/Odznačit + červené Smazat (pouze u označených) + detail
+            // Akce: Označit/Odznačit | červené Smazat pouze u označených | detail
             + '<span class="sf-akce">'
             + '<button class="' + btnTrida + '" onclick="sfOznacit(\'' + esc(s.cesta) + '\',\'' + esc(id) + '\')">' + btnTxt + '</button>'
-            + (ozn ? '<button class="sf-btn-smazat" onclick="sfSmazat(\'' + esc(s.cesta) + '\',\'' + esc(id) + '\')">Smazat</button>' : '')
-            + '<button class="sf-btn-d" onclick="sfToggleDetail(\'' + esc(id) + '\')">+</button>'
+            + (ozn ? ' <button class="sf-btn-smazat" onclick="sfSmazat(\'' + esc(s.cesta) + '\',\'' + esc(id) + '\')">Smazat</button>' : '')
+            + '<button class="sf-btn-d" onclick="sfToggleDetail(\'' + esc(id) + '\')" title="Zobrazit závislosti">+</button>'
             + '</span>'
 
             + '</div>'
