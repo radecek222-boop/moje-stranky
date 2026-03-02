@@ -154,8 +154,8 @@ require_once __DIR__ . '/includes/seo_meta.php';
       <a href="https://www.natuzzi.cz/kolekce-kresla-detail?logos" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo4.png" alt="Natuzzi Italia" loading="lazy">
       </a>
-      <a href="https://natuzzidesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka tmave-pozadi">
-        <img src="assets/img/partners/logo3.png" alt="Natuzzi Editions" loading="lazy">
+      <a href="https://natuzzidesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
+        <img src="assets/img/partners/logo3.png" alt="Natuzzi Editions" loading="lazy" style="filter: invert(1);">
       </a>
       <a href="https://www.italydesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo2.png" alt="Softaly" loading="lazy">
