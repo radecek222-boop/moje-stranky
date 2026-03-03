@@ -162,54 +162,70 @@ if (!$embedMode && $activeTab === 'dashboard'):
         </div>
     </div>
 
-    <div class="cc-grid">
-        <div class="cc-card" data-href="admin.php?tab=zakaznici">
-            <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
-            <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
+    <div class="cc-seznam">
+        <div class="cc-radek" data-href="admin.php?tab=zakaznici">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
+                <div class="cc-radek-popis" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=keys">
+        <div class="cc-radek" data-href="admin.php?tab=keys">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Bezpečnost & Klíče" data-lang-en="Security & Keys" data-lang-it="Sicurezza & Chiavi">Bezpečnost & Klíče</div>
+                <div class="cc-radek-popis" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
+            </div>
             <?php if ($activeKeys > 0): ?>
-                <div class="cc-card-badge"><?= $activeKeys ?></div>
+                <div class="cc-radek-badge"><?= $activeKeys ?></div>
             <?php endif; ?>
-            <div class="cc-card-title" data-lang-cs="Bezpečnost & Klíče" data-lang-en="Security & Keys" data-lang-it="Sicurezza & Chiavi">Bezpečnost & Klíče</div>
-            <div class="cc-card-description" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=notifications">
-            <div class="cc-card-title" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
-            <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
+        <div class="cc-radek" data-href="admin.php?tab=notifications">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
+                <div class="cc-radek-popis" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-href="psa-kalkulator.php">
-            <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
-            <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
+        <div class="cc-radek" data-href="psa-kalkulator.php">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
+                <div class="cc-radek-popis" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=admin_console">
-            <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
-            <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+        <div class="cc-radek" data-href="admin.php?tab=admin_console">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
+                <div class="cc-radek-popis" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-action="openSQLPage">
-            <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
-            <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
+        <div class="cc-radek" data-action="openSQLPage">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
+                <div class="cc-radek-popis" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=admin_soubory">
-            <div class="cc-card-title" data-lang-cs="ROOT Soubory" data-lang-en="ROOT Files" data-lang-it="File ROOT">ROOT Soubory</div>
-            <div class="cc-card-description" data-lang-cs="Přehled všech souborů, závislostí, využití a správa ke smazání" data-lang-en="Overview of all files, dependencies, usage and deletion management" data-lang-it="Panoramica di tutti i file, dipendenze, utilizzo e gestione eliminazione">Přehled všech souborů, závislostí, využití a správa ke smazání</div>
+        <div class="cc-radek" data-href="admin.php?tab=admin_soubory">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="ROOT Soubory" data-lang-en="ROOT Files" data-lang-it="File ROOT">ROOT Soubory</div>
+                <div class="cc-radek-popis" data-lang-cs="Přehled všech souborů, závislostí, využití a správa ke smazání" data-lang-en="Overview of all files, dependencies, usage and deletion management" data-lang-it="Panoramica di tutti i file, dipendenze, utilizzo e gestione eliminazione">Přehled všech souborů, závislostí, využití a správa ke smazání</div>
+            </div>
         </div>
 
-        <div class="cc-card" data-href="transport.php">
-            <div class="cc-card-title" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
-            <div class="cc-card-description" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
+        <div class="cc-radek" data-href="transport.php">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
+                <div class="cc-radek-popis" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-/* Dashboard kartový systém - stejný styl jako seznam.php */
+/* Dashboard - radkovy vypis */
 body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f5f5f7;
@@ -217,14 +233,14 @@ body {
 }
 
 .admin-dashboard-wrapper {
-    max-width: 1400px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
 .admin-dashboard-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #d1d1d6;
 }
@@ -271,8 +287,8 @@ body {
 
 .admin-cache-btn {
     font-family: 'Poppins', sans-serif;
-    background: #333333;
-    color: white;
+    background: #333;
+    color: #fff;
     border: none;
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
@@ -288,27 +304,71 @@ body {
 }
 
 .admin-cache-btn:hover {
-    background: #1a300d;
-    transform: translateY(-1px);
+    background: #111;
 }
 
-.admin-kategorie {
-    margin-bottom: 2.5rem;
+/* Radkovy seznam */
+.cc-seznam {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
-.admin-kategorie-nadpis {
+.cc-radek {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.cc-radek:first-child {
+    border-top: 1px solid #e5e5e5;
+}
+
+.cc-radek:hover {
+    background: #f0f0f0;
+}
+
+.cc-radek-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cc-radek-nazev {
     font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #1a1a1a;
-    margin: 0 0 1rem 0;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #d1d1d6;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    line-height: 1.3;
 }
 
-/* Responsive design */
+.cc-radek-popis {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    color: #888;
+    line-height: 1.3;
+    margin-top: 0.15rem;
+}
+
+.cc-radek-badge {
+    flex-shrink: 0;
+    margin-left: 1rem;
+    background: #dc3545;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .admin-dashboard-title {
         font-size: 1.5rem;
@@ -316,14 +376,6 @@ body {
 
     .admin-dashboard-subtitle {
         font-size: 0.85rem;
-    }
-
-    .admin-kategorie-nadpis {
-        font-size: 0.9rem;
-    }
-
-    .cc-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 
     .admin-dashboard-actions {
@@ -335,6 +387,18 @@ body {
     .admin-cache-btn {
         width: 100%;
         max-width: 300px;
+    }
+
+    .cc-radek {
+        padding: 0.75rem 0.75rem;
+    }
+
+    .cc-radek-nazev {
+        font-size: 0.85rem;
+    }
+
+    .cc-radek-popis {
+        font-size: 0.7rem;
     }
 }
 </style>
