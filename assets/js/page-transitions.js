@@ -67,6 +67,21 @@
     });
   }
 
+  // Odstranit CSS ktera nova stranka nepotrebuje (volat az po animaci)
+  function odstraNCss(novyDoc) {
+    var noveCss = new Set(
+      Array.from(novyDoc.querySelectorAll('link[rel="stylesheet"]'))
+        .map(function (l) { return l.getAttribute('href'); })
+        .filter(Boolean)
+    );
+    Array.from(document.querySelectorAll('link[rel="stylesheet"]')).forEach(function (l) {
+      var href = l.getAttribute('href');
+      if (href && !noveCss.has(href)) {
+        l.remove();
+      }
+    });
+  }
+
   // Spustit skripty nalezene v novem obsahu
   function spustiSkripty(kontejner) {
     var nacteneSrc = new Set(
@@ -182,6 +197,9 @@
           smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex']);
           document.body.style.overflow = '';
           document.body.style.minHeight = '';
+
+          // Synchronizovat CSS - odstranit co nova stranka nepotrebuje
+          odstraNCss(novyDoc);
 
           // Spustit skripty z noveho obsahu
           spustiSkripty(novaStranka);
