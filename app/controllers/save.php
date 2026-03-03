@@ -249,7 +249,8 @@ function handleUpdate(PDO $pdo, array $input): array
         'cas_navstevy',
         'fakturace_firma',
         'technik',
-        'prodejce'
+        'prodejce',
+        'created_by'
     ];
 
     $updateData = [];
@@ -330,6 +331,14 @@ function handleUpdate(PDO $pdo, array $input): array
                 // MAPPING: DB používá lowercase ENUM('cz','sk')
                 $firmValue = trim((string) $value);
                 $updateData[$field] = $firmValue === '' ? null : strtolower($firmValue);
+                break;
+            case 'created_by':
+                // Pouze admin smí měnit zadavatele
+                if (!$isAdmin) {
+                    break; // neadmin nemůže měnit
+                }
+                $novyZadavatel = trim((string) $value);
+                $updateData[$field] = $novyZadavatel === '' ? null : $novyZadavatel;
                 break;
             default:
                 $sanitized = sanitizeInput((string) $value);
