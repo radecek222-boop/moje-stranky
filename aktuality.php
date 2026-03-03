@@ -106,9 +106,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
   <link rel="preload" href="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop" as="image" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -408,6 +405,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 

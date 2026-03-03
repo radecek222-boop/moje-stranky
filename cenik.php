@@ -38,10 +38,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="preload" href="assets/css/cenik.min.css" as="style">
 
   <!-- Google Fonts - Natuzzi style -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -62,6 +59,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       window.isAdmin = true;
   </script>
   <?php endif; ?>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

@@ -89,9 +89,6 @@ if (!$isLoggedIn && !$isAdmin) {
   <link rel="icon" type="image/png" sizes="512x512" href="/icon512.png">
   <link rel="apple-touch-icon" href="/icon192.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
@@ -2102,6 +2099,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
   "is_admin" => false
 ]); ?>;
 </script>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>

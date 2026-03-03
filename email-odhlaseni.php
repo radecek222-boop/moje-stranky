@@ -64,9 +64,6 @@ $csrfToken = generateCSRFToken();
   <meta name="robots" content="noindex, nofollow">
   <title>Odhlášení z emailů | White Glove Service</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <style>
@@ -174,6 +171,7 @@ $csrfToken = generateCSRFToken();
       color: #111827;
     }
   </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <div class="unsubscribe-container">

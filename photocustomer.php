@@ -64,9 +64,6 @@ if (!$isAdmin && !$isTechnik) {
   <meta name="description" content="Fotodokumentace servisu White Glove Service. Pořizování a správa fotek před, během a po opravě nábytku.">
   
   <!-- Google Fonts - Natuzzi style -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- External CSS -->
     <!-- Unified Design System -->
@@ -78,6 +75,7 @@ if (!$isAdmin && !$isTechnik) {
   <link rel="stylesheet" href="assets/css/photocustomer-collapsible.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>

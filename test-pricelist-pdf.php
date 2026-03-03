@@ -12,9 +12,6 @@
     <title>Test PDF Export - Ceník</title>
 
     <!-- Google Fonts - Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- PDF knihovny -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -83,6 +80,7 @@
             letter-spacing: 2px;
         }
     </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
     <h1>Test PDF Export - Ceník kalkulačka</h1>

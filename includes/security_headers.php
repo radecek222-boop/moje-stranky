@@ -29,11 +29,11 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 // Musí odpovídat požadavkům moderních stránek (protokol.php potřebuje CDN knihovny a blob obrázky)
 $csp = [
     "default-src 'self' https:",
-    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com",
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com",
     "img-src 'self' data: blob: https: https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
-    "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
-    "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com https://router.project-osrm.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "font-src 'self'",
+    "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://router.project-osrm.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "media-src 'self' blob:", // Povolit blob URLs pro audio prehravac (hlasove poznamky)
     "frame-src 'self' blob:", // Povolit blob URLs v iframe (PDF preview)
     "worker-src 'self' blob:", // Povolit PDF.js workers

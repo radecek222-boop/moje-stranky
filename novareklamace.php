@@ -24,8 +24,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <title><?php echo getSeoTitle('novareklamace'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
@@ -33,7 +31,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
 
   <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -356,6 +353,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   background: transparent;
 }
 </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>
