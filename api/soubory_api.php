@@ -1417,6 +1417,262 @@ switch ($akce) {
         ], JSON_UNESCAPED_UNICODE);
         break;
 
+    // ----------------------------------------------------------------
+    // HROMADNÁ ANALÝZA – automatická kontrola všech NO_REFS_STATIC kandidátů
+    // Single-pass grep přes celý projekt – vrátí dvě skupiny:
+    //   bezpecneArchivovat: název souboru nenalezen nikde v projektu
+    //   potrebujeKontrolu:  název nalezen – ověřit ručně
+    // ----------------------------------------------------------------
+    case 'hromadnaAnalyza':
+        $zacatek = microtime(true);
+
+        // Načíst ze cache (musí existovat – uživatel nejprve spustí skenování)
+        if (!file_exists($cacheSoubor)) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'chyba',
+                'zprava' => 'Cache není dostupná. Nejprve spusťte skenování (tlačítko Znovu skenovat).',
+            ]);
+            exit;
+        }
+
+        $cacheData = json_decode(file_get_contents($cacheSoubor), true);
+        if (!$cacheData || !isset($cacheData['soubory'])) {
+            http_response_code(400);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se načíst cache. Spusťte znovu skenování.']);
+            exit;
+        }
+
+        $stavy = nactiStavSouboru($stavSoubor);
+
+        // Sestavit seznam kandidátů: NO_REFS_STATIC, nezarchivované, ne .map soubory
+        $kandidati = [];
+        foreach ($cacheData['soubory'] as $s) {
+            $kStatus  = $s['klasifikace']['status'] ?? 'USED';
+            $sCesta   = $s['cesta'] ?? '';
+            $sNazev   = $s['nazev'] ?? '';
+            $sPripona = strtolower(pathinfo($sNazev, PATHINFO_EXTENSION));
+
+            if ($kStatus !== KL_BEZ_REFERENCI) {
+                continue;
+            }
+            // Přeskočit soubory v _archiv/
+            if (strpos($sCesta, '_archiv/') === 0) {
+                continue;
+            }
+            // Přeskočit .map soubory (source mapy – jsou false-positive kandidáti)
+            if ($sPripona === 'map') {
+                continue;
+            }
+            // Přeskočit prázdný název
+            if ($sNazev === '') {
+                continue;
+            }
+
+            $kandidati[$sCesta] = [
+                'cesta'        => $sCesta,
+                'nazev'        => $sNazev,
+                'velikostText' => $s['velikostText'] ?? '',
+                'nalezeno'     => false,
+                'kde'          => [],
+            ];
+        }
+
+        if (empty($kandidati)) {
+            echo json_encode([
+                'status'             => 'success',
+                'bezpecneArchivovat' => [],
+                'potrebujeKontrolu'  => [],
+                'celkemKandidatu'    => 0,
+                'dobaSken'           => '0s',
+                'zprava'             => 'Žádné kandidáty nenalezeny (žádné soubory se stavem "Bez referencí").',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Soubory vyloučené z prohledávání (zdroje false-positive)
+        $vylouceneZdrojeGrep = [
+            'config/soubory_cache.json',
+            'config/soubory_stav.json',
+        ];
+
+        $textovePriponyGrep = [
+            'php', 'js', 'css', 'html', 'htm',
+            'json', 'yml', 'yaml', 'txt', 'md', 'sql', 'sh',
+        ];
+
+        // Single-pass: projít všechny soubory projektu a hledat jméno každého kandidáta
+        $projektSoubory = scanSouboru($korenAdresar, $vylouceneAdresare);
+
+        foreach ($projektSoubory as $soubor) {
+            // Přeskočit vyloučené zdroje
+            if (in_array($soubor['cesta'], $vylouceneZdrojeGrep)) {
+                continue;
+            }
+            // Přeskočit _archiv/
+            if (strpos($soubor['cesta'], '_archiv/') === 0) {
+                continue;
+            }
+            // Pouze textové soubory
+            $pripona = strtolower(pathinfo($soubor['nazev'], PATHINFO_EXTENSION));
+            if (!in_array($pripona, $textovePriponyGrep) && $soubor['nazev'] !== '.htaccess') {
+                continue;
+            }
+            // Přeskočit velké soubory (> 1 MB)
+            if ($soubor['velikost'] > 1024 * 1024) {
+                continue;
+            }
+
+            $obsah = @file_get_contents($soubor['absolutniCesta']);
+            if ($obsah === false) {
+                continue;
+            }
+
+            // Zkontrolovat každého kandidáta
+            foreach ($kandidati as $sCesta => &$kand) {
+                // Sám sebe přeskočit
+                if ($soubor['cesta'] === $sCesta) {
+                    continue;
+                }
+                // Rychlý test existence jména souboru v obsahu
+                if (strpos($obsah, $kand['nazev']) === false) {
+                    continue;
+                }
+
+                $kand['nalezeno'] = true;
+
+                // Sbírat příklady (max 3)
+                if (count($kand['kde']) < 3) {
+                    foreach (explode("\n", $obsah) as $i => $radek) {
+                        if (strpos($radek, $kand['nazev']) !== false) {
+                            $kand['kde'][] = [
+                                'soubor'  => $soubor['cesta'],
+                                'radek'   => $i + 1,
+                                'snippet' => mb_substr(trim($radek), 0, 110),
+                            ];
+                            if (count($kand['kde']) >= 3) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            unset($kand);
+        }
+
+        // Rozdělit do dvou skupin
+        $bezpecneArchivovat = [];
+        $potrebujeKontrolu  = [];
+
+        foreach ($kandidati as $kand) {
+            if ($kand['nalezeno']) {
+                $potrebujeKontrolu[] = $kand;
+            } else {
+                $bezpecneArchivovat[] = $kand;
+            }
+        }
+
+        $dobu = round(microtime(true) - $zacatek, 2);
+
+        echo json_encode([
+            'status'             => 'success',
+            'bezpecneArchivovat' => $bezpecneArchivovat,
+            'potrebujeKontrolu'  => $potrebujeKontrolu,
+            'celkemKandidatu'    => count($kandidati),
+            'dobaSken'           => $dobu . 's',
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
+    // ----------------------------------------------------------------
+    // ARCHIVOVAT VYBRANÉ – archivuje explicitní seznam cest v jednom
+    // timestampovaném archivu; alternativa k archivovatOznacene
+    // ----------------------------------------------------------------
+    case 'archivujVybrane':
+        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný CSRF token']);
+            exit;
+        }
+
+        $cetyJson = $_POST['cesty'] ?? '';
+        if (empty($cetyJson)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Chybí seznam cest']);
+            exit;
+        }
+
+        $cesty = json_decode($cetyJson, true);
+        if (!is_array($cesty) || empty($cesty)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný formát seznamu cest']);
+            exit;
+        }
+
+        $casovyRazitko = date('Y-m-d_H-i-s');
+        $archivAdresar = $korenAdresar . '/_archiv/' . $casovyRazitko;
+
+        if (!mkdir($archivAdresar, 0755, true)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se vytvořit archivní složku']);
+            exit;
+        }
+
+        $uspesne = [];
+        $chyby   = [];
+        $stavy   = nactiStavSouboru($stavSoubor);
+
+        foreach ($cesty as $relativniCesta) {
+            $relativniCesta = str_replace(['../', '..\\.', '..\\', '..'], '', (string)$relativniCesta);
+            $relativniCesta = ltrim($relativniCesta, '/\\');
+
+            if (in_array($relativniCesta, $chranenesoubory)) {
+                $chyby[] = $relativniCesta . ' (chráněný soubor)';
+                continue;
+            }
+
+            $absolutniZdroj = realpath($korenAdresar . '/' . $relativniCesta);
+            if ($absolutniZdroj === false || strpos($absolutniZdroj, $korenAdresar) !== 0) {
+                $chyby[] = $relativniCesta . ' (neplatná cesta)';
+                continue;
+            }
+
+            if (!file_exists($absolutniZdroj)) {
+                $chyby[] = $relativniCesta . ' (soubor neexistuje)';
+                continue;
+            }
+
+            $cilAdresar = $archivAdresar . '/' . dirname($relativniCesta);
+            if (dirname($relativniCesta) !== '.' && !is_dir($cilAdresar)) {
+                mkdir($cilAdresar, 0755, true);
+            }
+
+            $absolutniCil = $archivAdresar . '/' . $relativniCesta;
+
+            if (rename($absolutniZdroj, $absolutniCil)) {
+                $uspesne[] = $relativniCesta;
+                unset($stavy[$relativniCesta]);
+            } else {
+                $chyby[] = $relativniCesta . ' (přesun selhal)';
+            }
+        }
+
+        ulozStavSouboru($stavSoubor, $stavy);
+
+        if (file_exists($cacheSoubor)) {
+            unlink($cacheSoubor);
+        }
+
+        $zprava = 'Archivováno ' . count($uspesne) . ' souborů do _archiv/' . $casovyRazitko;
+        if (!empty($chyby)) {
+            $zprava .= '. Chyby (' . count($chyby) . '): ' . implode(', ', array_slice($chyby, 0, 3));
+        }
+
+        echo json_encode([
+            'status'       => 'success',
+            'zprava'       => $zprava,
+            'archivovano'  => count($uspesne),
+            'chyby'        => count($chyby),
+            'archivSlozka' => '_archiv/' . $casovyRazitko,
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['status' => 'chyba', 'zprava' => 'Neznámá akce: ' . htmlspecialchars($akce)]);
