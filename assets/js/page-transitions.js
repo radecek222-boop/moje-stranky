@@ -50,27 +50,30 @@
     klice.forEach(function (k) { el.style[k] = ''; });
   }
 
-  // Nacist CSS soubory ktere nova stranka potrebuje a jeste nejsou v DOM
+  // Nacist CSS soubory ktere nova stranka potrebuje a jeste nejsou v DOM.
+  // Zpracovava jak rel="stylesheet" tak rel="preload" as="style" (lazy-load pattern).
   function nactiNoveCss(novyDoc) {
     var existujici = new Set(
       Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
         .map(function (l) { return l.getAttribute('href'); })
     );
-    novyDoc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-      var href = l.getAttribute('href');
-      if (href && !existujici.has(href)) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-      }
-    });
+    novyDoc.querySelectorAll('link[rel="stylesheet"], link[rel="preload"][as="style"]')
+      .forEach(function (l) {
+        var href = l.getAttribute('href');
+        if (href && !existujici.has(href)) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          document.head.appendChild(link);
+        }
+      });
   }
 
-  // Odstranit CSS ktera nova stranka nepotrebuje (volat az po animaci)
+  // Odstranit CSS ktera nova stranka nepotrebuje (volat az po animaci).
+  // Povazuje za "potrebne" jak rel="stylesheet" tak rel="preload" as="style".
   function odstraNCss(novyDoc) {
     var noveCss = new Set(
-      Array.from(novyDoc.querySelectorAll('link[rel="stylesheet"]'))
+      Array.from(novyDoc.querySelectorAll('link[rel="stylesheet"], link[rel="preload"][as="style"]'))
         .map(function (l) { return l.getAttribute('href'); })
         .filter(Boolean)
     );
@@ -79,6 +82,20 @@
       if (href && !noveCss.has(href)) {
         l.remove();
       }
+    });
+  }
+
+  // Synchronizovat inline <style> bloky z <head> nove stranky.
+  // Volat PRED animaci aby nova stranka vypadala spravne hned pri vjezdu.
+  function spravujInlineStyley(novyDoc, urlKlic) {
+    // Odstranit inline styly pridane routerem pri predchozi navigaci
+    document.querySelectorAll('style[data-ajax-stranka]').forEach(function (s) { s.remove(); });
+    // Pridat inline styly z <head> nove stranky
+    novyDoc.querySelectorAll('head > style').forEach(function (s) {
+      var novy = document.createElement('style');
+      novy.textContent = s.textContent;
+      novy.setAttribute('data-ajax-stranka', urlKlic);
+      document.head.appendChild(novy);
     });
   }
 
@@ -150,8 +167,12 @@
 
         if (!novyMain) { window.location.href = url; return; }
 
-        // Nacist nova CSS
+        // Nacist nova CSS (vcetne preload as style)
         nactiNoveCss(novyDoc);
+
+        // Synchronizovat inline <style> bloky pred animaci
+        var urlKlic = normPath(new URL(url, location.origin).pathname);
+        spravujInlineStyley(novyDoc, urlKlic);
 
         // Aktualizovat title + history
         document.title = novyDoc.title;
@@ -161,10 +182,12 @@
           history.pushState({ url: url, smer: smer }, novyDoc.title, url);
         }
 
-        // Sestavit novy main
+        // Sestavit novy main - kopirovat VSECHNY atributy (vcetne x-data, x-init, class)
         var novaStranka = document.createElement('main');
         novaStranka.id = 'main-content';
-        if (novyMain.className) novaStranka.className = novyMain.className;
+        Array.from(novyMain.attributes).forEach(function (attr) {
+          if (attr.name !== 'id') novaStranka.setAttribute(attr.name, attr.value);
+        });
         novaStranka.innerHTML = novyMain.innerHTML;
 
         // Nova stranka vychazi mimo obrazovku
@@ -198,11 +221,16 @@
           document.body.style.overflow = '';
           document.body.style.minHeight = '';
 
-          // Synchronizovat CSS - odstranit co nova stranka nepotrebuje
+          // Odstranit CSS ktera nova stranka nepotrebuje
           odstraNCss(novyDoc);
 
           // Spustit skripty z noveho obsahu
           spustiSkripty(novaStranka);
+
+          // Inicializovat Alpine.js na nove strance (pokud je k dispozici)
+          if (window.Alpine) {
+            window.Alpine.initTree(novaStranka);
+          }
 
           // Aktualizovat nav + scroll
           aktualizeNav(new URL(url, location.origin).pathname);
@@ -235,6 +263,9 @@
     var url;
     try { url = new URL(href, location.origin); } catch (err) { return; }
     if (url.origin !== location.origin) return;
+
+    // Preskocit klik na aktualni stranku (zadna animace, zadny push do history)
+    if (normPath(url.pathname) === normPath(location.pathname)) return;
 
     // Preskocit non-HTML soubory
     var ext = url.pathname.split('.').pop().toLowerCase();
