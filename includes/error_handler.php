@@ -75,10 +75,14 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 
     // Pokud je API request, vrátit JSON
     if ($isApiRequest) {
-
+        // Vycistit output buffer - odstranit stray output pred JSON odpovedi
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('Content-Type: application/json');
 
         $response = [
+            'status' => 'error',
             'success' => false,
             'error' => IS_PRODUCTION ? 'Server Error' : $errorType,
             'message' => IS_PRODUCTION ? 'Došlo k chybě serveru. Kontaktujte podporu.' : $errstr
@@ -137,11 +141,15 @@ set_exception_handler(function($exception) {
 
     // Pokud je API request
     if ($isApiRequest) {
-
+        // Vycistit output buffer - odstranit stray output pred JSON odpovedi
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('Content-Type: application/json');
         http_response_code(500);
 
         $response = [
+            'status' => 'error',
             'success' => false,
             'error' => IS_PRODUCTION ? 'Exception' : get_class($exception),
             'message' => IS_PRODUCTION ? 'Došlo k neočekávané chybě. Kontaktujte podporu.' : $exception->getMessage()

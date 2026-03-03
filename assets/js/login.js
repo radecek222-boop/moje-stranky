@@ -253,7 +253,10 @@ async function handleAdminLogin() {
   try {
     const response = await fetch('app/controllers/login_controller.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
       credentials: 'include',
       body: `admin_key=${encodeURIComponent(adminKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
@@ -329,7 +332,10 @@ async function handleUserLogin() {
   try {
     const response = await fetch('app/controllers/login_controller.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
       credentials: 'include',
       body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&remember_me=${rememberMe ? '1' : '0'}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
