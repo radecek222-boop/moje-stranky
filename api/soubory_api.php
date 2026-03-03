@@ -830,6 +830,7 @@ switch ($akce) {
 
         foreach ($vsechnySoubory as $soubor) {
             $cesta          = $soubor['cesta'];
+            $adresar        = $soubor['adresar'];
             $typ            = ziskejTypSouboru($soubor['nazev']);
             $sobZavislosti  = $zavislosti[$cesta] ?? [];
             $sobVyuzivani   = $vyuzivani[$cesta] ?? [];
@@ -837,7 +838,34 @@ switch ($akce) {
             $aktivni        = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
             $oznaceno       = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
 
-            // Klasifikace
+            // Kategorie souboru (jednoduché, pro rychlé filtrování v UI)
+            $jeStranka  = ($typ === 'php' && $adresar === '');
+            $jeApi      = ($typ === 'php' && ($adresar === 'api' || str_starts_with($adresar, 'api/')));
+            $jeMigrace  = ($typ === 'php' && $adresar === '' && (
+                str_starts_with($soubor['nazev'], 'pridej_') ||
+                str_starts_with($soubor['nazev'], 'migrace_') ||
+                str_starts_with($soubor['nazev'], 'kontrola_') ||
+                str_starts_with($soubor['nazev'], 'vycisti_') ||
+                str_starts_with($soubor['nazev'], 'doplnit_') ||
+                str_starts_with($soubor['nazev'], 'setup_')
+            ));
+            $jeMinifikace = str_contains($soubor['nazev'], '.min.');
+
+            if ($jeStranka && $jeMigrace) {
+                $kategorie = 'migrace';
+            } elseif ($jeStranka) {
+                $kategorie = 'stranka';
+            } elseif ($jeApi) {
+                $kategorie = 'api';
+            } elseif ($jeMinifikace) {
+                $kategorie = 'minifikace';
+            } elseif ($pocetVyuzivani === 0 && in_array($typ, ['php', 'js', 'css'])) {
+                $kategorie = 'neuzivane';
+            } else {
+                $kategorie = 'aktivni';
+            }
+
+            // Klasifikační engine – přesná analýza s důkazy
             $klasifikace = klasifikovatSoubor(
                 $cesta,
                 $soubor['nazev'],
@@ -852,8 +880,13 @@ switch ($akce) {
             $polozka = [
                 'nazev'           => $soubor['nazev'],
                 'cesta'           => $cesta,
-                'adresar'         => $soubor['adresar'],
+                'adresar'         => $adresar,
                 'typ'             => $typ,
+                'kategorie'       => $kategorie,
+                'jeStranka'       => $jeStranka,
+                'jeApi'           => $jeApi,
+                'jeMigrace'       => $jeMigrace,
+                'jeMinifikace'    => $jeMinifikace,
                 'velikost'        => $soubor['velikost'],
                 'velikostText'    => formatovatVelikost($soubor['velikost']),
                 'zmeneno'         => $soubor['zmeneno'],

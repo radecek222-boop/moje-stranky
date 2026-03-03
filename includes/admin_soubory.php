@@ -323,7 +323,9 @@ if (!defined('ADMIN_PHP_LOADED')) {
 .sf-b-api       { background: #e5e5e5; color: #333; border-color: #bbb; font-weight: 600; }
 .sf-b-migrace   { background: #f0f0f0; color: #666; border-color: #d5d5d5; font-style: italic; }
 .sf-b-min       { background: #f5f5f5; color: #aaa; border-color: #e5e5e5; font-size: 0.58rem; }
-.sf-b-bezVyuz   { background: #e8e8e8; color: #888; border-color: #ccc; font-style: italic; }
+.sf-b-bez-ref   { background: #e8e8e8; color: #666; border-color: #bbb; font-style: italic; }
+.sf-b-nejiste   { background: #e0e0e0; color: #444; border-color: #aaa; font-weight: 600; }
+.sf-b-bezpecne  { background: #ddd; color: #222; border-color: #999; font-weight: 700; }
 .sf-b-oznacen   { background: #222; color: #fff; border-color: #000; letter-spacing: 0.02em; }
 
 /* Akce – flex kontejner */
@@ -469,6 +471,67 @@ if (!defined('ADMIN_PHP_LOADED')) {
 
 .sf-detail-meta strong { color: #555; }
 
+/* Klasifikační detail */
+.sf-klas-box {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.sf-klas-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: sans-serif;
+    margin-bottom: 0.4rem;
+}
+
+.sf-klas-varovani {
+    font-size: 0.66rem;
+    color: #666;
+    font-family: sans-serif;
+    font-style: italic;
+    padding: 0.3rem 0.5rem;
+    background: #f5f5f5;
+    border-left: 3px solid #aaa;
+    margin-bottom: 0.5rem;
+}
+
+.sf-klas-tabulka {
+    width: 100%;
+    font-size: 0.66rem;
+    border-collapse: collapse;
+    font-family: sans-serif;
+    margin-bottom: 0.4rem;
+}
+
+.sf-klas-tabulka th {
+    text-align: left;
+    padding: 0.2rem 0.4rem;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+    color: #555;
+}
+
+.sf-klas-tabulka td {
+    padding: 0.2rem 0.4rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+    vertical-align: top;
+}
+
+.sf-klas-tabulka tr:last-child td { border-bottom: none; }
+
+.sf-klas-passed { color: #555; }
+.sf-klas-failed { color: #222; font-weight: 600; }
+
+.sf-klas-evidence {
+    font-size: 0.66rem;
+    color: #777;
+    font-family: sans-serif;
+    margin-top: 0.3rem;
+}
+
 /* ================================================================
    STAVY UI
    ================================================================ */
@@ -545,6 +608,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                    placeholder="Hledat soubor nebo cestu..."
                    oninput="sfFiltrovat()">
             <button class="sf-btn" id="sf-btn-scan" onclick="sfNacist(true)">Znovu skenovat</button>
+            <button class="sf-btn" id="sf-btn-archiv" onclick="sfArchivovatOznacene()" style="display:none;">Archivovat označené</button>
         </div>
     </div>
 
@@ -570,9 +634,17 @@ if (!defined('ADMIN_PHP_LOADED')) {
             <span class="sf-stat-n" id="sf-n-ost">-</span>
             <span class="sf-stat-l">Ostatní</span>
         </div>
-        <div class="sf-stat" onclick="sfFiltr('bez-vyuziti',this)" data-filtr="bez-vyuziti">
+        <div class="sf-stat" onclick="sfFiltr('bez-referenci',this)" data-filtr="bez-referenci">
             <span class="sf-stat-n" id="sf-n-bv">-</span>
-            <span class="sf-stat-l">Bez využití</span>
+            <span class="sf-stat-l">Bez referencí</span>
+        </div>
+        <div class="sf-stat" onclick="sfFiltr('nejiste',this)" data-filtr="nejiste">
+            <span class="sf-stat-n" id="sf-n-nej">-</span>
+            <span class="sf-stat-l">Nejisté</span>
+        </div>
+        <div class="sf-stat" onclick="sfFiltr('bezpecne',this)" data-filtr="bezpecne">
+            <span class="sf-stat-n" id="sf-n-bp">-</span>
+            <span class="sf-stat-l">Bezpečné smazat</span>
         </div>
         <div class="sf-stat" onclick="sfFiltr('oznaceno',this)" data-filtr="oznaceno">
             <span class="sf-stat-n" id="sf-n-oz">-</span>
@@ -667,15 +739,24 @@ if (!defined('ADMIN_PHP_LOADED')) {
             document.getElementById('sf-n-js').textContent  = st.js     || 0;
             document.getElementById('sf-n-css').textContent = st.css    || 0;
             document.getElementById('sf-n-ost').textContent = st.ostatni|| 0;
-            document.getElementById('sf-n-bv').textContent  = st.bezVyuziti || 0;
-            document.getElementById('sf-n-oz').textContent  = st.oznaceno   || 0;
+            document.getElementById('sf-n-bv').textContent  = st.pocetBezRef  || 0;
+            document.getElementById('sf-n-nej').textContent = st.pocetNejiste || 0;
+            document.getElementById('sf-n-bp').textContent  = st.pocetBezpecne|| 0;
+            document.getElementById('sf-n-oz').textContent  = st.oznaceno     || 0;
             document.getElementById('sf-stats').style.display = 'flex';
+
+            // Tlačítko archivace – zobrazit pouze pokud jsou označené soubory
+            var btnArchiv = document.getElementById('sf-btn-archiv');
+            if (btnArchiv) {
+                btnArchiv.style.display = (st.oznaceno || 0) > 0 ? 'inline-block' : 'none';
+            }
 
             // Meta info
             var meta = document.getElementById('sf-meta');
+            var runtimeInfo = st.runtimeAktivni ? 'Runtime audit: aktivní' : 'Runtime audit: neaktivní';
             meta.textContent = data.zCache
-                ? 'Z cache (' + (data.cacheCas || '') + ')  •  ' + (st.celkem || vsechny.length) + ' souborů'
-                : 'Skenováno za ' + (st.dobaSken || '?') + '  •  ' + (st.celkem || vsechny.length) + ' souborů';
+                ? 'Z cache (' + (data.cacheCas || '') + ')  •  ' + (st.celkem || vsechny.length) + ' souborů  •  ' + runtimeInfo
+                : 'Skenováno za ' + (st.dobaSken || '?') + '  •  ' + (st.celkem || vsechny.length) + ' souborů  •  ' + runtimeInfo;
 
             document.getElementById('sf-loading').style.display = 'none';
             sfFiltrovat();
@@ -704,14 +785,17 @@ if (!defined('ADMIN_PHP_LOADED')) {
 
         var seznam = vsechny.filter(function (s) {
             if (hledani && s.cesta.toLowerCase().indexOf(hledani) === -1) { return false; }
+            var klStatus = s.klasifikace ? s.klasifikace.status : '';
             switch (filtr) {
-                case 'php':        return s.typ === 'php';
-                case 'js':         return s.typ === 'js';
-                case 'css':        return s.typ === 'css';
-                case 'ostatni':    return ['php','js','css'].indexOf(s.typ) === -1;
-                case 'bez-vyuziti': return (s.kategorie || '') === 'neuzivane';
-                case 'oznaceno':   return s.oznaceno;
-                default:           return true;
+                case 'php':           return s.typ === 'php';
+                case 'js':            return s.typ === 'js';
+                case 'css':           return s.typ === 'css';
+                case 'ostatni':       return ['php','js','css'].indexOf(s.typ) === -1;
+                case 'bez-referenci':  return klStatus === 'NO_REFS_STATIC';
+                case 'nejiste':       return klStatus === 'UNCERTAIN';
+                case 'bezpecne':      return klStatus === 'SAFE_TO_DELETE';
+                case 'oznaceno':      return s.oznaceno;
+                default:              return true;
             }
         });
 
@@ -788,13 +872,19 @@ if (!defined('ADMIN_PHP_LOADED')) {
     function sfRadek(s, sym) {
         var id      = 'sfr_' + s.cesta.replace(/[^a-z0-9]/gi, '_');
         var ozn    = s.oznaceno;
-        var bezVyu = (s.kategorie || '') === 'neuzivane';
+        var klStatus = s.klasifikace ? s.klasifikace.status : 'USED';
 
-        // Stav badge - priorita: označeno > kategorie
+        // Stav badge - priorita: označeno > klasifikace > kategorie
         var kat = s.kategorie || 'aktivni';
         var stavBadge;
         if (ozn) {
             stavBadge = '<span class="sf-badge sf-b-oznacen">Ke smazání</span>';
+        } else if (klStatus === 'SAFE_TO_DELETE') {
+            stavBadge = '<span class="sf-badge sf-b-bezpecne">Bezpečné smazat</span>';
+        } else if (klStatus === 'NO_REFS_STATIC') {
+            stavBadge = '<span class="sf-badge sf-b-bez-ref">Bez referencí</span>';
+        } else if (klStatus === 'UNCERTAIN') {
+            stavBadge = '<span class="sf-badge sf-b-nejiste">Nejisté</span>';
         } else if (kat === 'stranka') {
             stavBadge = '<span class="sf-badge sf-b-stranka">Stránka</span>';
         } else if (kat === 'api') {
@@ -803,8 +893,6 @@ if (!defined('ADMIN_PHP_LOADED')) {
             stavBadge = '<span class="sf-badge sf-b-migrace">Migrace</span>';
         } else if (kat === 'minifikace') {
             stavBadge = '<span class="sf-badge sf-b-min">.min</span>';
-        } else if (kat === 'neuzivane') {
-            stavBadge = '<span class="sf-badge sf-b-bezVyuz">Bez využití</span>';
         } else {
             stavBadge = '<span class="sf-badge sf-b-aktivni">Aktivní</span>';
         }
@@ -904,7 +992,58 @@ if (!defined('ADMIN_PHP_LOADED')) {
                     + '</div>';
             });
         } else {
-            vyuHtml += '<div class="sf-tree-empty">— nikde není odkazován → lze bezpečně smazat</div>';
+            vyuHtml += '<div class="sf-tree-empty">— žádné statické reference (viz klasifikace níže)</div>';
+        }
+
+        // Klasifikace
+        var klasHtml = '';
+        if (s.klasifikace) {
+            var kl = s.klasifikace;
+            var ev = kl.evidence || {};
+            var statusPopis = {
+                'USED': 'Aktivní (nalezeny reference)',
+                'NO_REFS_STATIC': 'Bez referencí (statická analýza)',
+                'UNCERTAIN': 'Nejisté (ověřit ručně)',
+                'SAFE_TO_DELETE': 'Bezpečné smazat (prošly všechny kontroly)'
+            };
+
+            klasHtml += '<div class="sf-klas-box">';
+            klasHtml += '<div class="sf-detail-label">Klasifikace</div>';
+            klasHtml += '<div class="sf-klas-status">' + esc(statusPopis[kl.status] || kl.status) + '</div>';
+
+            // Varování pokud runtime není dostupný
+            if (ev.runtime_dostupny === false) {
+                klasHtml += '<div class="sf-klas-varovani">'
+                    + 'Runtime audit není aktivní. Statická analýza kódu NEMUSÍ zachytit dynamické includy, '
+                    + 'lazy-load, cron joby ani URL přístupy. Aktivujte runtime audit pro spolehlivější klasifikaci.'
+                    + '</div>';
+            }
+
+            // Tabulka pravidel
+            if (kl.reasons && kl.reasons.length > 0) {
+                klasHtml += '<table class="sf-klas-tabulka">';
+                klasHtml += '<tr><th>Pravidlo</th><th>Stav</th><th>Detail</th></tr>';
+                kl.reasons.forEach(function (r) {
+                    var stavTd = r.passed
+                        ? '<td class="sf-klas-passed">OK</td>'
+                        : '<td class="sf-klas-failed">BLOKUJE</td>';
+                    klasHtml += '<tr>'
+                        + '<td title="' + esc(r.zdroj || '') + '">' + esc(r.rule_id) + '</td>'
+                        + stavTd
+                        + '<td>' + esc(r.details || r.nazev || '') + '</td>'
+                        + '</tr>';
+                });
+                klasHtml += '</table>';
+            }
+
+            // Evidence souhrn
+            klasHtml += '<div class="sf-klas-evidence">'
+                + 'Reference: ' + (ev.staticke_reference_pocet || 0)
+                + ' | Runtime: ' + (ev.runtime_dostupny ? (ev.runtime_hity || 0) + ' hitů / ' + (ev.runtime_okno_dni || 14) + ' dní' : 'neaktivní')
+                + ' | Stáří: ' + (ev.stari_dni || 0) + ' dní'
+                + '</div>';
+
+            klasHtml += '</div>';
         }
 
         return '<div class="sf-detail" id="' + esc(id) + '-d">'
@@ -913,6 +1052,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
             + '<div>' + zavHtml + '</div>'
             + '<div>' + vyuHtml + '</div>'
             + '</div>'
+            + klasHtml
             + '</div>';
     }
 
@@ -969,6 +1109,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                 document.getElementById('sf-n-oz').textContent  = pocetOzn;
                 document.getElementById('sf-n-vse').textContent = vsechny.length;
 
+                aktualizovatBtnArchiv();
                 sfFiltrovat();
             } else {
                 alert('Chyba: ' + (data.zprava || 'Neznámá chyba'));
@@ -1015,6 +1156,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                 var pocetOzn = vsechny.filter(function (x) { return x.oznaceno; }).length;
                 document.getElementById('sf-n-oz').textContent = pocetOzn;
 
+                aktualizovatBtnArchiv();
                 sfFiltrovat();
             } else {
                 alert('Chyba: ' + (data.zprava || 'Neznámá chyba'));
@@ -1023,6 +1165,57 @@ if (!defined('ADMIN_PHP_LOADED')) {
             alert('Chyba komunikace: ' + err.message);
         }
     };
+
+    /* --------------------------------------------------------
+       Archivovat všechny označené soubory
+       -------------------------------------------------------- */
+    window.sfArchivovatOznacene = async function () {
+        var pocet = vsechny.filter(function (x) { return x.oznaceno; }).length;
+        if (pocet === 0) {
+            alert('Žádné soubory nejsou označeny.');
+            return;
+        }
+
+        var potvrzeni = 'Archivovat ' + pocet + ' označených souborů?\n\n'
+            + 'Soubory budou přesunuty do složky _archiv/ s časovou značkou.\n'
+            + 'Tato akce je reverzibilní (soubory zůstanou v archivu).';
+        if (!confirm(potvrzeni)) { return; }
+
+        var btn = document.getElementById('sf-btn-archiv');
+        if (btn) { btn.disabled = true; btn.textContent = 'Archivuji...'; }
+
+        try {
+            var fd = new FormData();
+            fd.append('akce', 'archivovatOznacene');
+            fd.append('csrf_token', csrf());
+
+            var odp  = await fetch('/api/soubory_api.php', { method: 'POST', body: fd });
+            var data = await odp.json();
+
+            if (data.status === 'success') {
+                alert(data.zprava || 'Archivace dokončena.');
+                sfNacist(true);
+            } else {
+                alert('Chyba: ' + (data.zprava || 'Neznámá chyba'));
+            }
+        } catch (err) {
+            alert('Chyba komunikace: ' + err.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Archivovat označené'; }
+        }
+    };
+
+    /* --------------------------------------------------------
+       Aktualizace tlačítka archivace
+       -------------------------------------------------------- */
+    function aktualizovatBtnArchiv() {
+        var pocet = vsechny.filter(function (x) { return x.oznaceno; }).length;
+        var btn = document.getElementById('sf-btn-archiv');
+        if (btn) {
+            btn.style.display = pocet > 0 ? 'inline-block' : 'none';
+            btn.textContent = 'Archivovat označené (' + pocet + ')';
+        }
+    }
 
     /* --------------------------------------------------------
        Start
