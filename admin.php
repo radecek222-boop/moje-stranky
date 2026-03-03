@@ -307,9 +307,13 @@ body {
 
 /* Radkovy seznam */
 .cc-seznam {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: #e5e5e5;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .cc-radek {
@@ -318,13 +322,12 @@ body {
     justify-content: space-between;
     padding: 0.9rem 1rem;
     background: #fff;
-    border-bottom: 1px solid #e5e5e5;
     cursor: pointer;
     transition: background 0.15s ease;
 }
 
 .cc-radek:first-child {
-    border-top: 1px solid #e5e5e5;
+    border-top: none;
 }
 
 .cc-radek:hover {
@@ -385,6 +388,10 @@ body {
     .admin-cache-btn {
         width: 100%;
         max-width: 300px;
+    }
+
+    .cc-seznam {
+        grid-template-columns: 1fr;
     }
 
     .cc-radek {
