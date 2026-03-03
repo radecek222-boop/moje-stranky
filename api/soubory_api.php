@@ -994,61 +994,6 @@ switch ($akce) {
         }
         break;
 
-    case 'smazat':
-        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            http_response_code(403);
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný CSRF token']);
-            exit;
-        }
-
-        $cesta = $_POST['cesta'] ?? '';
-        if (empty($cesta)) {
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Chybí cesta souboru']);
-            exit;
-        }
-
-        // Zamezit path traversal
-        $cesta = str_replace(['../', '..\\.', '..\\', '..'], '', $cesta);
-        $cesta = ltrim($cesta, '/\\');
-
-        // Ochrana systémových souborů
-        if (in_array($cesta, $chranenesoubory)) {
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Tento soubor je chráněn a nelze jej smazat.']);
-            exit;
-        }
-
-        // Soubor musí být nejprve označen ke smazání
-        $stavySouboru = nactiStavSouboru($stavSoubor);
-        if (!isset($stavySouboru[$cesta]) || $stavySouboru[$cesta] !== 'smazat') {
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Soubor musí být nejprve označen ke smazání.']);
-            exit;
-        }
-
-        // Ověřit, že soubor existuje a je uvnitř root adresáře
-        $absolutniCesta = realpath($korenAdresar . '/' . $cesta);
-        if ($absolutniCesta === false || strpos($absolutniCesta, $korenAdresar) !== 0) {
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Soubor nebyl nalezen nebo má neplatnou cestu.']);
-            exit;
-        }
-
-        // Fyzické smazání
-        if (!@unlink($absolutniCesta)) {
-            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se smazat soubor. Zkontrolujte oprávnění.']);
-            exit;
-        }
-
-        // Odstranit ze stavového souboru
-        unset($stavySouboru[$cesta]);
-        ulozStavSouboru($stavSoubor, $stavySouboru);
-
-        // Invalidovat cache
-        if (file_exists($cacheSoubor)) {
-            unlink($cacheSoubor);
-        }
-
-        echo json_encode(['status' => 'success', 'zprava' => 'Soubor byl trvale smazán.']);
-        break;
-
     case 'archivovatOznacene':
         if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
             http_response_code(403);
@@ -1078,9 +1023,9 @@ switch ($akce) {
 
         foreach ($oznaceneCesty as $relativniCesta) {
             // Bezpečnostní kontrola
-            $relativniCesta = str_replace(['../', '..\\.', '..\\', '..'], '', $relativniCesta);
-            $relativniCesta = ltrim($relativniCesta, '/\\');
-            $absolutniZdroj = realpath($korenAdresar . '/' . $relativniCesta);
+            $relativniCesta   = str_replace(['../', '..\\.', '..\\', '..'], '', $relativniCesta);
+            $relativniCesta   = ltrim($relativniCesta, '/\\');
+            $absolutniZdroj   = realpath($korenAdresar . '/' . $relativniCesta);
 
             if ($absolutniZdroj === false || strpos($absolutniZdroj, $korenAdresar) !== 0) {
                 $chyby[] = $relativniCesta . ' (neplatná cesta)';
@@ -1088,6 +1033,7 @@ switch ($akce) {
             }
 
             if (!file_exists($absolutniZdroj)) {
+                // Soubor již neexistuje - odstranit ze stavů
                 unset($stavy[$relativniCesta]);
                 continue;
             }
@@ -1122,10 +1068,10 @@ switch ($akce) {
         }
 
         echo json_encode([
-            'status'       => 'success',
-            'zprava'       => $zprava,
-            'archivovano'  => count($uspesne),
-            'chyby'        => count($chyby),
+            'status'      => 'success',
+            'zprava'      => $zprava,
+            'archivovano' => count($uspesne),
+            'chyby'       => count($chyby),
             'archivSlozka' => '_archiv/' . $casovyRazitko,
         ], JSON_UNESCAPED_UNICODE);
         break;
