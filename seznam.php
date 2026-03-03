@@ -1318,7 +1318,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 }
 .admin-prodejce-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 0.3rem;
   flex: 1;
 }
@@ -1529,7 +1530,9 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 
   .admin-prodejce-list {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
+    grid-auto-flow: row !important;
+    grid-auto-columns: auto !important;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
     gap: 0.2rem !important;
   }
 
@@ -1550,7 +1553,7 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 
   .admin-prodejce-list {
-    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)) !important;
   }
 }
 
