@@ -199,8 +199,6 @@ $zemeNazvy = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
     <title>Analytics | WGS Service</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -718,6 +716,7 @@ $zemeNazvy = [
             font-weight: 500;
         }
     </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

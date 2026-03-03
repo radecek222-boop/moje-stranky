@@ -418,10 +418,6 @@ function createRememberToken(PDO $pdo, string $userId): void
 if (!function_exists('respondSuccess')) {
     function respondSuccess(array $payload = []): void
     {
-        // Vycistit output buffer - odstranit stray output pred JSON odpovedi
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(array_merge(['status' => 'success'], $payload), JSON_UNESCAPED_UNICODE);
         exit;
@@ -438,10 +434,6 @@ if (!function_exists('respondSuccess')) {
 if (!function_exists('respondError')) {
     function respondError(string $message, int $code = 400, array $extra = []): void
     {
-        // Vycistit output buffer - odstranit stray output pred JSON odpovedi
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
         http_response_code($code);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(array_merge([

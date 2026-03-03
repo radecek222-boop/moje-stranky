@@ -10,7 +10,8 @@ require_once __DIR__ . '/init.php';
 // KRITICKÉ: Vyžadovat admin session BEZ BYPASSU
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
-    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Poppins; background: #fff; color: #000; padding: 40px; text-align: center;"><h1>PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #000; border-bottom: 2px solid #000; text-decoration: none;">Přihlásit se</a></p></body></html>');
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title>  <link rel="stylesheet" href="assets/css/poppins-font.css">
+</head><body style="font-family: Poppins; background: #fff; color: #000; padding: 40px; text-align: center;"><h1>PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #000; border-bottom: 2px solid #000; text-decoration: none;">Přihlásit se</a></p></body></html>');
 }
 
 try {
@@ -102,7 +103,6 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Všechny SQL Tabulky | WGS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {

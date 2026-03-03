@@ -46,8 +46,6 @@ if (empty($token)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Cenová nabídka - White Glove Service</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -315,6 +313,7 @@ if (empty($token)) {
         }
         .footer a { color: #aaa; }
     </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
     <div class="header">

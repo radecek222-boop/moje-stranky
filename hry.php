@@ -215,9 +215,6 @@ $dostupneHry = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Herní zóna | White Glove Service</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --hry-bg: #0a0a0a;
@@ -813,6 +810,7 @@ $dostupneHry = [
             font-size: 0.9rem;
         }
     </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
     <?php include __DIR__ . '/includes/hamburger-menu.php'; ?>

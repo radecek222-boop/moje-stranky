@@ -31,9 +31,6 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="preload" href="assets/img/herman-image04.jpg" as="image" type="image/jpeg" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- External CSS -->
     <!-- Unified Design System -->
@@ -43,6 +40,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
   <link rel="preload" as="image" href="assets/img/herman-image04.webp" fetchpriority="high">

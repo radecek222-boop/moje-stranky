@@ -207,10 +207,7 @@ if ($initialBootstrapData) {
 <?php endif; ?>
 
 <!-- Google Fonts - Natuzzi style -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <?php $cssVersion = time(); ?>
   <!-- Preload critical CSS -->
@@ -232,6 +229,7 @@ if ($initialBootstrapData) {
   <!-- WGS Loading Dialog - hezký loading s přesýpacími hodinami -->
   <link rel="stylesheet" href="assets/css/wgs-loading.min.css">
   <!-- mobile-responsive.css odstraněn - protokol.min.css má vlastní mobilní styly -->
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>

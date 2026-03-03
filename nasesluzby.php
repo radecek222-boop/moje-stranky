@@ -31,14 +31,9 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="preload" href="assets/img/herman-image01.webp" as="image" type="image/webp" fetchpriority="high">
 
   <!-- Preconnect pro rychlejší načítání fontů -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
   <!-- Google Fonts - Natuzzi style - optimalizované načítání -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
   </noscript>
   
   <!-- External CSS -->
@@ -49,6 +44,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>

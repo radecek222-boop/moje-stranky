@@ -8,9 +8,6 @@
   <meta name="description" content="Obchodní podmínky společnosti White Glove Service pro poskytování servisních služeb prémiového nábytku Natuzzi.">
   <title>Obchodní podmínky | White Glove Service</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <style>
@@ -147,6 +144,7 @@
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

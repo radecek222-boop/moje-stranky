@@ -19,9 +19,6 @@ if (!$isAdmin) {
   <link rel="preload" href="assets/css/styles.min.css" as="style">
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -749,6 +746,7 @@ body {
     padding: 25px;
 }
   </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body>

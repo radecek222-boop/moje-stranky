@@ -22,13 +22,11 @@ $csrfToken = generateCSRFToken();
   <meta name="description" content="PSA kalkulačka White Glove Service. Výpočet cen a generování QR kódů pro platby PSA služeb.">
 
   <!-- Google Fonts - Poppins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <main id="main-content">

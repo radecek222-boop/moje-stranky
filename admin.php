@@ -22,9 +22,9 @@ if (!$embedMode) {
     // SECURITY FIX: Odstraněn 'unsafe-eval' pro lepší bezpečnost
     header("Content-Security-Policy: " .
         "default-src 'self'; " .
-        "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
-        "font-src 'self' https://fonts.gstatic.com; " .
+        "script-src 'self' 'unsafe-inline' https://unpkg.com; " .
+        "style-src 'self' 'unsafe-inline' https://unpkg.com; " .
+        "font-src 'self'; " .
         "img-src 'self' data: https: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; " .
         "connect-src 'self' data: https://api.geoapify.com https://router.project-osrm.org; " .
         "frame-src 'self'; " .
@@ -112,9 +112,6 @@ if ($activeTab === 'dashboard') {
   <link rel="preload" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>" as="style">
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- External CSS -->
     <!-- Unified Design System -->
@@ -133,6 +130,7 @@ if ($activeTab === 'dashboard') {
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="/assets/js/error-handler.min.js"></script>
   <script src="/assets/js/html-sanitizer.min.js"></script>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 
 <body<?php

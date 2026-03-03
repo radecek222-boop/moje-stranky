@@ -27,9 +27,6 @@ require_once "init.php";
   <title>WGS - Rychlý kontakt</title>
 
   <!-- Google Fonts - Poppins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Externí CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -198,6 +195,7 @@ require_once "init.php";
       outline-offset: 2px;
     }
   </style>
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body class="qr-kontakt-page">
 

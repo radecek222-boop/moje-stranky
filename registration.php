@@ -22,14 +22,12 @@ $csrfToken = generateCSRFToken();
   <title>White Glove Service – Registrace</title>
   <link rel="preload" href="assets/css/styles.min.css" as="style">
   <link rel="preload" href="assets/css/login.min.css" as="style">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Tmavý styl pro login box -->
   <link rel="stylesheet" href="assets/css/login-dark-theme.min.css">
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

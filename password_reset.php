@@ -14,13 +14,11 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
   <title>White Glove Service – Reset Hesla</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <!-- Tmavý styl pro login box -->
   <link rel="stylesheet" href="assets/css/login-dark-theme.min.css">
+  <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
