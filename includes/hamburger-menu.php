@@ -532,6 +532,9 @@ document.addEventListener('alpine:init', () => {
     resizeTimer: null,
 
     init() {
+      // Zabránit dvojité inicializaci (Alpine.js volá init() automaticky A přes x-init)
+      if (window.hamburgerMenu) return;
+
       const nav = document.getElementById('hamburger-nav');
       const hamburger = document.getElementById('hamburger-toggle');
 
