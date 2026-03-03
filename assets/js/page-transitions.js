@@ -1,10 +1,10 @@
 /**
- * Prechody mezi strankami - efekt listovani
- * Slide-out: okamzity, smerovy (pocit listovani)
- * Fade-in: rychly, nezavisi na load time
+ * View Transitions API - smerovy slide podle nav poradi
+ * Funguje v Chrome 111+ / Edge. Firefox: standardni prechod.
  */
 (function () {
-  // Poradi stranek v navigaci (zleva doprava)
+  if (!document.startViewTransition) return; // fallback pro stare prohlizece
+
   var poradi = [
     '/', '/index.php',
     '/novareklamace.php',
@@ -25,47 +25,28 @@
     return -1;
   }
 
-  // Zachytit kliknuti na odkaz
+  // Zachytit kliknuti pro nastaveni smeru prechodu
   document.addEventListener('click', function (udalost) {
     var odkaz = udalost.target.closest('a[href]');
     if (!odkaz) return;
 
     var href = odkaz.getAttribute('href');
-    if (!href) return;
-
-    if (
-      odkaz.target === '_blank' ||
-      href.startsWith('#') ||
-      href.startsWith('mailto:') ||
-      href.startsWith('tel:') ||
-      href.startsWith('javascript:')
-    ) return;
+    if (!href || odkaz.target === '_blank' ||
+        href.startsWith('#') || href.startsWith('mailto:') ||
+        href.startsWith('tel:') || href.startsWith('javascript:')) return;
 
     var url;
-    try {
-      url = new URL(href, window.location.origin);
-    } catch (e) {
-      return;
-    }
+    try { url = new URL(href, window.location.origin); }
+    catch (e) { return; }
     if (url.origin !== window.location.origin) return;
 
     var aktualniIndex = ziskIndex(window.location.pathname);
     var cilIndex = ziskIndex(url.pathname);
+    if (cilIndex === aktualniIndex) return;
 
-    var trida;
-    if (aktualniIndex !== -1 && cilIndex !== -1 && cilIndex !== aktualniIndex) {
-      trida = cilIndex > aktualniIndex ? 'odchod-vlevo' : 'odchod-vpravo';
-    } else if (cilIndex !== aktualniIndex) {
-      trida = 'odchod-vlevo';
-    } else {
-      return; // stejna stranka
-    }
+    var smer = (cilIndex === -1 || aktualniIndex === -1 || cilIndex > aktualniIndex)
+      ? 'vpred' : 'zpet';
 
-    udalost.preventDefault();
-    document.body.classList.add(trida);
-
-    setTimeout(function () {
-      window.location.href = url.href;
-    }, 125);
+    document.documentElement.setAttribute('data-prechod', smer);
   });
 })();
