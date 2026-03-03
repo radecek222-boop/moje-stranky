@@ -127,7 +127,7 @@ h6 {
 }
 .hero {
   position: relative;
-  min-height: 38vh;
+  height: 85vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -171,36 +171,46 @@ h6 {
 }
 .hero-title {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 600;
   color: #ffffff;
-  margin: 0 0 0.6rem 0;
+  margin: 2rem 0;
   letter-spacing: 0.05em;
-  line-height: 1.15;
-  text-transform: uppercase;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  line-height: 1.1;
+  text-shadow:
+    0 0 15px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(0, 0, 0, 0.7),
+    0 0 45px rgba(0, 0, 0, 0.5),
+    2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 .hero-subtitle,
 .hero .hero-subtitle {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  font-weight: 400;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 300;
   color: #ffffff !important;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  margin-bottom: 1.2rem;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8) !important;
+  margin-bottom: 3rem;
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(0, 0, 0, 0.5),
+    2px 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 .hero-description,
 .hero .hero-description,
 .hero p.hero-description {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 0.95rem;
+  color: #ffffff !important;
   max-width: 700px;
-  margin: 0 auto 1.2rem;
-  line-height: 1.6;
-  letter-spacing: 0.04em;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8) !important;
+  margin: 0 auto 5rem;
+  line-height: 1.8;
+  text-shadow:
+    0 0 8px rgba(0, 0, 0, 0.9),
+    0 0 15px rgba(0, 0, 0, 0.7),
+    0 0 25px rgba(0, 0, 0, 0.5),
+    1px 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 .cta-button {
   display: inline-block;
@@ -493,8 +503,8 @@ h6 {
   }
   .hero {
     height: auto;
-    min-height: 38vh;
-    padding: 2rem 0;
+    min-height: 95vh;
+    padding: 3rem 0;
   }
   .hero::after {
     background: transparent;
@@ -552,8 +562,18 @@ h6 {
   .logo {
     font-size: 1.4rem;
   }
-  .hero-description {
+  .hero-tagline {
+    font-size: 0.85rem;
+  }
+  .hero-title {
+    font-size: 5rem;
+  }
+  .hero-subtitle {
     font-size: 0.7rem;
+    letter-spacing: 0.25em;
+  }
+  .hero-description {
+    font-size: 0.75rem;
     line-height: 1.5;
   }
   .cta-button {
