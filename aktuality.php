@@ -121,7 +121,11 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       background-position: center;
       background-attachment: fixed;
       color: white;
-      padding: 55px 20px;
+      min-height: 38vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 20px;
       text-align: center;
       margin-bottom: 30px;
     }
@@ -389,7 +393,8 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     @media (max-width: 768px) {
       .hero {
-        padding: 38px 16px;
+        min-height: 30vh;
+        padding: 1.5rem 16px;
         background-attachment: scroll;
       }
 

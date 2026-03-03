@@ -19,7 +19,7 @@
   ];
 
   var nacitam = false;
-  var DOBA_ANIMACE = 260; // ms
+  var DOBA_ANIMACE = 380; // ms
 
   // --- Pomocne funkce ---
 
@@ -217,6 +217,9 @@
         setTimeout(function () {
           // Uklid po animaci
           staraStranka.remove();
+          // Scroll na 0 PRED tim nez nova stranka vstoupi do toku dokumentu –
+          // jinak by se vykreslila posunutá a pak skocila (viditelny jolt)
+          window.scrollTo(0, 0);
           smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex']);
           document.body.style.overflow = '';
           document.body.style.minHeight = '';
@@ -232,9 +235,8 @@
             window.Alpine.initTree(novaStranka);
           }
 
-          // Aktualizovat nav + scroll
+          // Aktualizovat nav
           aktualizeNav(new URL(url, location.origin).pathname);
-          window.scrollTo(0, 0);
 
           nacitam = false;
         }, DOBA_ANIMACE + 20);
