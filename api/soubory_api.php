@@ -747,6 +747,23 @@ function klasifikovatSoubor(
 // ZPRACOVÁNÍ AKCE
 // ============================================================
 
+// Soubory, které NELZE fyzicky smazat (ochrana systému)
+$chranenesoubory = [
+    'init.php',
+    'admin.php',
+    'login.php',
+    'index.php',
+    'config/config.php',
+    'config/database.php',
+    'includes/csrf_helper.php',
+    'includes/error_handler.php',
+    'includes/env_loader.php',
+    'includes/security_headers.php',
+    'includes/user_session_check.php',
+    'api/soubory_api.php',
+    '.htaccess',
+];
+
 // Adresáře a soubory přeskočit při skenování
 $vylouceneAdresare = [
     '.git', 'node_modules', 'vendor', 'logs', 'backups',
