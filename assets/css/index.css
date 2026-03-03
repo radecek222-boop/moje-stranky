@@ -395,7 +395,7 @@ h6 {
 @media (max-width: 768px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 8px;
   }
 }
 .footer-column {
@@ -512,23 +512,72 @@ h6 {
   .hero-content {
     padding: 2rem 1rem;
   }
+  /* Footer kompaktni na mobilech */
+  .footer {
+    padding: 1rem 1rem 0.5rem;
+  }
+  .footer-grid {
+    margin-bottom: 0.75rem;
+  }
+  .footer-column {
+    padding: 0.25rem 0;
+  }
+  .footer-title,
+  .footer h3 {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+  .footer-text,
+  .footer p,
+  .footer li,
+  .footer a {
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+  .footer-bottom {
+    padding-top: 0.5rem;
+  }
+  .footer-bottom p {
+    font-size: 0.62rem;
+  }
+  /* CTA sekce kompaktni na mobilech */
+  .cta-section {
+    padding: 2rem 1rem;
+  }
+  .cta-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+  }
+  .cta-text {
+    font-size: 0.8rem;
+    margin-bottom: 1.25rem;
+  }
+  /* Services sekce */
+  .services-links-section {
+    padding: 1.5rem 1rem;
+  }
 }
 @media (max-width: 480px) {
   .logo {
     font-size: 1.4rem;
   }
   .hero-tagline {
-    font-size: 1.2rem;
+    font-size: 0.85rem;
   }
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 5rem;
   }
   .hero-subtitle {
-    font-size: 0.9rem;
-    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+  }
+  .hero-description {
+    font-size: 0.75rem;
+    line-height: 1.5;
   }
   .cta-button {
-    padding: 0.9rem 2rem;
-    font-size: 0.85rem;
+    padding: 0.7rem 1.6rem;
+    font-size: 0.78rem;
   }
 }
