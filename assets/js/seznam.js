@@ -2612,12 +2612,36 @@ async function showCustomerDetail(id) {
   const cislo = CURRENT_RECORD.cislo || '';
   const reklamaceId = CURRENT_RECORD.reklamace_id || '';
   const zadavatel = CURRENT_RECORD.zadavatel_jmeno || CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
+  const zadavatelId = CURRENT_RECORD.created_by || '';
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';
   const barva = CURRENT_RECORD.barva || '';
   const doplnujici_info = CURRENT_RECORD.doplnujici_info || '';
   const fakturace_firma = CURRENT_RECORD.fakturace_firma || 'CZ';
+
+  const jeAdmin = CURRENT_USER && CURRENT_USER.is_admin;
+  let zadavatelSelectHtml = '';
+  if (jeAdmin) {
+    try {
+      const odpovUzivatele = await fetch('/api/admin_users_api.php?action=zadavatel_seznam');
+      const dataUzivatele = await odpovUzivatele.json();
+      if (dataUzivatele.status === 'success' && Array.isArray(dataUzivatele.uzivatele)) {
+        const moznosti = dataUzivatele.uzivatele.map(u => {
+          const vybrany = String(u.uzivatel_id) === String(zadavatelId) ? ' selected' : '';
+          const popisek = u.jmeno ? `${u.jmeno} (${u.email})` : u.email;
+          return `<option value="${Utils.escapeHtml(String(u.uzivatel_id))}"${vybrany}>${Utils.escapeHtml(popisek)}</option>`;
+        }).join('');
+        const prazdna = !zadavatelId ? ' selected' : '';
+        zadavatelSelectHtml = `<select id="edit_zadavatel" style="border: 1px solid #555; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000; width: 100%;"><option value=""${prazdna}>-- nevybráno --</option>${moznosti}</select>`;
+      }
+    } catch (e) {
+      logger.error('Chyba při načítání uživatelů pro zadavatele:', e);
+    }
+  }
+  if (!zadavatelSelectHtml) {
+    zadavatelSelectHtml = `<input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #eee; color: #000;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">`;
+  }
 
   const dbPhotos = await loadPhotosFromDB(reklamaceId);
   let fotky = dbPhotos.length > 0 ? dbPhotos : [];
@@ -2652,7 +2676,7 @@ async function showCustomerDetail(id) {
           <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
           <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
-          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #eee; color: #000;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
+          ${zadavatelSelectHtml}
 
           <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
           <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
@@ -3586,6 +3610,12 @@ async function saveAllCustomerData(id) {
     doplnujici_info: document.getElementById('edit_doplnujici_info').value,
     popis_problemu: document.getElementById('edit_popis_problemu').value
   };
+
+  // Admin může měnit zadavatele (created_by)
+  const selectZadavatel = document.getElementById('edit_zadavatel');
+  if (selectZadavatel && CURRENT_USER && CURRENT_USER.is_admin) {
+    data.created_by = selectZadavatel.value;
+  }
 
   await saveData(data, 'Všechny údaje byly aktualizovány');
 }

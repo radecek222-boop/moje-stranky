@@ -107,6 +107,34 @@ try {
             'users' => $users
         ]);
 
+    } elseif ($method === 'GET' && $action === 'zadavatel_seznam') {
+        // Jednoduchý seznam uživatelů pro dropdown změny zadavatele
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existujiciSloupce = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $maUserId = in_array('user_id', $existujiciSloupce);
+        $maId = in_array('id', $existujiciSloupce);
+        $maName = in_array('name', $existujiciSloupce);
+        $maIsActive = in_array('is_active', $existujiciSloupce);
+
+        $idSloupec = $maUserId ? 'user_id' : ($maId ? 'id' : null);
+        if (!$idSloupec) {
+            throw new Exception('Nelze najít ID sloupec v tabulce wgs_users');
+        }
+
+        $nameSloupec = $maName ? 'name' : 'email';
+        $whereAktivni = $maIsActive ? 'WHERE is_active = 1' : '';
+
+        $stmt = $pdo->query("
+            SELECT {$idSloupec} as uzivatel_id, {$nameSloupec} as jmeno, email
+            FROM wgs_users
+            {$whereAktivni}
+            ORDER BY {$nameSloupec} ASC
+        ");
+        $uzivatele = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(['status' => 'success', 'uzivatele' => $uzivatele]);
+
     } elseif ($method === 'GET' && $action === 'online') {
         // Online uživatelé (aktivní za posledních 5 minut)
         // FIX: Používáme wgs_users.last_activity místo wgs_tokens.created_at
