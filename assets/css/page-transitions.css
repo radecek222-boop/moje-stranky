@@ -1,8 +1,1 @@
-/**
- * Page transitions - AJAX router
- * Animace jsou rizeny JS (page-transitions.js)
- * Tento soubor jen zajistuje ze main nema z-index konflikty
- */
-#main-content {
-  position: relative;
-}
+/* page-transitions - deaktivovano */
