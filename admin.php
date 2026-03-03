@@ -196,6 +196,11 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
 
+        <div class="cc-card" data-href="admin.php?tab=admin_soubory">
+            <div class="cc-card-title" data-lang-cs="ROOT Soubory" data-lang-en="ROOT Files" data-lang-it="File ROOT">ROOT Soubory</div>
+            <div class="cc-card-description" data-lang-cs="Přehled všech souborů, závislostí, využití a správa ke smazání" data-lang-en="Overview of all files, dependencies, usage and deletion management" data-lang-it="Panoramica di tutti i file, dipendenze, utilizzo e gestione eliminazione">Přehled všech souborů, závislostí, využití a správa ke smazání</div>
+        </div>
+
         <div class="cc-card" data-href="transport.php">
             <div class="cc-card-title" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
             <div class="cc-card-description" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
