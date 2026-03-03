@@ -192,7 +192,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('../img/herman-image03.webp');
+  background-image: url('../img/herman-image01.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -200,7 +200,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .no-webp .hero {
-  background-image: url('../img/herman-image03.jpg');
+  background-image: url('../img/herman-image01.jpg');
 }
 
 .hero::before {

@@ -103,7 +103,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop" as="image" fetchpriority="high">
+  <link rel="preload" href="assets/img/herman-image01.jpg" as="image" type="image/jpeg" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style -->
 
@@ -116,7 +116,8 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
   <style>
     /* Aktuality specifické styly */
     .hero {
-      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop');
+      position: relative;
+      background-image: url('assets/img/herman-image01.webp');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -125,9 +126,20 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem 20px;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
       text-align: center;
-      margin-bottom: 30px;
+      padding: 2rem 20px;
     }
 
     .hero-title {
