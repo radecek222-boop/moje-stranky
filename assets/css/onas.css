@@ -126,7 +126,7 @@ h6 {
 }
 .hero {
   position: relative;
-  min-height: 50vh;
+  min-height: 38vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,30 +158,30 @@ h6 {
   z-index: var(--z-content, 2);
   text-align: center;
   max-width: 900px;
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
   color: var(--c-white);
 }
 .hero-title {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 300;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 600;
   color: var(--c-white);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.6rem;
   letter-spacing: 0.05em;
-  line-height: 1.2;
+  line-height: 1.15;
   text-transform: uppercase;
 }
 .hero-subtitle {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .content-section {
   background: var(--c-white);
-  padding: 5rem 2rem;
+  padding: 2.5rem 2rem;
 }
 .container {
   max-width: 1200px;
@@ -192,23 +192,23 @@ h6 {
 }
 .section-intro {
   max-width: 900px;
-  margin: 0 auto 4rem;
+  margin: 0 auto 2rem;
 }
 .section-title {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 300;
+  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+  font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 2rem;
-  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
 }
 .section-text {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: var(--c-grey);
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
 .section-text strong {
   color: var(--c-black);
@@ -216,13 +216,13 @@ h6 {
 }
 .values-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 3rem;
-  margin: 4rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
 }
 .value-card {
   background: var(--c-bg);
-  padding: 3rem 2rem;
+  padding: 1.75rem 1.5rem;
   text-align: center;
   transition: all 0.3s ease;
 }
@@ -233,28 +233,28 @@ h6 {
 }
 .value-number {
   font-family: "Poppins", sans-serif;
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 300;
   color: var(--c-black);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .value-title {
   font-family: "Poppins", sans-serif;
-  font-size: 1.3rem;
-  font-weight: 400;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 1rem;
-  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .value-description {
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: var(--c-grey);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 .certifications {
   background: var(--c-bg);
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
   text-align: center;
 }
 .cert-list {
@@ -355,28 +355,28 @@ h6 {
 .cta-section {
   background: var(--c-black);
   color: var(--c-white);
-  padding: 4rem 2rem;
+  padding: 2.5rem 2rem;
   text-align: center;
 }
 .cta-title {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 300;
-  margin-bottom: 1.5rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   color: #ffffff !important;
 }
 .cta-text {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: #ffffff !important;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
 .cta-button {
   display: inline-block;
-  padding: 1rem 3rem;
+  padding: 0.65rem 2rem;
   background: #ffffff !important;
   color: #000000 !important;
   text-decoration: none;
@@ -542,3 +542,4 @@ h6 {
     padding: 2rem 1.5rem;
   }
 }
+/* Prechody viz assets/css/page-transitions.css */

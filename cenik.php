@@ -41,6 +41,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- External CSS -->
+  <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
@@ -519,6 +520,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <!-- External JavaScript -->
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/page-transitions.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 
 <!-- Language Switcher (definuje window.t funkci) -->

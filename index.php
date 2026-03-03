@@ -37,6 +37,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
   <!-- External CSS -->
     <!-- Unified Design System -->
+  <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
@@ -82,6 +83,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/page-transitions.min.js" defer></script>
 
 <!-- REMOVED: index.js - veškerá funkcionalita přesunuta do hamburger-menu.php a language-switcher.js -->
 

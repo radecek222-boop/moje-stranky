@@ -38,6 +38,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   
   <!-- External CSS -->
     <!-- Unified Design System -->
+  <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
@@ -295,6 +296,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/page-transitions.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
 </body>
