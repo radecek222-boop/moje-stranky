@@ -1,54 +1,35 @@
 /**
- * Prechody mezi strankami - efekt listovani
- * Musi byt nacten v <head> pro eliminaci flashe
+ * Prechody mezi strankami
+ * - body zacina opacity:0 ihned po parsovani CSS (zadna bila stranka)
+ * - fade-in: 0.15s, hraje hned pri nacteni
+ * - slide-out: okamzita reakce na klik (doprava/doleva podle nav)
  */
 
-/* Vychozi stav - stranka se objevi az po nacteni animace */
 body {
-  animation: vstup-fade 0.18s ease forwards;
+  opacity: 0;
+  animation: stranka-vstup 0.15s ease forwards;
 }
 
-/* Vstup ze prava (navigace dopredu) */
-body.vstup-zprava {
-  animation: vstup-zprava 0.22s ease forwards;
+@keyframes stranka-vstup {
+  to { opacity: 1; }
 }
 
-/* Vstup zleva (navigace dozadu) */
-body.vstup-zleva {
-  animation: vstup-zleva 0.22s ease forwards;
-}
-
-/* Odchod doleva (dopredu) */
+/* Odchod doleva (dopredu v navigaci) */
 body.odchod-vlevo {
   animation: none !important;
-  opacity: 0;
-  transform: translateX(-28px);
-  transition: opacity 0.13s ease, transform 0.13s ease;
+  opacity: 0 !important;
+  transform: translateX(-32px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
   pointer-events: none;
   overflow: hidden;
 }
 
-/* Odchod doprava (dozadu) */
+/* Odchod doprava (dozadu v navigaci) */
 body.odchod-vpravo {
   animation: none !important;
-  opacity: 0;
-  transform: translateX(28px);
-  transition: opacity 0.13s ease, transform 0.13s ease;
+  opacity: 0 !important;
+  transform: translateX(32px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
   pointer-events: none;
   overflow: hidden;
-}
-
-@keyframes vstup-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes vstup-zprava {
-  from { opacity: 0; transform: translateX(28px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes vstup-zleva {
-  from { opacity: 0; transform: translateX(-28px); }
-  to   { opacity: 1; transform: translateX(0); }
 }

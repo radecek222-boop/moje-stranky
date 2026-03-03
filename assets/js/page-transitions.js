@@ -1,6 +1,7 @@
 /**
  * Prechody mezi strankami - efekt listovani
- * Smer slajdu zavisi na poradi stranky v navigaci
+ * Slide-out: okamzity, smerovy (pocit listovani)
+ * Fade-in: rychly, nezavisi na load time
  */
 (function () {
   // Poradi stranek v navigaci (zleva doprava)
@@ -23,15 +24,6 @@
     }
     return -1;
   }
-
-  // Aplikovat smer vstupu podle sessionStorage
-  var smer = sessionStorage.getItem('prechod-smer');
-  if (smer === 'vpred') {
-    document.body.classList.add('vstup-zprava');
-  } else if (smer === 'zpet') {
-    document.body.classList.add('vstup-zleva');
-  }
-  sessionStorage.removeItem('prechod-smer');
 
   // Zachytit kliknuti na odkaz
   document.addEventListener('click', function (udalost) {
@@ -60,29 +52,20 @@
     var aktualniIndex = ziskIndex(window.location.pathname);
     var cilIndex = ziskIndex(url.pathname);
 
-    var smerOdchodu, smerPrichodu;
-
-    if (aktualniIndex !== -1 && cilIndex !== -1) {
-      if (cilIndex > aktualniIndex) {
-        smerOdchodu = 'odchod-vlevo';
-        smerPrichodu = 'vpred';
-      } else if (cilIndex < aktualniIndex) {
-        smerOdchodu = 'odchod-vpravo';
-        smerPrichodu = 'zpet';
-      } else {
-        return; // stejna stranka
-      }
+    var trida;
+    if (aktualniIndex !== -1 && cilIndex !== -1 && cilIndex !== aktualniIndex) {
+      trida = cilIndex > aktualniIndex ? 'odchod-vlevo' : 'odchod-vpravo';
+    } else if (cilIndex !== aktualniIndex) {
+      trida = 'odchod-vlevo';
     } else {
-      smerOdchodu = 'odchod-vlevo';
-      smerPrichodu = 'vpred';
+      return; // stejna stranka
     }
 
     udalost.preventDefault();
-    sessionStorage.setItem('prechod-smer', smerPrichodu);
-    document.body.classList.add(smerOdchodu);
+    document.body.classList.add(trida);
 
     setTimeout(function () {
       window.location.href = url.href;
-    }, 135);
+    }, 125);
   });
 })();
