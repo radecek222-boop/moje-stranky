@@ -1,0 +1,54 @@
+/**
+ * Prechody mezi strankami - efekt listovani
+ * Musi byt nacten v <head> pro eliminaci flashe
+ */
+
+/* Vychozi stav - stranka se objevi az po nacteni animace */
+body {
+  animation: vstup-fade 0.18s ease forwards;
+}
+
+/* Vstup ze prava (navigace dopredu) */
+body.vstup-zprava {
+  animation: vstup-zprava 0.22s ease forwards;
+}
+
+/* Vstup zleva (navigace dozadu) */
+body.vstup-zleva {
+  animation: vstup-zleva 0.22s ease forwards;
+}
+
+/* Odchod doleva (dopredu) */
+body.odchod-vlevo {
+  animation: none !important;
+  opacity: 0;
+  transform: translateX(-28px);
+  transition: opacity 0.13s ease, transform 0.13s ease;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Odchod doprava (dozadu) */
+body.odchod-vpravo {
+  animation: none !important;
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity 0.13s ease, transform 0.13s ease;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes vstup-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes vstup-zprava {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes vstup-zleva {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

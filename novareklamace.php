@@ -33,6 +33,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
 
   <!-- Critical CSS -->
+  <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/novareklamace.min.css">
   <!-- novareklamace-mobile-fixes.css sloučen do novareklamace.min.css (Step 49) -->
@@ -649,6 +650,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   window.WGS_USER_LOGGED_IN = <?php echo $isLoggedIn ? "true" : "false"; ?>;
 </script>
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/page-transitions.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <script src="assets/js/novareklamace.min.js?v=1764635649" defer></script>

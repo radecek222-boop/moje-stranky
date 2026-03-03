@@ -108,6 +108,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
   <!-- Google Fonts - Natuzzi style -->
 
   <!-- External CSS -->
+  <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="preload" href="assets/css/mobile-responsive.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
@@ -401,20 +402,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       }
     }
 
-    /* Prechody mezi strankami */
-    @keyframes stranka-vstup {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    body {
-      animation: stranka-vstup 0.35s ease forwards;
-    }
-    body.stranka-odchazi {
-      opacity: 0;
-      transform: translateY(-5px);
-      transition: opacity 0.28s ease, transform 0.28s ease;
-      animation: none;
-    }
   </style>
 
   <!-- Analytics Tracker -->
