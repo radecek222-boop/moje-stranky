@@ -1,12 +1,1 @@
-/**
- * Page transitions – fade efekt
- * Overlay (#prechod-overlay) je vytvořen dynamicky v page-transitions.js
- */
-#prechod-overlay {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 99999;
-  pointer-events: none;
-  opacity: 0;
-}
+/* page-transitions - deaktivovano */
