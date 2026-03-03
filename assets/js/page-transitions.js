@@ -109,20 +109,22 @@
 
     var sirka = window.innerWidth + 'px';
 
+    // Zamknout vysku body pred tim nez stara stranka opusti flow
+    document.body.style.minHeight = document.body.offsetHeight + 'px';
+    document.body.style.overflow = 'hidden';
+
+    // Zarovnat dokument na scroll=0
+    var scrollY = window.scrollY;
+
     // Zafixovat starou stranku na miste aby se mohla pohybovat
     nastav(staraStranka, {
       position: 'fixed',
-      top: staraStranka.getBoundingClientRect().top + 'px',
+      top: (-scrollY) + 'px',
       left: '0',
       width: sirka,
       zIndex: '10',
       pointerEvents: 'none'
     });
-
-    // Zarovnat dokument na scroll=0 a zablokovat scrollovani
-    var scrollY = window.scrollY;
-    nastav(staraStranka, { top: (-scrollY) + 'px' });
-    document.body.style.overflow = 'hidden';
 
     fetch(url, { headers: { 'X-Requested-With': 'ajax' } })
       .then(function (r) { return r.text(); })
@@ -160,7 +162,8 @@
           transform: 'translateX(' + startX + ')',
           zIndex: '11'
         });
-        document.body.appendChild(novaStranka);
+        // Vlozit novou stranku PRED starou (spravne poradi v DOM, pred footerem)
+        staraStranka.before(novaStranka);
 
         // Jeden frame pauza, pak spustit animaci
         requestAnimationFrame(function () {
@@ -178,6 +181,7 @@
           staraStranka.remove();
           smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex']);
           document.body.style.overflow = '';
+          document.body.style.minHeight = '';
 
           // Spustit skripty z noveho obsahu
           spustiSkripty(novaStranka);
