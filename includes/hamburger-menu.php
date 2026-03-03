@@ -274,13 +274,13 @@ if ($isAdmin) {
   border: none !important;
   background: transparent !important;
   transition: all 0.2s ease;
-  padding: 0.5rem 1.2rem !important;
+  padding: 0.3rem 1rem !important;
   display: flex !important;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  font-size: 0.78rem;
 }
 
 .hamburger-notif-btn:hover {
@@ -294,13 +294,13 @@ if ($isAdmin) {
   border: none !important;
   background: transparent !important;
   transition: all 0.2s ease;
-  padding: 0.5rem 1.2rem !important;
+  padding: 0.3rem 1rem !important;
   display: flex !important;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  font-size: 0.78rem;
   cursor: pointer;
 }
 
@@ -438,7 +438,7 @@ if ($isAdmin) {
 }
 
 @media (max-width: 768px) {
-  .hamburger-header { padding: 1rem 1.5rem; }
+  .hamburger-header { padding: 0.6rem 1rem; }
   .hamburger-toggle { display: flex; }
   .hamburger-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
   .hamburger-toggle.active span:nth-child(2) { opacity: 0; }
@@ -454,7 +454,7 @@ if ($isAdmin) {
     height: 100dvh; /* PWA fix: dynamic viewport height */
     background: var(--c-bg-dark, #000);
     flex-direction: column;
-    padding: 60px 0 0 0;
+    padding: 50px 0 0 0;
     padding-bottom: env(safe-area-inset-bottom, 0); /* PWA fix: iPhone home indicator */
     gap: 0;
     margin: 0;
@@ -469,30 +469,30 @@ if ($isAdmin) {
 
   .hamburger-nav a {
     display: block;
-    padding: 0.5rem 1.2rem;
+    padding: 0.3rem 1rem;
     width: 100%;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    font-size: 0.88rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.78rem;
     gap: 0;
     word-wrap: break-word; overflow-wrap: break-word;
   }
 
   .hamburger-nav a:hover { background: rgba(255, 255, 255, 0.05); }
-  .hamburger-nav a.active { background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+  .hamburger-nav a.active { background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 
   .hamburger-lang-switcher {
-    padding: 0.6rem 1.2rem;
-    padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0)); /* PWA fix */
+    padding: 0.4rem 1rem;
+    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom, 0)); /* PWA fix */
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 0;
     margin-top: auto; /* Posunout na spodek */
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
 
-  .lang-flag img { width: 28px; height: 18px; }
-  .hamburger-logo { font-size: 1.3rem; }
-  .hamburger-logo span { font-size: 0.5rem; }
+  .lang-flag img { width: 22px; height: 14px; }
+  .hamburger-logo { font-size: 1.1rem; }
+  .hamburger-logo span { font-size: 0.45rem; }
   body.hamburger-menu-open { overflow: hidden; }
 }
 
