@@ -703,6 +703,14 @@
         const summaryDetails = document.getElementById('summary-details');
         const grandTotal = document.getElementById('grand-total');
 
+        // Detekce měny z hlavního formuláře (cenova-nabidka.php)
+        const menaEl = document.getElementById('mena');
+        const aktivniMena = menaEl ? menaEl.value : 'EUR';
+        const KURZ_CZK = 25;
+        const zobrazCenu = (eur) => aktivniMena === 'CZK'
+            ? (eur * KURZ_CZK).toFixed(2) + ' Kč'
+            : eur.toFixed(2) + ' €';
+
         let html = '';
         let celkem = 0;
 
@@ -710,14 +718,14 @@
         if (stav.typServisu === 'vlastni' && stav.vlastniCenaHodnota > 0) {
             html += `<div class="summary-line" style="font-size: 1.1em;">
                 <span>Vlastní cena:</span>
-                <span class="summary-price">${stav.vlastniCenaHodnota.toFixed(2)} €</span>
+                <span class="summary-price">${zobrazCenu(stav.vlastniCenaHodnota)}</span>
             </div>`;
 
             // Vyzvednutí dílu na skladě (pokud je zaškrtnuté)
             if (stav.vyzvednutiSklad) {
                 html += `<div class="summary-line">
                     <span>${preklad('summary.warehousePickup')}:</span>
-                    <span class="summary-price">${CENY.vyzvednutiSklad.toFixed(2)} €</span>
+                    <span class="summary-price">${zobrazCenu(CENY.vyzvednutiSklad)}</span>
                 </div>`;
                 celkem = stav.vlastniCenaHodnota + CENY.vyzvednutiSklad;
             } else {
@@ -732,7 +740,7 @@
             }
 
             summaryDetails.innerHTML = html;
-            grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
+            grandTotal.innerHTML = `<strong>${zobrazCenu(celkem)}</strong>`;
 
             // Upravit tlačítka podle režimu kalkulačky
             upravitTlacitkaProRezim();
@@ -741,8 +749,8 @@
 
         // Dopravné
         html += `<div class="summary-line">
-            <span>${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
-            <span class="summary-price">${stav.dopravne.toFixed(2)} €</span>
+            <span>${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${zobrazCenu(TRANSPORT_RATE)}):</span>
+            <span class="summary-price">${zobrazCenu(stav.dopravne)}</span>
         </div>`;
         celkem += stav.dopravne;
 
@@ -750,7 +758,7 @@
         if (stav.typServisu === 'diagnostika') {
             html += `<div class="summary-line">
                 <span>${preklad('summary.inspection')}:</span>
-                <span class="summary-price">${CENY.diagnostika.toFixed(2)} €</span>
+                <span class="summary-price">${zobrazCenu(CENY.diagnostika)}</span>
             </div>`;
             celkem += CENY.diagnostika;
         }
@@ -779,17 +787,17 @@
                 const produktyInfo = skutecnyPocetProduktu > 1 ? `, ${skutecnyPocetProduktu} produkty` : '';
                 html += `<div class="summary-line">
                     <span>${preklad('summary.upholsteryWork')} (${celkemDilu} ${partsWord}${produktyInfo}):</span>
-                    <span class="summary-price">${cenaDilu.toFixed(2)} €</span>
+                    <span class="summary-price">${zobrazCenu(cenaDilu)}</span>
                 </div>`;
 
                 if (skutecnyPocetProduktu === 1 && celkemDilu > 1) {
                     html += `<div class="summary-subline">
-                        ↳ ${preklad('summary.firstPart')}: ${CENY.prvniDil}€, ${preklad('summary.additionalParts')}: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                        ↳ ${preklad('summary.firstPart')}: ${zobrazCenu(CENY.prvniDil)}, ${preklad('summary.additionalParts')}: ${celkemDilu - 1}× ${zobrazCenu(CENY.dalsiDil)}
                     </div>`;
                 } else if (skutecnyPocetProduktu > 1) {
                     const dalsiDily = celkemDilu - skutecnyPocetProduktu;
                     html += `<div class="summary-subline">
-                        ↳ ${skutecnyPocetProduktu}× první díl: ${skutecnyPocetProduktu}× ${CENY.prvniDil}€${dalsiDily > 0 ? `, další: ${dalsiDily}× ${CENY.dalsiDil}€` : ''}
+                        ↳ ${skutecnyPocetProduktu}× první díl: ${skutecnyPocetProduktu}× ${zobrazCenu(CENY.prvniDil)}${dalsiDily > 0 ? `, další: ${dalsiDily}× ${zobrazCenu(CENY.dalsiDil)}` : ''}
                     </div>`;
                 }
 
@@ -805,7 +813,7 @@
             if (stav.typServisu === 'mechanika') {
                 html += `<div class="summary-line">
                     <span>${preklad('summary.basicServiceRate')}:</span>
-                    <span class="summary-price">${CENY.zakladniSazba.toFixed(2)} €</span>
+                    <span class="summary-price">${zobrazCenu(CENY.zakladniSazba)}</span>
                 </div>`;
                 celkem += CENY.zakladniSazba;
             }
@@ -815,17 +823,17 @@
 
                 html += `<div class="summary-line">
                     <span>${preklad('summary.mechanicalParts')} (${celkemMechanismu}× ${preklad('summary.mechanism')}):</span>
-                    <span class="summary-price">${cenaMechanismu.toFixed(2)} €</span>
+                    <span class="summary-price">${zobrazCenu(cenaMechanismu)}</span>
                 </div>`;
 
                 if (stav.relax > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${preklad('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismusPriplatek}€
+                        ↳ ${preklad('summary.relaxMechanisms')}: ${stav.relax}× ${zobrazCenu(CENY.mechanismusPriplatek)}
                     </div>`;
                 }
                 if (stav.vysuv > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${preklad('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismusPriplatek}€
+                        ↳ ${preklad('summary.slidingMechanisms')}: ${stav.vysuv}× ${zobrazCenu(CENY.mechanismusPriplatek)}
                     </div>`;
                 }
 
@@ -837,7 +845,7 @@
         if (stav.tezkyNabytek) {
             html += `<div class="summary-line">
                 <span>${preklad('summary.secondPerson')}:</span>
-                <span class="summary-price">${CENY.druhaOsoba.toFixed(2)} €</span>
+                <span class="summary-price">${zobrazCenu(CENY.druhaOsoba)}</span>
             </div>`;
             celkem += CENY.druhaOsoba;
         }
@@ -846,7 +854,7 @@
         if (stav.material) {
             html += `<div class="summary-line">
                 <span>${preklad('summary.materialSupplied')}:</span>
-                <span class="summary-price">${CENY.material.toFixed(2)} €</span>
+                <span class="summary-price">${zobrazCenu(CENY.material)}</span>
             </div>`;
             celkem += CENY.material;
         }
@@ -855,13 +863,13 @@
         if (stav.vyzvednutiSklad) {
             html += `<div class="summary-line">
                 <span>${preklad('summary.warehousePickup')}:</span>
-                <span class="summary-price">${CENY.vyzvednutiSklad.toFixed(2)} €</span>
+                <span class="summary-price">${zobrazCenu(CENY.vyzvednutiSklad)}</span>
             </div>`;
             celkem += CENY.vyzvednutiSklad;
         }
 
         summaryDetails.innerHTML = html;
-        grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
+        grandTotal.innerHTML = `<strong>${zobrazCenu(celkem)}</strong>`;
 
         // Upravit tlačítka podle režimu kalkulačky
         upravitTlacitkaProRezim();
