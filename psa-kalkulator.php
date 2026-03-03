@@ -198,7 +198,7 @@ $csrfToken = generateCSRFToken();
 <script src="assets/js/utils.min.js" defer></script>
 <!-- WGS Toast notifikace -->
 <link rel="stylesheet" href="assets/css/wgs-toast.css">
-<script src="assets/js/wgs-toast.js" defer></script>
+<script src="assets/js/wgs-toast.min.js" defer></script>
 <script>
   window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
 </script>

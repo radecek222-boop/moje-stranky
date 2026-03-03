@@ -1236,4 +1236,3 @@ if (typeof window.WGS_TRANSLATIONS === 'undefined') {
 
 Object.assign(window.WGS_TRANSLATIONS, window.WGS_TRANSLATIONS_CENIK);
 
-console.log('[WGS Translations] Ceník translations loaded:', Object.keys(window.WGS_TRANSLATIONS_CENIK).length, 'keys');

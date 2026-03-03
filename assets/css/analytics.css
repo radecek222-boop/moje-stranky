@@ -18,7 +18,7 @@
   padding: 0;
 }
 body {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   background: var(--c-bg);
   color: var(--c-black);
   line-height: 1.6;
@@ -43,7 +43,7 @@ body {
 }
 .logo {
   color: var(--c-white);
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -147,7 +147,7 @@ body {
   gap: 0.5rem;
 }
 .page-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.2rem;
   font-weight: 400;
   color: var(--c-black);
@@ -252,7 +252,7 @@ body {
   margin-bottom: 0.4rem;
 }
 .stat-value {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--c-black);
@@ -340,7 +340,7 @@ body {
   color: var(--c-grey);
 }
 .list-item-value {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.2rem;
   font-weight: 500;
   color: var(--c-black);
@@ -425,7 +425,7 @@ body {
 .error-state h3 {
   color: var(--c-error);
   margin-bottom: 0.5rem;
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1rem;
 }
 .error-state code {

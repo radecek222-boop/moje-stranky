@@ -252,8 +252,8 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <!-- Load dependencies -->
-<script src="assets/js/photo-storage-db.js"></script>
-<script src="assets/js/session-keepalive.js"></script>
+<script src="assets/js/photo-storage-db.min.js"></script>
+<script src="assets/js/session-keepalive.min.js"></script>
 
 <script>
 // ============================================

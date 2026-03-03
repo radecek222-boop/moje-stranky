@@ -415,9 +415,11 @@ function createRememberToken(PDO $pdo, string $userId): void
  *
  * @param array $payload Payload
  */
-function respondSuccess(array $payload = []): void
-{
-    echo json_encode(array_merge(['status' => 'success'], $payload), JSON_UNESCAPED_UNICODE);
+if (!function_exists('respondSuccess')) {
+    function respondSuccess(array $payload = []): void
+    {
+        echo json_encode(array_merge(['status' => 'success'], $payload), JSON_UNESCAPED_UNICODE);
+    }
 }
 
 /**
@@ -427,11 +429,13 @@ function respondSuccess(array $payload = []): void
  * @param int $code Code
  * @param array $extra Extra
  */
-function respondError(string $message, int $code = 400, array $extra = []): void
-{
-    http_response_code($code);
-    echo json_encode(array_merge([
-        'status' => 'error',
-        'message' => $message
-    ], $extra), JSON_UNESCAPED_UNICODE);
+if (!function_exists('respondError')) {
+    function respondError(string $message, int $code = 400, array $extra = []): void
+    {
+        http_response_code($code);
+        echo json_encode(array_merge([
+            'status' => 'error',
+            'message' => $message
+        ], $extra), JSON_UNESCAPED_UNICODE);
+    }
 }

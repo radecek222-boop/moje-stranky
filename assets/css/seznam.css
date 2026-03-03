@@ -19,7 +19,7 @@
   padding: 0;
 }
 body {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   background: var(--c-bg);
   color: var(--c-black);
   line-height: 1.6;
@@ -43,7 +43,7 @@ body {
 }
 .logo {
   color: var(--c-white);
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 2.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -51,7 +51,7 @@ body {
   line-height: 1;
 }
 .logo span {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.5rem;
   display: block;
   font-weight: 400;
@@ -79,7 +79,7 @@ body {
   padding: 2rem;
 }
 .page-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--c-black);
@@ -111,7 +111,7 @@ body {
   border: none;
   background: transparent;
   font-size: 0.85rem;
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   color: var(--c-black);
   outline: none;
   padding: 0.2rem 0;
@@ -267,7 +267,7 @@ body {
   gap: 0.2rem;
 }
 .order-number {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.6rem;
   font-weight: 500;
   color: #666666;
@@ -465,7 +465,7 @@ body {
   text-align: center;
 }
 .modal-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--c-black);
@@ -561,7 +561,7 @@ body {
   border: 1px solid var(--c-border);
   font-size: 1rem;
   color: var(--c-black);
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-weight: 400;
 }
 .field-input:focus,
@@ -642,7 +642,7 @@ body {
   margin-bottom: 0.5rem;
 }
 .calendar-month-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--c-black);
@@ -655,7 +655,7 @@ body {
   border: none;
   padding: 0.3rem 0.6rem;
   cursor: pointer;
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   transition: all 0.2s;
   text-transform: uppercase;
@@ -914,7 +914,7 @@ body {
   border: 2px solid var(--c-error);
 }
 .day-bookings h4 {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--c-error);
@@ -929,7 +929,7 @@ body {
   margin-bottom: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
 }
 .booking-item:hover {
   background: var(--c-bg);
@@ -1259,7 +1259,7 @@ body {
   }
 }
 .recording-time {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--c-error);

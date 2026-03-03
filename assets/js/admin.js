@@ -381,7 +381,7 @@ async function deleteUser(userId) {
 
     if (!response.ok) {
       if (isUnauthorizedStatus(response.status)) {
-        alert(SESSION_EXPIRED_MESSAGE());
+        wgsToast.error(SESSION_EXPIRED_MESSAGE());
         redirectToLogin('admin.php?tab=users');
         return;
       }
@@ -395,10 +395,10 @@ async function deleteUser(userId) {
     if (data.status === 'success' || data.success === true) {
       loadUsers();
     } else {
-      alert(data.message || t('delete_error'));
+      wgsToast.error(data.message || t('delete_error'));
     }
   } catch (error) {
-    alert(t('delete_user_error'));
+    wgsToast.error(t('delete_user_error'));
     logger.error('Delete user error:', error);
     logClientError(error, 'deleteUser');
   }
@@ -1112,7 +1112,7 @@ async function deleteKey(keyCode) {
 
     const csrfToken = await getCSRFToken();
     if (!csrfToken) {
-        alert(t('csrf_token_not_found'));
+        wgsToast.error(t('csrf_token_not_found'));
         return;
     }
 
@@ -1129,11 +1129,11 @@ async function deleteKey(keyCode) {
         if (isSuccess(data)) {
             loadKeysModal(); // Reload
         } else {
-            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
+            wgsToast.error(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
-        alert('Chyba: ' + err.message);
+        wgsToast.error('Chyba: ' + err.message);
     });
 }
 
@@ -1242,7 +1242,7 @@ function vytvorKlicZModalu() {
     const vybranyTyp = document.querySelector('input[name="keyType"]:checked');
 
     if (!vybranyTyp) {
-        alert('Vyberte typ klíče');
+        wgsToast.warning('Vyberte typ klíče');
         return;
     }
 
@@ -1252,7 +1252,7 @@ function vytvorKlicZModalu() {
     const csrfToken = getCSRFToken();
 
     if (!csrfToken) {
-        alert(t('csrf_token_not_found'));
+        wgsToast.error(t('csrf_token_not_found'));
         return;
     }
 
@@ -1278,16 +1278,16 @@ function vytvorKlicZModalu() {
         if (isSuccess(data)) {
             let zprava = t('key_created').replace('{key}', data.key_code);
             if (data.email) {
-                zprava += '\nPrirazeny email: ' + data.email;
+                zprava += ' (email: ' + data.email + ')';
             }
-            alert(zprava);
+            wgsToast.success(zprava);
             loadKeysModal(); // Reload
         } else {
-            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
+            wgsToast.error(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
-        alert('Chyba: ' + err.message);
+        wgsToast.error('Chyba: ' + err.message);
     });
 }
 
@@ -1302,7 +1302,7 @@ async function executeAction(actionId) {
     const csrfToken = await getCSRFToken();
 
     if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
-        alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
+        wgsToast.error('CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
         return;
     }
 
@@ -1351,16 +1351,16 @@ async function executeAction(actionId) {
     .then(data => {
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
-            alert(`Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+            wgsToast.success(`Akce dokončena: ${data.message} (${execTime})`);
             loadActionsModal();
         } else {
-            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            wgsToast.error('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
             btn.disabled = false;
             btn.textContent = originalText;
         }
     })
     .catch(err => {
-        alert('Chyba při provádění akce: ' + err.message);
+        wgsToast.error('Chyba při provádění akce: ' + err.message);
         btn.disabled = false;
         btn.textContent = originalText;
     });
@@ -1372,7 +1372,7 @@ async function executeAction(actionId) {
 function completeAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert(t('csrf_token_not_found'));
+        wgsToast.error(t('csrf_token_not_found'));
         return;
     }
 
@@ -1390,11 +1390,11 @@ function completeAction(actionId) {
             loadActionsModal();
             location.reload();
         } else {
-            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
+            wgsToast.error(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
-        alert('Chyba: ' + err.message);
+        wgsToast.error('Chyba: ' + err.message);
     });
 }
 
@@ -1404,7 +1404,7 @@ function completeAction(actionId) {
 function dismissAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert(t('csrf_token_not_found'));
+        wgsToast.error(t('csrf_token_not_found'));
         return;
     }
 
@@ -1422,11 +1422,11 @@ function dismissAction(actionId) {
             loadActionsModal();
             location.reload();
         } else {
-            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
+            wgsToast.error(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
-        alert('Chyba: ' + err.message);
+        wgsToast.error('Chyba: ' + err.message);
     });
 }
 
@@ -1486,7 +1486,7 @@ async function clearCacheAndReload() {
 
     } catch (err) {
         console.error('Chyba při mazání cache:', err);
-        alert('Chyba při mazání cache. Zkuste manuální refresh (Ctrl+Shift+R).');
+        wgsToast.error('Chyba při mazání cache. Zkuste manuální refresh (Ctrl+Shift+R).');
     }
 }
 
@@ -1766,7 +1766,7 @@ async function zobrazDetailUzivatele(userId) {
 
   } catch (error) {
     logger.error('Chyba při načítání detailu uživatele:', error);
-    alert('Chyba při načítání detailu: ' + error.message);
+    wgsToast.error('Chyba při načítání detailu: ' + error.message);
   }
 }
 
@@ -1796,7 +1796,7 @@ async function ulozitZmenyUzivatele(userId) {
                           document.getElementById('edit-user-provize-poz').value : null;
 
     if (!name || !email) {
-      alert('Jméno a email jsou povinné');
+      wgsToast.warning('Jméno a email jsou povinné');
       return;
     }
 
@@ -1804,7 +1804,7 @@ async function ulozitZmenyUzivatele(userId) {
     if (role === 'technik' && provizeProcent !== null) {
       const provizeNum = parseFloat(provizeProcent);
       if (isNaN(provizeNum) || provizeNum < 0 || provizeNum > 100) {
-        alert('Provize musí být číslo mezi 0 a 100');
+        wgsToast.warning('Provize musí být číslo mezi 0 a 100');
         return;
       }
     }
@@ -1813,7 +1813,7 @@ async function ulozitZmenyUzivatele(userId) {
     if (role === 'technik' && provizePozProcent !== null) {
       const provizePozNum = parseFloat(provizePozProcent);
       if (isNaN(provizePozNum) || provizePozNum < 0 || provizePozNum > 100) {
-        alert('Provize POZ musí být číslo mezi 0 a 100');
+        wgsToast.warning('Provize POZ musí být číslo mezi 0 a 100');
         return;
       }
     }
@@ -1857,15 +1857,15 @@ async function ulozitZmenyUzivatele(userId) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert('Změny byly uloženy!');
+      wgsToast.success('Změny byly uloženy');
       zavritDetailUzivatele();
       loadUsers(); // Obnovit tabulku
     } else {
-      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit změny'));
+      wgsToast.error('Chyba: ' + (data.message || 'Nepodařilo se uložit změny'));
     }
   } catch (error) {
     logger.error('Chyba při ukládání změn:', error);
-    alert('Chyba při ukládání: ' + error.message);
+    wgsToast.error('Chyba při ukládání: ' + error.message);
   }
 }
 
@@ -1877,12 +1877,12 @@ async function zmenitHesloUzivatele(userId) {
     const newPassword = document.getElementById('edit-user-password').value;
 
     if (!newPassword) {
-      alert('Zadejte nové heslo');
+      wgsToast.warning('Zadejte nové heslo');
       return;
     }
 
     if (newPassword.length < 8) {
-      alert('Heslo musí mít alespoň 8 znaků');
+      wgsToast.warning('Heslo musí mít alespoň 8 znaků');
       return;
     }
 
@@ -1916,14 +1916,14 @@ async function zmenitHesloUzivatele(userId) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert('Heslo bylo změněno!');
+      wgsToast.success('Heslo bylo změněno');
       document.getElementById('edit-user-password').value = ''; // Vymazat pole
     } else {
-      alert('Chyba: ' + (data.message || 'Nepodařilo se změnit heslo'));
+      wgsToast.error('Chyba: ' + (data.message || 'Nepodařilo se změnit heslo'));
     }
   } catch (error) {
     logger.error('Chyba při změně hesla:', error);
-    alert('Chyba při změně hesla: ' + error.message);
+    wgsToast.error('Chyba při změně hesla: ' + error.message);
   }
 }
 
@@ -1963,15 +1963,15 @@ async function prepnoutStatusUzivatele(userId, newStatus) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert(`Uživatel byl ${newStatus === 'active' ? 'aktivován' : 'deaktivován'}!`);
+      wgsToast.success(`Uživatel byl ${newStatus === 'active' ? 'aktivován' : 'deaktivován'}`);
       zavritDetailUzivatele();
       loadUsers(); // Obnovit tabulku
     } else {
-      alert('Chyba: ' + (data.message || 'Nepodařilo se změnit status'));
+      wgsToast.error('Chyba: ' + (data.message || 'Nepodařilo se změnit status'));
     }
   } catch (error) {
     logger.error('Chyba při změně statusu:', error);
-    alert('Chyba při změně statusu: ' + error.message);
+    wgsToast.error('Chyba při změně statusu: ' + error.message);
   }
 }
 
@@ -2076,7 +2076,7 @@ async function otevritSpravuSupervize(userId) {
 
   } catch (error) {
     logger.error('Chyba při otevírání správy supervize:', error);
-    alert('Chyba: ' + error.message);
+    wgsToast.error('Chyba: ' + error.message);
   }
 }
 
@@ -2119,16 +2119,16 @@ async function ulozitSupervizorPrirazeni(userId) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert(data.message || 'Přiřazení uloženo!');
+      wgsToast.success(data.message || 'Přiřazení uloženo');
       zavritSupervizorOverlay();
       // Aktualizovat náhled v detailu
       nactiSupervizorPrirazeni(userId);
     } else {
-      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit'));
+      wgsToast.error('Chyba: ' + (data.message || 'Nepodařilo se uložit'));
     }
   } catch (error) {
     logger.error('Chyba při ukládání supervizor přiřazení:', error);
-    alert('Chyba: ' + error.message);
+    wgsToast.error('Chyba: ' + error.message);
   }
 }
 

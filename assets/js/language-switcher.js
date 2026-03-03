@@ -108,13 +108,11 @@
         const data = await response.json();
 
         if (data.status === 'success') {
-          console.log('Překlad dokončen:', data);
         } else {
           console.error('Chyba překladu:', data.message);
         }
       } catch (fetchError) {
         if (fetchError.name === 'AbortError') {
-          console.log('Překlad timeout - pokračuji bez čekání');
         } else {
           throw fetchError;
         }

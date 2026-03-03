@@ -16,8 +16,7 @@
   <title>White Glove Service – Reset Hesla</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <!-- Tmavý styl pro login box -->
@@ -85,7 +84,7 @@
 
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <script src="assets/js/password-reset.min.js" defer></script>
 
 </body>

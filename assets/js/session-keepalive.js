@@ -41,8 +41,6 @@
                 // Log úspěšného pingu (pouze v dev módu)
                 if (typeof logger !== 'undefined') {
                     logger.log(`[Session Keep-Alive] ✓ Ping OK - Last activity: ${data.last_activity}`);
-                } else {
-                    console.log(`[Session Keep-Alive] ✓ Ping OK - Last activity: ${data.last_activity}`);
                 }
 
                 // Vizuální potvrzení (neonový toast)
@@ -111,13 +109,8 @@
         // Nastavit interval pro další pingy
         intervalId = setInterval(pingSession, PING_INTERVAL);
 
-        const intervalMinutes = PING_INTERVAL / 1000 / 60;
-        const mode = isPhotocustomer ? 'PHOTOCUSTOMER (agresivní)' : 'PROTOKOL (standard)';
-        console.log(`[Session Keep-Alive] ✓ Spuštěno - ${mode} - Ping každých ${intervalMinutes} minut`);
-
         // Ping také při focus okna (pokud uživatel přepíná mezi taby)
         window.addEventListener('focus', () => {
-            console.log('[Session Keep-Alive] Window focus - okamžitý ping');
             pingSession();
         });
 
@@ -137,7 +130,6 @@
         if (intervalId) {
             clearInterval(intervalId);
             intervalId = null;
-            console.log('[Session Keep-Alive] ✓ Zastaveno');
         }
     }
 

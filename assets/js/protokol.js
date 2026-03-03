@@ -108,36 +108,7 @@ window.pdfTextSafe = function(pdfObj, text, x, y, options = {}) {
 };
 
 // === NOTIFIKACE ===
-function showNotification(message, type = 'info') {
-  const notification = document.getElementById('notif');
-  if (!notification) {
-    return;
-  }
-
-  notification.textContent = message;
-  notification.className = `notif ${type}`;
-  notification.classList.remove('hidden');
-  notification.style.opacity = '1';
-
-  // Tap-to-dismiss (iOS touch feedback)
-  const skryjNotifikaci = () => {
-    notification.style.opacity = '0';
-    setTimeout(() => {
-      notification.classList.add('hidden');
-    }, 300);
-  };
-
-  // Click pro okamžité zavření
-  notification.onclick = skryjNotifikaci;
-
-  // Auto-hide po 3 sekundách (kromě error)
-  if (type !== 'error') {
-    setTimeout(skryjNotifikaci, 3000);
-  } else {
-    // Error zprávy se skryjí po 5 sekundách
-    setTimeout(skryjNotifikaci, 5000);
-  }
-}
+// showNotification() je definovana centralne v utils.js
 
 // REMOVED: Mrtvý kód pro zavírání menu - řešeno centrálně v hamburger-menu.php
 
@@ -743,11 +714,7 @@ function inicializovatFullscreenCanvas(canvas) {
 
 function potvrdirFullscreenPodpis() {
   if (!fullscreenSignaturePad || fullscreenSignaturePad.isEmpty()) {
-    if (typeof wgsToast !== 'undefined') {
-      wgsToast.warning('Prosim podepiste se pred potvrzenim');
-    } else {
-      alert('Prosim podepiste se pred potvrzenim');
-    }
+    wgsToast.warning('Prosim podepiste se pred potvrzenim');
     return;
   }
 
@@ -4008,7 +3975,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   window.debugKalkulace = function() {
     if (!window.kalkulaceData) {
-      alert('❌ KALKULACE NEBYLA VYTVOŘENA!\n\nNejdřív vyplň kalkulátor (tlačítko s kalkulačkou).');
+      wgsToast.error('Kalkulace nebyla vytvorena. Nejdrive vyplnte kalkulator.');
       return;
     }
 
@@ -4075,6 +4042,6 @@ document.addEventListener('DOMContentLoaded', () => {
       info += `\n❌ ROZPIS OBJEKT NEEXISTUJE!\n`;
     }
 
-    alert(info);
+    wgsToast.info('Debug data kalkulace zobrazena v konzoli'); console.info(info);
   };
 })();

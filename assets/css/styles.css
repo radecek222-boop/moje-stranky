@@ -1197,16 +1197,16 @@ footer a:hover,
 @media (max-width: 768px) {
   footer,
   .footer {
-    padding: 40px 0 25px 0 !important;
+    padding: 1rem 1rem 0.75rem !important;
   }
   .footer-grid {
-    gap: 25px !important;
+    gap: 0.6rem !important;
   }
   footer h3,
   .footer h3,
   .footer-title {
-    font-size: 0.95rem !important;
-    margin-bottom: 12px !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 0.25rem !important;
   }
   footer p,
   footer a,
@@ -1215,13 +1215,13 @@ footer a:hover,
   .footer a,
   .footer li,
   .footer-text {
-    font-size: 0.85rem !important;
-    line-height: 1.5 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
   }
   .footer-bottom {
-    margin-top: 25px !important;
-    padding-top: 12px !important;
-    font-size: 0.75rem !important;
+    margin-top: 0.5rem !important;
+    padding-top: 0.6rem !important;
+    font-size: 0.65rem !important;
   }
 }
 /* WELCOME MODAL S VTIPEM */

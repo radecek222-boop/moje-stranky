@@ -10,11 +10,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Poppins" !important;
+  font-family: "Poppins", sans-serif !important;
   font-weight: 400;
 }
 body {
-  font-family: "Poppins" !important;
+  font-family: "Poppins", sans-serif !important;
   background: var(--c-bg);
   color: var(--c-black);
   line-height: 1.6;
@@ -25,7 +25,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Poppins" !important;
+  font-family: "Poppins", sans-serif !important;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -43,7 +43,7 @@ h6 {
 }
 .logo {
   color: var(--c-white);
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.8rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -162,7 +162,7 @@ h6 {
   color: var(--c-white);
 }
 .hero-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 300;
   color: var(--c-white);
@@ -172,7 +172,7 @@ h6 {
   text-transform: uppercase;
 }
 .hero-subtitle {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.9);
@@ -195,7 +195,7 @@ h6 {
   margin: 0 auto 4rem;
 }
 .section-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 300;
   color: var(--c-black);
@@ -232,14 +232,14 @@ h6 {
   transform: translateY(-5px);
 }
 .value-number {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 3rem;
   font-weight: 300;
   color: var(--c-black);
   margin-bottom: 1rem;
 }
 .value-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1.3rem;
   font-weight: 400;
   color: var(--c-black);
@@ -267,7 +267,7 @@ h6 {
   margin-right: auto;
 }
 .cert-item {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--c-grey);
@@ -359,7 +359,7 @@ h6 {
   text-align: center;
 }
 .cta-title {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 300;
   margin-bottom: 1.5rem;
@@ -380,7 +380,7 @@ h6 {
   background: #ffffff !important;
   color: #000000 !important;
   text-decoration: none;
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -424,7 +424,7 @@ h6 {
 }
 .footer-title,
 .footer h3 {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 12px;
@@ -436,7 +436,7 @@ h6 {
 .footer p,
 .footer li,
 .footer a {
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.6;
@@ -454,7 +454,7 @@ h6 {
 .footer-bottom p {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
-  font-family: "Poppins";
+  font-family: "Poppins", sans-serif;
 }
 @media (max-width: 768px) {
   .top-bar {

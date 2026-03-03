@@ -19,7 +19,7 @@
 }
 
 body {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   background: var(--c-bg);
   color: var(--c-black);
   line-height: 1.6;
@@ -39,7 +39,7 @@ body {
 
 .logo {
   color: var(--c-white);
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -86,7 +86,7 @@ body {
 }
 
 .page-title {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 600;
   color: var(--c-black);
@@ -95,7 +95,7 @@ body {
 }
 
 .page-subtitle {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.8rem;
   font-weight: 300;
   color: var(--c-grey);
@@ -123,7 +123,7 @@ body {
 }
 
 .info-label {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--c-black);
@@ -132,7 +132,7 @@ body {
 }
 
 .info-value {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.85rem;
   color: var(--c-grey);
   text-align: right;
@@ -154,7 +154,7 @@ body {
 }
 
 .section-header {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--c-black);
@@ -253,7 +253,7 @@ body {
 
 .progress-text {
   text-align: center;
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.75rem;
   color: var(--c-grey);
   letter-spacing: 0.05em;
@@ -271,7 +271,7 @@ body {
   background: var(--c-black);
   color: var(--c-white);
   border: none;
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -311,7 +311,7 @@ body {
   z-index: var(--z-dropdown, 1000);
   opacity: 0;
   transition: opacity 0.3s;
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.85rem;
   max-width: 350px;
   border-radius: 4px;
@@ -373,7 +373,7 @@ body {
 }
 
 .wait-text {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.85rem;
   color: var(--c-grey);
   letter-spacing: 0.05em;
@@ -499,7 +499,7 @@ body {
   color: white;
   border: none;
   border-radius: 4px;
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;

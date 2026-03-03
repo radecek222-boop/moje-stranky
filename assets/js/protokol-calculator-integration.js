@@ -23,8 +23,6 @@
 
     // Inicializace při načtení stránky
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('[Protokol-CN] === INICIALIZACE ZAHÁJENA ===');
-
         modalOverlay = document.getElementById('calculatorModalOverlay');
         const priceTotalInput = document.getElementById('price-total');
 
@@ -34,7 +32,6 @@
 
         // Vytvořit WGS dialog pro výběr (funguje i bez kalkulačky)
         vytvorWgsDialog();
-        console.log('[Protokol-CN] WGS dialog vytvořen');
 
         // Kliknutí na pole ceny - MUSÍ být první handler!
         if (priceTotalInput) {
@@ -43,40 +40,28 @@
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                console.log('[Protokol-CN] Kliknuto na price-total');
                 zpracovatKliknutiNaCenu();
             }, true); // capture phase - spustí se jako první
 
             priceTotalInput.style.cursor = 'pointer';
-            console.log('[Protokol-CN] Event listener přidán na price-total (capture phase)');
-
-            // Debug: vypsat hodnotu claim-number (číslo reklamace - POZ zakázky začínají na POZ)
-            const claimNum = document.getElementById('claim-number');
-            console.log('[Protokol-CN] Claim number element:', claimNum);
-            console.log('[Protokol-CN] Claim number value:', claimNum?.value);
         } else {
             console.error('[Protokol-CN] price-total element NENALEZEN!');
         }
 
-        console.log('[Protokol-CN] === INICIALIZACE DOKONČENA ===');
     });
 
     // Zkontrolovat zda jde o POZ zakázku (kontroluje claim-number = Číslo reklamace)
     function jePozZakazka() {
         // claim-number obsahuje číslo reklamace (např. POZ/2025/08-12/01 pro mimozáruční)
         const claimNumber = document.getElementById('claim-number');
-        console.log('[Protokol-CN] jePozZakazka() - claim-number element:', claimNumber);
 
         if (!claimNumber) {
-            console.log('[Protokol-CN] jePozZakazka() - claim-number NENALEZEN -> false');
             return false;
         }
 
         const hodnota = claimNumber.value.trim().toUpperCase();
-        console.log('[Protokol-CN] jePozZakazka() - claim-number hodnota:', hodnota);
 
         const jePoz = hodnota.startsWith('POZ');
-        console.log('[Protokol-CN] jePozZakazka() - je POZ zakázka:', jePoz);
 
         return jePoz;
     }
@@ -191,11 +176,8 @@
 
     // Zobrazit WGS dialog
     function zobrazitWgsDialog() {
-        console.log('[Protokol-CN] zobrazitWgsDialog() - overlay:', wgsDialogOverlay);
-
         if (wgsDialogOverlay) {
             wgsDialogOverlay.style.display = 'flex';
-            console.log('[Protokol-CN] WGS dialog ZOBRAZEN');
         } else {
             console.error('[Protokol-CN] WGS dialog overlay NENALEZEN!');
         }
@@ -472,8 +454,6 @@
             formData.append('reklamace_id', reklamaceId);
             formData.append('kalkulace_data', JSON.stringify(kalkulaceData));
 
-            console.log('[Protokol-Kalkulačka] Ukládám kalkulaci do DB:', reklamaceId);
-
             // Odeslat na server
             const response = await fetch('/api/save_kalkulace_api.php', {
                 method: 'POST',
@@ -483,7 +463,6 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                console.log('[Protokol-Kalkulačka] ✅ Kalkulace uložena do databáze');
             } else {
                 console.error('[Protokol-Kalkulačka] ❌ Chyba při ukládání kalkulace:', result.message);
             }
@@ -495,16 +474,8 @@
 
     // Jednoduchá verze započítání (čte přímo z DOM)
     function zapocitatDoProtokolu() {
-        console.log('[Protokol-Kalkulačka] zapocitatDoProtokolu() - ZAČÁTEK');
-        console.log('[Protokol-Kalkulačka] window.kalkulaceData existuje:', !!window.kalkulaceData);
-        console.log('[Protokol-Kalkulačka] window.stav existuje:', !!window.stav);
-
         // PRIORITA 1: Použít data z zpracovatVysledek() (z kalkulátoru)
         if (window.kalkulaceData && window.kalkulaceData.celkovaCena && window.kalkulaceData.rozpis) {
-            console.log('[Protokol-Kalkulačka] ✅ Používám existující window.kalkulaceData z kalkulátoru');
-            console.log('[Protokol-Kalkulačka] Celková cena:', window.kalkulaceData.celkovaCena);
-            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
-
             // Přenést cenu do protokolu
             const priceTotalInput = document.getElementById('price-total');
             if (priceTotalInput) {
@@ -518,7 +489,6 @@
         }
 
         // FALLBACK: Pokud window.kalkulaceData neexistuje, vytvořit z DOM
-        console.log('[Protokol-Kalkulačka] ⚠️ window.kalkulaceData neexistuje - vytvářím z DOM');
 
         const grandTotalElement = document.getElementById('grand-total');
 
@@ -573,8 +543,6 @@
                 sluzby: []
             };
 
-            console.log('[Protokol-Kalkulačka] ✅ Kalkulace data vytvořena s rozpis objektem (fallback)');
-            console.log('[Protokol-Kalkulačka] Rozpis:', window.kalkulaceData.rozpis);
         }
 
         // Přenést cenu do protokolu

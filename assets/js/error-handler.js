@@ -223,7 +223,7 @@ ${'='.repeat(80)}
         }
     }).catch(err => {
         console.error('Failed to copy:', err);
-        alert('Kopírování selhalo. Zkopírujte chybu ručně z konzole.');
+        wgsToast.error('Kopírování selhalo. Zkopírujte chybu ručně z konzole.');
     });
 };
 

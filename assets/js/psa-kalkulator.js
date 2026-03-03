@@ -2,8 +2,6 @@
  * PSA Kalkulátor - JavaScript
  * WGS Payroll Calculator
  */
-console.log('PSA Kalkulátor script loading...');
-
 // === GLOBAL VARIABLES ===
 let employees = [];
 let allEmployeesDatabase = [];  // Kompletní seznam zaměstnanců z databáze
@@ -18,7 +16,6 @@ const PERMANENT_EMPLOYEE_IDS = [19, 20, 21, 22];  // Marek, Lenka, Radek, Prémi
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
-  console.log('DOMContentLoaded fired');
   try {
     logger.log('PSA Kalkulátor initialized');
     initializePeriod();

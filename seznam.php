@@ -1489,42 +1489,63 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 }
 
-/* MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
+/* MOBILNI OPTIMALIZACE FILTER TLACITEK - kompaktni 3 sloupce */
 @media (max-width: 768px) {
-  /* Filter bar - 2x2 grid s mezerami */
   .filter-bar {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
-    padding: 0.25rem !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.3rem !important;
+    margin-bottom: 0.35rem !important;
+    padding: 0.15rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.5rem 0.6rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.3rem 0.3rem !important;
+    font-size: 0.62rem !important;
     line-height: 1.2 !important;
-    min-height: 36px !important;
-    border-width: 2px !important; /* Šedý rámeček pro neaktivní */
-    border-radius: 6px !important;
+    min-height: 28px !important;
+    border-width: 2px !important;
+    border-radius: 4px !important;
+    min-width: 0 !important;
   }
 
   .filter-btn.active {
-    border-width: 3px !important; /* Tlustší černý rámeček pro aktivní */
+    border-width: 2px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Admin prodejce box - kompaktnejsi */
+  #adminProdejceBox {
+    padding: 0.25rem 0.5rem !important;
+    margin-bottom: 0.3rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .admin-prodejce-label {
+    font-size: 0.55rem !important;
+    padding-right: 0.35rem !important;
+  }
+
+  .admin-prodejce-list {
+    gap: 0.2rem !important;
+  }
+
+  .admin-prodejce-btn {
+    font-size: 0.58rem !important;
+    padding: 0.12rem 0.4rem !important;
   }
 }
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.4rem 0.5rem !important;
-    font-size: 0.65rem !important;
-    line-height: 1.2 !important;
-    min-height: 32px !important;
+    padding: 0.25rem 0.2rem !important;
+    font-size: 0.58rem !important;
+    min-height: 26px !important;
   }
 
   .filter-bar {
-    gap: 0.4rem !important;
+    gap: 0.25rem !important;
   }
 }
 

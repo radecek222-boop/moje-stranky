@@ -531,22 +531,8 @@ async function createNewAdminKey() {
 }
 
 // ============================================================
-// NOTIFICATIONS
+// NOTIFICATIONS - showNotification() je definovana centralne v utils.js
 // ============================================================
-function showNotification(message, type = 'info') {
-  const notification = document.getElementById('notification');
-  if (!notification) return;
-
-  notification.textContent = message;
-  // FIX: CSS pouziva tridu 'active' pro zobrazeni, ne 'hidden' pro skryti
-  notification.className = `notification ${type} active`;
-
-  if (type !== 'error') {
-    setTimeout(() => {
-      notification.classList.remove('active');
-    }, 3000);
-  }
-}
 
 logger.log('Login system loaded');
 

@@ -27,7 +27,6 @@ function initPhotoStorageDB() {
     };
 
     request.onsuccess = () => {
-      console.log('[IndexedDB] Databáze úspěšně otevřena');
       resolve(request.result);
     };
 
@@ -38,7 +37,6 @@ function initPhotoStorageDB() {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'reklamaceId' });
         objectStore.createIndex('timestamp', 'timestamp', { unique: false });
-        console.log('[IndexedDB] Object store vytvořen');
       }
     };
   });
@@ -66,16 +64,6 @@ async function saveSectionsToIndexedDB(reklamaceId, sections) {
 
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {
-        console.log(`[IndexedDB] Fotky uloženy pro reklamaci #${reklamaceId}`);
-        console.log(`[IndexedDB] Celkem sekcí: ${Object.keys(sections).length}`);
-
-        // Spočítat celkový počet fotek
-        let totalPhotos = 0;
-        Object.keys(sections).forEach(key => {
-          totalPhotos += sections[key].length;
-        });
-        console.log(`[IndexedDB] Celkem fotek: ${totalPhotos}`);
-
         resolve(true);
       };
 
@@ -112,19 +100,8 @@ async function loadSectionsFromIndexedDB(reklamaceId) {
         const data = request.result;
 
         if (data && data.sections) {
-          console.log(`[IndexedDB] Fotky načteny pro reklamaci #${reklamaceId}`);
-          console.log(`[IndexedDB] Timestamp: ${data.timestamp}`);
-
-          // Spočítat celkový počet fotek
-          let totalPhotos = 0;
-          Object.keys(data.sections).forEach(key => {
-            totalPhotos += data.sections[key].length;
-          });
-          console.log(`[IndexedDB] Obnoveno ${totalPhotos} fotek`);
-
           resolve(data.sections);
         } else {
-          console.log(`[IndexedDB] Žádné uložené fotky pro reklamaci #${reklamaceId}`);
           resolve(null);
         }
       };
@@ -158,7 +135,6 @@ async function deleteSectionsFromIndexedDB(reklamaceId) {
 
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {
-        console.log(`[IndexedDB] Fotky smazány pro reklamaci #${reklamaceId}`);
         resolve(true);
       };
 
@@ -202,9 +178,6 @@ async function cleanOldPhotos() {
         deletedCount++;
         cursor.continue();
       } else {
-        if (deletedCount > 0) {
-          console.log(`[IndexedDB] Vyčištěno ${deletedCount} starých záznamů`);
-        }
       }
     };
 
@@ -230,7 +203,6 @@ async function getAllStoredRecords() {
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {
         const records = request.result;
-        console.log(`[IndexedDB] Celkem uložených reklamací: ${records.length}`);
         resolve(records);
       };
 

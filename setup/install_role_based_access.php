@@ -4,7 +4,7 @@
  * BEZPEČNOST: Pouze pro přihlášené adminy
  */
 
-require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/../init.php';
 
 // BEZPEČNOST: Pouze admin může spustit instalaci
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {

@@ -35,18 +35,10 @@
             return response.json();
         })
         .then(function(data) {
-            if (data.status === 'success') {
-                // Heartbeat uspesny
-                if (window.console && window.console.debug) {
-                    console.debug('[Heartbeat] OK:', data.timestamp);
-                }
-            }
+            // Heartbeat uspesny
         })
         .catch(function(error) {
             // Ignorovat chyby - nechceme rusit uzivatele
-            if (window.console && window.console.debug) {
-                console.debug('[Heartbeat] Chyba:', error);
-            }
         });
     }
 
@@ -63,10 +55,6 @@
 
         // Nastavit interval
         heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
-
-        if (window.console && window.console.debug) {
-            console.debug('[Heartbeat] Spusten (interval: ' + HEARTBEAT_INTERVAL + 'ms)');
-        }
     }
 
     /**
@@ -80,10 +68,6 @@
         if (heartbeatTimer) {
             clearInterval(heartbeatTimer);
             heartbeatTimer = null;
-        }
-
-        if (window.console && window.console.debug) {
-            console.debug('[Heartbeat] Zastaven');
         }
     }
 

@@ -53,33 +53,25 @@
    * Inicializace notifikacniho systemu
    */
   async function init() {
-    console.log('[Notifikace] Inicializace...');
-    console.log('[Notifikace] iOS:', isIOS, 'verze:', iosVersion, 'PWA:', isPWA);
-
     // Registrace Service Worker
     if ('serviceWorker' in navigator) {
       try {
         swRegistration = await navigator.serviceWorker.ready;
-        console.log('[Notifikace] Service Worker připraven');
 
         // Zkontrolovat existujici push subscription
         if ('PushManager' in window) {
           pushSubscription = await swRegistration.pushManager.getSubscription();
           if (pushSubscription) {
-            console.log('[Notifikace] Existujici push subscription nalezena');
           }
         }
       } catch (e) {
-        console.log('[Notifikace] Service Worker není dostupný:', e);
       }
     }
 
     // Zkontrolovat podporu notifikací
     if (!('Notification' in window)) {
-      console.log('[Notifikace] Notification API neni podporovano');
     } else {
       notificationPermission = Notification.permission;
-      console.log('[Notifikace] Aktualni povoleni:', notificationPermission);
 
       // Pokud jsou povoleny a mame SW, registrovat push
       if (notificationPermission === 'granted' && swRegistration && !pushSubscription) {
@@ -95,8 +87,6 @@
 
     // Listener pro viditelnost stranky
     document.addEventListener('visibilitychange', onVisibilityChange);
-
-    console.log('[Notifikace] Inicializace dokoncena');
   }
 
   // ========================================
@@ -116,10 +106,8 @@
       // API vraci vapidPublicKey primo v odpovedi (ne v data.data)
       if (data.status === 'success' && data.vapidPublicKey) {
         vapidPublicKey = data.vapidPublicKey;
-        console.log('[Notifikace] VAPID key nacten');
         return vapidPublicKey;
       } else if (data.status === 'error') {
-        console.log('[Notifikace] VAPID key: ' + (data.message || 'neni nakonfigurovany'));
         return null;
       }
     } catch (e) {
@@ -152,7 +140,6 @@
    */
   async function registrovatPushSubscription() {
     if (!swRegistration || !('PushManager' in window)) {
-      console.log('[Notifikace] PushManager neni podporovan');
       return false;
     }
 
@@ -160,7 +147,6 @@
       // Nacist VAPID key
       const vapidKey = await nacistVapidKey();
       if (!vapidKey) {
-        console.log('[Notifikace] VAPID key nenacten - push neni nakonfigurovany');
         return false;
       }
 
@@ -170,12 +156,9 @@
         applicationServerKey: urlBase64ToUint8Array(vapidKey)
       });
 
-      console.log('[Notifikace] Push subscription vytvorena');
-
       // Odeslat na server
       const ulozeno = await ulozitSubscriptionNaServer(pushSubscription);
       if (ulozeno) {
-        console.log('[Notifikace] Subscription ulozena na serveru');
         return true;
       }
 
@@ -184,7 +167,6 @@
 
       // Pokud je permission denied, nezobrazovat jako chybu
       if (e.name === 'NotAllowedError') {
-        console.log('[Notifikace] Uzivatel zamitnul push notifikace');
       }
     }
 
@@ -256,7 +238,6 @@
         body: formData
       });
 
-      console.log('[Notifikace] Push subscription zrusena');
       return true;
 
     } catch (e) {
@@ -279,7 +260,6 @@
    */
   async function pozadatOPovoleni() {
     if (!('Notification' in window)) {
-      console.log('[Notifikace] Notification API neni podporovano');
       return false;
     }
 
@@ -294,14 +274,12 @@
     }
 
     if (Notification.permission === 'denied') {
-      console.log('[Notifikace] Notifikace jsou zablokovane');
       return false;
     }
 
     try {
       const permission = await Notification.requestPermission();
       notificationPermission = permission;
-      console.log('[Notifikace] Uzivatel odpoveděl:', permission);
 
       // Po povoleni registrovat push
       if (permission === 'granted' && swRegistration) {
@@ -327,10 +305,8 @@
     try {
       if (pocet > 0) {
         await navigator.setAppBadge(pocet);
-        console.log('[Notifikace] Badge nastaven na:', pocet);
       } else {
         await navigator.clearAppBadge();
-        console.log('[Notifikace] Badge smazan');
       }
     } catch (e) {
       console.error('[Notifikace] Chyba pri nastaveni badge:', e);
@@ -363,12 +339,10 @@
           claimId: data.claim_id || null
         });
       }
-      console.log('[Notifikace] Stranka viditelna, zobrazen toast');
       return;
     }
 
     if (notificationPermission !== 'granted') {
-      console.log('[Notifikace] Notifikace nejsou povoleny');
       return;
     }
 
@@ -394,7 +368,6 @@
           moznosti.actions = sestavitAkce(data);
         }
         await swRegistration.showNotification(titulek, moznosti);
-        console.log('[Notifikace] SW notifikace zobrazena:', titulek);
       } else {
         // Fallback na klasický Notification API
         const notification = new Notification(titulek, moznosti);
@@ -407,7 +380,6 @@
           }
         };
 
-        console.log('[Notifikace] Notifikace zobrazena:', titulek);
       }
     } catch (e) {
       console.error('[Notifikace] Chyba pri zobrazeni notifikace:', e);
@@ -494,7 +466,6 @@
       await aktualizovatPocetNeprectenych();
     }, CONFIG.pollingInterval);
 
-    console.log('[Notifikace] Polling spusten (interval:', CONFIG.pollingInterval, 'ms)');
   }
 
   /**
@@ -504,7 +475,6 @@
     if (pollingTimer) {
       clearInterval(pollingTimer);
       pollingTimer = null;
-      console.log('[Notifikace] Polling zastaven');
     }
   }
 

@@ -30,7 +30,7 @@ echo "<!DOCTYPE html>
         .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0; }
         .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 5px; margin: 15px 0; }
         code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
-        input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 300px; }
+        input[type=text] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 300px; }
         button { padding: 8px 20px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
         button:hover { background: #000; }
     </style>

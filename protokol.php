@@ -892,26 +892,24 @@ if ($initialBootstrapData) {
 
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <!-- Utils - obsahuje fetchCsrfToken a další pomocné funkce -->
-<script src="assets/js/utils.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
 <script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
-<script src="assets/js/protokol.js?v=<?= time() ?>" defer></script>
-<!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->
-<!-- protokol-buttons-fix.js odstraněn - handlery jsou již v protokol.js (Step 109) -->
+<script src="assets/js/protokol.min.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol.min.js') ?>" defer></script>
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js" defer></script>
 <script src="assets/js/language-switcher.min.js" defer></script>
 <!-- Mapa pro autocomplete adres v kalkulačce -->
 <script src="assets/js/wgs-map.min.js" defer></script>
 <!-- Kalkulačka integrace -->
-<script src="assets/js/cenik-calculator.js?v=<?= time() ?>" defer></script>
-<script src="assets/js/protokol-calculator-integration.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/cenik-calculator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/cenik-calculator.min.js') ?>" defer></script>
+<script src="assets/js/protokol-calculator-integration.min.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-calculator-integration.min.js') ?>" defer></script>
 
-<!-- Session Keep-Alive - KRITICKÉ: Brání vypršení session při práci -->
-<script src="assets/js/session-keepalive.js?v=<?= time() ?>" defer></script>
+<!-- Session Keep-Alive -->
+<script src="assets/js/session-keepalive.min.js?v=<?= filemtime(__DIR__ . '/assets/js/session-keepalive.min.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

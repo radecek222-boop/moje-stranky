@@ -389,6 +389,114 @@ $zemeNazvy = [
                 padding: 1rem;
             }
         }
+
+        /* Mobilni optimalizace */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                gap: 0.4rem;
+            }
+
+            .header-actions .btn {
+                flex: 1;
+                padding: 0.4rem 0.5rem;
+                font-size: 0.65rem;
+                text-align: center;
+            }
+
+            .obdobi-selector {
+                width: 100%;
+                overflow-x: auto;
+                gap: 0.25rem;
+                padding: 0.35rem;
+                margin-bottom: 1rem;
+            }
+
+            .obdobi-btn {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.65rem;
+                white-space: nowrap;
+            }
+
+            .metriky-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .metrika-card {
+                padding: 0.75rem;
+                border-radius: 10px;
+            }
+
+            .metrika-hodnota {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .metrika-label {
+                font-size: 0.6rem;
+                letter-spacing: 0.5px;
+            }
+
+            .sekce {
+                border-radius: 10px;
+                margin-bottom: 0.75rem;
+            }
+
+            .sekce-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .sekce-header h2 {
+                font-size: 0.85rem;
+            }
+
+            .grid-row {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table td,
+            .data-table th {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metriky-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.35rem;
+            }
+
+            .metrika-hodnota {
+                font-size: 1.25rem;
+            }
+
+            .metrika-label {
+                font-size: 0.55rem;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+            }
+        }
         /* Kompaktnější sekce */
         .sekce.kompakt .sekce-content {
             padding: 1rem;

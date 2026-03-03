@@ -22,7 +22,7 @@ if (!defined('LOGS_PATH')) {
 $action = $_GET['action'] ?? $_POST['action'] ?? 'unknown';
 
 // Helper funkce
-function safeFileGetContents($path, $maxSize = 1048576) {
+if (!function_exists('safeFileGetContents')) { function safeFileGetContents($path, $maxSize = 1048576) {
     if (!file_exists($path) || !is_readable($path)) {
         return false;
     }
@@ -31,7 +31,7 @@ function safeFileGetContents($path, $maxSize = 1048576) {
         return false;
     }
     return file_get_contents($path);
-}
+}}
 
 // Switch pro akce
 switch ($action) {

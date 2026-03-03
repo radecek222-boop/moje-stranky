@@ -582,7 +582,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
     font-family: sans-serif;
 }
 
-/* Responsivní: skrýt méně důležité sloupce */
+/* Responsivni: skryt mene dulezite sloupce */
 @media (max-width: 700px) {
     .sf-table-head,
     .sf-row {
@@ -592,6 +592,57 @@ if (!defined('ADMIN_PHP_LOADED')) {
     .sf-row .sf-deps,
     .sf-table-head > :nth-child(5),
     .sf-row .sf-size { display: none; }
+
+    .sf-head {
+        gap: 0.4rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sf-head h2 {
+        font-size: 0.85rem;
+    }
+
+    .sf-toolbar {
+        gap: 0.25rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .sf-search {
+        min-width: 100px;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    .sf-btn {
+        padding: 0.25rem 0.45rem;
+        font-size: 0.65rem;
+    }
+
+    .sf-row {
+        padding: 0.2rem 0.4rem;
+        gap: 0.25rem;
+    }
+
+    .sf-file-name {
+        font-size: 0.7rem;
+    }
+
+    .sf-table-head {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.6rem;
+        gap: 0.25rem;
+    }
+
+    .sf-btn-o,
+    .sf-btn-smazat,
+    .sf-btn-d {
+        font-size: 0.55rem;
+        padding: 0.15rem 0.35rem;
+    }
+
+    .sf-btn-d {
+        width: 18px;
+    }
 }
 </style>
 

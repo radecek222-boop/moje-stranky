@@ -6,7 +6,7 @@
  * Muzete jej spustit vicekrat - nevytvori duplicitni tabulku.
  */
 
-require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/../init.php';
 
 // Bezpecnostni kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {

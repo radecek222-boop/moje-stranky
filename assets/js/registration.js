@@ -85,19 +85,6 @@ registrationForm.addEventListener('submit', async (e) => {
   }
 });
 
-function showNotification(message, type = 'info') {
-  const notification = document.getElementById('notification');
-  if (!notification) return;
-  
-  notification.textContent = message;
-  notification.className = `notification ${type}`;
-  notification.classList.remove('hidden');
-  
-  if (type !== 'error') {
-    setTimeout(() => {
-      notification.classList.add('hidden');
-    }, 3000);
-  }
-}
+// showNotification() je definovana centralne v utils.js
 
 logger.log('Registration system loaded');

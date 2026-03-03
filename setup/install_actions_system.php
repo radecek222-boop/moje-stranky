@@ -11,7 +11,7 @@
  * URL: https://your-domain.com/install_actions_system.php
  */
 
-require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/../init.php';
 
 // BEZPEČNOST: Pouze admin
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
