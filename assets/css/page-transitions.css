@@ -1,8 +1,12 @@
 /**
- * Page transitions - AJAX router
- * Animace jsou rizeny JS (page-transitions.js)
- * Tento soubor jen zajistuje ze main nema z-index konflikty
+ * Page transitions – fade efekt
+ * Overlay (#prechod-overlay) je vytvořen dynamicky v page-transitions.js
  */
-#main-content {
-  position: relative;
+#prechod-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
 }
