@@ -1,45 +1,8 @@
 /**
- * View Transitions API - nativni podpora v Chrome 111+ / Edge
- * Firefox: standardni reload bez animace (fallback)
+ * Page transitions - AJAX router
+ * Animace jsou rizeny JS (page-transitions.js)
+ * Tento soubor jen zajistuje ze main nema z-index konflikty
  */
-
-@view-transition {
-  navigation: auto;
-}
-
-/* Dopredna navigace: stara stranka odjede doleva, nova prijede zprava */
-html[data-prechod="vpred"]::view-transition-old(root) {
-  animation: slide-ven-vlevo 0.28s ease forwards;
-}
-html[data-prechod="vpred"]::view-transition-new(root) {
-  animation: slide-vstup-zprava 0.28s ease forwards;
-}
-
-/* Zpetna navigace: stara odjede doprava, nova prijede zleva */
-html[data-prechod="zpet"]::view-transition-old(root) {
-  animation: slide-ven-vpravo 0.28s ease forwards;
-}
-html[data-prechod="zpet"]::view-transition-new(root) {
-  animation: slide-vstup-zleva 0.28s ease forwards;
-}
-
-/* Vychozi fade (bez nastaveneho smeru) */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.2s;
-}
-
-@keyframes slide-ven-vlevo {
-  to { transform: translateX(-100%); opacity: 0; }
-}
-@keyframes slide-ven-vpravo {
-  to { transform: translateX(100%); opacity: 0; }
-}
-@keyframes slide-vstup-zprava {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
-}
-@keyframes slide-vstup-zleva {
-  from { transform: translateX(-100%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+#main-content {
+  position: relative;
 }

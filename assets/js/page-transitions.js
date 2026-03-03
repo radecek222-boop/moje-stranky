@@ -1,11 +1,13 @@
 /**
- * View Transitions API - smerovy slide podle nav poradi
- * Funguje v Chrome 111+ / Edge. Firefox: standardni prechod.
+ * AJAX Router - efekt listovani bez bila stranky
+ * Interceptuje nav kliknutí, fetche novou stranku,
+ * sliduje <main> dovnitř/ven bez full page reloadu.
  */
 (function () {
-  if (!document.startViewTransition) return; // fallback pro stare prohlizece
+  'use strict';
 
-  var poradi = [
+  // Poradi v navigaci (leva = nizsi index)
+  var NAV_PORADI = [
     '/', '/index.php',
     '/novareklamace.php',
     '/cenik.php',
@@ -16,37 +18,221 @@
     '/registration.php'
   ];
 
-  function ziskIndex(pathname) {
-    var p = pathname.replace(/\/$/, '') || '/';
-    for (var i = 0; i < poradi.length; i++) {
-      var ref = poradi[i].replace(/\/$/, '') || '/';
-      if (ref === p) return i;
+  var nacitam = false;
+  var DOBA_ANIMACE = 260; // ms
+
+  // --- Pomocne funkce ---
+
+  function normPath(path) {
+    return path.split('?')[0].replace(/\/$/, '') || '/';
+  }
+
+  function ziskIndex(path) {
+    var p = normPath(path);
+    for (var i = 0; i < NAV_PORADI.length; i++) {
+      if (normPath(NAV_PORADI[i]) === p) return i;
     }
     return -1;
   }
 
-  // Zachytit kliknuti pro nastaveni smeru prechodu
-  document.addEventListener('click', function (udalost) {
-    var odkaz = udalost.target.closest('a[href]');
+  function ziskSmer(odPath, naPath) {
+    var od = ziskIndex(odPath);
+    var na = ziskIndex(naPath);
+    if (od === -1 || na === -1) return 'vpred';
+    return na >= od ? 'vpred' : 'zpet';
+  }
+
+  function nastav(el, styly) {
+    Object.keys(styly).forEach(function (k) { el.style[k] = styly[k]; });
+  }
+
+  function smaz(el, klice) {
+    klice.forEach(function (k) { el.style[k] = ''; });
+  }
+
+  // Nacist CSS soubory ktere nova stranka potrebuje a jeste nejsou v DOM
+  function nactiNoveCss(novyDoc) {
+    var existujici = new Set(
+      Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map(function (l) { return l.getAttribute('href'); })
+    );
+    novyDoc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+      var href = l.getAttribute('href');
+      if (href && !existujici.has(href)) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
+  }
+
+  // Spustit skripty nalezene v novem obsahu
+  function spustiSkripty(kontejner) {
+    var nacteneSrc = new Set(
+      Array.from(document.querySelectorAll('script[src]')).map(function (s) { return s.src; })
+    );
+    Array.from(kontejner.querySelectorAll('script')).forEach(function (stary) {
+      var novy = document.createElement('script');
+      Array.from(stary.attributes).forEach(function (a) { novy.setAttribute(a.name, a.value); });
+      if (stary.src) {
+        if (nacteneSrc.has(stary.src)) { stary.remove(); return; }
+        nacteneSrc.add(stary.src);
+      } else {
+        novy.textContent = stary.textContent;
+      }
+      document.body.appendChild(novy);
+      stary.remove();
+    });
+  }
+
+  // Aktualizovat aktivni polozku v navigaci
+  function aktualizeNav(pathname) {
+    var p = normPath(pathname);
+    document.querySelectorAll('.hamburger-nav a').forEach(function (a) {
+      var href = normPath(a.getAttribute('href') || '');
+      var shoda = href === p;
+      a.classList.toggle('active', shoda);
+      if (shoda) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  // --- Jadro navigace ---
+
+  function naviguj(url, smer, nahradHistorii) {
+    if (nacitam) return;
+    nacitam = true;
+
+    var staraStranka = document.getElementById('main-content');
+    if (!staraStranka) { window.location.href = url; return; }
+
+    var sirka = window.innerWidth + 'px';
+
+    // Zafixovat starou stranku na miste aby se mohla pohybovat
+    nastav(staraStranka, {
+      position: 'fixed',
+      top: staraStranka.getBoundingClientRect().top + 'px',
+      left: '0',
+      width: sirka,
+      zIndex: '10',
+      pointerEvents: 'none'
+    });
+
+    // Zarovnat dokument na scroll=0 a zablokovat scrollovani
+    var scrollY = window.scrollY;
+    nastav(staraStranka, { top: (-scrollY) + 'px' });
+    document.body.style.overflow = 'hidden';
+
+    fetch(url, { headers: { 'X-Requested-With': 'ajax' } })
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        var parser = new DOMParser();
+        var novyDoc = parser.parseFromString(html, 'text/html');
+        var novyMain = novyDoc.getElementById('main-content');
+
+        if (!novyMain) { window.location.href = url; return; }
+
+        // Nacist nova CSS
+        nactiNoveCss(novyDoc);
+
+        // Aktualizovat title + history
+        document.title = novyDoc.title;
+        if (nahradHistorii) {
+          history.replaceState({ url: url, smer: smer }, novyDoc.title, url);
+        } else {
+          history.pushState({ url: url, smer: smer }, novyDoc.title, url);
+        }
+
+        // Sestavit novy main
+        var novaStranka = document.createElement('main');
+        novaStranka.id = 'main-content';
+        if (novyMain.className) novaStranka.className = novyMain.className;
+        novaStranka.innerHTML = novyMain.innerHTML;
+
+        // Nova stranka vychazi mimo obrazovku
+        var startX = smer === 'vpred' ? '100%' : '-100%';
+        nastav(novaStranka, {
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          width: sirka,
+          transform: 'translateX(' + startX + ')',
+          zIndex: '11'
+        });
+        document.body.appendChild(novaStranka);
+
+        // Jeden frame pauza, pak spustit animaci
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            var venX = smer === 'vpred' ? '-100%' : '100%';
+            var prechod = 'transform ' + DOBA_ANIMACE + 'ms ease';
+
+            nastav(staraStranka, { transition: prechod, transform: 'translateX(' + venX + ')' });
+            nastav(novaStranka,  { transition: prechod, transform: 'translateX(0)' });
+          });
+        });
+
+        setTimeout(function () {
+          // Uklid po animaci
+          staraStranka.remove();
+          smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex']);
+          document.body.style.overflow = '';
+
+          // Spustit skripty z noveho obsahu
+          spustiSkripty(novaStranka);
+
+          // Aktualizovat nav + scroll
+          aktualizeNav(new URL(url, location.origin).pathname);
+          window.scrollTo(0, 0);
+
+          nacitam = false;
+        }, DOBA_ANIMACE + 20);
+      })
+      .catch(function () {
+        window.location.href = url;
+        nacitam = false;
+      });
+  }
+
+  // --- Event listenery ---
+
+  // Zachytit kliknuti na interní odkaz
+  document.addEventListener('click', function (e) {
+    var odkaz = e.target.closest('a[href]');
     if (!odkaz) return;
 
     var href = odkaz.getAttribute('href');
-    if (!href || odkaz.target === '_blank' ||
-        href.startsWith('#') || href.startsWith('mailto:') ||
-        href.startsWith('tel:') || href.startsWith('javascript:')) return;
+    if (!href ||
+        odkaz.target === '_blank' ||
+        href.startsWith('#') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:') ||
+        href.startsWith('javascript:')) return;
 
     var url;
-    try { url = new URL(href, window.location.origin); }
-    catch (e) { return; }
-    if (url.origin !== window.location.origin) return;
+    try { url = new URL(href, location.origin); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
 
-    var aktualniIndex = ziskIndex(window.location.pathname);
-    var cilIndex = ziskIndex(url.pathname);
-    if (cilIndex === aktualniIndex) return;
+    // Preskocit non-HTML soubory
+    var ext = url.pathname.split('.').pop().toLowerCase();
+    if (['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'css', 'js', 'svg'].includes(ext)) return;
 
-    var smer = (cilIndex === -1 || aktualniIndex === -1 || cilIndex > aktualniIndex)
-      ? 'vpred' : 'zpet';
+    // Preskocit stranky vyžadujici full reload (admin, API)
+    var skipPaths = ['/admin', '/api/', '/app/', '/setup/', '/logout'];
+    if (skipPaths.some(function (s) { return url.pathname.startsWith(s); })) return;
 
-    document.documentElement.setAttribute('data-prechod', smer);
+    e.preventDefault();
+    naviguj(url.href, ziskSmer(location.pathname, url.pathname), false);
   });
+
+  // Zpet/Vpred tlacitko prohlizece
+  window.addEventListener('popstate', function (e) {
+    var smer = (e.state && e.state.smer === 'vpred') ? 'zpet' : 'vpred';
+    naviguj(location.href, smer, true);
+  });
+
+  // Ulozit pocatecni stav
+  history.replaceState({ url: location.href, smer: null }, document.title, location.href);
+
 })();
