@@ -139,11 +139,17 @@
     var staraStranka = document.getElementById('main-content');
     if (!staraStranka) { window.location.href = url; return; }
 
+    // Zmerit sirku scrollbaru PRED skrytim – kompenzujeme paddingRight
+    // aby stranka pri zmizeni scrollbaru neposkocila doprava
+    var sirinaSvislehoScrollbaru = window.innerWidth - document.documentElement.clientWidth;
     var sirka = window.innerWidth + 'px';
 
     // Zamknout vysku body pred tim nez stara stranka opusti flow
     document.body.style.minHeight = document.body.offsetHeight + 'px';
     document.body.style.overflow = 'hidden';
+    if (sirinaSvislehoScrollbaru > 0) {
+      document.body.style.paddingRight = sirinaSvislehoScrollbaru + 'px';
+    }
 
     // Zarovnat dokument na scroll=0
     var scrollY = window.scrollY;
@@ -155,7 +161,8 @@
       left: '0',
       width: sirka,
       zIndex: '10',
-      pointerEvents: 'none'
+      pointerEvents: 'none',
+      willChange: 'transform'
     });
 
     fetch(url, { headers: { 'X-Requested-With': 'ajax' } })
@@ -198,7 +205,8 @@
           left: '0',
           width: sirka,
           transform: 'translateX(' + startX + ')',
-          zIndex: '11'
+          zIndex: '11',
+          willChange: 'transform'
         });
         // Vlozit novou stranku PRED starou (spravne poradi v DOM, pred footerem)
         staraStranka.before(novaStranka);
@@ -207,7 +215,7 @@
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             var venX = smer === 'vpred' ? '-100%' : '100%';
-            var prechod = 'transform ' + DOBA_ANIMACE + 'ms ease';
+            var prechod = 'transform ' + DOBA_ANIMACE + 'ms cubic-bezier(0.4,0,0.2,1)';
 
             nastav(staraStranka, { transition: prechod, transform: 'translateX(' + venX + ')' });
             nastav(novaStranka,  { transition: prechod, transform: 'translateX(0)' });
@@ -220,8 +228,10 @@
           // Scroll na 0 PRED tim nez nova stranka vstoupi do toku dokumentu –
           // jinak by se vykreslila posunutá a pak skocila (viditelny jolt)
           window.scrollTo(0, 0);
-          smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex']);
+          smaz(novaStranka, ['position', 'top', 'left', 'width', 'transform', 'transition', 'zIndex', 'willChange']);
+          // Obnovit overflow a paddingRight najednou – prohlizec to zpracuje v jednom vykreslovacim cyklu
           document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
           document.body.style.minHeight = '';
 
           // Odstranit CSS ktera nova stranka nepotrebuje
