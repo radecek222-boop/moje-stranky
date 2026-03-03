@@ -165,6 +165,16 @@ try {
     $sessionId = $data['session_id'] ?? (session_status() === PHP_SESSION_ACTIVE ? session_id() : uniqid('anon_'));
     // Bezpečný přístup k $_SESSION - kontrola jestli session je aktivní
     $userId = (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['user_id'])) ? $_SESSION['user_id'] : null;
+
+    // FILTR: Přihlášení uživatelé (prodejci, technici) se nepočítají do analytics
+    if ($userId !== null) {
+        echo json_encode([
+            'status' => 'skipped',
+            'message' => 'Prihlaseny uzivatel - netrackujeme'
+        ]);
+        exit;
+    }
+
     $pageUrl = $data['page_url'] ?? $_SERVER['REQUEST_URI'] ?? '';
     $pageTitle = $data['page_title'] ?? '';
     $referrer = $data['referrer'] ?? $_SERVER['HTTP_REFERER'] ?? '';
