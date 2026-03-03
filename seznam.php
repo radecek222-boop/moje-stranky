@@ -1273,21 +1273,22 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-color: #000 !important;
 }
 
-/* DESKTOP OPTIMALIZACE FILTER TLAČÍTEK - všechna vedle sebe */
+/* DESKTOP OPTIMALIZACE FILTER TLAČÍTEK - 6 stejně širokých sloupců */
 @media (min-width: 769px) {
   .filter-bar {
-    flex-wrap: nowrap !important;
-    gap: 0.3rem !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 0.4rem !important;
     margin-bottom: 1rem !important;
     padding-bottom: 1rem !important;
   }
   .filter-btn {
-    min-width: auto !important;
-    padding: 0.3rem 0.5rem !important;
+    padding: 0.35rem 0.4rem !important;
     font-size: 0.72rem !important;
-    flex: 1 1 0 !important;
     white-space: nowrap !important;
     letter-spacing: 0.03em !important;
+    min-height: 0 !important;
+    height: auto !important;
   }
 }
 
@@ -1316,8 +1317,9 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   border-right: 1px solid #444;
 }
 .admin-prodejce-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 0.3rem;
   flex: 1;
 }
@@ -1331,7 +1333,10 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   color: #ccc;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
+  text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .admin-prodejce-btn:hover {
   background: #2a2a2a;
@@ -1494,11 +1499,14 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 
   .filter-btn {
-    width: 100% !important;
-    padding: 0.3rem 0.3rem !important;
+    padding: 0.3rem 0.2rem !important;
     font-size: 0.62rem !important;
     line-height: 1.2 !important;
-    min-height: 28px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     border-width: 2px !important;
     border-radius: 4px !important;
     min-width: 0 !important;
@@ -1522,6 +1530,9 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 
   .admin-prodejce-list {
+    grid-auto-flow: row !important;
+    grid-auto-columns: auto !important;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
     gap: 0.2rem !important;
   }
 
@@ -1533,13 +1544,16 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.25rem 0.2rem !important;
-    font-size: 0.58rem !important;
-    min-height: 26px !important;
+    padding: 0.22rem 0.15rem !important;
+    font-size: 0.56rem !important;
   }
 
   .filter-bar {
-    gap: 0.25rem !important;
+    gap: 0.2rem !important;
+  }
+
+  .admin-prodejce-list {
+    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)) !important;
   }
 }
 

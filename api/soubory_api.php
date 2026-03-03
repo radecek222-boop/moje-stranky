@@ -252,6 +252,213 @@ function extrahovatReference(string $absolutniCesta): array
 }
 
 /**
+ * Extrahuje reference z obsahu souboru včetně čísla řádku a snippetu.
+ * Vrací pole ['ref' => string, 'radek' => int, 'snippet' => string]
+ */
+function extrahovatReferenceDetailed(string $absolutniCesta): array
+{
+    $pripona      = strtolower(pathinfo($absolutniCesta, PATHINFO_EXTENSION));
+    $nazevSouboru = basename($absolutniCesta);
+
+    if ($nazevSouboru === '.htaccess') {
+        return [];
+    }
+    if (!in_array($pripona, ['php', 'js', 'css', 'html', 'htm'])) {
+        return [];
+    }
+
+    $velikost = @filesize($absolutniCesta);
+    if ($velikost === false || $velikost > 2 * 1024 * 1024) {
+        return [];
+    }
+
+    $obsah = @file_get_contents($absolutniCesta);
+    if ($obsah === false) {
+        return [];
+    }
+
+    $radky     = explode("\n", $obsah);
+    $reference = [];
+
+    foreach ($radky as $i => $radek) {
+        $cisloRadku = $i + 1;
+        $snippet    = mb_substr(trim($radek), 0, 140);
+
+        if (in_array($pripona, ['php', 'html', 'htm'])) {
+            // PHP require/include
+            if (preg_match(
+                '/(?:require_once|require|include_once|include)\s*\(?\s*(?:__DIR__\s*\.\s*)?["\']([^"\']+)["\']\s*\)?/i',
+                $radek, $m
+            )) {
+                $reference[] = ['ref' => trim($m[1], '/\\ '), 'radek' => $cisloRadku, 'snippet' => $snippet];
+            }
+            // src/href/action – absolutní cesty
+            preg_match_all(
+                '/(?:src|href|action)\s*=\s*["\']\/([^"\'?#\s]+\.(?:php|js|css|html|htm))["\']/i',
+                $radek, $ms
+            );
+            foreach ($ms[1] as $ref) {
+                $reference[] = ['ref' => trim($ref, '/\\ '), 'radek' => $cisloRadku, 'snippet' => $snippet];
+            }
+            // src/href – relativní cesty
+            preg_match_all(
+                '/(?:src|href)\s*=\s*["\']((?!http|\/\/|data:|#)[^"\'?#\s]+\.(?:js|css|php))["\']/i',
+                $radek, $ms
+            );
+            foreach ($ms[1] as $ref) {
+                if (strpos($ref, '://') === false) {
+                    $reference[] = ['ref' => trim($ref, '/\\ '), 'radek' => $cisloRadku, 'snippet' => $snippet];
+                }
+            }
+        }
+
+        if ($pripona === 'js') {
+            if (preg_match('/import\s+.*?\s+from\s+["\']([^"\']+)["\']/s', $radek, $m)) {
+                $reference[] = ['ref' => ltrim($m[1], './'), 'radek' => $cisloRadku, 'snippet' => $snippet];
+            }
+            if (preg_match('/require\s*\(\s*["\']([^"\']+)["\']\s*\)/', $radek, $m)) {
+                $reference[] = ['ref' => ltrim($m[1], './'), 'radek' => $cisloRadku, 'snippet' => $snippet];
+            }
+        }
+
+        if ($pripona === 'css') {
+            if (preg_match('/@import\s+(?:url\s*\()?\s*["\']?([^"\'?\s)]+)["\']?\s*\)?/', $radek, $m)) {
+                $reference[] = ['ref' => ltrim($m[1], './'), 'radek' => $cisloRadku, 'snippet' => $snippet];
+            }
+        }
+    }
+
+    // Deduplikace podle ref+radek
+    $seen   = [];
+    $unique = [];
+    foreach ($reference as $r) {
+        $klic = $r['ref'] . ':' . $r['radek'];
+        if (!isset($seen[$klic])) {
+            $seen[$klic] = true;
+            $unique[]    = $r;
+        }
+    }
+    return $unique;
+}
+
+/**
+ * Prohledá celý projekt a najde soubory obsahující $hledanyNazev jako řetězec.
+ * Vrací max. $maxVysledku výsledků s soubor+řádek+snippet.
+ */
+function grepSouborVProjektu(string $hledanyNazev, string $vlastniCesta, string $koren, array $vyloucene, int $maxVysledku = 60): array
+{
+    if (empty($hledanyNazev)) {
+        return [];
+    }
+
+    $soubory         = scanSouboru($koren, $vyloucene);
+    $textovePripony  = ['php', 'js', 'css', 'html', 'htm', 'json', 'yml', 'yaml', 'txt', 'md', 'sql', 'sh'];
+    $vysledky        = [];
+    $celkem          = 0;
+
+    foreach ($soubory as $soubor) {
+        if ($soubor['cesta'] === $vlastniCesta) {
+            continue;
+        }
+
+        $pripona   = strtolower(pathinfo($soubor['nazev'], PATHINFO_EXTENSION));
+        $nazevSoub = $soubor['nazev'];
+
+        if (!in_array($pripona, $textovePripony) && $nazevSoub !== '.htaccess') {
+            continue;
+        }
+        if ($soubor['velikost'] > 1024 * 1024) {
+            continue;
+        }
+
+        $obsah = @file_get_contents($soubor['absolutniCesta']);
+        if ($obsah === false || strpos($obsah, $hledanyNazev) === false) {
+            continue;
+        }
+
+        $radky = explode("\n", $obsah);
+        foreach ($radky as $i => $radek) {
+            if (strpos($radek, $hledanyNazev) !== false) {
+                $vysledky[] = [
+                    'soubor'  => $soubor['cesta'],
+                    'radek'   => $i + 1,
+                    'snippet' => mb_substr(trim($radek), 0, 160),
+                ];
+                $celkem++;
+                if ($celkem >= $maxVysledku) {
+                    break 2;
+                }
+            }
+        }
+    }
+
+    return $vysledky;
+}
+
+/**
+ * Zkontroluje speciální soubory (sw.php, manifest.json, .github/workflows/)
+ * na výskyt hledaného názvu souboru.
+ */
+function kontrolujSpecialniSoubory(string $nazev, string $koren): array
+{
+    $nalezeno = [];
+
+    $souboryKe = [
+        'sw.php'        => 'Service Worker',
+        'sw.js'         => 'Service Worker JS',
+        'manifest.json' => 'PWA Manifest',
+    ];
+
+    foreach ($souboryKe as $soubor => $popis) {
+        $plna = $koren . '/' . $soubor;
+        if (!file_exists($plna)) {
+            continue;
+        }
+        $obsah = @file_get_contents($plna);
+        if ($obsah === false || strpos($obsah, $nazev) === false) {
+            continue;
+        }
+        foreach (explode("\n", $obsah) as $i => $radek) {
+            if (strpos($radek, $nazev) !== false) {
+                $nalezeno[] = [
+                    'soubor'  => $soubor,
+                    'typ'     => 'spec',
+                    'popis'   => $popis,
+                    'radek'   => $i + 1,
+                    'snippet' => mb_substr(trim($radek), 0, 140),
+                ];
+            }
+        }
+    }
+
+    // .github/workflows/
+    $workflowsDir = $koren . '/.github/workflows';
+    if (is_dir($workflowsDir)) {
+        $yamly = glob($workflowsDir . '/*.yml') ?: [];
+        foreach ($yamly as $yml) {
+            $obsah = @file_get_contents($yml);
+            if ($obsah === false || strpos($obsah, $nazev) === false) {
+                continue;
+            }
+            $kratkyNazev = '.github/workflows/' . basename($yml);
+            foreach (explode("\n", $obsah) as $i => $radek) {
+                if (strpos($radek, $nazev) !== false) {
+                    $nalezeno[] = [
+                        'soubor'  => $kratkyNazev,
+                        'typ'     => 'workflow',
+                        'popis'   => 'CI/CD Workflow',
+                        'radek'   => $i + 1,
+                        'snippet' => mb_substr(trim($radek), 0, 140),
+                    ];
+                }
+            }
+        }
+    }
+
+    return $nalezeno;
+}
+
+/**
  * Normalizuje referenci na relativní cestu od root
  * Vrátí null pokud nelze normalizovat
  */
@@ -288,7 +495,9 @@ function normalizujReferenci(string $ref, string $souborovaCesta, string $koren)
 }
 
 /**
- * Sestaví kompletní mapu závislostí pro všechny soubory
+ * Sestaví kompletní mapu závislostí pro všechny soubory.
+ * Navíc vrací $vyuzivaniDetaily: cesta → [{'soubor','radek','snippet'}]
+ * pro přesné zobrazení "kde a na jakém řádku je soubor referencován".
  */
 function sestavMapuZavislosti(array $vsechnySoubory, string $koren): array
 {
@@ -304,28 +513,44 @@ function sestavMapuZavislosti(array $vsechnySoubory, string $koren): array
         $mapaCest[$s['cesta']] = true;
     }
 
-    $zavislosti = []; // cesta -> [závislé cesty]
-    $vyuzivani  = []; // cesta -> [soubory, které tuto cestu využívají]
+    $zavislosti      = []; // cesta -> [závislé cesty]
+    $vyuzivani       = []; // cesta -> [soubory, které tuto cestu využívají]
+    $vyuzivaniDetaily = []; // cesta -> [{'soubor','radek','snippet'}]
 
     foreach ($vsechnySoubory as $soubor) {
-        $reference = extrahovatReference($soubor['absolutniCesta']);
+        // Používáme detailní verzi – vrací radek + snippet navíc
+        $referenceDetailed = extrahovatReferenceDetailed($soubor['absolutniCesta']);
         $nalezene  = [];
 
-        foreach ($reference as $ref) {
+        foreach ($referenceDetailed as $refData) {
+            $ref = $refData['ref'];
+
             // Pokus o přesnou normalizaci
             $normCesta = normalizujReferenci($ref, $soubor['cesta'], $koren);
 
             if ($normCesta && isset($mapaCest[$normCesta]) && $normCesta !== $soubor['cesta']) {
                 $nalezene[] = $normCesta;
-                $vyuzivani[$normCesta][] = $soubor['cesta'];
+                $vyuzivani[$normCesta][]        = $soubor['cesta'];
+                $vyuzivaniDetaily[$normCesta][] = [
+                    'soubor'  => $soubor['cesta'],
+                    'radek'   => $refData['radek'],
+                    'snippet' => $refData['snippet'],
+                ];
             } else {
-                // Fallback: shoda podle jména souboru
+                // Fallback: shoda pouze podle přesného jména souboru
+                // (basename – zamezit false-positive shody různých souborů se stejným jménem)
                 $bazJmeno = basename($ref);
-                if ($bazJmeno && isset($mapaJmen[$bazJmeno])) {
+                if ($bazJmeno && isset($mapaJmen[$bazJmeno]) && count($mapaJmen[$bazJmeno]) === 1) {
+                    // Fallback jen pokud existuje JEDINÝ soubor s tímto jménem (jinak nejisté)
                     foreach ($mapaJmen[$bazJmeno] as $moznasCesta) {
                         if ($moznasCesta !== $soubor['cesta'] && !in_array($moznasCesta, $nalezene)) {
                             $nalezene[] = $moznasCesta;
-                            $vyuzivani[$moznasCesta][] = $soubor['cesta'];
+                            $vyuzivani[$moznasCesta][]        = $soubor['cesta'];
+                            $vyuzivaniDetaily[$moznasCesta][] = [
+                                'soubor'  => $soubor['cesta'],
+                                'radek'   => $refData['radek'],
+                                'snippet' => $refData['snippet'],
+                            ];
                         }
                     }
                 }
@@ -335,12 +560,28 @@ function sestavMapuZavislosti(array $vsechnySoubory, string $koren): array
         $zavislosti[$soubor['cesta']] = array_unique($nalezene);
     }
 
-    // Deduplikovat vyuzivani
+    // Deduplikovat vyuzivani + vyuzivaniDetaily (soubor+radek)
     foreach ($vyuzivani as $cesta => $seznam) {
         $vyuzivani[$cesta] = array_values(array_unique($seznam));
     }
+    foreach ($vyuzivaniDetaily as $cesta => $seznam) {
+        $seen  = [];
+        $dedup = [];
+        foreach ($seznam as $item) {
+            $klic = $item['soubor'] . ':' . $item['radek'];
+            if (!isset($seen[$klic])) {
+                $seen[$klic] = true;
+                $dedup[]     = $item;
+            }
+        }
+        $vyuzivaniDetaily[$cesta] = $dedup;
+    }
 
-    return ['zavislosti' => $zavislosti, 'vyuzivani' => $vyuzivani];
+    return [
+        'zavislosti'       => $zavislosti,
+        'vyuzivani'        => $vyuzivani,
+        'vyuzivaniDetaily' => $vyuzivaniDetaily,
+    ];
 }
 
 // ============================================================
@@ -804,13 +1045,14 @@ switch ($akce) {
         }
 
         // Čerstvý sken
-        $zacatek        = microtime(true);
-        $vsechnySoubory = scanSouboru($korenAdresar, $vylouceneAdresare);
-        $graf           = sestavMapuZavislosti($vsechnySoubory, $korenAdresar);
-        $zavislosti     = $graf['zavislosti'];
-        $vyuzivani      = $graf['vyuzivani'];
-        $stavy          = nactiStavSouboru($stavSoubor);
-        $runtimeData    = nactiRuntimeAudit($korenAdresar);
+        $zacatek          = microtime(true);
+        $vsechnySoubory   = scanSouboru($korenAdresar, $vylouceneAdresare);
+        $graf             = sestavMapuZavislosti($vsechnySoubory, $korenAdresar);
+        $zavislosti       = $graf['zavislosti'];
+        $vyuzivani        = $graf['vyuzivani'];
+        $vyuzivaniDetaily = $graf['vyuzivaniDetaily'];
+        $stavy            = nactiStavSouboru($stavSoubor);
+        $runtimeData      = nactiRuntimeAudit($korenAdresar);
 
         $vysledek   = [];
         $statistiky = [
@@ -832,9 +1074,10 @@ switch ($akce) {
             $cesta          = $soubor['cesta'];
             $adresar        = $soubor['adresar'];
             $typ            = ziskejTypSouboru($soubor['nazev']);
-            $sobZavislosti  = $zavislosti[$cesta] ?? [];
-            $sobVyuzivani   = $vyuzivani[$cesta] ?? [];
-            $pocetVyuzivani = count($sobVyuzivani);
+            $sobZavislosti        = $zavislosti[$cesta] ?? [];
+            $sobVyuzivani         = $vyuzivani[$cesta] ?? [];
+            $sobVyuzivaniDetaily  = $vyuzivaniDetaily[$cesta] ?? [];
+            $pocetVyuzivani       = count($sobVyuzivani);
             $aktivni        = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
             $oznaceno       = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
 
@@ -890,10 +1133,11 @@ switch ($akce) {
                 'velikost'        => $soubor['velikost'],
                 'velikostText'    => formatovatVelikost($soubor['velikost']),
                 'zmeneno'         => $soubor['zmeneno'],
-                'zavislosti'      => $sobZavislosti,
-                'vyuzivani'       => $sobVyuzivani,
-                'pocetZavislosti' => count($sobZavislosti),
-                'pocetVyuzivani'  => $pocetVyuzivani,
+                'zavislosti'          => $sobZavislosti,
+                'vyuzivani'           => $sobVyuzivani,
+                'vyuzivaniDetaily'    => array_slice($sobVyuzivaniDetaily, 0, 15), // max 15 záznamů v cache
+                'pocetZavislosti'     => count($sobZavislosti),
+                'pocetVyuzivani'      => $pocetVyuzivani,
                 'bezpecneSmazat'  => $klasifikace['status'] === KL_BEZPECNE_SMAZAT,
                 'klasifikace'     => $klasifikace,
                 'aktivni'         => $aktivni,
@@ -1087,6 +1331,346 @@ switch ($akce) {
             unlink($cacheSoubor);
         }
         echo json_encode(['status' => 'success', 'zprava' => 'Cache smazána']);
+        break;
+
+    // ----------------------------------------------------------------
+    // DETAIL – hloubková analýza jednoho souboru (on-demand)
+    // Spouští full-text grep v celém projektu + speciální kontroly
+    // ----------------------------------------------------------------
+    case 'detail':
+        $cesta = $_GET['cesta'] ?? '';
+
+        // Sanitace cesty
+        $cesta = str_replace(['../', '..\\.', '..\\', '..'], '', $cesta);
+        $cesta = ltrim($cesta, '/\\');
+
+        if (empty($cesta)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Chybí parametr cesta']);
+            exit;
+        }
+
+        $absolutniCesta = realpath($korenAdresar . '/' . $cesta);
+        if ($absolutniCesta === false || strpos($absolutniCesta, $korenAdresar) !== 0) {
+            http_response_code(403);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatná cesta souboru']);
+            exit;
+        }
+
+        if (!file_exists($absolutniCesta)) {
+            http_response_code(404);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Soubor neexistuje']);
+            exit;
+        }
+
+        $nazev = basename($cesta);
+
+        // 1. Full-text grep v celém projektu (max 60 výsledků)
+        $grepVysledky = grepSouborVProjektu($nazev, $cesta, $korenAdresar, $vylouceneAdresare);
+
+        // 2. Speciální soubory (sw.php, manifest.json, .github/workflows/)
+        $specialniKontroly = kontrolujSpecialniSoubory($nazev, $korenAdresar);
+
+        // 3. Náhled obsahu souboru (prvních 40 řádků)
+        $nahlad  = null;
+        $pripona = strtolower(pathinfo($nazev, PATHINFO_EXTENSION));
+        $textovePriponyNahlad = ['php', 'js', 'css', 'html', 'htm', 'txt', 'json', 'yml', 'yaml', 'sql', 'md', 'sh'];
+        $statInfo = @stat($absolutniCesta);
+        $velikost = $statInfo ? $statInfo['size'] : 0;
+
+        if (in_array($pripona, $textovePriponyNahlad) && $velikost <= 500 * 1024) {
+            $obsah = @file_get_contents($absolutniCesta);
+            if ($obsah !== false) {
+                $vsechnyRadky = explode("\n", $obsah);
+                $nahlad = [
+                    'radky'       => array_slice($vsechnyRadky, 0, 40),
+                    'celkemRadku' => count($vsechnyRadky),
+                ];
+            }
+        }
+
+        // 4. Shrnutí: celkový počet nálezů grep + speciální
+        $pocetGrepVysledku     = count($grepVysledky);
+        $pocetSpecialnichNalezu = count($specialniKontroly);
+        $celkemNalezu          = $pocetGrepVysledku + $pocetSpecialnichNalezu;
+
+        // Závěr analýzy
+        if ($celkemNalezu === 0) {
+            $zaver = 'Soubor nebyl nalezen jako řetězec v žádném jiném souboru projektu. '
+                   . 'Statická analýza ani full-text grep nenašly žádné reference.';
+        } else {
+            $zaver = 'Soubor byl nalezen celkem ' . $celkemNalezu . '× v projektu '
+                   . '(grep: ' . $pocetGrepVysledku . ', speciální soubory: ' . $pocetSpecialnichNalezu . ').';
+        }
+
+        echo json_encode([
+            'status'                 => 'success',
+            'cesta'                  => $cesta,
+            'nazev'                  => $nazev,
+            'grepVysledky'           => $grepVysledky,
+            'specialniKontroly'      => $specialniKontroly,
+            'nahlad'                 => $nahlad,
+            'pocetGrepVysledku'      => $pocetGrepVysledku,
+            'pocetSpecialnichNalezu' => $pocetSpecialnichNalezu,
+            'celkemNalezu'           => $celkemNalezu,
+            'zaver'                  => $zaver,
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
+    // ----------------------------------------------------------------
+    // HROMADNÁ ANALÝZA – automatická kontrola všech NO_REFS_STATIC kandidátů
+    // Single-pass grep přes celý projekt – vrátí dvě skupiny:
+    //   bezpecneArchivovat: název souboru nenalezen nikde v projektu
+    //   potrebujeKontrolu:  název nalezen – ověřit ručně
+    // ----------------------------------------------------------------
+    case 'hromadnaAnalyza':
+        $zacatek = microtime(true);
+
+        // Načíst ze cache (musí existovat – uživatel nejprve spustí skenování)
+        if (!file_exists($cacheSoubor)) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'chyba',
+                'zprava' => 'Cache není dostupná. Nejprve spusťte skenování (tlačítko Znovu skenovat).',
+            ]);
+            exit;
+        }
+
+        $cacheData = json_decode(file_get_contents($cacheSoubor), true);
+        if (!$cacheData || !isset($cacheData['soubory'])) {
+            http_response_code(400);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se načíst cache. Spusťte znovu skenování.']);
+            exit;
+        }
+
+        $stavy = nactiStavSouboru($stavSoubor);
+
+        // Sestavit seznam kandidátů: NO_REFS_STATIC, nezarchivované, ne .map soubory
+        $kandidati = [];
+        foreach ($cacheData['soubory'] as $s) {
+            $kStatus  = $s['klasifikace']['status'] ?? 'USED';
+            $sCesta   = $s['cesta'] ?? '';
+            $sNazev   = $s['nazev'] ?? '';
+            $sPripona = strtolower(pathinfo($sNazev, PATHINFO_EXTENSION));
+
+            if ($kStatus !== KL_BEZ_REFERENCI) {
+                continue;
+            }
+            // Přeskočit soubory v _archiv/
+            if (strpos($sCesta, '_archiv/') === 0) {
+                continue;
+            }
+            // Přeskočit .map soubory (source mapy – jsou false-positive kandidáti)
+            if ($sPripona === 'map') {
+                continue;
+            }
+            // Přeskočit prázdný název
+            if ($sNazev === '') {
+                continue;
+            }
+
+            $kandidati[$sCesta] = [
+                'cesta'        => $sCesta,
+                'nazev'        => $sNazev,
+                'velikostText' => $s['velikostText'] ?? '',
+                'nalezeno'     => false,
+                'kde'          => [],
+            ];
+        }
+
+        if (empty($kandidati)) {
+            echo json_encode([
+                'status'             => 'success',
+                'bezpecneArchivovat' => [],
+                'potrebujeKontrolu'  => [],
+                'celkemKandidatu'    => 0,
+                'dobaSken'           => '0s',
+                'zprava'             => 'Žádné kandidáty nenalezeny (žádné soubory se stavem "Bez referencí").',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Soubory vyloučené z prohledávání (zdroje false-positive)
+        $vylouceneZdrojeGrep = [
+            'config/soubory_cache.json',
+            'config/soubory_stav.json',
+        ];
+
+        $textovePriponyGrep = [
+            'php', 'js', 'css', 'html', 'htm',
+            'json', 'yml', 'yaml', 'txt', 'md', 'sql', 'sh',
+        ];
+
+        // Single-pass: projít všechny soubory projektu a hledat jméno každého kandidáta
+        $projektSoubory = scanSouboru($korenAdresar, $vylouceneAdresare);
+
+        foreach ($projektSoubory as $soubor) {
+            // Přeskočit vyloučené zdroje
+            if (in_array($soubor['cesta'], $vylouceneZdrojeGrep)) {
+                continue;
+            }
+            // Přeskočit _archiv/
+            if (strpos($soubor['cesta'], '_archiv/') === 0) {
+                continue;
+            }
+            // Pouze textové soubory
+            $pripona = strtolower(pathinfo($soubor['nazev'], PATHINFO_EXTENSION));
+            if (!in_array($pripona, $textovePriponyGrep) && $soubor['nazev'] !== '.htaccess') {
+                continue;
+            }
+            // Přeskočit velké soubory (> 1 MB)
+            if ($soubor['velikost'] > 1024 * 1024) {
+                continue;
+            }
+
+            $obsah = @file_get_contents($soubor['absolutniCesta']);
+            if ($obsah === false) {
+                continue;
+            }
+
+            // Zkontrolovat každého kandidáta
+            foreach ($kandidati as $sCesta => &$kand) {
+                // Sám sebe přeskočit
+                if ($soubor['cesta'] === $sCesta) {
+                    continue;
+                }
+                // Rychlý test existence jména souboru v obsahu
+                if (strpos($obsah, $kand['nazev']) === false) {
+                    continue;
+                }
+
+                $kand['nalezeno'] = true;
+
+                // Sbírat příklady (max 3)
+                if (count($kand['kde']) < 3) {
+                    foreach (explode("\n", $obsah) as $i => $radek) {
+                        if (strpos($radek, $kand['nazev']) !== false) {
+                            $kand['kde'][] = [
+                                'soubor'  => $soubor['cesta'],
+                                'radek'   => $i + 1,
+                                'snippet' => mb_substr(trim($radek), 0, 110),
+                            ];
+                            if (count($kand['kde']) >= 3) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            unset($kand);
+        }
+
+        // Rozdělit do dvou skupin
+        $bezpecneArchivovat = [];
+        $potrebujeKontrolu  = [];
+
+        foreach ($kandidati as $kand) {
+            if ($kand['nalezeno']) {
+                $potrebujeKontrolu[] = $kand;
+            } else {
+                $bezpecneArchivovat[] = $kand;
+            }
+        }
+
+        $dobu = round(microtime(true) - $zacatek, 2);
+
+        echo json_encode([
+            'status'             => 'success',
+            'bezpecneArchivovat' => $bezpecneArchivovat,
+            'potrebujeKontrolu'  => $potrebujeKontrolu,
+            'celkemKandidatu'    => count($kandidati),
+            'dobaSken'           => $dobu . 's',
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
+    // ----------------------------------------------------------------
+    // ARCHIVOVAT VYBRANÉ – archivuje explicitní seznam cest v jednom
+    // timestampovaném archivu; alternativa k archivovatOznacene
+    // ----------------------------------------------------------------
+    case 'archivujVybrane':
+        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný CSRF token']);
+            exit;
+        }
+
+        $cetyJson = $_POST['cesty'] ?? '';
+        if (empty($cetyJson)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Chybí seznam cest']);
+            exit;
+        }
+
+        $cesty = json_decode($cetyJson, true);
+        if (!is_array($cesty) || empty($cesty)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný formát seznamu cest']);
+            exit;
+        }
+
+        $casovyRazitko = date('Y-m-d_H-i-s');
+        $archivAdresar = $korenAdresar . '/_archiv/' . $casovyRazitko;
+
+        if (!mkdir($archivAdresar, 0755, true)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se vytvořit archivní složku']);
+            exit;
+        }
+
+        $uspesne = [];
+        $chyby   = [];
+        $stavy   = nactiStavSouboru($stavSoubor);
+
+        foreach ($cesty as $relativniCesta) {
+            $relativniCesta = str_replace(['../', '..\\.', '..\\', '..'], '', (string)$relativniCesta);
+            $relativniCesta = ltrim($relativniCesta, '/\\');
+
+            if (in_array($relativniCesta, $chranenesoubory)) {
+                $chyby[] = $relativniCesta . ' (chráněný soubor)';
+                continue;
+            }
+
+            $absolutniZdroj = realpath($korenAdresar . '/' . $relativniCesta);
+            if ($absolutniZdroj === false || strpos($absolutniZdroj, $korenAdresar) !== 0) {
+                $chyby[] = $relativniCesta . ' (neplatná cesta)';
+                continue;
+            }
+
+            if (!file_exists($absolutniZdroj)) {
+                $chyby[] = $relativniCesta . ' (soubor neexistuje)';
+                continue;
+            }
+
+            $cilAdresar = $archivAdresar . '/' . dirname($relativniCesta);
+            if (dirname($relativniCesta) !== '.' && !is_dir($cilAdresar)) {
+                mkdir($cilAdresar, 0755, true);
+            }
+
+            $absolutniCil = $archivAdresar . '/' . $relativniCesta;
+
+            if (rename($absolutniZdroj, $absolutniCil)) {
+                $uspesne[] = $relativniCesta;
+                unset($stavy[$relativniCesta]);
+            } else {
+                $chyby[] = $relativniCesta . ' (přesun selhal)';
+            }
+        }
+
+        ulozStavSouboru($stavSoubor, $stavy);
+
+        if (file_exists($cacheSoubor)) {
+            unlink($cacheSoubor);
+        }
+
+        $zprava = 'Archivováno ' . count($uspesne) . ' souborů do _archiv/' . $casovyRazitko;
+        if (!empty($chyby)) {
+            $zprava .= '. Chyby (' . count($chyby) . '): ' . implode(', ', array_slice($chyby, 0, 3));
+        }
+
+        echo json_encode([
+            'status'       => 'success',
+            'zprava'       => $zprava,
+            'archivovano'  => count($uspesne),
+            'chyby'        => count($chyby),
+            'archivSlozka' => '_archiv/' . $casovyRazitko,
+        ], JSON_UNESCAPED_UNICODE);
         break;
 
     default:

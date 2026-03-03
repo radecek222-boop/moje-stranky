@@ -644,6 +644,304 @@ if (!defined('ADMIN_PHP_LOADED')) {
         width: 18px;
     }
 }
+
+/* ============================================================
+   REFERENCE DETAIL – řádky se snippetem (vyuzivaniDetaily)
+   ============================================================ */
+.sf-tree-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.25rem 0.3rem;
+    gap: 0.15rem;
+}
+.sf-ref-radek-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+.sf-ref-soubor {
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: #222;
+}
+.sf-ref-radek {
+    font-size: 0.68rem;
+    color: #999;
+    font-variant-numeric: tabular-nums;
+}
+.sf-ref-snippet {
+    width: 100%;
+}
+.sf-ref-snippet code {
+    display: block;
+    font-family: monospace;
+    font-size: 0.68rem;
+    color: #555;
+    background: #f5f5f5;
+    border-left: 2px solid #ddd;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ============================================================
+   HLOUBKOVÁ ANALÝZA – panel s tlačítkem a výsledky
+   ============================================================ */
+.sf-analyza-btn-wrap {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #eee;
+}
+.sf-btn-analyza {
+    background: #444;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+.sf-btn-analyza:hover { background: #222; }
+.sf-btn-analyza:disabled { background: #999; cursor: wait; }
+
+.sf-analyza-panel {
+    margin-top: 0.6rem;
+}
+.sf-analyza-loading {
+    font-size: 0.75rem;
+    color: #888;
+    padding: 0.4rem;
+}
+.sf-analyza-zaver {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.6rem;
+    background: #f5f5f5;
+    border-left: 3px solid #666;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+.sf-analyza-zaver.nulovy {
+    border-left-color: #333;
+    background: #eee;
+}
+.sf-analyza-sekce-nazev {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #666;
+    margin: 0.6rem 0 0.25rem;
+    padding-bottom: 0.15rem;
+    border-bottom: 1px solid #eee;
+}
+.sf-analyza-prazdno {
+    font-size: 0.73rem;
+    color: #aaa;
+    padding: 0.25rem 0.4rem;
+    font-style: italic;
+}
+.sf-grep-radek {
+    padding: 0.25rem 0.3rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.sf-grep-radek:last-child { border-bottom: none; }
+.sf-grep-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.1rem;
+}
+.sf-grep-soubor {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #222;
+}
+.sf-grep-cislo {
+    font-size: 0.65rem;
+    color: #999;
+}
+.sf-grep-tag {
+    font-size: 0.6rem;
+    background: #333;
+    color: #fff;
+    padding: 0.05rem 0.3rem;
+    border-radius: 2px;
+}
+.sf-grep-snippet code {
+    display: block;
+    font-family: monospace;
+    font-size: 0.67rem;
+    color: #555;
+    background: #f5f5f5;
+    border-left: 2px solid #ccc;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ============================================================
+   NÁHLED SOUBORU
+   ============================================================ */
+.sf-nahlad-pre {
+    font-family: monospace;
+    font-size: 0.67rem;
+    line-height: 1.5;
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
+    padding: 0.5rem;
+    overflow-x: auto;
+    max-height: 280px;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre;
+    color: #333;
+}
+.sf-nahlad-cislo {
+    display: inline-block;
+    min-width: 2.5em;
+    color: #bbb;
+    text-align: right;
+    margin-right: 0.6em;
+    user-select: none;
+}
+
+/* ============================================================
+   HROMADNÁ ANALÝZA – automatická kontrola všech kandidátů
+   ============================================================ */
+.sf-hromadna-panel {
+    display: none;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.sf-hromadna-panel.viditelny { display: block; }
+
+.sf-hromadna-hlava {
+    padding: 0.45rem 0.8rem;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    font-family: sans-serif;
+    font-size: 0.72rem;
+    color: #555;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sf-hromadna-hlava strong { color: #222; }
+
+.sf-hromadna-zaviracka {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #aaa;
+    padding: 0 0.2rem;
+    font-weight: 700;
+}
+
+.sf-hromadna-zaviracka:hover { color: #333; }
+
+.sf-hromadna-loading {
+    padding: 1.5rem;
+    text-align: center;
+    color: #888;
+    font-family: sans-serif;
+    font-size: 0.82rem;
+}
+
+.sf-hromadna-sekce { border-bottom: 1px solid #e8e8e8; }
+.sf-hromadna-sekce:last-child { border-bottom: none; }
+
+.sf-hromadna-sekce-hl {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    background: #f7f7f7;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #ebebeb;
+}
+
+.sf-hromadna-sekce-titulek {
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-family: sans-serif;
+    color: #222;
+}
+
+.sf-hromadna-sekce-cnt {
+    font-size: 0.7rem;
+    color: #888;
+    font-family: sans-serif;
+}
+
+.sf-hromadna-sekce-body { padding: 0.2rem 0.6rem; }
+.sf-hromadna-sekce-body.skryto { display: none; }
+
+.sf-hromadna-polozka {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.2rem 0.1rem;
+    border-bottom: 1px solid #f5f5f5;
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+}
+
+.sf-hromadna-polozka:last-child { border-bottom: none; }
+
+.sf-hromadna-polozka-info { flex: 1; min-width: 0; }
+
+.sf-hromadna-polozka-nazev {
+    word-break: break-all;
+    color: #222;
+}
+
+.sf-hromadna-polozka-vel {
+    color: #bbb;
+    font-size: 0.63rem;
+    margin-left: 0.3rem;
+    font-family: sans-serif;
+}
+
+.sf-hromadna-kde {
+    margin-top: 0.1rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid #e0e0e0;
+    font-size: 0.65rem;
+    color: #888;
+    font-family: sans-serif;
+}
+
+.sf-hromadna-kde code {
+    font-family: monospace;
+    font-size: 0.63rem;
+    color: #666;
+}
+
+.sf-hromadna-akce {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.55rem 0.8rem;
+    background: #f9f9f9;
+    border-top: 1px solid #ebebeb;
+    flex-wrap: wrap;
+}
+
+.sf-hromadna-pocet-label {
+    font-size: 0.71rem;
+    color: #888;
+    font-family: sans-serif;
+    margin-left: auto;
+}
 </style>
 
 <div class="sf-wrap">
@@ -659,6 +957,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                    placeholder="Hledat soubor nebo cestu..."
                    oninput="sfFiltrovat()">
             <button class="sf-btn" id="sf-btn-scan" onclick="sfNacist(true)">Znovu skenovat</button>
+            <button class="sf-btn" id="sf-btn-hromadna" onclick="sfHromadnaAnalyza()" title="Automaticky zkontroluje všechny soubory bez referencí pomocí full-text grepu">Automatická kontrola</button>
             <button class="sf-btn" id="sf-btn-archiv" onclick="sfArchivovatOznacene()" style="display:none;">Archivovat označené</button>
         </div>
     </div>
@@ -702,6 +1001,9 @@ if (!defined('ADMIN_PHP_LOADED')) {
             <span class="sf-stat-l">Ke smazání</span>
         </div>
     </div>
+
+    <!-- Hromadná analýza – automatická kontrola kandidátů -->
+    <div id="sf-hromadna-panel" class="sf-hromadna-panel"></div>
 
     <!-- Načítání -->
     <div id="sf-loading" class="sf-loading">
@@ -1032,9 +1334,30 @@ if (!defined('ADMIN_PHP_LOADED')) {
             zavHtml += '<div class="sf-tree-empty">— žádné závislosti</div>';
         }
 
-        // Využíváno v (kdo odkazuje na tento soubor)
-        var vyuHtml = '<div class="sf-detail-label">Využíváno v (' + s.pocetVyuzivani + ')</div>';
-        if (s.vyuzivani && s.vyuzivani.length > 0) {
+        // Využíváno v (kdo odkazuje na tento soubor) – s řádky a snippety
+        var vyuHtml = '<div class="sf-detail-label">Využíváno v (' + s.pocetVyuzivani + ')'
+            + (s.vyuzivani && s.vyuzivani.length > 0 ? ' <span style="font-size:.65rem;color:#888;font-weight:400">— statická analýza</span>' : '')
+            + '</div>';
+        if (s.vyuzivaniDetaily && s.vyuzivaniDetaily.length > 0) {
+            // Zobrazit s přesným řádkem a snippetem
+            s.vyuzivaniDetaily.forEach(function (v, i) {
+                var sym = i === s.vyuzivaniDetaily.length - 1 ? '└' : '├';
+                vyuHtml += '<div class="sf-tree-line sf-tree-detail">'
+                    + '<span class="sf-tree-sym">' + sym + '</span>'
+                    + '<span class="sf-ref-radek-wrap">'
+                    + '<span class="sf-ref-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-ref-radek">:' + esc(v.radek) + '</span>'
+                    + '</span>'
+                    + '<div class="sf-ref-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+            if (s.pocetVyuzivani > s.vyuzivaniDetaily.length) {
+                vyuHtml += '<div class="sf-tree-empty" style="font-style:normal;color:#888">'
+                    + '… a ' + (s.pocetVyuzivani - s.vyuzivaniDetaily.length) + ' dalších referencí'
+                    + '</div>';
+            }
+        } else if (s.vyuzivani && s.vyuzivani.length > 0) {
+            // Fallback – jen jména souborů bez řádků
             s.vyuzivani.forEach(function (v, i) {
                 var sym = i === s.vyuzivani.length - 1 ? '└' : '├';
                 vyuHtml += '<div class="sf-tree-line">'
@@ -1043,7 +1366,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                     + '</div>';
             });
         } else {
-            vyuHtml += '<div class="sf-tree-empty">— žádné statické reference (viz klasifikace níže)</div>';
+            vyuHtml += '<div class="sf-tree-empty">— žádné statické reference</div>';
         }
 
         // Klasifikace
@@ -1097,6 +1420,16 @@ if (!defined('ADMIN_PHP_LOADED')) {
             klasHtml += '</div>';
         }
 
+        // Hloubková analýza – tlačítko + prázdný panel (naplní se on-demand)
+        var anId    = esc(id) + '_an';
+        var anHtml  = '<div class="sf-analyza-btn-wrap">'
+            + '<button class="sf-btn-analyza" id="' + anId + '_btn" '
+            + 'onclick="sfNacistDetailAnalyzu(\'' + esc(s.cesta) + '\',\'' + esc(id) + '\')">'
+            + 'Prohledat celý projekt (full-text grep)'
+            + '</button>'
+            + '<div class="sf-analyza-panel" id="' + anId + '"></div>'
+            + '</div>';
+
         return '<div class="sf-detail" id="' + esc(id) + '-d">'
             + meta
             + '<div class="sf-detail-cols">'
@@ -1104,6 +1437,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
             + '<div>' + vyuHtml + '</div>'
             + '</div>'
             + klasHtml
+            + anHtml
             + '</div>';
     }
 
@@ -1218,6 +1552,100 @@ if (!defined('ADMIN_PHP_LOADED')) {
     };
 
     /* --------------------------------------------------------
+       Hloubková analýza – full-text grep + náhled souboru
+       -------------------------------------------------------- */
+    window.sfNacistDetailAnalyzu = async function (cesta, id) {
+        var anId    = id + '_an';
+        var panel   = document.getElementById(anId);
+        var btn     = document.getElementById(anId + '_btn');
+        if (!panel) { return; }
+
+        if (btn) { btn.disabled = true; btn.textContent = 'Prohledávám…'; }
+        panel.innerHTML = '<div class="sf-analyza-loading">Prohledávám celý projekt… (může trvat 5–30 s)</div>';
+
+        try {
+            var odp  = await fetch('/api/soubory_api.php?akce=detail&cesta=' + encodeURIComponent(cesta));
+            if (!odp.ok) { throw new Error('HTTP ' + odp.status); }
+            var data = await odp.json();
+            if (data.status !== 'success') { throw new Error(data.zprava || 'Chyba serveru'); }
+
+            panel.innerHTML = sfRenderDetailAnalyzy(data);
+        } catch (err) {
+            panel.innerHTML = '<div class="sf-analyza-loading" style="color:#c00">Chyba: ' + esc(err.message) + '</div>';
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Prohledat znovu'; }
+        }
+    };
+
+    function sfRenderDetailAnalyzy(data) {
+        var html = '';
+
+        // Celkový závěr
+        var zaver  = data.zaver || '';
+        var nulovy = (data.celkemNalezu || 0) === 0;
+        html += '<div class="sf-analyza-zaver' + (nulovy ? ' nulovy' : '') + '">' + esc(zaver) + '</div>';
+
+        // Speciální soubory (sw.php, manifest.json, .github/workflows/)
+        if (data.specialniKontroly && data.specialniKontroly.length > 0) {
+            html += '<div class="sf-analyza-sekce-nazev">Nalezeno ve speciálních souborech ('
+                + data.specialniKontroly.length + ')</div>';
+            data.specialniKontroly.forEach(function (v) {
+                html += '<div class="sf-grep-radek">'
+                    + '<div class="sf-grep-meta">'
+                    + '<span class="sf-grep-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-grep-cislo">:' + esc(v.radek) + '</span>'
+                    + '<span class="sf-grep-tag">' + esc(v.popis) + '</span>'
+                    + '</div>'
+                    + '<div class="sf-grep-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+        }
+
+        // Full-text grep výsledky
+        html += '<div class="sf-analyza-sekce-nazev">'
+            + 'Full-text grep v celém projektu (' + (data.pocetGrepVysledku || 0) + ' nálezů)'
+            + '</div>';
+
+        if (data.grepVysledky && data.grepVysledky.length > 0) {
+            html += '<div style="font-size:.68rem;color:#888;margin-bottom:.3rem;">'
+                + 'Veškeré výskyty jména souboru jako řetězce — include, URL, fetch(), konfigurace, komentáře…'
+                + '</div>';
+            data.grepVysledky.forEach(function (v) {
+                html += '<div class="sf-grep-radek">'
+                    + '<div class="sf-grep-meta">'
+                    + '<span class="sf-grep-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-grep-cislo">:' + esc(v.radek) + '</span>'
+                    + '</div>'
+                    + '<div class="sf-grep-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+            if ((data.pocetGrepVysledku || 0) >= 60) {
+                html += '<div class="sf-analyza-prazdno">… zobrazeno max. 60 výsledků</div>';
+            }
+        } else {
+            html += '<div class="sf-analyza-prazdno">'
+                + 'Soubor se nevyskytuje jako řetězec v žádném jiném souboru projektu.'
+                + '</div>';
+        }
+
+        // Náhled souboru
+        if (data.nahlad && data.nahlad.radky && data.nahlad.radky.length > 0) {
+            html += '<div class="sf-analyza-sekce-nazev">'
+                + 'Náhled souboru — prvních ' + data.nahlad.radky.length
+                + ' řádků z ' + (data.nahlad.celkemRadku || '?')
+                + '</div>';
+            html += '<pre class="sf-nahlad-pre">';
+            data.nahlad.radky.forEach(function (radek, i) {
+                html += '<span class="sf-nahlad-cislo">' + (i + 1) + '</span>'
+                    + esc(radek) + '\n';
+            });
+            html += '</pre>';
+        }
+
+        return html;
+    }
+
+    /* --------------------------------------------------------
        Archivovat všechny označené soubory
        -------------------------------------------------------- */
     window.sfArchivovatOznacene = async function () {
@@ -1267,6 +1695,179 @@ if (!defined('ADMIN_PHP_LOADED')) {
             btn.textContent = 'Archivovat označené (' + pocet + ')';
         }
     }
+
+    /* --------------------------------------------------------
+       Hromadná analýza – automatická kontrola všech kandidátů
+       -------------------------------------------------------- */
+    window.sfHromadnaAnalyza = async function () {
+        var panel = document.getElementById('sf-hromadna-panel');
+        var btn   = document.getElementById('sf-btn-hromadna');
+        if (!panel) { return; }
+
+        panel.className = 'sf-hromadna-panel viditelny';
+        panel.innerHTML = '<div class="sf-hromadna-loading">'
+            + '<div class="sf-spin"></div>'
+            + '<div style="font-weight:600;margin-top:.5rem;">Prohledávám celý projekt...</div>'
+            + '<div style="font-size:.72rem;color:#bbb;margin-top:.25rem;">Může trvat 10–60 sekund.</div>'
+            + '</div>';
+
+        if (btn) { btn.disabled = true; btn.textContent = 'Analyzuji...'; }
+
+        try {
+            var odp  = await fetch('/api/soubory_api.php?akce=hromadnaAnalyza');
+            if (!odp.ok) { throw new Error('HTTP ' + odp.status); }
+            var data = await odp.json();
+            if (data.status !== 'success') { throw new Error(data.zprava || 'Chyba serveru'); }
+
+            panel.innerHTML = sfRenderHromadnaAnalyzy(data);
+        } catch (err) {
+            panel.innerHTML = '<div class="sf-hromadna-loading" style="color:#c00;">Chyba: ' + esc(err.message) + '</div>';
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Automatická kontrola'; }
+        }
+    };
+
+    function sfRenderHromadnaAnalyzy(data) {
+        var bez = data.bezpecneArchivovat || [];
+        var pot = data.potrebujeKontrolu  || [];
+        var html = '';
+
+        // Záhlaví panelu s časem skenu a zavíracím tlačítkem
+        html += '<div class="sf-hromadna-hlava">'
+            + '<span>Automatická kontrola — prohledáno <strong>' + esc(data.celkemKandidatu || 0)
+            + ' kandidátů</strong> za ' + esc(data.dobaSken || '?') + '</span>'
+            + '<span class="sf-hromadna-zaviracka" onclick="sfZavritHromadna()" title="Zavřít">×</span>'
+            + '</div>';
+
+        // Sekce 1: Bez referencí – pravděpodobně k archivaci
+        html += '<div class="sf-hromadna-sekce">';
+        html += '<div class="sf-hromadna-sekce-hl" onclick="sfToggleHromadnaSekce(\'sf-hs-bez\')">'
+            + '<span class="sf-hromadna-sekce-titulek">Bez referencí v projektu — pravděpodobně k archivaci</span>'
+            + '<span class="sf-hromadna-sekce-cnt">' + bez.length + ' souborů</span>'
+            + '</div>';
+        html += '<div class="sf-hromadna-sekce-body" id="sf-hs-bez">';
+
+        if (bez.length === 0) {
+            html += '<div style="padding:.5rem;font-family:sans-serif;font-size:.75rem;color:#aaa;">Žádné soubory bez referencí.</div>';
+        } else {
+            bez.forEach(function (k) {
+                var chkId = 'sfhchk_' + k.cesta.replace(/[^a-z0-9]/gi, '_');
+                html += '<div class="sf-hromadna-polozka">'
+                    + '<input type="checkbox" class="sf-hromadna-chk" value="' + esc(k.cesta) + '" checked '
+                    + 'id="' + esc(chkId) + '" onchange="sfAktualizovatPocetVybranych()">'
+                    + '<label for="' + esc(chkId) + '" class="sf-hromadna-polozka-info" style="cursor:pointer;">'
+                    + '<span class="sf-hromadna-polozka-nazev">' + esc(k.cesta) + '</span>'
+                    + '<span class="sf-hromadna-polozka-vel">' + esc(k.velikostText || '') + '</span>'
+                    + '</label>'
+                    + '</div>';
+            });
+
+            html += '<div class="sf-hromadna-akce">'
+                + '<button class="sf-btn" id="sf-hromadna-archiv-btn" onclick="sfArchivujVybrane()">Archivovat vybrané</button>'
+                + '<button class="sf-btn" style="background:#666;border-color:#555;" onclick="sfHromadnaSelectAll(true)">Vybrat vše</button>'
+                + '<button class="sf-btn" style="background:#666;border-color:#555;" onclick="sfHromadnaSelectAll(false)">Odznačit vše</button>'
+                + '<span class="sf-hromadna-pocet-label" id="sf-hromadna-pocet-vybranych">' + bez.length + ' vybráno</span>'
+                + '</div>';
+        }
+        html += '</div></div>';
+
+        // Sekce 2: Nalezeno v projektu – vyžaduje ruční kontrolu (výchozí skrytá)
+        html += '<div class="sf-hromadna-sekce">';
+        html += '<div class="sf-hromadna-sekce-hl" onclick="sfToggleHromadnaSekce(\'sf-hs-pot\')">'
+            + '<span class="sf-hromadna-sekce-titulek">Nalezeno v projektu — vyžaduje ruční kontrolu</span>'
+            + '<span class="sf-hromadna-sekce-cnt">' + pot.length + ' souborů (kliknutím zobrazit)</span>'
+            + '</div>';
+        html += '<div class="sf-hromadna-sekce-body skryto" id="sf-hs-pot">';
+
+        if (pot.length === 0) {
+            html += '<div style="padding:.5rem;font-family:sans-serif;font-size:.75rem;color:#aaa;">Žádné soubory.</div>';
+        } else {
+            pot.forEach(function (k) {
+                html += '<div class="sf-hromadna-polozka" style="flex-direction:column;align-items:flex-start;">'
+                    + '<div class="sf-hromadna-polozka-info">'
+                    + '<span class="sf-hromadna-polozka-nazev" style="font-weight:600;">' + esc(k.cesta) + '</span>'
+                    + '<span class="sf-hromadna-polozka-vel">' + esc(k.velikostText || '') + '</span>'
+                    + '</div>';
+                if (k.kde && k.kde.length > 0) {
+                    k.kde.forEach(function (v) {
+                        html += '<div class="sf-hromadna-kde">'
+                            + '<strong>' + esc(v.soubor) + '</strong>:' + esc(v.radek)
+                            + ' — <code>' + esc(v.snippet) + '</code>'
+                            + '</div>';
+                    });
+                }
+                html += '</div>';
+            });
+        }
+        html += '</div></div>';
+
+        return html;
+    }
+
+    window.sfZavritHromadna = function () {
+        var panel = document.getElementById('sf-hromadna-panel');
+        if (panel) { panel.className = 'sf-hromadna-panel'; }
+    };
+
+    window.sfToggleHromadnaSekce = function (id) {
+        var body = document.getElementById(id);
+        if (body) { body.classList.toggle('skryto'); }
+    };
+
+    window.sfHromadnaSelectAll = function (vybrat) {
+        document.querySelectorAll('.sf-hromadna-chk').forEach(function (chk) {
+            chk.checked = vybrat;
+        });
+        sfAktualizovatPocetVybranych();
+    };
+
+    window.sfAktualizovatPocetVybranych = function () {
+        var pocet = document.querySelectorAll('.sf-hromadna-chk:checked').length;
+        var el    = document.getElementById('sf-hromadna-pocet-vybranych');
+        if (el) { el.textContent = pocet + ' vybráno'; }
+        var btn = document.getElementById('sf-hromadna-archiv-btn');
+        if (btn) { btn.disabled = pocet === 0; }
+    };
+
+    window.sfArchivujVybrane = async function () {
+        var checkboxy = document.querySelectorAll('.sf-hromadna-chk:checked');
+        var cesty = Array.from(checkboxy).map(function (c) { return c.value; });
+
+        if (cesty.length === 0) {
+            alert('Žádné soubory nejsou vybrány.');
+            return;
+        }
+
+        var potvrzeni = 'Archivovat ' + cesty.length + ' vybraných souborů?\n\n'
+            + 'Soubory budou přesunuty do složky _archiv/ s časovou značkou.\n'
+            + 'Tato akce je reverzibilní — soubory lze obnovit z archivu.';
+        if (!confirm(potvrzeni)) { return; }
+
+        var btn = document.getElementById('sf-hromadna-archiv-btn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Archivuji...'; }
+
+        try {
+            var fd = new FormData();
+            fd.append('akce', 'archivujVybrane');
+            fd.append('cesty', JSON.stringify(cesty));
+            fd.append('csrf_token', csrf());
+
+            var odp  = await fetch('/api/soubory_api.php', { method: 'POST', body: fd });
+            var data = await odp.json();
+
+            if (data.status === 'success') {
+                alert(data.zprava || 'Archivace dokončena.');
+                sfZavritHromadna();
+                sfNacist(true);
+            } else {
+                alert('Chyba: ' + (data.zprava || 'Neznámá chyba'));
+                if (btn) { btn.disabled = false; btn.textContent = 'Archivovat vybrané'; }
+            }
+        } catch (err) {
+            alert('Chyba komunikace: ' + err.message);
+            if (btn) { btn.disabled = false; btn.textContent = 'Archivovat vybrané'; }
+        }
+    };
 
     /* --------------------------------------------------------
        Start
