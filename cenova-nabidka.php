@@ -1069,6 +1069,14 @@ if ($reklamaceId > 0) {
             return kodMeny === 'CZK' ? 'Kč' : kodMeny;
         }
 
+        // Kurz EUR → CZK
+        const KURZ_EUR_CZK = 25;
+
+        // Přepočítá cenu z EUR do aktuálně zvolené měny
+        function prevesMenu(cenaEur, kodMeny) {
+            return kodMeny === 'CZK' ? cenaEur * KURZ_EUR_CZK : cenaEur;
+        }
+
         // State
         let kalkulaceData = null;
         let dodatecnePolozky = [];
@@ -1388,6 +1396,9 @@ if ($reklamaceId > 0) {
                 return;
             }
 
+            const mena = document.getElementById('mena').value;
+            const symbol = ziskejSymbolMeny(mena);
+
             // Seskupit položky
             const skupiny = {
                 doprava: { nazev: 'DOPRAVA', polozky: [], celkem: 0 },
@@ -1401,12 +1412,11 @@ if ($reklamaceId > 0) {
                 const skupina = p.skupina || 'prace';
                 if (skupiny[skupina]) {
                     skupiny[skupina].polozky.push(p);
-                    skupiny[skupina].celkem += p.cena * (p.pocet || 1);
+                    skupiny[skupina].celkem += prevesMenu(p.cena, mena) * (p.pocet || 1);
                 }
             });
 
             let html = '';
-            let celkovaCena = 0;
 
             // Renderovat každou skupinu
             Object.keys(skupiny).forEach(key => {
@@ -1416,26 +1426,24 @@ if ($reklamaceId > 0) {
                         <div class="kalkulace-skupina-nadpis">${skupina.nazev}</div>`;
 
                     skupina.polozky.forEach(p => {
-                        const cenaCelkem = p.cena * (p.pocet || 1);
+                        const cenaCelkem = prevesMenu(p.cena, mena) * (p.pocet || 1);
                         html += `<div class="kalkulace-polozka">
                             <span class="kalkulace-polozka-nazev">${p.nazev}</span>
-                            <span class="kalkulace-polozka-cena">${cenaCelkem.toFixed(2)} EUR</span>
+                            <span class="kalkulace-polozka-cena">${cenaCelkem.toFixed(2)} ${symbol}</span>
                         </div>`;
                     });
 
                     html += `<div class="kalkulace-skupina-celkem">
                         <span>Mezisoučet:</span>
-                        <span>${skupina.celkem.toFixed(2)} EUR</span>
+                        <span>${skupina.celkem.toFixed(2)} ${symbol}</span>
                     </div></div>`;
-
-                    celkovaCena += skupina.celkem;
                 }
             });
 
             kalkulacePolozkyEl.innerHTML = html;
             kalkulaceVysledek.classList.add('zobrazit');
 
-            // Uložit do globální proměnné pro odesílání
+            // Uložit do globální proměnné pro odesílání (vždy v EUR jako základ)
             window.kalkulacePolozky = polozky;
         }
 
@@ -1550,19 +1558,19 @@ if ($reklamaceId > 0) {
             let celkem = 0;
             const mena = document.getElementById('mena').value;
 
-            // Z kalkulace
+            // Z kalkulace - ceny jsou v EUR, přepočítáme kurzem
             if (window.kalkulacePolozky) {
                 window.kalkulacePolozky.forEach(p => {
-                    celkem += p.cena * p.pocet;
+                    celkem += prevesMenu(p.cena, mena) * (p.pocet || 1);
                 });
             }
 
-            // Z náhradních dílů
+            // Z náhradních dílů - zadávají se v aktuální měně
             nahradniDily.forEach(d => {
                 celkem += d.cena * d.pocet;
             });
 
-            // Z dodatečných položek
+            // Z dodatečných položek - zadávají se v aktuální měně
             dodatecnePolozky.forEach(p => {
                 celkem += p.cena * p.pocet;
             });
@@ -1570,7 +1578,13 @@ if ($reklamaceId > 0) {
             celkovaCenaEl.textContent = celkem.toFixed(2).replace('.', ',') + ' ' + ziskejSymbolMeny(mena);
         }
 
-        document.getElementById('mena').addEventListener('change', aktualizovatCelkovouCenu);
+        document.getElementById('mena').addEventListener('change', () => {
+            // Při změně měny přerenderovat kalkulaci s novými cenami
+            if (window.kalkulacePolozky && window.kalkulacePolozky.length > 0) {
+                zobrazitKalkulaciVysledek(window.kalkulacePolozky);
+            }
+            aktualizovatCelkovouCenu();
+        });
 
         // ========================================
         // ODESLAT NABÍDKU
