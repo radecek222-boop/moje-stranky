@@ -44,14 +44,14 @@ body {
 .stats-header {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .stats-header h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.35rem;
     color: #333333;
     font-weight: 600;
 }
@@ -65,15 +65,15 @@ body {
 /* Summary karty */
 .stats-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-card {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 0.85rem 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border-left: 4px solid #333333;
 }
@@ -88,10 +88,10 @@ body {
 }
 
 .summary-card-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #333333;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
 }
 
 .summary-card-sub {
@@ -103,16 +103,16 @@ body {
 .stats-filters {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .filters-title {
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: #333333;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .filters-grid {
@@ -264,8 +264,8 @@ body {
 .stats-table-wrapper {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
@@ -371,15 +371,15 @@ body {
 .chart-card {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 0.85rem 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .chart-title {
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: #333333;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .chart-content {
@@ -413,20 +413,20 @@ body {
 /* Loading */
 .loading {
     text-align: center;
-    padding: 2rem;
+    padding: 1rem;
     color: #666;
 }
 
 /* Empty state */
 .empty-state {
     text-align: center;
-    padding: 3rem;
+    padding: 1.5rem;
     color: #999;
 }
 
 .empty-state-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
     opacity: 0.5;
 }
 
@@ -713,13 +713,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 25px;
+    padding: 12px 16px;
     border-bottom: 1px solid #ddd;
 }
 
 .wgs-modal-header h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1rem;
     color: #333;
 }
 
@@ -743,7 +743,7 @@ body {
 }
 
 .wgs-modal-body {
-    padding: 25px;
+    padding: 14px 16px;
 }
   </style>
   <link rel="stylesheet" href="assets/css/poppins-font.css">

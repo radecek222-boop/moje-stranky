@@ -1822,9 +1822,9 @@ function renderCalendar(m, y) {
   const navHeader = document.createElement('div');
   navHeader.className = 'calendar-controls';
   navHeader.innerHTML = `
-    <button class="calendar-nav-btn" data-action="previousMonth">◀ Předchozí</button>
+    <button class="calendar-nav-btn" data-action="previousMonth">◀</button>
     <span class="calendar-month-title">${monthNames[m]} ${y}</span>
-    <button class="calendar-nav-btn" data-action="nextMonth">Další ▶</button>
+    <button class="calendar-nav-btn" data-action="nextMonth">▶</button>
   `;
   grid.appendChild(navHeader);
   

@@ -458,21 +458,21 @@ body {
 
   .cal-day,
   .calendar-day {
-    min-height: 40px;
-    padding: 0.5rem;
-    font-size: 0.9rem;
+    min-height: 30px;
+    padding: 2px;
+    font-size: 0.7rem;
   }
 
   #timeGrid,
   .time-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 0.5rem;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.1rem;
   }
 
   .time-slot {
-    min-height: 44px;
-    padding: 0.5rem;
-    font-size: 0.85rem;
+    min-height: 32px;
+    padding: 0.2rem 0.1rem;
+    font-size: 0.65rem;
   }
 }
 

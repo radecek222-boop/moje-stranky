@@ -638,7 +638,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 .calendar-month-title {
   font-family: "Poppins", sans-serif;
@@ -647,19 +647,23 @@ body {
   color: var(--c-black);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 .calendar-nav-btn {
   background: var(--c-black);
   color: var(--c-white);
   border: none;
-  padding: 0.3rem 0.6rem;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
 }
 .calendar-nav-btn:hover {
   background: var(--c-grey);
@@ -753,6 +757,37 @@ body {
   font-weight: 600;
   color: var(--c-error);
 }
+/* KOLIZE panel */
+.collision-distance-box {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: #111;
+  border: 1px solid #39ff14;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 3px;
+}
+.collision-distance-box strong {
+  color: #39ff14;
+}
+.collision-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+.collision-route {
+  background: rgba(0,0,0,0.08);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
 /* #selectedDateDisplay - styly přesunuty do JS inline */
 .distance-info-panel {
   background: var(--c-bg);
@@ -1094,37 +1129,61 @@ body {
     gap: 0.1rem;
   }
   .cal-day {
-    padding: 0.3rem;
-    font-size: 0.7rem;
-    min-height: 28px;
+    padding: 0.2rem;
+    font-size: 0.65rem;
+    min-height: 26px;
   }
   .calendar-weekdays {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     gap: 0.1rem;
   }
+  .calendar-month-title {
+    font-size: 0.75rem;
+  }
+  .calendar-nav-btn {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.4rem;
+  }
   #timeGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.15rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.1rem;
   }
   .time-slot {
-    font-size: 0.65rem;
-    padding: 0.3rem 0.1rem;
-    min-height: 28px;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.05rem;
+    min-height: 26px;
   }
   .distance-info-panel {
-    padding: 0.8rem;
-    margin: 0.5rem 0;
+    padding: 0.4rem 0.5rem;
+    margin: 0.3rem 0;
+  }
+  .distance-info-title {
+    font-size: 0.55rem;
+    margin-bottom: 0.3rem;
   }
   .distance-stats {
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: 0.3rem;
+  }
+  .distance-stat {
+    padding: 0.3rem;
   }
   .distance-stat-value {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
+  }
+  .distance-stat-label {
+    font-size: 0.5rem;
+    margin-bottom: 0.1rem;
+  }
+  .route-info {
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
   }
   .route-item {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     flex-wrap: nowrap;
+    padding: 0.2rem 0.3rem;
+    margin-bottom: 0.15rem;
   }
   .map-stats {
     grid-template-columns: 1fr;
@@ -1393,12 +1452,12 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* Calendar Days - Touch targets 44px */
+  /* Calendar Days - kompaktní pro mobil */
   .cal-day {
-    min-height: 44px !important;
-    min-width: 44px !important;
-    padding: 8px 4px;
-    font-size: 0.85rem;
+    min-height: 30px !important;
+    min-width: unset !important;
+    padding: 2px;
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1406,16 +1465,29 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Time Slots - Touch targets 48px */
+  /* Time Slots - kompaktní pro mobil, 5 sloupců */
   .time-slot {
-    min-height: 48px !important;
-    padding: 0.75rem 0.5rem;
-    font-size: 0.9rem;
+    min-height: 32px !important;
+    padding: 0.2rem 0.1rem;
+    font-size: 0.65rem;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  #timeGrid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.1rem;
+  }
+
+  /* Nav tlačítka - malé čtverce */
+  .calendar-nav-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    font-size: 0.7rem !important;
   }
 
   /* Modal Close Button 44px */

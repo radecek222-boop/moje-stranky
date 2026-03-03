@@ -264,7 +264,6 @@ if ($initialBootstrapData) {
             <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
             <tr><td class="label">Typ zákazníka<span class="en-label">Customer type</span></td><td>
               <input type="text" id="typ-zakaznika" value="<?= wgs_escape($prefillFields['typ_zakaznika']); ?>" readonly>
-              <div id="ico-upozorneni" class="ico-upozorneni" style="display: <?= (strpos($prefillFields['typ_zakaznika'] ?? '', 'IČO') !== false) ? 'block' : 'none'; ?>;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</div>
             </td></tr>
           </table>
         </div>
@@ -302,6 +301,7 @@ if ($initialBootstrapData) {
           </table>
         </div>
       </div>
+      <div id="ico-upozorneni" class="ico-upozorneni" style="display: <?= (strpos($prefillFields['typ_zakaznika'] ?? '', 'IČO') !== false) ? 'block' : 'none'; ?>;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</div>
     </div>
   </div>
 
