@@ -257,10 +257,16 @@ async function handleAdminLogin() {
       credentials: 'include',
       body: `admin_key=${encodeURIComponent(adminKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
-    
-    const data = await response.json();
-    logger.log('Response:', data);
-    
+
+    const responseText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      showNotification('Server vrátil neplatnou odpověď (HTTP ' + response.status + ')', 'error');
+      return;
+    }
+
     if (data.status === 'success') {
       localStorage.removeItem('admin_login_attempts');
       showNotification('Admin přihlášení úspěšné!', 'success');
@@ -271,7 +277,7 @@ async function handleAdminLogin() {
       let msg = data.message || 'Přihlášení selhalo';
       msg += ` (pokus ${attempts}/3)`;
       showNotification(msg, 'error');
-      
+
       if (attempts >= 3) {
         logger.log('[Login] Recovery mode activated!');
         setTimeout(() => {
@@ -282,8 +288,7 @@ async function handleAdminLogin() {
       }
     }
   } catch (error) {
-    logger.error('Admin login error:', error);
-    showNotification('Chyba při přihlašování', 'error');
+    showNotification('Chyba: ' + (error.message || 'Síťová chyba'), 'error');
   }
 }
 
@@ -328,16 +333,21 @@ async function handleUserLogin() {
       credentials: 'include',
       body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&remember_me=${rememberMe ? '1' : '0'}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
-    
-    const data = await response.json();
+
+    const responseText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      showNotification('Server vrátil neplatnou odpověď (HTTP ' + response.status + ')', 'error');
+      return;
+    }
 
     if (data.status === 'success') {
-      // Zobraz welcome modal s vtipem a předej roli pro správné přesměrování
+      // Zobraz welcome modal s vtipem a predej roli pro spravne presmerovani
       if (typeof window.showWelcomeModal === 'function') {
         showWelcomeModal(data.user.name, data.user.role);
       } else {
-        // Fallback - přímý redirect bez modalu
-        logger.warn('showWelcomeModal není dostupná, přesměruji přímo');
         showNotification('Přihlášení úspěšné!', 'success');
 
         setTimeout(() => {
@@ -353,8 +363,7 @@ async function handleUserLogin() {
       showNotification(data.message || 'Přihlášení selhalo', 'error');
     }
   } catch (error) {
-    logger.error('User login error:', error);
-    showNotification('Chyba při přihlašování', 'error');
+    showNotification('Chyba: ' + (error.message || 'Síťová chyba'), 'error');
   }
 }
 
