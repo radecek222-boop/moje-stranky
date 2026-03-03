@@ -644,6 +644,171 @@ if (!defined('ADMIN_PHP_LOADED')) {
         width: 18px;
     }
 }
+
+/* ============================================================
+   REFERENCE DETAIL – řádky se snippetem (vyuzivaniDetaily)
+   ============================================================ */
+.sf-tree-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.25rem 0.3rem;
+    gap: 0.15rem;
+}
+.sf-ref-radek-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+.sf-ref-soubor {
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: #222;
+}
+.sf-ref-radek {
+    font-size: 0.68rem;
+    color: #999;
+    font-variant-numeric: tabular-nums;
+}
+.sf-ref-snippet {
+    width: 100%;
+}
+.sf-ref-snippet code {
+    display: block;
+    font-family: monospace;
+    font-size: 0.68rem;
+    color: #555;
+    background: #f5f5f5;
+    border-left: 2px solid #ddd;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ============================================================
+   HLOUBKOVÁ ANALÝZA – panel s tlačítkem a výsledky
+   ============================================================ */
+.sf-analyza-btn-wrap {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #eee;
+}
+.sf-btn-analyza {
+    background: #444;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+.sf-btn-analyza:hover { background: #222; }
+.sf-btn-analyza:disabled { background: #999; cursor: wait; }
+
+.sf-analyza-panel {
+    margin-top: 0.6rem;
+}
+.sf-analyza-loading {
+    font-size: 0.75rem;
+    color: #888;
+    padding: 0.4rem;
+}
+.sf-analyza-zaver {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.6rem;
+    background: #f5f5f5;
+    border-left: 3px solid #666;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+.sf-analyza-zaver.nulovy {
+    border-left-color: #333;
+    background: #eee;
+}
+.sf-analyza-sekce-nazev {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #666;
+    margin: 0.6rem 0 0.25rem;
+    padding-bottom: 0.15rem;
+    border-bottom: 1px solid #eee;
+}
+.sf-analyza-prazdno {
+    font-size: 0.73rem;
+    color: #aaa;
+    padding: 0.25rem 0.4rem;
+    font-style: italic;
+}
+.sf-grep-radek {
+    padding: 0.25rem 0.3rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.sf-grep-radek:last-child { border-bottom: none; }
+.sf-grep-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.1rem;
+}
+.sf-grep-soubor {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #222;
+}
+.sf-grep-cislo {
+    font-size: 0.65rem;
+    color: #999;
+}
+.sf-grep-tag {
+    font-size: 0.6rem;
+    background: #333;
+    color: #fff;
+    padding: 0.05rem 0.3rem;
+    border-radius: 2px;
+}
+.sf-grep-snippet code {
+    display: block;
+    font-family: monospace;
+    font-size: 0.67rem;
+    color: #555;
+    background: #f5f5f5;
+    border-left: 2px solid #ccc;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ============================================================
+   NÁHLED SOUBORU
+   ============================================================ */
+.sf-nahlad-pre {
+    font-family: monospace;
+    font-size: 0.67rem;
+    line-height: 1.5;
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
+    padding: 0.5rem;
+    overflow-x: auto;
+    max-height: 280px;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre;
+    color: #333;
+}
+.sf-nahlad-cislo {
+    display: inline-block;
+    min-width: 2.5em;
+    color: #bbb;
+    text-align: right;
+    margin-right: 0.6em;
+    user-select: none;
+}
 </style>
 
 <div class="sf-wrap">
@@ -1032,9 +1197,30 @@ if (!defined('ADMIN_PHP_LOADED')) {
             zavHtml += '<div class="sf-tree-empty">— žádné závislosti</div>';
         }
 
-        // Využíváno v (kdo odkazuje na tento soubor)
-        var vyuHtml = '<div class="sf-detail-label">Využíváno v (' + s.pocetVyuzivani + ')</div>';
-        if (s.vyuzivani && s.vyuzivani.length > 0) {
+        // Využíváno v (kdo odkazuje na tento soubor) – s řádky a snippety
+        var vyuHtml = '<div class="sf-detail-label">Využíváno v (' + s.pocetVyuzivani + ')'
+            + (s.vyuzivani && s.vyuzivani.length > 0 ? ' <span style="font-size:.65rem;color:#888;font-weight:400">— statická analýza</span>' : '')
+            + '</div>';
+        if (s.vyuzivaniDetaily && s.vyuzivaniDetaily.length > 0) {
+            // Zobrazit s přesným řádkem a snippetem
+            s.vyuzivaniDetaily.forEach(function (v, i) {
+                var sym = i === s.vyuzivaniDetaily.length - 1 ? '└' : '├';
+                vyuHtml += '<div class="sf-tree-line sf-tree-detail">'
+                    + '<span class="sf-tree-sym">' + sym + '</span>'
+                    + '<span class="sf-ref-radek-wrap">'
+                    + '<span class="sf-ref-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-ref-radek">:' + esc(v.radek) + '</span>'
+                    + '</span>'
+                    + '<div class="sf-ref-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+            if (s.pocetVyuzivani > s.vyuzivaniDetaily.length) {
+                vyuHtml += '<div class="sf-tree-empty" style="font-style:normal;color:#888">'
+                    + '… a ' + (s.pocetVyuzivani - s.vyuzivaniDetaily.length) + ' dalších referencí'
+                    + '</div>';
+            }
+        } else if (s.vyuzivani && s.vyuzivani.length > 0) {
+            // Fallback – jen jména souborů bez řádků
             s.vyuzivani.forEach(function (v, i) {
                 var sym = i === s.vyuzivani.length - 1 ? '└' : '├';
                 vyuHtml += '<div class="sf-tree-line">'
@@ -1043,7 +1229,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
                     + '</div>';
             });
         } else {
-            vyuHtml += '<div class="sf-tree-empty">— žádné statické reference (viz klasifikace níže)</div>';
+            vyuHtml += '<div class="sf-tree-empty">— žádné statické reference</div>';
         }
 
         // Klasifikace
@@ -1097,6 +1283,16 @@ if (!defined('ADMIN_PHP_LOADED')) {
             klasHtml += '</div>';
         }
 
+        // Hloubková analýza – tlačítko + prázdný panel (naplní se on-demand)
+        var anId    = esc(id) + '_an';
+        var anHtml  = '<div class="sf-analyza-btn-wrap">'
+            + '<button class="sf-btn-analyza" id="' + anId + '_btn" '
+            + 'onclick="sfNacistDetailAnalyzu(\'' + esc(s.cesta) + '\',\'' + esc(id) + '\')">'
+            + 'Prohledat celý projekt (full-text grep)'
+            + '</button>'
+            + '<div class="sf-analyza-panel" id="' + anId + '"></div>'
+            + '</div>';
+
         return '<div class="sf-detail" id="' + esc(id) + '-d">'
             + meta
             + '<div class="sf-detail-cols">'
@@ -1104,6 +1300,7 @@ if (!defined('ADMIN_PHP_LOADED')) {
             + '<div>' + vyuHtml + '</div>'
             + '</div>'
             + klasHtml
+            + anHtml
             + '</div>';
     }
 
@@ -1216,6 +1413,100 @@ if (!defined('ADMIN_PHP_LOADED')) {
             alert('Chyba komunikace: ' + err.message);
         }
     };
+
+    /* --------------------------------------------------------
+       Hloubková analýza – full-text grep + náhled souboru
+       -------------------------------------------------------- */
+    window.sfNacistDetailAnalyzu = async function (cesta, id) {
+        var anId    = id + '_an';
+        var panel   = document.getElementById(anId);
+        var btn     = document.getElementById(anId + '_btn');
+        if (!panel) { return; }
+
+        if (btn) { btn.disabled = true; btn.textContent = 'Prohledávám…'; }
+        panel.innerHTML = '<div class="sf-analyza-loading">Prohledávám celý projekt… (může trvat 5–30 s)</div>';
+
+        try {
+            var odp  = await fetch('/api/soubory_api.php?akce=detail&cesta=' + encodeURIComponent(cesta));
+            if (!odp.ok) { throw new Error('HTTP ' + odp.status); }
+            var data = await odp.json();
+            if (data.status !== 'success') { throw new Error(data.zprava || 'Chyba serveru'); }
+
+            panel.innerHTML = sfRenderDetailAnalyzy(data);
+        } catch (err) {
+            panel.innerHTML = '<div class="sf-analyza-loading" style="color:#c00">Chyba: ' + esc(err.message) + '</div>';
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Prohledat znovu'; }
+        }
+    };
+
+    function sfRenderDetailAnalyzy(data) {
+        var html = '';
+
+        // Celkový závěr
+        var zaver  = data.zaver || '';
+        var nulovy = (data.celkemNalezu || 0) === 0;
+        html += '<div class="sf-analyza-zaver' + (nulovy ? ' nulovy' : '') + '">' + esc(zaver) + '</div>';
+
+        // Speciální soubory (sw.php, manifest.json, .github/workflows/)
+        if (data.specialniKontroly && data.specialniKontroly.length > 0) {
+            html += '<div class="sf-analyza-sekce-nazev">Nalezeno ve speciálních souborech ('
+                + data.specialniKontroly.length + ')</div>';
+            data.specialniKontroly.forEach(function (v) {
+                html += '<div class="sf-grep-radek">'
+                    + '<div class="sf-grep-meta">'
+                    + '<span class="sf-grep-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-grep-cislo">:' + esc(v.radek) + '</span>'
+                    + '<span class="sf-grep-tag">' + esc(v.popis) + '</span>'
+                    + '</div>'
+                    + '<div class="sf-grep-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+        }
+
+        // Full-text grep výsledky
+        html += '<div class="sf-analyza-sekce-nazev">'
+            + 'Full-text grep v celém projektu (' + (data.pocetGrepVysledku || 0) + ' nálezů)'
+            + '</div>';
+
+        if (data.grepVysledky && data.grepVysledky.length > 0) {
+            html += '<div style="font-size:.68rem;color:#888;margin-bottom:.3rem;">'
+                + 'Veškeré výskyty jména souboru jako řetězce — include, URL, fetch(), konfigurace, komentáře…'
+                + '</div>';
+            data.grepVysledky.forEach(function (v) {
+                html += '<div class="sf-grep-radek">'
+                    + '<div class="sf-grep-meta">'
+                    + '<span class="sf-grep-soubor">' + esc(v.soubor) + '</span>'
+                    + '<span class="sf-grep-cislo">:' + esc(v.radek) + '</span>'
+                    + '</div>'
+                    + '<div class="sf-grep-snippet"><code>' + esc(v.snippet) + '</code></div>'
+                    + '</div>';
+            });
+            if ((data.pocetGrepVysledku || 0) >= 60) {
+                html += '<div class="sf-analyza-prazdno">… zobrazeno max. 60 výsledků</div>';
+            }
+        } else {
+            html += '<div class="sf-analyza-prazdno">'
+                + 'Soubor se nevyskytuje jako řetězec v žádném jiném souboru projektu.'
+                + '</div>';
+        }
+
+        // Náhled souboru
+        if (data.nahlad && data.nahlad.radky && data.nahlad.radky.length > 0) {
+            html += '<div class="sf-analyza-sekce-nazev">'
+                + 'Náhled souboru — prvních ' + data.nahlad.radky.length
+                + ' řádků z ' + (data.nahlad.celkemRadku || '?')
+                + '</div>';
+            html += '<pre class="sf-nahlad-pre">';
+            data.nahlad.radky.forEach(function (radek, i) {
+                html += '<span class="sf-nahlad-cislo">' + (i + 1) + '</span>'
+                    + esc(radek) + '\n';
+            });
+            html += '</pre>';
+        }
+
+        return html;
+    }
 
     /* --------------------------------------------------------
        Archivovat všechny označené soubory
