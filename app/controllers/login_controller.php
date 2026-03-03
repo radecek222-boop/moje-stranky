@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/audit_logger.php';
 require_once __DIR__ . '/../../includes/rate_limiter.php';
+require_once __DIR__ . '/../../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
