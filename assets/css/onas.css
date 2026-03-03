@@ -130,17 +130,17 @@ h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url("../img/herman-image04.webp");
+  background-image: url("../img/herman-image01.webp");
   background-size: cover;
   background-position: center 35%;
-  background-attachment: fixed;
+  background-attachment: scroll;
   overflow: hidden;
 }
 .no-webp .hero {
-  background-image: url("../img/herman-image04.jpg");
+  background-image: url("../img/herman-image01.jpg");
   background-size: cover;
   background-position: center 35%;
-  background-attachment: fixed;
+  background-attachment: scroll;
   overflow: hidden;
 }
 .hero::before {

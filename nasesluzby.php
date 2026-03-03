@@ -202,8 +202,6 @@ require_once __DIR__ . '/includes/seo_meta.php';
   </div>
 </section>
 
-</main>
-
 <!-- SEKCE ODKAZŮ NA KONKRÉTNÍ SLUŽBY -->
 <section class="sluzby-odkazy-sekce">
   <div class="sluzby-odkazy-kontejner">
@@ -292,6 +290,8 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Ordina il servizio di posti a sedere">Objednat servis sedačky</a>
   </div>
 </section>
+
+</main>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 

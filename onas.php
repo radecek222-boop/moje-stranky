@@ -28,7 +28,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
   <link rel="preload" href="assets/css/onas.min.css" as="style">
-  <link rel="preload" href="assets/img/herman-image04.jpg" as="image" type="image/jpeg" fetchpriority="high">
+  <link rel="preload" href="assets/img/herman-image01.jpg" as="image" type="image/jpeg" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style -->
   
@@ -44,7 +44,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="stylesheet" href="assets/css/poppins-font.css">
 </head>
 <body>
-  <link rel="preload" as="image" href="assets/img/herman-image04.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/img/herman-image01.webp" fetchpriority="high">
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <!-- ČERNÝ HORNÍ PANEL -->
 
