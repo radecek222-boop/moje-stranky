@@ -120,25 +120,27 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       background-position: center;
       background-attachment: fixed;
       color: white;
-      padding: 100px 20px;
+      padding: 55px 20px;
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
     }
 
     .hero-title {
-      font-size: 3.5em;
-      font-weight: 700;
-      margin: 0 0 15px 0;
-      letter-spacing: -1px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.05em;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
       text-transform: uppercase;
     }
 
     .hero-subtitle {
-      font-size: 1.4em;
-      opacity: 0.95;
-      font-weight: 300;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+      opacity: 0.85;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
     }
 
     .container {
@@ -187,32 +189,32 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     /* ŠIROKÝ ČLÁNEK */
     .siroky-clanek {
       background: white;
-      padding: 35px 40px;
-      margin-bottom: 40px;
-      border: 2px solid #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 22px 28px;
+      margin-bottom: 24px;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       position: relative;
       height: auto;  /* Výška podle obsahu */
     }
 
     .siroky-clanek h2 {
       color: #1a1a1a;
-      font-size: 2em;
-      margin: 0 0 20px 0;
-      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 0 0 14px 0;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      border-bottom: 4px solid #1a1a1a;
-      padding-bottom: 15px;
+      letter-spacing: 0.07em;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 10px;
       font-family: 'Poppins', sans-serif;
     }
 
     .siroky-clanek p {
-      font-size: 1.1em;
-      line-height: 1.8;
+      font-size: 0.9em;
+      line-height: 1.7;
       color: #333;
-      margin: 0 0 15px 0;
+      margin: 0 0 10px 0;
     }
 
     .siroky-clanek a {
@@ -313,20 +315,20 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     .clanek-obsah h2 {
       color: #1a1a1a;
-      font-size: 1.4em;
-      margin: 0 0 15px 0;
-      font-weight: 700;
+      font-size: 1rem;
+      margin: 0 0 10px 0;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      border-bottom: 3px solid #000;
-      padding-bottom: 10px;
+      letter-spacing: 0.06em;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
       font-family: 'Poppins', sans-serif;
     }
 
     .clanek-obsah h3 {
       color: #333333;
-      font-size: 1.2em;
-      margin: 20px 0 12px 0;
+      font-size: 0.95em;
+      margin: 14px 0 8px 0;
       font-weight: 600;
     }
 
@@ -386,20 +388,32 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     @media (max-width: 768px) {
       .hero {
-        padding: 60px 20px;
-      }
-
-      .hero-title {
-        font-size: 2em;
+        padding: 38px 16px;
+        background-attachment: scroll;
       }
 
       .siroky-clanek {
-        padding: 25px 20px;
+        padding: 16px 18px;
       }
 
       .clanek-card {
-        padding: 20px;
+        padding: 14px;
       }
+    }
+
+    /* Prechody mezi strankami */
+    @keyframes stranka-vstup {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body {
+      animation: stranka-vstup 0.35s ease forwards;
+    }
+    body.stranka-odchazi {
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      animation: none;
     }
   </style>
 
@@ -1107,6 +1121,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 <?php endif; ?>
 
 <?php renderHeatmapTracker(); ?>
+<script src="assets/js/page-transitions.min.js" defer></script>
 </body>
 </html>
 

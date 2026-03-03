@@ -295,6 +295,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/page-transitions.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
 </body>
