@@ -152,27 +152,26 @@ body {
   color: var(--c-error);
 }
 .filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--c-border);
 }
 .filter-btn {
-  padding: 0.6rem 1.2rem;
-  background: #ccc; /* Šedé pozadí pro neaktivní filtry */
-  border: 2px solid #999; /* Šedý rámeček */
-  color: #000; /* Černý text */
+  padding: 0.6rem 0.4rem;
+  background: #ccc;
+  border: 2px solid #999;
+  color: #000;
   cursor: pointer;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.2s ease;
   text-align: center;
-  flex: 1;
-  min-width: 120px;
-  font-weight: 500; /* Normální font */
+  white-space: nowrap;
+  font-weight: 500;
 }
 .filter-btn:hover {
   background: #bbb; /* Tmavší šedá na hover */
