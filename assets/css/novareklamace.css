@@ -195,7 +195,7 @@ h1, h2, h3, h4, h5, h6 {
   background-image: url('../img/herman-image01.webp');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   overflow: hidden;
 }
 

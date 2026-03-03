@@ -120,7 +120,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       background-image: url('assets/img/herman-image01.webp');
       background-size: cover;
       background-position: center;
-      background-attachment: fixed;
+      background-attachment: scroll;
       color: white;
       min-height: 38vh;
       display: flex;

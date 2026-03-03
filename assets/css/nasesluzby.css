@@ -133,7 +133,7 @@ h6 {
   background-image: url("../img/herman-image01.webp");
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   overflow: hidden;
 }
 .no-webp .hero {
