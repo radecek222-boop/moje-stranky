@@ -344,6 +344,406 @@ function sestavMapuZavislosti(array $vsechnySoubory, string $koren): array
 }
 
 // ============================================================
+// KLASIFIKAČNÍ ENGINE
+// ============================================================
+
+// Status kódy
+define('KL_POUZIVANO',       'USED');           // Nalezeny důkazy využívání
+define('KL_BEZ_REFERENCI',   'NO_REFS_STATIC'); // Žádné statické reference, runtime chybí
+define('KL_NEJISTE',         'UNCERTAIN');       // Nelze potvrdit – ověřte ručně
+define('KL_BEZPECNE_SMAZAT', 'SAFE_TO_DELETE'); // Prošly VŠECHNY kontroly
+
+// Chráněné adresáře 1. úrovně (dynamické includy, autoload, cron)
+define('KL_CHRANENE_ADRESARE', [
+    'includes', 'config', 'app', 'api', 'cron', 'scripts',
+    'setup', 'migrations', 'lib', 'temp', 'data',
+]);
+
+// Prefixe veřejně dostupných adresářů (statické assety)
+define('KL_VEREJNA_PREFIXE', ['assets/', 'uploads/', 'screen/']);
+
+// Konkrétní soubory vždy USED – kritické systémové soubory
+define('KL_KRITICKE_SOUBORY', [
+    'robots.txt', 'sitemap.xml', 'manifest.json', 'CNAME',
+    'icon192.png', 'icon512.png', 'sw.js', 'sw.php',
+    '.htaccess', 'init.php', 'index.php', 'health.php',
+]);
+
+// Vzory artefaktů: zálohy, dočasné soubory – kandidáti na smazání po ověření
+define('KL_ARTEFAKT_VZORY', [
+    '/\.(bak|old|tmp|archive|backup|orig)$/i',
+    '/~$/',
+    '/\.bak_[a-z0-9_]+$/i',
+    '/_old\.[a-z]+$/i',
+]);
+
+// Minimální stáří souboru pro SAFE_TO_DELETE (dny)
+define('KL_MIN_STARI_DNI', 30);
+
+// Okno runtime auditu (dny)
+define('KL_RUNTIME_OKNO_DNI', 14);
+
+/**
+ * Načte záznamy runtime auditu z JSONL souboru
+ * Formát záznamu: {"ts":1234567890,"cesta":"/assets/js/foo.js","status":200}
+ *
+ * @return list<array{ts:int,cesta:string,status:int}>
+ */
+function nactiRuntimeAudit(string $koren): array
+{
+    $logSoubor = $koren . '/logs/runtime_audit.jsonl';
+    if (!file_exists($logSoubor) || !is_readable($logSoubor)) {
+        return [];
+    }
+
+    $hranice  = time() - (KL_RUNTIME_OKNO_DNI * 86400);
+    $zaznamy  = [];
+    $maxRadku = 50000; // ochrana před obrovskými logy
+    $pocet    = 0;
+
+    $handle = @fopen($logSoubor, 'r');
+    if (!$handle) {
+        return [];
+    }
+
+    while (($radek = fgets($handle)) !== false && $pocet < $maxRadku) {
+        $pocet++;
+        $data = json_decode(trim($radek), true);
+        if (is_array($data) && isset($data['ts'], $data['cesta'])
+            && is_int($data['ts']) && $data['ts'] >= $hranice
+        ) {
+            $zaznamy[] = [
+                'ts'     => $data['ts'],
+                'cesta'  => ltrim($data['cesta'], '/'),
+                'status' => (int)($data['status'] ?? 200),
+            ];
+        }
+    }
+    fclose($handle);
+    return $zaznamy;
+}
+
+/**
+ * Zkontroluje reference v konfiguračních souborech
+ * (composer.json PSR-4 autoload, .github workflows)
+ *
+ * @return list<string> Nalezené konfig reference
+ */
+function zkontrolujKonfigReference(string $cesta, string $nazev, string $koren): array
+{
+    $nalezeno = [];
+
+    // composer.json PSR-4 autoload
+    $composerSoubor = $koren . '/composer.json';
+    if (file_exists($composerSoubor)) {
+        $composer = json_decode(@file_get_contents($composerSoubor), true);
+        if (is_array($composer)) {
+            $mapy = array_merge(
+                $composer['autoload']['psr-4']     ?? [],
+                $composer['autoload-dev']['psr-4'] ?? []
+            );
+            foreach ($mapy as $ns => $dir) {
+                $dir = rtrim((string)$dir, '/') . '/';
+                if (str_starts_with($cesta, $dir)
+                    && strtolower(pathinfo($nazev, PATHINFO_EXTENSION)) === 'php'
+                ) {
+                    $nalezeno[] = 'composer.json (autoload ' . $ns . '→' . $dir . ')';
+                }
+            }
+            // files[] pole v autoloadu
+            foreach ($composer['autoload']['files'] ?? [] as $soubor) {
+                if ($soubor === $cesta || basename($soubor) === $nazev) {
+                    $nalezeno[] = 'composer.json (autoload.files: ' . $soubor . ')';
+                }
+            }
+        }
+    }
+
+    return $nalezeno;
+}
+
+/**
+ * Zjistí, zda soubor odpovídá vzorům artefaktů (zálohy, dočasné soubory)
+ */
+function jeArtefakt(string $nazev): bool
+{
+    foreach (KL_ARTEFAKT_VZORY as $vzor) {
+        if (preg_match($vzor, $nazev)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Sestaví výsledkový array klasifikace
+ *
+ * @param list<array> $rules
+ * @param list<string> $vyuzivaniList
+ */
+function sestavVysledekKlasifikace(
+    string $status,
+    array $rules,
+    int $stariDni,
+    array $vyuzivaniList,
+    bool $runtimeDostupny,
+    int $runtimeHity
+): array {
+    return [
+        'status'   => $status,
+        'reasons'  => $rules,
+        'evidence' => [
+            'staticke_reference_pocet' => count($vyuzivaniList),
+            'staticke_reference'       => array_slice($vyuzivaniList, 0, 10),
+            'runtime_dostupny'         => $runtimeDostupny,
+            'runtime_hity'             => $runtimeHity,
+            'runtime_okno_dni'         => KL_RUNTIME_OKNO_DNI,
+            'stari_dni'                => $stariDni,
+        ],
+    ];
+}
+
+/**
+ * Klasifikuje soubor – vrátí status, pravidla a evidenci.
+ *
+ * Status kódy:
+ *   USED           = nalezeny důkazy využívání
+ *   NO_REFS_STATIC = žádné statické reference, runtime chybí → jen signál
+ *   UNCERTAIN      = nelze potvrdit bezpečnost → výchozí stav nejistoty
+ *   SAFE_TO_DELETE = prošly VŠECHNY kontroly incl. runtime
+ *
+ * @param string       $cesta          Relativní cesta od rootu
+ * @param string       $nazev          Název souboru
+ * @param string       $typ            Typ souboru (php, js, css, ...)
+ * @param int          $zmeneno        Unix timestamp poslední změny
+ * @param int          $pocetVyuzivani Počet souborů odkazujících na tento (statická analýza)
+ * @param list<string> $vyuzivaniList  Které soubory odkazují
+ * @param string       $koren          Absolutní cesta ke kořeni projektu
+ * @param list<array>  $runtimeData    Runtime audit záznamy (prázdné = audit vypnutý)
+ */
+function klasifikovatSoubor(
+    string $cesta,
+    string $nazev,
+    string $typ,
+    int $zmeneno,
+    int $pocetVyuzivani,
+    array $vyuzivaniList,
+    string $koren,
+    array $runtimeData
+): array {
+    $rules    = [];
+    $ted      = time();
+    $stariDni = max(0, (int)(($ted - $zmeneno) / 86400));
+    // Adresář 1. úrovně ('' = root)
+    $adresar  = str_contains($cesta, '/') ? explode('/', $cesta)[0] : '';
+
+    // === R01: Statické reference ===
+    $r01Passed = $pocetVyuzivani === 0;
+    $rules[] = [
+        'rule_id' => 'R01',
+        'nazev'   => 'Statické reference (include/require/src/href/import)',
+        'passed'  => $r01Passed,
+        'details' => $r01Passed
+            ? 'Žádné statické reference nenalezeny ve skenování kódu'
+            : 'Nalezeno ' . $pocetVyuzivani . ' souborů odkazujících na tento soubor: '
+              . implode(', ', array_slice($vyuzivaniList, 0, 5))
+              . (count($vyuzivaniList) > 5 ? ' … a ' . (count($vyuzivaniList) - 5) . ' dalších' : ''),
+        'zdroj'   => 'statická analýza kódu (regex scan include/require/src/href/import)',
+    ];
+
+    if (!$r01Passed) {
+        // Má reference → USED, nepotřebujeme další kontroly
+        return sestavVysledekKlasifikace(
+            KL_POUZIVANO, $rules, $stariDni, $vyuzivaniList, false, 0
+        );
+    }
+
+    // === R02: Kritický/systémový soubor ===
+    $jeKriticky = in_array($nazev, KL_KRITICKE_SOUBORY, true)
+               || in_array($cesta, KL_KRITICKE_SOUBORY, true);
+    $rules[] = [
+        'rule_id' => 'R02',
+        'nazev'   => 'Kritický/systémový soubor (allowlist)',
+        'passed'  => !$jeKriticky,
+        'details' => $jeKriticky
+            ? 'Soubor je na allowlistu kritických souborů (robots.txt, sw.js, init.php, …)'
+            : 'Soubor není na allowlistu kritických souborů',
+        'zdroj'   => 'seznam KL_KRITICKE_SOUBORY',
+    ];
+
+    if ($jeKriticky) {
+        return sestavVysledekKlasifikace(
+            KL_POUZIVANO, $rules, $stariDni, $vyuzivaniList, false, 0
+        );
+    }
+
+    // === R03: Config/build reference (composer autoload, CI) ===
+    $konfigRef = zkontrolujKonfigReference($cesta, $nazev, $koren);
+    $rules[] = [
+        'rule_id' => 'R03',
+        'nazev'   => 'Config/build reference (composer.json autoload, CI workflows)',
+        'passed'  => empty($konfigRef),
+        'details' => empty($konfigRef)
+            ? 'Žádné config/build reference nenalezeny'
+            : 'Nalezena reference v: ' . implode(', ', $konfigRef),
+        'zdroj'   => 'composer.json (autoload/files), .github/workflows/',
+    ];
+
+    if (!empty($konfigRef)) {
+        return sestavVysledekKlasifikace(
+            KL_POUZIVANO, $rules, $stariDni, $vyuzivaniList, false, 0
+        );
+    }
+
+    // === R04: Chráněný adresář ===
+    $jeChraneny = $adresar !== '' && in_array($adresar, KL_CHRANENE_ADRESARE, true);
+    $rules[] = [
+        'rule_id' => 'R04',
+        'nazev'   => 'Chráněný adresář (includes/, config/, app/, api/, cron/, …)',
+        'passed'  => !$jeChraneny,
+        'details' => $jeChraneny
+            ? 'Soubor je v chráněném adresáři "' . $adresar . '/" — může být dynamicky include/autoload/cron, '
+              . 'statická analýza nemusí zachytit všechna volání'
+            : 'Soubor není v chráněném adresáři',
+        'zdroj'   => 'seznam KL_CHRANENE_ADRESARE',
+    ];
+
+    // === R05: Veřejný URL entrypoint (PHP soubor v rootu) ===
+    $jeRootPhp = $typ === 'php' && $adresar === '';
+    $rules[] = [
+        'rule_id' => 'R05',
+        'nazev'   => 'Veřejný URL entrypoint (PHP soubor v rootu – .htaccess clean URL)',
+        'passed'  => !$jeRootPhp,
+        'details' => $jeRootPhp
+            ? 'PHP soubor v rootu je přístupný jako URL (přes .htaccess RewriteRule ^(.+)$ $1.php)'
+            : 'Soubor není PHP entrypoint v rootu',
+        'zdroj'   => '.htaccess rewrite pravidla',
+    ];
+
+    // === R06: Veřejný asset (assets/, uploads/, screen/) ===
+    $jeAsset = false;
+    foreach (KL_VEREJNA_PREFIXE as $prefix) {
+        if (str_starts_with($cesta, $prefix)) {
+            $jeAsset = true;
+            break;
+        }
+    }
+    $rules[] = [
+        'rule_id' => 'R06',
+        'nazev'   => 'Veřejný asset (assets/, uploads/, screen/)',
+        'passed'  => !$jeAsset,
+        'details' => $jeAsset
+            ? 'Soubor je pod veřejnou asset cestou — .htaccess: RewriteRule ^assets/ - [L]. '
+              . 'Může být cachován klientem nebo volán dynamicky (lazy load, SW cache).'
+            : 'Soubor není pod veřejnou asset cestou',
+        'zdroj'   => '.htaccess RewriteRule ^assets/ - [L]',
+    ];
+
+    // Chráněný nebo asset → UNCERTAIN (ne SAFE, nelze říct ani USED jen ze statiky)
+    if ($jeChraneny || $jeAsset) {
+        return sestavVysledekKlasifikace(
+            KL_NEJISTE, $rules, $stariDni, $vyuzivaniList, !empty($runtimeData), 0
+        );
+    }
+
+    // Root PHP → UNCERTAIN (přístupný přes URL, ale bez referencí = pravděpodobně nevyužívaný)
+    if ($jeRootPhp) {
+        return sestavVysledekKlasifikace(
+            KL_NEJISTE, $rules, $stariDni, $vyuzivaniList, !empty($runtimeData), 0
+        );
+    }
+
+    // === R07: Artefakt (záloha/dočasný soubor) ===
+    $artefakt = jeArtefakt($nazev);
+    $rules[] = [
+        'rule_id' => 'R07',
+        'nazev'   => 'Artefakt (záloha/dočasný soubor: .bak, .old, .tmp, …)',
+        'passed'  => $artefakt, // true = jde o artefakt = kandidát na smazání
+        'details' => $artefakt
+            ? 'Soubor odpovídá vzoru artefaktu — pravděpodobně záloha nebo dočasný soubor'
+            : 'Soubor neodpovídá vzorům artefaktů',
+        'zdroj'   => 'seznam KL_ARTEFAKT_VZORY (*.bak, *.old, *.tmp, …)',
+    ];
+
+    // === R08: Runtime audit ===
+    $runtimeDostupny = !empty($runtimeData);
+    $runtimeHity     = 0;
+
+    if ($runtimeDostupny) {
+        $hranice = $ted - (KL_RUNTIME_OKNO_DNI * 86400);
+        foreach ($runtimeData as $hit) {
+            if ($hit['ts'] < $hranice) {
+                continue;
+            }
+            $hitCesta = $hit['cesta'];
+            if ($hitCesta === $cesta
+                || $hitCesta === '/' . $cesta
+                || basename($hitCesta) === $nazev
+                || str_ends_with($hitCesta, '/' . $nazev)
+            ) {
+                $runtimeHity++;
+            }
+        }
+    }
+
+    $rules[] = [
+        'rule_id' => 'R08',
+        'nazev'   => 'Runtime audit (produkční HTTP requesty, ' . KL_RUNTIME_OKNO_DNI . ' dní)',
+        'passed'  => $runtimeDostupny && $runtimeHity === 0,
+        'details' => !$runtimeDostupny
+            ? 'Runtime audit není aktivní — nelze ověřit produkční využití. '
+              . 'Aktivujte runtime audit pro spolehlivou klasifikaci (viz docs/SOUBORY_KLASIFIKACE.md).'
+            : ($runtimeHity > 0
+                ? 'Nalezeno ' . $runtimeHity . ' HTTP requestů v posledních ' . KL_RUNTIME_OKNO_DNI . ' dnech'
+                : 'Žádné HTTP requesty v posledních ' . KL_RUNTIME_OKNO_DNI . ' dnech'),
+        'zdroj'   => $runtimeDostupny ? 'logs/runtime_audit.jsonl' : 'N/A – audit není zapnutý',
+    ];
+
+    if ($runtimeHity > 0) {
+        return sestavVysledekKlasifikace(
+            KL_POUZIVANO, $rules, $stariDni, $vyuzivaniList, true, $runtimeHity
+        );
+    }
+
+    // Bez runtime dat → jen NO_REFS_STATIC (statická analýza nestačí)
+    if (!$runtimeDostupny) {
+        return sestavVysledekKlasifikace(
+            KL_BEZ_REFERENCI, $rules, $stariDni, $vyuzivaniList, false, 0
+        );
+    }
+
+    // === R09: Stáří souboru ===
+    $dostatecneStary = $stariDni >= KL_MIN_STARI_DNI;
+    $rules[] = [
+        'rule_id' => 'R09',
+        'nazev'   => 'Stáří souboru (min. ' . KL_MIN_STARI_DNI . ' dní od poslední změny)',
+        'passed'  => $dostatecneStary || $artefakt,
+        'details' => ($dostatecneStary || $artefakt)
+            ? 'Soubor nebyl změněn ' . $stariDni . ' dní'
+              . ($artefakt ? ' (+ jde o artefakt – stáří prominuto)' : '')
+            : 'Soubor byl změněn před ' . $stariDni . ' dny — příliš čerstvý pro bezpečné smazání',
+        'zdroj'   => 'mtime souboru: ' . date('Y-m-d', $zmeneno),
+    ];
+
+    // === Finální rozhodnutí ===
+    // SAFE_TO_DELETE pouze pokud VŠECHNA pravidla prošla
+    $vseProslo = $r01Passed             // žádné statické reference
+              && !$jeKriticky           // není kritický soubor
+              && empty($konfigRef)      // není v config/build
+              && !$jeChraneny           // není v chráněném adresáři
+              && !$jeRootPhp            // není root PHP entrypoint
+              && !$jeAsset              // není veřejný asset
+              && $runtimeDostupny       // runtime audit dostupný
+              && $runtimeHity === 0     // 0 runtime requestů v okně
+              && ($dostatecneStary || $artefakt); // dostatečně starý NEBO artefakt
+
+    return sestavVysledekKlasifikace(
+        $vseProslo ? KL_BEZPECNE_SMAZAT : KL_NEJISTE,
+        $rules, $stariDni, $vyuzivaniList, true, 0
+    );
+}
+
+// ============================================================
 // ZPRACOVÁNÍ AKCE
 // ============================================================
 
@@ -387,65 +787,89 @@ switch ($akce) {
         }
 
         // Čerstvý sken
-        $zacatek      = microtime(true);
+        $zacatek        = microtime(true);
         $vsechnySoubory = scanSouboru($korenAdresar, $vylouceneAdresare);
-        $graf         = sestavMapuZavislosti($vsechnySoubory, $korenAdresar);
-        $zavislosti   = $graf['zavislosti'];
-        $vyuzivani    = $graf['vyuzivani'];
-        $stavy        = nactiStavSouboru($stavSoubor);
+        $graf           = sestavMapuZavislosti($vsechnySoubory, $korenAdresar);
+        $zavislosti     = $graf['zavislosti'];
+        $vyuzivani      = $graf['vyuzivani'];
+        $stavy          = nactiStavSouboru($stavSoubor);
+        $runtimeData    = nactiRuntimeAudit($korenAdresar);
 
         $vysledek   = [];
         $statistiky = [
-            'celkem'     => 0,
-            'php'        => 0,
-            'js'         => 0,
-            'css'        => 0,
-            'ostatni'    => 0,
-            'bezVyuziti' => 0,
-            'oznaceno'   => 0,
+            'celkem'         => 0,
+            'php'            => 0,
+            'js'             => 0,
+            'css'            => 0,
+            'ostatni'        => 0,
+            'bezVyuziti'     => 0, // zpětná kompatibilita – počet NO_REFS_STATIC
+            'oznaceno'       => 0,
+            'pocetUsed'      => 0,
+            'pocetBezRef'    => 0,
+            'pocetNejiste'   => 0,
+            'pocetBezpecne'  => 0,
+            'runtimeAktivni' => !empty($runtimeData),
         ];
 
         foreach ($vsechnySoubory as $soubor) {
-            $cesta         = $soubor['cesta'];
-            $typ           = ziskejTypSouboru($soubor['nazev']);
-            $sobZavislosti = $zavislosti[$cesta] ?? [];
-            $sobVyuzivani  = $vyuzivani[$cesta] ?? [];
+            $cesta          = $soubor['cesta'];
+            $typ            = ziskejTypSouboru($soubor['nazev']);
+            $sobZavislosti  = $zavislosti[$cesta] ?? [];
+            $sobVyuzivani   = $vyuzivani[$cesta] ?? [];
             $pocetVyuzivani = count($sobVyuzivani);
-            $aktivni       = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
-            $oznaceno      = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
-            $bezpecneSmazat = $pocetVyuzivani === 0;
+            $aktivni        = !isset($stavy[$cesta]) || $stavy[$cesta] !== 'smazat';
+            $oznaceno       = isset($stavy[$cesta]) && $stavy[$cesta] === 'smazat';
+
+            // Klasifikace
+            $klasifikace = klasifikovatSoubor(
+                $cesta,
+                $soubor['nazev'],
+                $typ,
+                $soubor['zmeneno'],
+                $pocetVyuzivani,
+                $sobVyuzivani,
+                $korenAdresar,
+                $runtimeData
+            );
 
             $polozka = [
-                'nazev'          => $soubor['nazev'],
-                'cesta'          => $cesta,
-                'adresar'        => $soubor['adresar'],
-                'typ'            => $typ,
-                'velikost'       => $soubor['velikost'],
-                'velikostText'   => formatovatVelikost($soubor['velikost']),
-                'zmeneno'        => $soubor['zmeneno'],
-                'zavislosti'     => $sobZavislosti,
-                'vyuzivani'      => $sobVyuzivani,
+                'nazev'           => $soubor['nazev'],
+                'cesta'           => $cesta,
+                'adresar'         => $soubor['adresar'],
+                'typ'             => $typ,
+                'velikost'        => $soubor['velikost'],
+                'velikostText'    => formatovatVelikost($soubor['velikost']),
+                'zmeneno'         => $soubor['zmeneno'],
+                'zavislosti'      => $sobZavislosti,
+                'vyuzivani'       => $sobVyuzivani,
                 'pocetZavislosti' => count($sobZavislosti),
-                'pocetVyuzivani' => $pocetVyuzivani,
-                'bezpecneSmazat' => $bezpecneSmazat,
-                'aktivni'        => $aktivni,
-                'oznaceno'       => $oznaceno,
+                'pocetVyuzivani'  => $pocetVyuzivani,
+                'bezpecneSmazat'  => $klasifikace['status'] === KL_BEZPECNE_SMAZAT,
+                'klasifikace'     => $klasifikace,
+                'aktivni'         => $aktivni,
+                'oznaceno'        => $oznaceno,
             ];
 
             $vysledek[] = $polozka;
 
             $statistiky['celkem']++;
-            if ($typ === 'php') {
-                $statistiky['php']++;
-            } elseif ($typ === 'js') {
-                $statistiky['js']++;
-            } elseif ($typ === 'css') {
-                $statistiky['css']++;
-            } else {
-                $statistiky['ostatni']++;
-            }
+            match ($typ) {
+                'php'   => $statistiky['php']++,
+                'js'    => $statistiky['js']++,
+                'css'   => $statistiky['css']++,
+                default => $statistiky['ostatni']++,
+            };
 
-            if ($bezpecneSmazat && in_array($typ, ['php', 'js', 'css'])) {
+            match ($klasifikace['status']) {
+                KL_POUZIVANO       => $statistiky['pocetUsed']++,
+                KL_BEZ_REFERENCI   => $statistiky['pocetBezRef']++,
+                KL_NEJISTE         => $statistiky['pocetNejiste']++,
+                KL_BEZPECNE_SMAZAT => $statistiky['pocetBezpecne']++,
+                default            => null,
+            };
+
+            // zpětná kompatibilita
+            if ($klasifikace['status'] === KL_BEZ_REFERENCI) {
                 $statistiky['bezVyuziti']++;
             }
             if ($oznaceno) {
