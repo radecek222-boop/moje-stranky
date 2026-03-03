@@ -632,12 +632,93 @@ switch ($akce) {
         unset($stavySouboru[$cesta]);
         ulozStavSouboru($stavSoubor, $stavySouboru);
 
-        // Invalidovat cache (soubor byl odstraněn)
+        // Invalidovat cache
         if (file_exists($cacheSoubor)) {
             unlink($cacheSoubor);
         }
 
         echo json_encode(['status' => 'success', 'zprava' => 'Soubor byl trvale smazán.']);
+        break;
+
+    case 'archivovatOznacene':
+        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Neplatný CSRF token']);
+            exit;
+        }
+
+        $stavy = nactiStavSouboru($stavSoubor);
+        $oznaceneCesty = array_keys(array_filter($stavy, fn($v) => $v === 'smazat'));
+
+        if (empty($oznaceneCesty)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Žádné soubory nejsou označeny ke smazání']);
+            exit;
+        }
+
+        // Složka archivu s časovou značkou
+        $casovyRazitko = date('Y-m-d_H-i-s');
+        $archivAdresar = $korenAdresar . '/_archiv/' . $casovyRazitko;
+
+        if (!mkdir($archivAdresar, 0755, true)) {
+            echo json_encode(['status' => 'chyba', 'zprava' => 'Nepodařilo se vytvořit archivní složku']);
+            exit;
+        }
+
+        $uspesne = [];
+        $chyby   = [];
+
+        foreach ($oznaceneCesty as $relativniCesta) {
+            // Bezpečnostní kontrola
+            $relativniCesta = str_replace(['../', '..\\.', '..\\', '..'], '', $relativniCesta);
+            $relativniCesta = ltrim($relativniCesta, '/\\');
+            $absolutniZdroj = realpath($korenAdresar . '/' . $relativniCesta);
+
+            if ($absolutniZdroj === false || strpos($absolutniZdroj, $korenAdresar) !== 0) {
+                $chyby[] = $relativniCesta . ' (neplatná cesta)';
+                continue;
+            }
+
+            if (!file_exists($absolutniZdroj)) {
+                unset($stavy[$relativniCesta]);
+                continue;
+            }
+
+            // Zachovat adresářovou strukturu v archivu
+            $cilAdresar = $archivAdresar . '/' . dirname($relativniCesta);
+            if (dirname($relativniCesta) !== '.' && !is_dir($cilAdresar)) {
+                mkdir($cilAdresar, 0755, true);
+            }
+
+            $absolutniCil = $archivAdresar . '/' . $relativniCesta;
+
+            if (rename($absolutniZdroj, $absolutniCil)) {
+                $uspesne[] = $relativniCesta;
+                unset($stavy[$relativniCesta]);
+            } else {
+                $chyby[] = $relativniCesta . ' (přesun selhal)';
+            }
+        }
+
+        // Uložit aktualizované stavy (bez přesunutých souborů)
+        ulozStavSouboru($stavSoubor, $stavy);
+
+        // Zneplatnit cache
+        if (file_exists($cacheSoubor)) {
+            unlink($cacheSoubor);
+        }
+
+        $zprava = 'Archivováno ' . count($uspesne) . ' souborů do _archiv/' . $casovyRazitko;
+        if (!empty($chyby)) {
+            $zprava .= '. Chyby (' . count($chyby) . '): ' . implode(', ', array_slice($chyby, 0, 3));
+        }
+
+        echo json_encode([
+            'status'       => 'success',
+            'zprava'       => $zprava,
+            'archivovano'  => count($uspesne),
+            'chyby'        => count($chyby),
+            'archivSlozka' => '_archiv/' . $casovyRazitko,
+        ], JSON_UNESCAPED_UNICODE);
         break;
 
     case 'smazatCache':
