@@ -5,30 +5,36 @@ require_once "init.php";
 // Eliminuje race condition s async fetch v csrf-auto-inject.min.js
 $csrfToken = generateCSRFToken();
 
-// FIX: Pokud je uzivatel JIZ PRIHLASEN a ma redirect parametr, presmerovat ho tam
-// SCENAR: photocustomer.php redirectuje na login.php?redirect=photocustomer.php
-// ale technik JE stale prihlasen -> nemel by videt login formular, mel by skocit na photocustomer.php
-if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
-    $redirect = $_GET['redirect'];
-
-    // BEZPECNOST: Whitelist povolenych redirect URLs (ochrana proti open redirect)
-    $allowedRedirects = [
-        'photocustomer.php',
-        'seznam.php',
-        'protokol.php',
-        'statistiky.php',
-        'novareklamace.php',
-        'admin.php'
-    ];
-
-    // Extrahuj jen název souboru (bez path traversal)
-    $redirectFile = basename($redirect);
-
-    if (in_array($redirectFile, $allowedRedirects, true)) {
-        error_log("LOGIN.PHP: Uživatel již přihlášen (user_id: {$_SESSION['user_id']}), redirectuji na: {$redirectFile}");
-        header("Location: {$redirectFile}");
-        exit;
+// Pokud je uzivatel JIZ PRIHLASEN, presmerovat ho na spravnou stranku
+// Zahrnuje automaticke prihlaseni pres remember_me cookie (nastavi init.php)
+if (isset($_SESSION['user_id'])) {
+    // Pokud je explicitni redirect parametr, pouzit ho (s whitelistem)
+    if (isset($_GET['redirect'])) {
+        $allowedRedirects = [
+            'photocustomer.php',
+            'seznam.php',
+            'protokol.php',
+            'statistiky.php',
+            'novareklamace.php',
+            'admin.php'
+        ];
+        $redirectFile = basename($_GET['redirect']);
+        if (in_array($redirectFile, $allowedRedirects, true)) {
+            header("Location: {$redirectFile}");
+            exit;
+        }
     }
+
+    // Presmerovat podle role
+    $role = strtolower(trim($_SESSION['role'] ?? ''));
+    if ($role === 'technik' || $role === 'technician') {
+        header('Location: seznam.php');
+    } elseif (!empty($_SESSION['is_admin'])) {
+        header('Location: admin.php');
+    } else {
+        header('Location: novareklamace.php');
+    }
+    exit;
 }
 ?>
 <!DOCTYPE html>
