@@ -211,7 +211,7 @@ $zemeNazvy = [
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
 
         /* Header */
@@ -219,12 +219,12 @@ $zemeNazvy = [
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid #ddd;
         }
         .header h1 {
-            font-size: 1.75rem;
+            font-size: 1.35rem;
             font-weight: 600;
             color: #333;
         }
@@ -233,17 +233,17 @@ $zemeNazvy = [
             gap: 0.75rem;
         }
         .btn {
-            padding: 0.6rem 1.25rem;
+            padding: 0.4rem 0.9rem;
             border: 1px solid #ccc;
             background: #fff;
             color: #333;
             font-family: 'Poppins', sans-serif;
             font-weight: 500;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .btn:hover, .btn.active {
@@ -256,16 +256,16 @@ $zemeNazvy = [
         /* Období selector */
         .obdobi-selector {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
             background: #fff;
-            padding: 0.5rem;
-            border-radius: 12px;
+            padding: 0.35rem;
+            border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             width: fit-content;
         }
         .obdobi-btn {
-            padding: 0.6rem 1.2rem;
+            padding: 0.4rem 0.85rem;
             border: none;
             background: transparent;
             font-size: 0.8rem;
@@ -284,17 +284,17 @@ $zemeNazvy = [
         /* Metriky grid */
         .metriky-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
         .metrika-card {
             background: #fff;
             border: none;
-            border-radius: 16px;
-            padding: 1.75rem;
+            border-radius: 8px;
+            padding: 1rem;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .metrika-card:hover {
@@ -310,10 +310,10 @@ $zemeNazvy = [
             color: #fff;
         }
         .metrika-hodnota {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 700;
             line-height: 1;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         .metrika-label {
             font-size: 0.75rem;
@@ -326,21 +326,21 @@ $zemeNazvy = [
         .sekce {
             background: #fff;
             border: none;
-            border-radius: 16px;
-            margin-bottom: 1.75rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             overflow: hidden;
         }
         .sekce-header {
             background: linear-gradient(135deg, #444 0%, #222 100%);
             color: #fff;
-            padding: 1rem 1.5rem;
+            padding: 0.6rem 1rem;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             letter-spacing: 0.5px;
         }
         .sekce-content {
-            padding: 1.5rem;
+            padding: 0.85rem;
         }
 
         /* Tabulky */
@@ -349,10 +349,10 @@ $zemeNazvy = [
             border-collapse: collapse;
         }
         th, td {
-            padding: 0.85rem 1rem;
+            padding: 0.45rem 0.7rem;
             text-align: left;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
         }
         th {
             font-weight: 600;
@@ -516,7 +516,7 @@ $zemeNazvy = [
         }
         .ip-form input {
             flex: 1;
-            padding: 0.75rem 1rem;
+            padding: 0.45rem 0.75rem;
             border: 1px solid #444;
             border-radius: 8px;
             font-family: 'Poppins', sans-serif;
@@ -540,7 +540,7 @@ $zemeNazvy = [
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 1rem;
+            padding: 0.45rem 0.75rem;
             border: 1px solid #333;
             font-size: 0.85rem;
             border-radius: 8px;
@@ -593,7 +593,7 @@ $zemeNazvy = [
         .modal-header {
             background: #333;
             color: #fff;
-            padding: 1.25rem 1.5rem;
+            padding: 0.7rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -601,7 +601,7 @@ $zemeNazvy = [
             border-bottom: 1px solid #444;
         }
         .modal-header h3 {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #fff;
         }
@@ -619,7 +619,7 @@ $zemeNazvy = [
             opacity: 1;
         }
         .modal-body {
-            padding: 2rem;
+            padding: 1rem;
             color: #ccc;
         }
 
