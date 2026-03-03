@@ -97,8 +97,6 @@
             }, trvani);
         }
 
-        console.log('[Toast] Zobrazen:', zprava);
-
         return toast;
     }
 
@@ -143,7 +141,5 @@
         zavrit: zavritToast,
         zavritVsechny: zavritVsechny
     };
-
-    console.log('[Toast] WGS Toast inicializovan');
 
 })();

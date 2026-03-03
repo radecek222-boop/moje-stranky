@@ -968,7 +968,7 @@ body {
 
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
-<script src="assets/js/statistiky.js?v=<?= time() ?>" defer></script>
+<script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

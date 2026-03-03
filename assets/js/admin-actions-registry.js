@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    console.log('[AdminActions] Registrace centralizovaných akcí...');
-
     // Globální akce
     Utils.registerAction('reloadPage', () => location.reload());
 
@@ -490,5 +488,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    console.log('[AdminActions] ✓ Všechny akce zaregistrovány');
 });

@@ -48,10 +48,6 @@
      */
     async function inicializovatTracking() {
         try {
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Inicializuji tracking...');
-            }
-
             // 1. Inicializovat relaci
             await inicializovatRelaci();
 
@@ -60,12 +56,6 @@
 
             // 3. Spustit heartbeat
             spustitHeartbeat();
-
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Tracking inicializován úspěšně');
-                console.log('[WGS Analytics V2] Session ID:', sessionId);
-                console.log('[WGS Analytics V2] Fingerprint ID:', fingerprintId);
-            }
 
         } catch (error) {
             console.error('[WGS Analytics V2] Chyba při inicializaci:', error);
@@ -89,9 +79,6 @@
             // Relace je stále aktivní - znovu použít session_id
             sessionId = localStorage.getItem('wgs_session_id');
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Používám existující relaci:', sessionId);
-            }
         } else {
             // Nová relace - vygenerovat nový session_id
             sessionId = 'sess_' + vygeneratNahodnyId();
@@ -99,9 +86,6 @@
             sessionStorage.setItem('wgs_session_start', ted);
             sessionStorage.setItem('wgs_entry_page', window.location.href);
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Vytvořena nová relace:', sessionId);
-            }
         }
 
         // Aktualizovat timestamp poslední aktivity
@@ -189,10 +173,6 @@
                 bot_signals: botSignaly
             };
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Odesílám pageview:', payload);
-            }
-
             const odpoved = await fetch(CONFIG.apiEndpoint, {
                 method: 'POST',
                 headers: {
@@ -204,10 +184,6 @@
             const vysledek = await odpoved.json();
 
             if (vysledek.status === 'success') {
-                if (CONFIG.debug) {
-                    console.log('[WGS Analytics V2] Pageview zaznamenán:', vysledek);
-                }
-
                 // Uložit engagement score pokud je dostupné
                 if (vysledek.data && vysledek.data.session && vysledek.data.session.engagement_score) {
                     sessionStorage.setItem('wgs_engagement_score', vysledek.data.session.engagement_score);
@@ -452,11 +428,6 @@
                 localStorage.setItem('wgs_utm_conversion_path', JSON.stringify(conversionPath));
             }
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] UTM Parameters detected:', utmParams);
-                console.log('[WGS Analytics V2] Conversion Path length:', conversionPath.length);
-            }
-
             return utmParams;
 
         } else {
@@ -622,14 +593,7 @@
             const ted = Date.now();
             localStorage.setItem('wgs_last_activity', ted);
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Heartbeat - aktivita aktualizována');
-            }
         }, CONFIG.heartbeatInterval);
-
-        if (CONFIG.debug) {
-            console.log('[WGS Analytics V2] Heartbeat spuštěn (interval:', CONFIG.heartbeatInterval, 'ms)');
-        }
     }
 
     /**
@@ -640,9 +604,6 @@
             clearInterval(heartbeatIntervalId);
             heartbeatIntervalId = null;
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Heartbeat zastaven');
-            }
         }
     }
 
@@ -693,9 +654,6 @@
             // Uživatel opustil stránku - aktualizovat timestamp
             localStorage.setItem('wgs_last_activity', Date.now());
 
-            if (CONFIG.debug) {
-                console.log('[WGS Analytics V2] Stránka skryta - aktivita uložena');
-            }
         }
     });
 
@@ -792,10 +750,6 @@
                     csrf_token: csrfToken
                 };
 
-                if (CONFIG.debug) {
-                    console.log('[WGS Analytics V2] Tracking conversion:', payload);
-                }
-
                 const odpoved = await fetch('/api/track_conversion.php', {
                     method: 'POST',
                     headers: {
@@ -807,9 +761,6 @@
                 const vysledek = await odpoved.json();
 
                 if (vysledek.status === 'success') {
-                    if (CONFIG.debug) {
-                        console.log('[WGS Analytics V2] Conversion tracked successfully:', vysledek.data);
-                    }
                     return vysledek;
                 } else {
                     console.error('[WGS Analytics V2] Chyba při trackování konverze:', vysledek.message);
@@ -857,8 +808,6 @@
             return;
         }
 
-        console.log('[WGS Analytics V2] Inicializuji Event Tracker...');
-
         EventTracker.init({
             sessionId: sessionId,
             fingerprintId: fingerprintId,
@@ -876,7 +825,6 @@
             idleTimeout: 30000
         });
 
-        console.log('[WGS Analytics V2] Event Tracker inicializován');
     }
 
     // Spustit Event Tracker po inicializaci trackingu (s malým delay)
@@ -905,8 +853,6 @@
         // Určit page index (počet pageviews v current session)
         const pageIndex = parseInt(sessionStorage.getItem('wgs_page_index') || '0');
 
-        console.log('[WGS Analytics V2] Inicializuji Replay Recorder (page_index: ' + pageIndex + ')...');
-
         ReplayRecorder.init({
             sessionId: sessionId,
             pageUrl: window.location.href,
@@ -926,7 +872,6 @@
         // Increment page index pro další stránku
         sessionStorage.setItem('wgs_page_index', pageIndex + 1);
 
-        console.log('[WGS Analytics V2] Replay Recorder inicializován');
     }
 
     // Spustit Replay Recorder po inicializaci trackingu (s delay po Event Trackeru)

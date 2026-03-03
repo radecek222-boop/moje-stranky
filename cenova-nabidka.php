@@ -1055,7 +1055,7 @@ if ($reklamaceId > 0) {
 
     <!-- WGS Toast pro notifikace -->
     <link rel="stylesheet" href="assets/css/wgs-toast.css">
-    <script src="assets/js/wgs-toast.js"></script>
+    <script src="assets/js/wgs-toast.min.js"></script>
 
     <!-- PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

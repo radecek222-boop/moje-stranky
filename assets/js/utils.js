@@ -569,6 +569,47 @@ window.wgsToast = wgsToast;
 window.Utils.wgsToast = wgsToast;
 
 // ========================================
+// HELPER: showNotification - Zobrazeni notifikace v DOM elementu
+// Konsolidovano z login.js, password-reset.js, registration.js, protokol.js
+// ========================================
+function showNotification(message, type = 'info') {
+    // Hledat notifikacni element - ruzne stranky pouzivaji ruzna ID
+    const notification = document.getElementById('notification') || document.getElementById('notif');
+    if (!notification) return;
+
+    notification.textContent = message;
+
+    // Nastavit CSS tridy podle typu
+    const baseClass = notification.id === 'notif' ? 'notif' : 'notification';
+    notification.className = `${baseClass} ${type}`;
+    notification.classList.remove('hidden');
+    notification.classList.add('active');
+    notification.style.opacity = '1';
+
+    const skryjNotifikaci = () => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.classList.add('hidden');
+            notification.classList.remove('active');
+        }, 300);
+    };
+
+    // Click pro okamzite zavreni
+    notification.onclick = skryjNotifikaci;
+
+    // Auto-hide po 3s (error po 5s)
+    if (type !== 'error') {
+        setTimeout(skryjNotifikaci, 3000);
+    } else {
+        setTimeout(skryjNotifikaci, 5000);
+    }
+}
+
+// Export showNotification
+window.showNotification = showNotification;
+window.Utils.showNotification = showNotification;
+
+// ========================================
 // HELPER: toBase64 - Convert Blob to Base64
 // Step 134: Centralized from photocustomer.js, protokol.js
 // ========================================

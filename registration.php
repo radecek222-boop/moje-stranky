@@ -91,6 +91,7 @@ $csrfToken = generateCSRFToken();
 </main>
 
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <script src="assets/js/registration.min.js" defer></script>
 

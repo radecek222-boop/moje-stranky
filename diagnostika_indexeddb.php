@@ -147,7 +147,7 @@
 
 </div>
 
-<script src="assets/js/photo-storage-db.js"></script>
+<script src="assets/js/photo-storage-db.min.js"></script>
 <script>
     // Načíst všechny fotky z IndexedDB
     async function nactiVsechnyFotky() {

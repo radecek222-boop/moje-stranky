@@ -105,6 +105,4 @@
         }
     });
 
-    console.log('WGS Analytics Tracker loaded');
-
 })();

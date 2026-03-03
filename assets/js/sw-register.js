@@ -17,7 +17,6 @@
       await navigator.serviceWorker.register(SW_PATH, {
         scope: '/'
       });
-      console.log('[PWA] Service Worker registrován');
     } catch (error) {
       console.error('[PWA] Chyba registrace SW:', error);
     }

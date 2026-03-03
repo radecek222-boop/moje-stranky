@@ -152,21 +152,7 @@ function goBack() {
 }
 
 // ============================================================
-// NOTIFICATIONS
+// NOTIFICATIONS - showNotification() je definovana centralne v utils.js
 // ============================================================
-function showNotification(message, type = 'info') {
-  const notification = document.getElementById('notification');
-  if (!notification) return;
-  
-  notification.textContent = message;
-  notification.className = `notification ${type}`;
-  notification.classList.remove('hidden');
-  
-  if (type !== 'error') {
-    setTimeout(() => {
-      notification.classList.add('hidden');
-    }, 3000);
-  }
-}
 
 logger.log('Password reset system loaded');

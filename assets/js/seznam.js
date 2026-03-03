@@ -1472,17 +1472,13 @@ function sanitizujZpravu(zprava) {
 
 // Generování SPD stringu pro QR platbu
 function generujSpdString(ucet, castka, vs, cisloObj, jmeno) {
-  console.log('[QR] Vstupní údaje - účet:', ucet, 'částka:', castka, 'vs:', vs, 'obj:', cisloObj, 'jméno:', jmeno);
-
   // Pokud přijde účet ve formátu 188784838/0300, konvertuj na IBAN
   let cleanIban = ucet;
   if (ucet && ucet.includes('/')) {
     const parts = ucet.split('/');
-    console.log('[QR] Konvertuji účet', parts[0], 'banka', parts[1]);
     cleanIban = convertToIBAN(parts[0], parts[1]);
   } else {
     cleanIban = ucet.replace(/\s/g, '').toUpperCase();
-    console.log('[QR] Použití přímo IBAN:', cleanIban);
   }
 
   // Částka - vždy 2 desetinná místa s tečkou
@@ -1494,11 +1490,6 @@ function generujSpdString(ucet, castka, vs, cisloObj, jmeno) {
   // SPAYD formát s MSG
   const spd = `SPD*1.0*ACC:${cleanIban}*AM:${amountStr}*CC:CZK*MSG:${zprava}`;
 
-  console.log('[QR] === VÝSLEDNÝ SPD STRING ===');
-  console.log('[QR]', spd);
-  console.log('[QR] IBAN:', cleanIban, '(délka:', cleanIban.length, ')');
-  console.log('[QR] Částka:', amountStr, 'CZK');
-  console.log('[QR] Zpráva:', zprava);
   return spd;
 }
 
@@ -1546,7 +1537,6 @@ function convertToIBAN(account, bankCode) {
     throw new Error(`Neplatná délka IBAN: ${iban.length} (očekáváno 24)`);
   }
 
-  console.log('[QR] Konverze účtu:', account, '/', bankCode, '→', iban);
   return iban;
 }
 
@@ -3787,27 +3777,18 @@ async function addNote(orderId, text, audioBlob = null) {
 }
 
 async function deleteNote(noteId, orderId) {
-  console.log('[deleteNote] Zacinam mazat poznamku ID:', noteId);
-
   if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
-    console.log('[deleteNote] Uzivatel zrusil');
     return;
   }
 
-  console.log('[deleteNote] Uzivatel potvrdil, pripravuji request...');
-
   try {
     const csrfToken = await getCSRFToken();
-    console.log('[deleteNote] CSRF token:', csrfToken ? 'OK (' + csrfToken.substring(0, 10) + '...)' : 'CHYBI!');
 
     // FIX: Pouzit URLSearchParams misto FormData - spolehlivejsi pro Safari
     const params = new URLSearchParams();
     params.append('action', 'delete');
     params.append('note_id', noteId);
     params.append('csrf_token', csrfToken);
-
-    console.log('[deleteNote] Params pripraveny:', params.toString().substring(0, 50) + '...');
-    console.log('[deleteNote] Odesilam POST na /api/notes_api.php...');
 
     const response = await fetch('/api/notes_api.php', {
       method: 'POST',
@@ -3816,8 +3797,6 @@ async function deleteNote(noteId, orderId) {
       },
       body: params
     });
-
-    console.log('[deleteNote] Response status:', response.status, response.statusText);
 
     const data = await response.json();
 
@@ -4491,8 +4470,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // === ADMIN: ZMĚNA STAVU ZAKÁZKY ===
 async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
-  console.log('[Admin] zmenitStavZakazky voláno:', { reklamaceId, novyStav, zakaznikEmail });
-
   if (!reklamaceId || !novyStav) {
     console.error('[Admin] Chybí povinné parametry:', { reklamaceId, novyStav });
     wgsToast.error('Chybí ID nebo nový stav');

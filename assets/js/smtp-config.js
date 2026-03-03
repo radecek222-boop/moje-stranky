@@ -5,28 +5,7 @@
 
 let smtpConfigData = {};
 
-// Helper pro zobrazení notifikací
-function showNotification(type, message) {
-    // Vytvořit toast notifikaci
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed; top: 20px; right: 20px; padding: 15px 20px;
-        border-radius: 4px; color: white; font-family: 'Poppins', sans-serif;
-        font-size: 14px; z-index: 10000; max-width: 350px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-
-    const colors = { success: '#28a745', error: '#dc3545', warning: '#ffc107', info: '#17a2b8' };
-    toast.style.backgroundColor = colors[type] || colors.info;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
+// Notifikace pouzivaji centralni wgsToast z utils.js
 
 // Načíst SMTP konfiguraci
 async function loadSmtpConfig() {
@@ -54,11 +33,11 @@ async function loadSmtpConfig() {
             document.getElementById('smtp_from_name').value = smtpConfigData.smtp_from_name || 'White Glove Service';
         } else {
             console.error('Chyba při načítání SMTP konfigurace:', result.message);
-            showNotification('error', 'Chyba při načítání SMTP konfigurace: ' + result.message);
+            wgsToast.error( 'Chyba při načítání SMTP konfigurace: ' + result.message);
         }
     } catch (error) {
         console.error('Load SMTP config error:', error);
-        showNotification('error', 'Chyba při načítání SMTP konfigurace');
+        wgsToast.error( 'Chyba při načítání SMTP konfigurace');
     }
 }
 
@@ -80,12 +59,12 @@ async function saveSmtpConfig() {
 
     // Validace
     if (!smtpData.smtp_host) {
-        showNotification('warning', 'Vyplňte SMTP server');
+        wgsToast.warning( 'Vyplňte SMTP server');
         return;
     }
 
     if (!smtpData.smtp_username) {
-        showNotification('warning', 'Vyplňte uživatelské jméno');
+        wgsToast.warning( 'Vyplňte uživatelské jméno');
         return;
     }
 
@@ -113,13 +92,13 @@ async function saveSmtpConfig() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            showNotification('success', 'SMTP konfigurace byla uložena');
+            wgsToast.success( 'SMTP konfigurace byla uložena');
         } else {
-            showNotification('error', 'Chyba: ' + result.message);
+            wgsToast.error( 'Chyba: ' + result.message);
         }
     } catch (error) {
         console.error('Save SMTP config error:', error);
-        showNotification('error', 'Chyba při ukládání SMTP konfigurace');
+        wgsToast.error( 'Chyba při ukládání SMTP konfigurace');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = originalText;
@@ -138,7 +117,7 @@ async function testSmtpConnection() {
         const csrfToken = await getCSRFToken();
 
         if (!csrfToken) {
-            showNotification('error', 'CSRF token nebyl nalezen - session problém v Safari iframe');
+            wgsToast.error( 'CSRF token nebyl nalezen - session problém v Safari iframe');
             throw new Error('CSRF token nebyl nalezen');
         }
 
@@ -158,7 +137,7 @@ async function testSmtpConnection() {
         if (response.status === 403) {
             const errorData = await response.json();
             console.error('403 Error details:', errorData);
-            showNotification('error', `CSRF validace selhala: ${JSON.stringify(errorData.debug || {})}`);
+            wgsToast.error( `CSRF validace selhala: ${JSON.stringify(errorData.debug || {})}`);
             throw new Error(`HTTP 403 - ${errorData.message || 'CSRF validation failed'}`);
         }
 
@@ -176,18 +155,18 @@ async function testSmtpConnection() {
         } catch (parseError) {
             console.error('JSON parse failed:', parseError);
             console.error('Full response:', responseText);
-            showNotification('error', `Server vrátil neplatnou odpověď (ne JSON). Zkontrolujte konzoli pro detaily.`);
+            wgsToast.error( `Server vrátil neplatnou odpověď (ne JSON). Zkontrolujte konzoli pro detaily.`);
             throw new Error(`Invalid JSON response: ${parseError.message}`);
         }
 
         if (result.status === 'success') {
-            showNotification('success', result.message);
+            wgsToast.success( result.message);
         } else {
-            showNotification('error', 'Test selhal: ' + result.message);
+            wgsToast.error( 'Test selhal: ' + result.message);
         }
     } catch (error) {
         console.error('Test SMTP error:', error);
-        showNotification('error', 'Chyba při testování SMTP připojení');
+        wgsToast.error( 'Chyba při testování SMTP připojení');
     } finally {
         testBtn.disabled = false;
         testBtn.textContent = originalText;
