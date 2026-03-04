@@ -1263,8 +1263,8 @@ async function showDetail(recordOrId) {
 
     // Technické funkce — ne pro prodejce
     const technickaFunkce = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
     ` : '';
 
     // Tisk zakázky — admin a prodejce
