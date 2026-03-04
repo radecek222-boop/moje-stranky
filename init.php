@@ -220,6 +220,31 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 }
 
+// ============================================================
+// MULTI-TENANT: Inicializace tenant kontextu
+// Aktivní pouze pokud byl spuštěn migrace_multi_tenant.php
+// ============================================================
+require_once INCLUDES_PATH . '/TenantManager.php';
+if (function_exists('getDbConnection')) {
+    try {
+        $pdo = getDbConnection();
+        TenantManager::getInstance()->inicializovat($pdo);
+    } catch (Exception $e) {
+        // Tenant tabulka neexistuje → výchozí tenant ID=1, bez přerušení
+        error_log('TenantManager init přeskočen: ' . $e->getMessage());
+    }
+    unset($pdo);
+}
+
+/**
+ * Vrátí aktuální tenant ID (shortcut pro TenantManager::getInstance()->getTenantId())
+ * Výchozí hodnota 1 zajišťuje zpětnou kompatibilitu před migrací.
+ */
+function tenantId(): int
+{
+    return TenantManager::getInstance()->getTenantId();
+}
+
 // Helper function to include files from different directories
 function load_controller($filename) {
     $path = CONTROLLERS_PATH . '/' . $filename;
