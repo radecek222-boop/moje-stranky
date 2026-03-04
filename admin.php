@@ -206,6 +206,13 @@ if (!$embedMode && $activeTab === 'dashboard'):
             </div>
         </div>
 
+        <div class="cc-radek" data-href="api-docs.php" data-target="_blank">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="API Dokumentace" data-lang-en="API Documentation" data-lang-it="Documentazione API">API Dokumentace</div>
+                <div class="cc-radek-popis" data-lang-cs="Přehled všech API endpointů, akcí a autorizace (63 endpointů)" data-lang-en="Overview of all API endpoints, actions and authorization (63 endpoints)" data-lang-it="Panoramica di tutti gli endpoint API, azioni e autorizzazione (63 endpoint)">Přehled všech API endpointů, akcí a autorizace (63 endpointů)</div>
+            </div>
+        </div>
+
         <div class="cc-radek" data-href="admin.php?tab=admin_soubory">
             <div class="cc-radek-info">
                 <div class="cc-radek-nazev" data-lang-cs="ROOT Soubory" data-lang-en="ROOT Files" data-lang-it="File ROOT">ROOT Soubory</div>
