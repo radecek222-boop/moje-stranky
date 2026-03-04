@@ -1302,7 +1302,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
+        <button class="detail-btn" style="background:#dc3545;color:#fff;border:none;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
