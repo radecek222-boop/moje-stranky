@@ -1177,7 +1177,7 @@ function createCustomerHeader() {
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
     const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
@@ -1190,10 +1190,10 @@ function createCustomerHeader() {
         ${pill('done',           'HOTOVO', '#39ff14', '#000')}
       </div>
       <div style="display:flex;gap:0.2rem;width:100%;">
-        ${pillCN('cn_poslana',      'Poslána CN')}
-        ${pillCN('cn_odsouhlasena', 'Odsouhlasena')}
-        ${pillCN('cn_cekame_nd',    'Čekáme ND')}
-        ${pillCN('cn_zamitnuta',    'Zamítnuta')}
+        ${pillCN('cn_poslana',      'Pos.CN')}
+        ${pillCN('cn_odsouhlasena', 'Odsouh.')}
+        ${pillCN('cn_cekame_nd',    'Čeká ND')}
+        ${pillCN('cn_zamitnuta',    'Zamítnu.')}
       </div>
     </div>
   ` : status.text;
