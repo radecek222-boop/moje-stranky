@@ -1145,6 +1145,22 @@ document.addEventListener('alpine:init', () => {
       const overlay = document.getElementById('detailOverlay');
       if (overlay) {
         overlay.classList.add('active');
+
+        // Vycentrovat modal na desktopu
+        if (window.innerWidth >= 769) {
+          overlay.style.display       = 'flex';
+          overlay.style.alignItems    = 'center';
+          overlay.style.justifyContent = 'center';
+          overlay.style.padding       = '1.5rem';
+          const obsah = overlay.querySelector('.modal-content');
+          if (obsah) {
+            obsah.style.maxWidth   = '580px';
+            obsah.style.width      = '100%';
+            obsah.style.maxHeight  = '88vh';
+            obsah.style.overflowY  = 'auto';
+            obsah.style.margin     = '0';
+          }
+        }
       }
       // Scroll lock přes centralizovanou utilitu
       if (window.scrollLock) {
