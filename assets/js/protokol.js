@@ -611,7 +611,7 @@ function inicializovatFullscreenCanvas(canvas) {
   };
 
   // Nastavit styl čáry
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = 'var(--wgs-black)';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1485,7 +1485,7 @@ async function generateProtocolPDF() {
 
   const canvas = await html2canvas(clone, {
     scale: 3,
-    backgroundColor: "#fff",
+    backgroundColor: "var(--wgs-white)",
     useCORS: true,
     logging: false,
     imageTimeout: 0,
@@ -3783,7 +3783,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Nastavit styl čáry
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = 'var(--wgs-black)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';

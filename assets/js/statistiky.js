@@ -713,7 +713,7 @@ async function exportovatPDF() {
                 </thead>
                 <tbody>
                     ${zakazky.map((z, idx) => `
-                        <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f5f5f5'};">
+                        <tr style="background: ${idx % 2 === 0 ? 'var(--wgs-white)' : 'var(--c-success-bg)'};">
                             <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.cislo_reklamace || '-'}</td>
                             <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.jmeno_zakaznika || '-'}</td>
                             <td style="padding: 3px; border: 1px solid #ddd; font-size: 8px;">${z.adresa || '-'}</td>
@@ -760,7 +760,7 @@ async function exportovatPDF() {
         // Renderovat pomocí html2canvas
         const canvas = await html2canvas(pdfContainer, {
             scale: 2,
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--wgs-white)',
             useCORS: true,
             logging: false
         });

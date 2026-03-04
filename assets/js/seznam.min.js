@@ -41,7 +41,7 @@ function showToast(message, type = 'info') {
     position: fixed;
     top: 80px;
     right: 20px;
-    background: ${type === 'success' ? '#333' : type === 'error' ? '#666' : '#333'};
+    background: ${type === 'success' ? 'var(--wgs-gray-33)' : type === 'error' ? 'var(--wgs-gray-66)' : 'var(--wgs-gray-33)'};
     color: white;
     padding: 16px 24px;
     border-radius: 4px;
@@ -1439,8 +1439,8 @@ function regenerovatQrKod() {
         text: spdString,
         width: 220,
         height: 220,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        colorDark: 'var(--wgs-black)',
+        colorLight: 'var(--wgs-white)',
         correctLevel: QRCode.CorrectLevel.L
       });
     }
@@ -1881,7 +1881,7 @@ function renderCalendar(m, y) {
       el.title = 'Nelze vybrat minulé datum';
       el.style.opacity = '0.3';
       el.style.cursor = 'not-allowed';
-      el.style.backgroundColor = '#f0f0f0';
+      el.style.backgroundColor = 'var(--wgs-gray-f0)';
     } else if (occupiedDays.has(d)) {
       el.classList.add('occupied');
       el.title = 'Tento den má již nějaké termíny';
@@ -3239,7 +3239,7 @@ async function zobrazKnihovnuPDF(claimId) {
                  style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
                         background: #222; color: #fff; font-size: 1rem; margin-bottom: 20px;
                         box-sizing: border-box; outline: none;"
-                 onfocus="this.style.borderColor='#666'" onblur="this.style.borderColor='#444'">
+                 onfocus="this.style.borderColor='var(--wgs-gray-66)'" onblur="this.style.borderColor='var(--wgs-gray-44)'">
           <div style="display: grid; gap: 10px;">
             <button type="button" class="wgs-prompt-btn-potvrdit" style="padding: 12px 24px; border: none;
                         background: #28a745; color: #fff; border-radius: 8px; cursor: pointer;
@@ -5334,7 +5334,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.stopPropagation();
     dragCounter++;
     dropOverlay.classList.remove('hidden');
-    content.style.background = '#252525';
+    content.style.background = 'var(--wgs-gray-25)';
   });
 
   content.addEventListener('dragleave', (e) => {
@@ -5343,7 +5343,7 @@ async function zobrazVideotekaArchiv(claimId) {
     dragCounter--;
     if (dragCounter === 0) {
       dropOverlay.classList.add('hidden');
-      content.style.background = '#1a1a1a';
+      content.style.background = 'var(--wgs-darkest)';
     }
   });
 
@@ -5357,7 +5357,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.stopPropagation();
     dragCounter = 0;
     dropOverlay.classList.add('hidden');
-    content.style.background = '#1a1a1a';
+    content.style.background = 'var(--wgs-darkest)';
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
@@ -5593,14 +5593,14 @@ function vytvorVideoKartu(video, claimId) {
 
   // Kdo přidal video (hlavní řádek) - menší na mobilu
   const autorRow = document.createElement('div');
-  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; color: ${isMobile ? '#aaa' : '#fff'};`;
+  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; color: ${isMobile ? 'var(--wgs-gray-aa)' : 'var(--wgs-white)'};`;
   if (video.uploader_email) {
     const emailKratky = video.uploader_email.split('@')[0];
     autorRow.textContent = emailKratky;
     autorRow.title = video.uploader_email;
   } else {
     autorRow.textContent = 'Admin';
-    autorRow.style.color = '#888';
+    autorRow.style.color = 'var(--wgs-gray-88)';
   }
 
   // Velikost a datum (sekundární řádek) - menší na mobilu
@@ -5945,7 +5945,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         progressFill.style.width = '100%';
         progressFill.textContent = '100%';
         statusText.textContent = 'Hotovo!';
-        progressFill.style.background = '#333';
+        progressFill.style.background = 'var(--wgs-gray-33)';
 
         // Neonový toast pro úspěšný upload
         if (typeof WGSToast !== 'undefined') {
@@ -5969,7 +5969,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
 
     } catch (error) {
       logger.error('[Videotéka] Chyba při uploadu:', error);
-      progressFill.style.background = '#c33';
+      progressFill.style.background = 'var(--c-progress-red)';
       statusText.textContent = 'Chyba: ' + error.message;
       btnNahrat.disabled = false;
       btnZrusit.disabled = false;
@@ -6082,7 +6082,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       progressBarInner.style.width = '100%';
       progressBarInner.textContent = '100%';
       progressStatus.textContent = 'Hotovo!';
-      progressBarInner.style.background = '#333';
+      progressBarInner.style.background = 'var(--wgs-gray-33)';
 
       // Neonový toast pro úspěšný upload
       if (typeof WGSToast !== 'undefined') {
@@ -6104,7 +6104,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
 
   } catch (error) {
     logger.error('[Videotéka] Chyba při drag & drop uploadu:', error);
-    progressBarInner.style.background = '#c33';
+    progressBarInner.style.background = 'var(--c-progress-red)';
     progressBarInner.style.width = '100%';
     progressStatus.textContent = 'Chyba: ' + error.message;
     showToast('Chyba při nahrávání videa: ' + error.message, 'error');

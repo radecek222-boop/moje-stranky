@@ -332,7 +332,7 @@ function vykreslitGraf() {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = '14px Poppins';
-        ctx.fillStyle = '#999';
+        ctx.fillStyle = 'var(--wgs-light-grey)';
         ctx.textAlign = 'center';
         ctx.fillText('Graf se nepodařilo načíst. Zkuste obnovit stránku (F5).', canvas.width / 2, canvas.height / 2);
         return;
@@ -344,7 +344,7 @@ function vykreslitGraf() {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = '14px Poppins';
-        ctx.fillStyle = '#999';
+        ctx.fillStyle = 'var(--wgs-light-grey)';
         ctx.textAlign = 'center';
         ctx.fillText('Žádná data k zobrazení', canvas.width / 2, canvas.height / 2);
         return;
@@ -368,7 +368,7 @@ function vykreslitGraf() {
                 {
                     label: 'Celkem návštěv',
                     data: visits,
-                    borderColor: '#3b82f6',
+                    borderColor: 'var(--c-chart-blue)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true
@@ -376,7 +376,7 @@ function vykreslitGraf() {
                 {
                     label: 'Unikátní návštěvníci',
                     data: unique,
-                    borderColor: '#10b981',
+                    borderColor: 'var(--c-chart-green)',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: true

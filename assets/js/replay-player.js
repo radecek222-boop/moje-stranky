@@ -278,13 +278,13 @@
             ctx.fill();
 
             // Inner circle (grayscale per color policy)
-            ctx.fillStyle = '#666';
+            ctx.fillStyle = 'var(--wgs-gray-66)';
             ctx.beginPath();
             ctx.arc(x, y, 8, 0, Math.PI * 2);
             ctx.fill();
 
             // White dot
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = 'var(--wgs-white)';
             ctx.beginPath();
             ctx.arc(x, y, 3, 0, Math.PI * 2);
             ctx.fill();
@@ -297,7 +297,7 @@
             const ctx = this.state.ctx;
 
             // Ripple effect (grayscale per color policy)
-            ctx.strokeStyle = '#888';
+            ctx.strokeStyle = 'var(--wgs-gray-88)';
             ctx.lineWidth = 3;
 
             for (let i = 1; i <= 3; i++) {

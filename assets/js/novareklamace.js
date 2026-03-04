@@ -283,7 +283,7 @@ const WGS = {
               `;
 
               div.addEventListener('mouseenter', () => {
-                div.style.background = '#f0f7ff';
+                div.style.background = 'var(--c-light-blue-2)';
                 div.style.transform = 'translateX(4px)';
               });
 
@@ -365,7 +365,7 @@ const WGS = {
               `;
 
               div.addEventListener('mouseenter', () => {
-                div.style.background = '#f0f7ff';
+                div.style.background = 'var(--c-light-blue-2)';
                 div.style.transform = 'translateX(4px)';
               });
 
@@ -471,7 +471,7 @@ const WGS = {
 
     // Nakreslit trasu na mapu pomocí WGSMap
     WGSMap.drawRoute(coordinates, {
-      color: '#2563eb',
+      color: 'var(--c-link-blue)',
       weight: 4,
       opacity: 0.7,
       layerId: 'route',
@@ -526,8 +526,8 @@ const WGS = {
       if (cisloInput) {
         cisloInput.setAttribute('readonly', 'readonly');
         cisloInput.value = 'POZ (automaticky)';
-        cisloInput.style.backgroundColor = '#e9e9e9';
-        cisloInput.style.color = '#666';
+        cisloInput.style.backgroundColor = 'var(--c-active)';
+        cisloInput.style.color = 'var(--wgs-gray-66)';
         cisloInput.style.cursor = 'not-allowed';
         cisloInput.style.fontStyle = 'italic';
         cisloInput.style.pointerEvents = 'none';
@@ -537,7 +537,7 @@ const WGS = {
       if (datumProdejeInput) {
         datumProdejeInput.value = 'nevyplňuje se';
         datumProdejeInput.readOnly = true;
-        datumProdejeInput.style.backgroundColor = '#f5f5f5';
+        datumProdejeInput.style.backgroundColor = 'var(--c-success-bg)';
         datumProdejeInput.style.cursor = 'not-allowed';
         datumProdejeInput.classList.add('disabled-field');
       }
@@ -545,7 +545,7 @@ const WGS = {
       if (datumReklamaceInput) {
         datumReklamaceInput.value = 'nevyplňuje se';
         datumReklamaceInput.readOnly = true;
-        datumReklamaceInput.style.backgroundColor = '#f5f5f5';
+        datumReklamaceInput.style.backgroundColor = 'var(--c-success-bg)';
         datumReklamaceInput.style.cursor = 'not-allowed';
         datumReklamaceInput.classList.add('disabled-field');
       }
@@ -553,7 +553,7 @@ const WGS = {
       if (doplnujiciInfoTextarea) {
         doplnujiciInfoTextarea.value = 'nevyplňuje se';
         doplnujiciInfoTextarea.readOnly = true;
-        doplnujiciInfoTextarea.style.backgroundColor = '#f5f5f5';
+        doplnujiciInfoTextarea.style.backgroundColor = 'var(--c-success-bg)';
         doplnujiciInfoTextarea.style.cursor = 'not-allowed';
       }
       
@@ -571,8 +571,8 @@ const WGS = {
       
       if (modeInfo) {
         modeInfo.classList.remove('hidden');
-        modeInfo.style.borderLeftColor = '#006600';
-        modeInfo.style.background = '#f0fff0';
+        modeInfo.style.borderLeftColor = 'var(--c-dark-green)';
+        modeInfo.style.background = 'var(--c-light-green)';
         document.getElementById('modeTitle').textContent = t('mode_seller_title');
         document.getElementById('modeDescription').textContent = t('mode_seller_desc');
       }
@@ -739,8 +739,8 @@ const WGS = {
         chybejici.push(pole.label);
 
         // Označit červeně
-        element.style.borderColor = '#dc3545';
-        element.style.backgroundColor = '#fff5f5';
+        element.style.borderColor = 'var(--wgs-danger)';
+        element.style.backgroundColor = 'var(--c-error-bg-light)';
 
         // Zapamatovat první prázdné pole
         if (!prvniPrazdne) {
@@ -774,7 +774,7 @@ const WGS = {
         // Označit červeně
         if (typZakaznikaWrapper) {
           typZakaznikaWrapper.style.border = '2px solid #dc3545';
-          typZakaznikaWrapper.style.backgroundColor = '#fff5f5';
+          typZakaznikaWrapper.style.backgroundColor = 'var(--c-error-bg-light)';
           typZakaznikaWrapper.style.borderRadius = '8px';
           typZakaznikaWrapper.style.padding = '0.75rem';
 
@@ -922,7 +922,7 @@ const WGS = {
           if (pdfInput) pdfInput.value = '';
           if (statusSpan) {
             statusSpan.textContent = '';
-            statusSpan.style.color = '#666';
+            statusSpan.style.color = 'var(--wgs-gray-66)';
           }
           logger.log('PDF pověření vyčištěno po úspěšném uložení');
         }
@@ -1113,7 +1113,7 @@ const WGS = {
       // Zobrazení názvu souboru
       const velikostMB = (file.size / (1024 * 1024)).toFixed(2);
       statusSpan.textContent = t('processing_file').replace('{filename}', file.name);
-      statusSpan.style.color = '#666';
+      statusSpan.style.color = 'var(--wgs-gray-66)';
       statusSpan.style.fontWeight = '600';
 
       this.toast(t('processing_file').replace('{filename}', 'PDF pověření'), 'info');
@@ -1125,14 +1125,14 @@ const WGS = {
         statusSpan.textContent = t('file_processed_success')
           .replace('{filename}', file.name)
           .replace('{size}', velikostMB);
-        statusSpan.style.color = '#333333';
+        statusSpan.style.color = 'var(--wgs-gray-33)';
         this.toast(`Formulář byl předvyplněn z PDF pověření`, 'success');
       } catch (error) {
         logger.error('Chyba při zpracování PDF:', error);
         statusSpan.textContent = t('file_processing_error')
           .replace('{filename}', file.name)
           .replace('{size}', velikostMB);
-        statusSpan.style.color = '#cc0000';
+        statusSpan.style.color = 'var(--wgs-delete)';
         this.toast(`⚠ PDF nahráno, ale nepodařilo se extrahovat data`, 'error');
       }
     });

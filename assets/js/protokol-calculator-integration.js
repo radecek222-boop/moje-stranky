@@ -273,7 +273,7 @@
                         </div>
                         <div style="text-align: right;">
                             <span style="font-size: 18px; font-weight: 600; color: #333;">${cena} €</span>
-                            <div style="font-size: 11px; color: ${n.stav === 'potvrzena' ? '#28a745' : '#666'};">${stav}</div>
+                            <div style="font-size: 11px; color: ${n.stav === 'potvrzena' ? 'var(--wgs-success)' : 'var(--wgs-gray-66)'};">${stav}</div>
                         </div>
                     </div>
                 </div>
@@ -318,12 +318,12 @@
         // Event listenery pro položky
         dialogBox.querySelectorAll('.cn-polozka').forEach(polozka => {
             polozka.addEventListener('mouseenter', () => {
-                polozka.style.borderColor = '#333';
-                polozka.style.background = '#f9f9f9';
+                polozka.style.borderColor = 'var(--wgs-gray-33)';
+                polozka.style.background = 'var(--wgs-gray-f9)';
             });
             polozka.addEventListener('mouseleave', () => {
-                polozka.style.borderColor = '#ddd';
-                polozka.style.background = '#fff';
+                polozka.style.borderColor = 'var(--wgs-gray-dd)';
+                polozka.style.background = 'var(--wgs-white)';
             });
             polozka.addEventListener('click', () => {
                 const cena = parseFloat(polozka.dataset.cena);

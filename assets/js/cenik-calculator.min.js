@@ -1358,7 +1358,7 @@
             // Převést HTML na canvas (stejné nastavení jako protokol.php)
             const canvas = await html2canvas(pdfContent, {
                 scale: 3,
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--wgs-white)',
                 useCORS: true,
                 logging: false,
                 imageTimeout: 0,

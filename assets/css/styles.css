@@ -70,6 +70,14 @@
   --c-status-orange: #ff8c00;
   --c-status-online: #22c55e;
   --c-light-blue: #f0f9ff;
+  --c-light-blue-2: #f0f7ff;
+  --c-light-green: #f0fff0;
+  --c-dark-green: #006600;
+  --c-link-blue: #2563eb;
+  --c-chart-blue: #3b82f6;
+  --c-chart-green: #10b981;
+  --c-progress-red: #cc3333;
+  --wgs-gray-25: #252525;
   /* Schválené barevné výjimky */
   --wgs-neon-green: #39ff14;
   --wgs-neon-green-rgb: 57, 255, 20;
