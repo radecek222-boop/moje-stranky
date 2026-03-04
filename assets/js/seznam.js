@@ -1162,10 +1162,14 @@ function createCustomerHeader() {
     </select>
   ` : status.text;
 
+  const smsIndikator = CURRENT_RECORD._sms_odeslana
+    ? `<br><span class="order-status-text status-poslana-sms" style="display:inline-block;margin-top:0.3rem;">POSLÁNA SMS</span>`
+    : '';
+
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-    <strong>Stav:</strong> ${stavHtml}
+    <strong>Stav:</strong> ${stavHtml}${smsIndikator}
   `);
 }
 
