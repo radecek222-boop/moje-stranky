@@ -103,8 +103,17 @@ try {
         throw new Exception('Neplatný identifikátor sloupce.');
     }
 
-    $stmt = $pdo->prepare('SELECT * FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier LIMIT 1');
-    $stmt->execute([':identifier' => $identifierValue]);
+    // MULTI-TENANT: Omezit výběr a mazání na záznamy aktuálního tenanta
+    $reklamaceSloupce = db_get_table_columns($pdo, 'wgs_reklamace');
+    $maTenantSloupec  = in_array('tenant_id', $reklamaceSloupce);
+    $tenantPodminka   = $maTenantSloupec ? ' AND tenant_id = :tenant_id' : '';
+
+    $stmt = $pdo->prepare('SELECT * FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier' . $tenantPodminka . ' LIMIT 1');
+    $params = [':identifier' => $identifierValue];
+    if ($maTenantSloupec) {
+        $params[':tenant_id'] = tenantId();
+    }
+    $stmt->execute($params);
     $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$record) {
@@ -196,8 +205,12 @@ try {
     //     $deletedCounters['notifications'] = $stmt->rowCount();
     // }
 
-    $deleteStmt = $pdo->prepare('DELETE FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier LIMIT 1');
-    $deleteStmt->execute([':identifier' => $identifierValue]);
+    $deleteStmt = $pdo->prepare('DELETE FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier' . $tenantPodminka . ' LIMIT 1');
+    $deleteParams = [':identifier' => $identifierValue];
+    if ($maTenantSloupec) {
+        $deleteParams[':tenant_id'] = tenantId();
+    }
+    $deleteStmt->execute($deleteParams);
     if ($deleteStmt->rowCount() === 0) {
         throw new Exception('Reklamaci se nepodařilo odstranit.');
     }

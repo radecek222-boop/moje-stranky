@@ -374,6 +374,14 @@ function handleUpdate(PDO $pdo, array $input): array
 
     try {
         $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
+
+        // MULTI-TENANT: Omezit aktualizaci pouze na záznamy aktuálního tenanta
+        $tenantSloupecExistuje = in_array('tenant_id', db_get_table_columns($pdo, 'wgs_reklamace'));
+        if ($tenantSloupecExistuje) {
+            $sql .= ' AND tenant_id = :tenant_id';
+            $params[':tenant_id'] = tenantId();
+        }
+
         if ($identifierColumn === 'id') {
             $sql .= ' LIMIT 1';
         }
@@ -652,6 +660,11 @@ try {
     $hasGdprNote = in_array('gdpr_note', $existingColumns);
     if ($hasGdprNote && !empty($gdprNote)) {
         $columns['gdpr_note'] = $gdprNote;
+    }
+
+    // MULTI-TENANT: Přidat tenant_id pokud sloupec existuje (po migraci)
+    if (in_array('tenant_id', $existingColumns)) {
+        $columns['tenant_id'] = tenantId();
     }
 
     if ($hasReklamaceId && $workflowId !== null) {
