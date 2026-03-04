@@ -140,5 +140,5 @@ try {
 
 } catch (Exception $e) {
     error_log("DELETE_PHOTO ERROR: " . $e->getMessage());
-    sendJsonError($e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 }
