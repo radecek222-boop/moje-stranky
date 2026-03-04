@@ -785,32 +785,8 @@ async function renderOrders(items = null) {
     return;
   }
 
-  // Načíst unread counts pro všechny reklamace najednou
-  let unreadCountsMap = {};
-  try {
-    const response = await fetch('/api/notes_api.php?action=get_unread_counts');
-    const data = await response.json();
-    if (data.status === 'success') {
-      unreadCountsMap = data.unread_counts || {};
-    }
-  } catch (e) {
-    logger.warn('Nepodařilo se načíst unread counts:', e);
-  }
-
-  // Načíst emaily zákazníků s cenovou nabídkou (CN) včetně stavů
-  try {
-    const cnResponse = await fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
-    const cnData = await cnResponse.json();
-    if (cnData.status === 'success') {
-      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
-      STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
-    }
-  } catch (e) {
-    logger.warn('Nepodařilo se načíst emaily s CN:', e);
-  }
+  // Použít CACHED data pro okamžitý render (žádný await před vykreslením!)
+  let unreadCountsMap = window.UNREAD_COUNTS_MAP || {};
 
   // Aktualizovat počet POZ (mimozáruční opravy + zákazníci s CN)
   const countPozEl = document.getElementById('count-poz');
@@ -1022,6 +998,61 @@ async function renderOrders(items = null) {
 
   // Uložit unreadCountsMap pro filtrování
   window.UNREAD_COUNTS_MAP = unreadCountsMap;
+
+  // Načíst čerstvá data NA POZADÍ — neblokuje render gridu
+  const _filteredSnapshot = filtered;
+  const _itemsSnapshot = items;
+  Promise.all([
+    fetch('/api/notes_api.php?action=get_unread_counts').then(r => r.json()).catch(() => null),
+    fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(r => r.json()).catch(() => null)
+  ]).then(([unreadData, cnData]) => {
+    let novyUnreadMap = window.UNREAD_COUNTS_MAP || {};
+    if (unreadData?.status === 'success') {
+      novyUnreadMap = unreadData.unread_counts || {};
+      window.UNREAD_COUNTS_MAP = novyUnreadMap;
+    }
+    if (cnData?.status === 'success') {
+      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
+      STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
+    }
+    // Aktualizovat počty a unread indikátor po načtení čerstvých dat
+    const countPozElBg = document.getElementById('count-poz');
+    if (countPozElBg && _itemsSnapshot) {
+      const stav = _itemsSnapshot.filter(r => {
+        const s = r.stav || 'wait';
+        if (s === 'HOTOVO' || s === 'done') return false;
+        const createdBy = (r.created_by || '').trim();
+        if (!createdBy) return true;
+        const email = (r.email || '').toLowerCase().trim();
+        return email && EMAILS_S_CN.includes(email);
+      }).length;
+      countPozElBg.textContent = `(${stav})`;
+    }
+    const countWaitElBg = document.getElementById('count-wait');
+    if (countWaitElBg && _itemsSnapshot) {
+      const pocet = _itemsSnapshot.filter(r => {
+        const s = r.stav || 'wait';
+        if (s !== 'ČEKÁ' && s !== 'wait') return false;
+        const email = (r.email || '').toLowerCase().trim();
+        return !(email && EMAILS_S_CN.includes(email));
+      }).length;
+      countWaitElBg.textContent = `(${pocet})`;
+    }
+    const totalUnread = Object.values(novyUnreadMap).reduce((sum, c) => sum + c, 0);
+    const unreadInd = document.getElementById('unreadNotesIndicator');
+    const unreadSpan = document.getElementById('unreadNotesCount');
+    if (unreadInd && unreadSpan) {
+      if (totalUnread > 0) {
+        unreadSpan.textContent = totalUnread;
+        unreadInd.style.display = 'block';
+      } else {
+        unreadInd.style.display = 'none';
+      }
+    }
+  }).catch(() => {});
 }
 
 // === FILTROVÁNÍ PODLE NEPŘEČTENÝCH POZNÁMEK ===
@@ -1287,6 +1318,12 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
+
+    const jeDesktopBtn = window.innerWidth >= 769;
+    const btnGap = jeDesktopBtn ? '0.15rem' : '0.4rem';
+    const btnPad = jeDesktopBtn ? '0.25rem 0.6rem' : '0.4rem 0.75rem';
+    const btnMinH = jeDesktopBtn ? '28px' : '34px';
+    const btnFs = jeDesktopBtn ? '0.78rem' : '0.78rem';
 
     buttonsHtml = `
       <div class="detail-buttons">
@@ -2853,6 +2890,12 @@ async function showCustomerDetail(id) {
   `;
 
   ModalManager.show(content);
+
+  // Zúžit modal pro detail zákazníka (je užší než hlavní detail zakázky)
+  const obsahDetailZakaznika = document.querySelector('#detailOverlay .modal-content');
+  if (obsahDetailZakaznika) {
+    obsahDetailZakaznika.style.setProperty('max-width', '520px', 'important');
+  }
 
   // Auto-resize textarea pri prvnim zobrazeni
   setTimeout(() => {
@@ -4601,9 +4644,9 @@ async function aktualizujFototekaGrid(reklamaceId) {
         const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
         return `
-          <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
+          <div class="foto-wrapper" style="position:relative;aspect-ratio:1;min-width:0;">
             <img src='${photoPath}'
-                 style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
+                 style='width:100%;height:100%;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;display:block;'
                  alt='Fotka ${i+1}'
                  loading="lazy"
                  data-action="showPhotoFullscreen"
@@ -5945,6 +5988,74 @@ async function zalozitZnovu(reklamaceId) {
 
 // Export do window
 window.zalozitZnovu = zalozitZnovu;
+window.zmenitStavZakazky = zmenitStavZakazky;
+
+// ==========================================
+// GALERIE — fototéka zakázky
+// ==========================================
+function openGalerie(id) {
+  const reklamaceId = id || (CURRENT_RECORD && CURRENT_RECORD.id);
+  if (!reklamaceId) return;
+
+  const zaznam = WGS_DATA_CACHE[reklamaceId] || CURRENT_RECORD;
+  const fotky = (zaznam && zaznam.photos || []).filter(f => f && (f.photo_path || f.url || f.path));
+
+  const renderGrid = (seznam) => seznam.map((f, i) => {
+    const photoPath = typeof f === 'object' ? (f.photo_path || f.url || f.path) : f;
+    const photoId   = typeof f === 'object' ? f.id : null;
+    const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+    return `
+      <div class="foto-wrapper" style="position:relative;aspect-ratio:1;min-width:0;">
+        <img src='${photoPath}'
+             style='width:100%;height:100%;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;display:block;'
+             alt='Fotka ${i + 1}'
+             loading="lazy"
+             data-action="showPhotoFullscreen"
+             data-url="${escapedUrl}">
+        ${photoId ? `
+          <button class="foto-delete-btn"
+                  data-action="smazatFotku"
+                  data-photo-id="${photoId}"
+                  data-url="${escapedUrl}"
+                  title="Smazat fotku">x</button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  ModalManager.show(`
+    <div style="padding:1rem;">
+      <div style="background:#1a1a1a;border-radius:6px;padding:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <label style="color:#aaa;font-weight:600;font-size:0.85rem;" id="fototeka-nadpis">Fototeka (${fotky.length})</label>
+          <button type="button"
+                  data-action="otevritVyberFotek"
+                  data-id="${reklamaceId}"
+                  style="background:#333;color:#fff;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">
+            Přidat fotky
+          </button>
+        </div>
+        <input type="file"
+               id="fototeka-input-${reklamaceId}"
+               accept="image/*"
+               multiple
+               style="display:none;"
+               data-reklamace-id="${reklamaceId}">
+        <div id="fototeka-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;min-height:60px;">
+          ${fotky.length > 0 ? renderGrid(fotky) : `<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>`}
+        </div>
+        <div id="fototeka-nahravani" style="display:none;margin-top:0.75rem;padding:0.5rem;background:#222;border-radius:4px;">
+          <p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p>
+          <div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;">
+            <div id="fototeka-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:0.75rem;padding:0.4rem;font-size:0.78rem;background:#1a1a1a;color:white;" data-action="closeDetail">Zavřít</button>
+    </div>
+  `);
+}
+window.openGalerie = openGalerie;
 
 // ==========================================
 // HROMADNÉ AKCE (U8)
