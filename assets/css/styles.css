@@ -1,16 +1,26 @@
 :root {
+  /* Základní tóny */
   --wgs-white: #ffffff;
   --wgs-black: #000000;
+  /* Stupnice šedi - čím vyšší číslo, tím tmavší */
+  --wgs-near-black: #111111;
   --wgs-darkest: #1a1a1a;
   --wgs-dark-grey: #222222;
+  --wgs-gray-33: #333333;
+  --wgs-gray-44: #444444;
   --wgs-grey: #555555;
+  --wgs-gray-66: #666666;
+  --wgs-gray-88: #888888;
   --wgs-light-grey: #999999;
+  --wgs-gray-aa: #aaaaaa;
+  --wgs-gray-bb: #bbbbbb;
   --wgs-border: #e0e0e0;
   /* Schválené barevné výjimky */
   --wgs-neon-green: #39ff14;
   --wgs-neon-green-rgb: 57, 255, 20;
   --wgs-danger: #dc3545;
   --wgs-success: #28a745;
+  --wgs-success-hover: #218838;
   --wgs-play-blue: #0099ff;
   --c-black: var(--wgs-black);
   --c-dark-grey: var(--wgs-dark-grey);

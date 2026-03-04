@@ -18,18 +18,18 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #111;
-    color: #fff;
+    background: var(--wgs-near-black);
+    color: var(--wgs-white);
     padding: 16px 20px;
     border-radius: 8px;
     min-width: 320px;
     max-width: 450px;
     box-shadow:
-        0 0 10px rgba(57, 255, 20, 0.4),
-        0 0 20px rgba(57, 255, 20, 0.2),
-        0 0 30px rgba(57, 255, 20, 0.1),
-        inset 0 0 60px rgba(57, 255, 20, 0.05);
-    border: 2px solid #39ff14;
+        0 0 10px rgba(var(--wgs-neon-green-rgb), 0.4),
+        0 0 20px rgba(var(--wgs-neon-green-rgb), 0.2),
+        0 0 30px rgba(var(--wgs-neon-green-rgb), 0.1),
+        inset 0 0 60px rgba(var(--wgs-neon-green-rgb), 0.05);
+    border: 2px solid var(--wgs-neon-green);
     pointer-events: auto;
     cursor: pointer;
     opacity: 0;
@@ -48,8 +48,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #39ff14;
-    text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14;
+    color: var(--wgs-neon-green);
+    text-shadow: 0 0 10px var(--wgs-neon-green), 0 0 20px var(--wgs-neon-green);
 }
 
 .wgs-toast-icon svg {
@@ -66,17 +66,17 @@
 .wgs-toast-title {
     font-size: 12px;
     font-weight: 600;
-    color: #39ff14;
+    color: var(--wgs-neon-green);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 4px;
-    text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    text-shadow: 0 0 10px rgba(var(--wgs-neon-green-rgb), 0.5);
 }
 
 .wgs-toast-message {
     font-size: 14px;
     font-weight: 400;
-    color: #fff;
+    color: var(--wgs-white);
     line-height: 1.4;
 }
 
@@ -87,14 +87,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: var(--wgs-gray-66);
     cursor: pointer;
     border-radius: 4px;
     transition: color 0.2s, background 0.2s;
 }
 
 .wgs-toast-close:hover {
-    color: #fff;
+    color: var(--wgs-white);
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -129,7 +129,7 @@
     right: -2px;
     bottom: -2px;
     border-radius: 10px;
-    background: linear-gradient(45deg, #39ff14, transparent, #39ff14);
+    background: linear-gradient(45deg, var(--wgs-neon-green), transparent, var(--wgs-neon-green));
     z-index: -1;
     opacity: 0.3;
     animation: wgsNeonPulse 2s ease-in-out infinite;
