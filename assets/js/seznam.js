@@ -1160,20 +1160,38 @@ function createCustomerHeader() {
     else aktualniHodnota = 'cn_poslana';
   }
 
+  // Helper: vygeneruje 1 pill tlačítko s neonovou barvou
+  const pill = (stav, label, barva, textAktivni = '#000') => {
+    const aktivni = aktualniHodnota === stav;
+    const bg      = aktivni ? barva : 'transparent';
+    const barvaText = aktivni ? textAktivni : barva;
+    const border  = `1px solid ${barva}`;
+    const glow    = aktivni ? `box-shadow:0 0 8px ${barva}99;` : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.25rem 0.3rem;border-radius:10px;font-size:0.65rem;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+  };
+  const pillCN = (stav, label) => {
+    const aktivni = aktualniHodnota === stav;
+    const barva   = '#aaaaaa';
+    const bg      = aktivni ? barva : 'transparent';
+    const barvaText = aktivni ? '#000' : '#888';
+    const glow    = aktivni ? `box-shadow:0 0 6px #aaaaaa88;` : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:1px solid ${aktivni ? barva : '#555'};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+  };
+
   const stavHtml = isAdmin ? `
-    <div class="stav-workflow" style="margin-top:0.4rem;">
-      <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.3rem;">
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'wait' ? '#ffdd00' : '#333'};color:${aktualniHodnota === 'wait' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'wait' ? '#ffdd00' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="wait" data-email="${zakaznikEmail}">NOVÁ</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'open' ? '#00e5ff' : '#333'};color:${aktualniHodnota === 'open' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'open' ? '#00e5ff' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="open" data-email="${zakaznikEmail}">DOMLUVENÁ</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'cekame_na_dily' ? '#777' : '#333'};color:#fff;cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'cekame_na_dily' ? '#777' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cekame_na_dily" data-email="${zakaznikEmail}">Čekáme na díly</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'odlozena' ? '#9b59b6' : '#333'};color:#fff;cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'odlozena' ? '#9b59b6' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="odlozena" data-email="${zakaznikEmail}">ODLOŽENO</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'done' ? '#39ff14' : '#333'};color:${aktualniHodnota === 'done' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'done' ? '#39ff14' : '#444'};${aktualniHodnota === 'done' ? 'box-shadow:0 0 6px rgba(57,255,20,0.4);' : ''}" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="done" data-email="${zakaznikEmail}">HOTOVO</span>
+    <div class="stav-workflow" style="margin-top:0.5rem;">
+      <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
+        ${pill('wait',          'NOVÁ',           '#ffdd00', '#000')}
+        ${pill('open',          'DOMLUVENÁ',      '#00e5ff', '#000')}
+        ${pill('cekame_na_dily','ČEKÁ DÍLY',      '#888888', '#fff')}
+        ${pill('odlozena',      'ODLOŽENO',       '#9b59b6', '#fff')}
+        ${pill('done',          'HOTOVO',         '#39ff14', '#000')}
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_poslana' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_poslana" data-email="${zakaznikEmail}">Poslána CN</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_odsouhlasena' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_odsouhlasena" data-email="${zakaznikEmail}">Odsouhlasena</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_cekame_nd' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_cekame_nd" data-email="${zakaznikEmail}">Čekáme ND</span>
-        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_zamitnuta' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_zamitnuta" data-email="${zakaznikEmail}">Zamítnuta</span>
+      <div style="display:flex;gap:0.2rem;width:100%;justify-content:center;">
+        ${pillCN('cn_poslana',      'Poslána CN')}
+        ${pillCN('cn_odsouhlasena', 'Odsouhlasena')}
+        ${pillCN('cn_cekame_nd',    'Čekáme ND')}
+        ${pillCN('cn_zamitnuta',    'Zamítnuta')}
       </div>
     </div>
   ` : status.text;
