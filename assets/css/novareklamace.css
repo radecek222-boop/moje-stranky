@@ -1008,10 +1008,10 @@ textarea.form-control {
 .disabled-field,
 .form-control[readonly],
 .form-control:disabled {
-  background-color: var(--c-active) !important;
-  color: var(--wgs-gray-66) !important;
+  background-color: #f0f0f0 !important;
+  color: #666666 !important;
   cursor: not-allowed !important;
-  border-color: var(--wgs-gray-d0) !important;
+  border-color: #d0d0d0 !important;
 }
 
 .disabled-field::placeholder,
@@ -1021,8 +1021,8 @@ textarea.form-control {
 }
 
 .provedeni-input[readonly] {
-  background-color: var(--c-active) !important;
-  color: var(--wgs-gray-66) !important;
+  background-color: #f0f0f0 !important;
+  color: #666666 !important;
   cursor: pointer !important;
 }
 
