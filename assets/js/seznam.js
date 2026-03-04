@@ -692,6 +692,9 @@ async function renderOrders(items = null) {
 
   if (!Array.isArray(items)) items = [];
 
+  // Přímá kontrola localStorage – pojistka pro případ kdy _sms_odeslana není v cache
+  const _smsOdeslaneVRenderu = _nactiSmsZeStorage ? _nactiSmsZeStorage() : new Set();
+
   // Admin filtr podle prodejce
   if (CURRENT_USER && CURRENT_USER.is_admin && ADMIN_PRODEJCE_FILTER !== null) {
     items = items.filter(r => String(r.created_by || '') === ADMIN_PRODEJCE_FILTER);
@@ -937,7 +940,7 @@ async function renderOrders(items = null) {
     // Sdílený badge stavu (používá se v obou šablonách)
     const stavBadge = appointmentText
       ? `<span class="order-appointment">${appointmentText}</span>`
-      : (rec._sms_odeslana
+      : ((rec._sms_odeslana || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
           ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
           : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
               ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
