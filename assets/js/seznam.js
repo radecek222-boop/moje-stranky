@@ -4610,9 +4610,9 @@ async function aktualizujFototekaGrid(reklamaceId) {
         const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
         return `
-          <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
+          <div class="foto-wrapper" style="position:relative;aspect-ratio:1;min-width:0;">
             <img src='${photoPath}'
-                 style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
+                 style='width:100%;height:100%;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;display:block;'
                  alt='Fotka ${i+1}'
                  loading="lazy"
                  data-action="showPhotoFullscreen"
@@ -5887,9 +5887,9 @@ function openGalerie(id) {
     const photoId   = typeof f === 'object' ? f.id : null;
     const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
     return `
-      <div class="foto-wrapper" style="position:relative;width:60px;height:60px;flex-shrink:0;">
+      <div class="foto-wrapper" style="position:relative;aspect-ratio:1;min-width:0;">
         <img src='${photoPath}'
-             style='width:60px;height:60px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             style='width:100%;height:100%;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;display:block;'
              alt='Fotka ${i + 1}'
              loading="lazy"
              data-action="showPhotoFullscreen"
@@ -5923,7 +5923,7 @@ function openGalerie(id) {
                multiple
                style="display:none;"
                data-reklamace-id="${reklamaceId}">
-        <div id="fototeka-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
+        <div id="fototeka-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;min-height:60px;">
           ${fotky.length > 0 ? renderGrid(fotky) : `<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>`}
         </div>
         <div id="fototeka-nahravani" style="display:none;margin-top:0.75rem;padding:0.5rem;background:#222;border-radius:4px;">
