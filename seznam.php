@@ -2567,10 +2567,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'otevritVyberFotek':
         if (id && typeof otevritVyberFotek === 'function') {
-          console.log('[EMERGENCY] Otviram vyber fotek pro ID:', id);
           otevritVyberFotek(id);
+        }
+        break;
+
+      case 'otevritGalerii':
+        if (id && typeof otevritGalerii === 'function') {
+          otevritGalerii(id);
         } else {
-          console.error('[EMERGENCY] otevritVyberFotek funkce neni dostupna nebo ID chybi');
+          console.error('[EMERGENCY] otevritGalerii funkce neni dostupna nebo ID chybi');
         }
         break;
 

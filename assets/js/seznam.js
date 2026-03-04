@@ -1255,6 +1255,7 @@ async function showDetail(recordOrId) {
       </div>
 
       <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
@@ -1264,7 +1265,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
-        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
           <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
@@ -1289,10 +1290,11 @@ async function showDetail(recordOrId) {
 
     buttonsHtml = `
       <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${vytvorCNBtn}
         ${technickaFunkce}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
-        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
@@ -4552,8 +4554,13 @@ async function zpracujVybraneFotky(event) {
     logger.log('[Fototeka] Nahrano fotek:', vysledek.count);
     wgsToast.success('Nahrano ' + vysledek.count + ' fotek');
 
-    // Aktualizovat grid s fotkami
-    await aktualizujFototekaGrid(reklamaceId);
+    // Aktualizovat grid s fotkami - galerie nebo fototéka podle kontextu
+    if (input.getAttribute('data-galerie-mode') === '1' && document.getElementById('galerie-grid')) {
+      const noveFotky = await loadPhotosFromDB(reklamaceId);
+      renderGalerieGrid(noveFotky, reklamaceId);
+    } else {
+      await aktualizujFototekaGrid(reklamaceId);
+    }
 
     // Reset inputu
     input.value = '';
@@ -4693,8 +4700,92 @@ async function aktualizujFototekaGrid(reklamaceId) {
   }
 }
 
+// Galerie: zobrazí fotky zakázky v overlay (stejné chování jako fototéka v showCustomerDetail)
+async function otevritGalerii(reklamaceId) {
+  const fotky = await loadPhotosFromDB(reklamaceId);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'galerie-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:10005;display:flex;flex-direction:column;';
+
+  const hlavicka = document.createElement('div');
+  hlavicka.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #333;flex-shrink:0;';
+  hlavicka.innerHTML = `
+    <span id="galerie-nadpis" style="color:#aaa;font-size:0.9rem;font-weight:600;">Fotografie (${fotky.length})</span>
+    <div style="display:flex;gap:0.5rem;">
+      <button id="galerie-pridat-btn" style="background:#333;color:#fff;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Přidat fotky</button>
+      <button onclick="document.getElementById('galerie-overlay').remove()" style="background:transparent;color:#aaa;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Zavřít</button>
+    </div>
+  `;
+
+  const obsah = document.createElement('div');
+  obsah.style.cssText = 'flex:1;overflow-y:auto;padding:1rem;';
+
+  const grid = document.createElement('div');
+  grid.id = 'galerie-grid';
+  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;min-height:60px;';
+  obsah.appendChild(grid);
+
+  const nahravaniDiv = document.createElement('div');
+  nahravaniDiv.id = 'galerie-nahravani';
+  nahravaniDiv.style.cssText = 'display:none;padding:0.5rem;background:#222;border-radius:4px;margin-top:0.75rem;';
+  nahravaniDiv.innerHTML = `<p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p><div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;"><div id="galerie-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div></div>`;
+  obsah.appendChild(nahravaniDiv);
+
+  overlay.appendChild(hlavicka);
+  overlay.appendChild(obsah);
+  document.body.appendChild(overlay);
+
+  // File input pro přidání fotek
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.id = 'galerie-input-' + reklamaceId;
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.style.display = 'none';
+  input.setAttribute('data-reklamace-id', reklamaceId);
+  input.setAttribute('data-galerie-mode', '1');
+  document.body.appendChild(input);
+  input.addEventListener('change', zpracujVybraneFotky);
+
+  document.getElementById('galerie-pridat-btn').onclick = () => input.click();
+
+  renderGalerieGrid(fotky, reklamaceId);
+}
+
+function renderGalerieGrid(fotky, reklamaceId) {
+  const grid = document.getElementById('galerie-grid');
+  const nadpis = document.getElementById('galerie-nadpis');
+  if (!grid) return;
+  if (nadpis) nadpis.textContent = `Fotografie (${fotky.length})`;
+  if (fotky.length === 0) {
+    grid.innerHTML = '<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>';
+    return;
+  }
+  grid.innerHTML = fotky.map((f, i) => {
+    const photoPath = typeof f === 'object' ? f.photo_path : f;
+    const photoId = typeof f === 'object' ? f.id : null;
+    const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+    return `
+      <div class="foto-wrapper" style="position:relative;width:80px;height:80px;flex-shrink:0;">
+        <img src='${photoPath}'
+             style='width:80px;height:80px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             alt='Fotka ${i+1}' loading="lazy"
+             data-action="showPhotoFullscreen" data-url="${escapedUrl}">
+        ${photoId ? `
+          <button class="foto-delete-btn"
+                  data-action="smazatFotku"
+                  data-photo-id="${photoId}"
+                  data-url="${escapedUrl}"
+                  title="Smazat fotku">x</button>
+        ` : ''}
+      </div>`;
+  }).join('');
+}
+
 // Globalni pristup k funkcim fototéky
 window.otevritVyberFotek = otevritVyberFotek;
+window.otevritGalerii = otevritGalerii;
 window.zpracujVybraneFotky = zpracujVybraneFotky;
 
 // PAGINATION: Load more handler
