@@ -2583,6 +2583,17 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       }
 
+      case 'zmenaStavuPill': {
+        if (id) {
+          const stavPill = button.getAttribute('data-stav');
+          const emailPill = button.getAttribute('data-email') || '';
+          if (stavPill && typeof zmenitStavZakazky === 'function') {
+            zmenitStavZakazky(id, stavPill, emailPill);
+          }
+        }
+        break;
+      }
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }

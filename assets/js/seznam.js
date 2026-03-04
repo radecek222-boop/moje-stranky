@@ -1165,21 +1165,21 @@ function createCustomerHeader() {
   }
 
   const stavHtml = isAdmin ? `
-    <select id="zmenaStavuSelect" class="wgs-select wgs-select--small" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}">
-      <optgroup label="Základní stavy">
-        <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
-        <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
-        <option value="cekame_na_dily" ${aktualniHodnota === 'cekame_na_dily' ? 'selected' : ''}>Čekáme na díly</option>
-        <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
-        <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
-      </optgroup>
-      <optgroup label="CN workflow">
-        <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
-        <option value="cn_odsouhlasena" ${aktualniHodnota === 'cn_odsouhlasena' ? 'selected' : ''}>Odsouhlasena</option>
-        <option value="cn_cekame_nd" ${aktualniHodnota === 'cn_cekame_nd' ? 'selected' : ''}>Čekáme ND</option>
-        <option value="cn_zamitnuta" ${aktualniHodnota === 'cn_zamitnuta' ? 'selected' : ''}>Zamítnuta</option>
-      </optgroup>
-    </select>
+    <div class="stav-workflow" style="margin-top:0.4rem;">
+      <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.3rem;">
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'wait' ? '#ffdd00' : '#333'};color:${aktualniHodnota === 'wait' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'wait' ? '#ffdd00' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="wait" data-email="${zakaznikEmail}">NOVÁ</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'open' ? '#00e5ff' : '#333'};color:${aktualniHodnota === 'open' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'open' ? '#00e5ff' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="open" data-email="${zakaznikEmail}">DOMLUVENÁ</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'cekame_na_dily' ? '#777' : '#333'};color:#fff;cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'cekame_na_dily' ? '#777' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cekame_na_dily" data-email="${zakaznikEmail}">Čekáme na díly</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'odlozena' ? '#9b59b6' : '#333'};color:#fff;cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'odlozena' ? '#9b59b6' : '#444'};" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="odlozena" data-email="${zakaznikEmail}">ODLOŽENO</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'done' ? '#39ff14' : '#333'};color:${aktualniHodnota === 'done' ? '#000' : '#888'};cursor:pointer;padding:0.2rem 0.55rem;border-radius:12px;font-size:0.72rem;font-weight:700;border:1px solid ${aktualniHodnota === 'done' ? '#39ff14' : '#444'};${aktualniHodnota === 'done' ? 'box-shadow:0 0 6px rgba(57,255,20,0.4);' : ''}" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="done" data-email="${zakaznikEmail}">HOTOVO</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_poslana' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_poslana" data-email="${zakaznikEmail}">Poslána CN</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_odsouhlasena' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_odsouhlasena" data-email="${zakaznikEmail}">Odsouhlasena</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_cekame_nd' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_cekame_nd" data-email="${zakaznikEmail}">Čekáme ND</span>
+        <span class="workflow-pill" style="background:${aktualniHodnota === 'cn_zamitnuta' ? '#555' : '#1a1a1a'};color:#bbb;cursor:pointer;padding:0.15rem 0.4rem;border-radius:10px;font-size:0.68rem;border:1px solid #444;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="cn_zamitnuta" data-email="${zakaznikEmail}">Zamítnuta</span>
+      </div>
+    </div>
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
@@ -1243,13 +1243,17 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="detail-btn detail-btn-warning" style="background: #ffeb3b; color: #000; border: 2px solid #000; font-weight: 700;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        ${CURRENT_USER && CURRENT_USER.is_admin ? `
+          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+        ` : ''}
       </div>
     `;
   } else {
@@ -1273,9 +1277,13 @@ async function showDetail(recordOrId) {
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         ${vytvorCNBtn}
         ${technickaFunkce}
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
+        ${CURRENT_USER && CURRENT_USER.is_admin ? `
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+        ` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
@@ -3944,7 +3952,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'previousMonth', 'nextMonth', 'showBookingDetail', 'showCalendarBack',
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
-      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek'
+      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek',
+      'zmenaStavuPill'
     ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
