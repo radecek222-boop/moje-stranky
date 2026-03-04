@@ -1014,9 +1014,11 @@ async function renderOrders(items = null) {
       novyUnreadMap = unreadData.unread_counts || {};
       window.UNREAD_COUNTS_MAP = novyUnreadMap;
     }
+    let cnDataChanged = false;
     if (cnData?.status === 'success') {
       EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
       STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
+      cnDataChanged = true;
     }
     // Aktualizovat počty a unread indikátor po načtení čerstvých dat
     const countPozElBg = document.getElementById('count-poz');
@@ -1041,6 +1043,11 @@ async function renderOrders(items = null) {
       }).length;
       countWaitElBg.textContent = `(${pocet})`;
     }
+    // Po načtení CN dat překreslit seznam aby karta ukazala správný stav (Odsouhlasena atd.)
+    if (cnDataChanged && _itemsSnapshot) {
+      renderOrders(Utils.filterByUserRole(_itemsSnapshot));
+    }
+
     const totalUnread = Object.values(novyUnreadMap).reduce((sum, c) => sum + c, 0);
     const unreadInd = document.getElementById('unreadNotesIndicator');
     const unreadSpan = document.getElementById('unreadNotesCount');
@@ -3940,7 +3947,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
       'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek',
-      'zmenaStavuPill'
+      'zmenaStavuPill', 'zpetDoDetailu'
     ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
