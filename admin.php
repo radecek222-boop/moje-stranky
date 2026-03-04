@@ -1032,6 +1032,202 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'tenanti'): ?>
+  <!-- TAB: TENANTI (Multi-tenant správa) -->
+  <div id="tab-tenanti" class="tab-content">
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title">Správa tenantů</h3>
+        <div class="table-actions">
+          <button class="btn btn-sm" id="btnNovyTenant">Nový tenant</button>
+          <button class="btn btn-sm" id="btnObnovitTenanty">Obnovit</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Slug</th>
+            <th scope="col">Název</th>
+            <th scope="col">Doména</th>
+            <th scope="col">Reklamace</th>
+            <th scope="col">Uživatelé</th>
+            <th scope="col">Aktivní</th>
+            <th scope="col">Akce</th>
+          </tr>
+        </thead>
+        <tbody id="tabulka-tenantu">
+          <tr><td colspan="8" class="loading">Načítání...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal: nový / editace tenanta -->
+    <div id="modal-tenant" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:28px; border-radius:6px; width:420px; max-width:95vw;">
+        <h3 id="modal-tenant-titulek" style="margin:0 0 20px;">Nový tenant</h3>
+        <input type="hidden" id="modal-tenant-id" value="">
+
+        <div style="margin-bottom:14px;">
+          <label for="inp-slug" style="display:block; font-weight:600; margin-bottom:4px;">Slug <small>(neměnný identifikátor, jen a-z, 0-9, pomlčka)</small></label>
+          <input type="text" id="inp-slug" placeholder="napr-tenant-1" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label for="inp-nazev" style="display:block; font-weight:600; margin-bottom:4px;">Název</label>
+          <input type="text" id="inp-nazev" placeholder="Název organizace" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label for="inp-domena" style="display:block; font-weight:600; margin-bottom:4px;">Doména <small>(volitelné, např. klient.wgs-service.cz)</small></label>
+          <input type="text" id="inp-domena" placeholder="klient.wgs-service.cz" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn btn-sm" id="btn-tenant-zrusit">Zrušit</button>
+          <button class="btn btn-sm" id="btn-tenant-ulozit">Uložit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var csrfToken = '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>';
+
+    function nactiTenanty() {
+      var tbody = document.getElementById('tabulka-tenantu');
+      tbody.innerHTML = '<tr><td colspan="8" class="loading">Načítání...</td></tr>';
+
+      fetch('/api/tenants_api.php?akce=seznam')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status !== 'success') {
+            tbody.innerHTML = '<tr><td colspan="8">Chyba: ' + (data.message || 'Neznámá chyba') + '</td></tr>';
+            return;
+          }
+          var tenanti = data.data.tenanti;
+          if (!tenanti || tenanti.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8">Žádní tenanti nenalezeni.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = tenanti.map(function(t) {
+            var aktivni = t.je_aktivni == 1 ? 'Ano' : 'Ne';
+            var aktualni = (t.tenant_id == <?php echo tenantId(); ?>) ? ' <small>(aktuální)</small>' : '';
+            return '<tr>' +
+              '<td>' + t.tenant_id + '</td>' +
+              '<td><code>' + escHtml(t.slug) + '</code>' + aktualni + '</td>' +
+              '<td>' + escHtml(t.nazev) + '</td>' +
+              '<td>' + escHtml(t.domena || '—') + '</td>' +
+              '<td>' + t.pocet_reklamaci + '</td>' +
+              '<td>' + t.pocet_uzivatelu + '</td>' +
+              '<td>' + aktivni + '</td>' +
+              '<td>' +
+                '<button class="btn btn-sm" onclick="upravitTenant(' + t.tenant_id + ')">Upravit</button>' +
+                (t.tenant_id != 1 && t.je_aktivni == 1
+                  ? ' <button class="btn btn-sm btn-danger" onclick="smazatTenant(' + t.tenant_id + ', \'' + escHtml(t.nazev) + '\')">Deaktivovat</button>'
+                  : '') +
+              '</td>' +
+              '</tr>';
+          }).join('');
+        })
+        .catch(function(e) {
+          tbody.innerHTML = '<tr><td colspan="8">Síťová chyba: ' + e.message + '</td></tr>';
+        });
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function otevritModal(titulek, tenantId, slug, nazev, domena) {
+      document.getElementById('modal-tenant-titulek').textContent = titulek;
+      document.getElementById('modal-tenant-id').value = tenantId || '';
+      document.getElementById('inp-slug').value = slug || '';
+      document.getElementById('inp-slug').disabled = !!tenantId; // slug nelze měnit při editaci
+      document.getElementById('inp-nazev').value = nazev || '';
+      document.getElementById('inp-domena').value = domena || '';
+      document.getElementById('modal-tenant').style.display = 'flex';
+    }
+
+    function zavritModal() {
+      document.getElementById('modal-tenant').style.display = 'none';
+    }
+
+    window.upravitTenant = function(tenantId) {
+      fetch('/api/tenants_api.php?akce=detail&tenant_id=' + tenantId)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status !== 'success') { alert('Chyba: ' + data.message); return; }
+          var t = data.data.tenant;
+          otevritModal('Upravit tenant', t.tenant_id, t.slug, t.nazev, t.domena);
+        });
+    };
+
+    window.smazatTenant = function(tenantId, nazev) {
+      if (!confirm('Opravdu deaktivovat tenant "' + nazev + '"?\n\nData zůstanou zachována, tenant bude pouze skryt.')) return;
+      var fd = new FormData();
+      fd.append('akce', 'smazat');
+      fd.append('tenant_id', tenantId);
+      fd.append('csrf_token', csrfToken);
+      fetch('/api/tenants_api.php', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'success') { nactiTenanty(); }
+          else { alert('Chyba: ' + data.message); }
+        });
+    };
+
+    document.getElementById('btnNovyTenant').addEventListener('click', function() {
+      otevritModal('Nový tenant', '', '', '', '');
+    });
+
+    document.getElementById('btnObnovitTenanty').addEventListener('click', nactiTenanty);
+    document.getElementById('btn-tenant-zrusit').addEventListener('click', zavritModal);
+
+    document.getElementById('btn-tenant-ulozit').addEventListener('click', function() {
+      var tenantId = document.getElementById('modal-tenant-id').value;
+      var slug = document.getElementById('inp-slug').value.trim();
+      var nazev = document.getElementById('inp-nazev').value.trim();
+      var domena = document.getElementById('inp-domena').value.trim();
+
+      if (!nazev) { alert('Název je povinný.'); return; }
+      if (!tenantId && !slug) { alert('Slug je povinný.'); return; }
+
+      var fd = new FormData();
+      fd.append('akce', tenantId ? 'upravit' : 'vytvorit');
+      fd.append('csrf_token', csrfToken);
+      fd.append('nazev', nazev);
+      fd.append('domena', domena);
+      if (tenantId) { fd.append('tenant_id', tenantId); }
+      else { fd.append('slug', slug); }
+
+      fetch('/api/tenants_api.php', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'success') {
+            zavritModal();
+            nactiTenanty();
+          } else {
+            alert('Chyba: ' + data.message);
+          }
+        });
+    });
+
+    // Zavřít modal kliknutím mimo
+    document.getElementById('modal-tenant').addEventListener('click', function(e) {
+      if (e.target === this) zavritModal();
+    });
+
+    // Automaticky načíst při zobrazení tabu
+    nactiTenanty();
+  })();
+  </script>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'admin_testing'): ?>
   <!-- TAB: TESTING ENVIRONMENT (OLD) -->
   <?php require_once __DIR__ . '/includes/admin_testing.php'; ?>

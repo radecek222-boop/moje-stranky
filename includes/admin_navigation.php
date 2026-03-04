@@ -117,6 +117,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'ROOT Soubory',
                 'tab' => 'admin_soubory',
             ],
+            'tenanti' => [
+                'href' => 'admin.php?tab=tenanti',
+                'tab_label' => 'Tenanti',
+                'tab' => 'tenanti',
+            ],
             'transport' => [
                 'href' => 'transport.php',
                 'tab_label' => 'Transport',
