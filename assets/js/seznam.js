@@ -1218,17 +1218,19 @@ async function showDetail(recordOrId) {
   const status = getStatus(record.stav);
   
   const isCompleted = Utils.isCompleted(record);
-  
+
   let buttonsHtml = '';
-  
+  let dokoncenoDatum, dokoncenoData, dokoncenoCas, jeProdejce;
+  let vytvorCNBtn, jeProdejceElse, technickaFunkce;
+
   if (isCompleted) {
     // Formátovat datum a čas dokončení
-    const dokoncenoDatum = record.updated_at ? formatDate(record.updated_at) : '—';
-    const dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
-    const dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
+    dokoncenoDatum = record.updated_at ? formatDate(record.updated_at) : '—';
+    dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
+    dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
 
     // Tlacitka podle role - prodejce nema pristup k technickim funkcim
-    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+    jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
       <div class="detail-info-box">
@@ -1252,15 +1254,15 @@ async function showDetail(recordOrId) {
     `;
   } else {
     // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
-    const vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
+    vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
     ` : '';
 
     // Prodejce nema pristup k technickim funkcim (zahajit navstevu, naplanovat termin, kontaktovat)
-    const jeProdejceElse = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+    jeProdejceElse = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     // Tlacitka pro techniky a adminy (ne pro prodejce)
-    const technickaFunkce = !jeProdejceElse ? `
+    technickaFunkce = !jeProdejceElse ? `
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
@@ -1273,7 +1275,7 @@ async function showDetail(recordOrId) {
         ${technickaFunkce}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisknout výtisk</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;

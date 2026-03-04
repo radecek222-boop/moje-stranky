@@ -2519,6 +2519,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'tiskniVytisk':
+        if (id) {
+          window.open('tisk.php?id=' + id, '_blank');
+        }
+        break;
+
       case 'showQrPlatbaModal':
         if (id && typeof showQrPlatbaModal === 'function') {
           console.log('[EMERGENCY] Oteviram QR platbu pro ID:', id);
