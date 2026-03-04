@@ -1199,7 +1199,7 @@ function createCustomerHeader() {
     const barvaText = aktivni ? textAktivni : barva;
     const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
     const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
   // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
@@ -1208,7 +1208,7 @@ function createCustomerHeader() {
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
     const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
@@ -4102,6 +4102,20 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
       // Překreslit seznam (karty)
       renderOrders(WGS_DATA_CACHE);
 
+      // Překreslit modal header (pills) okamžitě bez zavírání modalu
+      const modalContent = document.getElementById('modalContent');
+      if (modalContent) {
+        const stavovyHeader = modalContent.querySelector('.modal-header');
+        if (stavovyHeader) {
+          const novyHeader = createCustomerHeader();
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = novyHeader;
+          if (tempDiv.firstElementChild) {
+            stavovyHeader.replaceWith(tempDiv.firstElementChild);
+          }
+        }
+      }
+
       logger.log(`[Admin] Stav zakázky ${reklamaceId} změněn na ${novyStav}`);
     } else {
       wgsToast.error(data.message || 'Nepodařilo se změnit stav');
@@ -4674,67 +4688,59 @@ async function aktualizujFototekaGrid(reklamaceId) {
 
 // Galerie: zobrazí fotky zakázky v overlay (stejné chování jako fototéka v showCustomerDetail)
 async function otevritGalerii(reklamaceId) {
-  const fotky = await loadPhotosFromDB(reklamaceId);
+  // Správné ID: použít reklamace_id z CURRENT_RECORD pokud dostupné
+  const effectiveId = CURRENT_RECORD ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id) : reklamaceId;
 
-  const overlay = document.createElement('div');
-  overlay.id = 'galerie-overlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:10005;display:flex;flex-direction:column;';
+  // Zobrazit loading stav uvnitř modalu (ne jako samostatnou overlay)
+  ModalManager.show(`
+    ${ModalManager.createHeader('Galerie', '')}
+    <div class="modal-body"><p style="color:#aaa;padding:1rem 0;">Načítání fotek...</p></div>
+  `);
 
-  const hlavicka = document.createElement('div');
-  hlavicka.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #333;flex-shrink:0;';
-  hlavicka.innerHTML = `
-    <span id="galerie-nadpis" style="color:#aaa;font-size:0.9rem;font-weight:600;">Fotografie (${fotky.length})</span>
-    <div style="display:flex;gap:0.5rem;">
-      <button id="galerie-pridat-btn" style="background:#333;color:#fff;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Přidat fotky</button>
-      <button onclick="document.getElementById('galerie-overlay').remove()" style="background:transparent;color:#aaa;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Zavřít</button>
+  const fotky = await loadPhotosFromDB(effectiveId);
+
+  const content = `
+    ${ModalManager.createHeader(`Galerie (${fotky.length})`, '')}
+    <div class="modal-body">
+      <div class="detail-buttons" style="margin-bottom:1rem;">
+        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu">Zpět do detailu</button>
+        <button class="detail-btn detail-btn-primary" id="galerie-pridat-btn">Přidat fotky</button>
+      </div>
+      <div id="galerie-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
+        ${renderGalerieGridHtml(fotky)}
+      </div>
+      <div id="galerie-nahravani" style="display:none;padding:0.5rem;background:#222;border-radius:4px;margin-top:0.75rem;">
+        <p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p>
+        <div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;">
+          <div id="galerie-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div>
+        </div>
+      </div>
     </div>
   `;
-
-  const obsah = document.createElement('div');
-  obsah.style.cssText = 'flex:1;overflow-y:auto;padding:1rem;';
-
-  const grid = document.createElement('div');
-  grid.id = 'galerie-grid';
-  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;min-height:60px;';
-  obsah.appendChild(grid);
-
-  const nahravaniDiv = document.createElement('div');
-  nahravaniDiv.id = 'galerie-nahravani';
-  nahravaniDiv.style.cssText = 'display:none;padding:0.5rem;background:#222;border-radius:4px;margin-top:0.75rem;';
-  nahravaniDiv.innerHTML = `<p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p><div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;"><div id="galerie-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div></div>`;
-  obsah.appendChild(nahravaniDiv);
-
-  overlay.appendChild(hlavicka);
-  overlay.appendChild(obsah);
-  document.body.appendChild(overlay);
+  ModalManager.show(content);
 
   // File input pro přidání fotek
-  let input = document.createElement('input');
-  input.type = 'file';
-  input.id = 'galerie-input-' + reklamaceId;
-  input.accept = 'image/*';
-  input.multiple = true;
-  input.style.display = 'none';
-  input.setAttribute('data-reklamace-id', reklamaceId);
-  input.setAttribute('data-galerie-mode', '1');
-  document.body.appendChild(input);
-  input.addEventListener('change', zpracujVybraneFotky);
+  let input = document.getElementById('galerie-input-' + effectiveId);
+  if (!input) {
+    input = document.createElement('input');
+    input.type = 'file';
+    input.id = 'galerie-input-' + effectiveId;
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.style.display = 'none';
+    input.setAttribute('data-reklamace-id', effectiveId);
+    input.setAttribute('data-galerie-mode', '1');
+    document.body.appendChild(input);
+    input.addEventListener('change', zpracujVybraneFotky);
+  }
 
-  document.getElementById('galerie-pridat-btn').onclick = () => input.click();
-
-  renderGalerieGrid(fotky, reklamaceId);
+  const pridatBtn = document.getElementById('galerie-pridat-btn');
+  if (pridatBtn) pridatBtn.onclick = () => input.click();
 }
 
-function renderGalerieGrid(fotky, reklamaceId) {
-  const grid = document.getElementById('galerie-grid');
-  const nadpis = document.getElementById('galerie-nadpis');
-  if (!grid) return;
-  if (nadpis) nadpis.textContent = `Fotografie (${fotky.length})`;
-  if (fotky.length === 0) {
-    grid.innerHTML = '<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>';
-    return;
-  }
-  grid.innerHTML = fotky.map((f, i) => {
+function renderGalerieGridHtml(fotky) {
+  if (fotky.length === 0) return '<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>';
+  return fotky.map((f, i) => {
     const photoPath = typeof f === 'object' ? f.photo_path : f;
     const photoId = typeof f === 'object' ? f.id : null;
     const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
@@ -4753,6 +4759,14 @@ function renderGalerieGrid(fotky, reklamaceId) {
         ` : ''}
       </div>`;
   }).join('');
+}
+
+function renderGalerieGrid(fotky, reklamaceId) {
+  const grid = document.getElementById('galerie-grid');
+  if (!grid) return;
+  const nadpis = document.querySelector('.modal-title');
+  if (nadpis && nadpis.textContent.startsWith('Galerie')) nadpis.textContent = `Galerie (${fotky.length})`;
+  grid.innerHTML = renderGalerieGridHtml(fotky);
 }
 
 // Globalni pristup k funkcim fototéky

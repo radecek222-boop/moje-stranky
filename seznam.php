@@ -2587,10 +2587,16 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'otevritGalerii':
-        if (id && typeof otevritGalerii === 'function') {
+        if (typeof otevritGalerii === 'function') {
           otevritGalerii(id);
         } else {
           console.error('[EMERGENCY] otevritGalerii funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
+      case 'zpetDoDetailu':
+        if (typeof showDetail === 'function' && window.CURRENT_RECORD) {
+          showDetail(window.CURRENT_RECORD);
         }
         break;
 
