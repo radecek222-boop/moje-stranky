@@ -317,7 +317,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control {
   padding: 0.7rem 0.9rem; /* ZMĚNA: z 0.9rem 1rem na 0.7rem 0.9rem */
-  border: 1px solid #cccccc;
+  border: 1px solid #999999;
   background: #ffffff;
   font-family: 'Poppins', sans-serif;
   font-size: 0.95rem;
@@ -339,7 +339,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control::placeholder {
-  color: #999999;
+  color: #555555;
   font-style: italic;
 }
 
@@ -1016,7 +1016,7 @@ textarea.form-control {
 
 .disabled-field::placeholder,
 .form-control[readonly]::placeholder {
-  color: var(--wgs-light-grey) !important;
+  color: #777777 !important;
   opacity: 1 !important;
 }
 

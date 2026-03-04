@@ -3,7 +3,7 @@
   --c-white: var(--wgs-white);
   --c-black: var(--wgs-darkest);
   --c-grey: var(--wgs-gray-66);
-  --c-border: var(--wgs-border);
+  --c-border: #999999;
   --c-accent: var(--wgs-gray-2a);
 }
 
@@ -177,7 +177,7 @@ input:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 ::placeholder {
-  color: var(--wgs-gray-aa);
+  color: #555555;
   font-weight: 300;
 }
 .checkbox-group {
