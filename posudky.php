@@ -14,7 +14,7 @@ if (!$jeLoggedIn && !$jeAdmin) {
 $sekce = [
 
     'uznavaji' => [
-        'nazev'  => 'Schválené',
+        'nazev'  => 'Schvalovací',
         'trida'  => 'uznavaji',
         'vety'   => [
             'Při kontrole výrobku byla zjištěna závada, která neodpovídá běžným vlastnostem výrobku při standardním používání.',
@@ -31,7 +31,7 @@ $sekce = [
     ],
 
     'zamitnute' => [
-        'nazev'  => 'Zamítnuté',
+        'nazev'  => 'Zamítací',
         'trida'  => 'zamitnute',
         'vety'   => [
             'Při kontrole výrobku nebyla zjištěna výrobní ani materiálová vada.',
