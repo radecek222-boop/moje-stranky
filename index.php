@@ -41,6 +41,18 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
+  <style>
+    /* Skrýt kontaktní sloupec (Tel/Email) v patičce na index stránce */
+    .footer-column:nth-child(2) {
+      display: none !important;
+    }
+    /* Bílý text pro Tel/Email v patičce */
+    .footer-text,
+    .footer-text a,
+    .footer-link {
+      color: #ffffff !important;
+    }
+  </style>
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>

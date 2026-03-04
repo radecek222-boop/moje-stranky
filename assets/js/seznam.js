@@ -323,18 +323,26 @@ function initSearch() {
       clearSearch();
     }
   });
+
+  searchClear.addEventListener('click', () => {
+    clearSearch();
+  });
 }
 
 function clearSearch() {
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
-  
+
   searchInput.value = '';
   SEARCH_QUERY = '';
   searchClear.classList.remove('visible');
 
-  let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+  if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+    _htmxAktualizujGrid();
+  } else {
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
     renderOrders(userItems);
+  }
 }
 
 // highlightText a escapeRegex přesunuty do utils.js (Step 105)
@@ -4665,6 +4673,32 @@ function updateLoadMoreButton() {
 // === ODESLÁNÍ POKUSU O KONTAKT (EMAIL + SMS) ===
 
 /**
+ * Označí kartu zákazníka žlutě jako "nezvedá - SMS odesláno" v DOM i v cache
+ * @param {string|number} reklamaceId - ID reklamace
+ */
+function _oznacNezvedaSms(reklamaceId) {
+  // Aktualizovat DOM - najít kartu a přidat žlutý badge
+  const karta = document.querySelector(`.order-box[data-id="${reklamaceId}"]`);
+  if (karta) {
+    // Přidat třídu pro žluté zvýraznění
+    karta.classList.add('nezvedala-sms');
+
+    // Najít existující status badge a nahradit ho
+    const stavBadge = karta.querySelector('.order-status-text, .order-appointment, .order-cn-text');
+    if (stavBadge) {
+      stavBadge.className = 'order-status-text status-nezvedala-sms';
+      stavBadge.textContent = 'nezvedá SMS';
+    }
+  }
+
+  // Aktualizovat cache - označit záznam
+  const zaznamVCache = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
+  if (zaznamVCache) {
+    zaznamVCache._nezvedala_sms = true;
+  }
+}
+
+/**
  * Odešle zákazníkovi email o pokusu o kontakt a otevře SMS aplikaci s předvyplněným textem
  * @param {string} reklamaceId - ID reklamace
  * @param {string} telefon - Telefonní číslo zákazníka
@@ -4711,6 +4745,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       } else {
         showToast('Email odeslán zákazníkovi', 'success');
       }
+
+      // Označit kartu jako "nezvedá - SMS odesláno" v cache a v DOM
+      _oznacNezvedaSms(reklamaceId);
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS

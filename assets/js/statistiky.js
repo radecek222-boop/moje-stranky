@@ -580,24 +580,6 @@ function renderCharty(data) {
         }
     }
 
-    // 4b. Statistiky techniků - POZ
-    const techniciansPozContainer = document.getElementById('chart-technicians-poz');
-    if (techniciansPozContainer) {
-        if (data.techniciPoz && data.techniciPoz.length > 0) {
-            let html = '';
-            data.techniciPoz.forEach(t => {
-                html += `
-                    <div class="chart-item">
-                        <div class="chart-item-label">${t.technik} (${t.pocet} ks)</div>
-                        <div class="chart-item-value">${parseFloat(t.vydelek).toFixed(2)} €</div>
-                    </div>
-                `;
-            });
-            techniciansPozContainer.innerHTML = html;
-        } else {
-            techniciansPozContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
-        }
-    }
 }
 
 /**
