@@ -1308,6 +1308,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
           <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
