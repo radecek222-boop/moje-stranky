@@ -94,6 +94,11 @@ if (!$isLoggedIn && !$isAdmin) {
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 
+<!-- HTMX (Step 142 - Phase 9) - progressivní enhancement pro server-rendered fragmenty -->
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer
+        integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+        crossorigin="anonymous"></script>
+
 
 <!-- External CSS -->
     <!-- Unified Design System -->
