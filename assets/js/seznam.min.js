@@ -941,11 +941,12 @@ async function renderOrders(items = null) {
     }
 
     // Sdílený badge stavu (používá se v obou šablonách)
-    // POSLÁNA SMS má přednost před termínem i ostatními stavy
-    const stavBadge = (rec._sms_odeslana || rec.sms_kontakt_datum || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
-      ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
-      : (appointmentText
-          ? `<span class="order-appointment">${appointmentText}</span>`
+    // Priorita: 1) termín, 2) POSLÁNA SMS, 3) odloženo, 4) čekáme na díly, 5) CN, 6) stav
+    const maSmsBadge = (rec._sms_odeslana || rec.sms_kontakt_datum || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)));
+    const stavBadge = appointmentText
+      ? `<span class="order-appointment">${appointmentText}</span>`
+      : (maSmsBadge
+          ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
           : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
               ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
               : (status.class === 'cekame-na-dily'
@@ -955,7 +956,7 @@ async function renderOrders(items = null) {
                       : `<span class="order-status-text status-${status.class}">${status.text}</span>`))));
 
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
-    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
+    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse unread-cerveny' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
 
     if (VIEW_MODE === 'radky') {
       return `
@@ -1169,14 +1170,13 @@ function createCustomerHeader() {
     </select>
   ` : status.text;
 
-  const smsIndikator = (CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum)
-    ? `<br><span class="order-status-text status-poslana-sms" style="display:inline-block;margin-top:0.3rem;">POSLÁNA SMS</span>`
-    : '';
+  const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
 
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-    <strong>Stav:</strong> ${stavHtml}${smsIndikator}
+    <strong>Stav:</strong> ${stavHtml}
+    ${smsBylKontaktovan ? `<div style="margin-top:0.5rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
   `);
 }
 

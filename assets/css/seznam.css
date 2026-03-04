@@ -1591,7 +1591,8 @@ body {
 
 .order-notes-badge.has-unread {
   font-weight: bold;
-  color: var(--wgs-black);
+  background: #dc3545 !important;
+  color: #fff !important;
 }
 
 .order-notes-badge {
