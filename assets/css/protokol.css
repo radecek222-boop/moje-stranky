@@ -755,7 +755,7 @@ button.btn:hover {
   input::-webkit-input-placeholder,
   select::-webkit-input-placeholder {
     font-size: 11px !important;
-    color: var(--wgs-light-grey) !important;
+    color: #555555 !important;
     padding-left: 0 !important;
     text-indent: 0 !important;
   }
