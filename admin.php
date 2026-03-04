@@ -260,6 +260,12 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-radek-popis" data-lang-cs="Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení" data-lang-en="Detailed WGS audit — structure, security, value, recommendations" data-lang-it="Audit dettagliato WGS — struttura, sicurezza, valore, raccomandazioni">Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení</div>
             </div>
         </div>
+        <div class="cc-radek" data-href="admin.php?tab=tools">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Diagnostika" data-lang-en="Diagnostics" data-lang-it="Diagnostica">Diagnostika</div>
+                <div class="cc-radek-popis" data-lang-cs="Zdraví systému, logy, neúspěšná přihlášení, výkon" data-lang-en="System health, logs, failed logins, performance" data-lang-it="Salute del sistema, log, accessi falliti, prestazioni">Zdraví systému, logy, neúspěšná přihlášení, výkon</div>
+            </div>
+        </div>
     </div>
 </div>
 

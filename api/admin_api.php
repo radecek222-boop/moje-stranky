@@ -195,7 +195,7 @@ try {
 function handleListKeys(PDO $pdo): void
 {
     $stmt = $pdo->prepare(
-        'SELECT id, key_code, key_type, max_usage, usage_count, is_active, created_at, sent_to_email, sent_at
+        'SELECT id, key_code, key_type, max_usage, usage_count, is_active, created_at, sent_to_email, sent_at, expires_at
          FROM wgs_registration_keys
          ORDER BY created_at DESC'
     );
@@ -215,6 +215,7 @@ function handleListKeys(PDO $pdo): void
                 'created_at' => $key['created_at'] ?? null,
                 'sent_to_email' => $key['sent_to_email'] ?? null,
                 'sent_at' => $key['sent_at'] ?? null,
+                'expires_at' => $key['expires_at'] ?? null,
             ];
         }, $keys)
     ]);
@@ -289,12 +290,24 @@ function handleCreateKey(PDO $pdo, array $payload): void
         }
     }
 
+    // Volitelna expirace klice
+    $expiresAt = null;
+    if (isset($payload['expires_at']) && trim($payload['expires_at']) !== '') {
+        $expiresInput = trim($payload['expires_at']);
+        // Ocekavame format YYYY-MM-DD nebo YYYY-MM-DD HH:MM:SS
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $expiresInput)) {
+            $expiresAt = $expiresInput . ' 23:59:59';
+        } elseif (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $expiresInput)) {
+            $expiresAt = $expiresInput;
+        }
+    }
+
     $prefix = strtoupper(substr($keyType, 0, 3));
     $keyCode = generateRegistrationKey($prefix);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at, created_by, sent_to_email)
-         VALUES (:key_code, :key_type, :max_usage, 0, 1, NOW(), :created_by, :sent_to_email)'
+        'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at, created_by, sent_to_email, expires_at)
+         VALUES (:key_code, :key_type, :max_usage, 0, 1, NOW(), :created_by, :sent_to_email, :expires_at)'
     );
 
     $stmt->bindValue(':key_code', $keyCode, PDO::PARAM_STR);
@@ -317,6 +330,13 @@ function handleCreateKey(PDO $pdo, array $payload): void
         $stmt->bindValue(':sent_to_email', $email, PDO::PARAM_STR);
     } else {
         $stmt->bindValue(':sent_to_email', null, PDO::PARAM_NULL);
+    }
+
+    // Expirace (volitelna)
+    if ($expiresAt !== null) {
+        $stmt->bindValue(':expires_at', $expiresAt, PDO::PARAM_STR);
+    } else {
+        $stmt->bindValue(':expires_at', null, PDO::PARAM_NULL);
     }
 
     $stmt->execute();

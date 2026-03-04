@@ -58,6 +58,11 @@ try {
             throw new InvalidArgumentException('Registrační klíč již byl vyčerpán.');
         }
     }
+    if (isset($keyRow['expires_at']) && $keyRow['expires_at'] !== null) {
+        if ($keyRow['expires_at'] < date('Y-m-d H:i:s')) {
+            throw new InvalidArgumentException('Registrační klíč vypršel.');
+        }
+    }
 
     $role = $keyRow['key_type'] ?? 'user';
 

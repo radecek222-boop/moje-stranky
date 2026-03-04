@@ -1240,6 +1240,7 @@ async function nactiRegistracniKlice() {
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Použití</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Aktivní</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Vytvořen</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Platný do</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Akce</th>';
             html += '</tr></thead><tbody>';
 
@@ -1266,6 +1267,22 @@ async function nactiRegistracniKlice() {
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
+                // Sloupec expirace
+                if (klic.expires_at) {
+                    const expirace = new Date(klic.expires_at);
+                    const nyni = new Date();
+                    const zbyvaMs = expirace - nyni;
+                    const zbyvaDni = Math.ceil(zbyvaMs / (1000 * 60 * 60 * 24));
+                    if (zbyvaMs < 0) {
+                        html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="color: #dc3545; font-weight: 600;">Vypršel</span><br><span style="font-size: 0.75rem; color: #999;">' + expirace.toLocaleDateString('cs-CZ') + '</span></td>';
+                    } else if (zbyvaDni <= 7) {
+                        html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="color: #856404;">Brzy vyprší</span><br><span style="font-size: 0.75rem; color: #999;">' + expirace.toLocaleDateString('cs-CZ') + ' (' + zbyvaDni + ' dní)</span></td>';
+                    } else {
+                        html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + expirace.toLocaleDateString('cs-CZ') + '</td>';
+                    }
+                } else {
+                    html += '<td style="padding: 0.5rem; border: 1px solid #ddd; color: #999;">bez omezení</td>';
+                }
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button data-action="kopirovatDoSchranky" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
                 html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-danger">Smazat</button></td>';
                 html += '</tr>';
@@ -1328,6 +1345,14 @@ function vytvorNovyKlic() {
                 </label>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Platný do (volitelné)</label>
+                <input type="date" id="expiraceDatumKlice"
+                       style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                              border-radius: 6px; color: #fff; font-size: 0.95rem; box-sizing: border-box;">
+                <div style="color: #666; font-size: 0.78rem; margin-top: 5px;">Nevyplněno = bez expirace</div>
+            </div>
+
             <div style="display: flex; gap: 10px;">
                 <button data-action="odeslatVytvoreniKlice" style="flex: 1; padding: 12px;
                         background: #fff; color: #000; border: none; border-radius: 6px;
@@ -1368,13 +1393,16 @@ async function odeslatVytvoreniKlice() {
             throw new Error('CSRF token není k dispozici');
         }
 
+        const expiraceDatum = document.getElementById('expiraceDatumKlice')?.value || '';
+
         const odpoved = await fetch('/api/admin_api.php?action=create_key', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 key_type: typKlice,
-                csrf_token: csrfToken
+                csrf_token: csrfToken,
+                expires_at: expiraceDatum || null
             })
         });
 
