@@ -103,7 +103,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-01">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-03">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -113,8 +113,23 @@ if (!$isLoggedIn && !$isAdmin) {
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
 <style>
+/* Modal vycentrován na střed desktopu */
+@media (min-width: 769px) {
+  #detailOverlay {
+    align-items: center !important;
+    padding: 1.5rem !important;
+  }
+  #detailOverlay .modal-content {
+    max-width: 560px !important;
+    width: 100% !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
+  }
+}
+
 /* ============================================
-   🔧 FIX: iOS/Safari/PWA Modal Scroll Lock
+   FIX: iOS/Safari/PWA Modal Scroll Lock
    ============================================ */
 
 /* Scroll lock pro html a body když je modal otevřený */

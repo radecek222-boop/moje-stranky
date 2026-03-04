@@ -1145,6 +1145,22 @@ document.addEventListener('alpine:init', () => {
       const overlay = document.getElementById('detailOverlay');
       if (overlay) {
         overlay.classList.add('active');
+
+        // Vycentrovat modal na desktopu - setProperty s important přebíjí universal-modal-theme
+        if (window.innerWidth >= 769) {
+          overlay.style.setProperty('display', 'flex', 'important');
+          overlay.style.setProperty('align-items', 'center', 'important');
+          overlay.style.setProperty('justify-content', 'center', 'important');
+          overlay.style.setProperty('padding', '1.5rem', 'important');
+          const obsah = overlay.querySelector('.modal-content');
+          if (obsah) {
+            obsah.style.setProperty('max-width', '860px', 'important');
+            obsah.style.setProperty('width', '100%', 'important');
+            obsah.style.setProperty('max-height', '88vh', 'important');
+            obsah.style.setProperty('overflow-y', 'auto', 'important');
+            obsah.style.setProperty('margin', '0 auto', 'important');
+          }
+        }
       }
       // Scroll lock přes centralizovanou utilitu
       if (window.scrollLock) {
