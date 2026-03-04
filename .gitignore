@@ -15,6 +15,7 @@ FINALNI_*.php
 !tests/*.md
 !docs/*.md
 !master_prompt_system*.md
+!audit.md
 *.txt
 live_test_pdf.html
 div.

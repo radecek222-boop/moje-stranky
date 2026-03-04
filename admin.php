@@ -76,6 +76,7 @@ try {
 // Získání statistik pro dashboard
 $activeKeys = 0;
 $pendingActions = 0;
+$pocetNeuspesnychPrihlaseniDnes = 0;
 
 if ($activeTab === 'dashboard') {
     try {
@@ -93,6 +94,24 @@ if ($activeTab === 'dashboard') {
     } catch (Exception $e) {
         $activeKeys = 0;
         $pendingActions = 0;
+    }
+
+    // Počet neúspěšných přihlášení dnes z audit logu
+    try {
+        $logDir = defined('LOGS_PATH') ? LOGS_PATH : __DIR__ . '/logs';
+        $logSoubor = $logDir . '/audit_' . date('Y-m') . '.log';
+        $dnesRano = date('Y-m-d') . ' 00:00:00';
+        if (file_exists($logSoubor)) {
+            $radky = file($logSoubor, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($radky as $radek) {
+                $z = json_decode($radek, true);
+                if ($z && $z['action'] === 'failed_login' && isset($z['timestamp']) && $z['timestamp'] >= $dnesRano) {
+                    $pocetNeuspesnychPrihlaseniDnes++;
+                }
+            }
+        }
+    } catch (Exception $e) {
+        $pocetNeuspesnychPrihlaseniDnes = 0;
     }
 }
 ?>
@@ -161,6 +180,15 @@ if (!$embedMode && $activeTab === 'dashboard'):
     </div>
 
     <div class="cc-seznam">
+        <?php if ($pocetNeuspesnychPrihlaseniDnes >= 5): ?>
+        <div class="cc-radek cc-radek-varovani" data-href="admin.php?tab=tools" style="border-left:3px solid #dc3545;">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" style="color:#dc3545;">Bezpečnostní upozornění</div>
+                <div class="cc-radek-popis">Dnes bylo zaznamenáno <?= $pocetNeuspesnychPrihlaseniDnes ?> neúspěšných pokusů o přihlášení — zobrazit detail v Diagnostice</div>
+            </div>
+            <div class="cc-radek-badge" style="background:#dc3545;"><?= $pocetNeuspesnychPrihlaseniDnes ?></div>
+        </div>
+        <?php endif; ?>
         <div class="cc-radek" data-href="admin.php?tab=zakaznici">
             <div class="cc-radek-info">
                 <div class="cc-radek-nazev" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
@@ -224,6 +252,24 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-radek-info">
                 <div class="cc-radek-nazev" data-lang-cs="Transport" data-lang-en="Transport" data-lang-it="Trasporto">Transport</div>
                 <div class="cc-radek-popis" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
+            </div>
+        </div>
+        <div class="cc-radek" data-href="admin.php?tab=audit">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Audit projektu" data-lang-en="Project Audit" data-lang-it="Audit del Progetto">Audit projektu</div>
+                <div class="cc-radek-popis" data-lang-cs="Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení" data-lang-en="Detailed WGS audit — structure, security, value, recommendations" data-lang-it="Audit dettagliato WGS — struttura, sicurezza, valore, raccomandazioni">Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení</div>
+            </div>
+        </div>
+        <div class="cc-radek" data-href="admin.php?tab=tools">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Diagnostika" data-lang-en="Diagnostics" data-lang-it="Diagnostica">Diagnostika</div>
+                <div class="cc-radek-popis" data-lang-cs="Zdraví systému, logy, neúspěšná přihlášení, výkon" data-lang-en="System health, logs, failed logins, performance" data-lang-it="Salute del sistema, log, accessi falliti, prestazioni">Zdraví systému, logy, neúspěšná přihlášení, výkon</div>
+            </div>
+        </div>
+        <div class="cc-radek" data-href="dnes.php">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Denní přehled" data-lang-en="Daily Overview" data-lang-it="Riepilogo Giornaliero">Denní přehled</div>
+                <div class="cc-radek-popis" data-lang-cs="Aktivní zakázky technika — termíny, kontakty, skupiny stavů" data-lang-en="Technician active jobs — deadlines, contacts, status groups" data-lang-it="Lavori attivi del tecnico — scadenze, contatti, gruppi">Aktivní zakázky technika — termíny, kontakty, skupiny stavů</div>
             </div>
         </div>
     </div>
@@ -1271,6 +1317,11 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'transport'): ?>
   <!-- TAB: TRANSPORT EVENTS -->
   <?php require_once __DIR__ . '/includes/admin_transport.php'; ?>
+  <?php endif; ?>
+
+  <?php if ($activeTab === 'audit'): ?>
+  <!-- TAB: AUDIT PROJEKTU -->
+  <?php require_once __DIR__ . '/includes/admin_audit.php'; ?>
   <?php endif; ?>
 
 </div>

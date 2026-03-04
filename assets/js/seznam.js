@@ -959,17 +959,26 @@ async function renderOrders(items = null) {
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
     const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse unread-cerveny' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
 
+    // U9: Počet fotek
+    const pocetFotek = (rec.photos || []).length;
+    const fotoBadge  = pocetFotek > 0
+      ? `<span class="foto-pocet-badge" title="${pocetFotek} fotek">${pocetFotek} F</span>`
+      : '';
+
+    // U8: Checkbox pro hromadné akce
+    const hromadneCheck = `<input type="checkbox" class="hromadne-check" data-id="${rec.id}" onclick="event.stopPropagation(); hromadneToggle(${rec.id}, this.checked);" style="width:16px;height:16px;cursor:pointer;display:none;" title="Vybrat">`;
+
     if (VIEW_MODE === 'radky') {
       return `
         <div class="order-row ${searchMatchClass} ${statusBgClass} ${cnClass}" data-action="showDetailById" data-id="${rec.id}">
-          <div class="order-row-dot">${stavDot}</div>
+          <div class="order-row-dot">${hromadneCheck}${stavDot}</div>
           <div class="order-row-id">${highlightedOrderId}</div>
           <div class="order-row-customer">${highlightedCustomer}</div>
           <div class="order-row-address">${highlightedAddress}</div>
           <div class="order-row-product">${highlightedProduct}</div>
           <div class="order-row-date">${date}</div>
           <div class="order-row-badge">${stavBadge}</div>
-          <div class="order-row-chat">${chatBadge}</div>
+          <div class="order-row-chat">${fotoBadge}${chatBadge}</div>
         </div>
       `;
     }
@@ -979,6 +988,8 @@ async function renderOrders(items = null) {
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
+            ${hromadneCheck}
+            ${fotoBadge}
             ${chatBadge}
             ${stavDot}
           </div>
@@ -1262,6 +1273,7 @@ async function showDetail(recordOrId) {
         ${technickaFunkce}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisknout výtisk</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
@@ -5881,3 +5893,98 @@ async function zalozitZnovu(reklamaceId) {
 
 // Export do window
 window.zalozitZnovu = zalozitZnovu;
+
+// ==========================================
+// HROMADNÉ AKCE (U8)
+// ==========================================
+let VYBRANE_IDS = new Set();
+let HROMADNE_MOD = false;
+
+function hromadneToggle(id, zaskrtnuto) {
+    if (zaskrtnuto) {
+        VYBRANE_IDS.add(id);
+    } else {
+        VYBRANE_IDS.delete(id);
+    }
+    hromadneAktualizujToolbar();
+}
+
+function hromadneZapnout() {
+    HROMADNE_MOD = true;
+    VYBRANE_IDS.clear();
+    document.querySelectorAll('.hromadne-check').forEach(el => { el.style.display = ''; el.checked = false; });
+    document.querySelectorAll('[data-action="showDetailById"]').forEach(el => {
+        el.addEventListener('click', hromadneZabranDetailu, true);
+    });
+    hromadneAktualizujToolbar();
+    const btn = document.getElementById('btnHromadneToggle');
+    if (btn) btn.textContent = 'Zrušit výběr';
+}
+
+function hromadneVypnout() {
+    HROMADNE_MOD = false;
+    VYBRANE_IDS.clear();
+    document.querySelectorAll('.hromadne-check').forEach(el => { el.style.display = 'none'; el.checked = false; });
+    document.querySelectorAll('[data-action="showDetailById"]').forEach(el => {
+        el.removeEventListener('click', hromadneZabranDetailu, true);
+    });
+    const toolbar = document.getElementById('hromadneToolbar');
+    if (toolbar) toolbar.style.display = 'none';
+    const btn = document.getElementById('btnHromadneToggle');
+    if (btn) btn.textContent = 'Výběr';
+}
+
+function hromadneZabranDetailu(e) {
+    if (HROMADNE_MOD) e.stopImmediatePropagation();
+}
+
+function hromadneAktualizujToolbar() {
+    let toolbar = document.getElementById('hromadneToolbar');
+    if (!toolbar) {
+        toolbar = document.createElement('div');
+        toolbar.id = 'hromadneToolbar';
+        toolbar.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:0.75rem 1.25rem;border-radius:6px;display:flex;align-items:center;gap:0.75rem;z-index:9000;box-shadow:0 4px 20px rgba(0,0,0,0.4);font-size:0.85rem;flex-wrap:wrap;';
+        document.body.appendChild(toolbar);
+    }
+    if (VYBRANE_IDS.size === 0) {
+        toolbar.style.display = 'none';
+        return;
+    }
+    toolbar.style.display = 'flex';
+    toolbar.innerHTML = `
+        <span style="font-weight:600;">Vybráno: ${VYBRANE_IDS.size}</span>
+        <button onclick="hromadneZmenStav('done')"   style="background:#555;color:#fff;border:none;padding:0.4rem 0.9rem;border-radius:4px;cursor:pointer;font-size:0.8rem;">Hotovo</button>
+        <button onclick="hromadneZmenStav('open')"   style="background:#555;color:#fff;border:none;padding:0.4rem 0.9rem;border-radius:4px;cursor:pointer;font-size:0.8rem;">Domluvená</button>
+        <button onclick="hromadneZmenStav('wait')"   style="background:#555;color:#fff;border:none;padding:0.4rem 0.9rem;border-radius:4px;cursor:pointer;font-size:0.8rem;">Čeká</button>
+        <button onclick="hromadneVypnout()"          style="background:#333;color:#ccc;border:none;padding:0.4rem 0.9rem;border-radius:4px;cursor:pointer;font-size:0.8rem;">Zrušit</button>
+    `;
+}
+
+async function hromadneZmenStav(novyStav) {
+    if (VYBRANE_IDS.size === 0) return;
+    const ids = Array.from(VYBRANE_IDS);
+    const csrfToken = await (typeof fetchCsrfToken === 'function' ? fetchCsrfToken() : Promise.resolve(''));
+    let uspesnych = 0;
+    for (const id of ids) {
+        try {
+            const resp = await fetch('/app/controllers/save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, stav: novyStav, csrf_token: csrfToken })
+            });
+            const data = await resp.json();
+            if (data.status === 'success' || data.id) uspesnych++;
+        } catch (e) {
+            logger.warn('Hromadná změna stavu selhala pro ID ' + id + ':', e);
+        }
+    }
+    wgsToast && wgsToast.success('Změněno ' + uspesnych + ' z ' + ids.length + ' zakázek.');
+    hromadneVypnout();
+    if (typeof loadOrders === 'function') loadOrders();
+    else if (typeof renderOrders === 'function') renderOrders();
+}
+
+window.hromadneToggle  = hromadneToggle;
+window.hromadneZapnout = hromadneZapnout;
+window.hromadneVypnout = hromadneVypnout;
+window.hromadneZmenStav = hromadneZmenStav;

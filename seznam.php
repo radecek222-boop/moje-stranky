@@ -1007,6 +1007,18 @@ body.modal-open {
   background: #444444 !important;
   color: #ffffff !important;
 }
+/* U9: Foto počet badge */
+.foto-pocet-badge {
+  display: inline-block;
+  background: #888;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+  cursor: default;
+}
 
 /* Neonově zelený box pro vzdálenost při kolizi */
 .collision-distance-box {
@@ -2198,6 +2210,8 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="view-toggle-btn" data-view="karty">KARTY</button>
     <span class="view-toggle-sep">|</span>
     <button class="view-toggle-btn" data-view="radky">ŘÁDKY</button>
+    <span class="view-toggle-sep">|</span>
+    <button class="view-toggle-btn" id="btnHromadneToggle" onclick="typeof hromadneZapnout === 'function' && (HROMADNE_MOD ? hromadneVypnout() : hromadneZapnout())">Výběr</button>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
