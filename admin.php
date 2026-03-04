@@ -1273,6 +1273,11 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_transport.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'audit'): ?>
+  <!-- TAB: AUDIT PROJEKTU -->
+  <?php require_once __DIR__ . '/includes/admin_audit.php'; ?>
+  <?php endif; ?>
+
 </div>
 </main>
 <?php endif; // Konec MAIN (pokud není dashboard) ?>

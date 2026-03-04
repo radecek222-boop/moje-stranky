@@ -106,6 +106,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Konfigurace systému',
                 'tab' => 'admin_configuration',
             ],
+            'audit' => [
+                'href' => 'admin.php?tab=audit',
+                'tab_label' => 'Audit',
+                'tab' => 'audit',
+            ],
             'admin_actions' => [
                 'href' => 'admin.php?tab=admin_actions',
                 'tab_label' => 'Akce & Úkoly',
