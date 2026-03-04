@@ -18,6 +18,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/wgs_cache.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -43,6 +44,15 @@ try {
         // LIST - Veřejný seznam položek ceníku
         // ========================================
         case 'list':
+            // Cache ceníku - TTL 1 hodina (invaliduje se při update/create/delete/reorder)
+            $cacheKlic = 'cenik_list_v1';
+            $cachovanaData = WgsCache::nacti($cacheKlic);
+
+            if ($cachovanaData !== null) {
+                sendJsonSuccess('Ceník načten', $cachovanaData);
+                break;
+            }
+
             $stmt = $pdo->query("
                 SELECT *
                 FROM wgs_pricing
@@ -62,11 +72,15 @@ try {
                 $byCategory[$category][] = $item;
             }
 
-            sendJsonSuccess('Ceník načten', [
-                'items' => $items,
+            $vysledek = [
+                'items'       => $items,
                 'by_category' => $byCategory,
-                'total' => count($items)
-            ]);
+                'total'       => count($items),
+            ];
+
+            WgsCache::uloz($cacheKlic, $vysledek, WgsCache::TTL_DLOUHY);
+
+            sendJsonSuccess('Ceník načten', $vysledek);
             break;
 
         // ========================================
@@ -156,6 +170,7 @@ try {
             ]);
 
             if ($success) {
+                WgsCache::smaz('cenik_list_v1');
                 sendJsonSuccess('Položka aktualizována', ['id' => $itemId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při aktualizaci');
@@ -219,6 +234,7 @@ try {
 
             if ($success) {
                 $newId = $pdo->lastInsertId();
+                WgsCache::smaz('cenik_list_v1');
                 sendJsonSuccess('Položka vytvořena', ['id' => $newId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při vytváření');
@@ -247,6 +263,7 @@ try {
             $success = $stmt->execute(['id' => $itemId]);
 
             if ($success) {
+                WgsCache::smaz('cenik_list_v1');
                 sendJsonSuccess('Položka smazána');
             } else {
                 sendJsonError('Chyba při mazání');
@@ -287,6 +304,7 @@ try {
                 }
 
                 $pdo->commit();
+                WgsCache::smaz('cenik_list_v1');
                 sendJsonSuccess('Pořadí aktualizováno');
 
             } catch (Exception $e) {
