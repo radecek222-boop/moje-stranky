@@ -159,9 +159,17 @@ function wygStav(string $stav): string {
             font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .btn-tisk:hover { background: #333; }
+        .btn-zavrit {
+            position: fixed; bottom: 1.5rem; left: 1.5rem;
+            background: #fff; color: #000; border: 1px solid #ccc;
+            padding: 0.75rem 1.5rem; border-radius: 4px;
+            font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-zavrit:hover { background: #f0f0f0; }
 
         @media print {
             .btn-tisk { display: none !important; }
+            .btn-zavrit { display: none !important; }
             body { background: #fff; }
             .tisk-obal { padding: 1rem; max-width: 100%; }
             @page { margin: 1.5cm; }
@@ -341,6 +349,7 @@ function wygStav(string $stav): string {
 
 </div>
 
+<button class="btn-zavrit" onclick="window.close()">Zavřít</button>
 <button class="btn-tisk" onclick="window.print()">Tisknout</button>
 
 </body>

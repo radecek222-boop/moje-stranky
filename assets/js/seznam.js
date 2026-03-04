@@ -935,6 +935,9 @@ async function renderOrders(items = null) {
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
     const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse unread-cerveny' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
 
+    // Počet fotek (použito v detailu u tlačítka Galerie)
+    const pocetFotek = (rec.photos || []).length;
+
     // U8: Checkbox pro hromadné akce
     const hromadneCheck = `<input type="checkbox" class="hromadne-check" data-id="${rec.id}" onclick="event.stopPropagation(); hromadneToggle(${rec.id}, this.checked);" style="width:16px;height:16px;cursor:pointer;display:none;" title="Vybrat">`;
 
@@ -1188,45 +1191,43 @@ function createCustomerHeader() {
     else aktualniHodnota = 'cn_poslana';
   }
 
-  // Barevné badge pro výběr stavu (stejné neonové barvy jako karet)
-  const stavyProVyber = [
-    { hodnota: 'wait',           text: 'NOVÁ',           barva: '#ffdd00', stin: 'rgba(255,221,0,0.5)',     textBarva: '#111' },
-    { hodnota: 'open',           text: 'DOMLUVENÁ',      barva: '#00e5ff', stin: 'rgba(0,229,255,0.5)',     textBarva: '#111' },
-    { hodnota: 'cekame_na_dily', text: 'Čekáme na díly', barva: '#999',    stin: 'rgba(153,153,153,0.4)',   textBarva: '#fff' },
-    { hodnota: 'odlozena',       text: 'ODLOŽENO',        barva: '#9b59b6', stin: 'rgba(155,89,182,0.5)',    textBarva: '#fff' },
-    { hodnota: 'done',           text: 'HOTOVO',          barva: '#39ff14', stin: 'rgba(57,255,20,0.5)',     textBarva: '#111' },
-  ];
-
-  const stavBadgeButtonsHtml = stavyProVyber.map(s => {
-    const jeAktivni = aktualniHodnota === s.hodnota;
-    const styl = jeAktivni
-      ? `background:${s.barva};color:${s.textBarva};box-shadow:0 0 8px ${s.stin},0 0 16px ${s.stin};border:1px solid ${s.barva};`
-      : `background:transparent;color:${s.barva};border:1px solid ${s.barva};opacity:0.55;`;
-    return `<span onclick="zmenitStavZakazky('${CURRENT_RECORD.id}','${s.hodnota}','${zakaznikEmail}')"
-                  style="cursor:pointer;display:inline-block;border-radius:10px;padding:0.18rem 0.5rem;font-size:0.58rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;transition:all 0.2s;${styl}">${s.text}</span>`;
-  }).join('');
-
-  // Druhý řádek — POZ (CN) stavy
-  const cnStavyProVyber = [
-    { hodnota: 'cn_poslana',      text: 'Poslána CN',   barva: '#aaa',    stin: 'rgba(170,170,170,0.4)', textBarva: '#111' },
-    { hodnota: 'cn_odsouhlasena', text: 'Odsouhlasena', barva: '#28a745', stin: 'rgba(40,167,69,0.5)',   textBarva: '#fff' },
-    { hodnota: 'cn_cekame_nd',    text: 'Čekáme ND',    barva: '#888',    stin: 'rgba(136,136,136,0.4)', textBarva: '#fff' },
-    { hodnota: 'cn_zamitnuta',    text: 'Zamítnuta',    barva: '#dc3545', stin: 'rgba(220,53,69,0.5)',   textBarva: '#fff' },
-  ];
-
-  const cnBadgeButtonsHtml = cnStavyProVyber.map(s => {
-    const jeAktivni = aktualniHodnota === s.hodnota;
-    const styl = jeAktivni
-      ? `background:${s.barva};color:${s.textBarva};box-shadow:0 0 8px ${s.stin},0 0 16px ${s.stin};border:1px solid ${s.barva};`
-      : `background:transparent;color:${s.barva};border:1px solid ${s.barva};opacity:0.55;`;
-    return `<span onclick="zmenitStavZakazky('${CURRENT_RECORD.id}','${s.hodnota}','${zakaznikEmail}')"
-                  style="cursor:pointer;display:inline-block;border-radius:10px;padding:0.18rem 0.5rem;font-size:0.58rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;transition:all 0.2s;${styl}">${s.text}</span>`;
-  }).join('');
+  // Helper: vygeneruje 1 pill tlačítko (horní řada stavů)
+  // Stejná výška jako spodní CN řada: padding 0.2rem 0.3rem, border-radius 8px, font 0.6rem/600
+  const pill = (stav, label, barva, textAktivni = '#000') => {
+    const aktivni = aktualniHodnota === stav;
+    const bg      = aktivni ? barva : 'transparent';
+    const barvaText = aktivni ? textAktivni : barva;
+    const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
+    const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+  };
+  // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
+  const pillCN = (stav, label) => {
+    const aktivni = aktualniHodnota === stav;
+    const bg      = aktivni ? '#1a1a1a' : '#888';
+    const barvaText = '#fff';
+    const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
+    const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+  };
 
   const stavHtml = isAdmin ? `
-    <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.2rem;">${stavBadgeButtonsHtml}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.25rem;padding-top:0.25rem;border-top:1px solid #333;">${cnBadgeButtonsHtml}</div>
-  ` : `<span class="order-status-text status-${status.class}" style="font-size:0.65rem;padding:0.18rem 0.5rem;">${status.text}</span>`;
+    <div class="stav-workflow" style="margin-top:0.5rem;">
+      <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
+        ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
+        ${pill('open',           'DOML',   '#00e5ff', '#000')}
+        ${pill('cekame_na_dily', 'DÍLY',   '#888888', '#fff')}
+        ${pill('odlozena',       'ODLOŽ',  '#9b59b6', '#fff')}
+        ${pill('done',           'HOTOVO', '#39ff14', '#000')}
+      </div>
+      <div style="display:flex;gap:0.2rem;width:100%;">
+        ${pillCN('cn_poslana',      'Pos.CN')}
+        ${pillCN('cn_odsouhlasena', 'Odsouh.')}
+        ${pillCN('cn_cekame_nd',    'Čeká ND')}
+        ${pillCN('cn_zamitnuta',    'Zamítnu.')}
+      </div>
+    </div>
+  ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
 
@@ -1264,17 +1265,19 @@ async function showDetail(recordOrId) {
   const status = getStatus(record.stav);
   
   const isCompleted = Utils.isCompleted(record);
-  
+
   let buttonsHtml = '';
-  
+  let dokoncenoDatum, dokoncenoData, dokoncenoCas, jeProdejce;
+  let vytvorCNBtn, jeProdejceElse, technickaFunkce;
+
   if (isCompleted) {
     // Formátovat datum a čas dokončení
-    const dokoncenoDatum = record.updated_at ? formatDate(record.updated_at) : '—';
-    const dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
-    const dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
+    dokoncenoDatum = record.updated_at ? formatDate(record.updated_at) : '—';
+    dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
+    dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
 
     // Tlacitka podle role - prodejce nema pristup k technickim funkcim
-    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+    jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
       <div class="detail-info-box">
@@ -1283,48 +1286,37 @@ async function showDetail(recordOrId) {
       </div>
 
       <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        <button class="detail-btn detail-btn-warning" style="background: #ffeb3b; color: #000; border: 2px solid #000; font-weight: 700;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
+        <button class="detail-btn detail-btn-primary" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="openGalerie" data-id="${record.id}">Galerie</button>
-        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <div style="border-top: 1px solid #333; margin-top: 0.5rem; padding-top: 0.4rem;">
-            <button class="detail-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 0.4rem 0.75rem; font-size: 0.78rem; width: 100%; cursor: pointer;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
-          </div>
+          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
   } else {
-    const jeAdminElse = CURRENT_USER && CURRENT_USER.is_admin;
-    const jeProdejceElse = CURRENT_USER && CURRENT_USER.role === 'prodejce';
-
-    // Vytvořit CN — pouze admin
-    const vytvorCNBtn = jeAdminElse ? `
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
+    // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
+    vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
+        <button class="detail-btn detail-btn-success" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
     ` : '';
 
-    // Technické funkce — ne pro prodejce
-    const technickaFunkce = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-    ` : '';
+    // Prodejce nema pristup k technickim funkcim (zahajit navstevu, naplanovat termin, kontaktovat)
+    jeProdejceElse = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
-    // Tisk zakázky — admin a prodejce
-    const tiskBtn = (jeAdminElse || jeProdejceElse) ? `
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisk zakázky</button>
-    ` : '';
-
-    // QR Platba — ne pro prodejce, předposlední
-    const qrPlatbaBtn = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+    // Tlacitka pro techniky a adminy (ne pro prodejce)
+    technickaFunkce = !jeProdejceElse ? `
+        <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     const jeDesktopBtn = window.innerWidth >= 769;
@@ -1334,20 +1326,17 @@ async function showDetail(recordOrId) {
     const btnFs = jeDesktopBtn ? '0.78rem' : '0.78rem';
 
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: ${btnGap};">
-        <button class="btn" style="width: 100%; padding: 0.2rem 0.6rem; font-size: 0.75rem; background: transparent; color: #aaa; text-decoration: underline; border: none; cursor: pointer;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+      <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${vytvorCNBtn}
         ${technickaFunkce}
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="openGalerie" data-id="${record.id}">Galerie</button>
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        ${tiskBtn}
-        ${qrPlatbaBtn}
-        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
-        ${jeAdminElse ? `
-        <div style="border-top: 1px solid #333; margin-top: 0.3rem; padding-top: 0.3rem;">
-          <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
-        </div>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
+        ${CURRENT_USER && CURRENT_USER.is_admin ? `
+          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+        ` : ''}
       </div>
     `;
   }
@@ -2673,7 +2662,7 @@ function showContactMenu(id) {
     <div class="modal-body">
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
-        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Nezveda SMS</button>` : ''}
+        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
         ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
@@ -3950,7 +3939,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'previousMonth', 'nextMonth', 'showBookingDetail', 'showCalendarBack',
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
-      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek'
+      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek',
+      'zmenaStavuPill'
     ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
@@ -3979,7 +3969,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('change', (e) => {
-    // Handler pro změnu stavu zakázky (admin dropdown)
+    // Handler pro změnu stavu zakázky (admin dropdown - fallback)
     if (e.target.id === 'zmenaStavuSelect') {
       const novyStav = e.target.value;
       const reklamaceId = e.target.getAttribute('data-id');
@@ -4434,12 +4424,20 @@ async function loadPhotosFromDB(reklamaceId) {
  */
 function otevritVyberFotek(reklamaceId) {
   logger.log('[Fototeka] Otviram vyber fotek pro reklamaci:', reklamaceId);
-  const input = document.getElementById('fototeka-input-' + reklamaceId);
-  if (input) {
-    input.click();
-  } else {
-    logger.error('[Fototeka] Input element nenalezen');
+  let input = document.getElementById('fototeka-input-' + reklamaceId);
+  if (!input) {
+    // Dynamicky vytvorit input pokud neexistuje (volano z hlavniho detailu)
+    input = document.createElement('input');
+    input.type = 'file';
+    input.id = 'fototeka-input-' + reklamaceId;
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.style.display = 'none';
+    input.setAttribute('data-reklamace-id', reklamaceId);
+    document.body.appendChild(input);
+    input.addEventListener('change', zpracujVybraneFotky);
   }
+  input.click();
 }
 
 /**
@@ -4528,8 +4526,13 @@ async function zpracujVybraneFotky(event) {
     logger.log('[Fototeka] Nahrano fotek:', vysledek.count);
     wgsToast.success('Nahrano ' + vysledek.count + ' fotek');
 
-    // Aktualizovat grid s fotkami
-    await aktualizujFototekaGrid(reklamaceId);
+    // Aktualizovat grid s fotkami - galerie nebo fototéka podle kontextu
+    if (input.getAttribute('data-galerie-mode') === '1' && document.getElementById('galerie-grid')) {
+      const noveFotky = await loadPhotosFromDB(reklamaceId);
+      renderGalerieGrid(noveFotky, reklamaceId);
+    } else {
+      await aktualizujFototekaGrid(reklamaceId);
+    }
 
     // Reset inputu
     input.value = '';
@@ -4669,8 +4672,92 @@ async function aktualizujFototekaGrid(reklamaceId) {
   }
 }
 
+// Galerie: zobrazí fotky zakázky v overlay (stejné chování jako fototéka v showCustomerDetail)
+async function otevritGalerii(reklamaceId) {
+  const fotky = await loadPhotosFromDB(reklamaceId);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'galerie-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:10005;display:flex;flex-direction:column;';
+
+  const hlavicka = document.createElement('div');
+  hlavicka.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #333;flex-shrink:0;';
+  hlavicka.innerHTML = `
+    <span id="galerie-nadpis" style="color:#aaa;font-size:0.9rem;font-weight:600;">Fotografie (${fotky.length})</span>
+    <div style="display:flex;gap:0.5rem;">
+      <button id="galerie-pridat-btn" style="background:#333;color:#fff;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Přidat fotky</button>
+      <button onclick="document.getElementById('galerie-overlay').remove()" style="background:transparent;color:#aaa;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">Zavřít</button>
+    </div>
+  `;
+
+  const obsah = document.createElement('div');
+  obsah.style.cssText = 'flex:1;overflow-y:auto;padding:1rem;';
+
+  const grid = document.createElement('div');
+  grid.id = 'galerie-grid';
+  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;min-height:60px;';
+  obsah.appendChild(grid);
+
+  const nahravaniDiv = document.createElement('div');
+  nahravaniDiv.id = 'galerie-nahravani';
+  nahravaniDiv.style.cssText = 'display:none;padding:0.5rem;background:#222;border-radius:4px;margin-top:0.75rem;';
+  nahravaniDiv.innerHTML = `<p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p><div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;"><div id="galerie-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div></div>`;
+  obsah.appendChild(nahravaniDiv);
+
+  overlay.appendChild(hlavicka);
+  overlay.appendChild(obsah);
+  document.body.appendChild(overlay);
+
+  // File input pro přidání fotek
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.id = 'galerie-input-' + reklamaceId;
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.style.display = 'none';
+  input.setAttribute('data-reklamace-id', reklamaceId);
+  input.setAttribute('data-galerie-mode', '1');
+  document.body.appendChild(input);
+  input.addEventListener('change', zpracujVybraneFotky);
+
+  document.getElementById('galerie-pridat-btn').onclick = () => input.click();
+
+  renderGalerieGrid(fotky, reklamaceId);
+}
+
+function renderGalerieGrid(fotky, reklamaceId) {
+  const grid = document.getElementById('galerie-grid');
+  const nadpis = document.getElementById('galerie-nadpis');
+  if (!grid) return;
+  if (nadpis) nadpis.textContent = `Fotografie (${fotky.length})`;
+  if (fotky.length === 0) {
+    grid.innerHTML = '<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>';
+    return;
+  }
+  grid.innerHTML = fotky.map((f, i) => {
+    const photoPath = typeof f === 'object' ? f.photo_path : f;
+    const photoId = typeof f === 'object' ? f.id : null;
+    const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+    return `
+      <div class="foto-wrapper" style="position:relative;width:80px;height:80px;flex-shrink:0;">
+        <img src='${photoPath}'
+             style='width:80px;height:80px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             alt='Fotka ${i+1}' loading="lazy"
+             data-action="showPhotoFullscreen" data-url="${escapedUrl}">
+        ${photoId ? `
+          <button class="foto-delete-btn"
+                  data-action="smazatFotku"
+                  data-photo-id="${photoId}"
+                  data-url="${escapedUrl}"
+                  title="Smazat fotku">x</button>
+        ` : ''}
+      </div>`;
+  }).join('');
+}
+
 // Globalni pristup k funkcim fototéky
 window.otevritVyberFotek = otevritVyberFotek;
+window.otevritGalerii = otevritGalerii;
 window.zpracujVybraneFotky = zpracujVybraneFotky;
 
 // PAGINATION: Load more handler

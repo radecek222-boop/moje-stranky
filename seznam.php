@@ -103,7 +103,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-03">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-06">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -2534,6 +2534,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'tiskniVytisk':
+        if (id) {
+          window.open('tisk.php?id=' + id, '_blank');
+        }
+        break;
+
       case 'showQrPlatbaModal':
         if (id && typeof showQrPlatbaModal === 'function') {
           console.log('[EMERGENCY] Oteviram QR platbu pro ID:', id);
@@ -2576,10 +2582,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'otevritVyberFotek':
         if (id && typeof otevritVyberFotek === 'function') {
-          console.log('[EMERGENCY] Otviram vyber fotek pro ID:', id);
           otevritVyberFotek(id);
+        }
+        break;
+
+      case 'otevritGalerii':
+        if (id && typeof otevritGalerii === 'function') {
+          otevritGalerii(id);
         } else {
-          console.error('[EMERGENCY] otevritVyberFotek funkce neni dostupna nebo ID chybi');
+          console.error('[EMERGENCY] otevritGalerii funkce neni dostupna nebo ID chybi');
         }
         break;
 
@@ -2588,6 +2599,17 @@ document.addEventListener('DOMContentLoaded', () => {
           const aktualniStav = parseInt(button.getAttribute('data-odlozena') || '0');
           const novyStav = aktualniStav ? 0 : 1;
           prepnoutOdlozeni(id, novyStav);
+        }
+        break;
+      }
+
+      case 'zmenaStavuPill': {
+        if (id) {
+          const stavPill = button.getAttribute('data-stav');
+          const emailPill = button.getAttribute('data-email') || '';
+          if (stavPill && typeof zmenitStavZakazky === 'function') {
+            zmenitStavZakazky(id, stavPill, emailPill);
+          }
         }
         break;
       }
