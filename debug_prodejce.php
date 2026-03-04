@@ -6,9 +6,10 @@ require_once __DIR__ . '/init.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Kontrola přihlášení
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['error' => 'Nepřihlášen']);
+// Kontrola přihlášení - pouze admin
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Přístup odepřen']);
     exit;
 }
 
