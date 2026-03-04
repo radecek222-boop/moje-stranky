@@ -2595,8 +2595,8 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'zpetDoDetailu':
-        if (typeof showDetail === 'function' && window.CURRENT_RECORD) {
-          showDetail(window.CURRENT_RECORD);
+        if (typeof showDetail === 'function' && id) {
+          showDetail(id);
         }
         break;
 

@@ -4710,7 +4710,7 @@ async function otevritGalerii(reklamaceId) {
     ${ModalManager.createHeader(`Galerie (${fotky.length})`, '')}
     <div class="modal-body">
       <div class="detail-buttons" style="margin-bottom:1rem;">
-        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu">Zpět do detailu</button>
+        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu" data-id="${reklamaceId}">Zpět do detailu</button>
         <button class="detail-btn detail-btn-primary" id="galerie-pridat-btn">Přidat fotky</button>
       </div>
       <div id="galerie-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
