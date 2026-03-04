@@ -8,6 +8,7 @@ require_once __DIR__ . '/init.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
     die("Přístup odepřen - pouze admin");
 }
 
