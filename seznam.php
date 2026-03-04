@@ -2336,7 +2336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'openPDF':
+      case 'openPDF': {
         // Podpora pro data-url i data-pdf-path
         const pdfUrl = url || button.getAttribute('data-pdf-path');
         if (!pdfUrl) {
@@ -2355,6 +2355,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.open(pdfUrl, '_blank');
         }
         break;
+      }
 
       case 'openKnihovnaPDF':
         // Otevrit knihovnu PDF se seznamem dokumentu a moznosti nahrat
@@ -2438,27 +2439,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'sendContactAttemptEmail':
+      case 'sendContactAttemptEmail': {
         if (id && typeof sendContactAttemptEmail === 'function') {
-          const phone = button.getAttribute('data-phone');
-          sendContactAttemptEmail(id, phone);
+          const telefon = button.getAttribute('data-phone');
+          sendContactAttemptEmail(id, telefon);
         }
         break;
+      }
 
-      case 'showPhotoFullscreen':
-        const photoSrc = button.getAttribute('data-src') || button.src;
-        if (photoSrc && typeof showPhotoFullscreen === 'function') {
-          showPhotoFullscreen(photoSrc);
+      case 'showPhotoFullscreen': {
+        const fotoSrc = button.getAttribute('data-src') || button.src;
+        if (fotoSrc && typeof showPhotoFullscreen === 'function') {
+          showPhotoFullscreen(fotoSrc);
         }
         break;
+      }
 
-      case 'smazatFotku':
-        const photoId = button.getAttribute('data-photo-id');
-        const photoUrl = button.getAttribute('data-url');
-        if (typeof smazatFotku === 'function' && photoId) {
-          smazatFotku(photoId, photoUrl);
+      case 'smazatFotku': {
+        const fotoId = button.getAttribute('data-photo-id');
+        const fotoUrl = button.getAttribute('data-url');
+        if (typeof smazatFotku === 'function' && fotoId) {
+          smazatFotku(fotoId, fotoUrl);
         }
         break;
+      }
 
       case 'deleteReklamace':
         if (id && typeof deleteReklamace === 'function') {
@@ -2496,12 +2500,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'closeErrorModal':
-        const errorModal = document.getElementById('errorModal');
-        if (errorModal) {
-          errorModal.remove();
+      case 'closeErrorModal': {
+        const chybovaHlaska = document.getElementById('errorModal');
+        if (chybovaHlaska) {
+          chybovaHlaska.remove();
         }
         break;
+      }
 
       case 'filterUnreadNotes':
         if (typeof filterUnreadNotes === 'function') {
@@ -2509,15 +2514,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'showHistoryPDF':
-        const originalId = button.getAttribute('data-original-id');
-        if (originalId && typeof showHistoryPDF === 'function') {
-          console.log('[EMERGENCY] Nacitam historii PDF pro original ID:', originalId);
-          showHistoryPDF(originalId);
+      case 'showHistoryPDF': {
+        const puvodniId = button.getAttribute('data-original-id');
+        if (puvodniId && typeof showHistoryPDF === 'function') {
+          console.log('[EMERGENCY] Nacitam historii PDF pro original ID:', puvodniId);
+          showHistoryPDF(puvodniId);
         } else {
           console.error('[EMERGENCY] showHistoryPDF funkce neni dostupna nebo original ID chybi');
         }
         break;
+      }
 
       case 'showVideoteka':
         if (id && typeof zobrazVideotekaArchiv === 'function') {
@@ -2552,20 +2558,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'deleteNote':
+      case 'deleteNote': {
         e.preventDefault();
         e.stopPropagation();
-        const noteId = button.getAttribute('data-note-id');
-        const orderId = button.getAttribute('data-order-id');
-        console.log('[EMERGENCY] deleteNote - noteId:', noteId, 'orderId:', orderId, 'funkce dostupna:', typeof deleteNote === 'function');
-        if (noteId && typeof deleteNote === 'function') {
-          console.log('[EMERGENCY] Mazu poznamku ID:', noteId);
-          deleteNote(noteId, orderId);
+        const idPoznamky = button.getAttribute('data-note-id');
+        const idObjednavky = button.getAttribute('data-order-id');
+        console.log('[EMERGENCY] deleteNote - noteId:', idPoznamky, 'orderId:', idObjednavky, 'funkce dostupna:', typeof deleteNote === 'function');
+        if (idPoznamky && typeof deleteNote === 'function') {
+          console.log('[EMERGENCY] Mazu poznamku ID:', idPoznamky);
+          deleteNote(idPoznamky, idObjednavky);
         } else {
           console.error('[EMERGENCY] deleteNote funkce neni dostupna nebo note ID chybi');
           alert('Chyba: Funkce pro mazání není dostupná. Zkuste obnovit stránku.');
         }
         break;
+      }
 
       case 'otevritVyberFotek':
         if (id && typeof otevritVyberFotek === 'function') {
@@ -2576,13 +2583,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'prepnoutOdlozeni':
+      case 'prepnoutOdlozeni': {
         if (id) {
-          const aktualniHodnota = parseInt(button.getAttribute('data-odlozena') || '0');
-          const novaHodnota = aktualniHodnota ? 0 : 1;
-          prepnoutOdlozeni(id, novaHodnota);
+          const aktualniStav = parseInt(button.getAttribute('data-odlozena') || '0');
+          const novyStav = aktualniStav ? 0 : 1;
+          prepnoutOdlozeni(id, novyStav);
         }
         break;
+      }
 
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
