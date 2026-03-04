@@ -55,8 +55,6 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <main id="main-content">
   <section class="hero">
     <div class="hero-content">
-      <h1 class="hero-title">WGS</h1>
-      
       <div class="hero-subtitle">White Glove Service</div>
       
       <p class="hero-description"
