@@ -12,7 +12,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.95); /* intentional - tmavý overlay */
   z-index: 10005;
   display: none;
   align-items: center;
@@ -28,14 +28,14 @@
 
 /* Hlavní loading box */
 .wgs-loading-box {
-  background: #1a1a1a;
-  border: 2px solid #39ff14;
+  background: var(--wgs-darkest);
+  border: 2px solid var(--wgs-neon-green);
   border-radius: 12px;
   padding: 40px 50px;
   box-shadow:
-    0 0 20px rgba(57, 255, 20, 0.4),
-    0 0 40px rgba(57, 255, 20, 0.2),
-    0 0 60px rgba(57, 255, 20, 0.1);
+    0 0 20px rgba(var(--wgs-neon-green-rgb), 0.4),
+    0 0 40px rgba(var(--wgs-neon-green-rgb), 0.2),
+    0 0 60px rgba(var(--wgs-neon-green-rgb), 0.1);
   animation: wgs-loading-pulse 2s ease-in-out infinite;
   display: flex;
   flex-direction: column;
@@ -49,15 +49,15 @@
 @keyframes wgs-loading-pulse {
   0%, 100% {
     box-shadow:
-      0 0 20px rgba(57, 255, 20, 0.4),
-      0 0 40px rgba(57, 255, 20, 0.2),
-      0 0 60px rgba(57, 255, 20, 0.1);
+      0 0 20px rgba(var(--wgs-neon-green-rgb), 0.4),
+      0 0 40px rgba(var(--wgs-neon-green-rgb), 0.2),
+      0 0 60px rgba(var(--wgs-neon-green-rgb), 0.1);
   }
   50% {
     box-shadow:
-      0 0 30px rgba(57, 255, 20, 0.6),
-      0 0 60px rgba(57, 255, 20, 0.4),
-      0 0 90px rgba(57, 255, 20, 0.2);
+      0 0 30px rgba(var(--wgs-neon-green-rgb), 0.6),
+      0 0 60px rgba(var(--wgs-neon-green-rgb), 0.4),
+      0 0 90px rgba(var(--wgs-neon-green-rgb), 0.2);
   }
 }
 
@@ -112,17 +112,17 @@
 
 /* Text zprávy */
 .wgs-loading-message {
-  color: #39ff14;
+  color: var(--wgs-neon-green);
   font-size: 18px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
-  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+  text-shadow: 0 0 10px rgba(var(--wgs-neon-green-rgb), 0.5);
   letter-spacing: 0.5px;
 }
 
 /* Sekundární text (volitelný) */
 .wgs-loading-submessage {
-  color: #999;
+  color: var(--wgs-light-grey);
   font-size: 14px;
   font-weight: 400;
   font-family: 'Poppins', sans-serif;
