@@ -1243,23 +1243,23 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        <button class="detail-btn detail-btn-warning" style="background: #ffeb3b; color: #000; border: 2px solid #000; font-weight: 700;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
+        <button class="detail-btn detail-btn-primary" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
   } else {
     // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
     vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
+        <button class="detail-btn detail-btn-success" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
     ` : '';
 
     // Prodejce nema pristup k technickim funkcim (zahajit navstevu, naplanovat termin, kontaktovat)
@@ -1267,24 +1267,24 @@ async function showDetail(recordOrId) {
 
     // Tlacitka pro techniky a adminy (ne pro prodejce)
     technickaFunkce = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+        <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+        <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="detail-buttons">
         ${vytvorCNBtn}
         ${technickaFunkce}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
