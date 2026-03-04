@@ -1704,6 +1704,11 @@ body {
   background: var(--wgs-gray-66);
   color: var(--wgs-white);
 }
+.order-status-text.status-poslana-sms {
+  background: var(--wgs-gray-44);
+  color: var(--wgs-white);
+  font-weight: 600;
+}
 
 /* CN badge varianty */
 .order-cn-text          { background: var(--wgs-gray-44); color: var(--wgs-white); }
