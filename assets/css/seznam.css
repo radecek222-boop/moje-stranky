@@ -1974,18 +1974,18 @@ a.detail-btn-primary:active {
   color: var(--wgs-gray-88);
 }
 
-/* DESKTOP - větší mezery a padding */
+/* DESKTOP - kompaktní mezery */
 @media (min-width: 769px) {
   .detail-buttons {
-    gap: 0.875rem;
-    padding: 0.75rem 0;
+    gap: 0.25rem;
+    padding: 0.25rem 0;
   }
 
   .detail-btn {
-    padding: 1rem 1.25rem;
-    min-height: 52px;
-    font-size: 0.95rem;
-    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    min-height: 34px;
+    font-size: 0.82rem;
+    border-radius: 6px;
   }
 }
 

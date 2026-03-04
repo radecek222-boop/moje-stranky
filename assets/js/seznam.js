@@ -1277,39 +1277,45 @@ async function showDetail(recordOrId) {
 
     // Vytvořit CN — pouze admin
     const vytvorCNBtn = jeAdminElse ? `
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
     ` : '';
 
     // Technické funkce — ne pro prodejce
     const technickaFunkce = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
     ` : '';
 
     // Tisk zakázky — admin a prodejce
     const tiskBtn = (jeAdminElse || jeProdejceElse) ? `
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisk zakázky</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisk zakázky</button>
     ` : '';
 
     // QR Platba — ne pro prodejce, předposlední
     const qrPlatbaBtn = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
+    const jeDesktopBtn = window.innerWidth >= 769;
+    const btnGap = jeDesktopBtn ? '0.15rem' : '0.4rem';
+    const btnPad = jeDesktopBtn ? '0.25rem 0.6rem' : '0.4rem 0.75rem';
+    const btnMinH = jeDesktopBtn ? '28px' : '34px';
+    const btnFs = jeDesktopBtn ? '0.78rem' : '0.78rem';
+
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <button class="btn" style="width: 100%; padding: 0.3rem 0.75rem; font-size: 0.75rem; background: transparent; color: #aaa; text-decoration: underline; border: none; cursor: pointer;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+      <div style="display: flex; flex-direction: column; gap: ${btnGap};">
+        <button class="btn" style="width: 100%; padding: 0.2rem 0.6rem; font-size: 0.75rem; background: transparent; color: #aaa; text-decoration: underline; border: none; cursor: pointer;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${vytvorCNBtn}
         ${technickaFunkce}
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="openGalerie" data-id="${record.id}">Galerie</button>
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="openGalerie" data-id="${record.id}">Galerie</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${tiskBtn}
         ${qrPlatbaBtn}
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+        <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
         ${jeAdminElse ? `
-        <div style="border-top: 1px solid #333; margin-top: 0.4rem; padding-top: 0.4rem;">
-          <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+        <div style="border-top: 1px solid #333; margin-top: 0.3rem; padding-top: 0.3rem;">
+          <button class="btn" style="width: 100%; padding: ${btnPad}; min-height: ${btnMinH}; font-size: ${btnFs}; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         </div>` : ''}
       </div>
     `;
