@@ -132,7 +132,7 @@ h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(to bottom, #000000 0%, #3a3a3a 100%);
+  background: #000000;
 }
 .hero::after {
   content: "";
@@ -141,7 +141,7 @@ h6 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: transparent;
+  background: linear-gradient(to bottom, transparent 50%, #ffffff 100%);
   z-index: var(--z-background, 1);
   pointer-events: none;
 }
@@ -173,7 +173,7 @@ h6 {
   font-family: "Poppins", sans-serif;
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 600;
-  color: var(--wgs-white);
+  color: #ffffff;
   margin: 2rem 0;
   letter-spacing: 0.05em;
   line-height: 1.1;
@@ -183,7 +183,7 @@ h6 {
   font-family: "Poppins", sans-serif;
   font-size: clamp(1.2rem, 3vw, 2rem);
   font-weight: 300;
-  color: var(--wgs-white) !important;
+  color: #ffffff !important;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   margin-bottom: 3rem;
@@ -192,7 +192,7 @@ h6 {
 .hero .hero-description,
 .hero p.hero-description {
   font-size: 0.95rem;
-  color: var(--wgs-white) !important;
+  color: #ffffff !important;
   max-width: 700px;
   margin: 0 auto 5rem;
   line-height: 1.8;
