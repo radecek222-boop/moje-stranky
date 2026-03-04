@@ -715,10 +715,14 @@ async function renderOrders(items = null) {
       // Kontrolovat každý aktivní filtr
       for (const filterType of ACTIVE_FILTERS) {
         if (filterType === 'wait') {
-          // ČEKAJÍCÍ: stav je wait A nemá CN
+          // NOVÁ: stav je wait A nemá CN A není odložená
+          // ODSOUHLASENA: stav je wait A má CN odsouhlasenou A není odložená
           const isWait = stav === 'ČEKÁ' || stav === 'wait';
-          const hasNoCn = !(email && EMAILS_S_CN.includes(email));
-          if (isWait && hasNoCn) return true;
+          const jeOdlozena = r.je_odlozena == 1 || r.je_odlozena === true;
+          const maCN = email && EMAILS_S_CN.includes(email);
+          const cnStavR = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
+          if (isWait && !maCN && !jeOdlozena) return true;
+          if (isWait && maCN && cnStavR === 'potvrzena' && !jeOdlozena) return true;
         }
 
         if (filterType === 'open') {
@@ -1014,9 +1018,11 @@ async function renderOrders(items = null) {
       novyUnreadMap = unreadData.unread_counts || {};
       window.UNREAD_COUNTS_MAP = novyUnreadMap;
     }
+    let cnDataChanged = false;
     if (cnData?.status === 'success') {
       EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
       STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
+      cnDataChanged = true;
     }
     // Aktualizovat počty a unread indikátor po načtení čerstvých dat
     const countPozElBg = document.getElementById('count-poz');
@@ -1041,6 +1047,11 @@ async function renderOrders(items = null) {
       }).length;
       countWaitElBg.textContent = `(${pocet})`;
     }
+    // Po načtení CN dat překreslit seznam aby karta ukazala správný stav (Odsouhlasena atd.)
+    if (cnDataChanged && _itemsSnapshot) {
+      renderOrders(Utils.filterByUserRole(_itemsSnapshot));
+    }
+
     const totalUnread = Object.values(novyUnreadMap).reduce((sum, c) => sum + c, 0);
     const unreadInd = document.getElementById('unreadNotesIndicator');
     const unreadSpan = document.getElementById('unreadNotesCount');
@@ -1199,7 +1210,7 @@ function createCustomerHeader() {
     const barvaText = aktivni ? textAktivni : barva;
     const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
     const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
   // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
@@ -1208,7 +1219,7 @@ function createCustomerHeader() {
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
     const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
@@ -1291,15 +1302,16 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
+        <button class="detail-btn" style="background:#dc3545 !important;color:#fff !important;border:none;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #fff !important; color: #dc3545 !important; border: 1px solid #dc3545 !important; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
@@ -1335,7 +1347,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #fff !important; color: #dc3545 !important; border: 1px solid #dc3545 !important; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
@@ -3940,7 +3952,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
       'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
       'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes', 'otevritVyberFotek',
-      'zmenaStavuPill'
+      'zmenaStavuPill', 'zpetDoDetailu'
     ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
@@ -4703,7 +4715,7 @@ async function otevritGalerii(reklamaceId) {
     ${ModalManager.createHeader(`Galerie (${fotky.length})`, '')}
     <div class="modal-body">
       <div class="detail-buttons" style="margin-bottom:1rem;">
-        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu">Zpět do detailu</button>
+        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu" data-id="${reklamaceId}">Zpět do detailu</button>
         <button class="detail-btn detail-btn-primary" id="galerie-pridat-btn">Přidat fotky</button>
       </div>
       <div id="galerie-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
@@ -4745,9 +4757,9 @@ function renderGalerieGridHtml(fotky) {
     const photoId = typeof f === 'object' ? f.id : null;
     const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
     return `
-      <div class="foto-wrapper" style="position:relative;width:80px;height:80px;flex-shrink:0;">
+      <div class="foto-wrapper" style="position:relative;width:130px;height:130px;flex-shrink:0;">
         <img src='${photoPath}'
-             style='width:80px;height:80px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             style='width:130px;height:130px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
              alt='Fotka ${i+1}' loading="lazy"
              data-action="showPhotoFullscreen" data-url="${escapedUrl}">
         ${photoId ? `
