@@ -1243,7 +1243,7 @@ async function showDetail(recordOrId) {
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
@@ -1271,7 +1271,7 @@ async function showDetail(recordOrId) {
       <div class="detail-buttons">
         ${vytvorCNBtn}
         ${technickaFunkce}
-        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
