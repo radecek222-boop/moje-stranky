@@ -480,12 +480,28 @@ async function loadAll(status = 'all', append = false) {
     }
 
     // PAGINATION: Append místo replace při loadMore
+    // Zachovat dočasné příznaky (např. _sms_odeslana) přes auto-refresh
+    const _smsOdeslaneIds = new Set(
+      WGS_DATA_CACHE
+        .filter(x => x._sms_odeslana)
+        .map(x => String(x.id || x.reklamace_id))
+    );
+
     if (append) {
       WGS_DATA_CACHE = [...WGS_DATA_CACHE, ...items];
       CURRENT_PAGE = page;
     } else {
       WGS_DATA_CACHE = items;
       CURRENT_PAGE = 1;
+    }
+
+    // Obnovit příznaky po přepisu cache
+    if (_smsOdeslaneIds.size > 0) {
+      WGS_DATA_CACHE.forEach(zaznam => {
+        if (_smsOdeslaneIds.has(String(zaznam.id || zaznam.reklamace_id))) {
+          zaznam._sms_odeslana = true;
+        }
+      });
     }
 
     // PAGINATION: Detekce zda jsou další stránky
