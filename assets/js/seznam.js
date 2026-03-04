@@ -1157,23 +1157,27 @@ function createCustomerHeader() {
     else aktualniHodnota = 'cn_poslana';
   }
 
+  // Barevné badge pro výběr stavu (stejné neonové barvy jako karet)
+  const stavyProVyber = [
+    { hodnota: 'wait',           text: 'NOVÁ',           barva: '#ffdd00', stin: 'rgba(255,221,0,0.5)',     textBarva: '#111' },
+    { hodnota: 'open',           text: 'DOMLUVENÁ',      barva: '#00e5ff', stin: 'rgba(0,229,255,0.5)',     textBarva: '#111' },
+    { hodnota: 'cekame_na_dily', text: 'Čekáme na díly', barva: '#999',    stin: 'rgba(153,153,153,0.4)',   textBarva: '#fff' },
+    { hodnota: 'odlozena',       text: 'ODLOŽENO',        barva: '#9b59b6', stin: 'rgba(155,89,182,0.5)',    textBarva: '#fff' },
+    { hodnota: 'done',           text: 'HOTOVO',          barva: '#39ff14', stin: 'rgba(57,255,20,0.5)',     textBarva: '#111' },
+  ];
+
+  const stavBadgeButtonsHtml = stavyProVyber.map(s => {
+    const jeAktivni = aktualniHodnota === s.hodnota;
+    const styl = jeAktivni
+      ? `background:${s.barva};color:${s.textBarva};box-shadow:0 0 8px ${s.stin},0 0 16px ${s.stin};border:1px solid ${s.barva};`
+      : `background:transparent;color:${s.barva};border:1px solid ${s.barva};opacity:0.55;`;
+    return `<span onclick="zmenitStavZakazky('${CURRENT_RECORD.id}','${s.hodnota}','${zakaznikEmail}')"
+                  style="cursor:pointer;display:inline-block;border-radius:10px;padding:0.18rem 0.5rem;font-size:0.58rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;transition:all 0.2s;${styl}">${s.text}</span>`;
+  }).join('');
+
   const stavHtml = isAdmin ? `
-    <select id="zmenaStavuSelect" class="wgs-select wgs-select--small" data-id="${CURRENT_RECORD.id}" data-email="${zakaznikEmail}">
-      <optgroup label="Základní stavy">
-        <option value="wait" ${aktualniHodnota === 'wait' ? 'selected' : ''}>NOVÁ</option>
-        <option value="open" ${aktualniHodnota === 'open' ? 'selected' : ''}>DOMLUVENÁ</option>
-        <option value="cekame_na_dily" ${aktualniHodnota === 'cekame_na_dily' ? 'selected' : ''}>Čekáme na díly</option>
-        <option value="done" ${aktualniHodnota === 'done' ? 'selected' : ''}>HOTOVO</option>
-        <option value="odlozena" ${aktualniHodnota === 'odlozena' ? 'selected' : ''}>Odložená</option>
-      </optgroup>
-      <optgroup label="CN workflow">
-        <option value="cn_poslana" ${aktualniHodnota === 'cn_poslana' ? 'selected' : ''}>Poslána CN</option>
-        <option value="cn_odsouhlasena" ${aktualniHodnota === 'cn_odsouhlasena' ? 'selected' : ''}>Odsouhlasena</option>
-        <option value="cn_cekame_nd" ${aktualniHodnota === 'cn_cekame_nd' ? 'selected' : ''}>Čekáme ND</option>
-        <option value="cn_zamitnuta" ${aktualniHodnota === 'cn_zamitnuta' ? 'selected' : ''}>Zamítnuta</option>
-      </optgroup>
-    </select>
-  ` : status.text;
+    <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.2rem;">${stavBadgeButtonsHtml}</div>
+  ` : `<span class="order-status-text status-${status.class}" style="font-size:0.65rem;padding:0.18rem 0.5rem;">${status.text}</span>`;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
 
@@ -5898,6 +5902,7 @@ async function zalozitZnovu(reklamaceId) {
 
 // Export do window
 window.zalozitZnovu = zalozitZnovu;
+window.zmenitStavZakazky = zmenitStavZakazky;
 
 // ==========================================
 // GALERIE — fototéka zakázky
