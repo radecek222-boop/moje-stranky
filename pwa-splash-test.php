@@ -12,7 +12,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucean">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>WGS - White Glove Service (TEST)</title>
 
