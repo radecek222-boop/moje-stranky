@@ -29,7 +29,7 @@ WHERE email = 'naty@naty.cz';
 -- UPDATE wgs_users SET role = 'prodejce' WHERE email = 'prodejce3@firma.cz';
 
 -- Admini by měli mít is_admin=1 (role není tak důležitá)
--- UPDATE wgs_users SET is_admin = 1 WHERE email = 'admin@wgs-service.cz';
+-- UPDATE wgs_users SET is_admin = 1 WHERE email = 'radek@wgs-service.cz';
 
 -- 3. Ověř změny
 SELECT

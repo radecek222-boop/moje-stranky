@@ -9,6 +9,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/EmailQueue.php';
+require_once __DIR__ . '/../includes/email_template_base.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -156,42 +157,43 @@ try {
         }
     }
 
-    // Náhrada proměnných v šabloně
-    $subject = str_replace([
-        '{{customer_name}}',
-        '{{order_id}}',
-        '{{product}}',
-        '{{date}}'
-    ], [
-        $customerName,
-        $orderId,
-        $product,
-        date('d.m.Y')
-    ], $notification['subject']);
+    // Proměnné pro náhradu v šabloně
+    $nahradyKlice = [
+        '{{customer_name}}', '{{order_id}}', '{{product}}', '{{date}}',
+        '{{address}}', '{{technician_name}}', '{{technician_email}}',
+        '{{technician_phone}}', '{{company_email}}', '{{company_phone}}'
+    ];
+    $nahradyHodnoty = [
+        $customerName, $orderId, $product, date('d.m.Y H:i'),
+        $adresa ?: 'Neuvedena', $technicianName, $technicianEmail,
+        $technicianPhone, 'reklamace@wgs-service.cz', '+420 725 965 826'
+    ];
 
-    $body = str_replace([
-        '{{customer_name}}',
-        '{{order_id}}',
-        '{{product}}',
-        '{{date}}',
-        '{{address}}',
-        '{{technician_name}}',
-        '{{technician_email}}',
-        '{{technician_phone}}',
-        '{{company_email}}',
-        '{{company_phone}}'
-    ], [
-        $customerName,
-        $orderId,
-        $product,
-        date('d.m.Y H:i'),
-        $adresa ?: 'Neuvedena',
-        $technicianName,
-        $technicianEmail,
-        $technicianPhone,
-        'reklamace@wgs-service.cz',  // Obecný firemní email
-        '+420 725 965 826'            // Obecný firemní telefon
-    ], $notification['template']);
+    // Náhrada proměnných v předmětu
+    $subject = str_replace(
+        ['{{customer_name}}', '{{order_id}}', '{{product}}', '{{date}}'],
+        [$customerName, $orderId, $product, date('d.m.Y')],
+        $notification['subject']
+    );
+
+    // Pokud má notifikace template_data (JSON s grafickou šablonou), použít grafický render
+    $templateData = null;
+    if (!empty($notification['template_data'])) {
+        $templateData = json_decode($notification['template_data'], true);
+    }
+
+    if ($templateData && function_exists('renderujGrafickyEmail')) {
+        // Nahradit proměnné v každém textovém poli JSON šablony
+        foreach ($templateData as $pole => $hodnota) {
+            if (is_string($hodnota)) {
+                $templateData[$pole] = str_replace($nahradyKlice, $nahradyHodnoty, $hodnota);
+            }
+        }
+        $body = renderujGrafickyEmail($templateData);
+    } else {
+        // Fallback na starý textový template
+        $body = str_replace($nahradyKlice, $nahradyHodnoty, $notification['template']);
+    }
 
     // Nacist SMS sablonu z databaze (pokud existuje)
     $smsText = null;
@@ -255,6 +257,19 @@ try {
 
     if (!$queueId) {
         throw new Exception('Nepodařilo se přidat email do fronty');
+    }
+
+    // Uložit datum SMS kontaktu do databáze (persistentní pro všechny uživatele)
+    try {
+        $stmtSms = $pdo->prepare("
+            UPDATE wgs_reklamace
+            SET sms_kontakt_datum = NOW()
+            WHERE id = :id
+        ");
+        $stmtSms->execute(['id' => $reklamace['id']]);
+    } catch (PDOException $e) {
+        // Sloupec ještě neexistuje – migrace nebyla spuštěna, pokračovat bez chyby
+        error_log('[SMS] sms_kontakt_datum nelze uložit (spusťte pridej_sms_kontakt_datum.php): ' . $e->getMessage());
     }
 
     // Logování akce

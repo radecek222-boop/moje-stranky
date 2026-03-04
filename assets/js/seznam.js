@@ -480,6 +480,14 @@ async function loadAll(status = 'all', append = false) {
     }
 
     // PAGINATION: Append místo replace při loadMore
+    // Zachovat dočasné příznaky (např. _sms_odeslana) přes auto-refresh i page reload
+    // Spojit ID z paměti (auto-refresh) a z localStorage (page reload)
+    const _smsZPameti = WGS_DATA_CACHE
+      .filter(x => x._sms_odeslana)
+      .map(x => String(x.id || x.reklamace_id));
+    const _smsZStorage = _nactiSmsZeStorage ? _nactiSmsZeStorage() : new Set();
+    const _smsOdeslaneIds = new Set([..._smsZPameti, ..._smsZStorage]);
+
     if (append) {
       WGS_DATA_CACHE = [...WGS_DATA_CACHE, ...items];
       CURRENT_PAGE = page;
@@ -487,6 +495,18 @@ async function loadAll(status = 'all', append = false) {
       WGS_DATA_CACHE = items;
       CURRENT_PAGE = 1;
     }
+
+    // Obnovit příznaky po přepisu cache
+    WGS_DATA_CACHE.forEach(zaznam => {
+      // Z databáze (persistentní pro všechny uživatele)
+      if (zaznam.sms_kontakt_datum) {
+        zaznam._sms_odeslana = true;
+      }
+      // Z localStorage nebo paměti (fallback pro zařízení bez DB záznamu)
+      if (_smsOdeslaneIds.has(String(zaznam.id || zaznam.reklamace_id))) {
+        zaznam._sms_odeslana = true;
+      }
+    });
 
     // PAGINATION: Detekce zda jsou další stránky
     HAS_MORE_PAGES = items.length === PER_PAGE;
@@ -674,6 +694,9 @@ async function renderOrders(items = null) {
   }
 
   if (!Array.isArray(items)) items = [];
+
+  // Přímá kontrola localStorage – pojistka pro případ kdy _sms_odeslana není v cache
+  const _smsOdeslaneVRenderu = _nactiSmsZeStorage ? _nactiSmsZeStorage() : new Set();
 
   // Admin filtr podle prodejce
   if (CURRENT_USER && CURRENT_USER.is_admin && ADMIN_PRODEJCE_FILTER !== null) {
@@ -918,20 +941,23 @@ async function renderOrders(items = null) {
     }
 
     // Sdílený badge stavu (používá se v obou šablonách)
+    // Priorita: 1) termín, 2) odloženo, 3) čekáme na díly, 4) CN, 5) stav (vč. DOMLUVENÁ/HOTOVO)
+    // POSLÁNA SMS: nejnižší priorita – zobrazí se pouze u stavu NOVÁ (wait) když žádná jiná podmínka neplatí
+    const maSmsBadge = (rec._sms_odeslana || rec.sms_kontakt_datum || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)));
     const stavBadge = appointmentText
       ? `<span class="order-appointment">${appointmentText}</span>`
-      : (rec._sms_odeslana
-          ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
-          : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
-              ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-              : (status.class === 'cekame-na-dily'
-                  ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
-                  : (maCenovouNabidku && !jeHotovo
-                      ? `<span class="${cnTextClass}">${cnText}</span>`
+      : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+          ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+          : (status.class === 'cekame-na-dily'
+              ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
+              : (maCenovouNabidku && !jeHotovo
+                  ? `<span class="${cnTextClass}">${cnText}</span>`
+                  : (maSmsBadge && status.class === 'wait'
+                      ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
                       : `<span class="order-status-text status-${status.class}">${status.text}</span>`))));
 
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
-    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
+    const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse unread-cerveny' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
 
     if (VIEW_MODE === 'radky') {
       return `
@@ -1145,10 +1171,13 @@ function createCustomerHeader() {
     </select>
   ` : status.text;
 
+  const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
+
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
     <strong>Stav:</strong> ${stavHtml}
+    ${smsBylKontaktovan ? `<div style="margin-top:0.5rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
   `);
 }
 
@@ -4670,6 +4699,26 @@ function updateLoadMoreButton() {
  * Označí kartu i řádek zákazníka jako "POSLÁNA SMS" v DOM i v cache
  * @param {string|number} reklamaceId - ID reklamace
  */
+// Klíč v localStorage pro persistenci SMS příznaků přes page reload
+const _SMS_STORAGE_KEY = 'wgs_sms_odeslane';
+
+function _ulozSmsDoStorage(reklamaceId) {
+  try {
+    const ulozene = JSON.parse(localStorage.getItem(_SMS_STORAGE_KEY) || '[]');
+    const idStr = String(reklamaceId);
+    if (!ulozene.includes(idStr)) {
+      ulozene.push(idStr);
+      localStorage.setItem(_SMS_STORAGE_KEY, JSON.stringify(ulozene));
+    }
+  } catch (e) { /* localStorage nedostupný */ }
+}
+
+function _nactiSmsZeStorage() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(_SMS_STORAGE_KEY) || '[]'));
+  } catch (e) { return new Set(); }
+}
+
 function _oznacPoslanaSms(reklamaceId) {
   const badgeHtml = '<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>';
 
@@ -4695,7 +4744,11 @@ function _oznacPoslanaSms(reklamaceId) {
   const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
   if (zaznam) {
     zaznam._sms_odeslana = true;
+    zaznam.sms_kontakt_datum = new Date().toISOString(); // Okamžitě viditelné pro všechny
   }
+
+  // Uložit do localStorage - aby badge přežil page reload
+  _ulozSmsDoStorage(reklamaceId);
 }
 
 /**
@@ -4741,6 +4794,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
       // Zavřít detail modal
       closeDetail();
+
+      // Překreslit seznam karet aby byl badge vidět ihned (i na mobilu)
+      renderOrders();
 
       // Zobrazit neonový toast (WGSToast pro důležité akce)
       if (typeof WGSToast !== 'undefined') {

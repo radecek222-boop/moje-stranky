@@ -317,9 +317,9 @@ if ($initialBootstrapData) {
     <textarea id="problem-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
-  <div class="section-title">Návrh opravy<span class="en-label">REPAIR PROPOSAL</span></div>
+  <div class="section-title">Řešení<span class="en-label">SOLUTION</span></div>
   <div class="split-section">
-    <textarea id="repair-cz" placeholder="Návrh..."></textarea>
+    <textarea id="repair-cz" placeholder="Kliknutím vyberte posudek nebo napište vlastní..." readonly></textarea>
     <textarea id="repair-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
@@ -910,5 +910,192 @@ if ($initialBootstrapData) {
 <script src="assets/js/session-keepalive.min.js?v=<?= filemtime(__DIR__ . '/assets/js/session-keepalive.min.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
+
+<!-- === PICKER POSUDKŮ PRO POLE ŘEŠENÍ === -->
+<div id="posudkyPickerOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; overflow-y:auto;">
+  <div style="max-width:600px; margin:0 auto; padding:1rem;">
+    <div style="background:#1a1a1a; border:1px solid #333; border-radius:6px; overflow:hidden;">
+
+      <!-- Hlavička -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.9rem 1rem; border-bottom:1px solid #333;">
+        <span style="font-family:Poppins,sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#fff;">Vyberte posudek</span>
+        <button onclick="posudkyPickerZavrit()" style="background:none; border:none; color:#999; font-size:1.2rem; cursor:pointer; padding:0 0.3rem; line-height:1;">&#x2715;</button>
+      </div>
+
+      <!-- Záložky kategorií -->
+      <div style="display:flex; border-bottom:1px solid #333;">
+        <button class="posudky-tab active" data-kategorie="uznavaji" onclick="posudkyPickerTab(this)" style="flex:1; padding:0.7rem 0.3rem; background:none; border:none; border-bottom:2px solid #28a745; color:#28a745; font-family:Poppins,sans-serif; font-size:0.62rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer;">Schvalovací</button>
+        <button class="posudky-tab" data-kategorie="zamitnute" onclick="posudkyPickerTab(this)" style="flex:1; padding:0.7rem 0.3rem; background:none; border:none; border-bottom:2px solid transparent; color:#999; font-family:Poppins,sans-serif; font-size:0.62rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer;">Zamítací</button>
+        <button class="posudky-tab" data-kategorie="neutralni" onclick="posudkyPickerTab(this)" style="flex:1; padding:0.7rem 0.3rem; background:none; border:none; border-bottom:2px solid transparent; color:#999; font-family:Poppins,sans-serif; font-size:0.62rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer;">Neutrální</button>
+        <button class="posudky-tab" data-kategorie="vlastni" onclick="posudkyPickerTab(this)" style="flex:1; padding:0.7rem 0.3rem; background:none; border:none; border-bottom:2px solid transparent; color:#999; font-family:Poppins,sans-serif; font-size:0.62rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer;">Vlastní</button>
+      </div>
+
+      <!-- Seznam vět -->
+      <div id="posudkyPickerSeznam" style="padding:0.5rem 0;">
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// === PICKER POSUDKŮ ===
+var POSUDKY_DATA = {
+  uznavaji: [
+    'Při kontrole výrobku byla zjištěna závada, která neodpovídá běžným vlastnostem výrobku při standardním používání.',
+    'Zjištěný stav výrobku nasvědčuje výrobní nebo materiálové vadě, která ovlivňuje jeho funkčnost nebo komfort užívání.',
+    'Při prohlídce byla zaznamenána deformace sedací části, která přesahuje běžné opotřebení vznikající standardním používáním.',
+    'Byla zjištěna závada na mechanismu výrobku, která nebyla způsobena zjevně nesprávným používáním.',
+    'Kontrolou bylo potvrzeno, že konstrukční část výrobku nevykazuje odpovídající stabilitu při běžném zatížení.',
+    'Byla zaznamenána nedostatečná pevnost šicího spoje, která vedla k rozvolnění nebo rozpárání švu.',
+    'Při kontrole bylo zjištěno nerovnoměrné nebo nadměrné změknutí sedacích nebo opěrných částí výrobku.',
+    'Na výrobku byla zjištěna závada funkčního mechanismu, která omezuje nebo znemožňuje jeho správné používání.',
+    'Závada se projevila v relativně krátké době od dodání výrobku a neodpovídá běžnému opotřebení.',
+    'Zjištěný stav výrobku vyžaduje další řešení v rámci reklamačního řízení.'
+  ],
+  zamitnute: [
+    'Při kontrole výrobku nebyla zjištěna výrobní ani materiálová vada.',
+    'Zjištěný stav odpovídá běžnému opotřebení vznikajícímu při standardním používání výrobku.',
+    'Zaznamenané změny vlastností materiálu jsou přirozeným důsledkem používání výrobku.',
+    'Mírné změny tuhosti sedacích nebo opěrných částí odpovídají přirozeným vlastnostem použitých materiálů.',
+    'Zjištěné vrásnění nebo přirozené deformace materiálu odpovídají charakteru použitých potahových materiálů.',
+    'Při kontrole nebyla zjištěna závada funkčních mechanismů výrobku.',
+    'Zjištěné drobné zvuky konstrukce nebo mechanismu odpovídají běžnému provozu výrobku.',
+    'Zaznamenané odchylky konstrukce jsou v rámci výrobních tolerancí výrobce.',
+    'Zjištěné poškození mohlo vzniknout vnějšími vlivy nebo způsobem používání výrobku.',
+    'Zjištěný stav výrobku neomezuje jeho funkčnost ani běžné užívání.'
+  ],
+  neutralni: [
+    'Stav výrobku byl zdokumentován a předán k dalšímu odbornému posouzení výrobci.',
+    'Při kontrole byla zaznamenána reklamovaná závada, jejíž příčina bude dále posouzena výrobcem.',
+    'Výrobek byl převzat k odborné kontrole za účelem posouzení příčiny vzniku závady.',
+    'Na základě vizuální kontroly nelze jednoznačně určit příčinu vzniku závady bez dalšího posouzení výrobce.',
+    'Reklamovaný stav výrobku byl zaznamenán a bude předán výrobci k vyjádření.',
+    'Výrobek vykazuje změny odpovídající době a způsobu jeho používání, jejich přesná příčina bude dále posouzena.',
+    'Pro stanovení příčiny závady je nutné další technické posouzení výrobce.',
+    'Stav výrobku byl zdokumentován pro účely reklamačního řízení.',
+    'Reklamace byla přijata a výrobek bude dále posouzen v rámci standardního reklamačního procesu.',
+    'Závada byla zaznamenána při kontrole výrobku a bude dále řešena v rámci reklamačního řízení.'
+  ]
+};
+
+var _posudkyAktivniKategorie = 'uznavaji';
+
+function posudkyPickerOtevrit() {
+  document.getElementById('posudkyPickerOverlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  posudkyPickerRenderujVety(_posudkyAktivniKategorie);
+}
+
+function posudkyPickerZavrit() {
+  document.getElementById('posudkyPickerOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function posudkyPickerTab(btn) {
+  // Aktualizovat styly záložek
+  document.querySelectorAll('.posudky-tab').forEach(function(t) {
+    t.style.color = '#999';
+    t.style.borderBottom = '2px solid transparent';
+  });
+  var kategorie = btn.getAttribute('data-kategorie');
+  _posudkyAktivniKategorie = kategorie;
+
+  if (kategorie === 'uznavaji') {
+    btn.style.color = '#28a745';
+    btn.style.borderBottom = '2px solid #28a745';
+  } else if (kategorie === 'zamitnute') {
+    btn.style.color = '#dc3545';
+    btn.style.borderBottom = '2px solid #dc3545';
+  } else if (kategorie === 'neutralni') {
+    btn.style.color = '#aaa';
+    btn.style.borderBottom = '2px solid #aaa';
+  } else {
+    btn.style.color = '#fff';
+    btn.style.borderBottom = '2px solid #fff';
+  }
+
+  posudkyPickerRenderujVety(kategorie);
+}
+
+function posudkyPickerRenderujVety(kategorie) {
+  var seznam = document.getElementById('posudkyPickerSeznam');
+
+  if (kategorie === 'vlastni') {
+    seznam.innerHTML = '<div style="padding:1.5rem 1rem; text-align:center;">' +
+      '<p style="font-family:Poppins,sans-serif; font-size:0.82rem; color:#ccc; margin-bottom:1rem;">Zavřete picker a napište vlastní text do pole Řešení.</p>' +
+      '<button onclick="posudkyPickerVlastni()" style="padding:0.65rem 1.5rem; background:#333; color:#fff; border:1px solid #555; border-radius:4px; font-family:Poppins,sans-serif; font-size:0.75rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;">Zavřít a psát vlastní</button>' +
+      '</div>';
+    return;
+  }
+
+  var vety = POSUDKY_DATA[kategorie] || [];
+  var html = '';
+  for (var i = 0; i < vety.length; i++) {
+    html += '<div class="posudky-picker-veta" onclick="posudkyPickerVybrat(this)" data-veta="' + vety[i].replace(/"/g, '&quot;') + '" style="padding:0.75rem 1rem; border-bottom:1px solid #2a2a2a; cursor:pointer; font-family:Poppins,sans-serif; font-size:0.8rem; color:#ddd; line-height:1.5; display:flex; gap:0.75rem; align-items:flex-start;">' +
+      '<span style="flex-shrink:0; width:1.2rem; font-size:0.65rem; color:#666; padding-top:0.15rem;">' + (i + 1) + '.</span>' +
+      '<span>' + vety[i] + '</span>' +
+      '</div>';
+  }
+  seznam.innerHTML = html;
+}
+
+function posudkyPickerVybrat(el) {
+  var veta = el.getAttribute('data-veta');
+  var textarea = document.getElementById('repair-cz');
+  textarea.value = veta;
+  textarea.readOnly = false;
+  // Spustit event pro překlad
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  posudkyPickerZavrit();
+}
+
+function posudkyPickerVlastni() {
+  var textarea = document.getElementById('repair-cz');
+  textarea.readOnly = false;
+  textarea.value = '';
+  textarea.placeholder = 'Napište vlastní posudek...';
+  posudkyPickerZavrit();
+  textarea.focus();
+}
+
+// Inicializace – otevřít picker při kliknutí na textarea
+document.addEventListener('DOMContentLoaded', function() {
+  var repairTextarea = document.getElementById('repair-cz');
+  if (repairTextarea) {
+    repairTextarea.addEventListener('click', function() {
+      if (this.readOnly) {
+        posudkyPickerOtevrit();
+      }
+    });
+    // Touch podpora pro mobil
+    repairTextarea.addEventListener('touchend', function(e) {
+      if (this.readOnly) {
+        e.preventDefault();
+        posudkyPickerOtevrit();
+      }
+    });
+  }
+
+  // Zavřít picker kliknutím na overlay (mimo dialog)
+  document.getElementById('posudkyPickerOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      posudkyPickerZavrit();
+    }
+  });
+
+  // Hover efekty pro věty (přidáme přes JS aby to fungovalo bez CSS tříd)
+  document.getElementById('posudkyPickerSeznam').addEventListener('mouseover', function(e) {
+    var veta = e.target.closest('.posudky-picker-veta');
+    if (veta) veta.style.background = '#222';
+  });
+  document.getElementById('posudkyPickerSeznam').addEventListener('mouseout', function(e) {
+    var veta = e.target.closest('.posudky-picker-veta');
+    if (veta) veta.style.background = '';
+  });
+});
+</script>
+<!-- === KONEC PICKER POSUDKŮ === -->
+
 </body>
 </html>

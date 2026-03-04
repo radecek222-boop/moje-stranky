@@ -103,7 +103,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260302-01">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-01">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -1078,20 +1078,19 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   height: 0 !important;
 }
 
-/* Barevné nádechy karet podle stavu (velmi světlé) */
-/* Řádky mají stejné barvy jako karty - pro mobil i desktop */
-.order-row.status-bg-wait     { background: rgba(255, 235, 59, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.status-bg-open     { background: rgba(33, 150, 243, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.status-bg-done     { background: rgba(76, 175, 80, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.status-bg-odlozena { background: rgba(156, 39, 176, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.ma-cenovou-nabidku { background: rgba(255, 152, 0, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.cn-zamitnuta       { background: rgba(220, 53, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
-.order-row.status-bg-wait:hover     { background: rgba(255, 235, 59, 0.12) !important; box-shadow: none !important; }
-.order-row.status-bg-open:hover     { background: rgba(33, 150, 243, 0.12) !important; box-shadow: none !important; }
-.order-row.status-bg-done:hover     { background: rgba(76, 175, 80, 0.12) !important; box-shadow: none !important; }
-.order-row.status-bg-odlozena:hover { background: rgba(156, 39, 176, 0.12) !important; box-shadow: none !important; }
+/* Barevné nádechy řádků podle stavu - stejné jako karty (pozadí + barevný border + glow) */
+.order-row.status-bg-wait     { background: rgba(255, 235, 59, 0.08) !important; }
+.order-row.status-bg-open     { background: rgba(33, 150, 243, 0.08) !important; }
+.order-row.status-bg-done     { background: rgba(76, 175, 80, 0.08) !important; }
+.order-row.status-bg-odlozena { background: rgba(156, 39, 176, 0.08) !important; }
+.order-row.ma-cenovou-nabidku { background: rgba(255, 152, 0, 0.08) !important; }
+.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.08) !important; }
+.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.08) !important; }
+.order-row.cn-zamitnuta       { background: rgba(220, 53, 69, 0.08) !important; }
+.order-row.status-bg-wait:hover     { background: rgba(255, 235, 59, 0.12) !important; }
+.order-row.status-bg-open:hover     { background: rgba(33, 150, 243, 0.12) !important; }
+.order-row.status-bg-done:hover     { background: rgba(76, 175, 80, 0.12) !important; }
+.order-row.status-bg-odlozena:hover { background: rgba(156, 39, 176, 0.12) !important; }
 
 .order-box.status-bg-wait {
   background: rgba(255, 235, 59, 0.08) !important; /* Žlutá nádech - ČEKÁ */

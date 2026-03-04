@@ -20,7 +20,7 @@
 //
 // NEEXISTUJÍ (nesmí se používat!):
 //   - noreply@wgs-service.cz
-//   - admin@wgs-service.cz
+//   - reklamace@wgs-service.cz (toto je reálná adresa, používej ji)
 //   - technik@wgs-service.cz
 //   - analytics@wgs-service.cz
 //   - test-e2e@wgs-service.cz

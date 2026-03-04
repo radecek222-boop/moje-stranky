@@ -59,15 +59,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <!-- HERO SEKCE -->
 <section class="hero">
   <div class="hero-content">
-    <h1 class="hero-title" 
+    <h1 class="hero-title"
         data-lang-cs="WHITE GLOVE SERVIS"
         data-lang-en="WHITE GLOVE SERVICE"
         data-lang-it="WHITE GLOVE SERVICE">WHITE GLOVE SERVIS</h1>
-    <p class="hero-brands">Natuzzi Italia • Natuzzi Editions • Natuzzi Softaly • Phase</p>
-    <div class="hero-subtitle"
-         data-lang-cs="Opravy • Reklamace • Montáž • Praha, Brno, Bratislava"
-         data-lang-en="Repairs • Complaints • Installation • Prague, Brno, Bratislava"
-         data-lang-it="Riparazioni • Reclami • Installazione • Praga, Brno, Bratislava">Opravy • Reklamace • Montáž • Praha, Brno, Bratislava</div>
   </div>
 </section>
 
@@ -81,120 +76,78 @@ require_once __DIR__ . '/includes/seo_meta.php';
           data-lang-en="Luxury Furniture Service and Repairs"
           data-lang-it="Assistenza e Riparazioni di Mobili di Lusso">Servis a opravy luxusního nábytku</h2>
       <p class="section-description"
-         data-lang-cs="Jsme autorizovaný servisní partner předních výrobců luxusního nábytku – zejména značek Natuzzi, Softaly a Phase – s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst."
-         data-lang-en="We are an authorized service partner for leading luxury furniture manufacturers – especially Natuzzi, Softaly and Phase – with many years of experience in repairing luxury sofas. We specialize in leather sofa repairs, complaints, renovations and professional furniture upholstery. We provide service in the Czech Republic and Slovakia, including Prague, Brno, Bratislava, Ostrava and other cities."
-         data-lang-it="Siamo un partner autorizzato per l'assistenza dei principali produttori di mobili di lusso – in particolare Natuzzi, Softaly e Phase – con molti anni di esperienza nella riparazione di divani di lusso. Siamo specializzati in riparazioni, reclami, ristrutturazioni e rivestimenti professionali di divani in pelle. Offriamo assistenza in Repubblica Ceca e Slovacchia, tra cui Praga, Brno, Bratislava, Ostrava e altre città.">
-        Jsme autorizovaný servisní partner předních výrobců luxusního nábytku – zejména značek Natuzzi, Softaly a Phase – s dlouholetými zkušenostmi v opravách luxusních sedacích souprav. Specializujeme se na opravy kožených sedaček, reklamace, renovace a profesionální čalounění nábytku. Poskytujeme servis v České republice i na Slovensku včetně Prahy, Brna, Bratislavy, Ostravy a dalších měst.
-      </p>
-      <p class="section-description"
-         data-lang-cs="Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku – Natuzzi, Softaly, Phase a dalšími préminími značkami. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav."
-         data-lang-en="We cooperate with leading Czech and Slovak luxury furniture retailers – Natuzzi, Softaly, Phase and other premium brands. We provide quick complaint handling, professional damage assessment, replacement of damaged parts, upholstery renovation and complete assembly of sofas. We work with original spare parts and use top-quality materials to ensure the highest quality repairs."
-         data-lang-it="Collaboriamo con i principali rivenditori di mobili di lusso cechi e slovacchi – Natuzzi, Softaly, Phase e altri marchi premium. Offriamo una rapida gestione dei reclami, una valutazione professionale dei danni, la sostituzione delle parti danneggiate, il rinnovo dei rivestimenti e il montaggio completo dei divani. Utilizziamo solo ricambi originali e materiali di alta qualità per garantire riparazioni di altissima qualità.">
-        Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku – Natuzzi, Softaly, Phase a dalšími préminími značkami. Zajišťujeme rychlé vyřízení reklamací, odborné posouzení škod, výměnu poškozených dílů, renovaci čalounění a kompletní montáž sedacích souprav. Pracujeme s originálními náhradními díly a používáme špičkové materiály pro zajištění nejvyšší kvality oprav.
+         data-lang-cs="Jsme autorizovaný servisní partner značek Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase. Provádíme opravy, reklamace a montáž luxusního nábytku v Praze, Brně, Bratislavě a po celé ČR a SR."
+         data-lang-en="We are an authorized service partner for Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly and Phase. We carry out repairs, complaints and installation of luxury furniture in Prague, Brno, Bratislava and throughout the Czech Republic and Slovakia."
+         data-lang-it="Siamo un partner autorizzato per Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly e Phase. Eseguiamo riparazioni, reclami e installazioni di mobili di lusso a Praga, Brno, Bratislava e in tutta la Repubblica Ceca e Slovacchia.">
+        Jsme autorizovaný servisní partner značek Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase. Provádíme opravy, reklamace a montáž luxusního nábytku v Praze, Brně, Bratislavě a po celé ČR a SR.
       </p>
     </div>
 
     <div class="services-grid">
-      
+
       <!-- OPRAVY A REKLAMACE -->
       <div class="service-card">
         <h3 class="service-title"
-            data-lang-cs="Opravy a reklamace sedaček"
-            data-lang-en="Seat Repairs and Complaints"
-            data-lang-it="Riparazioni e Reclami sui Sedili">Opravy a reklamace sedaček</h3>
-        <p class="service-description"
-           data-lang-cs="Specializace na opravy sedacích souprav Natuzzi, Softaly, Phase a dalších luxusních značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami."
-           data-lang-en="Specializing in repairs of Natuzzi, Softaly, Phase and other luxury sofas and furniture brands. We repair leather and fabric sofas, replace damaged mechanisms, renovate upholstery. We ensure quick settlement of complaints with the manufacturer and insurance companies."
-           data-lang-it="Specializzati nella riparazione di divani e mobili Natuzzi, Softaly, Phase e di altri marchi di lusso. Ripariamo divani in pelle e tessuto, sostituiamo meccanismi danneggiati e rinnoviamo i rivestimenti. Garantiamo una rapida risoluzione dei reclami con il produttore e le compagnie assicurative.">
-          Specializace na opravy sedacích souprav Natuzzi, Softaly, Phase a dalších luxusních značek. Opravujeme kožené i látkové sedačky, vyměňujeme poškozené mechanismy, renovujeme čalounění. Zajišťujeme rychlé vyřízení reklamací s výrobcem a pojišťovnami.
-        </p>
+            data-lang-cs="Opravy a reklamace"
+            data-lang-en="Repairs and Complaints"
+            data-lang-it="Riparazioni e Reclami">Opravy a reklamace</h3>
         <ul class="service-list">
-          <li data-lang-cs="Oprava kožených a látkových sedaček všech značek"
-              data-lang-en="Repair of leather and fabric seats of all brands"
-              data-lang-it="Riparazione sedili in pelle e tessuto di tutte le marche">Oprava kožených a látkových sedaček všech značek</li>
-          <li data-lang-cs="Výměna mechanismů, pružin a nosných konstrukcí"
-              data-lang-en="Replacement of mechanisms, springs and supporting structures"
-              data-lang-it="Sostituzione di meccanismi, molle e strutture di supporto">Výměna mechanismů, pružin a nosných konstrukcí</li>
-          <li data-lang-cs="Renovace a čalounění sedacích souprav"
-              data-lang-en="Renovation and upholstery of sofas"
-              data-lang-it="Ristrutturazione e rivestimento divani">Renovace a čalounění sedacích souprav</li>
+          <li data-lang-cs="Oprava kožených a látkových sedaček"
+              data-lang-en="Repair of leather and fabric sofas"
+              data-lang-it="Riparazione divani in pelle e tessuto">Oprava kožených a látkových sedaček</li>
+          <li data-lang-cs="Výměna mechanismů a nosných konstrukcí"
+              data-lang-en="Replacement of mechanisms and structures"
+              data-lang-it="Sostituzione meccanismi e strutture">Výměna mechanismů a nosných konstrukcí</li>
           <li data-lang-cs="Reklamační řízení Natuzzi a dalších značek"
               data-lang-en="Complaints procedure for Natuzzi and other brands"
-              data-lang-it="Procedura di reclamo per Natuzzi e altri marchi">Reklamační řízení Natuzzi a dalších značek</li>
-          <li data-lang-cs="Oprava relaxačních a elektrických mechanismů"
-              data-lang-en="Repair of relaxation and electrical mechanisms"
-              data-lang-it="Riparazione dei meccanismi di rilassamento ed elettrici">Oprava relaxačních a elektrických mechanismů</li>
-          <li data-lang-cs="Posouzení a odhad škod pro pojišťovny"
-              data-lang-en="Damage assessment and estimation for insurance companies"
-              data-lang-it="Valutazione e stima dei danni per le compagnie assicurative">Posouzení a odhad škod pro pojišťovny</li>
+              data-lang-it="Procedura reclami Natuzzi e altri marchi">Reklamační řízení Natuzzi a dalších značek</li>
+          <li data-lang-cs="Posouzení škod pro pojišťovny"
+              data-lang-en="Damage assessment for insurance companies"
+              data-lang-it="Valutazione danni per assicurazioni">Posouzení škod pro pojišťovny</li>
         </ul>
       </div>
 
       <!-- MONTÁŽ A INSTALACE -->
       <div class="service-card">
         <h3 class="service-title"
-            data-lang-cs="Montáž sedacích souprav"
-            data-lang-en="Assembly of Sofas"
-            data-lang-it="Montaggio di Divani">Montáž sedacích souprav</h3>
-        <p class="service-description"
-           data-lang-cs="Profesionální montáž luxusního nábytku značek Natuzzi, Softaly, Phase a dalších prémiových výrobců s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů."
-           data-lang-en="Professional installation of luxury furniture from Natuzzi, Softaly, Phase and other premium manufacturers with a quality guarantee. We ensure safe installation of sofas, relaxation chairs and corner sofas, including electrical mechanisms."
-           data-lang-it="Installazione professionale di mobili di lusso di Natuzzi, Softaly, Phase e altri produttori premium con garanzia di qualità. Garantiamo l'installazione sicura di divani, poltrone relax e divani angolari, compresi i meccanismi elettrici.">
-          Profesionální montáž luxusního nábytku značek Natuzzi, Softaly, Phase a dalších prémiových výrobců s garancí kvality. Zajišťujeme bezpečnou instalaci sedacích souprav, relaxačních křesel a rohových sedaček včetně elektrických mechanismů.
-        </p>
+            data-lang-cs="Montáž a instalace"
+            data-lang-en="Assembly and Installation"
+            data-lang-it="Montaggio e Installazione">Montáž a instalace</h3>
         <ul class="service-list">
           <li data-lang-cs="Montáž sedacích souprav a rohových sedaček"
               data-lang-en="Assembly of sofas and corner sofas"
               data-lang-it="Montaggio divani e divani angolari">Montáž sedacích souprav a rohových sedaček</li>
           <li data-lang-cs="Instalace elektrických a manuálních mechanismů"
               data-lang-en="Installation of electrical and manual mechanisms"
-              data-lang-it="Installazione di meccanismi elettrici e manuali">Instalace elektrických a manuálních mechanismů</li>
+              data-lang-it="Installazione meccanismi elettrici e manuali">Instalace elektrických a manuálních mechanismů</li>
           <li data-lang-cs="Seřízení relaxačních funkcí křesel"
-              data-lang-en="Adjusting the relaxation functions of the chairs"
-              data-lang-it="Regolazione delle funzioni di rilassamento delle sedie">Seřízení relaxačních funkcí křesel</li>
-          <li data-lang-cs="Kontrola stability a bezpečnosti"
-              data-lang-en="Stability and safety check"
-              data-lang-it="Controllo di stabilità e sicurezza">Kontrola stability a bezpečnosti</li>
-          <li data-lang-cs="Instruktáž k používání a údržbě"
-              data-lang-en="Instruction on use and maintenance"
-              data-lang-it="Istruzioni per l'uso e la manutenzione">Instruktáž k používání a údržbě</li>
+              data-lang-en="Adjusting relaxation functions of chairs"
+              data-lang-it="Regolazione funzioni relax delle poltrone">Seřízení relaxačních funkcí křesel</li>
           <li data-lang-cs="Dovoz a odborná přeprava nábytku"
-              data-lang-en="Import and professional transportation of furniture"
-              data-lang-it="Importazione e trasporto professionale di mobili">Dovoz a odborná přeprava nábytku</li>
+              data-lang-en="Delivery and professional transportation"
+              data-lang-it="Consegna e trasporto professionale">Dovoz a odborná přeprava nábytku</li>
         </ul>
       </div>
 
       <!-- PORADENSTVÍ -->
       <div class="service-card">
         <h3 class="service-title"
-            data-lang-cs="Poradenství a expertní posudky"
+            data-lang-cs="Poradenství a posudky"
             data-lang-en="Consulting and Expert Opinions"
-            data-lang-it="Consulenza e Perizie">Poradenství a expertní posudky</h3>
-        <p class="service-description"
-           data-lang-cs="Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobci luxusního nábytku i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody."
-           data-lang-en="Professional assessment of furniture complaints and damages. Our expertise is recognized by insurance companies, luxury furniture manufacturers and the courts. We will help you with the settlement of your complaint and obtaining compensation for damages."
-           data-lang-it="Valutazione professionale di reclami e danni relativi agli arredi. La nostra competenza è riconosciuta dalle compagnie assicurative, dai produttori di mobili di lusso e dai tribunali. Vi aiuteremo a risolvere il vostro reclamo e a ottenere il risarcimento dei danni.">
-          Odborné posouzení reklamací a škod na nábytku. Naše expertízy jsou uznávány pojišťovnami, výrobci luxusního nábytku i soudy. Pomůžeme vám s vyřízením reklamace a získáním náhrady škody.
-        </p>
+            data-lang-it="Consulenza e Perizie">Poradenství a posudky</h3>
         <ul class="service-list">
-          <li data-lang-cs="Posouzení důvodnosti reklamace sedaček"
-              data-lang-en="Assessment of the validity of a seat complaint"
-              data-lang-it="Valutazione della validità di un reclamo relativo al posto a sedere">Posouzení důvodnosti reklamace sedaček</li>
           <li data-lang-cs="Znalecké posudky pro pojišťovny a soudy"
               data-lang-en="Expert opinions for insurance companies and courts"
-              data-lang-it="Perizie per compagnie assicurative e tribunali">Znalecké posudky pro pojišťovny a soudy</li>
+              data-lang-it="Perizie per assicurazioni e tribunali">Znalecké posudky pro pojišťovny a soudy</li>
           <li data-lang-cs="Odhad rozsahu škod a nákladů na opravu"
-              data-lang-en="Estimate the extent of damage and repair costs"
-              data-lang-it="Stimare l'entità del danno e i costi di riparazione">Odhad rozsahu škod a nákladů na opravu</li>
+              data-lang-en="Estimate of damage and repair costs"
+              data-lang-it="Stima danni e costi di riparazione">Odhad rozsahu škod a nákladů na opravu</li>
           <li data-lang-cs="Konzultace při výběru sedací soupravy"
-              data-lang-en="Consultation when choosing a sofa set"
-              data-lang-it="Consulenza nella scelta di un set di divani">Konzultace při výběru sedací soupravy</li>
+              data-lang-en="Consultation when choosing a sofa"
+              data-lang-it="Consulenza nella scelta del divano">Konzultace při výběru sedací soupravy</li>
           <li data-lang-cs="Doporučení péče o kožený nábytek"
               data-lang-en="Leather furniture care recommendations"
               data-lang-it="Consigli per la cura dei mobili in pelle">Doporučení péče o kožený nábytek</li>
-          <li data-lang-cs="Asistence při komunikaci s výrobcem"
-              data-lang-en="Assistance in communicating with the manufacturer"
-              data-lang-it="Assistenza nella comunicazione con il produttore">Asistence při komunikaci s výrobcem</li>
         </ul>
       </div>
 

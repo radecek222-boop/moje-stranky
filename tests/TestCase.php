@@ -90,7 +90,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function loginAsAdmin(): void
     {
-        $this->loginAsUser(1, 'admin@wgs-service.cz');
+        $this->loginAsUser(1, 'radek@wgs-service.cz');
         $_SESSION['is_admin'] = true;
     }
 
