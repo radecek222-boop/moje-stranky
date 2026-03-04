@@ -38,6 +38,17 @@ require_once INCLUDES_PATH . '/company_config.php';  // Firemní kontakty - sing
 // Load advanced error handler (with detailed error reporting)
 require_once INCLUDES_PATH . '/error_handler.php';
 
+// Sentry monitoring - aktivní pouze pokud je nastaven SENTRY_DSN v .env
+// Neovlivňuje existující error_handler.php (pouze register_shutdown_function)
+if (function_exists('getEnvValue')) {
+    $sentryDsn = getEnvValue('SENTRY_DSN');
+    if ($sentryDsn && str_starts_with($sentryDsn, 'https://')) {
+        require_once INCLUDES_PATH . '/sentry_handler.php';
+        inicializovatSentry($sentryDsn);
+    }
+    unset($sentryDsn);
+}
+
 // Set error reporting based on environment
 if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     error_reporting(E_ALL);
