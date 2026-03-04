@@ -1199,7 +1199,7 @@ function createCustomerHeader() {
     const barvaText = aktivni ? textAktivni : barva;
     const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
     const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
   // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
@@ -1208,7 +1208,7 @@ function createCustomerHeader() {
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
     const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.4rem 0.5rem;border-radius:10px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
@@ -4745,9 +4745,9 @@ function renderGalerieGridHtml(fotky) {
     const photoId = typeof f === 'object' ? f.id : null;
     const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
     return `
-      <div class="foto-wrapper" style="position:relative;width:80px;height:80px;flex-shrink:0;">
+      <div class="foto-wrapper" style="position:relative;width:130px;height:130px;flex-shrink:0;">
         <img src='${photoPath}'
-             style='width:80px;height:80px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             style='width:130px;height:130px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
              alt='Fotka ${i+1}' loading="lazy"
              data-action="showPhotoFullscreen" data-url="${escapedUrl}">
         ${photoId ? `
