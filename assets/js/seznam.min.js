@@ -1243,13 +1243,12 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
           <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="detail-btn detail-btn-primary" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
-        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
           <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
@@ -1276,8 +1275,8 @@ async function showDetail(recordOrId) {
       <div class="detail-buttons">
         ${vytvorCNBtn}
         ${technickaFunkce}
+        <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="otevritVyberFotek" data-id="${record.id}">Galerie</button>
-        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisknout výtisk</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
