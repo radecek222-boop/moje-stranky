@@ -462,7 +462,7 @@ async function loadAll(status = 'all', append = false) {
     const page = append ? CURRENT_PAGE + 1 : 1;
     // Cache-busting pro Safari PWA
     const cacheBuster = Date.now();
-    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`, {
+    const response = await fetch(`/app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`, {
       cache: 'no-store',
       headers: {
         'Cache-Control': 'no-cache'
