@@ -1278,7 +1278,6 @@ async function showDetail(recordOrId) {
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
           <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
-        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
