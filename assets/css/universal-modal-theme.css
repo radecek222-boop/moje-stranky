@@ -230,7 +230,7 @@ button[onclick*="close"] {
 .modal-content textarea::placeholder,
 .modal-body input::placeholder,
 .modal-body textarea::placeholder {
-    color: var(--wgs-gray-66) !important;
+    color: #555555 !important;
 }
 
 /* ============================================
@@ -609,7 +609,7 @@ button.note-delete-btn:focus {
 /* Prázdné poznámky */
 .modal-body .empty-notes,
 .modal-content .empty-notes {
-    color: var(--wgs-gray-66) !important;
+    color: #555555 !important;
     font-style: italic;
     text-align: center;
     padding: 2rem;
@@ -626,7 +626,7 @@ button.note-delete-btn:focus {
 
 .modal-body .note-textarea::placeholder,
 .modal-content .note-textarea::placeholder {
-    color: var(--wgs-gray-66) !important;
+    color: #555555 !important;
 }
 
 .modal-body .note-textarea:focus,
@@ -737,7 +737,7 @@ textarea.wgs-input:focus,
 
 input.wgs-input::placeholder,
 textarea.wgs-input::placeholder {
-    color: var(--wgs-gray-66) !important;
+    color: #555555 !important;
     font-style: italic !important;
 }
 

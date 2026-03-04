@@ -648,7 +648,7 @@ textarea,
 select {
   width: 100%;
   padding: calc(var(--space-md) - var(--space-xs)) var(--space-md);
-  border: var(--border-width-thin) solid var(--c-border);
+  border: var(--border-width-thin) solid var(--c-border-dark);
   background: var(--c-white);
   font-family: var(--font-primary);
   font-size: var(--fs-base);
@@ -660,7 +660,7 @@ select {
 .form-control::placeholder,
 input::placeholder,
 textarea::placeholder {
-  color: var(--c-text-light);
+  color: #555555;
   font-style: italic;
 }
 .form-control:hover,

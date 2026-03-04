@@ -117,8 +117,8 @@ body {
   padding: 0.2rem 0;
 }
 .search-input::placeholder {
-  color: var(--c-grey);
-  opacity: 0.6;
+  color: #555555;
+  opacity: 1;
 }
 .search-clear {
   background: var(--c-black);
