@@ -971,11 +971,16 @@ body {
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
 
-<!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146) -->
+<!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146)
+     Pořadí listenerů DOMContentLoaded:
+     1. Tento inline script (registrován dříve) → přepíše nactiSummary
+     2. statistiky.min.js listener (registrován po deferred načtení) → zavolá nactiSummary()
+     Výsledek: statistiky.min.js zavolá HTMX verzi — žádné dvojité volání. -->
 <script>
 window.addEventListener('DOMContentLoaded', function() {
     if (typeof htmx === 'undefined' || typeof getFilterParams === 'undefined') return;
 
+    // Přepsat PŘED voláním ze statistiky.min.js listeneru (ten se spustí jako druhý)
     window.nactiSummary = function() {
         var filterParams = getFilterParams();
         htmx.ajax('GET', '/api/statistiky_html.php?' + filterParams, {
@@ -983,9 +988,7 @@ window.addEventListener('DOMContentLoaded', function() {
             swap: 'innerHTML'
         });
     };
-
-    // Spustit okamžitě pro první načtení
-    window.nactiSummary();
+    // NEvolat zde — statistiky.min.js ji zavolá sám ve svém DOMContentLoaded listeneru
 });
 </script>
 

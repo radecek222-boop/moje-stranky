@@ -636,6 +636,13 @@ function sestavAdminProdejceBox() {
 
 // === HTMX HELPER: Aktualizace gridu přes server-rendered HTML ===
 function _htmxAktualizujGrid() {
+  // Server renderuje pouze karty (order-box) — nepoužívat v režimu řádků
+  if (typeof VIEW_MODE !== 'undefined' && VIEW_MODE === 'radky') {
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
+    return;
+  }
+
   const stavFiltr = ACTIVE_FILTERS.size === 1 ? [...ACTIVE_FILTERS][0] : 'all';
   const hledej = SEARCH_QUERY || '';
   const prodejceId = ADMIN_PRODEJCE_FILTER || '';
@@ -643,6 +650,17 @@ function _htmxAktualizujGrid() {
   let url = `/api/seznam_html.php?status=${encodeURIComponent(stavFiltr)}`;
   if (hledej) url += `&search=${encodeURIComponent(hledej)}`;
   if (prodejceId) url += `&prodejce_id=${encodeURIComponent(prodejceId)}`;
+
+  // Aktualizovat info o výsledcích hledání
+  const searchResultsInfo = document.getElementById('searchResultsInfo');
+  if (searchResultsInfo) {
+    if (hledej) {
+      searchResultsInfo.classList.remove('hidden');
+      searchResultsInfo.textContent = `Hledání: "${hledej}"`;
+    } else {
+      searchResultsInfo.classList.add('hidden');
+    }
+  }
 
   htmx.ajax('GET', url, { target: '#orderGrid', swap: 'innerHTML' });
 }
