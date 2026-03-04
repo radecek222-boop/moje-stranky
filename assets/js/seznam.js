@@ -2618,8 +2618,8 @@ function showContactMenu(id) {
     <div class="modal-body">
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
+        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Nezveda SMS</button>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
         ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
