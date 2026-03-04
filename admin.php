@@ -226,6 +226,12 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-radek-popis" data-lang-cs="Správa transportů a řidičů" data-lang-en="Transport and driver management" data-lang-it="Gestione trasporti e autisti">Správa transportů a řidičů</div>
             </div>
         </div>
+        <div class="cc-radek" data-href="admin.php?tab=audit">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Audit projektu" data-lang-en="Project Audit" data-lang-it="Audit del Progetto">Audit projektu</div>
+                <div class="cc-radek-popis" data-lang-cs="Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení" data-lang-en="Detailed WGS audit — structure, security, value, recommendations" data-lang-it="Audit dettagliato WGS — struttura, sicurezza, valore, raccomandazioni">Detailní audit WGS — struktura, bezpečnost, hodnota, doporučení</div>
+            </div>
+        </div>
     </div>
 </div>
 
