@@ -2604,8 +2604,8 @@ function showContactMenu(id) {
     <div class="modal-body">
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
         ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
         ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
@@ -4431,12 +4431,20 @@ async function loadPhotosFromDB(reklamaceId) {
  */
 function otevritVyberFotek(reklamaceId) {
   logger.log('[Fototeka] Otviram vyber fotek pro reklamaci:', reklamaceId);
-  const input = document.getElementById('fototeka-input-' + reklamaceId);
-  if (input) {
-    input.click();
-  } else {
-    logger.error('[Fototeka] Input element nenalezen');
+  let input = document.getElementById('fototeka-input-' + reklamaceId);
+  if (!input) {
+    // Dynamicky vytvorit input pokud neexistuje (volano z hlavniho detailu)
+    input = document.createElement('input');
+    input.type = 'file';
+    input.id = 'fototeka-input-' + reklamaceId;
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.style.display = 'none';
+    input.setAttribute('data-reklamace-id', reklamaceId);
+    document.body.appendChild(input);
+    input.addEventListener('change', zpracujVybraneFotky);
   }
+  input.click();
 }
 
 /**
