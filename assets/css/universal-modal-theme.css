@@ -61,7 +61,7 @@
 #adminModal,
 #detailOverlay .modal-content {
     /* Tmavý gradient pozadí (jako welcome modal) */
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    background: linear-gradient(135deg, var(--wgs-darkest) 0%, var(--wgs-gray-2d) 100%) !important;
 
     /* Jemný border */
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -80,7 +80,7 @@
 .admin-modal-header,
 .wgs-modal .modal-header {
     /* Tmavé pozadí hlavičky */
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+    background: linear-gradient(135deg, var(--wgs-midnight) 0%, var(--wgs-darkest) 100%) !important;
 
     /* Jemný spodní border */
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -103,7 +103,7 @@
 #notifModalTitle,
 #editNotificationTitle {
     /* Jednotný styl titulku (jako wgsConfirm) */
-    color: #fff !important;
+    color: var(--wgs-white) !important;
     font-size: 1.1rem !important;
     font-weight: 600 !important;
     margin: 0 0 15px 0 !important;
@@ -121,7 +121,7 @@
 button[onclick*="zavrit"],
 button[onclick*="close"] {
     /* Barva zavírací ikony */
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
 
     /* Hover efekt */
     transition: all 0.2s ease !important;
@@ -132,7 +132,7 @@ button[onclick*="close"] {
 .admin-modal-close:hover,
 .close-modal:hover {
     /* Světlejší při hover */
-    color: #ffffff !important;
+    color: var(--wgs-white) !important;
 
     /* Jemné pozadí */
     background: rgba(255, 255, 255, 0.08) !important;
@@ -147,7 +147,7 @@ button[onclick*="close"] {
 .admin-modal-body,
 .wgs-modal .modal-body {
     /* Jednotný styl textu (jako wgsConfirm) */
-    color: #ccc !important;
+    color: var(--c-border-medium) !important;
     font-size: 0.95rem !important;
     line-height: 1.5 !important;
 }
@@ -161,7 +161,7 @@ button[onclick*="close"] {
 .cc-modal p,
 .admin-modal p {
     /* Jednotný styl odstavců (jako wgsConfirm) */
-    color: #ccc !important;
+    color: var(--c-border-medium) !important;
     font-size: 0.95rem !important;
     line-height: 1.5 !important;
     margin: 0 0 20px 0 !important;
@@ -173,7 +173,7 @@ button[onclick*="close"] {
 .cc-modal label,
 .admin-modal label {
     /* Jednotný styl labelů */
-    color: #aaa !important;
+    color: var(--wgs-gray-aa) !important;
     font-size: 0.85rem !important;
     margin-bottom: 8px !important;
     display: block !important;
@@ -199,10 +199,10 @@ button[onclick*="close"] {
 .admin-modal textarea,
 .admin-modal select {
     /* Tmavé pozadí inputů */
-    background: #2a2a2a !important;
+    background: var(--wgs-gray-2a) !important;
 
     /* Světlý text */
-    color: #ffffff !important;
+    color: var(--wgs-white) !important;
 
     /* Jemný border */
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -230,7 +230,7 @@ button[onclick*="close"] {
 .modal-content textarea::placeholder,
 .modal-body input::placeholder,
 .modal-body textarea::placeholder {
-    color: #666666 !important;
+    color: var(--wgs-gray-66) !important;
 }
 
 /* ============================================
@@ -255,8 +255,8 @@ button[onclick*="close"] {
 .modal-footer button[data-action*="zavrit"],
 .modal-footer button[data-action*="zrusit"] {
     background: transparent !important;
-    color: #ccc !important;
-    border: 1px solid #444 !important;
+    color: var(--c-border-medium) !important;
+    border: 1px solid var(--wgs-gray-44) !important;
 }
 
 .modal-footer button.btn-secondary:hover,
@@ -264,29 +264,29 @@ button[onclick*="close"] {
 .modal-footer button[data-action*="zavrit"]:hover,
 .modal-footer button[data-action*="zrusit"]:hover {
     background: rgba(255, 255, 255, 0.05) !important;
-    border-color: #666 !important;
+    border-color: var(--wgs-gray-66) !important;
 }
 
 /* Primární tlačítko */
 .modal-footer button.btn-primary,
 .modal-footer button[type="submit"] {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--wgs-white) !important;
+    color: var(--wgs-black) !important;
     border: none !important;
     font-weight: 500 !important;
 }
 
 .modal-footer button.btn-primary:hover,
 .modal-footer button[type="submit"]:hover {
-    background: #e0e0e0 !important;
+    background: var(--wgs-border) !important;
 }
 
 /* Danger/smazat tlačítko */
 .modal-footer button.btn-danger,
 .modal-footer button[data-action*="smazat"],
 .modal-footer button[data-action*="delete"] {
-    background: #dc3545 !important;
-    color: #fff !important;
+    background: var(--wgs-danger) !important;
+    color: var(--wgs-white) !important;
     border: none !important;
     font-weight: 500 !important;
 }
@@ -294,7 +294,7 @@ button[onclick*="close"] {
 .modal-footer button.btn-danger:hover,
 .modal-footer button[data-action*="smazat"]:hover,
 .modal-footer button[data-action*="delete"]:hover {
-    background: #c82333 !important;
+    background: var(--wgs-danger-hover) !important;
 }
 
 /* ============================================
@@ -304,7 +304,7 @@ button[onclick*="close"] {
 .modal-footer,
 .wgs-modal .modal-footer {
     /* Tmavé pozadí patičky */
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+    background: linear-gradient(135deg, var(--wgs-midnight) 0%, var(--wgs-darkest) 100%) !important;
 
     /* Horní border */
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -319,7 +319,7 @@ button[onclick*="close"] {
 .cc-modal table,
 .admin-modal table {
     /* Barva textu */
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
 }
 
 /* Table headers */
@@ -328,10 +328,10 @@ button[onclick*="close"] {
 .cc-modal th,
 .admin-modal th {
     /* Tmavé pozadí hlavičky */
-    background: #1a1a1a !important;
+    background: var(--wgs-darkest) !important;
 
     /* Bílý text */
-    color: #ffffff !important;
+    color: var(--wgs-white) !important;
 
     /* Spodní border */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -368,20 +368,20 @@ button[onclick*="close"] {
 .modal-body::-webkit-scrollbar-track,
 .cc-modal-body::-webkit-scrollbar-track,
 .admin-modal-body::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--wgs-darkest);
 }
 
 .modal-body::-webkit-scrollbar-thumb,
 .cc-modal-body::-webkit-scrollbar-thumb,
 .admin-modal-body::-webkit-scrollbar-thumb {
-    background: #444444;
+    background: var(--wgs-gray-44);
     border-radius: 4px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover,
 .cc-modal-body::-webkit-scrollbar-thumb:hover,
 .admin-modal-body::-webkit-scrollbar-thumb:hover {
-    background: #666666;
+    background: var(--wgs-gray-66);
 }
 
 /* ============================================
@@ -398,7 +398,7 @@ button[onclick*="close"] {
 .cc-modal-loading-text,
 .admin-modal-loading-text {
     /* Světlý text */
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
 }
 
 /* Loading spinner */
@@ -406,7 +406,7 @@ button[onclick*="close"] {
 .admin-modal-spinner {
     /* Barva spinneru */
     border-color: rgba(255, 255, 255, 0.1) !important;
-    border-top-color: #ffffff !important;
+    border-top-color: var(--wgs-white) !important;
 }
 
 /* ============================================
@@ -415,7 +415,7 @@ button[onclick*="close"] {
 
 /* QR Modal (PSA kalkulátor) */
 #qrModal .qr-code-container {
-    background: #ffffff !important; /* QR kódy musí být na bílém */
+    background: var(--wgs-white) !important; /* QR kódy musí být na bílém */
     padding: 1rem;
     border-radius: 8px;
 }
@@ -433,14 +433,14 @@ button[onclick*="close"] {
 .admin-modal-back-btn,
 .cc-back-btn,
 button[onclick*="history.back"] {
-    background: #000000 !important;
-    color: #ffffff !important;
+    background: var(--wgs-black) !important;
+    color: var(--wgs-white) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .admin-modal-back-btn:hover,
 .cc-back-btn:hover {
-    background: #1a1a1a !important;
+    background: var(--wgs-darkest) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
@@ -454,7 +454,7 @@ button[onclick*="history.back"] {
 .admin-modal .alert {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
 }
 
 /* Error alerts */
@@ -462,7 +462,7 @@ button[onclick*="history.back"] {
 .modal-body .alert-error {
     background: rgba(100, 100, 100, 0.2) !important;
     border-color: rgba(100, 100, 100, 0.3) !important;
-    color: #aaa !important;
+    color: var(--wgs-gray-aa) !important;
 }
 
 /* Success alerts - zelené (ale tmavé) */
@@ -470,7 +470,7 @@ button[onclick*="history.back"] {
 .modal-body .alert-success {
     background: rgba(100, 100, 100, 0.2) !important;
     border-color: rgba(150, 150, 150, 0.3) !important;
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
 }
 
 /* ============================================
@@ -496,7 +496,7 @@ button[onclick*="history.back"] {
 .modal-body .note-item.unread,
 .modal-content .note-item.unread {
     background: rgba(255, 255, 255, 0.08) !important;
-    border-left: 4px solid #999 !important;
+    border-left: 4px solid var(--wgs-light-grey) !important;
 }
 
 /* Header poznámky */
@@ -510,14 +510,14 @@ button[onclick*="history.back"] {
 /* Autor poznámky - světlý text */
 .modal-body .note-author,
 .modal-content .note-author {
-    color: #ffffff !important;
+    color: var(--wgs-white) !important;
     font-weight: 600;
 }
 
 /* Čas poznámky - šedý text, menší */
 .modal-body .note-time,
 .modal-content .note-time {
-    color: #888888 !important;
+    color: var(--wgs-gray-88) !important;
     font-size: 0.7rem !important;
 }
 
@@ -528,7 +528,7 @@ button[onclick*="history.back"] {
 button.note-delete-btn {
     background: none !important;
     border: none !important;
-    color: #cc0000 !important;
+    color: var(--wgs-delete) !important;
     width: auto !important;
     height: auto !important;
     min-width: 0 !important;
@@ -554,7 +554,7 @@ button.note-delete-btn {
 button.note-delete-btn:hover {
     background: none !important;
     border: none !important;
-    color: #ff0000 !important;
+    color: var(--wgs-delete-hover) !important;
     opacity: 1 !important;
     box-shadow: none !important;
 }
@@ -602,14 +602,14 @@ button.note-delete-btn:focus {
 /* Text poznámky - světle šedý */
 .modal-body .note-text,
 .modal-content .note-text {
-    color: #cccccc !important;
+    color: var(--c-border-medium) !important;
     line-height: 1.6;
 }
 
 /* Prázdné poznámky */
 .modal-body .empty-notes,
 .modal-content .empty-notes {
-    color: #666666 !important;
+    color: var(--wgs-gray-66) !important;
     font-style: italic;
     text-align: center;
     padding: 2rem;
@@ -618,15 +618,15 @@ button.note-delete-btn:focus {
 /* Textarea pro novou poznámku */
 .modal-body .note-textarea,
 .modal-content .note-textarea {
-    background: #2a2a2a !important;
-    color: #ffffff !important;
+    background: var(--wgs-gray-2a) !important;
+    color: var(--wgs-white) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 6px;
 }
 
 .modal-body .note-textarea::placeholder,
 .modal-content .note-textarea::placeholder {
-    color: #666666 !important;
+    color: var(--wgs-gray-66) !important;
 }
 
 .modal-body .note-textarea:focus,
@@ -675,8 +675,8 @@ button.note-delete-btn:focus {
 .no-dark-theme,
 .no-dark-theme .modal-content,
 .no-dark-theme .modal-body {
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: var(--wgs-white) !important;
+    color: var(--wgs-black) !important;
 }
 
 /* ============================================
@@ -693,9 +693,9 @@ input.wgs-input[type="tel"],
 textarea.wgs-input,
 .modal-body input.wgs-input,
 .modal-content input.wgs-input {
-    background: #1a1a1a !important;
-    color: #ffffff !important;
-    border: 1px solid #333 !important;
+    background: var(--wgs-darkest) !important;
+    color: var(--wgs-white) !important;
+    border: 1px solid var(--wgs-gray-33) !important;
     border-radius: 6px !important;
     padding: 10px 12px !important;
     font-family: 'Poppins', sans-serif !important;
@@ -723,21 +723,21 @@ input.wgs-input[type="number"] {
 input.wgs-input:hover,
 textarea.wgs-input:hover,
 .modal-body input.wgs-input:hover {
-    border-color: #444 !important;
-    background: #222 !important;
+    border-color: var(--wgs-gray-44) !important;
+    background: var(--wgs-dark-grey) !important;
 }
 
 input.wgs-input:focus,
 textarea.wgs-input:focus,
 .modal-body input.wgs-input:focus {
-    border-color: #555 !important;
+    border-color: var(--wgs-grey) !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
-    background: #222 !important;
+    background: var(--wgs-dark-grey) !important;
 }
 
 input.wgs-input::placeholder,
 textarea.wgs-input::placeholder {
-    color: #666 !important;
+    color: var(--wgs-gray-66) !important;
     font-style: italic !important;
 }
 
@@ -747,7 +747,7 @@ input.wgs-input.wgs-input--cislo,
     text-align: right !important;
     font-weight: 600 !important;
     font-family: 'Roboto Mono', 'Consolas', monospace !important;
-    color: #39ff14 !important;
+    color: var(--wgs-neon-green) !important;
     letter-spacing: 0.5px !important;
 }
 
@@ -755,9 +755,9 @@ input.wgs-input.wgs-input--cislo,
 select.wgs-select,
 .modal-body select.wgs-select,
 .modal-content select.wgs-select {
-    background: #1a1a1a !important;
-    color: #ffffff !important;
-    border: 1px solid #333 !important;
+    background: var(--wgs-darkest) !important;
+    color: var(--wgs-white) !important;
+    border: 1px solid var(--wgs-gray-33) !important;
     border-radius: 6px !important;
     padding: 10px 32px 10px 12px !important;
     font-family: 'Poppins', sans-serif !important;
@@ -777,28 +777,28 @@ select.wgs-select,
 
 select.wgs-select:hover,
 .modal-body select.wgs-select:hover {
-    border-color: #444 !important;
-    background-color: #222 !important;
+    border-color: var(--wgs-gray-44) !important;
+    background-color: var(--wgs-dark-grey) !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaaaaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
 }
 
 select.wgs-select:focus,
 .modal-body select.wgs-select:focus {
-    border-color: #555 !important;
+    border-color: var(--wgs-grey) !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
-    background-color: #222 !important;
+    background-color: var(--wgs-dark-grey) !important;
 }
 
 /* Select option styling */
 select.wgs-select option {
-    background: #1a1a1a !important;
-    color: #ffffff !important;
+    background: var(--wgs-darkest) !important;
+    color: var(--wgs-white) !important;
     padding: 8px !important;
 }
 
 select.wgs-select optgroup {
-    background: #111 !important;
-    color: #888 !important;
+    background: var(--wgs-near-black) !important;
+    color: var(--wgs-gray-88) !important;
     font-weight: 600 !important;
     font-style: normal !important;
 }
