@@ -715,13 +715,14 @@ async function renderOrders(items = null) {
       // Kontrolovat každý aktivní filtr
       for (const filterType of ACTIVE_FILTERS) {
         if (filterType === 'wait') {
-          // NOVÁ: stav je wait A nemá CN
-          // ODSOUHLASENA: stav je wait A má CN odsouhlasenou
+          // NOVÁ: stav je wait A nemá CN A není odložená
+          // ODSOUHLASENA: stav je wait A má CN odsouhlasenou A není odložená
           const isWait = stav === 'ČEKÁ' || stav === 'wait';
+          const jeOdlozena = r.je_odlozena == 1 || r.je_odlozena === true;
           const maCN = email && EMAILS_S_CN.includes(email);
           const cnStavR = maCN ? (STAVY_NABIDEK && STAVY_NABIDEK[email]) : null;
-          if (isWait && !maCN) return true;
-          if (isWait && maCN && cnStavR === 'potvrzena') return true;
+          if (isWait && !maCN && !jeOdlozena) return true;
+          if (isWait && maCN && cnStavR === 'potvrzena' && !jeOdlozena) return true;
         }
 
         if (filterType === 'open') {
