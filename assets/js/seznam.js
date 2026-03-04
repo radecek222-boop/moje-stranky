@@ -480,12 +480,13 @@ async function loadAll(status = 'all', append = false) {
     }
 
     // PAGINATION: Append místo replace při loadMore
-    // Zachovat dočasné příznaky (např. _sms_odeslana) přes auto-refresh
-    const _smsOdeslaneIds = new Set(
-      WGS_DATA_CACHE
-        .filter(x => x._sms_odeslana)
-        .map(x => String(x.id || x.reklamace_id))
-    );
+    // Zachovat dočasné příznaky (např. _sms_odeslana) přes auto-refresh i page reload
+    // Spojit ID z paměti (auto-refresh) a z localStorage (page reload)
+    const _smsZPameti = WGS_DATA_CACHE
+      .filter(x => x._sms_odeslana)
+      .map(x => String(x.id || x.reklamace_id));
+    const _smsZStorage = _nactiSmsZeStorage ? _nactiSmsZeStorage() : new Set();
+    const _smsOdeslaneIds = new Set([..._smsZPameti, ..._smsZStorage]);
 
     if (append) {
       WGS_DATA_CACHE = [...WGS_DATA_CACHE, ...items];
@@ -4686,6 +4687,26 @@ function updateLoadMoreButton() {
  * Označí kartu i řádek zákazníka jako "POSLÁNA SMS" v DOM i v cache
  * @param {string|number} reklamaceId - ID reklamace
  */
+// Klíč v localStorage pro persistenci SMS příznaků přes page reload
+const _SMS_STORAGE_KEY = 'wgs_sms_odeslane';
+
+function _ulozSmsDoStorage(reklamaceId) {
+  try {
+    const ulozene = JSON.parse(localStorage.getItem(_SMS_STORAGE_KEY) || '[]');
+    const idStr = String(reklamaceId);
+    if (!ulozene.includes(idStr)) {
+      ulozene.push(idStr);
+      localStorage.setItem(_SMS_STORAGE_KEY, JSON.stringify(ulozene));
+    }
+  } catch (e) { /* localStorage nedostupný */ }
+}
+
+function _nactiSmsZeStorage() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(_SMS_STORAGE_KEY) || '[]'));
+  } catch (e) { return new Set(); }
+}
+
 function _oznacPoslanaSms(reklamaceId) {
   const badgeHtml = '<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>';
 
@@ -4712,6 +4733,9 @@ function _oznacPoslanaSms(reklamaceId) {
   if (zaznam) {
     zaznam._sms_odeslana = true;
   }
+
+  // Uložit do localStorage - aby badge přežil page reload
+  _ulozSmsDoStorage(reklamaceId);
 }
 
 /**
