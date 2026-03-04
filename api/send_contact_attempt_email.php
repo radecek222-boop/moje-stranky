@@ -259,6 +259,19 @@ try {
         throw new Exception('Nepodařilo se přidat email do fronty');
     }
 
+    // Uložit datum SMS kontaktu do databáze (persistentní pro všechny uživatele)
+    try {
+        $stmtSms = $pdo->prepare("
+            UPDATE wgs_reklamace
+            SET sms_kontakt_datum = NOW()
+            WHERE id = :id
+        ");
+        $stmtSms->execute(['id' => $reklamace['id']]);
+    } catch (PDOException $e) {
+        // Sloupec ještě neexistuje – migrace nebyla spuštěna, pokračovat bez chyby
+        error_log('[SMS] sms_kontakt_datum nelze uložit (spusťte pridej_sms_kontakt_datum.php): ' . $e->getMessage());
+    }
+
     // Logování akce
     error_log("[EMAIL] Pokus o kontakt: Zakaznik: {$customerName}, Email: {$customerEmail}, Zakazka: {$orderId}");
 

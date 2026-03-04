@@ -497,13 +497,16 @@ async function loadAll(status = 'all', append = false) {
     }
 
     // Obnovit příznaky po přepisu cache
-    if (_smsOdeslaneIds.size > 0) {
-      WGS_DATA_CACHE.forEach(zaznam => {
-        if (_smsOdeslaneIds.has(String(zaznam.id || zaznam.reklamace_id))) {
-          zaznam._sms_odeslana = true;
-        }
-      });
-    }
+    WGS_DATA_CACHE.forEach(zaznam => {
+      // Z databáze (persistentní pro všechny uživatele)
+      if (zaznam.sms_kontakt_datum) {
+        zaznam._sms_odeslana = true;
+      }
+      // Z localStorage nebo paměti (fallback pro zařízení bez DB záznamu)
+      if (_smsOdeslaneIds.has(String(zaznam.id || zaznam.reklamace_id))) {
+        zaznam._sms_odeslana = true;
+      }
+    });
 
     // PAGINATION: Detekce zda jsou další stránky
     HAS_MORE_PAGES = items.length === PER_PAGE;
@@ -939,7 +942,7 @@ async function renderOrders(items = null) {
 
     // Sdílený badge stavu (používá se v obou šablonách)
     // POSLÁNA SMS má přednost před termínem i ostatními stavy
-    const stavBadge = (rec._sms_odeslana || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
+    const stavBadge = (rec._sms_odeslana || rec.sms_kontakt_datum || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
       ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
       : (appointmentText
           ? `<span class="order-appointment">${appointmentText}</span>`
@@ -1166,7 +1169,7 @@ function createCustomerHeader() {
     </select>
   ` : status.text;
 
-  const smsIndikator = CURRENT_RECORD._sms_odeslana
+  const smsIndikator = (CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum)
     ? `<br><span class="order-status-text status-poslana-sms" style="display:inline-block;margin-top:0.3rem;">POSLÁNA SMS</span>`
     : '';
 
@@ -4740,6 +4743,7 @@ function _oznacPoslanaSms(reklamaceId) {
   const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
   if (zaznam) {
     zaznam._sms_odeslana = true;
+    zaznam.sms_kontakt_datum = new Date().toISOString(); // Okamžitě viditelné pro všechny
   }
 
   // Uložit do localStorage - aby badge přežil page reload
