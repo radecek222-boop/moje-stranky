@@ -920,13 +920,15 @@ async function renderOrders(items = null) {
     // Sdílený badge stavu (používá se v obou šablonách)
     const stavBadge = appointmentText
       ? `<span class="order-appointment">${appointmentText}</span>`
-      : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
-          ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-          : (status.class === 'cekame-na-dily'
-              ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
-              : (maCenovouNabidku && !jeHotovo
-                  ? `<span class="${cnTextClass}">${cnText}</span>`
-                  : `<span class="order-status-text status-${status.class}">${status.text}</span>`)));
+      : (rec._sms_odeslana
+          ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
+          : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+              ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+              : (status.class === 'cekame-na-dily'
+                  ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
+                  : (maCenovouNabidku && !jeHotovo
+                      ? `<span class="${cnTextClass}">${cnText}</span>`
+                      : `<span class="order-status-text status-${status.class}">${status.text}</span>`))));
 
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
     const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
@@ -4665,6 +4667,38 @@ function updateLoadMoreButton() {
 // === ODESLÁNÍ POKUSU O KONTAKT (EMAIL + SMS) ===
 
 /**
+ * Označí kartu i řádek zákazníka jako "POSLÁNA SMS" v DOM i v cache
+ * @param {string|number} reklamaceId - ID reklamace
+ */
+function _oznacPoslanaSms(reklamaceId) {
+  const badgeHtml = '<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>';
+
+  // Aktualizovat kartu (VIEW_MODE = karty)
+  const karta = document.querySelector(`.order-box[data-id="${reklamaceId}"]`);
+  if (karta) {
+    const stavBadgeEl = karta.querySelector('.order-status-text, .order-appointment, .order-cn-text');
+    if (stavBadgeEl) {
+      stavBadgeEl.outerHTML = badgeHtml;
+    }
+  }
+
+  // Aktualizovat řádek (VIEW_MODE = radky)
+  const radek = document.querySelector(`.order-row[data-id="${reklamaceId}"]`);
+  if (radek) {
+    const stavBadgeEl = radek.querySelector('.order-status-text, .order-appointment, .order-cn-text');
+    if (stavBadgeEl) {
+      stavBadgeEl.outerHTML = badgeHtml;
+    }
+  }
+
+  // Aktualizovat cache - aby badge přežil re-render
+  const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
+  if (zaznam) {
+    zaznam._sms_odeslana = true;
+  }
+}
+
+/**
  * Odešle zákazníkovi email o pokusu o kontakt a otevře SMS aplikaci s předvyplněným textem
  * @param {string} reklamaceId - ID reklamace
  * @param {string} telefon - Telefonní číslo zákazníka
@@ -4701,6 +4735,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
     if (data.success) {
       logger.log('Email o pokusu o kontakt odeslán zákazníkovi');
+
+      // Označit kartu/řádek jako "POSLÁNA SMS" v DOM i cache
+      _oznacPoslanaSms(reklamaceId);
 
       // Zavřít detail modal
       closeDetail();
