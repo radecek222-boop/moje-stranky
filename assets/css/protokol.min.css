@@ -1,9 +1,9 @@
 :root {
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #1a1a1a;
-  --c-grey: #666666;
-  --c-border: #e0e0e0;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-darkest);
+  --c-grey: var(--wgs-gray-66);
+  --c-border: var(--wgs-border);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,7 +21,7 @@ body {
 
 /* === ČERNÁ HORNÍ PANEL === */
 .top-bar {
-  background: #000000;
+  background: var(--wgs-black);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -113,7 +113,7 @@ body {
 .header div:last-child {
   font-family: 'Poppins', sans-serif;
   font-size: 10px;
-  color: #333;
+  color: var(--wgs-gray-33);
 }
 /* === Rozbalovací sekce zákaznických dat (DESKTOP - skrytá) === */
 .customer-info-collapsible {
@@ -175,7 +175,7 @@ td {
 input, select, textarea {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid #999;
+  border: 1px solid var(--wgs-light-grey);
   border-radius: 0;
   background: var(--c-white);
   color: var(--c-black);
@@ -202,7 +202,7 @@ select::placeholder,
 textarea::placeholder {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;
-  color: #999;
+  color: var(--wgs-light-grey);
   opacity: 1;
 }
 
@@ -211,7 +211,7 @@ select::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;
-  color: #999;
+  color: var(--wgs-light-grey);
 }
 
 input::-moz-placeholder,
@@ -219,7 +219,7 @@ select::-moz-placeholder,
 textarea::-moz-placeholder {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;
-  color: #999;
+  color: var(--wgs-light-grey);
 }
 
 input:-ms-input-placeholder,
@@ -227,7 +227,7 @@ select:-ms-input-placeholder,
 textarea:-ms-input-placeholder {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;
-  color: #999;
+  color: var(--wgs-light-grey);
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
@@ -266,8 +266,8 @@ input[readonly], textarea[readonly] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
   border: none;
   border-radius: 50%;
   width: 44px;
@@ -283,7 +283,7 @@ input[readonly], textarea[readonly] {
 }
 .translate-btn:hover {
   transform: translate(-50%, -50%) scale(1.1);
-  background: #333;
+  background: var(--wgs-gray-33);
 }
 .translate-btn:active {
   transform: translate(-50%, -50%) scale(0.95);
@@ -300,10 +300,10 @@ input[readonly], textarea[readonly] {
   to { transform: rotate(360deg); }
 }
 #signature-pad {
-  border: 2px solid #000;
+  border: 2px solid var(--wgs-black);
   width: 100%;
   height: 180px;
-  background: #fff;
+  background: var(--wgs-white);
   touch-action: none;
   cursor: crosshair;
   margin-top: 10px;
@@ -315,7 +315,7 @@ input[readonly], textarea[readonly] {
   margin: 8px 0 15px;
 }
 .signature-label {
-  color: #666;
+  color: var(--wgs-gray-66);
   font-size: 0.9em;
   font-style: italic;
   margin: 0;
@@ -326,16 +326,16 @@ input[readonly], textarea[readonly] {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding-top: 20px;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid var(--wgs-border);
 }
 button.btn {
-  border: 2px solid #000;
+  border: 2px solid var(--wgs-black);
   border-radius: 6px;
   padding: 12px 24px;
-  color: #000;
+  color: var(--wgs-black);
   font-weight: 700;
   cursor: pointer;
-  background: #fff;
+  background: var(--wgs-white);
   transition: all 0.2s;
   text-transform: uppercase;
   font-size: 12px;
@@ -343,17 +343,17 @@ button.btn {
   text-align: center;
 }
 button.btn:hover {
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
 }
 .btn-primary {
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
 }
 .btn-clear {
-  background: #e5e5e5;
-  color: #444;
-  border: 1px solid #999;
+  background: var(--wgs-gray-e5);
+  color: var(--wgs-gray-44);
+  border: 1px solid var(--wgs-light-grey);
   padding: 4px 10px;
   font-size: 0.75em;
   cursor: pointer;
@@ -362,17 +362,17 @@ button.btn:hover {
   white-space: nowrap;
 }
 .btn-clear:hover {
-  background: #d5d5d5;
-  color: #333;
+  background: var(--wgs-gray-d5);
+  color: var(--wgs-gray-33);
 }
 .notif {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #fff;
-  border: 2px solid #000;
-  color: #000;
+  background: var(--wgs-white);
+  border: 2px solid var(--wgs-black);
+  color: var(--wgs-black);
   padding: 12px 24px;
   border-radius: 6px;
   font-weight: 600;
@@ -386,12 +386,12 @@ button.btn:hover {
   transform: translate(-50%, 10px);
 }
 .notif.success {
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
 }
 .notif.error {
-  border-color: #666;
-  color: #333;
+  border-color: var(--wgs-gray-66);
+  color: var(--wgs-gray-33);
 }
 .loading-overlay {
   position: fixed;
@@ -415,15 +415,15 @@ button.btn:hover {
   to { opacity: 1; }
 }
 .loading-spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #333333;
+  border: 6px solid var(--wgs-gray-f3);
+  border-top: 6px solid var(--wgs-gray-33);
   border-radius: 50%;
   width: 70px;
   height: 70px;
   animation: spinLoader 0.8s linear infinite;
 }
 .loading-text {
-  color: #fff;
+  color: var(--wgs-white);
   font-size: 20px;
   font-weight: 700;
   margin-top: 25px;
@@ -437,12 +437,12 @@ button.btn:hover {
 #photoPreviewContainer {
   margin-top: 25px;
   padding-top: 20px;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid var(--wgs-border);
 }
 #photoPreviewContainer h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #000;
+  color: var(--wgs-black);
   margin-bottom: 15px;
 }
 #photoGrid {
@@ -454,7 +454,7 @@ button.btn:hover {
   width: 100%;
   height: 120px;
   object-fit: cover;
-  border: 2px solid #000;
+  border: 2px solid var(--wgs-black);
   cursor: pointer;
 }
 
@@ -500,9 +500,9 @@ button.btn:hover {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: #000;
+  background: var(--wgs-black);
   color: white;
-  border-bottom: 2px solid #333333;
+  border-bottom: 2px solid var(--wgs-gray-33);
 }
 
 .pdf-preview-title {
@@ -534,7 +534,7 @@ button.btn:hover {
 
 .pdf-action-btn:hover {
   background: white;
-  color: #000;
+  color: var(--wgs-black);
   transform: scale(1.05);
 }
 
@@ -543,34 +543,34 @@ button.btn:hover {
 }
 
 .pdf-share-btn {
-  border-color: #333333;
-  background: #333333;
+  border-color: var(--wgs-gray-33);
+  background: var(--wgs-gray-33);
 }
 
 .pdf-share-btn:hover {
-  background: #555;
-  border-color: #555;
+  background: var(--wgs-grey);
+  border-color: var(--wgs-grey);
   color: white;
 }
 
 .pdf-send-btn {
-  border-color: #333;
-  background: #333;
+  border-color: var(--wgs-gray-33);
+  background: var(--wgs-gray-33);
 }
 
 .pdf-send-btn:hover {
-  background: #555;
-  border-color: #555;
+  background: var(--wgs-grey);
+  border-color: var(--wgs-grey);
   color: white;
 }
 
 .pdf-close-btn {
-  border-color: #666;
+  border-color: var(--wgs-gray-66);
 }
 
 .pdf-close-btn:hover {
-  background: #666;
-  border-color: #666;
+  background: var(--wgs-gray-66);
+  border-color: var(--wgs-gray-66);
   color: white;
 }
 
@@ -578,7 +578,7 @@ button.btn:hover {
   flex: 1;
   overflow: hidden;
   position: relative;
-  background: #333;
+  background: var(--wgs-gray-33);
 }
 
 .pdf-preview-frame {
@@ -621,7 +621,7 @@ button.btn:hover {
     position: fixed;
     top: 70px;
     right: -100%;
-    background: #000000;
+    background: var(--wgs-black);
     flex-direction: column;
     padding: 2rem;
     transition: right 0.3s;
@@ -660,8 +660,8 @@ button.btn:hover {
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    background: #f5f5f5;
-    border: 2px solid #000;
+    background: var(--c-success-bg);
+    border: 2px solid var(--wgs-black);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
@@ -673,14 +673,14 @@ button.btn:hover {
   }
 
   .customer-info-name {
-    color: #000;
+    color: var(--wgs-black);
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.02em;
   }
 
   .customer-info-arrow {
-    stroke: #000;
+    stroke: var(--wgs-black);
     transition: transform 0.3s;
     flex-shrink: 0;
   }
@@ -755,7 +755,7 @@ button.btn:hover {
   input::-webkit-input-placeholder,
   select::-webkit-input-placeholder {
     font-size: 11px !important;
-    color: #999 !important;
+    color: var(--wgs-light-grey) !important;
     padding-left: 0 !important;
     text-indent: 0 !important;
   }
@@ -1072,8 +1072,8 @@ body.pdf-export-mode #signature-pad {
   max-width: 900px !important;
   padding: 30px 35px !important;
   margin: 20px auto !important;
-  background: #fff !important;
-  border: 2px solid #000 !important;
+  background: var(--wgs-white) !important;
+  border: 2px solid var(--wgs-black) !important;
   box-sizing: border-box !important;
   font-size: 13px !important;
   visibility: visible !important;
@@ -1221,7 +1221,7 @@ body.pdf-export-mode #signature-pad {
 /* IČO upozornění - plný řádek pod dvousloupcovým gridem */
 .ico-upozorneni {
   font-size: 7.5px !important;
-  color: #c00 !important;
+  color: var(--wgs-delete) !important;
   display: block;
   width: 100%;
   margin-top: 6px;
@@ -1296,7 +1296,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .zakaznik-schvaleni-container {
-  background: #1a1a1a;
+  background: var(--wgs-darkest);
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
@@ -1305,17 +1305,17 @@ body.pdf-export-mode #signature-pad {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  border: 1px solid #333;
+  border: 1px solid var(--wgs-gray-33);
 }
 
 .zakaznik-schvaleni-header {
-  background: #333;
-  color: #ffffff;
+  background: var(--wgs-gray-33);
+  color: var(--wgs-white);
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--wgs-gray-44);
   position: relative;
 }
 
@@ -1323,14 +1323,14 @@ body.pdf-export-mode #signature-pad {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--wgs-white);
   text-align: center;
 }
 
 .zakaznik-schvaleni-close {
   background: none;
   border: none;
-  color: #ffffff;
+  color: var(--wgs-white);
   font-size: 2rem;
   cursor: pointer;
   padding: 0;
@@ -1354,21 +1354,21 @@ body.pdf-export-mode #signature-pad {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  color: #ccc;
+  color: var(--c-border-medium);
 }
 
 .zakaznik-schvaleni-text-sekce label,
 .zakaznik-schvaleni-podpis-sekce label {
   display: block;
   font-weight: 600;
-  color: #aaa;
+  color: var(--wgs-gray-aa);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
 .zakaznik-schvaleni-text {
-  background: #fff;
-  border: 1px solid #333;
+  background: var(--wgs-white);
+  border: 1px solid var(--wgs-gray-33);
   border-radius: 8px;
   padding: 1rem;
   min-height: 120px;
@@ -1376,7 +1376,7 @@ body.pdf-export-mode #signature-pad {
   overflow-y: auto;
   font-size: 1rem;
   line-height: 1.5;
-  color: #000;
+  color: var(--wgs-black);
   white-space: pre-wrap;
 }
 
@@ -1389,9 +1389,9 @@ body.pdf-export-mode #signature-pad {
 #zakaznikSchvaleniPad {
   width: 100%;
   height: 150px;
-  border: 2px solid #1a1a1a;
+  border: 2px solid var(--wgs-darkest);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--wgs-white);
   touch-action: none;
   cursor: crosshair;
 }
@@ -1405,13 +1405,13 @@ body.pdf-export-mode #signature-pad {
 
 .zakaznik-schvaleni-hint {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--wgs-gray-88);
 }
 
 .btn-vymazat-podpis {
   background: transparent;
-  color: #dc3545;
-  border: 1px solid #dc3545;
+  color: var(--wgs-danger);
+  border: 1px solid var(--wgs-danger);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -1420,17 +1420,17 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-vymazat-podpis:hover {
-  background: #dc3545;
-  color: #fff;
+  background: var(--wgs-danger);
+  color: var(--wgs-white);
 }
 
 .zakaznik-schvaleni-footer {
-  background: #222;
+  background: var(--wgs-dark-grey);
   padding: 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--wgs-gray-33);
 }
 
 /* Volba typu podpisu */
@@ -1457,7 +1457,7 @@ body.pdf-export-mode #signature-pad {
   padding: 1.25rem 2rem;
   font-size: 1.1rem;
   font-weight: 700;
-  border: 2px solid #333;
+  border: 2px solid var(--wgs-gray-33);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -1465,36 +1465,36 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-nutno-objednat-dil {
-  background: #444;
-  color: #fff;
+  background: var(--wgs-gray-44);
+  color: var(--wgs-white);
 }
 
 .btn-nutno-objednat-dil:hover {
-  background: #555;
-  border-color: #666;
+  background: var(--wgs-grey);
+  border-color: var(--wgs-gray-66);
 }
 
 .btn-pouze-podpis {
-  background: #333;
-  color: #fff;
+  background: var(--wgs-gray-33);
+  color: var(--wgs-white);
 }
 
 .btn-pouze-podpis:hover {
-  background: #444;
-  border-color: #555;
+  background: var(--wgs-gray-44);
+  border-color: var(--wgs-grey);
 }
 
 /* Info text o prodloužení lhůty */
 .prodlouzeni-lhuty-info {
-  background: #fff5f5;
-  border: 2px solid #cc0000;
+  background: var(--c-error-bg-light);
+  border: 2px solid var(--wgs-delete);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
 .prodlouzeni-lhuty-info span {
-  color: #cc0000;
+  color: var(--wgs-delete);
   font-weight: 600;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -1502,7 +1502,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .footer-checkbox-sekce .checkbox-prodlouzeni-lhuty {
-  color: #fff;
+  color: var(--wgs-white);
   display: flex !important;
   align-items: flex-start;
   gap: 0.5rem;
@@ -1514,12 +1514,12 @@ body.pdf-export-mode #signature-pad {
   width: 20px;
   height: 20px;
   margin-top: 2px;
-  accent-color: #666;
+  accent-color: var(--wgs-gray-66);
   flex-shrink: 0;
 }
 
 .footer-checkbox-sekce .checkbox-prodlouzeni-lhuty span {
-  color: #fff;
+  color: var(--wgs-white);
   flex: 1;
 }
 
@@ -1539,20 +1539,20 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-container {
-  background: #2a2a2a;  /* Změněno z #1a1a1a na světlejší pro lepší kontrast textu */
+  background: var(--wgs-gray-2a);  /* Změněno z var(--wgs-darkest) na světlejší pro lepší kontrast textu */
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  border: 2px solid #555;  /* Výraznější border */
+  border: 2px solid var(--wgs-grey);  /* Výraznější border */
   max-height: 90vh;
   display: flex;
   flex-direction: column;
 }
 
 .souhlas-dil-header {
-  background: #dc3545;  /* Červené pozadí pro důležitost */
-  color: #fff;
+  background: var(--wgs-danger);  /* Červené pozadí pro důležitost */
+  color: var(--wgs-white);
   padding: 1.5rem;
   border-radius: 12px 12px 0 0;
   box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
@@ -1574,7 +1574,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-text {
-  color: #fff !important;  /* !important aby se nepřepsalo jinými CSS */
+  color: var(--wgs-white) !important;  /* !important aby se nepřepsalo jinými CSS */
   line-height: 1.8 !important;
   margin-bottom: 2rem !important;
   font-size: 1.05rem !important;  /* Zvětšeno pro lepší čitelnost */
@@ -1584,7 +1584,7 @@ body.pdf-export-mode #signature-pad {
 .souhlas-dil-text p {
   margin-bottom: 1.5rem !important;  /* Větší mezera mezi odstavci */
   text-align: justify !important;
-  color: #fff !important;
+  color: var(--wgs-white) !important;
 }
 
 .souhlas-dil-otazka {
@@ -1593,19 +1593,19 @@ body.pdf-export-mode #signature-pad {
 }
 
 .souhlas-dil-otazka h3 {
-  color: #fff;
+  color: var(--wgs-white);
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
 }
 
 .souhlas-dil-footer {
-  background: #222;
+  background: var(--wgs-dark-grey);
   padding: 1.5rem;
   display: flex;
   gap: 1rem;
   border-radius: 0 0 12px 12px;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--wgs-gray-33);
 }
 
 .btn-nesouhlas,
@@ -1622,27 +1622,27 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-nesouhlas {
-  background: #dc3545;
-  color: #fff;
+  background: var(--wgs-danger);
+  color: var(--wgs-white);
 }
 
 .btn-nesouhlas:hover {
-  background: #c82333;
+  background: var(--wgs-danger-hover);
 }
 
 .btn-souhlas {
-  background: #28a745;
-  color: #fff;
+  background: var(--wgs-success);
+  color: var(--wgs-white);
 }
 
 .btn-souhlas:hover {
-  background: #218838;
+  background: var(--wgs-success-hover);
 }
 
 /* Červené tlačítko POTŘEBA DÍL K OPRAVĚ - hlavní protokol */
 .btn-potreba-dil {
-  background: #dc3545 !important;
-  color: #fff !important;
+  background: var(--wgs-danger) !important;
+  color: var(--wgs-white) !important;
   padding: 0.5rem 1.5rem !important;  /* Poloviční výška */
   font-size: 1rem !important;
   font-weight: 700 !important;
@@ -1657,7 +1657,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-potreba-dil:hover {
-  background: #c82333 !important;
+  background: var(--wgs-danger-hover) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4) !important;
 }
@@ -1675,8 +1675,8 @@ body.pdf-export-mode #signature-pad {
 
 .btn-zrusit {
   background: transparent;
-  color: #ccc;
-  border: 1px solid #444;
+  color: var(--c-border-medium);
+  border: 1px solid var(--wgs-gray-44);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -1686,13 +1686,13 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-zrusit:hover {
-  background: #333;
+  background: var(--wgs-gray-33);
 }
 
 .btn-pouzit {
-  background: #333;
-  color: #ffffff;
-  border: 1px solid #444;
+  background: var(--wgs-gray-33);
+  color: var(--wgs-white);
+  border: 1px solid var(--wgs-gray-44);
   padding: 0.75rem 2rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -1702,7 +1702,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-pouzit:hover {
-  background: #444;
+  background: var(--wgs-gray-44);
 }
 
 /* Tlačítko Podepsat protokol */
@@ -1711,8 +1711,8 @@ body.pdf-export-mode #signature-pad {
   width: 100%;
   padding: 1rem 1.5rem;
   margin-bottom: 1rem;
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--wgs-darkest);
+  color: var(--wgs-white);
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
@@ -1722,7 +1722,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-podepsat-protokol:hover {
-  background: #333333;
+  background: var(--wgs-gray-33);
 }
 
 /* Sekce v modalu */
@@ -1733,7 +1733,7 @@ body.pdf-export-mode #signature-pad {
 .zakaznik-schvaleni-sekce label {
   display: block;
   font-weight: 600;
-  color: #fff;
+  color: var(--wgs-white);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -1742,8 +1742,8 @@ body.pdf-export-mode #signature-pad {
 .zakaznik-schvaleni-tabulka {
   width: 100%;
   border-collapse: collapse;
-  background: #222;
-  border: 1px solid #444;
+  background: var(--wgs-dark-grey);
+  border: 1px solid var(--wgs-gray-44);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1763,15 +1763,15 @@ body.pdf-export-mode #signature-pad {
 }
 
 .zakaznik-schvaleni-tabulka .tabulka-label {
-  background: #2a2a2a;
-  color: #aaa;
+  background: var(--wgs-gray-2a);
+  color: var(--wgs-gray-aa);
   font-weight: 500;
   width: 55%;
 }
 
 .zakaznik-schvaleni-tabulka .tabulka-hodnota {
-  background: #222;
-  color: #fff;
+  background: var(--wgs-dark-grey);
+  color: var(--wgs-white);
   font-weight: 600;
   text-align: center;
 }
@@ -1779,7 +1779,7 @@ body.pdf-export-mode #signature-pad {
 /* Checkbox prodloužení lhůty */
 .zakaznik-schvaleni-tabulka .tabulka-checkbox-row {
   padding: 0.75rem 1rem;
-  background: #2a2a2a;
+  background: var(--wgs-gray-2a);
 }
 
 .checkbox-prodlouzeni-lhuty {
@@ -1796,22 +1796,22 @@ body.pdf-export-mode #signature-pad {
   height: 18px;
   margin-top: 2px;
   cursor: pointer;
-  accent-color: #333;
+  accent-color: var(--wgs-gray-33);
   flex-shrink: 0;
 }
 
 .checkbox-prodlouzeni-lhuty span {
-  color: #fff;
+  color: var(--wgs-white);
 }
 
 /* Text prodloužení lhůty v modalu */
 .prodlouzeni-lhuty-text {
   margin-top: 0.75rem;
   padding: 0.75rem;
-  background: #fff5f5;
-  border: 1px solid #cc0000;
+  background: var(--c-error-bg-light);
+  border: 1px solid var(--wgs-delete);
   border-radius: 4px;
-  color: #cc0000;
+  color: var(--wgs-delete);
   font-size: 0.85rem;
   line-height: 1.5;
   text-align: justify;
@@ -1961,8 +1961,8 @@ body.pdf-export-mode #signature-pad {
   position: relative;
   width: 100%;
   height: 180px;
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--wgs-black);
+  background: var(--wgs-white);
 }
 
 /* Canvas uvnitř kontejneru - přepsat původní styl */
@@ -1997,8 +1997,8 @@ body.pdf-export-mode #signature-pad {
 
 /* Tlačítko PODEPSAT */
 .btn-podepsat-fullscreen {
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
   border: none;
   padding: 18px 48px;
   font-size: 1.2rem;
@@ -2011,7 +2011,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-podepsat-fullscreen:hover {
-  background: #333;
+  background: var(--wgs-gray-33);
   transform: scale(1.05);
 }
 
@@ -2030,7 +2030,7 @@ body.pdf-export-mode #signature-pad {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #000;
+  background: var(--wgs-black);
   z-index: 99999;
   flex-direction: column;
 }
@@ -2045,13 +2045,13 @@ body.pdf-export-mode #signature-pad {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: var(--wgs-white);
 }
 
 /* Header s textem */
 .fullscreen-podpis-header {
-  background: #000;
-  color: #fff;
+  background: var(--wgs-black);
+  color: var(--wgs-white);
   padding: 8px 15px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -2067,7 +2067,7 @@ body.pdf-export-mode #signature-pad {
 #fullscreen-signature-pad {
   flex: 1;
   width: 100%;
-  background: #fff;
+  background: var(--wgs-white);
   touch-action: none;
   cursor: crosshair;
 }
@@ -2078,8 +2078,8 @@ body.pdf-export-mode #signature-pad {
   justify-content: space-between;
   padding: 5px 10px;
   padding-bottom: max(5px, env(safe-area-inset-bottom));
-  background: #f5f5f5;
-  border-top: 1px solid #ccc;
+  background: var(--c-success-bg);
+  border-top: 1px solid var(--c-border-medium);
   flex-shrink: 0;
   min-height: 36px;
   max-height: 50px;
@@ -2093,9 +2093,9 @@ body.pdf-export-mode #signature-pad {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  border: 1px solid #dc3545;
+  border: 1px solid var(--wgs-danger);
   background: transparent;
-  color: #dc3545;
+  color: var(--wgs-danger);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -2103,8 +2103,8 @@ body.pdf-export-mode #signature-pad {
 
 .btn-smazat-podpis:hover,
 .btn-smazat-podpis:active {
-  background: #dc3545;
-  color: #fff;
+  background: var(--wgs-danger);
+  color: var(--wgs-white);
 }
 
 /* Tlačítko Potvrdit - vpravo */
@@ -2115,8 +2115,8 @@ body.pdf-export-mode #signature-pad {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   border: none;
-  background: #28a745;
-  color: #fff;
+  background: var(--wgs-success);
+  color: var(--wgs-white);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -2124,7 +2124,7 @@ body.pdf-export-mode #signature-pad {
 
 .btn-potvrdit-podpis:hover,
 .btn-potvrdit-podpis:active {
-  background: #218838;
+  background: var(--wgs-success-hover);
 }
 
 /* ============================================================================
@@ -2236,7 +2236,7 @@ body.pdf-export-mode #signature-pad {
     height: 70%;
     max-height: 500px;
     margin: auto;
-    border: 3px solid #000;
+    border: 3px solid var(--wgs-black);
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
   }
 }
