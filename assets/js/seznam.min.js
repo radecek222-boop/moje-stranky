@@ -941,18 +941,19 @@ async function renderOrders(items = null) {
     }
 
     // Sdílený badge stavu (používá se v obou šablonách)
-    // Priorita: 1) termín, 2) POSLÁNA SMS, 3) odloženo, 4) čekáme na díly, 5) CN, 6) stav
+    // Priorita: 1) termín, 2) odloženo, 3) čekáme na díly, 4) CN, 5) stav (vč. DOMLUVENÁ/HOTOVO)
+    // POSLÁNA SMS: nejnižší priorita – zobrazí se pouze u stavu NOVÁ (wait) když žádná jiná podmínka neplatí
     const maSmsBadge = (rec._sms_odeslana || rec.sms_kontakt_datum || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)));
     const stavBadge = appointmentText
       ? `<span class="order-appointment">${appointmentText}</span>`
-      : (maSmsBadge
-          ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
-          : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
-              ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
-              : (status.class === 'cekame-na-dily'
-                  ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
-                  : (maCenovouNabidku && !jeHotovo
-                      ? `<span class="${cnTextClass}">${cnText}</span>`
+      : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
+          ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
+          : (status.class === 'cekame-na-dily'
+              ? `<span class="order-cn-text cekame-nd">Čekáme na díly</span>`
+              : (maCenovouNabidku && !jeHotovo
+                  ? `<span class="${cnTextClass}">${cnText}</span>`
+                  : (maSmsBadge && status.class === 'wait'
+                      ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
                       : `<span class="order-status-text status-${status.class}">${status.text}</span>`))));
 
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
