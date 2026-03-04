@@ -228,7 +228,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  color: var(--wgs-white);
+  color: #ffffff;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 
@@ -317,29 +317,29 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control {
   padding: 0.7rem 0.9rem; /* ZMĚNA: z 0.9rem 1rem na 0.7rem 0.9rem */
-  border: 1px solid var(--c-border);
-  background: var(--c-white);
+  border: 1px solid #cccccc;
+  background: #ffffff;
   font-family: 'Poppins', sans-serif;
   font-size: 0.95rem;
-  color: var(--c-black);
+  color: #000000;
   transition: all 0.3s;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: var(--c-black);
-  box-shadow: 0 0 0 1px var(--c-black);
+  border-color: #000000;
+  box-shadow: 0 0 0 1px #000000;
 }
 
 .form-control:read-only,
 .form-control.disabled-field {
-  background-color: var(--c-success-bg) !important;
+  background-color: #f0f0f0 !important;
   cursor: not-allowed !important;
-  color: var(--wgs-light-grey);
+  color: #888888;
 }
 
 .form-control::placeholder {
-  color: var(--c-light-grey);
+  color: #999999;
   font-style: italic;
 }
 

@@ -159,13 +159,13 @@ h6 {
   text-align: center;
   max-width: 900px;
   padding: 2rem 2rem;
-  color: var(--c-white);
+  color: #ffffff;
 }
 .hero-title {
   font-family: "Poppins", sans-serif;
   font-size: clamp(1.5rem, 3.5vw, 2.5rem);
   font-weight: 600;
-  color: var(--c-white);
+  color: #ffffff;
   margin-bottom: 0.6rem;
   letter-spacing: 0.05em;
   line-height: 1.15;
