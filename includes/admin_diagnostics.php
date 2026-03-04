@@ -68,6 +68,33 @@ if (file_exists($securityLogPath)) {
     $securityCount = count($securityLog);
 }
 
+// 8. Neúspěšná přihlášení z audit logu (posledních 7 dní)
+$neuspesnaPrihlaseni = [];
+$pocetNeuspesnychDnes = 0;
+$logDir = defined('LOGS_PATH') ? LOGS_PATH : __DIR__ . '/../logs';
+$dnesRano = date('Y-m-d') . ' 00:00:00';
+$pred7Dny = date('Y-m-d H:i:s', strtotime('-7 days'));
+$mesice = [date('Y-m'), date('Y-m', strtotime('-1 month'))];
+foreach ($mesice as $mesic) {
+    $logSoubor = $logDir . '/audit_' . $mesic . '.log';
+    if (!file_exists($logSoubor)) continue;
+    $radky = file($logSoubor, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($radky as $radek) {
+        $zaznam = json_decode($radek, true);
+        if (!$zaznam || $zaznam['action'] !== 'failed_login') continue;
+        if ($zaznam['timestamp'] < $pred7Dny) continue;
+        $neuspesnaPrihlaseni[] = $zaznam;
+        if ($zaznam['timestamp'] >= $dnesRano) {
+            $pocetNeuspesnychDnes++;
+        }
+    }
+}
+// Seřadit od nejnovějšího, omezit na 25 zobrazených
+usort($neuspesnaPrihlaseni, fn($a, $b) => strcmp($b['timestamp'], $a['timestamp']));
+$pocetNeuspesnychCelkem = count($neuspesnaPrihlaseni);
+$neuspesnaPrihlaseni = array_slice($neuspesnaPrihlaseni, 0, 25);
+$stavPrihlaseni = $pocetNeuspesnychDnes === 0 ? 'healthy' : ($pocetNeuspesnychDnes < 10 ? 'warning' : 'error');
+
 // Overall status
 $overallStatus = 'healthy';
 if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'error') {
@@ -243,6 +270,90 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- NEÚSPĚŠNÁ PŘIHLÁŠENÍ -->
+        <div class="setting-group">
+            <h3 class="setting-group-title" style="display:flex;align-items:center;gap:0.6rem;">
+                Neúspěšná přihlášení — posledních 7 dní
+                <?php if ($pocetNeuspesnychDnes > 0): ?>
+                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;background:<?= $stavPrihlaseni === 'error' ? '#dc3545' : '#856404' ?>;color:#fff;border-radius:11px;font-size:0.7rem;font-weight:700;">
+                    <?= $pocetNeuspesnychDnes ?> dnes
+                </span>
+                <?php endif; ?>
+            </h3>
+
+            <?php if ($pocetNeuspesnychCelkem === 0): ?>
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label" style="color:#28a745;font-weight:600;">Žádné neúspěšné pokusy</div>
+                    <div class="setting-item-description">Za posledních 7 dní nebyl zaznamenán žádný neúspěšný pokus o přihlášení.</div>
+                </div>
+            </div>
+            <?php else: ?>
+
+            <div style="padding:0 0 0.75rem;">
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                    <div style="font-size:0.78rem;color:#666;">
+                        Celkem za 7 dní: <strong style="color:#111;"><?= $pocetNeuspesnychCelkem ?></strong>
+                    </div>
+                    <div style="font-size:0.78rem;color:<?= $pocetNeuspesnychDnes >= 10 ? '#dc3545' : ($pocetNeuspesnychDnes > 0 ? '#856404' : '#666') ?>;">
+                        Dnes: <strong><?= $pocetNeuspesnychDnes ?></strong>
+                        <?php if ($pocetNeuspesnychDnes >= 10): ?>
+                        — <strong>Zvýšená aktivita!</strong>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($pocetNeuspesnychCelkem > 25): ?>
+                    <div style="font-size:0.78rem;color:#888;">Zobrazeno posledních 25 z <?= $pocetNeuspesnychCelkem ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div style="overflow-x:auto;border:1px solid #e0e0e0;border-radius:4px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+                        <thead>
+                            <tr style="background:#111;color:#fff;">
+                                <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;white-space:nowrap;">Datum a čas</th>
+                                <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;">IP adresa</th>
+                                <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;">Typ</th>
+                                <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;">Důvod</th>
+                                <th style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;">Email / detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($neuspesnaPrihlaseni as $i => $zaznam): ?>
+                        <?php
+                            $det = $zaznam['details'] ?? [];
+                            $ip = $det['ip'] ?? $zaznam['ip'] ?? '—';
+                            $typ = $det['type'] ?? '—';
+                            $duvod = $det['reason'] ?? '—';
+                            $email = $det['email'] ?? $det['identifier'] ?? $zaznam['user_name'] ?? '—';
+                            $jeDnes = str_starts_with($zaznam['timestamp'], date('Y-m-d'));
+                            $radekBg = $jeDnes ? '#fff8f8' : ($i % 2 === 0 ? '#fff' : '#fafafa');
+                        ?>
+                            <tr style="background:<?= $radekBg ?>;">
+                                <td style="padding:0.45rem 0.75rem;border-bottom:1px solid #eee;white-space:nowrap;<?= $jeDnes ? 'font-weight:600;' : '' ?>">
+                                    <?= htmlspecialchars(date('j.n. H:i:s', strtotime($zaznam['timestamp'])), ENT_QUOTES, 'UTF-8') ?>
+                                    <?php if ($jeDnes): ?><span style="margin-left:0.35rem;font-size:0.68rem;background:#dc3545;color:#fff;padding:0.1rem 0.4rem;border-radius:2px;">dnes</span><?php endif; ?>
+                                </td>
+                                <td style="padding:0.45rem 0.75rem;border-bottom:1px solid #eee;font-family:monospace;">
+                                    <?= htmlspecialchars($ip, ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding:0.45rem 0.75rem;border-bottom:1px solid #eee;">
+                                    <?= htmlspecialchars($typ, ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding:0.45rem 0.75rem;border-bottom:1px solid #eee;color:#666;">
+                                    <?= htmlspecialchars($duvod, ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding:0.45rem 0.75rem;border-bottom:1px solid #eee;color:#888;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    <?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- ACTIONS -->

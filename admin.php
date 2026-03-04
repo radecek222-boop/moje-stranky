@@ -76,6 +76,7 @@ try {
 // Získání statistik pro dashboard
 $activeKeys = 0;
 $pendingActions = 0;
+$pocetNeuspesnychPrihlaseniDnes = 0;
 
 if ($activeTab === 'dashboard') {
     try {
@@ -93,6 +94,24 @@ if ($activeTab === 'dashboard') {
     } catch (Exception $e) {
         $activeKeys = 0;
         $pendingActions = 0;
+    }
+
+    // Počet neúspěšných přihlášení dnes z audit logu
+    try {
+        $logDir = defined('LOGS_PATH') ? LOGS_PATH : __DIR__ . '/logs';
+        $logSoubor = $logDir . '/audit_' . date('Y-m') . '.log';
+        $dnesRano = date('Y-m-d') . ' 00:00:00';
+        if (file_exists($logSoubor)) {
+            $radky = file($logSoubor, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($radky as $radek) {
+                $z = json_decode($radek, true);
+                if ($z && $z['action'] === 'failed_login' && isset($z['timestamp']) && $z['timestamp'] >= $dnesRano) {
+                    $pocetNeuspesnychPrihlaseniDnes++;
+                }
+            }
+        }
+    } catch (Exception $e) {
+        $pocetNeuspesnychPrihlaseniDnes = 0;
     }
 }
 ?>
@@ -161,6 +180,15 @@ if (!$embedMode && $activeTab === 'dashboard'):
     </div>
 
     <div class="cc-seznam">
+        <?php if ($pocetNeuspesnychPrihlaseniDnes >= 5): ?>
+        <div class="cc-radek cc-radek-varovani" data-href="admin.php?tab=tools" style="border-left:3px solid #dc3545;">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" style="color:#dc3545;">Bezpečnostní upozornění</div>
+                <div class="cc-radek-popis">Dnes bylo zaznamenáno <?= $pocetNeuspesnychPrihlaseniDnes ?> neúspěšných pokusů o přihlášení — zobrazit detail v Diagnostice</div>
+            </div>
+            <div class="cc-radek-badge" style="background:#dc3545;"><?= $pocetNeuspesnychPrihlaseniDnes ?></div>
+        </div>
+        <?php endif; ?>
         <div class="cc-radek" data-href="admin.php?tab=zakaznici">
             <div class="cc-radek-info">
                 <div class="cc-radek-nazev" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
