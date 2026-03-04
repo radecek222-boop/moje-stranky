@@ -23,6 +23,10 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+    # Force non-www (www.wgs-service.cz -> wgs-service.cz)
+    RewriteCond %{HTTP_HOST} ^www\.wgs-service\.cz [NC]
+    RewriteRule ^(.*)$ https://wgs-service.cz/$1 [L,R=301]
+
     # ======================================
     # CRITICAL: Exclude /app/ and /api/ from ALL rewrites
     # ======================================
