@@ -19,14 +19,14 @@
 | **Phase 6** | Security Hardening | COMPLETE | Steps 132-133 |
 | **Phase 7** | Code Deduplication | COMPLETE | Steps 134 |
 | **Phase 8** | Inline Styles Migration | COMPLETE | Steps 135-137 |
-| **Phase 9** | HTMX Migration | PARTIAL (141,142 done) | Steps 141-150 |
+| **Phase 9** | HTMX Migration | PARTIAL (141-146 done) | Steps 141-150 |
 | **Phase 10** | Testing & Documentation | COMPLETE | Steps 151-165 |
 | **Phase 11** | Performance Optimization | COMPLETE (167,168 done) | Steps 166-175 |
 | **Bonus** | Multi-tenant, Router, E2E, Redis | COMPLETE | #3,#7,#8,#10 |
 
 ## Current Work
 
-**Active Phase:** 9 - HTMX Migration - PARTIAL (Steps 141-142 done, 143-150 pending)
+**Active Phase:** 9 - HTMX Migration - PARTIAL (Steps 141-146 done, 147-150 pending)
 **Current Step:** 170 - Performance analysis (COMPLETE)
 **Deferred:** Steps 167-168 (module splitting - needs dedicated testing)
 
@@ -2742,10 +2742,10 @@ Migrate fetch-based AJAX calls to HTMX for server-rendered HTML responses where 
 **Tasks:**
 - [x] Step 141: Create HTMX HTML endpoint for notes - api/poznamky_html.php (DONE)
 - [x] Step 142: Migrate notes CRUD to HTMX - saveNewNote uses htmx.ajax() refresh (DONE)
-- [ ] Step 143: Create HTMX endpoint for complaint filters
-- [ ] Step 144: Migrate complaint list to HTMX partial
-- [ ] Step 145: Create HTMX endpoint for statistics
-- [ ] Step 146: Migrate statistics filters to HTMX
+- [x] Step 143: Create HTMX endpoint for complaint filters - api/seznam_html.php (DONE)
+- [x] Step 144: Migrate complaint list to HTMX partial - _htmxAktualizujGrid() in seznam.js (DONE)
+- [x] Step 145: Create HTMX endpoint for statistics - api/statistiky_html.php (DONE)
+- [x] Step 146: Migrate statistics filters to HTMX - nactiSummary override in statistiky.php (DONE)
 - [ ] Step 147-150: Additional migrations as needed
 
 ---
@@ -2891,11 +2891,11 @@ Optimize bundle sizes and loading performance.
 - [x] Only intentional dynamic styles remain
 
 ## Phase 9: HTMX Migration - PARTIAL
-- [x] HTMX library loaded in seznam.php (htmx.org v2.0.4)
+- [x] HTMX library loaded in seznam.php and statistiky.php (htmx.org v2.0.4)
 - [x] Notes HTML endpoint: api/poznamky_html.php (Step 141)
 - [x] Notes refresh via htmx.ajax() after add (Step 142)
-- [ ] Complaint filtering via HTMX (Steps 143-144)
-- [ ] Statistics filtering via HTMX (Steps 145-146)
+- [x] Complaint filtering via HTMX: api/seznam_html.php + _htmxAktualizujGrid() (Steps 143-144)
+- [x] Statistics summary via HTMX: api/statistiky_html.php + nactiSummary override (Steps 145-146)
 
 ## Phase 10: Testing & Documentation - COMPLETE
 - [x] PHPUnit tests for critical APIs

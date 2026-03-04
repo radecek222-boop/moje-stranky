@@ -310,8 +310,12 @@ function initSearch() {
 
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
-    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    renderOrders(userItems);
+    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+      _htmxAktualizujGrid();
+    } else {
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    }
   });
   
   searchInput.addEventListener('keydown', (e) => {
@@ -401,8 +405,12 @@ function initFilters() {
         }
       }
 
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
+      if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+        _htmxAktualizujGrid();
+      } else {
+        let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+        renderOrders(userItems);
+      }
     });
   });
 
@@ -617,9 +625,26 @@ function sestavAdminProdejceBox() {
     ADMIN_PRODEJCE_FILTER = id || null;
     novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    renderOrders(userItems);
+    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+      _htmxAktualizujGrid();
+    } else {
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    }
   });
+}
+
+// === HTMX HELPER: Aktualizace gridu přes server-rendered HTML ===
+function _htmxAktualizujGrid() {
+  const stavFiltr = ACTIVE_FILTERS.size === 1 ? [...ACTIVE_FILTERS][0] : 'all';
+  const hledej = SEARCH_QUERY || '';
+  const prodejceId = ADMIN_PRODEJCE_FILTER || '';
+
+  let url = `/api/seznam_html.php?status=${encodeURIComponent(stavFiltr)}`;
+  if (hledej) url += `&search=${encodeURIComponent(hledej)}`;
+  if (prodejceId) url += `&prodejce_id=${encodeURIComponent(prodejceId)}`;
+
+  htmx.ajax('GET', url, { target: '#orderGrid', swap: 'innerHTML' });
 }
 
 async function renderOrders(items = null) {
