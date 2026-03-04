@@ -1241,6 +1241,11 @@ async function showDetail(recordOrId) {
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        ${CURRENT_USER && CURRENT_USER.is_admin ? `
+          <div style="border-top: 1px solid #333; margin-top: 0.5rem; padding-top: 0.4rem;">
+            <button class="detail-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 0.4rem 0.75rem; font-size: 0.78rem; width: 100%; cursor: pointer;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          </div>
+        ` : ''}
       </div>
     `;
   } else {
@@ -1255,7 +1260,6 @@ async function showDetail(recordOrId) {
     // Technické funkce — ne pro prodejce
     const technickaFunkce = !jeProdejceElse ? `
         <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
         <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
     ` : '';
 
@@ -1280,6 +1284,10 @@ async function showDetail(recordOrId) {
         ${tiskBtn}
         ${qrPlatbaBtn}
         <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+        ${jeAdminElse ? `
+        <div style="border-top: 1px solid #333; margin-top: 0.4rem; padding-top: 0.4rem;">
+          <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #dc3545; color: white;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+        </div>` : ''}
       </div>
     `;
   }
@@ -2886,14 +2894,6 @@ async function showCustomerDetail(id) {
         </button>
       </div>
 
-      ${CURRENT_USER.is_admin ? `
-        <div style="border-top: 1px solid #333; padding-top: 1rem; margin-top: 1rem;">
-          <button class="btn customer-detail-btn danger" data-action="deleteReklamace" data-id="${id}">
-            Smazat reklamaci
-          </button>
-          <p style="font-size: 0.7rem; color: #666; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
-        </div>
-      ` : ''}
 
       <div class="detail-buttons">
         <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
