@@ -272,12 +272,12 @@ body.modal-open {
 /* MINIATURY FOTEK v detailu */
 #detailOverlay .foto-wrapper {
   position: relative !important;
-  width: 60px !important;
-  height: 60px !important;
-  min-width: 60px !important;
-  min-height: 60px !important;
-  max-width: 60px !important;
-  max-height: 60px !important;
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px !important;
+  min-height: 120px !important;
+  max-width: 120px !important;
+  max-height: 120px !important;
   flex-shrink: 0 !important;
   display: inline-block !important;
   overflow: hidden !important;
@@ -285,12 +285,12 @@ body.modal-open {
 }
 
 #detailOverlay .foto-wrapper img {
-  width: 60px !important;
-  height: 60px !important;
-  min-width: 60px !important;
-  min-height: 60px !important;
-  max-width: 60px !important;
-  max-height: 60px !important;
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px !important;
+  min-height: 120px !important;
+  max-width: 120px !important;
+  max-height: 120px !important;
   object-fit: cover !important;
   border: 1px solid #444 !important;
   border-radius: 4px !important;
