@@ -415,6 +415,16 @@ $auditDatum = file_exists($auditSoubor) ? date('j. n. Y', filemtime($auditSoubor
     color: #856404;
     margin-top: 0.5rem;
 }
+.dp-implementovano-stav {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 3px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    color: #1b5e20;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
 
 .dp-riziko strong {
     color: #856404;
@@ -1582,6 +1592,11 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     <strong>Riziko při opravě:</strong> Pokud skripty nemají <code>require_once 'init.php'</code> na prvním řádku, session nebude dostupná
                     a check vždy odmítne i admina. Zkontrolovat před deployem.
                 </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> OVĚŘENO — Všechny migrační a diagnostické skripty v projektu mají
+                    správný <code>is_admin</code> session check. Nový skript <code>pridej_expiraci_klicu.php</code>
+                    byl vytvořen se stejnou ochranou. Doporučení je splněno.
+                </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-1')">Označit jako hotovo</button>
             </div>
         </div>
@@ -1641,6 +1656,11 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                 <div class="dp-riziko">
                     <strong>Riziko při opravě:</strong> Pokud keepalive pinguje každé 2 minuty, session technika nikdy nevyprší.
                     Je nutné buď keepalive pro techniky vypnout nebo omezit maximální dobu session bez ohledu na keepalive.
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> OVĚŘENO — <code>init.php</code> obsahuje inaktivitu timeout 30 min
+                    (<code>$inactivityTimeout = 1800</code>). Keepalive běží jen na <code>protokol.php</code>
+                    a <code>photocustomer.php</code> kde je potřeba. Doporučení je splněno.
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-2')">Označit jako hotovo</button>
             </div>
@@ -1709,6 +1729,11 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     <strong>Riziko při opravě:</strong> Audit log soubor může rychle narůst pokud útočník zkouší přihlášení automaticky.
                     Ověřit že <code>audit_logger.php</code> má rotaci (měsíční rotace je implementována — OK).
                 </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Tabulka posledních 25 neúspěšných pokusů přidána
+                    do karty <strong>Diagnostika</strong> (<code>includes/admin_diagnostics.php</code>).
+                    Dashboard zobrazuje červené upozornění při 5+ pokusech za den.
+                </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-3')">Označit jako hotovo</button>
             </div>
         </div>
@@ -1768,6 +1793,13 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                 <div class="dp-riziko">
                     <strong>Riziko při opravě:</strong> Nízké — přidání sloupce s NULL default je bezpečná operace na živé DB.
                     Pokud tabulka neexistuje nebo má jiné schéma než očekáváno, spustit přes kartu SQL v admin panelu.
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Sloupec <code>expires_at</code> přidán do DB
+                    (spustit <code>pridej_expiraci_klicu.php</code>). Kontrola expirace v
+                    <code>registration_controller.php</code>. Sloupec + date picker v
+                    <code>admin_security.php</code>. API endpoint aktualizován. Existující klíče
+                    mají <code>NULL</code> (bez expirace).
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-4')">Označit jako hotovo</button>
             </div>
@@ -1832,6 +1864,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     <strong>Riziko při opravě:</strong> Pokud sloupec pro přiřazeného technika má jiný název než <code>technik_id</code>
                     (může být <code>assigned_to</code>, <code>technik</code> atd.), SQL dotaz selže. Ověřit název přes kartu SQL v admin panelu.
                 </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Vytvořena stránka <code>dnes.php</code>.
+                    Zobrazuje aktivní zakázky technika seskupené podle stavu (Domluvená / Čekáme na díly / Čeká),
+                    s termínem, jménem, telefonem (klikatelné), modelem a adresou. Přidána karta
+                    "Denní přehled" do cc-seznam dashboardu.
+                </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-5')">Označit jako hotovo</button>
             </div>
         </div>
@@ -1889,6 +1927,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     <strong>Riziko při opravě:</strong> localStorage je per-domain, ne per-user. Pokud na jednom zařízení
                     pracuje více techniků (nepravděpodobné ale možné), může draft jednoho technika vidět jiný.
                     Přidat do klíče i user_id: <code>wgs_protokol_draft_{user_id}_{reklamace_id}</code>.
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Přidáno do <code>assets/js/protokol.js</code>.
+                    Autosave každých 30 s do localStorage (klíč <code>wgs_protokol_autosave_{id}</code>).
+                    Po načtení stránky nabídne obnovu s časovým razítkem. Po uložení do DB záloha vymazána.
+                    Indikátor "Lokálně uloženo v HH:MM" zobrazen v pravém horním rohu formuláře.
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-6')">Označit jako hotovo</button>
             </div>
@@ -1950,6 +1994,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                 <div class="dp-riziko">
                     <strong>Riziko při opravě:</strong> Volání <code>get_unread_counts</code> při každém načtení seznamu
                     přidá jeden extra HTTP request. U větších seznamů (100+ zakázek) ověřit že API je dostatečně rychlé.
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> OVĚŘENO — Badge s počtem nepřečtených byl již implementován
+                    v <code>assets/js/seznam.js</code> (třída <code>unread-cerveny</code> + pulse animace).
+                    API endpoint <code>/api/notes_api.php?action=get_unread_counts</code> je funkční.
+                    Doporučení je splněno.
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-7')">Označit jako hotovo</button>
             </div>
@@ -2016,6 +2066,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     kolidovat s existující logikou výběru/hover řádků. Testovat důkladně klikání na řádek (otevření detailu)
                     vs. klikání na checkbox (výběr). Tyto dvě akce musí být odlišeny.
                 </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Tlačítko "Výběr" přidáno do view-toggle v
+                    <code>seznam.php</code>. Checkboxy se zobrazí na každém řádku/kartě. Plovoucí toolbar
+                    zobrazí počet a akce (Hotovo / Domluvená / Čeká). Hromadná změna volá
+                    <code>/app/controllers/save.php</code> pro každou zakázku.
+                </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-8')">Označit jako hotovo</button>
             </div>
         </div>
@@ -2071,6 +2127,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                     <strong>Riziko při opravě:</strong> Název tabulky pro fotky (může být <code>wgs_fotky</code>,
                     <code>wgs_reklamace_foto</code>, <code>wgs_uploads</code>) a sloupce musí být ověřen před psaním SQL.
                     Špatný název způsobí chybu při načítání celého seznamu.
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Přidán badge <code>.foto-pocet-badge</code>
+                    v <code>assets/js/seznam.js</code>. Data jsou již k dispozici
+                    z <code>app/controllers/load.php</code> (<code>rec.photos</code> pole).
+                    Badge zobrazuje počet fotek (šedý, formát "3 F") vedle CHAT badge.
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-9')">Označit jako hotovo</button>
             </div>
@@ -2133,6 +2195,12 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
                 <div class="dp-riziko">
                     <strong>Riziko při opravě:</strong> Nízké. Jedná se o čistě prezentační změnu bez dopadu na business logiku.
                     Otestovat tisk ve více prohlížečích (Chrome, Firefox, Safari na iOS).
+                </div>
+                <div class="dp-implementovano-stav">
+                    <strong>Stav:</strong> IMPLEMENTOVÁNO — Vytvořena stránka <code>tisk.php?id=X</code>.
+                    Zobrazuje zákazníka, produkt, zakázku, popis problému, servisní protokoly a fotky.
+                    Tlačítko "Tisknout výtisk" přidáno do detail modalu v <code>assets/js/seznam.js</code>.
+                    Stránka má print CSS a tlačítko "Tisknout" fixované v pravém dolním rohu.
                 </div>
                 <button class="dp-hotovo-btn" onclick="dpHotovo('dp-10')">Označit jako hotovo</button>
             </div>

@@ -266,6 +266,12 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-radek-popis" data-lang-cs="Zdraví systému, logy, neúspěšná přihlášení, výkon" data-lang-en="System health, logs, failed logins, performance" data-lang-it="Salute del sistema, log, accessi falliti, prestazioni">Zdraví systému, logy, neúspěšná přihlášení, výkon</div>
             </div>
         </div>
+        <div class="cc-radek" data-href="dnes.php">
+            <div class="cc-radek-info">
+                <div class="cc-radek-nazev" data-lang-cs="Denní přehled" data-lang-en="Daily Overview" data-lang-it="Riepilogo Giornaliero">Denní přehled</div>
+                <div class="cc-radek-popis" data-lang-cs="Aktivní zakázky technika — termíny, kontakty, skupiny stavů" data-lang-en="Technician active jobs — deadlines, contacts, status groups" data-lang-it="Lavori attivi del tecnico — scadenze, contatti, gruppi">Aktivní zakázky technika — termíny, kontakty, skupiny stavů</div>
+            </div>
+        </div>
     </div>
 </div>
 
