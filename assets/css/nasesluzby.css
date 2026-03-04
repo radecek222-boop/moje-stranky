@@ -193,7 +193,7 @@ h6 {
   padding: 2.5rem 1.5rem;
 }
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 .cta-section .container {
@@ -203,25 +203,26 @@ h6 {
 
 /* Section intro */
 .section-intro {
-  text-align: left;
-  max-width: 100%;
-  margin: 0 0 2rem;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 2rem;
 }
 .section-title {
   font-family: "Poppins", sans-serif;
-  font-size: 1.1rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
   font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 0.75rem;
-  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-align: center;
 }
 .section-text,
 .section-description {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--c-grey);
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
 
 /* Services grid */

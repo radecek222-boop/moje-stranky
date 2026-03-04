@@ -161,7 +161,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px 40px 20px;
     }
@@ -324,10 +324,10 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     }
 
     .clanek-obsah {
-      font-size: 0.95em;
-      line-height: 1.6;
-      color: #333;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #666;
+      font-family: 'Poppins', sans-serif;
     }
 
     .clanek-obsah h2 {
@@ -351,7 +351,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     .clanek-obsah p {
       margin: 0 0 12px 0;
-      text-align: justify;
     }
 
     .clanek-obsah strong {
