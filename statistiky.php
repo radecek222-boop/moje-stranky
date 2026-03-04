@@ -947,6 +947,13 @@ body {
       </div>
     </div>
 
+    <!-- Statistiky techniků - POZ -->
+    <div class="chart-card">
+      <div class="chart-title">Statistiky techniků - POZ</div>
+      <div class="chart-content" id="chart-technicians-poz" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
+      </div>
+    </div>
   </div>
 
 </div>

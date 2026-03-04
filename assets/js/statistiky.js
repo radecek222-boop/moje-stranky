@@ -580,6 +580,24 @@ function renderCharty(data) {
         }
     }
 
+    // 4b. Statistiky techniků - POZ (bez provize)
+    const techniciansPozContainer = document.getElementById('chart-technicians-poz');
+    if (techniciansPozContainer) {
+        if (data.techniciPoz && data.techniciPoz.length > 0) {
+            let html = '';
+            data.techniciPoz.forEach(t => {
+                html += `
+                    <div class="chart-item">
+                        <div class="chart-item-label">${t.technik}</div>
+                        <div class="chart-item-value">${t.pocet} ks</div>
+                    </div>
+                `;
+            });
+            techniciansPozContainer.innerHTML = html;
+        } else {
+            techniciansPozContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
+        }
+    }
 }
 
 /**

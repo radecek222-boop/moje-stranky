@@ -162,7 +162,6 @@ body.modal-open {
 
 .search-bar {
   margin-top: 2rem !important;
-  border: 2px solid #1a1a1a !important;
 }
 
 /* MOBILNÍ OPTIMALIZACE SEARCH BAR */
@@ -999,16 +998,6 @@ body.modal-open {
   color: #ffffff !important;
 }
 
-/* Žlutý badge pro "nezvedá - SMS odesláno" */
-.order-status-text.status-nezvedala-sms {
-  background: #ffeb3b !important;
-  color: #000 !important;
-  font-weight: 600 !important;
-}
-.order-box.nezvedala-sms {
-  background: rgba(255, 235, 59, 0.25) !important;
-}
-
 /* Poznámky badge - tmavá šedá pro dobrou čitelnost */
 .order-notes-badge {
   background: #444444 !important;
@@ -1089,67 +1078,54 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   height: 0 !important;
 }
 
-/* Tenký šedý rámeček pro všechny karty i řádky (přepisuje neonové rámečky) */
-.order-box,
-.order-box.status-bg-wait,
-.order-box.status-bg-open,
-.order-box.status-bg-done,
-.order-box.status-bg-odlozena,
-.order-box.status-bg-cekame-na-dily,
-.order-box.ma-cenovou-nabidku,
-.order-box.cn-odsouhlasena,
-.order-box.cn-cekame-nd,
-.order-box.cn-zamitnuta {
-  border: 1px solid #cccccc !important;
-  box-shadow: none !important;
-}
-.order-row,
-.order-row.status-bg-wait,
-.order-row.status-bg-open,
-.order-row.status-bg-done,
-.order-row.status-bg-odlozena,
-.order-row.ma-cenovou-nabidku,
-.order-row.cn-odsouhlasena,
-.order-row.cn-cekame-nd,
-.order-row.cn-zamitnuta {
-  border: 1px solid #cccccc !important;
-  box-shadow: none !important;
-}
+/* Barevné nádechy karet podle stavu (velmi světlé) */
+/* Řádky mají stejné barvy jako karty - pro mobil i desktop */
+.order-row.status-bg-wait     { background: rgba(255, 235, 59, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-open     { background: rgba(33, 150, 243, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-done     { background: rgba(76, 175, 80, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-odlozena { background: rgba(156, 39, 176, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.ma-cenovou-nabidku { background: rgba(255, 152, 0, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-zamitnuta       { background: rgba(220, 53, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-wait:hover     { background: rgba(255, 235, 59, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-open:hover     { background: rgba(33, 150, 243, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-done:hover     { background: rgba(76, 175, 80, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-odlozena:hover { background: rgba(156, 39, 176, 0.12) !important; box-shadow: none !important; }
 
-/* Barevné nádechy karet podle stavu */
 .order-box.status-bg-wait {
-  background: rgba(255, 235, 59, 0.20) !important; /* Žlutá nádech - ČEKÁ */
+  background: rgba(255, 235, 59, 0.08) !important; /* Žlutá nádech - ČEKÁ */
 }
 
 .order-box.status-bg-open {
-  background: rgba(33, 150, 243, 0.20) !important; /* Modrá nádech - DOMLUVENÁ */
+  background: rgba(33, 150, 243, 0.08) !important; /* Modrá nádech - DOMLUVENÁ */
 }
 
 .order-box.status-bg-done {
-  background: rgba(76, 175, 80, 0.20) !important; /* Zelená nádech - HOTOVO */
+  background: rgba(76, 175, 80, 0.08) !important; /* Zelená nádech - HOTOVO */
 }
 
 /* Zachovat original při hover */
 .order-box.status-bg-wait:hover {
-  background: rgba(255, 235, 59, 0.28) !important;
+  background: rgba(255, 235, 59, 0.12) !important; /* Trochu více na hover */
 }
 
 .order-box.status-bg-open:hover {
-  background: rgba(33, 150, 243, 0.28) !important;
+  background: rgba(33, 150, 243, 0.12) !important;
 }
 
 .order-box.status-bg-done:hover {
-  background: rgba(76, 175, 80, 0.28) !important;
+  background: rgba(76, 175, 80, 0.12) !important;
 }
 
 /* Fialová nádech - ODLOŽENÁ */
 .order-box.status-bg-odlozena {
-  background: rgba(156, 39, 176, 0.20) !important;
+  background: rgba(156, 39, 176, 0.08) !important;
   border-color: #9c27b0 !important;
 }
 
 .order-box.status-bg-odlozena:hover {
-  background: rgba(156, 39, 176, 0.28) !important;
+  background: rgba(156, 39, 176, 0.14) !important;
 }
 
 /* ============================================

@@ -67,53 +67,6 @@ if (isset($_SESSION['user_id'])) {
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
     .admin-checkbox-group label { font-weight: 500; cursor: pointer; }
-    /* Tmavé pozadí celé stránky - invertovaný login box (bílý box na tmavém pozadí) */
-    body { background: #111111 !important; }
-    .container {
-      background: #ffffff !important;
-      border: 2px solid #1a1a1a !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-    }
-    .container h1,
-    .container .subtitle { color: #111111 !important; text-shadow: none !important; }
-    .container label,
-    .container .links p,
-    .container .links a,
-    .container .remember-me-group label { color: #111111 !important; }
-    .container input[type="text"],
-    .container input[type="email"],
-    .container input[type="password"],
-    .container input[type="tel"] {
-      background: #f5f5f5 !important;
-      color: #111111 !important;
-      border: 1px solid #cccccc !important;
-    }
-    .container input[type="text"]:focus,
-    .container input[type="email"]:focus,
-    .container input[type="password"]:focus,
-    .container input[type="tel"]:focus {
-      background: #ffffff !important;
-      border-color: #444444 !important;
-      outline: 1px solid #444444 !important;
-    }
-    .container input::placeholder { color: #999999 !important; }
-    .container .btn-primary {
-      background: #111111 !important;
-      color: #ffffff !important;
-      border: 1px solid #333333 !important;
-    }
-    .container .btn-primary:hover { background: #333333 !important; }
-    .container .admin-checkbox-group {
-      background: #f5f5f5 !important;
-      border: 1px solid #dddddd !important;
-    }
-    .container .admin-checkbox-group label { color: #111111 !important; }
-    .container .remember-me-helper { color: #666666 !important; }
-    .container .divider span {
-      background: #ffffff !important;
-      color: #666666 !important;
-    }
-    .container .divider::before { background: #dddddd !important; }
   </style>
 
   <!-- Analytics Tracker -->
