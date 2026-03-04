@@ -637,22 +637,14 @@ try {
     if (strpos($errorMsg, 'Duplicate entry') !== false && strpos($errorMsg, 'cislo_nabidky') !== false) {
         sendJsonError('Konflikt při generování čísla nabídky. Zkuste znovu.', 409);
     } else {
-        // DOČASNĚ: Vždy vracet detaily pro debugging
-        sendJsonError('Chyba databáze: ' . $errorMsg, 500, [
-            'file' => $errorFile,
-            'line' => $errorLine
-        ]);
+        sendJsonError('Chyba při zpracování požadavku', 500);
     }
 } catch (Exception $e) {
     $errorMsg = $e->getMessage();
     $errorLine = $e->getLine();
     $errorFile = basename($e->getFile());
     error_log("Nabídka API error: " . $errorMsg . " | File: " . $errorFile . " | Line: " . $errorLine);
-    // DOČASNĚ: Vždy vracet detaily pro debugging
-    sendJsonError('Chyba serveru: ' . $errorMsg, 500, [
-        'file' => $errorFile,
-        'line' => $errorLine
-    ]);
+    sendJsonError('Chyba při zpracování požadavku', 500);
 }
 
 /**
