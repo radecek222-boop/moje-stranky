@@ -2834,69 +2834,6 @@ async function showCustomerDetail(id) {
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
       </div>
 
-      <!-- FOTOTÉKA -->
-      <div style="margin-bottom: 1rem; background: #1a1a1a; border-radius: 6px; padding: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <label style="color: #aaa; font-weight: 600; font-size: 0.85rem;" id="fototeka-nadpis">Fototeka (${fotky.length})</label>
-          <button type="button"
-                  data-action="otevritVyberFotek"
-                  data-id="${reklamaceId}"
-                  style="background: #333; color: #fff; border: 1px solid #555; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
-            Pridat fotky
-          </button>
-        </div>
-        <input type="file"
-               id="fototeka-input-${reklamaceId}"
-               accept="image/*"
-               multiple
-               style="display: none;"
-               data-reklamace-id="${reklamaceId}">
-        <div id="fototeka-grid" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;">
-          ${fotky.length > 0 ? fotky.map((f, i) => {
-            const photoPath = typeof f === 'object' ? f.photo_path : f;
-            const photoId = typeof f === 'object' ? f.id : null;
-            const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
-
-            return `
-              <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
-                <img src='${photoPath}'
-                     style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
-                     alt='Fotka ${i+1}'
-                     loading="lazy"
-                     data-action="showPhotoFullscreen"
-                     data-url="${escapedUrl}">
-                ${photoId ? `
-                  <button class="foto-delete-btn"
-                          data-action="smazatFotku"
-                          data-photo-id="${photoId}"
-                          data-url="${escapedUrl}"
-                          title="Smazat fotku">
-                    x
-                  </button>
-                ` : ''}
-              </div>
-            `;
-          }).join('') : `
-            <p style="color: #666; font-size: 0.85rem; margin: 0; padding: 0.5rem 0;">Zadne fotografie</p>
-          `}
-        </div>
-        <div id="fototeka-nahravani" style="display: none; margin-top: 0.75rem; padding: 0.5rem; background: #222; border-radius: 4px;">
-          <p style="color: #aaa; font-size: 0.8rem; margin: 0;">Nahravani fotek...</p>
-          <div style="background: #333; height: 4px; border-radius: 2px; margin-top: 0.5rem; overflow: hidden;">
-            <div id="fototeka-progress" style="background: #fff; height: 100%; width: 0%; transition: width 0.3s;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PDF DOKUMENTY - nyní jako knihovna s možností nahrát interní PDF -->
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">KNIHOVNA PDF:</label>
-        <button class="btn customer-detail-btn"
-                data-action="openKnihovnaPDF"
-                data-id="${id}">
-          KNIHOVNA PDF
-        </button>
-      </div>
 
 
       <div class="detail-buttons">
