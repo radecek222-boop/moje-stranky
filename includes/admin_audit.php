@@ -2213,7 +2213,31 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD</div>
 <script>
 (function () {
     var ULOZISTE_KLIC = 'wgs_doporuceni_stav';
+    var VERZE_KLIC = 'wgs_doporuceni_verze';
+    var AKTUALNI_VERZE = '2026-03-04-v1'; // Změnit při přidání nových položek
     var celkem = 10;
+
+    // Předvyplnit hotové položky pokud ještě nebyly inicializovány v této verzi
+    (function() {
+        try {
+            if (localStorage.getItem(VERZE_KLIC) !== AKTUALNI_VERZE) {
+                var stavHotovo = {
+                    'dp-1': true,  // B1 — ověřeno (bylo již implementováno)
+                    'dp-2': true,  // B2 — ověřeno (bylo již implementováno)
+                    'dp-3': true,  // B3 — implementováno
+                    'dp-4': true,  // B4 — implementováno
+                    'dp-5': true,  // U5 — implementováno (dnes.php)
+                    'dp-6': true,  // U6 — implementováno (autosave protokolu)
+                    'dp-7': true,  // U7 — ověřeno (bylo již implementováno)
+                    'dp-8': true,  // U8 — implementováno (hromadné akce)
+                    'dp-9': true,  // U9 — implementováno (foto badge)
+                    'dp-10': true  // U10 — implementováno (tisk.php)
+                };
+                localStorage.setItem(ULOZISTE_KLIC, JSON.stringify(stavHotovo));
+                localStorage.setItem(VERZE_KLIC, AKTUALNI_VERZE);
+            }
+        } catch (e) {}
+    })();
 
     // Načíst uložený stav
     function nacistStav() {
