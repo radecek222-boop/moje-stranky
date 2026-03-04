@@ -19,21 +19,21 @@
    =========================================================================== */
 
 :root {
-  --cc-primary: #444;
-  --cc-primary-dark: #333;
-  --cc-secondary: #555;
-  --cc-success: #666;
-  --cc-warning: #888;
-  --cc-danger: #dc3545;
-  --cc-danger-hover: #c82333;
-  --cc-info: #777;
+  --cc-primary: var(--wgs-gray-44);
+  --cc-primary-dark: var(--wgs-gray-33);
+  --cc-secondary: var(--wgs-grey);
+  --cc-success: var(--wgs-gray-66);
+  --cc-warning: var(--wgs-gray-88);
+  --cc-danger: var(--wgs-danger);
+  --cc-danger-hover: var(--wgs-danger-hover);
+  --cc-info: var(--wgs-gray-77);
 
-  --cc-bg-primary: #f5f5f7;
-  --cc-bg-secondary: #ffffff;
-  --cc-border: #d1d1d6;
-  --cc-text-primary: #1d1d1f;
-  --cc-text-secondary: #6e6e73;
-  --cc-text-tertiary: #86868b;
+  --cc-bg-primary: var(--wgs-apple-gray-f5);
+  --cc-bg-secondary: var(--wgs-white);
+  --cc-border: var(--wgs-gray-d1);
+  --cc-text-primary: var(--wgs-apple-black);
+  --cc-text-secondary: var(--wgs-apple-gray-6e);
+  --cc-text-tertiary: var(--wgs-apple-gray-86);
 
   --cc-radius: 12px;
   --cc-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
@@ -43,18 +43,18 @@
   --cc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Legacy Control Center variables referenced napříč aplikací */
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #1a1a1a;
-  --c-grey: #666666;
-  --c-light-grey: #999999;
-  --c-border: #e0e0e0;
-  --c-success: #333333;
-  --c-error: #333333;
-  --c-warning: #555555;
-  --c-primary: #444;
-  --c-online: #333333;
-  --c-info: #555;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-darkest);
+  --c-grey: var(--wgs-gray-66);
+  --c-light-grey: var(--wgs-light-grey);
+  --c-border: var(--wgs-border);
+  --c-success: var(--wgs-gray-33);
+  --c-error: var(--wgs-gray-33);
+  --c-warning: var(--wgs-grey);
+  --c-primary: var(--wgs-gray-44);
+  --c-online: var(--wgs-gray-33);
+  --c-info: var(--wgs-grey);
 }
 
 
@@ -111,7 +111,7 @@
 }
 
 .cc-clear-cache-btn {
-    background: linear-gradient(135deg, #333 0%, #555 100%);
+    background: linear-gradient(135deg, var(--wgs-gray-33) 0%, var(--wgs-grey) 100%);
     color: white;
     border: none;
     padding: 0.5rem 0.75rem;
@@ -446,21 +446,21 @@
    PROMĚNNÉ
    ============================================ */
 :root {
-  --cc-primary: #444;
-  --cc-primary-dark: #333;
-  --cc-secondary: #555;
-  --cc-success: #666;
-  --cc-warning: #888;
-  --cc-danger: #dc3545;
-  --cc-danger-hover: #c82333;
-  --cc-info: #777;
+  --cc-primary: var(--wgs-gray-44);
+  --cc-primary-dark: var(--wgs-gray-33);
+  --cc-secondary: var(--wgs-grey);
+  --cc-success: var(--wgs-gray-66);
+  --cc-warning: var(--wgs-gray-88);
+  --cc-danger: var(--wgs-danger);
+  --cc-danger-hover: var(--wgs-danger-hover);
+  --cc-info: var(--wgs-gray-77);
 
-  --cc-bg-primary: #f5f5f7;
-  --cc-bg-secondary: #ffffff;
-  --cc-border: #d1d1d6;
-  --cc-text-primary: #1d1d1f;
-  --cc-text-secondary: #6e6e73;
-  --cc-text-tertiary: #86868b;
+  --cc-bg-primary: var(--wgs-apple-gray-f5);
+  --cc-bg-secondary: var(--wgs-white);
+  --cc-border: var(--wgs-gray-d1);
+  --cc-text-primary: var(--wgs-apple-black);
+  --cc-text-secondary: var(--wgs-apple-gray-6e);
+  --cc-text-tertiary: var(--wgs-apple-gray-86);
 
   --cc-radius: 12px;
   --cc-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
@@ -713,7 +713,7 @@
 }
 
 .control-card-status-dot.blue {
-  background: #555;
+  background: var(--wgs-grey);
   box-shadow: 0 0 8px rgba(85, 85, 85, 0.5);
 }
 
@@ -910,7 +910,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--c-border-medium);
   transition: 0.3s;
   border-radius: 31px;
 }
@@ -1056,25 +1056,25 @@
 
 .cc-alert.success {
   background: rgba(102, 102, 102, 0.1);
-  color: #333;
+  color: var(--wgs-gray-33);
   border: 1px solid rgba(102, 102, 102, 0.2);
 }
 
 .cc-alert.warning {
   background: rgba(136, 136, 136, 0.1);
-  color: #444;
+  color: var(--wgs-gray-44);
   border: 1px solid rgba(136, 136, 136, 0.2);
 }
 
 .cc-alert.danger {
   background: rgba(68, 68, 68, 0.1);
-  color: #333;
+  color: var(--wgs-gray-33);
   border: 1px solid rgba(68, 68, 68, 0.2);
 }
 
 .cc-alert.info {
   background: rgba(119, 119, 119, 0.1);
-  color: #444;
+  color: var(--wgs-gray-44);
   border: 1px solid rgba(119, 119, 119, 0.2);
 }
 
@@ -1096,7 +1096,7 @@
 }
 
 .cc-skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--wgs-gray-f0) 25%, var(--wgs-border) 50%, var(--wgs-gray-f0) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -1199,7 +1199,7 @@
     transform: translate(-50%, -50%);
     width: 90%;
     height: 75%;
-    background: var(--c-white, #ffffff);
+    background: var(--c-white, var(--wgs-white));
     z-index: var(--z-menu-overlay, 9999);
     overflow: hidden;
     border-radius: 8px;
@@ -1229,8 +1229,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1.5rem;
-    background: var(--c-white, #ffffff);
-    border-bottom: 2px solid var(--c-border, #dddddd);
+    background: var(--c-white, var(--wgs-white));
+    border-bottom: 2px solid var(--c-border, var(--wgs-gray-dd));
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     flex-shrink: 0;
 }
@@ -1246,8 +1246,8 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 1rem;
-    background: var(--c-black, #000000);
-    color: var(--c-white, #ffffff);
+    background: var(--c-black, var(--wgs-black));
+    color: var(--c-white, var(--wgs-white));
     border: none;
     font-size: 0.75rem;
     font-weight: 600;
@@ -1258,7 +1258,7 @@
 }
 
 .admin-modal-back-btn:hover {
-    background: var(--c-success, #333333);
+    background: var(--c-success, var(--wgs-gray-33));
     transform: translateX(-3px);
 }
 
@@ -1273,7 +1273,7 @@
 .admin-modal-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--c-black, #000000);
+    color: var(--c-black, var(--wgs-black));
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 0;
@@ -1281,7 +1281,7 @@
 
 .admin-modal-subtitle {
     font-size: 0.75rem;
-    color: var(--c-grey, #666666);
+    color: var(--c-grey, var(--wgs-gray-66));
     margin-top: 0.2rem;
 }
 
@@ -1291,7 +1291,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0;
-    background: var(--c-bg, #f8f8f8);
+    background: var(--c-bg, var(--c-bg-hover));
 }
 
 /* Iframe container pro embedované stránky */
@@ -1308,7 +1308,7 @@
     height: 100%;
     border: none;
     display: block;
-    background: var(--c-white, #ffffff);
+    background: var(--c-white, var(--wgs-white));
     flex: 1;
 }
 
@@ -1318,7 +1318,7 @@
     height: 100%;
     border: none;
     display: block;
-    background: var(--c-white, #ffffff);
+    background: var(--c-white, var(--wgs-white));
 }
 
 /* Loading spinner */
@@ -1328,14 +1328,14 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: var(--c-grey, #666666);
+    color: var(--c-grey, var(--wgs-gray-66));
 }
 
 .admin-modal-spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid var(--c-border, #dddddd);
-    border-top-color: var(--c-success, #333333);
+    border: 4px solid var(--c-border, var(--wgs-gray-dd));
+    border-top-color: var(--c-success, var(--wgs-gray-33));
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
@@ -1361,7 +1361,7 @@
     height: 100%;
     padding: 2rem;
     text-align: center;
-    color: var(--c-error, #666);
+    color: var(--c-error, var(--wgs-gray-66));
 }
 
 .admin-modal-error-icon {
@@ -1377,14 +1377,14 @@
 
 .admin-modal-error-message {
     font-size: 0.9rem;
-    color: var(--c-grey, #666666);
+    color: var(--c-grey, var(--wgs-gray-66));
     margin-bottom: 1.5rem;
 }
 
 .admin-modal-error-btn {
     padding: 0.75rem 1.5rem;
-    background: var(--c-error, #666);
-    color: var(--c-white, #ffffff);
+    background: var(--c-error, var(--wgs-gray-66));
+    color: var(--c-white, var(--wgs-white));
     border: none;
     cursor: pointer;
     font-weight: 600;
@@ -1392,7 +1392,7 @@
 }
 
 .admin-modal-error-btn:hover {
-    background: var(--c-black, #000000);
+    background: var(--c-black, var(--wgs-black));
 }
 
 /* Responsive */
@@ -1432,16 +1432,16 @@
 }
 
 .admin-modal-body::-webkit-scrollbar-track {
-    background: var(--c-bg, #f8f8f8);
+    background: var(--c-bg, var(--c-bg-hover));
 }
 
 .admin-modal-body::-webkit-scrollbar-thumb {
-    background: var(--c-border, #dddddd);
+    background: var(--c-border, var(--wgs-gray-dd));
     border-radius: 5px;
 }
 
 .admin-modal-body::-webkit-scrollbar-thumb:hover {
-    background: var(--c-grey, #666666);
+    background: var(--c-grey, var(--wgs-gray-66));
 }
 
 /* Prevent body scroll when modal is open */
@@ -1457,7 +1457,7 @@ body.admin-modal-open {
     bottom: 5%;
     width: 80%;
     height: 90%;
-    border: 3px solid var(--c-success, #333333);
+    border: 3px solid var(--c-success, var(--wgs-gray-33));
     box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.1),
                 0 20px 60px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
@@ -1484,7 +1484,7 @@ body.admin-modal-open {
     position: absolute;
     top: -12px;
     right: 20px;
-    background: var(--c-success, #333333);
+    background: var(--c-success, var(--wgs-gray-33));
     color: white;
     padding: 4px 12px;
     font-size: 0.7rem;
@@ -1938,8 +1938,8 @@ body.admin-modal-open {
 .admin-card-loader-spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid var(--c-border, #ddd);
-    border-top-color: var(--c-primary, #333);
+    border: 3px solid var(--c-border, var(--wgs-gray-dd));
+    border-top-color: var(--c-primary, var(--wgs-gray-33));
     border-radius: 50%;
     animation: cc-spinner-spin 0.8s linear infinite;
 }
@@ -1990,7 +1990,7 @@ body.admin-modal-open {
     max-width: 1400px;
     height: 90vh;
     max-height: 900px;
-    background: var(--cc-bg-secondary, #ffffff);
+    background: var(--cc-bg-secondary, var(--wgs-white));
     border-radius: var(--cc-radius, 12px);
     box-shadow: var(--cc-shadow-lg, 0 8px 32px rgba(0,0,0,0.16));
     z-index: var(--z-top-layer, 10003);
@@ -2013,7 +2013,7 @@ body.admin-modal-open {
     align-items: center;
     justify-content: flex-end;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--cc-border, #d1d1d6);
+    border-bottom: 1px solid var(--cc-border, var(--wgs-gray-d1));
     flex-shrink: 0;
 }
 
@@ -2022,7 +2022,7 @@ body.admin-modal-open {
     border: none;
     font-size: 2rem;
     line-height: 1;
-    color: var(--cc-text-secondary, #6e6e73);
+    color: var(--cc-text-secondary, var(--wgs-apple-gray-6e));
     cursor: pointer;
     padding: 0;
     width: 40px;
@@ -2036,7 +2036,7 @@ body.admin-modal-open {
 
 .cc-modal-close:hover {
     background: rgba(0, 0, 0, 0.05);
-    color: var(--cc-text-primary, #1d1d1f);
+    color: var(--cc-text-primary, var(--wgs-apple-black));
 }
 
 /* Modal Body - obsah modalu s iframe */
@@ -2082,16 +2082,16 @@ body.admin-modal-open {
     bottom: 0;
     width: 100%;
     height: 100%;
-    color: var(--cc-text-secondary, #6e6e73);
-    background: var(--cc-bg-secondary, #ffffff); /* CRITICAL: Cover content during loading */
+    color: var(--cc-text-secondary, var(--wgs-apple-gray-6e));
+    background: var(--cc-bg-secondary, var(--wgs-white)); /* CRITICAL: Cover content during loading */
     z-index: var(--z-background, 1); /* CRITICAL: Above iframe during loading */
 }
 
 .cc-modal-spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid var(--cc-border, #d1d1d6);
-    border-top-color: var(--cc-primary, #333);
+    border: 4px solid var(--cc-border, var(--wgs-gray-d1));
+    border-top-color: var(--cc-primary, var(--wgs-gray-33));
     border-radius: 50%;
     animation: cc-modal-spinner-spin 0.8s linear infinite;
 }
@@ -2658,7 +2658,7 @@ ol li {
 
 /* OVERRIDE: Černé pozadí pro admin dashboard landing page */
 body.admin-dashboard-page {
-    background: #000 !important;
+    background: var(--wgs-black) !important;
     overflow: hidden !important;
 }
 
@@ -2669,7 +2669,7 @@ body.admin-dashboard-page {
 
 /* Hlavní kontejner - černý vesmír */
 .admin-landing-planets {
-    background: #000;
+    background: var(--wgs-black);
     position: fixed;
     top: 0;
     left: 0;
@@ -2695,7 +2695,7 @@ body.admin-dashboard-page {
     font-family: 'Poppins', sans-serif;
     font-size: 6rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--wgs-white);
     letter-spacing: 0.1em;
     margin: 0;
     text-transform: uppercase;
@@ -2706,7 +2706,7 @@ body.admin-dashboard-page {
     font-family: 'Poppins', sans-serif;
     font-size: 2rem;
     font-weight: 300;
-    color: #fff;
+    color: var(--wgs-white);
     text-transform: uppercase;
     letter-spacing: 0.3em;
     margin: 2rem 0 0 0;
@@ -2742,8 +2742,8 @@ body.admin-dashboard-page {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #444, #111, #000);
-    border: 2px solid #666;
+    background: radial-gradient(circle at 30% 30%, var(--wgs-gray-44), var(--wgs-near-black), var(--wgs-black));
+    border: 2px solid var(--wgs-gray-66);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2787,9 +2787,9 @@ body.admin-dashboard-page {
         0 0 70px rgba(0, 255, 255, 0.5),
         inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
     z-index: var(--z-sticky, 10);
-    border-color: #666;
+    border-color: var(--wgs-gray-66);
     border-width: 3px;
-    background: radial-gradient(circle at 30% 30%, #555, #222, #111);
+    background: radial-gradient(circle at 30% 30%, var(--wgs-grey), var(--wgs-dark-grey), var(--wgs-near-black));
 }
 
 .admin-planet:active {
@@ -2913,7 +2913,7 @@ body.admin-dashboard-page {
 /* Obsah planety - perfektně vycentrovaný + proti-rotace ŘÍZENÁ JS */
 .planet-content {
     text-align: center;
-    color: #fff;
+    color: var(--wgs-white);
     padding: 1rem;
     width: 100%;
     display: flex;
@@ -3316,19 +3316,19 @@ body.admin-dashboard-page {
 }
 
 .priority-badge[data-priority="kritické"] {
-  background: #333;
+  background: var(--wgs-gray-33);
 }
 
 .priority-badge[data-priority="vysoká"] {
-  background: #555;
+  background: var(--wgs-grey);
 }
 
 .priority-badge[data-priority="střední"] {
-  background: #777;
+  background: var(--wgs-gray-77);
 }
 
 .priority-badge[data-priority="nízká"] {
-  background: #999;
+  background: var(--wgs-light-grey);
 }
 
 @media (max-width: 768px) {

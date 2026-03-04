@@ -1,16 +1,16 @@
 :root {
-  --c-bg: #ffffff;
-  --c-white: #ffffff;
-  --c-black: #000000;
-  --c-grey: #555555;
-  --c-light-grey: #888888;
-  --c-border: #e0e0e0;
-  --c-success: #555555;
-  --c-error: #555555;
-  --c-warning: #555555;
-  --c-blue: #555555;
-  --c-purple: #555555;
-  --c-teal: #555555;
+  --c-bg: var(--wgs-white);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-black);
+  --c-grey: var(--wgs-grey);
+  --c-light-grey: var(--wgs-gray-88);
+  --c-border: var(--wgs-border);
+  --c-success: var(--wgs-grey);
+  --c-error: var(--wgs-grey);
+  --c-warning: var(--wgs-grey);
+  --c-blue: var(--wgs-grey);
+  --c-purple: var(--wgs-grey);
+  --c-teal: var(--wgs-grey);
 }
 * {
   box-sizing: border-box;
@@ -72,12 +72,12 @@ body {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: #555555;
+  color: var(--wgs-grey);
 }
 .pulse-dot {
   width: 6px;
   height: 6px;
-  background: #555555;
+  background: var(--wgs-grey);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }

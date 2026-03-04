@@ -18,10 +18,58 @@
   --wgs-light-grey: #999999;
   --wgs-gray-aa: #aaaaaa;
   --wgs-gray-bb: #bbbbbb;
+  --wgs-gray-77: #777777;
+  --wgs-gray-c0: #c0c0c0;
+  --wgs-gray-d0: #d0d0d0;
+  --wgs-gray-d1: #d1d1d6;
+  --wgs-gray-d5: #d5d5d5;
   --wgs-gray-dd: #dddddd;
   --wgs-border: #e0e0e0;
+  --wgs-gray-e5: #e5e5e5;
   --wgs-gray-ee: #eeeeee;
   --wgs-gray-f0: #f0f0f0;
+  --wgs-gray-f1: #f1f1f1;
+  --wgs-gray-f3: #f3f3f3;
+  --wgs-gray-f4: #f4f4f4;
+  --wgs-gray-f9: #f9f9f9;
+  /* Apple šedá paleta (admin.css) */
+  --wgs-apple-black: #1d1d1f;
+  --wgs-apple-gray-6e: #6e6e73;
+  --wgs-apple-gray-86: #86868b;
+  --wgs-apple-gray-f5: #f5f5f7;
+  /* Bootstrap alert barvy (login.css) */
+  --c-alert-success-bg: #d4edda;
+  --c-alert-success-text: #155724;
+  --c-alert-success-border: #c3e6cb;
+  --c-alert-error-bg: #f8d7da;
+  --c-alert-error-text: #721c24;
+  --c-alert-error-border: #f5c6cb;
+  --c-alert-info-bg: #d1ecf1;
+  --c-alert-info-text: #0c5460;
+  --c-alert-info-border: #bee5eb;
+  /* Speciální sémantické barvy */
+  --c-error-bg-light: #fff5f5;
+  --c-text-secondary: #6c757d;
+  --c-text-secondary-hover: #5a6268;
+  --c-dark-red: #990000;
+  /* Stavové barvy seznam.css */
+  --c-status-dark-red: #8b0000;
+  --c-status-dark-red-2: #6b0000;
+  --c-status-gold: #b8860b;
+  --c-status-yellow: #ffe100;
+  --c-status-yellow-2: #ffdd00;
+  --c-status-cyan: #00d4ff;
+  --c-status-cyan-2: #00e5ff;
+  --c-status-bright-green: #00ff88;
+  --c-status-purple: #9b59b6;
+  --c-status-pink-red: #ff8888;
+  --c-status-dark-green: #2a5a2a;
+  --c-status-dark-green-2: #3a7a3a;
+  --c-status-dark-maroon: #5a2a2a;
+  --c-status-maroon: #7a3a3a;
+  --c-status-orange: #ff8c00;
+  --c-status-online: #22c55e;
+  --c-light-blue: #f0f9ff;
   /* Schválené barevné výjimky */
   --wgs-neon-green: #39ff14;
   --wgs-neon-green-rgb: 57, 255, 20;
@@ -1191,7 +1239,7 @@ footer a:hover,
 .admin-status-dot {
   width: 8px;
   height: 8px;
-  background: #22c55e;
+  background: var(--c-status-online);
   border-radius: 50%;
   animation: pulse-dot 2s ease-in-out infinite;
 }

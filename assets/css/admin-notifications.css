@@ -4,7 +4,7 @@
 
 .notification-card {
   background: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--wgs-border);
   border-radius: 8px;
   margin-bottom: 1rem;
   overflow: hidden;
@@ -25,7 +25,7 @@
 }
 
 .notification-header:hover {
-  background: #f8f9fa;
+  background: var(--wgs-gray-f9);
 }
 
 .notification-title {
@@ -44,7 +44,7 @@
 .toggle-switch {
   width: 48px;
   height: 24px;
-  background: #ccc;
+  background: var(--c-border-medium);
   border-radius: 12px;
   position: relative;
   cursor: pointer;
@@ -64,7 +64,7 @@
 }
 
 .toggle-switch.active {
-  background: #555;
+  background: var(--wgs-grey);
 }
 
 .toggle-switch.active::after {
@@ -92,20 +92,20 @@
 
 .notification-info-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--wgs-gray-66);
   text-transform: uppercase;
   font-weight: 500;
 }
 
 .notification-info-value {
   font-size: 0.95rem;
-  color: #333;
+  color: var(--wgs-gray-33);
 }
 
 .template-preview {
-  background: #f5f5f5;
+  background: var(--c-success-bg);
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--wgs-gray-dd);
   border-radius: 4px;
   white-space: pre-wrap;
   font-family: 'Courier New', monospace;
@@ -128,13 +128,13 @@
 }
 
 .badge-active {
-  background: #e5e5e5;
-  color: #333;
+  background: var(--wgs-gray-e5);
+  color: var(--wgs-gray-33);
 }
 
 .badge-inactive {
-  background: #f0f0f0;
-  color: #666;
+  background: var(--wgs-gray-f0);
+  color: var(--wgs-gray-66);
 }
 
 /* ============================================
@@ -143,8 +143,8 @@
 
 .variable-tag {
   display: inline-block;
-  background: #e5e5e5;
-  color: #333;
+  background: var(--wgs-gray-e5);
+  color: var(--wgs-gray-33);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -154,7 +154,7 @@
 }
 
 .variable-tag:hover {
-  background: #d5d5d5;
+  background: var(--wgs-gray-d5);
 }
 
 /* ============================================
@@ -165,8 +165,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--c-success-bg);
+  border: 1px solid var(--wgs-gray-dd);
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -174,7 +174,7 @@
 
 .email-tag-remove {
   cursor: pointer;
-  color: #999;
+  color: var(--wgs-light-grey);
   font-weight: bold;
   font-size: 1.2rem;
   line-height: 1;
@@ -182,7 +182,7 @@
 }
 
 .email-tag-remove:hover {
-  color: #333;
+  color: var(--wgs-gray-33);
 }
 
 /* ============================================
@@ -218,7 +218,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--wgs-border);
 }
 
 .modal .modal-title {
@@ -231,7 +231,7 @@
   background: none;
   border: none;
   font-size: 2rem;
-  color: #999;
+  color: var(--wgs-light-grey);
   cursor: pointer;
   line-height: 1;
   padding: 0;
@@ -243,7 +243,7 @@
 }
 
 .modal .modal-close:hover {
-  color: #333;
+  color: var(--wgs-gray-33);
 }
 
 .modal .modal-body {
@@ -255,7 +255,7 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--wgs-border);
 }
 
 /* ============================================
@@ -270,14 +270,14 @@
   display: block;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--wgs-gray-33);
 }
 
 .form-input,
 .form-select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--wgs-gray-dd);
   border-radius: 4px;
   font-size: 0.95rem;
   transition: border-color 0.2s;
@@ -286,7 +286,7 @@
 .form-input:focus,
 .form-select:focus {
   outline: none;
-  border-color: #666;
+  border-color: var(--wgs-gray-66);
   box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.3);
 }
 
@@ -308,15 +308,15 @@ textarea.form-input {
 }
 
 .error-message {
-  background: #f0f0f0;
-  color: #333;
-  border: 1px solid #999;
+  background: var(--wgs-gray-f0);
+  color: var(--wgs-gray-33);
+  border: 1px solid var(--wgs-light-grey);
 }
 
 .success-message {
-  background: #e5e5e5;
-  color: #333;
-  border: 1px solid #999;
+  background: var(--wgs-gray-e5);
+  color: var(--wgs-gray-33);
+  border: 1px solid var(--wgs-light-grey);
 }
 
 /* ============================================
@@ -326,7 +326,7 @@ textarea.form-input {
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #999;
+  color: var(--wgs-light-grey);
   font-style: italic;
 }
 
@@ -349,9 +349,9 @@ textarea.form-input {
   display: inline-flex !important;
   align-items: center;
   gap: 0.5rem;
-  background: #e5e5e5 !important;
-  border: 1px solid #999 !important;
-  color: #333 !important;
+  background: var(--wgs-gray-e5) !important;
+  border: 1px solid var(--wgs-light-grey) !important;
+  color: var(--wgs-gray-33) !important;
   padding: 0.5rem 0.8rem !important;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -360,7 +360,7 @@ textarea.form-input {
 
 .email-tag-remove {
   cursor: pointer;
-  color: #666;
+  color: var(--wgs-gray-66);
   font-weight: bold;
   font-size: 1.3rem;
   line-height: 1;
@@ -369,7 +369,7 @@ textarea.form-input {
 }
 
 .email-tag-remove:hover {
-  color: #333;
+  color: var(--wgs-gray-33);
   transform: scale(1.2);
 }
 
@@ -389,7 +389,7 @@ textarea.form-input {
 
 #tab-notifications .page-subtitle {
   margin-bottom: 2rem;
-  color: #666;
+  color: var(--wgs-gray-66);
 }
 
 #notifications-container {
@@ -460,16 +460,16 @@ textarea.form-input {
 }
 
 .modal .modal-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--wgs-gray-f1);
 }
 
 .modal .modal-body::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--wgs-gray-88);
   border-radius: 4px;
 }
 
 .modal .modal-body::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--wgs-grey);
 }
 
 /* Notification card - jednodušší vzhled */
@@ -615,13 +615,13 @@ textarea.form-input {
 .modal textarea,
 .modal select {
   /* Světlé pozadí pro inputy v bílém modalu */
-  background: #f9f9f9 !important;
+  background: var(--wgs-gray-f9) !important;
 
   /* TMAVÝ TEXT - viditelný na světlém pozadí */
-  color: #000000 !important;
+  color: var(--wgs-black) !important;
 
   /* Border */
-  border: 1px solid #ddd !important;
+  border: 1px solid var(--wgs-gray-dd) !important;
 
   /* Padding */
   padding: 0.75rem !important;
@@ -638,10 +638,10 @@ textarea.form-input {
 .modal textarea:focus,
 .modal select:focus {
   /* Světlejší pozadí při focusu */
-  background: #ffffff !important;
+  background: var(--wgs-white) !important;
 
   /* Výraznější border */
-  border-color: #666 !important;
+  border-color: var(--wgs-gray-66) !important;
 
   /* Outline */
   outline: 2px solid rgba(33, 150, 243, 0.1) !important;
@@ -653,7 +653,7 @@ textarea.form-input {
 .modal input::placeholder,
 .modal textarea::placeholder {
   /* Šedý placeholder - viditelný na světlém pozadí */
-  color: #999999 !important;
+  color: var(--wgs-light-grey) !important;
 }
 
 /* Labels - BÍLÉ pro tmavé pozadí modalu */
@@ -664,7 +664,7 @@ textarea.form-input {
 #editNotificationModal p,
 #editNotificationModal .modal-title,
 .modal .form-label {
-  color: #ffffff !important;
+  color: var(--wgs-white) !important;
 }
 
 /* Info texty - také bílé */
@@ -672,5 +672,5 @@ textarea.form-input {
 #editNotificationModal .form-help,
 #editNotificationModal .notification-info-label,
 #editNotificationModal .notification-info-value {
-  color: #cccccc !important;
+  color: var(--c-border-medium) !important;
 }

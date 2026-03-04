@@ -1,10 +1,10 @@
 :root {
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #1a1a1a;
-  --c-grey: #666666;
-  --c-border: #e0e0e0;
-  --c-accent: #2a2a2a;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-darkest);
+  --c-grey: var(--wgs-gray-66);
+  --c-border: var(--wgs-border);
+  --c-accent: var(--wgs-gray-2a);
 }
 
 /* Třída pro skrytí elementů - používá JavaScript pro přepínání formulářů */
@@ -37,7 +37,7 @@ h6 {
   text-transform: uppercase;
 }
 .top-bar {
-  background: #000000;
+  background: var(--wgs-black);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -168,16 +168,16 @@ input {
   transition: all 0.3s ease;
 }
 input:hover {
-  border-color: #c0c0c0;
+  border-color: var(--wgs-gray-c0);
 }
 input:focus {
   outline: none;
   border-color: var(--c-black);
-  background: #fafafa;
+  background: var(--c-bg-hover);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 ::placeholder {
-  color: #aaaaaa;
+  color: var(--wgs-gray-aa);
   font-weight: 300;
 }
 .checkbox-group {
@@ -342,19 +342,19 @@ input:focus {
   display: block;
 }
 .notification.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: var(--c-alert-success-bg);
+  color: var(--c-alert-success-text);
+  border: 1px solid var(--c-alert-success-border);
 }
 .notification.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: var(--c-alert-error-bg);
+  color: var(--c-alert-error-text);
+  border: 1px solid var(--c-alert-error-border);
 }
 .notification.info {
-  background: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
+  background: var(--c-alert-info-bg);
+  color: var(--c-alert-info-text);
+  border: 1px solid var(--c-alert-info-border);
 }
 .role-select {
   display: grid;
@@ -371,11 +371,11 @@ input:focus {
   position: relative;
 }
 .role-option:hover {
-  border-color: #c0c0c0;
+  border-color: var(--wgs-gray-c0);
 }
 .role-option.selected {
   border-color: var(--c-black);
-  background: #fafafa;
+  background: var(--c-bg-hover);
 }
 .role-option input[type="radio"] {
   position: absolute;
@@ -426,7 +426,7 @@ input:focus {
     right: -100%;
     width: 300px;
     height: 100vh;
-    background: #000000;
+    background: var(--wgs-black);
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -461,7 +461,7 @@ input:focus {
   font-weight: 600;
 }
 .welcome-info {
-  background: #fafafa;
+  background: var(--c-bg-hover);
   padding: 1.5rem;
   margin-bottom: 2rem;
   border: 1px solid var(--c-border);
@@ -559,7 +559,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #f0f0f0 inset !important;
+  -webkit-box-shadow: 0 0 0 30px var(--wgs-gray-f0) inset !important;
   -webkit-text-fill-color: var(--c-black) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
@@ -569,8 +569,8 @@ input:-webkit-autofill:active {
 .dark input:-webkit-autofill:hover,
 .dark input:-webkit-autofill:focus,
 .dark input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #2a2a2a inset !important;
-  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 30px var(--wgs-gray-2a) inset !important;
+  -webkit-text-fill-color: var(--wgs-white) !important;
 }
 
 /* Zajistit že autofilled pole jsou vizuálně aktivní */
