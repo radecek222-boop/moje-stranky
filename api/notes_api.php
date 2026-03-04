@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../includes/db_metadata.php';
 require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
