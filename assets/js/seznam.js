@@ -2865,6 +2865,12 @@ async function showCustomerDetail(id) {
 
   ModalManager.show(content);
 
+  // Zúžit modal pro detail zákazníka (je užší než hlavní detail zakázky)
+  const obsahDetailZakaznika = document.querySelector('#detailOverlay .modal-content');
+  if (obsahDetailZakaznika) {
+    obsahDetailZakaznika.style.setProperty('max-width', '520px', 'important');
+  }
+
   // Auto-resize textarea pri prvnim zobrazeni
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
