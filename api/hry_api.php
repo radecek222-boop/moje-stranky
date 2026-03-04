@@ -1135,9 +1135,9 @@ try {
 
 } catch (PDOException $e) {
     error_log("Hry API PDO error: " . $e->getMessage());
-    sendJsonError('Chyba databaze: ' . $e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 } catch (Exception $e) {
     error_log("Hry API error: " . $e->getMessage());
-    sendJsonError('Chyba serveru: ' . $e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 }
 ?>

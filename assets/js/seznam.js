@@ -41,7 +41,7 @@ function showToast(message, type = 'info') {
     position: fixed;
     top: 80px;
     right: 20px;
-    background: ${type === 'success' ? '#333' : type === 'error' ? '#666' : '#333'};
+    background: ${type === 'success' ? 'var(--wgs-gray-33)' : type === 'error' ? 'var(--wgs-gray-66)' : 'var(--wgs-gray-33)'};
     color: white;
     padding: 16px 24px;
     border-radius: 4px;
@@ -310,8 +310,12 @@ function initSearch() {
 
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
-    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    renderOrders(userItems);
+    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+      _htmxAktualizujGrid();
+    } else {
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    }
   });
   
   searchInput.addEventListener('keydown', (e) => {
@@ -324,7 +328,7 @@ function initSearch() {
 function clearSearch() {
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
-  
+
   searchInput.value = '';
   SEARCH_QUERY = '';
   searchClear.classList.remove('visible');
@@ -401,8 +405,12 @@ function initFilters() {
         }
       }
 
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
+      if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+        _htmxAktualizujGrid();
+      } else {
+        let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+        renderOrders(userItems);
+      }
     });
   });
 
@@ -617,9 +625,44 @@ function sestavAdminProdejceBox() {
     ADMIN_PRODEJCE_FILTER = id || null;
     novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
+      _htmxAktualizujGrid();
+    } else {
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
+    }
+  });
+}
+
+// === HTMX HELPER: Aktualizace gridu přes server-rendered HTML ===
+function _htmxAktualizujGrid() {
+  // Server renderuje pouze karty (order-box) — nepoužívat v režimu řádků
+  if (typeof VIEW_MODE !== 'undefined' && VIEW_MODE === 'radky') {
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
     renderOrders(userItems);
-  });
+    return;
+  }
+
+  const stavFiltr = ACTIVE_FILTERS.size === 1 ? [...ACTIVE_FILTERS][0] : 'all';
+  const hledej = SEARCH_QUERY || '';
+  const prodejceId = ADMIN_PRODEJCE_FILTER || '';
+
+  let url = `/api/seznam_html.php?status=${encodeURIComponent(stavFiltr)}`;
+  if (hledej) url += `&search=${encodeURIComponent(hledej)}`;
+  if (prodejceId) url += `&prodejce_id=${encodeURIComponent(prodejceId)}`;
+
+  // Aktualizovat info o výsledcích hledání
+  const searchResultsInfo = document.getElementById('searchResultsInfo');
+  if (searchResultsInfo) {
+    if (hledej) {
+      searchResultsInfo.classList.remove('hidden');
+      searchResultsInfo.textContent = `Hledání: "${hledej}"`;
+    } else {
+      searchResultsInfo.classList.add('hidden');
+    }
+  }
+
+  htmx.ajax('GET', url, { target: '#orderGrid', swap: 'innerHTML' });
 }
 
 async function renderOrders(items = null) {
@@ -1439,8 +1482,8 @@ function regenerovatQrKod() {
         text: spdString,
         width: 220,
         height: 220,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        colorDark: 'var(--wgs-black)',
+        colorLight: 'var(--wgs-white)',
         correctLevel: QRCode.CorrectLevel.L
       });
     }
@@ -1881,7 +1924,7 @@ function renderCalendar(m, y) {
       el.title = 'Nelze vybrat minulé datum';
       el.style.opacity = '0.3';
       el.style.cursor = 'not-allowed';
-      el.style.backgroundColor = '#f0f0f0';
+      el.style.backgroundColor = 'var(--wgs-gray-f0)';
     } else if (occupiedDays.has(d)) {
       el.classList.add('occupied');
       el.title = 'Tento den má již nějaké termíny';
@@ -3239,7 +3282,7 @@ async function zobrazKnihovnuPDF(claimId) {
                  style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
                         background: #222; color: #fff; font-size: 1rem; margin-bottom: 20px;
                         box-sizing: border-box; outline: none;"
-                 onfocus="this.style.borderColor='#666'" onblur="this.style.borderColor='#444'">
+                 onfocus="this.style.borderColor='var(--wgs-gray-66)'" onblur="this.style.borderColor='var(--wgs-gray-44)'">
           <div style="display: grid; gap: 10px;">
             <button type="button" class="wgs-prompt-btn-potvrdit" style="padding: 12px 24px; border: none;
                         background: #28a745; color: #fff; border-radius: 8px; cursor: pointer;
@@ -3731,649 +3774,57 @@ async function autoAssignTechnician(reklamaceId) {
   }
 }
 
-// === SYSTÉM POZNÁMEK - API VERSION ===
+// === SYSTÉM POZNÁMEK - Lazy-loaded modul (Step 167+168) ===
+// Kód přesunut do assets/js/seznam-poznamky.js
+// Modul se stáhne automaticky při prvním kliknutí na CHAT.
 
-async function getNotes(orderId) {
-  try {
-    const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
-    if (!record) return [];
+let _szLoadingPromise = null;
 
-    const reklamaceId = record.reklamace_id || record.id;
-    const response = await fetch(`api/notes_api.php?action=get&reklamace_id=${encodeURIComponent(reklamaceId)}`);
-    const data = await response.json();
-
-    if (data.status === 'success' || data.success === true) {
-      return data.notes || [];
-    }
-    return [];
-  } catch (e) {
-    logger.error('Chyba při načítání poznámek:', e);
-    return [];
-  }
-}
-
-async function addNote(orderId, text, audioBlob = null) {
-  try {
-    const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
-    if (!record) {
-      throw new Error('Reklamace nenalezena');
-    }
-
-    // Get CSRF token
-    const csrfToken = await getCSRFToken();
-
-    const reklamaceId = record.reklamace_id || record.id;
-    const formData = new FormData();
-    formData.append('action', 'add');
-    formData.append('reklamace_id', reklamaceId);
-    formData.append('text', text.trim());
-    formData.append('csrf_token', csrfToken);
-
-    // Pridat audio pokud existuje
-    logger.log('[Audio] audioBlob status:', audioBlob ? 'existuje' : 'null', audioBlob ? audioBlob.size + ' bytes' : '');
-
-    if (audioBlob) {
-      // Urcit priponu podle MIME typu
-      let ext = 'webm';
-      if (audioBlob.type.includes('mp4')) ext = 'm4a';
-      else if (audioBlob.type.includes('ogg')) ext = 'ogg';
-      else if (audioBlob.type.includes('mp3') || audioBlob.type.includes('mpeg')) ext = 'mp3';
-      else if (audioBlob.type.includes('wav')) ext = 'wav';
-
-      formData.append('audio', audioBlob, `nahravka.${ext}`);
-      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB, type:', audioBlob.type);
-    }
-
-    logger.log('[Notes] Odesilam poznamku na API...');
-    const response = await fetch('api/notes_api.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    logger.log('[Notes] API odpoved status:', response.status);
-    const data = await response.json();
-    logger.log('[Notes] API odpoved data:', JSON.stringify(data));
-
-    if (data.status === 'success' || data.success === true) {
-      return { success: true, note_id: data.note_id };
-    } else {
-      // PHP vraci 'error' ne 'message'
-      throw new Error(data.error || data.message || 'Chyba pri pridavani poznamky');
-    }
-  } catch (e) {
-    logger.error('Chyba pri pridavani poznamky:', e);
-    throw e;
-  }
-}
-
-async function deleteNote(noteId, orderId) {
-  if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
-    return;
-  }
-
-  try {
-    const csrfToken = await getCSRFToken();
-
-    // FIX: Pouzit URLSearchParams misto FormData - spolehlivejsi pro Safari
-    const params = new URLSearchParams();
-    params.append('action', 'delete');
-    params.append('note_id', noteId);
-    params.append('csrf_token', csrfToken);
-
-    const response = await fetch('/api/notes_api.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params
-    });
-
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      // Odstranit poznamku z DOM
-      const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
-      if (noteElement) {
-        noteElement.remove();
-      }
-
-      // Zkontrolovat zda jsou jeste nejake poznamky
-      const notesContainer = document.querySelector('.notes-container');
-      if (notesContainer && notesContainer.querySelectorAll('.note-item').length === 0) {
-        notesContainer.innerHTML = '<div class="empty-notes">Zatim zadne poznamky</div>';
-      }
-
-      await loadAll();
-    } else {
-      wgsToast.error('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
-    }
-  } catch (e) {
-    logger.error('Chyba pri mazani poznamky:', e);
-    wgsToast.error('Chyba pri mazani poznamky: ' + e.message);
-  }
-}
-
-async function markNotesAsRead(orderId) {
-  try {
-    const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
-    if (!record) return;
-
-    // Get CSRF token
-    const csrfToken = await getCSRFToken();
-
-    const reklamaceId = record.reklamace_id || record.id;
-    const formData = new FormData();
-    formData.append('action', 'mark_read');
-    formData.append('reklamace_id', reklamaceId);
-    formData.append('csrf_token', csrfToken);
-
-    await fetch('api/notes_api.php', {
-      method: 'POST',
-      body: formData
-    });
-  } catch (e) {
-    logger.error('Chyba při označování poznámek:', e);
-  }
+function _nacistModulPoznamek() {
+  if (_szLoadingPromise) return _szLoadingPromise;
+  _szLoadingPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = '/assets/js/seznam-poznamky.js';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Nepodařilo se načíst modul poznámek'));
+    document.head.appendChild(s);
+  });
+  return _szLoadingPromise;
 }
 
 async function showNotes(recordOrId) {
-  let record;
-  if (typeof recordOrId === 'string' || typeof recordOrId === 'number') {
-    record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
-    if (!record) {
-      wgsToast.error(t('record_not_found'));
+  if (!window._szPoznamkyNacten) {
+    try {
+      await _nacistModulPoznamek();
+    } catch (e) {
+      logger.error('[Notes] Chyba načítání modulu:', e);
+      if (typeof wgsToast !== 'undefined') wgsToast.error('Chyba při načítání modulu poznámek');
       return;
     }
-  } else {
-    record = recordOrId;
   }
-
-  CURRENT_RECORD = record;
-
-  const loadingContent = `
-    ${createCustomerHeader()}
-    <div class="modal-body" style="text-align: center; padding: 3rem;">
-      <div class="loading">Načítání poznámek...</div>
-    </div>
-  `;
-  ModalManager.show(loadingContent);
-
-  const notes = await getNotes(record.id);
-
-  notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  const content = `
-    ${createCustomerHeader()}
-
-    <div class="modal-body">
-      <div class="notes-container">
-        ${notes.length > 0
-          ? notes.map(note => {
-              const canDelete = CURRENT_USER && (CURRENT_USER.is_admin || note.author === CURRENT_USER.email);
-              const hasAudio = note.has_audio && note.audio_url;
-              const isVoiceNote = note.text === '[Hlasová poznámka]' || note.text === '[Hlasova poznamka]';
-              return `
-              <div class="note-item ${note.read ? '' : 'unread'} ${hasAudio ? 'has-audio' : ''}" data-note-id="${note.id}">
-                <div class="note-header">
-                  <span class="note-author">${note.author_name || note.author}</span>
-                  <span class="note-time">${formatDateTime(note.timestamp)}</span>
-                  ${canDelete ? `<button class="note-delete-btn" data-note-id="${note.id}" data-order-id="${record.id}" onclick="event.stopPropagation(); potvrditSmazaniPoznamky(this);" title="Smazat poznamku">x</button>` : ''}
-                </div>
-                ${!isVoiceNote ? `<div class="note-text">${Utils.escapeHtml(note.text)}</div>` : ''}
-                ${hasAudio ? `
-                <div class="note-audio">
-                  <audio controls preload="metadata" class="note-audio-player">
-                    <source src="${note.audio_url}" type="audio/mp4">
-                    <source src="${note.audio_url}" type="audio/webm">
-                    <source src="${note.audio_url}" type="audio/mpeg">
-                    Vas prohlizec nepodporuje prehravani audia.
-                  </audio>
-                </div>
-                ` : ''}
-              </div>
-            `;
-            }).join('')
-          : '<div class="empty-notes">Zatim zadne poznamky</div>'
-        }
-      </div>
-
-      <div class="note-input-area">
-        <textarea
-          class="note-textarea"
-          id="newNoteText"
-          placeholder="Napiste poznamku..."
-        ></textarea>
-        <div class="note-input-controls">
-          <button type="button" class="btn-record" id="btnStartRecord" data-action="startRecording" data-id="${record.id}" title="Nahrat hlasovou zpravu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-            </svg>
-          </button>
-          <div class="recording-indicator" id="recordingIndicator">
-            <span class="recording-dot"></span>
-            <span class="recording-time" id="recordingTime">0:00</span>
-            <button type="button" class="btn-stop-record" id="btnStopRecord" data-action="stopRecording" data-id="${record.id}">Stop</button>
-          </div>
-          <div class="audio-preview hidden" id="audioPreview">
-            <audio id="audioPreviewPlayer" controls></audio>
-            <button type="button" class="btn-delete-audio" id="btnDeleteAudio" data-action="deleteAudioPreview" title="Smazat nahravku">x</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveNewNote" data-id="${record.id}">Pridat poznamku</button>
-      <button class="detail-btn detail-btn-secondary" data-action="closeNotesModal">Zavrit</button>
-    </div>
-  `;
-
-  ModalManager.show(content);
-
-  // Pridat error handling pro vsechny audio prehravace
-  setTimeout(() => {
-    const audioPlayers = document.querySelectorAll('.note-audio-player');
-    audioPlayers.forEach(audio => {
-      audio.onerror = function() {
-        logger.log('[Audio] Chyba pri nacitani ulozene nahravky');
-        // Nahradit audio element chybovou zpravou
-        const parent = audio.closest('.note-audio');
-        if (parent) {
-          parent.innerHTML = '<span style="color: var(--c-grey); font-size: 0.75rem;">Audio nelze nacist</span>';
-        }
-      };
-    });
-  }, 100);
-
-  setTimeout(async () => {
-    await markNotesAsRead(record.id);
-    await loadAll();
-    // Aktualizovat badge na ikone PWA
-    if (window.WGSNotifikace) {
-      window.WGSNotifikace.aktualizovat();
-    }
-  }, 1000);
+  window._showNotes(recordOrId);
 }
 
-async function saveNewNote(orderId) {
-  const textarea = document.getElementById('newNoteText');
-  const text = textarea.value.trim();
-  const audioBlob = window.wgsAudioRecorder ? window.wgsAudioRecorder.audioBlob : null;
-
-  // Musi byt text NEBO audio
-  if (!text && !audioBlob) {
-    wgsToast.warning(t('write_note_text'));
-    return;
-  }
-
-  try {
-    await addNote(orderId, text, audioBlob);
-
-    // Vycistit audio recorder
-    if (window.wgsAudioRecorder) {
-      window.wgsAudioRecorder.audioBlob = null;
-      window.wgsAudioRecorder.audioChunks = [];
-    }
-
-    // Zavrit modal po uspesnem pridani poznamky
-    closeNotesModal();
-
-    await loadAll();
-
-    // Aktualizovat badge na ikone PWA (nova poznamka)
-    if (window.WGSNotifikace) {
-      window.WGSNotifikace.aktualizovat();
-    }
-  } catch (e) {
-    wgsToast.error(t('note_save_error') + ': ' + e.message);
-  }
-}
-
-function closeNotesModal() {
-  // Zastavit nahravani pokud probiha
-  if (window.wgsAudioRecorder && window.wgsAudioRecorder.isRecording) {
-    stopRecording();
-  }
-  // Uvolnit mikrofon (kdyby zustal aktivni)
-  if (typeof releaseMicrophone === 'function') {
-    releaseMicrophone();
-  }
-  closeDetail();
-  renderOrders();
-}
-
-// ========================================
-// AUDIO NAHRAVANI - Hlasove poznamky
-// ========================================
-window.wgsAudioRecorder = {
-  mediaRecorder: null,
-  audioChunks: [],
-  audioBlob: null,
-  isRecording: false,
-  recordingStartTime: null,
-  recordingTimer: null,
-  permissionGranted: false, // Zapamatovat ze bylo povoleno
-  stream: null // Ulozit stream pro pozdejsi zastaveni
-};
-
-// Zkontrolovat stav opravneni mikrofonu
-async function checkMicrophonePermission() {
-  try {
-    // Pouzit Permissions API pokud je k dispozici
-    if (navigator.permissions && navigator.permissions.query) {
-      const result = await navigator.permissions.query({ name: 'microphone' });
-      logger.log('[Audio] Stav opravneni mikrofonu:', result.state);
-
-      if (result.state === 'granted') {
-        window.wgsAudioRecorder.permissionGranted = true;
-        return 'granted';
-      } else if (result.state === 'denied') {
-        return 'denied';
-      }
-      return 'prompt'; // Jeste se nezeptalo
-    }
-  } catch (e) {
-    // Permissions API neni podporovano (napr. Safari)
-    logger.log('[Audio] Permissions API neni podporovano, zkusim primo');
-  }
-  return 'unknown';
-}
-
-async function startRecording(orderId) {
-  logger.log('[Audio] Spoustim nahravani...');
-
-  try {
-    // Zkontrolovat podporu
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('Vas prohlizec nepodporuje nahravani zvuku');
-    }
-
-    // Zkontrolovat stav opravneni
-    const permissionState = await checkMicrophonePermission();
-
-    if (permissionState === 'denied') {
-      throw new Error('Pristup k mikrofonu byl trvale odepren. Povolte ho v nastaveni prohlizece.');
-    }
-
-    // Pokud jeste nebylo povoleno, zobrazit vysvetleni (jen poprve)
-    if (!window.wgsAudioRecorder.permissionGranted && permissionState !== 'granted') {
-      // Ulozit do localStorage ze jsme uz vysvetleni zobrazili
-      const explanationShown = localStorage.getItem('wgs_mic_explained');
-      if (!explanationShown) {
-        wgsToast.info('Pro nahravani hlasovych poznamek potrebujeme pristup k mikrofonu. Po kliknuti na OK vas prohlizec pozada o povoleni.');
-        localStorage.setItem('wgs_mic_explained', '1');
-      }
-    }
-
-    // Pozadat o pristup k mikrofonu
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    // Ulozit stream pro pozdejsi zastaveni
-    window.wgsAudioRecorder.stream = stream;
-
-    // Zapamatovat ze bylo povoleno
-    window.wgsAudioRecorder.permissionGranted = true;
-
-    // Vybrat podporovany format
-    // Safari/iOS: preferovat MP4 (WebM nefunguje pri prehravani)
-    // Chrome/Firefox: preferovat WebM (lepsi komprese)
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-                     /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-    let mimeType = 'audio/webm';
-
-    if (isSafari) {
-      // Safari/iOS - pouzit MP4 (jediny spolehlivy format)
-      if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      } else if (MediaRecorder.isTypeSupported('audio/aac')) {
-        mimeType = 'audio/aac';
-      }
-      // Fallback na cokoliv co funguje
-      logger.log('[Audio] Safari detekovan, preferuji MP4');
-    } else {
-      // Chrome/Firefox - pouzit WebM (lepsi komprese)
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-        mimeType = 'audio/ogg';
-      }
-    }
-
-    logger.log('[Audio] Pouzivam format:', mimeType);
-
-    const recorder = window.wgsAudioRecorder;
-    recorder.mimeType = mimeType; // Ulozit pro pouziti v onstop
-    recorder.mediaRecorder = new MediaRecorder(stream, { mimeType });
-    recorder.audioChunks = [];
-    recorder.isRecording = true;
-    recorder.recordingStartTime = Date.now();
-
-    // Sbírat data
-    recorder.mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        recorder.audioChunks.push(e.data);
-        logger.log('[Audio] Data chunk:', e.data.size, 'bytes');
-      }
-    };
-
-    // Po ukonceni nahravani
-    recorder.mediaRecorder.onstop = () => {
-      logger.log('[Audio] Nahravani ukonceno, chunks:', recorder.audioChunks.length);
-
-      if (recorder.audioChunks.length === 0) {
-        logger.error('[Audio] Zadna data nebyla nahrana');
-        wgsToast.warning('Nahravka je prazdna. Zkuste to prosim znovu.');
-        document.getElementById('btnStartRecord').classList.remove('hidden');
-        document.getElementById('recordingIndicator').classList.remove('active');
-        return;
-      }
-
-      // Pouzit ulozeny mimeType
-      const blobType = recorder.mimeType || 'audio/webm';
-      recorder.audioBlob = new Blob(recorder.audioChunks, { type: blobType });
-      recorder.isRecording = false;
-
-      logger.log('[Audio] Blob vytvoren:', recorder.audioBlob.size, 'bytes, type:', blobType);
-
-      // Uvolnit mikrofon
-      releaseMicrophone();
-
-      // Zobrazit nahled
-      showAudioPreview(recorder.audioBlob);
-    };
-
-    // Spustit nahravani s timeslice 1000ms
-    // Timeslice zajisti ze ondataavailable se vola kazdou sekundu
-    // To je dulezite pro mobilni prohlizece/PWA kde bez timeslice muze byt nespolehlivy
-    recorder.mediaRecorder.start(1000);
-
-    // Aktualizovat UI
-    document.getElementById('btnStartRecord').classList.add('hidden');
-    document.getElementById('recordingIndicator').classList.add('active');
-
-    // Casovac
-    recorder.recordingTimer = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - recorder.recordingStartTime) / 1000);
-      const mins = Math.floor(elapsed / 60);
-      const secs = elapsed % 60;
-      document.getElementById('recordingTime').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-    }, 1000);
-
-    logger.log('[Audio] Nahravani spusteno');
-
-  } catch (err) {
-    logger.error('[Audio] Chyba pri nahravani:', err);
-
-    // Uvolnit prostredky pri chybe (dulezite pro iOS PWA)
-    releaseMicrophone();
-
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      wgsToast.error('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
-    } else {
-      wgsToast.error('Chyba pri nahravani: ' + err.message);
-    }
-  }
-}
-
-function stopRecording() {
-  logger.log('[Audio] Zastavuji nahravani...');
-
-  const recorder = window.wgsAudioRecorder;
-
-  // Zastavit casovac hned
-  if (recorder.recordingTimer) {
-    clearInterval(recorder.recordingTimer);
-    recorder.recordingTimer = null;
-  }
-
-  if (recorder.mediaRecorder && recorder.isRecording) {
-    // Vyzadat posledni data pred zastavenim (dulezite pro mobilni prohlizece)
-    if (recorder.mediaRecorder.state === 'recording') {
-      try {
-        recorder.mediaRecorder.requestData();
-        // FIX: Pridat male zpozdeni aby data stihla dorazit pred stop()
-        // Na nekterych prohlizecich (Safari/iOS) requestData() je asynchronni
-        // a data dorazila az po stop(), coz vedlo k prazdnym nahrávkam
-        setTimeout(() => {
-          if (recorder.mediaRecorder && recorder.mediaRecorder.state === 'recording') {
-            recorder.mediaRecorder.stop();
-            logger.log('[Audio] MediaRecorder zastaven po requestData zpozdeni');
-          }
-        }, 150);
-      } catch (e) {
-        logger.log('[Audio] requestData neni podporovano:', e.message);
-        // Fallback - zavolat stop() primo
-        recorder.mediaRecorder.stop();
-      }
-    } else if (recorder.mediaRecorder.state !== 'inactive') {
-      recorder.mediaRecorder.stop();
-    }
-  }
-
-  // Aktualizovat UI - skryt recording indicator
-  // Pozn: tlacitko startRecord se ukaze az v onstop handleru po zpracovani dat
-  const recordingIndicator = document.getElementById('recordingIndicator');
-  if (recordingIndicator) recordingIndicator.classList.remove('active');
-}
-
-// Uvolnit mikrofon - zastavit stream
-// Dulezite pro iOS PWA - bez kompletniho uvolneni nahravani funguje jen jednou
-function releaseMicrophone() {
-  const recorder = window.wgsAudioRecorder;
-
-  // Zastavit vsechny tracky streamu
-  if (recorder.stream) {
-    recorder.stream.getTracks().forEach(track => {
-      track.stop();
-      logger.log('[Audio] Track zastaven:', track.kind);
-    });
-    recorder.stream = null;
-  }
-
-  // Reset MediaRecorder (dulezite pro iOS PWA)
-  if (recorder.mediaRecorder) {
-    recorder.mediaRecorder = null;
-  }
-
-  // Reset stavu
-  recorder.isRecording = false;
-  recorder.audioChunks = [];
-
-  logger.log('[Audio] Mikrofon a MediaRecorder uvolneny');
-}
-
-function showAudioPreview(audioBlob) {
-  const audioUrl = URL.createObjectURL(audioBlob);
-  const previewPlayer = document.getElementById('audioPreviewPlayer');
-  const previewContainer = document.getElementById('audioPreview');
-
-  // Odstranit predchozi error handlery
-  previewPlayer.onerror = null;
-  previewPlayer.oncanplay = null;
-
-  // Flag aby se error zobrazil jen jednou
-  let errorShown = false;
-
-  // Pridat error handler
-  previewPlayer.onerror = function(e) {
-    if (errorShown) return; // Zabranit opakovanemu zobrazeni
-    errorShown = true;
-
-    logger.log('[Audio] Chyba pri nacitani nahravky:', e);
-    // Skryt preview a zobrazit tlacitko pro nahravani
-    previewContainer.classList.add('hidden');
-    document.getElementById('btnStartRecord').classList.remove('hidden');
-
-    // Uvolnit blob URL
-    if (previewPlayer.src) {
-      URL.revokeObjectURL(previewPlayer.src);
-      previewPlayer.src = '';
-    }
-
-    // Zobrazit info v console misto alertu
-    logger.error('[Audio] Nahravka se nepodarila nacist');
-  };
-
-  previewPlayer.src = audioUrl;
-  previewContainer.classList.remove('hidden');
-
-  logger.log('[Audio] Nahled zobrazen, velikost:', Math.round(audioBlob.size / 1024), 'KB');
-}
-
-function deleteAudioPreview() {
-  const recorder = window.wgsAudioRecorder;
-  recorder.audioBlob = null;
-  recorder.audioChunks = [];
-
-  const previewPlayer = document.getElementById('audioPreviewPlayer');
-  const previewContainer = document.getElementById('audioPreview');
-
-  if (previewPlayer.src) {
-    URL.revokeObjectURL(previewPlayer.src);
-    previewPlayer.src = '';
-  }
-
-  previewContainer.classList.add('hidden');
-  document.getElementById('btnStartRecord').classList.remove('hidden');
-
-  logger.log('[Audio] Nahled smazan');
-}
-
-function formatDateTime(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const diff = now - date;
-
-  if (diff < 60000) {
-    return 'Právě teď';
-  }
-
-  if (diff < 3600000) {
-    const mins = Math.floor(diff / 60000);
-    return `Před ${mins} min`;
-  }
-
-  if (diff < 86400000) {
-    const hours = Math.floor(diff / 3600000);
-    return `Před ${hours} h`;
-  }
-
-  // Zkracene nazvy dnu v tydnu (cesky)
-  const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
-  const den = dny[date.getDay()];
-  const datum = date.getDate();
-  const mesic = date.getMonth() + 1;
-  const rok = date.getFullYear();
-  const hodiny = date.getHours().toString().padStart(2, '0');
-  const minuty = date.getMinutes().toString().padStart(2, '0');
-
-  return `${den} ${datum}.${mesic}.${rok} ${hodiny}:${minuty}`;
+// ---- PLACEHOLDER FUNKCE ----
+// Zástupné funkce — přepíší se po načtení seznam-poznamky.js.
+// Existují proto, aby typeof X === 'function' vrátilo true
+// v EMERGENCY listeneru ještě před načtením modulu.
+// Modul se načte automaticky při prvním volání showNotes().
+
+async function getNotes(orderId) {}
+async function addNote(orderId, text, audioBlob) {}
+async function deleteNote(noteId, orderId) {}
+async function markNotesAsRead(orderId) {}
+async function saveNewNote(orderId) {}
+function closeNotesModal() {}
+async function startRecording(orderId) {}
+function stopRecording() {}
+function releaseMicrophone() {}
+function deleteAudioPreview() {}
+function formatDateTime(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  return d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 // === UTILITY ===
@@ -5334,7 +4785,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.stopPropagation();
     dragCounter++;
     dropOverlay.classList.remove('hidden');
-    content.style.background = '#252525';
+    content.style.background = 'var(--wgs-gray-25)';
   });
 
   content.addEventListener('dragleave', (e) => {
@@ -5343,7 +4794,7 @@ async function zobrazVideotekaArchiv(claimId) {
     dragCounter--;
     if (dragCounter === 0) {
       dropOverlay.classList.add('hidden');
-      content.style.background = '#1a1a1a';
+      content.style.background = 'var(--wgs-darkest)';
     }
   });
 
@@ -5357,7 +4808,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.stopPropagation();
     dragCounter = 0;
     dropOverlay.classList.add('hidden');
-    content.style.background = '#1a1a1a';
+    content.style.background = 'var(--wgs-darkest)';
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
@@ -5593,14 +5044,14 @@ function vytvorVideoKartu(video, claimId) {
 
   // Kdo přidal video (hlavní řádek) - menší na mobilu
   const autorRow = document.createElement('div');
-  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; color: ${isMobile ? '#aaa' : '#fff'};`;
+  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; color: ${isMobile ? 'var(--wgs-gray-aa)' : 'var(--wgs-white)'};`;
   if (video.uploader_email) {
     const emailKratky = video.uploader_email.split('@')[0];
     autorRow.textContent = emailKratky;
     autorRow.title = video.uploader_email;
   } else {
     autorRow.textContent = 'Admin';
-    autorRow.style.color = '#888';
+    autorRow.style.color = 'var(--wgs-gray-88)';
   }
 
   // Velikost a datum (sekundární řádek) - menší na mobilu
@@ -5945,7 +5396,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         progressFill.style.width = '100%';
         progressFill.textContent = '100%';
         statusText.textContent = 'Hotovo!';
-        progressFill.style.background = '#333';
+        progressFill.style.background = 'var(--wgs-gray-33)';
 
         // Neonový toast pro úspěšný upload
         if (typeof WGSToast !== 'undefined') {
@@ -5969,7 +5420,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
 
     } catch (error) {
       logger.error('[Videotéka] Chyba při uploadu:', error);
-      progressFill.style.background = '#c33';
+      progressFill.style.background = 'var(--c-progress-red)';
       statusText.textContent = 'Chyba: ' + error.message;
       btnNahrat.disabled = false;
       btnZrusit.disabled = false;
@@ -6082,7 +5533,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       progressBarInner.style.width = '100%';
       progressBarInner.textContent = '100%';
       progressStatus.textContent = 'Hotovo!';
-      progressBarInner.style.background = '#333';
+      progressBarInner.style.background = 'var(--wgs-gray-33)';
 
       // Neonový toast pro úspěšný upload
       if (typeof WGSToast !== 'undefined') {
@@ -6104,7 +5555,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
 
   } catch (error) {
     logger.error('[Videotéka] Chyba při drag & drop uploadu:', error);
-    progressBarInner.style.background = '#c33';
+    progressBarInner.style.background = 'var(--c-progress-red)';
     progressBarInner.style.width = '100%';
     progressStatus.textContent = 'Chyba: ' + error.message;
     showToast('Chyba při nahrávání videa: ' + error.message, 'error');

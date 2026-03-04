@@ -1,12 +1,12 @@
 /* White Glove Service - Nova Reklamace CSS - KOMPAKTNÍ VERZE */
 
 :root {
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #1a1a1a;
-  --c-grey: #666666;
-  --c-light-grey: #999999;
-  --c-border: #e0e0e0;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-darkest);
+  --c-grey: var(--wgs-gray-66);
+  --c-light-grey: var(--wgs-light-grey);
+  --c-border: var(--wgs-border);
 }
 
 * {
@@ -33,7 +33,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Top Bar */
 .top-bar {
-  background: #000000;
+  background: var(--wgs-black);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -228,7 +228,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  color: #FFFFFF;
+  color: #ffffff;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 
@@ -317,29 +317,29 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control {
   padding: 0.7rem 0.9rem; /* ZMĚNA: z 0.9rem 1rem na 0.7rem 0.9rem */
-  border: 1px solid var(--c-border);
-  background: var(--c-white);
+  border: 1px solid #cccccc;
+  background: #ffffff;
   font-family: 'Poppins', sans-serif;
   font-size: 0.95rem;
-  color: var(--c-black);
+  color: #000000;
   transition: all 0.3s;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: var(--c-black);
-  box-shadow: 0 0 0 1px var(--c-black);
+  border-color: #000000;
+  box-shadow: 0 0 0 1px #000000;
 }
 
 .form-control:read-only,
 .form-control.disabled-field {
-  background-color: #f5f5f5 !important;
+  background-color: #f0f0f0 !important;
   cursor: not-allowed !important;
-  color: #999999;
+  color: #888888;
 }
 
 .form-control::placeholder {
-  color: var(--c-light-grey);
+  color: #999999;
   font-style: italic;
 }
 
@@ -499,8 +499,8 @@ textarea.form-control {
 }
 
 .btn:hover {
-  background: #2a2a2a;
-  border-color: #2a2a2a;
+  background: var(--wgs-gray-2a);
+  border-color: var(--wgs-gray-2a);
 }
 
 .btn-secondary {
@@ -536,11 +536,11 @@ textarea.form-control {
 }
 
 .toast.error {
-  background: #cc0000;
+  background: var(--wgs-delete);
 }
 
 .toast.success {
-  background: #555555;
+  background: var(--wgs-grey);
 }
 
 /* Overlay Provedeni */
@@ -599,7 +599,7 @@ textarea.form-control {
 
 /* Footer */
 .footer {
-  background: #000000;
+  background: var(--wgs-black);
   color: var(--c-white);
   padding: 3rem 2rem 1rem;
   margin-top: 4rem;
@@ -630,14 +630,14 @@ textarea.form-control {
 .footer-text {
   font-size: 0.9rem;
   line-height: 1.8;
-  color: #cccccc;
+  color: var(--c-border-medium);
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #999999;
+  color: var(--wgs-light-grey);
   font-size: 0.85rem;
 }
 
@@ -681,7 +681,7 @@ textarea.form-control {
     right: -260px;
     width: 250px;
     height: calc(100vh - 73px);
-    background: #000000;
+    background: var(--wgs-black);
     flex-direction: column;
     gap: 0;
     padding: 1rem 0;
@@ -1008,21 +1008,21 @@ textarea.form-control {
 .disabled-field,
 .form-control[readonly],
 .form-control:disabled {
-  background-color: #e8e8e8 !important;
-  color: #666 !important;
+  background-color: var(--c-active) !important;
+  color: var(--wgs-gray-66) !important;
   cursor: not-allowed !important;
-  border-color: #d0d0d0 !important;
+  border-color: var(--wgs-gray-d0) !important;
 }
 
 .disabled-field::placeholder,
 .form-control[readonly]::placeholder {
-  color: #999 !important;
+  color: var(--wgs-light-grey) !important;
   opacity: 1 !important;
 }
 
 .provedeni-input[readonly] {
-  background-color: #e8e8e8 !important;
-  color: #666 !important;
+  background-color: var(--c-active) !important;
+  color: var(--wgs-gray-66) !important;
   cursor: pointer !important;
 }
 
@@ -1238,7 +1238,7 @@ textarea.form-control {
 
   .form-card {
     box-shadow: none;
-    border: 1px solid #ddd;
+    border: 1px solid var(--wgs-gray-dd);
   }
 }
 

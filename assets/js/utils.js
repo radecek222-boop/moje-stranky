@@ -346,7 +346,12 @@ function initEventDelegation() {
             event.preventDefault();
             const href = hrefTarget.dataset.href;
             if (href) {
-                window.location.href = href;
+                const cil = hrefTarget.dataset.target;
+                if (cil === '_blank') {
+                    window.open(href, '_blank', 'noopener,noreferrer');
+                } else {
+                    window.location.href = href;
+                }
             }
         }
     });

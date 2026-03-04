@@ -1,0 +1,86 @@
+name: E2E testy (Playwright)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Playwright E2E testy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Nastavit PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_mysql, mbstring, json, redis
+          coverage: none
+
+      - name: Nastavit Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Nainstalovat závislosti
+        run: npm ci
+
+      - name: Nainstalovat Playwright prohlížeče
+        run: npx playwright install chromium --with-deps
+
+      - name: Vytvořit testovací .env
+        run: |
+          cat > .env << 'EOF'
+          DB_HOST=127.0.0.1
+          DB_NAME=wgs_test
+          DB_USER=root
+          DB_PASS=
+          SMTP_HOST=localhost
+          SMTP_PORT=25
+          SMTP_FROM=test@test.cz
+          SMTP_USER=
+          SMTP_PASS=
+          JWT_SECRET=testovaci-jwt-secret-pro-ci-32chars
+          ADMIN_KEY_HASH=test
+          ENVIRONMENT=test
+          EOF
+
+      - name: Spustit PHP dev server na pozadí
+        run: |
+          php -S localhost:8080 -t . > /tmp/php-server.log 2>&1 &
+          echo "PHP server PID: $!"
+          # Počkat až server nastartuje
+          sleep 2
+          curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health.php || echo "Health check selhal (pokračujeme)"
+
+      - name: Spustit E2E testy
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:8080
+          CI: true
+
+      - name: Nahrát Playwright report při selhání
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Nahrát snímky obrazovky při selhání
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: test-results/
+          retention-days: 7

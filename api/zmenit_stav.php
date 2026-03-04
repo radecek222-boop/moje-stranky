@@ -279,5 +279,5 @@ try {
     }
     error_log("zmenit_stav.php: Exception - " . $e->getMessage());
     error_log("Trace: " . $e->getTraceAsString());
-    sendJsonError('Chyba při zpracování požadavku: ' . $e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 }

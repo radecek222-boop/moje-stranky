@@ -10,11 +10,11 @@
   z-index: 9999;
   max-width: 400px;
   width: calc(100% - 40px);
-  background: #1a1a1a;
+  background: var(--wgs-darkest);
   border-radius: 10px;
   padding: 16px 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  border: 1px solid #333;
+  border: 1px solid var(--wgs-gray-33);
   font-family: 'Poppins', sans-serif;
   animation: wgsCookieSlideIn 0.3s ease-out;
 }
@@ -47,7 +47,7 @@
 
 .wgs-cookie-consent-titulek {
   margin: 0 0 6px 0;
-  color: #fff;
+  color: var(--wgs-white);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -55,19 +55,19 @@
 
 .wgs-cookie-consent-text {
   margin: 0 0 12px 0;
-  color: #aaa;
+  color: var(--wgs-gray-aa);
   font-size: 0.72rem;
   line-height: 1.5;
 }
 
 .wgs-cookie-consent-text a {
-  color: #fff;
+  color: var(--wgs-white);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .wgs-cookie-consent-text a:hover {
-  color: #ddd;
+  color: var(--wgs-border);
 }
 
 /* Sekce s checkboxy */
@@ -83,7 +83,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
-  color: #bbb;
+  color: var(--wgs-gray-bb);
   font-size: 0.7rem;
 }
 
@@ -94,7 +94,7 @@
 .wgs-cookie-consent-volba input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #28a745;
+  accent-color: var(--wgs-success);
   cursor: pointer;
 }
 
@@ -110,7 +110,7 @@
 
 .wgs-cookie-consent-volba .povinne {
   font-size: 0.7rem;
-  color: #888;
+  color: var(--wgs-gray-88);
   margin-left: 5px;
 }
 
@@ -140,34 +140,34 @@
 
 .wgs-cookie-consent-btn-odmitnout {
   background: transparent;
-  border: 1px solid #444;
-  color: #ccc;
+  border: 1px solid var(--wgs-gray-44);
+  color: var(--c-border-medium);
 }
 
 .wgs-cookie-consent-btn-odmitnout:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-color: #666;
+  border-color: var(--wgs-gray-66);
 }
 
 .wgs-cookie-consent-btn-nastaveni {
   background: transparent;
-  border: 1px solid #444;
-  color: #ccc;
+  border: 1px solid var(--wgs-gray-44);
+  color: var(--c-border-medium);
 }
 
 .wgs-cookie-consent-btn-nastaveni:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-color: #666;
+  border-color: var(--wgs-gray-66);
 }
 
 .wgs-cookie-consent-btn-prijmout {
-  background: #28a745;
+  background: var(--wgs-success);
   border: none;
-  color: #fff;
+  color: var(--wgs-white);
 }
 
 .wgs-cookie-consent-btn-prijmout:hover {
-  background: #218838;
+  background: var(--wgs-success-hover);
 }
 
 /* Rozšířený pohled s nastavením */

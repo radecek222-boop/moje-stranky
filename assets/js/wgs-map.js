@@ -340,7 +340,7 @@ const WGSMap = {
     }
 
     const polyline = L.polyline(coordinates, {
-      color: options.color || '#006600',
+      color: options.color || 'var(--c-dark-green)',
       weight: options.weight || 4,
       opacity: options.opacity || 0.7
     }).addTo(this.map);

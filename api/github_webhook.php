@@ -254,10 +254,12 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
-    logWebhook(['status' => 'error', 'error' => $e->getMessage()]);
+    error_log('GitHub webhook DB error: ' . $e->getMessage());
+    echo json_encode(['error' => 'Database error']);
+    logWebhook(['status' => 'error', 'error' => 'Database error']);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
-    logWebhook(['status' => 'error', 'error' => $e->getMessage()]);
+    error_log('GitHub webhook error: ' . $e->getMessage());
+    echo json_encode(['error' => 'Internal error']);
+    logWebhook(['status' => 'error', 'error' => 'Internal error']);
 }

@@ -76,7 +76,7 @@ Nová kolekce **Apulo** s čalouněním z kůže nebo kožešiny nabízí sofist
 
 [Zobrazit kolekci](https://www.natuzzi.com)
 
-![Natuzzi luxusní pohovka kolekce 2025/2026](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 
 ## POSIDONIA - MULTIFUNKČNÍ DESIGN ELENY SALMISTRARO
 
@@ -104,7 +104,7 @@ The new **Apulo collection** with leather or hide upholstery offers a sophistica
 
 [View collection](https://www.natuzzi.com)
 
-![Natuzzi luxury sofa collection 2025/2026](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 
 ## POSIDONIA - MULTIFUNCTIONAL DESIGN BY ELENA SALMISTRARO
 
@@ -132,7 +132,7 @@ La nuova **collezione Apulo** con rivestimento in pelle o pelliccia offre un loo
 
 [Visualizza la collezione](https://www.natuzzi.com)
 
-![Divano di lusso Natuzzi collezione 2025/2026](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 
 ## POSIDONIA - DESIGN MULTIFUNZIONALE DI ELENA SALMISTRARO
 
@@ -184,7 +184,7 @@ Značka Natuzzi byla založena v roce **1959** Pasqualem Natuzzim a je na Newyor
 
 Certifikace **ISO 9001** (kvalita), **ISO 14001** (životní prostředí), **ISO 45001** (bezpečnost práce) a **FSC® Chain of Custody** (odpovědná těžba dřeva) potvrzují závazek k vysokým standardům ve všech oblastech podnikání.
 
-![Natuzzi - italská tradice a řemeslo](https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&h=600&fit=crop)
+
 EOT;
 
     $obsahEn2 = <<<'EOT'
@@ -210,7 +210,7 @@ The Natuzzi brand was founded in **1959** by Pasquale Natuzzi and has been liste
 
 Certifications **ISO 9001** (quality), **ISO 14001** (environment), **ISO 45001** (workplace safety), and **FSC® Chain of Custody** (responsible timber) confirm a commitment to high standards across all areas of business.
 
-![Natuzzi - Italian tradition and craftsmanship](https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&h=600&fit=crop)
+
 EOT;
 
     $obsahIt2 = <<<'EOT'
@@ -236,7 +236,7 @@ Il marchio Natuzzi è stato fondato nel **1959** da Pasquale Natuzzi ed è quota
 
 Le certificazioni **ISO 9001** (qualità), **ISO 14001** (ambiente), **ISO 45001** (sicurezza sul lavoro) e **FSC® Chain of Custody** (legno responsabile) confermano l'impegno verso gli standard elevati in tutte le aree aziendali.
 
-![Natuzzi - tradizione e artigianato italiano](https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800&h=600&fit=crop)
+
 EOT;
 
     $aktuality[] = [
@@ -258,7 +258,7 @@ Letošní ročník přivítá **více než 1 900 vystavovatelů z 32 zemí** na 
 
 [Více o Salone del Mobile 2026](https://www.salonemilano.it/en/articles/salone-del-mobile-2026)
 
-![Salone del Mobile Milán 2026](https://images.unsplash.com/photo-1493663284031-b7e3aaa4c7c7?w=800&h=600&fit=crop)
+
 
 ## SALONE CONTRACT - NOVÁ INICIATIVA S ARCHITEKTY OMA
 
@@ -284,7 +284,7 @@ This year's edition will welcome **more than 1,900 exhibitors from 32 countries*
 
 [More about Salone del Mobile 2026](https://www.salonemilano.it/en/articles/salone-del-mobile-2026)
 
-![Salone del Mobile Milan 2026](https://images.unsplash.com/photo-1493663284031-b7e3aaa4c7c7?w=800&h=600&fit=crop)
+
 
 ## SALONE CONTRACT - NEW INITIATIVE WITH OMA ARCHITECTS
 
@@ -310,7 +310,7 @@ L'edizione di quest'anno accoglierà **più di 1.900 espositori da 32 paesi** su
 
 [Maggiori informazioni sul Salone del Mobile 2026](https://www.salonemilano.it/en/articles/salone-del-mobile-2026)
 
-![Salone del Mobile Milano 2026](https://images.unsplash.com/photo-1493663284031-b7e3aaa4c7c7?w=800&h=600&fit=crop)
+
 
 ## SALONE CONTRACT - NUOVA INIZIATIVA CON GLI ARCHITETTI OMA
 
@@ -362,7 +362,7 @@ Příchod jara je ideálním časem pro důkladnou péči o kožený nábytek. O
 
 Pravidelná péče prodlužuje životnost vašeho luxusního nábytku Natuzzi o mnoho let a zachovává jeho původní krásu.
 
-![Péče o kožený nábytek Natuzzi](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 EOT;
 
     $obsahEn4 = <<<'EOT'
@@ -390,7 +390,7 @@ The arrival of spring is the ideal time for thorough leather furniture care. Nat
 
 Regular care extends the life of your Natuzzi luxury furniture for many years while preserving its original beauty.
 
-![Natuzzi leather furniture care](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 EOT;
 
     $obsahIt4 = <<<'EOT'
@@ -418,7 +418,7 @@ L'arrivo della primavera è il momento ideale per una cura approfondita dei mobi
 
 La cura regolare prolunga la vita dei vostri mobili di lusso Natuzzi per molti anni preservandone la bellezza originale.
 
-![Cura dei mobili in pelle Natuzzi](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop)
+
 EOT;
 
     $aktuality[] = [

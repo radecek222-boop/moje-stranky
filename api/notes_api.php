@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../includes/db_metadata.php';
 require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
@@ -62,14 +63,20 @@ try {
 
     $pdo = getDbConnection();
 
+    // MULTI-TENANT: Připravit tenant podmínku pro všechny dotazy na wgs_reklamace
+    $reklamaceSloupce     = db_get_table_columns($pdo, 'wgs_reklamace');
+    $notesApiMaTenantSloupec = in_array('tenant_id', $reklamaceSloupce);
+    $notesApiTenantSql    = $notesApiMaTenantSloupec ? ' AND tenant_id = :tenant_id' : '';
+    $notesApiTenantParams = $notesApiMaTenantSloupec ? [':tenant_id' => tenantId()] : [];
+
     switch ($action) {
         case 'get':
             // Načtení poznámek
             $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
 
             // Převést reklamace_id na claim_id (číselné ID)
-            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
-            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE (reklamace_id = :reklamace_id OR cislo = :cislo){$notesApiTenantSql} LIMIT 1");
+            $stmt->execute(array_merge([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId], $notesApiTenantParams));
             $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reklamace) {
@@ -208,8 +215,8 @@ try {
             $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 
             // Převést reklamace_id na claim_id (číselné ID)
-            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
-            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE (reklamace_id = :reklamace_id OR cislo = :cislo){$notesApiTenantSql} LIMIT 1");
+            $stmt->execute(array_merge([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId], $notesApiTenantParams));
             $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reklamace) {
@@ -537,8 +544,8 @@ try {
             $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
 
             // Převést reklamace_id na claim_id (číselné ID)
-            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
-            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE (reklamace_id = :reklamace_id OR cislo = :cislo){$notesApiTenantSql} LIMIT 1");
+            $stmt->execute(array_merge([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId], $notesApiTenantParams));
             $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reklamace) {

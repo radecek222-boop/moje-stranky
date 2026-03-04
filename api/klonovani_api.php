@@ -167,8 +167,7 @@ try {
         } catch (PDOException $e) {
             $pdo->rollBack();
             error_log("Chyba při klonování reklamace: " . $e->getMessage());
-            // DEBUG: Vrátit detailní chybu pro diagnostiku
-            sendJsonError('Databázová chyba: ' . $e->getMessage());
+            sendJsonError('Chyba při zpracování požadavku', 500);
         }
 
     } else {

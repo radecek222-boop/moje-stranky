@@ -94,6 +94,11 @@ if (!$isLoggedIn && !$isAdmin) {
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 
+<!-- HTMX (Step 142 - Phase 9) - progressivní enhancement pro server-rendered fragmenty -->
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer
+        integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+        crossorigin="anonymous"></script>
+
 
 <!-- External CSS -->
     <!-- Unified Design System -->
@@ -993,7 +998,11 @@ body.modal-open {
   color: #ffffff !important;
 }
 
-/* Poznámky badge */
+/* Poznámky badge - tmavá šedá pro dobrou čitelnost */
+.order-notes-badge {
+  background: #444444 !important;
+  color: #ffffff !important;
+}
 #detailOverlay .order-notes-badge {
   background: #444444 !important;
   color: #ffffff !important;
@@ -1070,6 +1079,20 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 }
 
 /* Barevné nádechy karet podle stavu (velmi světlé) */
+/* Řádky mají stejné barvy jako karty - pro mobil i desktop */
+.order-row.status-bg-wait     { background: rgba(255, 235, 59, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-open     { background: rgba(33, 150, 243, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-done     { background: rgba(76, 175, 80, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-odlozena { background: rgba(156, 39, 176, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.ma-cenovou-nabidku { background: rgba(255, 152, 0, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.08) !important; border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.cn-zamitnuta       { background: rgba(220, 53, 69, 0.08) !important;  border-color: #cccccc !important; box-shadow: none !important; }
+.order-row.status-bg-wait:hover     { background: rgba(255, 235, 59, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-open:hover     { background: rgba(33, 150, 243, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-done:hover     { background: rgba(76, 175, 80, 0.12) !important; box-shadow: none !important; }
+.order-row.status-bg-odlozena:hover { background: rgba(156, 39, 176, 0.12) !important; box-shadow: none !important; }
+
 .order-box.status-bg-wait {
   background: rgba(255, 235, 59, 0.08) !important; /* Žlutá nádech - ČEKÁ */
 }

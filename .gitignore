@@ -69,3 +69,7 @@ uploads/*
 !uploads/videos
 !uploads/videos/
 !uploads/videos/.gitkeep
+
+# Playwright
+playwright-report/
+test-results/

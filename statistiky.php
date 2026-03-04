@@ -761,8 +761,8 @@ body {
     <p>Vyúčtování zakázek, prodejci, technici - <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Administrátor'); ?></p>
   </div>
 
-  <!-- Summary karty -->
-  <div class="stats-summary">
+  <!-- Summary karty (Step 146: HTMX target) -->
+  <div class="stats-summary" id="stats-summary-container">
     <div class="summary-card">
       <div class="summary-card-label">Celkem reklamací</div>
       <div class="summary-card-value" id="total-all">0</div>
@@ -964,9 +964,33 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer
+        integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+        crossorigin="anonymous"></script>
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
+
+<!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146)
+     Pořadí listenerů DOMContentLoaded:
+     1. Tento inline script (registrován dříve) → přepíše nactiSummary
+     2. statistiky.min.js listener (registrován po deferred načtení) → zavolá nactiSummary()
+     Výsledek: statistiky.min.js zavolá HTMX verzi — žádné dvojité volání. -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    if (typeof htmx === 'undefined' || typeof getFilterParams === 'undefined') return;
+
+    // Přepsat PŘED voláním ze statistiky.min.js listeneru (ten se spustí jako druhý)
+    window.nactiSummary = function() {
+        var filterParams = getFilterParams();
+        htmx.ajax('GET', '/api/statistiky_html.php?' + filterParams, {
+            target: '#stats-summary-container',
+            swap: 'innerHTML'
+        });
+    };
+    // NEvolat zde — statistiky.min.js ji zavolá sám ve svém DOMContentLoaded listeneru
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

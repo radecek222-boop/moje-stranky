@@ -1,17 +1,17 @@
 :root {
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #1a1a1a;
-  --c-grey: #666666;
-  --c-light-grey: #999999;
-  --c-border: #e0e0e0;
-  --c-success: #333333;
-  --c-error: #8b0000;
-  --c-warning: #b8860b;
-  --c-info: #555555;
-  --c-neon-yellow: #ffe100;
-  --c-neon-blue: #00d4ff;
-  --c-neon-green: #00ff88;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-darkest);
+  --c-grey: var(--wgs-gray-66);
+  --c-light-grey: var(--wgs-light-grey);
+  --c-border: var(--wgs-border);
+  --c-success: var(--wgs-gray-33);
+  --c-error: var(--c-status-dark-red);
+  --c-warning: var(--c-status-gold);
+  --c-info: var(--wgs-grey);
+  --c-neon-yellow: var(--c-status-yellow);
+  --c-neon-blue: var(--c-status-cyan);
+  --c-neon-green: var(--c-status-bright-green);
 }
 * {
   box-sizing: border-box;
@@ -161,9 +161,9 @@ body {
 }
 .filter-btn {
   padding: 0.6rem 0.4rem;
-  background: #ccc;
-  border: 2px solid #999;
-  color: #000;
+  background: var(--c-border-medium);
+  border: 2px solid var(--wgs-light-grey);
+  color: var(--wgs-black);
   cursor: pointer;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -174,14 +174,14 @@ body {
   font-weight: 500;
 }
 .filter-btn:hover {
-  background: #bbb; /* Tmavší šedá na hover */
-  border-color: #888;
-  color: #000;
+  background: var(--wgs-gray-bb); /* Tmavší šedá na hover */
+  border-color: var(--wgs-gray-88);
+  color: var(--wgs-black);
 }
 .filter-btn.active {
-  background: #000; /* Černé pozadí pro aktivní "Všechny" */
-  color: #fff; /* Bílý text */
-  border: 3px solid #000; /* Tlustší rámeček */
+  background: var(--wgs-black); /* Černé pozadí pro aktivní "Všechny" */
+  color: var(--wgs-white); /* Bílý text */
+  border: 3px solid var(--wgs-black); /* Tlustší rámeček */
   font-weight: 700; /* Tučný font */
 }
 .order-grid {
@@ -191,8 +191,8 @@ body {
   margin-bottom: 2rem;
 }
 .order-box {
-  background: #f8f8f8;
-  border: 2px solid #1a1a1a;
+  background: var(--c-bg-hover);
+  border: 2px solid var(--wgs-darkest);
   border-radius: 8px;
   padding: 0.4rem;
   cursor: pointer;
@@ -204,27 +204,27 @@ body {
 }
 /* Neonovy obrys podle stavu reklamace */
 .order-box.status-bg-wait {
-  border: 2px solid #ffdd00;
+  border: 2px solid var(--c-status-yellow-2);
   box-shadow: 0 0 6px rgba(255, 221, 0, 0.4);
 }
 .order-box.status-bg-open {
-  border: 2px solid #00e5ff;
+  border: 2px solid var(--c-status-cyan-2);
   box-shadow: 0 0 6px rgba(0, 229, 255, 0.4);
 }
 .order-box.status-bg-done {
-  border: 2px solid #39ff14;
+  border: 2px solid var(--wgs-neon-green);
   box-shadow: 0 0 6px rgba(57, 255, 20, 0.4);
 }
 .order-box.status-bg-odlozena {
-  border: 2px solid #9b59b6;
+  border: 2px solid var(--c-status-purple);
   box-shadow: 0 0 6px rgba(155, 89, 182, 0.4);
 }
 .order-box.status-bg-cekame-na-dily {
-  border: 2px solid #999;
+  border: 2px solid var(--wgs-light-grey);
   box-shadow: 0 0 6px rgba(153, 153, 153, 0.4);
 }
 .order-box:hover {
-  background: #ffffff;
+  background: var(--wgs-white);
   transform: translateY(-2px);
 }
 .order-box.status-bg-wait:hover {
@@ -269,7 +269,7 @@ body {
   font-family: "Poppins", sans-serif;
   font-size: 0.6rem;
   font-weight: 500;
-  color: #666666;
+  color: var(--wgs-gray-66);
   opacity: 0.8;
 }
 .order-status {
@@ -277,7 +277,7 @@ body {
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 0 2px #1a1a1a;
+  box-shadow: 0 0 0 2px var(--wgs-darkest);
 }
 .status-wait {
   background: var(--c-neon-yellow);
@@ -289,7 +289,7 @@ body {
   background: var(--c-neon-green);
 }
 .status-cekame-na-dily {
-  background: #999;
+  background: var(--wgs-light-grey);
 }
 .order-body {
   flex: 1;
@@ -299,7 +299,7 @@ body {
 .order-customer {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--wgs-darkest);
   margin-bottom: 0.03rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -307,7 +307,7 @@ body {
 }
 .order-detail {
   font-size: 0.65rem;
-  color: #666666;
+  color: var(--wgs-gray-66);
   line-height: 1.1;
 }
 .order-detail-line {
@@ -344,7 +344,7 @@ body {
 }
 .order-notes-badge.has-unread {
   background: var(--c-error);
-  color: #fff;
+  color: var(--wgs-white);
   animation: notes-pulse 2s ease-in-out infinite;
 }
 @keyframes notes-pulse {
@@ -575,9 +575,9 @@ body {
 }
 .btn {
   padding: 0.9rem 1.8rem;
-  background: #ffffff;
-  color: #1a1a1a;
-  border: 2px solid #1a1a1a;
+  background: var(--wgs-white);
+  color: var(--wgs-darkest);
+  border: 2px solid var(--wgs-darkest);
   cursor: pointer;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -589,36 +589,36 @@ body {
   text-align: center;
 }
 .btn:hover {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--wgs-darkest);
+  color: var(--wgs-white);
 }
 .btn-success {
-  background: #1a1a1a;
-  color: #ffffff;
-  border: 2px solid #1a1a1a;
+  background: var(--wgs-darkest);
+  color: var(--wgs-white);
+  border: 2px solid var(--wgs-darkest);
 }
 .btn-success:hover {
-  background: #ffffff;
-  color: #1a1a1a;
+  background: var(--wgs-white);
+  color: var(--wgs-darkest);
 }
 .btn-danger {
-  background: #ffffff;
-  color: #8b0000;
-  border: 2px solid #8b0000;
+  background: var(--wgs-white);
+  color: var(--c-status-dark-red);
+  border: 2px solid var(--c-status-dark-red);
 }
 .btn-danger:hover {
-  background: #8b0000;
-  color: #ffffff;
+  background: var(--c-status-dark-red);
+  color: var(--wgs-white);
 }
 .btn-secondary {
-  background: #f5f5f5;
-  color: #666666;
-  border: 2px solid #e0e0e0;
+  background: var(--c-success-bg);
+  color: var(--wgs-gray-66);
+  border: 2px solid var(--wgs-border);
 }
 .btn-secondary:hover {
-  background: #e0e0e0;
-  color: #1a1a1a;
-  border-color: #1a1a1a;
+  background: var(--wgs-border);
+  color: var(--wgs-darkest);
+  border-color: var(--wgs-darkest);
 }
 .modal-actions {
   display: flex;
@@ -762,15 +762,15 @@ body {
   display: inline-block;
   margin-top: 0.3rem;
   padding: 0.2rem 0.6rem;
-  background: #111;
-  border: 1px solid #39ff14;
-  color: #fff;
+  background: var(--wgs-near-black);
+  border: 1px solid var(--wgs-neon-green);
+  color: var(--wgs-white);
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 3px;
 }
 .collision-distance-box strong {
-  color: #39ff14;
+  color: var(--wgs-neon-green);
 }
 .collision-context {
   display: flex;
@@ -1335,7 +1335,7 @@ body {
   transition: all 0.2s;
 }
 .btn-stop-record:hover {
-  background: #6b0000;
+  background: var(--c-status-dark-red-2);
 }
 .audio-preview {
   display: none;
@@ -1371,7 +1371,7 @@ body {
   flex-shrink: 0;
 }
 .btn-delete-audio:hover {
-  background: #6b0000;
+  background: var(--c-status-dark-red-2);
   transform: scale(1.1);
 }
 .note-audio {
@@ -1422,7 +1422,7 @@ body {
   font-size: 0.75rem !important;
   font-weight: 500 !important;
   line-height: 1.3 !important;
-  color: #333 !important;
+  color: var(--wgs-gray-33) !important;
 }
 
 .order-customer {
@@ -1591,7 +1591,7 @@ body {
 
 .order-notes-badge.has-unread {
   font-weight: bold;
-  color: #000;
+  color: var(--wgs-black);
 }
 
 .order-notes-badge {
@@ -1679,42 +1679,42 @@ body {
 
 /* Termín návštěvy */
 .order-appointment {
-  background: #e8e8e8;
-  color: #444;
+  background: var(--c-active);
+  color: var(--wgs-gray-44);
 }
 
 /* Stavy reklamace */
 .order-status-text.status-wait {
-  background: #e8e8e8;
-  color: #555;
+  background: var(--c-active);
+  color: var(--wgs-grey);
 }
 .order-status-text.status-open {
-  background: #444;
-  color: #fff;
+  background: var(--wgs-gray-44);
+  color: var(--wgs-white);
 }
 .order-status-text.status-done {
-  background: #111;
-  color: #fff;
+  background: var(--wgs-near-black);
+  color: var(--wgs-white);
 }
 .order-status-text.status-odlozena {
-  background: #888;
-  color: #fff;
+  background: var(--wgs-gray-88);
+  color: var(--wgs-white);
 }
 .order-status-text.status-cekame-na-dily {
-  background: #666;
-  color: #fff;
+  background: var(--wgs-gray-66);
+  color: var(--wgs-white);
 }
 
 /* CN badge varianty */
-.order-cn-text          { background: #444; color: #fff; }
-.order-cn-text.cekame-nd    { background: #666; color: #fff; }
-.order-cn-text.odsouhlasena { background: #222; color: #fff; }
-.order-cn-text.zamitnuta    { background: #dc3545; color: #fff; }
+.order-cn-text          { background: var(--wgs-gray-44); color: var(--wgs-white); }
+.order-cn-text.cekame-nd    { background: var(--wgs-gray-66); color: var(--wgs-white); }
+.order-cn-text.odsouhlasena { background: var(--wgs-dark-grey); color: var(--wgs-white); }
+.order-cn-text.zamitnuta    { background: var(--wgs-danger); color: var(--wgs-white); }
 
 /* CN Zamítnuta - červený rámeček */
 .order-box.cn-zamitnuta {
   background: rgba(220, 53, 69, 0.08);
-  border: 2px solid #dc3545;
+  border: 2px solid var(--wgs-danger);
   box-shadow: 0 0 6px rgba(220, 53, 69, 0.25);
 }
 .order-box.cn-zamitnuta:hover {
@@ -1723,7 +1723,7 @@ body {
 }
 .order-row.cn-zamitnuta {
   background: rgba(220, 53, 69, 0.08);
-  border: 2px solid #dc3545;
+  border: 2px solid var(--wgs-danger);
   box-shadow: 0 0 6px rgba(220, 53, 69, 0.25);
 }
 .order-row.cn-zamitnuta:hover {
@@ -1862,12 +1862,12 @@ a.detail-btn-primary,
 a.detail-btn-primary:visited,
 a.detail-btn-primary:hover,
 a.detail-btn-primary:active {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--wgs-darkest);
+  color: var(--wgs-white);
 }
 
 .detail-btn-primary:hover {
-  background: #333333;
+  background: var(--wgs-gray-33);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -1879,56 +1879,56 @@ a.detail-btn-primary:active {
 
 /* Sekundární tlačítko - šedé */
 .detail-btn-secondary {
-  background: #444444;
-  color: #ffffff;
+  background: var(--wgs-gray-44);
+  color: var(--wgs-white);
 }
 
 .detail-btn-secondary:hover {
-  background: #555555;
+  background: var(--wgs-grey);
 }
 
 /* Terciální tlačítko - průhledné s rámečkem */
 .detail-btn-outline {
   background: transparent;
-  color: #ffffff;
-  border: 2px solid #555555;
+  color: var(--wgs-white);
+  border: 2px solid var(--wgs-grey);
 }
 
 .detail-btn-outline:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: #888888;
+  border-color: var(--wgs-gray-88);
 }
 
 /* Tlačítko Zavřít - tmavě šedé */
 .detail-btn-close {
-  background: #333333;
-  color: #999999;
+  background: var(--wgs-gray-33);
+  color: var(--wgs-light-grey);
   margin-top: 0.5rem;
 }
 
 .detail-btn-close:hover {
-  background: #444444;
-  color: #ffffff;
+  background: var(--wgs-gray-44);
+  color: var(--wgs-white);
 }
 
 /* Speciální tlačítka */
 .detail-btn-success {
-  background: #2a5a2a;
-  color: #ffffff;
+  background: var(--c-status-dark-green);
+  color: var(--wgs-white);
 }
 
 .detail-btn-success:hover {
-  background: #3a7a3a;
+  background: var(--c-status-dark-green-2);
 }
 
 .detail-btn-danger {
-  background: #5a2a2a;
-  color: #ff8888;
+  background: var(--c-status-dark-maroon);
+  color: var(--c-status-pink-red);
 }
 
 .detail-btn-danger:hover {
-  background: #7a3a3a;
-  color: #ffffff;
+  background: var(--c-status-maroon);
+  color: var(--wgs-white);
 }
 
 /* Odkaz jako tlačítko */
@@ -1942,14 +1942,14 @@ a.detail-btn-primary:active {
 /* Separator mezi skupinami tlačítek */
 .detail-btn-separator {
   height: 1px;
-  background: #333333;
+  background: var(--wgs-gray-33);
   margin: 0.5rem 0;
 }
 
 /* Info box nad tlačítky (např. "Zakázka dokončena") */
 .detail-info-box {
-  background: #222222;
-  border: 1px solid #333333;
+  background: var(--wgs-dark-grey);
+  border: 1px solid var(--wgs-gray-33);
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -1959,13 +1959,13 @@ a.detail-btn-primary:active {
 .detail-info-box-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--wgs-white);
   margin-bottom: 0.25rem;
 }
 
 .detail-info-box-subtitle {
   font-size: 0.75rem;
-  color: #888888;
+  color: var(--wgs-gray-88);
 }
 
 /* DESKTOP - větší mezery a padding */
@@ -2038,7 +2038,7 @@ a.detail-btn-primary:active {
   min-height: 48px;
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
-  background: #1a1a1a;
+  background: var(--wgs-darkest);
   color: white;
   box-sizing: border-box;
   text-decoration: none;
@@ -2048,7 +2048,7 @@ a.detail-btn-primary:active {
 }
 
 .contact-action-btn.secondary {
-  background: #444;
+  background: var(--wgs-gray-44);
 }
 
 /* ============================================
@@ -2057,7 +2057,7 @@ a.detail-btn-primary:active {
 .customer-detail-btn {
   width: 100%;
   padding: 0.75rem;
-  background: #333333;
+  background: var(--wgs-gray-33);
   color: white;
   border: none;
   border-radius: 4px;
@@ -2067,11 +2067,11 @@ a.detail-btn-primary:active {
 }
 
 .customer-detail-btn.danger {
-  background: #dc3545;
+  background: var(--wgs-danger);
 }
 
 .customer-detail-btn.danger:hover {
-  background: #c82333;
+  background: var(--wgs-danger-hover);
 }
 
 /* ============================================
@@ -2115,8 +2115,8 @@ a.detail-btn-primary:active {
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.6rem;
-  background: #f8f8f8;
-  border: 1px solid #ddd;
+  background: var(--c-bg-hover);
+  border: 1px solid var(--wgs-gray-dd);
   border-radius: 3px;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
@@ -2124,18 +2124,18 @@ a.detail-btn-primary:active {
 }
 
 .order-row:hover {
-  background: #fff;
+  background: var(--wgs-white);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Barevna vplň radku podle stavu reklamace */
-.order-row.status-bg-wait     { background: rgba(255, 221, 0, 0.12);  border: 2px solid #ffdd00; box-shadow: 0 0 6px rgba(255, 221, 0, 0.4); }
-.order-row.status-bg-open     { background: rgba(0, 229, 255, 0.12);  border: 2px solid #00e5ff; box-shadow: 0 0 6px rgba(0, 229, 255, 0.4); }
-.order-row.status-bg-done     { background: rgba(57, 255, 20, 0.12);  border: 2px solid #39ff14; box-shadow: 0 0 6px rgba(57, 255, 20, 0.4); }
-.order-row.status-bg-odlozena { background: rgba(155, 89, 182, 0.12); border: 2px solid #9b59b6; box-shadow: 0 0 6px rgba(155, 89, 182, 0.4); }
-.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.12); border: 2px solid #999;   box-shadow: 0 0 6px rgba(153, 153, 153, 0.4); }
-.order-row.ma-cenovou-nabidku { background: rgba(255, 140, 0, 0.12);  border: 2px solid #ff8c00; box-shadow: 0 0 6px rgba(255, 140, 0, 0.4); }
-.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.12);  border: 2px solid #28a745; box-shadow: 0 0 6px rgba(40, 167, 69, 0.4); }
+.order-row.status-bg-wait     { background: rgba(255, 221, 0, 0.12);  border: 2px solid var(--c-status-yellow-2); box-shadow: 0 0 6px rgba(255, 221, 0, 0.4); }
+.order-row.status-bg-open     { background: rgba(0, 229, 255, 0.12);  border: 2px solid var(--c-status-cyan-2); box-shadow: 0 0 6px rgba(0, 229, 255, 0.4); }
+.order-row.status-bg-done     { background: rgba(57, 255, 20, 0.12);  border: 2px solid var(--wgs-neon-green); box-shadow: 0 0 6px rgba(57, 255, 20, 0.4); }
+.order-row.status-bg-odlozena { background: rgba(155, 89, 182, 0.12); border: 2px solid var(--c-status-purple); box-shadow: 0 0 6px rgba(155, 89, 182, 0.4); }
+.order-row.cn-cekame-nd       { background: rgba(153, 153, 153, 0.12); border: 2px solid var(--wgs-light-grey);   box-shadow: 0 0 6px rgba(153, 153, 153, 0.4); }
+.order-row.ma-cenovou-nabidku { background: rgba(255, 140, 0, 0.12);  border: 2px solid var(--c-status-orange); box-shadow: 0 0 6px rgba(255, 140, 0, 0.4); }
+.order-row.cn-odsouhlasena    { background: rgba(40, 167, 69, 0.12);  border: 2px solid var(--wgs-success); box-shadow: 0 0 6px rgba(40, 167, 69, 0.4); }
 
 /* Hover - intenzivnejsi zari a svetlejsi vplň */
 .order-row.status-bg-wait:hover     { background: rgba(255, 221, 0, 0.2);  box-shadow: 0 0 12px rgba(255, 221, 0, 0.7); }
@@ -2147,11 +2147,11 @@ a.detail-btn-primary:active {
 .order-row.cn-odsouhlasena:hover    { background: rgba(40, 167, 69, 0.2);  box-shadow: 0 0 12px rgba(40, 167, 69, 0.7); }
 
 .order-row-dot     { }
-.order-row-id      { font-size: 0.65rem; color: #666; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
-.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.1rem; }
-.order-row-address { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-row-product { font-size: 0.72rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
-.order-row-date    { font-size: 0.65rem; color: #888; text-align: right; }
+.order-row-id      { font-size: 0.65rem; color: var(--wgs-gray-66); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
+.order-row-customer{ font-size: 0.8rem; font-weight: 600; color: var(--wgs-darkest); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.1rem; }
+.order-row-address { font-size: 0.72rem; color: var(--wgs-grey); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-product { font-size: 0.72rem; color: var(--wgs-gray-33); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 0.6rem; }
+.order-row-date    { font-size: 0.65rem; color: var(--wgs-gray-88); text-align: right; }
 .order-row-badge   { display: flex; align-items: center; justify-content: flex-end; overflow: hidden; }
 .order-row-chat    { }
 

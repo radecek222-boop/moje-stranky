@@ -161,7 +161,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px 40px 20px;
     }
@@ -324,10 +324,10 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     }
 
     .clanek-obsah {
-      font-size: 0.95em;
-      line-height: 1.6;
-      color: #333;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #666;
+      font-family: 'Poppins', sans-serif;
     }
 
     .clanek-obsah h2 {
@@ -351,7 +351,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     .clanek-obsah p {
       margin: 0 0 12px 0;
-      text-align: justify;
     }
 
     .clanek-obsah strong {
@@ -419,6 +418,21 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       }
     }
 
+    /* FOTKY VLOŽENÉ MEZI ČLÁNKY */
+    .foto-karta {
+      overflow: hidden;
+      background: #e0e0e0;
+      margin: 0;
+    }
+    .foto-karta picture,
+    .foto-karta img {
+      width: 100%;
+      height: auto;
+      display: block;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
   </style>
 
   <!-- Analytics Tracker -->
@@ -468,11 +482,26 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
         <?php endif; ?>
       </div>
 
-      <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ S INTELIGENTNÍM VYVÁŽENÍM -->
+      <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ S FOTKAMI -->
       <div class="clanky-grid">
         <?php
         // NÁHODNÉ POŘADÍ ČLÁNKŮ pro SEO (stránka vypadá aktivně)
         shuffle($articles);
+
+        // Fotky do levého sloupce (4 ks)
+        $fotkyLevy = [
+            ['webp' => 'assets/img/herman-image01.webp', 'jpg' => 'assets/img/herman-image01.jpg', 'alt' => 'White Glove Service – servis luxusního nábytku Natuzzi'],
+            ['webp' => 'assets/img/herman-image03.webp', 'jpg' => 'assets/img/herman-image03.jpg', 'alt' => 'Servis sedacích souprav Natuzzi'],
+            ['webp' => 'assets/img/herman-image05.webp', 'jpg' => 'assets/img/herman-image05.jpg', 'alt' => 'Renovace kožených povrchů'],
+            ['webp' => 'assets/img/index-2.webp', 'jpg' => 'assets/img/index-2.webp', 'alt' => 'WGS – prémiový servis nábytku'],
+        ];
+
+        // Fotky do pravého sloupce (3 ks)
+        $fotkyPravy = [
+            ['webp' => 'assets/img/herman-image02.webp', 'jpg' => 'assets/img/herman-image02.jpg', 'alt' => 'Profesionální oprava čalounění'],
+            ['webp' => 'assets/img/herman-image04.webp', 'jpg' => 'assets/img/herman-image04.jpg', 'alt' => 'Oprava kožené sedačky'],
+            ['webp' => 'assets/img/natuzzi-hero.webp', 'jpg' => 'assets/img/natuzzi-hero.webp', 'alt' => 'Natuzzi – autorizovaný servis'],
+        ];
 
         // Rozdělit na 2 sloupce střídavě (lichý/sudý)
         $levySloupec = [];
@@ -486,10 +515,27 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
             }
         }
 
+        // Pomocná funkce pro vykreslení fotky
+        function renderFotka(array $fotka): string {
+            $webp = htmlspecialchars($fotka['webp']);
+            $jpg  = htmlspecialchars($fotka['jpg']);
+            $alt  = htmlspecialchars($fotka['alt']);
+            return "
+            <div class=\"foto-karta\">
+              <picture>
+                <source srcset=\"{$webp}\" type=\"image/webp\">
+                <img src=\"{$jpg}\" alt=\"{$alt}\" loading=\"lazy\">
+              </picture>
+            </div>";
+        }
+
         // Zobrazit oba sloupce
         ?>
         <div class="column-left">
-          <?php foreach ($levySloupec as $clanek): ?>
+          <?php
+          $fotkaIndexLevy = 0;
+          foreach ($levySloupec as $pozice => $clanek):
+          ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
                 <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
@@ -500,11 +546,20 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
                 <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
               </div>
             </div>
-          <?php endforeach; ?>
+            <?php
+            // Vložit fotku po každém článku (pokud zbývají fotky)
+            if (isset($fotkyLevy[$fotkaIndexLevy])) {
+                echo renderFotka($fotkyLevy[$fotkaIndexLevy]);
+                $fotkaIndexLevy++;
+            }
+          endforeach; ?>
         </div>
 
         <div class="column-right">
-          <?php foreach ($pravySloupec as $clanek): ?>
+          <?php
+          $fotkaIndexPravy = 0;
+          foreach ($pravySloupec as $pozice => $clanek):
+          ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
                 <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
@@ -515,7 +570,13 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
                 <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
               </div>
             </div>
-          <?php endforeach; ?>
+            <?php
+            // Vložit fotku po každém článku (pokud zbývají fotky)
+            if (isset($fotkyPravy[$fotkaIndexPravy])) {
+                echo renderFotka($fotkyPravy[$fotkaIndexPravy]);
+                $fotkaIndexPravy++;
+            }
+          endforeach; ?>
         </div>
       </div>
 
@@ -540,6 +601,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
   </div>
 </section>
+
 </main>
 
 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
@@ -1126,6 +1188,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
 <?php renderHeatmapTracker(); ?>
 <script src="assets/js/page-transitions.min.js" defer></script>
+
 </body>
 </html>
 

@@ -602,7 +602,7 @@ try {
                         Vybráno: <strong id="selected-email-count">0</strong>
                     </span>
                 </div>
-                <button id="resend-emails-btn" onclick="resendVybraneEmaily()" disabled
+                <button id="resend-emails-btn" data-action="resendVybraneEmaily" disabled
                         style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;">
                     Znovu odeslat vybrané
                 </button>

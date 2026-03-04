@@ -122,6 +122,6 @@ try {
     sendJsonError('Chyba databáze při ukládání změn');
 } catch (Exception $e) {
     error_log("Error in uprav_odkaz_aktuality.php: " . $e->getMessage());
-    sendJsonError('Chyba při zpracování požadavku: ' . $e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 }
 ?>

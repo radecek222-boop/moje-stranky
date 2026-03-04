@@ -1,69 +1,89 @@
 # WGS Service - Robots.txt
 # https://www.robotstxt.org/
-# Aktualizovano: 2025-11-24
+# Aktualizovano: 2026-03-04
 
 # === GOOGLEBOT ===
 User-agent: Googlebot
 Allow: /
-Allow: /index.php
-Allow: /cenik.php
-Allow: /novareklamace.php
-Allow: /aktuality.php
-Allow: /psa-kalkulator.php
-Allow: /psa.php
-Allow: /gdpr.php
+Allow: /cenik
+Allow: /novareklamace
+Allow: /aktuality
+Allow: /nasesluzby
+Allow: /onas
+Allow: /oprava-sedacky
+Allow: /oprava-kresla
+Allow: /servis-natuzzi
+Allow: /pozarucni-servis
+Allow: /neuznana-reklamace
+Allow: /psa-kalkulator
+Allow: /psa
+Allow: /gdpr
 Crawl-delay: 5
 
 # === SEZNAMBOT (Seznam.cz) ===
 User-agent: SeznamBot
 Allow: /
-Allow: /index.php
-Allow: /cenik.php
-Allow: /novareklamace.php
-Allow: /aktuality.php
-Allow: /psa-kalkulator.php
-Allow: /psa.php
-Allow: /gdpr.php
+Allow: /cenik
+Allow: /novareklamace
+Allow: /aktuality
+Allow: /nasesluzby
+Allow: /onas
+Allow: /oprava-sedacky
+Allow: /oprava-kresla
+Allow: /servis-natuzzi
+Allow: /pozarucni-servis
+Allow: /neuznana-reklamace
+Allow: /psa-kalkulator
+Allow: /psa
+Allow: /gdpr
 Crawl-delay: 5
 
 # === BINGBOT ===
 User-agent: bingbot
 Allow: /
-Allow: /index.php
-Allow: /cenik.php
-Allow: /novareklamace.php
-Allow: /aktuality.php
+Allow: /cenik
+Allow: /novareklamace
+Allow: /aktuality
+Allow: /nasesluzby
+Allow: /onas
+Allow: /oprava-sedacky
+Allow: /oprava-kresla
+Allow: /servis-natuzzi
 Crawl-delay: 5
 
 # === YANDEXBOT ===
 User-agent: YandexBot
 Allow: /
-Allow: /index.php
-Allow: /cenik.php
-Allow: /novareklamace.php
+Allow: /cenik
+Allow: /novareklamace
+Allow: /aktuality
 Crawl-delay: 10
 
 # === VSECHNY OSTATNI BOTY ===
 User-agent: *
 
-# Allow main pages
+# Allow main pages (cisté URL bez .php - .htaccess presmerovava)
 Allow: /
-Allow: /index.php
-Allow: /cenik.php
-Allow: /novareklamace.php
-Allow: /aktuality.php
-Allow: /psa-kalkulator.php
-Allow: /psa.php
-Allow: /gdpr.php
-Allow: /reklamace.php
-Allow: /seznam.php
-Allow: /protokol.php
+Allow: /cenik
+Allow: /novareklamace
+Allow: /aktuality
+Allow: /nasesluzby
+Allow: /onas
+Allow: /oprava-sedacky
+Allow: /oprava-kresla
+Allow: /servis-natuzzi
+Allow: /pozarucni-servis
+Allow: /neuznana-reklamace
+Allow: /psa-kalkulator
+Allow: /psa
+Allow: /gdpr
 
 # Block all API endpoints
 Disallow: /api/
 
 # Block admin areas
 Disallow: /admin*
+Disallow: /audit_report.php
 Disallow: /login.php
 Disallow: /logout.php
 

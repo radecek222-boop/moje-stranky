@@ -38,6 +38,17 @@ require_once INCLUDES_PATH . '/company_config.php';  // Firemní kontakty - sing
 // Load advanced error handler (with detailed error reporting)
 require_once INCLUDES_PATH . '/error_handler.php';
 
+// Sentry monitoring - aktivní pouze pokud je nastaven SENTRY_DSN v .env
+// Neovlivňuje existující error_handler.php (pouze register_shutdown_function)
+if (function_exists('getEnvValue')) {
+    $sentryDsn = getEnvValue('SENTRY_DSN');
+    if ($sentryDsn && str_starts_with($sentryDsn, 'https://')) {
+        require_once INCLUDES_PATH . '/sentry_handler.php';
+        inicializovatSentry($sentryDsn);
+    }
+    unset($sentryDsn);
+}
+
 // Set error reporting based on environment
 if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     error_reporting(E_ALL);
@@ -207,6 +218,31 @@ if (session_status() === PHP_SESSION_NONE) {
         require_once __DIR__ . '/includes/remember_me_handler.php';
         handleRememberMeLogin();
     }
+}
+
+// ============================================================
+// MULTI-TENANT: Inicializace tenant kontextu
+// Aktivní pouze pokud byl spuštěn migrace_multi_tenant.php
+// ============================================================
+require_once INCLUDES_PATH . '/TenantManager.php';
+if (function_exists('getDbConnection')) {
+    try {
+        $pdo = getDbConnection();
+        TenantManager::getInstance()->inicializovat($pdo);
+    } catch (Exception $e) {
+        // Tenant tabulka neexistuje → výchozí tenant ID=1, bez přerušení
+        error_log('TenantManager init přeskočen: ' . $e->getMessage());
+    }
+    unset($pdo);
+}
+
+/**
+ * Vrátí aktuální tenant ID (shortcut pro TenantManager::getInstance()->getTenantId())
+ * Výchozí hodnota 1 zajišťuje zpětnou kompatibilitu před migrací.
+ */
+function tenantId(): int
+{
+    return TenantManager::getInstance()->getTenantId();
 }
 
 // Helper function to include files from different directories

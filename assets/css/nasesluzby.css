@@ -1,10 +1,10 @@
 :root {
-  --c-bg: #f5f5f5;
-  --c-white: #ffffff;
-  --c-black: #000000;
-  --c-grey: #666666;
-  --c-light-grey: #999999;
-  --c-border: #e0e0e0;
+  --c-bg: var(--c-success-bg);
+  --c-white: var(--wgs-white);
+  --c-black: var(--wgs-black);
+  --c-grey: var(--wgs-gray-66);
+  --c-light-grey: var(--wgs-light-grey);
+  --c-border: var(--wgs-border);
 }
 * {
   box-sizing: border-box;
@@ -31,7 +31,7 @@ h6 {
   text-transform: uppercase;
 }
 .top-bar {
-  background: #000000;
+  background: var(--wgs-black);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -155,13 +155,13 @@ h6 {
   text-align: center;
   max-width: 900px;
   padding: 2rem 2rem;
-  color: var(--c-white);
+  color: #ffffff;
 }
 .hero-title {
   font-family: "Poppins", sans-serif;
   font-size: clamp(1.5rem, 3.5vw, 2.5rem);
   font-weight: 600;
-  color: var(--c-white);
+  color: #ffffff;
   margin-bottom: 0.6rem;
   letter-spacing: 0.05em;
   line-height: 1.15;
@@ -193,7 +193,7 @@ h6 {
   padding: 2.5rem 1.5rem;
 }
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 .cta-section .container {
@@ -203,25 +203,26 @@ h6 {
 
 /* Section intro */
 .section-intro {
-  text-align: left;
-  max-width: 100%;
-  margin: 0 0 2rem;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 2rem;
 }
 .section-title {
   font-family: "Poppins", sans-serif;
-  font-size: 1.1rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
   font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 0.75rem;
-  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-align: center;
 }
 .section-text,
 .section-description {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--c-grey);
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
 
 /* Services grid */
@@ -232,14 +233,14 @@ h6 {
   margin-bottom: 2rem;
 }
 .service-card {
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
+  background: var(--c-bg-hover);
+  border: 1px solid var(--wgs-gray-e5);
   padding: 1rem 1.25rem;
   border-radius: 4px;
   transition: border-color 0.2s ease;
 }
 .service-card:hover {
-  border-color: #000;
+  border-color: var(--wgs-black);
 }
 .service-title {
   font-family: "Poppins", sans-serif;
@@ -263,7 +264,7 @@ h6 {
 }
 .service-list li {
   font-size: 0.75rem;
-  color: #555;
+  color: var(--wgs-grey);
   padding: 0.25rem 0;
   padding-left: 1rem;
   position: relative;
@@ -273,14 +274,14 @@ h6 {
   content: "•";
   position: absolute;
   left: 0;
-  color: #000;
+  color: var(--wgs-black);
   font-weight: bold;
 }
 
 /* Pricing info */
 .pricing-info {
-  background: #f8f8f8;
-  border: 1px solid #e5e5e5;
+  background: var(--c-bg-hover);
+  border: 1px solid var(--wgs-gray-e5);
   padding: 1.25rem;
   border-radius: 4px;
   margin-bottom: 2rem;
@@ -300,17 +301,17 @@ h6 {
 .pricing-info li {
   font-size: 0.75rem;
   padding: 0.2rem 0;
-  color: #555;
+  color: var(--wgs-grey);
 }
 .pricing-info li strong {
-  color: #000;
+  color: var(--wgs-black);
 }
 .pricing-info p {
   margin: 0;
 }
 .link-cenik {
   font-size: 0.75rem;
-  color: #000;
+  color: var(--wgs-black);
   text-decoration: underline;
 }
 .link-cenik:hover {
@@ -331,28 +332,28 @@ h6 {
   gap: 0.75rem;
 }
 .faq-item {
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
+  background: var(--c-bg-hover);
+  border: 1px solid var(--wgs-gray-e5);
   padding: 0.875rem 1rem;
   border-radius: 4px;
 }
 .faq-question {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #000;
+  color: var(--wgs-black);
   margin-bottom: 0.4rem;
   text-transform: none;
   letter-spacing: 0;
 }
 .faq-answer {
   font-size: 0.75rem;
-  color: #555;
+  color: var(--wgs-grey);
   line-height: 1.5;
   margin: 0;
 }
 /* ========== SEKCE ODKAZŮ NA SLUŽBY ========== */
 .sluzby-odkazy-sekce {
-  background: #f8f8f8;
+  background: var(--c-bg-hover);
   padding: 3rem 1.5rem;
 }
 
@@ -366,7 +367,7 @@ h6 {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 2rem;
-  color: #000;
+  color: var(--wgs-black);
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
@@ -378,18 +379,18 @@ h6 {
 }
 
 .sluzba-odkaz-karta {
-  background: #fff;
+  background: var(--wgs-white);
   padding: 1.25rem 1rem;
   text-decoration: none;
   color: inherit;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--wgs-gray-e5);
   border-radius: 4px;
   transition: all 0.2s ease;
   display: block;
 }
 
 .sluzba-odkaz-karta:hover {
-  border-color: #000;
+  border-color: var(--wgs-black);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -397,13 +398,13 @@ h6 {
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
-  color: #000;
+  color: var(--wgs-black);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .sluzba-odkaz-karta p {
-  color: #666;
+  color: var(--wgs-gray-66);
   font-size: 0.8rem;
   line-height: 1.4;
   margin: 0;
@@ -460,11 +461,11 @@ h6 {
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #ffffff !important;
+  color: var(--wgs-white) !important;
 }
 .cta-text {
   font-size: 0.8rem;
-  color: #ccc !important;
+  color: var(--c-border-medium) !important;
   margin-bottom: 1rem;
   max-width: 500px;
   margin-left: auto;
@@ -474,8 +475,8 @@ h6 {
 .cta-button {
   display: inline-block;
   padding: 0.6rem 2rem;
-  background: #ffffff !important;
-  color: #000000 !important;
+  background: var(--wgs-white) !important;
+  color: var(--wgs-black) !important;
   text-decoration: none;
   font-family: "Poppins", sans-serif;
   font-size: 0.75rem;
@@ -488,7 +489,7 @@ h6 {
   cursor: pointer;
 }
 .cta-button:hover {
-  background: #f0f0f0 !important;
+  background: var(--wgs-gray-f0) !important;
   transform: translateY(-1px);
 }
 /* Responsivní grid - 2 sloupce na desktopu, 1 na mobilu */
@@ -517,7 +518,7 @@ h6 {
     right: -260px;
     width: 250px;
     height: calc(100vh - 73px);
-    background: #000000;
+    background: var(--wgs-black);
     flex-direction: column;
     gap: 0;
     padding: 1rem 0;
@@ -628,7 +629,7 @@ h6 {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #ffffff;
+  color: var(--wgs-white);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -640,7 +641,7 @@ h6 {
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.6;
-  color: #e0e0e0;
+  color: var(--wgs-border);
 }
 .footer-text strong {
   color: var(--c-white);

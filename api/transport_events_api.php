@@ -441,7 +441,7 @@ try {
 
 } catch (PDOException $e) {
     error_log("Transport Events API Error: " . $e->getMessage());
-    sendJsonError('Chyba databaze: ' . $e->getMessage());
+    sendJsonError('Chyba při zpracování požadavku', 500);
 } catch (Exception $e) {
     error_log("Transport Events API Error: " . $e->getMessage());
     sendJsonError('Chyba serveru');

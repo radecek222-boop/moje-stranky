@@ -1694,12 +1694,12 @@ async function zobrazDetailUzivatele(userId) {
             </div>
 
             <!-- Status a akce -->
-            <div style="padding: 1rem; background: #222; border-radius: 8px; border: 1px solid ${user.status === 'active' ? '#333' : '#dc3545'};">
+            <div style="padding: 1rem; background: #222; border-radius: 8px; border: 1px solid ${user.status === 'active' ? 'var(--wgs-gray-33)' : 'var(--wgs-danger)'};">
               <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Stav účtu</h3>
 
               <div style="margin-bottom: 1rem; color: #ccc;">
                 <strong>Aktuální stav:</strong>
-                <span style="font-weight: bold; color: ${user.status === 'active' ? '#39ff14' : '#dc3545'};">
+                <span style="font-weight: bold; color: ${user.status === 'active' ? 'var(--wgs-neon-green)' : 'var(--wgs-danger)'};">
                   ${user.status === 'active' ? 'AKTIVNÍ' : 'NEAKTIVNÍ'}
                 </span>
               </div>
@@ -1716,7 +1716,7 @@ async function zobrazDetailUzivatele(userId) {
                 </div>
               ` : ''}
 
-              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc3545' : '#333'}; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? 'var(--wgs-danger)' : 'var(--wgs-gray-33)'}; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
                 ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>

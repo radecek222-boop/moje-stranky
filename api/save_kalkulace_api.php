@@ -9,6 +9,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -25,15 +26,14 @@ if (!$userId && !$isAdmin) {
     sendJsonError('Uživatel není přihlášen', 401);
 }
 
-// Rate limiting - DOČASNĚ VYPNUTO PRO TESTOVÁNÍ
-// TODO: Zapnout po testování!
-// $rateLimiter = new RateLimiter($pdo);
-// if (!$rateLimiter->checkLimit('save_kalkulace', $_SERVER['REMOTE_ADDR'], 30, 3600)) {
-//     sendJsonError('Příliš mnoho požadavků', 429);
-// }
+// Rate limiting - max 30 uložení kalkulace za hodinu
+$pdo = getDbConnection();
+$rateLimiter = new RateLimiter($pdo);
+if (!$rateLimiter->checkLimit('save_kalkulace', $_SERVER['REMOTE_ADDR'], 30, 3600)) {
+    sendJsonError('Příliš mnoho požadavků', 429);
+}
 
 try {
-    $pdo = getDbConnection();
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Získat parametry

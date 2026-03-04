@@ -63,7 +63,7 @@
   }
 
   .cc-radek:active {
-    background: #e8e8e8;
+    background: var(--c-active);
   }
 
   .cc-radek:hover {
@@ -315,7 +315,7 @@
   }
 
   .cc-radek:active {
-    background: #e8e8e8;
+    background: var(--c-active);
     transition: background 0.1s ease;
   }
 

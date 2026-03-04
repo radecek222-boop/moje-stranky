@@ -817,7 +817,7 @@ async function showEmployeeSelector() {
         ${allAvailable.map(emp => {
           const isAlreadyAdded = currentIds.includes(emp.id);
           return `
-            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid #444; border-radius: 4px; cursor: pointer; background: ${isAlreadyAdded ? '#2a2a2a' : '#222'}; ${isAlreadyAdded ? 'opacity: 0.5;' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
+            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid #444; border-radius: 4px; cursor: pointer; background: ${isAlreadyAdded ? 'var(--wgs-gray-2a)' : 'var(--wgs-dark-grey)'}; ${isAlreadyAdded ? 'opacity: 0.5;' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
               <input type="checkbox"
                      name="selectedEmployee"
                      value="${emp.id}"
@@ -1712,8 +1712,8 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         text: qrText,
         width: size,
         height: size,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        colorDark: 'var(--wgs-black)',
+        colorLight: 'var(--wgs-white)',
         correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
