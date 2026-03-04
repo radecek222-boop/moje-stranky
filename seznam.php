@@ -2448,9 +2448,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       case 'showPhotoFullscreen': {
-        const fotoSrc = button.getAttribute('data-src') || button.src;
+        const fotoSrc = button.getAttribute('data-url') || button.getAttribute('data-src') || button.src;
         if (fotoSrc && typeof showPhotoFullscreen === 'function') {
-          showPhotoFullscreen(fotoSrc);
+          showPhotoFullscreen(fotoSrc, button);
         }
         break;
       }

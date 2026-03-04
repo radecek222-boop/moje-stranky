@@ -3574,27 +3574,92 @@ function zobrazFormularNahraniPdf(claimId, onUspech) {
   }, 100);
 }
 
-function showPhotoFullscreen(photoUrl) {
+function showPhotoFullscreen(photoUrl, zdrojovyElement) {
+  // Sestavit seznam všech fotek ze stejné galerie
+  let vsechnyFotky = [photoUrl];
+  let aktualniIndex = 0;
+
+  if (zdrojovyElement) {
+    const rodic = zdrojovyElement.closest('.foto-wrapper')?.parentElement;
+    if (rodic) {
+      const imgs = Array.from(rodic.querySelectorAll('img[data-action="showPhotoFullscreen"]'));
+      if (imgs.length > 1) {
+        vsechnyFotky = imgs.map(i => i.getAttribute('data-url') || i.src);
+        aktualniIndex = imgs.indexOf(zdrojovyElement);
+        if (aktualniIndex < 0) aktualniIndex = 0;
+      }
+    }
+  }
+
   const overlay = document.createElement('div');
-  // z-index 10010 - vyšší než detailOverlay (10002)
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10010; display: flex; align-items: center; justify-content: center; cursor: pointer;';
-  overlay.onclick = () => overlay.remove();
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10010;display:flex;align-items:center;justify-content:center;';
 
   const img = document.createElement('img');
   img.alt = 'Zvětšená fotka reklamace';
-  img.src = photoUrl;
-  img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 4px;';
+  img.src = vsechnyFotky[aktualniIndex];
+  img.style.cssText = 'max-width:90%;max-height:90%;object-fit:contain;border-radius:4px;user-select:none;';
 
-  // Zavřít klávesou Escape
-  const escHandler = (e) => {
-    if (e.key === 'Escape') {
-      overlay.remove();
-      document.removeEventListener('keydown', escHandler);
-    }
+  // Počítadlo fotek (jen pokud víc než 1)
+  const pocitadlo = document.createElement('div');
+  pocitadlo.style.cssText = 'position:absolute;top:1rem;left:50%;transform:translateX(-50%);color:#fff;font-size:0.9rem;opacity:0.7;pointer-events:none;';
+  const aktualizujPocitadlo = () => {
+    pocitadlo.textContent = vsechnyFotky.length > 1 ? `${aktualniIndex + 1} / ${vsechnyFotky.length}` : '';
   };
-  document.addEventListener('keydown', escHandler);
+  aktualizujPocitadlo();
 
+  const prejitNa = (novyIndex) => {
+    aktualniIndex = (novyIndex + vsechnyFotky.length) % vsechnyFotky.length;
+    img.src = vsechnyFotky[aktualniIndex];
+    aktualizujPocitadlo();
+  };
+
+  // Tlačítko zavřít
+  const btnZavrit = document.createElement('button');
+  btnZavrit.textContent = 'x';
+  btnZavrit.style.cssText = 'position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;opacity:0.7;padding:0.25rem 0.5rem;line-height:1;';
+  btnZavrit.onclick = (e) => { e.stopPropagation(); zavrit(); };
+
+  // Šipky navigace (jen pokud víc než 1 fotka)
+  const tlacitkoSipky = (text, smer) => {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    btn.style.cssText = `position:absolute;top:50%;${smer}:1rem;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:1.8rem;cursor:pointer;padding:0.5rem 0.9rem;border-radius:4px;line-height:1;user-select:none;`;
+    btn.onmouseenter = () => { btn.style.background = 'rgba(255,255,255,0.25)'; };
+    btn.onmouseleave = () => { btn.style.background = 'rgba(255,255,255,0.1)'; };
+    return btn;
+  };
+
+  let btnPrev = null, btnNext = null;
+  if (vsechnyFotky.length > 1) {
+    btnPrev = tlacitkoSipky('\u2039', 'left');
+    btnPrev.onclick = (e) => { e.stopPropagation(); prejitNa(aktualniIndex - 1); };
+
+    btnNext = tlacitkoSipky('\u203a', 'right');
+    btnNext.onclick = (e) => { e.stopPropagation(); prejitNa(aktualniIndex + 1); };
+  }
+
+  // Klik na pozadí zavře
+  overlay.onclick = (e) => {
+    if (e.target === overlay) zavrit();
+  };
+
+  const zavrit = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', klavesyHandler);
+  };
+
+  const klavesyHandler = (e) => {
+    if (e.key === 'Escape') { zavrit(); }
+    else if (e.key === 'ArrowLeft' && vsechnyFotky.length > 1) { prejitNa(aktualniIndex - 1); }
+    else if (e.key === 'ArrowRight' && vsechnyFotky.length > 1) { prejitNa(aktualniIndex + 1); }
+  };
+  document.addEventListener('keydown', klavesyHandler);
+
+  overlay.appendChild(pocitadlo);
   overlay.appendChild(img);
+  overlay.appendChild(btnZavrit);
+  if (btnPrev) overlay.appendChild(btnPrev);
+  if (btnNext) overlay.appendChild(btnNext);
   document.body.appendChild(overlay);
 }
 
