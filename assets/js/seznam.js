@@ -785,32 +785,8 @@ async function renderOrders(items = null) {
     return;
   }
 
-  // Načíst unread counts pro všechny reklamace najednou
-  let unreadCountsMap = {};
-  try {
-    const response = await fetch('/api/notes_api.php?action=get_unread_counts');
-    const data = await response.json();
-    if (data.status === 'success') {
-      unreadCountsMap = data.unread_counts || {};
-    }
-  } catch (e) {
-    logger.warn('Nepodařilo se načíst unread counts:', e);
-  }
-
-  // Načíst emaily zákazníků s cenovou nabídkou (CN) včetně stavů
-  try {
-    const cnResponse = await fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
-    const cnData = await cnResponse.json();
-    if (cnData.status === 'success') {
-      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
-      STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
-    }
-  } catch (e) {
-    logger.warn('Nepodařilo se načíst emaily s CN:', e);
-  }
+  // Použít CACHED data pro okamžitý render (žádný await před vykreslením!)
+  let unreadCountsMap = window.UNREAD_COUNTS_MAP || {};
 
   // Aktualizovat počet POZ (mimozáruční opravy + zákazníci s CN)
   const countPozEl = document.getElementById('count-poz');
@@ -1019,6 +995,61 @@ async function renderOrders(items = null) {
 
   // Uložit unreadCountsMap pro filtrování
   window.UNREAD_COUNTS_MAP = unreadCountsMap;
+
+  // Načíst čerstvá data NA POZADÍ — neblokuje render gridu
+  const _filteredSnapshot = filtered;
+  const _itemsSnapshot = items;
+  Promise.all([
+    fetch('/api/notes_api.php?action=get_unread_counts').then(r => r.json()).catch(() => null),
+    fetch(`/api/nabidka_api.php?action=emaily_s_nabidkou&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(r => r.json()).catch(() => null)
+  ]).then(([unreadData, cnData]) => {
+    let novyUnreadMap = window.UNREAD_COUNTS_MAP || {};
+    if (unreadData?.status === 'success') {
+      novyUnreadMap = unreadData.unread_counts || {};
+      window.UNREAD_COUNTS_MAP = novyUnreadMap;
+    }
+    if (cnData?.status === 'success') {
+      EMAILS_S_CN = cnData.data?.emaily || cnData.emaily || [];
+      STAVY_NABIDEK = cnData.data?.stavy || cnData.stavy || {};
+    }
+    // Aktualizovat počty a unread indikátor po načtení čerstvých dat
+    const countPozElBg = document.getElementById('count-poz');
+    if (countPozElBg && _itemsSnapshot) {
+      const stav = _itemsSnapshot.filter(r => {
+        const s = r.stav || 'wait';
+        if (s === 'HOTOVO' || s === 'done') return false;
+        const createdBy = (r.created_by || '').trim();
+        if (!createdBy) return true;
+        const email = (r.email || '').toLowerCase().trim();
+        return email && EMAILS_S_CN.includes(email);
+      }).length;
+      countPozElBg.textContent = `(${stav})`;
+    }
+    const countWaitElBg = document.getElementById('count-wait');
+    if (countWaitElBg && _itemsSnapshot) {
+      const pocet = _itemsSnapshot.filter(r => {
+        const s = r.stav || 'wait';
+        if (s !== 'ČEKÁ' && s !== 'wait') return false;
+        const email = (r.email || '').toLowerCase().trim();
+        return !(email && EMAILS_S_CN.includes(email));
+      }).length;
+      countWaitElBg.textContent = `(${pocet})`;
+    }
+    const totalUnread = Object.values(novyUnreadMap).reduce((sum, c) => sum + c, 0);
+    const unreadInd = document.getElementById('unreadNotesIndicator');
+    const unreadSpan = document.getElementById('unreadNotesCount');
+    if (unreadInd && unreadSpan) {
+      if (totalUnread > 0) {
+        unreadSpan.textContent = totalUnread;
+        unreadInd.style.display = 'block';
+      } else {
+        unreadInd.style.display = 'none';
+      }
+    }
+  }).catch(() => {});
 }
 
 // === FILTROVÁNÍ PODLE NEPŘEČTENÝCH POZNÁMEK ===
