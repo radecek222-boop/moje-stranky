@@ -1244,30 +1244,42 @@ async function showDetail(recordOrId) {
       </div>
     `;
   } else {
-    // Tlacitko pro vytvoreni cenove nabidky - pouze pro adminy
-    const vytvorCNBtn = CURRENT_USER && CURRENT_USER.is_admin ? `
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
-    ` : '';
-
-    // Prodejce nema pristup k technickim funkcim (zahajit navstevu, naplanovat termin, kontaktovat)
+    const jeAdminElse = CURRENT_USER && CURRENT_USER.is_admin;
     const jeProdejceElse = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
-    // Tlacitka pro techniky a adminy (ne pro prodejce)
+    // Vytvořit CN — pouze admin
+    const vytvorCNBtn = jeAdminElse ? `
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #28a745; color: white;" data-action="vytvorCenovouNabidku" data-id="${record.id}">Vytvořit CN</button>
+    ` : '';
+
+    // Technické funkce — ne pro prodejce
     const technickaFunkce = !jeProdejceElse ? `
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+    ` : '';
+
+    // Tisk zakázky — admin a prodejce
+    const tiskBtn = (jeAdminElse || jeProdejceElse) ? `
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisk zakázky</button>
+    ` : '';
+
+    // QR Platba — ne pro prodejce, předposlední
+    const qrPlatbaBtn = !jeProdejceElse ? `
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <button class="btn" style="width: 100%; padding: 0.3rem 0.75rem; font-size: 0.75rem; background: transparent; color: #aaa; text-decoration: underline; border: none; cursor: pointer;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${vytvorCNBtn}
         ${technickaFunkce}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #555; color: white;" onclick="window.open('tisk.php?id=${record.id}','_blank')">Tisknout výtisk</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="openGalerie" data-id="${record.id}">Galerie</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF</button>
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        ${tiskBtn}
+        ${qrPlatbaBtn}
+        <button class="btn" style="width: 100%; padding: 0.4rem 0.75rem; min-height: 34px; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -5886,6 +5898,51 @@ async function zalozitZnovu(reklamaceId) {
 
 // Export do window
 window.zalozitZnovu = zalozitZnovu;
+
+// ==========================================
+// GALERIE — fototéka zakázky
+// ==========================================
+function openGalerie(id) {
+  const zaznam = WGS_DATA_CACHE[id] || CURRENT_RECORD;
+  if (!zaznam) return;
+
+  const fotky = (zaznam.photos || []).filter(f => f && (f.url || f.path || f.src));
+
+  if (fotky.length === 0) {
+    ModalManager.show(`
+      <div style="padding: 2rem; text-align: center; color: #999; font-size: 0.9rem;">
+        Žádné fotografie k této zakázce.
+      </div>
+    `);
+    return;
+  }
+
+  const radky = fotky.map((f, idx) => {
+    const src = f.url || f.path || f.src || '';
+    const popis = f.popis || f.description || f.caption || '';
+    return `
+      <div style="break-inside: avoid; margin-bottom: 0.75rem;">
+        <img src="${src}" alt="${popis || 'Fotografie ' + (idx + 1)}"
+             style="width: 100%; border-radius: 4px; cursor: pointer; display: block;"
+             data-action="showPhotoFullscreen" data-src="${src}">
+        ${popis ? `<div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">${popis}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  ModalManager.show(`
+    <div style="padding: 1rem;">
+      <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 1rem; text-align: center;">
+        Galerie · ${fotky.length} ${fotky.length === 1 ? 'fotografie' : (fotky.length < 5 ? 'fotografie' : 'fotografií')}
+      </div>
+      <div style="column-count: 2; column-gap: 0.5rem;">
+        ${radky}
+      </div>
+      <button class="btn" style="width: 100%; margin-top: 1rem; padding: 0.4rem; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+    </div>
+  `);
+}
+window.openGalerie = openGalerie;
 
 // ==========================================
 // HROMADNÉ AKCE (U8)
