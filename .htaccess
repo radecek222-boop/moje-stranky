@@ -31,6 +31,23 @@
     RewriteRule ^ - [L]
 
     # ======================================
+    # CENTRÁLNÍ ROUTER - parametrizované čisté URL
+    # Musí být PŘED obecnými clean URL pravidly
+    # ======================================
+
+    # /r/{cislo}     → zkrácené linky na reklamace
+    RewriteRule ^r(/.*)?$ router.php [L,QSA]
+
+    # /qr/{cislo}    → QR code redirecty s logováním
+    RewriteRule ^qr(/.*)?$ router.php [L,QSA]
+
+    # /zdravi        → health check endpoint
+    RewriteRule ^zdravi$ router.php [L,QSA]
+
+    # /api/v2/*      → nová verze API přes router
+    RewriteRule ^api/v2(/.*)?$ router.php [L,QSA]
+
+    # ======================================
     # Clean URLs - Remove .php extension
     # ======================================
 
