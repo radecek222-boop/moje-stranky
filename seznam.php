@@ -1089,6 +1089,33 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   height: 0 !important;
 }
 
+/* Tenký šedý rámeček pro všechny karty i řádky (přepisuje neonové rámečky) */
+.order-box,
+.order-box.status-bg-wait,
+.order-box.status-bg-open,
+.order-box.status-bg-done,
+.order-box.status-bg-odlozena,
+.order-box.status-bg-cekame-na-dily,
+.order-box.ma-cenovou-nabidku,
+.order-box.cn-odsouhlasena,
+.order-box.cn-cekame-nd,
+.order-box.cn-zamitnuta {
+  border: 1px solid #cccccc !important;
+  box-shadow: none !important;
+}
+.order-row,
+.order-row.status-bg-wait,
+.order-row.status-bg-open,
+.order-row.status-bg-done,
+.order-row.status-bg-odlozena,
+.order-row.ma-cenovou-nabidku,
+.order-row.cn-odsouhlasena,
+.order-row.cn-cekame-nd,
+.order-row.cn-zamitnuta {
+  border: 1px solid #cccccc !important;
+  box-shadow: none !important;
+}
+
 /* Barevné nádechy karet podle stavu */
 .order-box.status-bg-wait {
   background: rgba(255, 235, 59, 0.20) !important; /* Žlutá nádech - ČEKÁ */
