@@ -418,6 +418,107 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
       }
     }
 
+    /* FOTOGALERIE */
+    .fotogalerie-sekce {
+      background: #f5f5f5;
+      padding: 3rem 2rem;
+    }
+    .fotogalerie-sekce .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .fotogalerie-nadpis {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      font-weight: 600;
+      color: #000;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2rem;
+    }
+    .fotogalerie-mrizka {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .fotogalerie-polozka {
+      overflow: hidden;
+      cursor: pointer;
+      background: #e0e0e0;
+      aspect-ratio: 4 / 3;
+    }
+    .fotogalerie-polozka picture,
+    .fotogalerie-polozka img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .fotogalerie-polozka:hover img {
+      transform: scale(1.04);
+    }
+    @media (max-width: 900px) {
+      .fotogalerie-mrizka { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .fotogalerie-mrizka { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .fotogalerie-sekce { padding: 2rem 1rem; }
+    }
+
+    /* LIGHTBOX */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox-overlay.aktivni {
+      display: flex;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 88vh;
+      object-fit: contain;
+      display: block;
+      cursor: default;
+    }
+    .lightbox-zavrit {
+      position: fixed;
+      top: 1rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      z-index: 100000;
+    }
+    .lightbox-prev,
+    .lightbox-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 3.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 1rem;
+      z-index: 100000;
+      user-select: none;
+    }
+    .lightbox-prev { left: 0.5rem; }
+    .lightbox-next { right: 0.5rem; }
+
   </style>
 
   <!-- Analytics Tracker -->
@@ -539,6 +640,84 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
   </div>
 </section>
+
+<!-- FOTOGALERIE -->
+<section class="fotogalerie-sekce">
+  <div class="container">
+    <h2 class="fotogalerie-nadpis"
+        data-lang-cs="Fotogalerie"
+        data-lang-en="Photo Gallery"
+        data-lang-it="Fotogalleria">Fotogalerie</h2>
+    <div class="fotogalerie-mrizka">
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/herman-image01.webp" type="image/webp">
+          <img src="assets/img/herman-image01.jpg" alt="White Glove Service – servis luxusního nábytku" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/herman-image02.webp" type="image/webp">
+          <img src="assets/img/herman-image02.jpg" alt="Profesionální oprava čalounění" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/herman-image03.webp" type="image/webp">
+          <img src="assets/img/herman-image03.jpg" alt="Servis sedacích souprav Natuzzi" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/herman-image04.webp" type="image/webp">
+          <img src="assets/img/herman-image04.jpg" alt="Oprava kožené sedačky" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/herman-image05.webp" type="image/webp">
+          <img src="assets/img/herman-image05.jpg" alt="Renovace kožených povrchů" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/natuzzi-hero.webp" type="image/webp">
+          <img src="assets/img/natuzzi-hero.webp" alt="Natuzzi – autorizovaný servis" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/index-2.webp" type="image/webp">
+          <img src="assets/img/index-2.webp" alt="WGS – prémiový servis nábytku" loading="lazy">
+        </picture>
+      </div>
+
+      <div class="fotogalerie-polozka" onclick="otevritFoto(this)">
+        <picture>
+          <source srcset="assets/img/index-new.webp" type="image/webp">
+          <img src="assets/img/index-new.webp" alt="White Glove Service – luxusní péče o nábytek" loading="lazy">
+        </picture>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightboxOverlay" onclick="zavritFoto()">
+  <button class="lightbox-zavrit" onclick="zavritFoto()">&#10005;</button>
+  <button class="lightbox-prev" onclick="event.stopPropagation(); posunFoto(-1)">&#8249;</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <button class="lightbox-next" onclick="event.stopPropagation(); posunFoto(1)">&#8250;</button>
+</div>
+
 </main>
 
 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
@@ -1125,6 +1304,57 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
 <?php renderHeatmapTracker(); ?>
 <script src="assets/js/page-transitions.min.js" defer></script>
+
+<script>
+(function() {
+  'use strict';
+
+  const polozky = Array.from(document.querySelectorAll('.fotogalerie-polozka'));
+  const overlay = document.getElementById('lightboxOverlay');
+  const lightboxImg = document.getElementById('lightboxImg');
+  let aktualniIndex = 0;
+
+  function ziskatSrc(polozka) {
+    const img = polozka.querySelector('img');
+    return img ? img.src : '';
+  }
+
+  function ziskatAlt(polozka) {
+    const img = polozka.querySelector('img');
+    return img ? img.alt : '';
+  }
+
+  window.otevritFoto = function(polozka) {
+    aktualniIndex = polozky.indexOf(polozka);
+    lightboxImg.src = ziskatSrc(polozka);
+    lightboxImg.alt = ziskatAlt(polozka);
+    overlay.classList.add('aktivni');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.zavritFoto = function() {
+    overlay.classList.remove('aktivni');
+    lightboxImg.src = '';
+    document.body.style.overflow = '';
+  };
+
+  window.posunFoto = function(smer) {
+    aktualniIndex = (aktualniIndex + smer + polozky.length) % polozky.length;
+    lightboxImg.src = ziskatSrc(polozky[aktualniIndex]);
+    lightboxImg.alt = ziskatAlt(polozky[aktualniIndex]);
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (!overlay.classList.contains('aktivni')) return;
+    if (e.key === 'Escape') window.zavritFoto();
+    if (e.key === 'ArrowLeft') window.posunFoto(-1);
+    if (e.key === 'ArrowRight') window.posunFoto(1);
+  });
+
+  lightboxImg.addEventListener('click', function(e) { e.stopPropagation(); });
+})();
+</script>
+
 </body>
 </html>
 
