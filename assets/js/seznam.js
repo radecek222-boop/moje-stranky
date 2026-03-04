@@ -1160,34 +1160,36 @@ function createCustomerHeader() {
     else aktualniHodnota = 'cn_poslana';
   }
 
-  // Helper: vygeneruje 1 pill tlačítko s neonovou barvou
+  // Helper: vygeneruje 1 pill tlačítko (horní řada stavů)
+  // Stejná výška jako spodní CN řada: padding 0.2rem 0.3rem, border-radius 8px, font 0.6rem/600
   const pill = (stav, label, barva, textAktivni = '#000') => {
     const aktivni = aktualniHodnota === stav;
     const bg      = aktivni ? barva : 'transparent';
     const barvaText = aktivni ? textAktivni : barva;
-    const border  = `1px solid ${barva}`;
-    const glow    = aktivni ? `box-shadow:0 0 8px ${barva}99;` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.25rem 0.3rem;border-radius:10px;font-size:0.65rem;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
+    const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
+  // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
     const aktivni = aktualniHodnota === stav;
-    const barva   = '#aaaaaa';
-    const bg      = aktivni ? barva : 'transparent';
-    const barvaText = aktivni ? '#000' : '#888';
-    const glow    = aktivni ? `box-shadow:0 0 6px #aaaaaa88;` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:1px solid ${aktivni ? barva : '#555'};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const bg      = aktivni ? '#1a1a1a' : '#888';
+    const barvaText = '#fff';
+    const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
+    const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
+    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.2rem 0.3rem;border-radius:8px;font-size:0.6rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
     <div class="stav-workflow" style="margin-top:0.5rem;">
       <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
-        ${pill('wait',          'NOVÁ',           '#ffdd00', '#000')}
-        ${pill('open',          'DOMLUVENÁ',      '#00e5ff', '#000')}
-        ${pill('cekame_na_dily','ČEKÁ DÍLY',      '#888888', '#fff')}
-        ${pill('odlozena',      'ODLOŽENO',       '#9b59b6', '#fff')}
-        ${pill('done',          'HOTOVO',         '#39ff14', '#000')}
+        ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
+        ${pill('open',           'DOML',   '#00e5ff', '#000')}
+        ${pill('cekame_na_dily', 'DÍLY',   '#888888', '#fff')}
+        ${pill('odlozena',       'ODLOŽ',  '#9b59b6', '#fff')}
+        ${pill('done',           'HOTOVO', '#39ff14', '#000')}
       </div>
-      <div style="display:flex;gap:0.2rem;width:100%;justify-content:center;">
+      <div style="display:flex;gap:0.2rem;width:100%;">
         ${pillCN('cn_poslana',      'Poslána CN')}
         ${pillCN('cn_odsouhlasena', 'Odsouhlasena')}
         ${pillCN('cn_cekame_nd',    'Čekáme ND')}
@@ -3993,7 +3995,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('change', (e) => {
-    // Handler pro změnu stavu zakázky (admin dropdown)
+    // Handler pro změnu stavu zakázky (admin dropdown - fallback)
     if (e.target.id === 'zmenaStavuSelect') {
       const novyStav = e.target.value;
       const reklamaceId = e.target.getAttribute('data-id');

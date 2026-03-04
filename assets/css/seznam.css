@@ -1681,6 +1681,18 @@ body {
    STATUS BADGES – jednotná základna
    Všechny badge typy identické: font, velikost, padding
    ===================================================== */
+
+/* === WORKFLOW PILL - sdílený základ pro pill tlačítka (detail zakázky) === */
+.workflow-pill {
+  white-space: nowrap;
+  line-height: 1.4;
+  font-family: 'Poppins', sans-serif;
+  transition: filter 0.15s;
+}
+.workflow-pill:hover {
+  filter: brightness(1.15);
+}
+
 .order-appointment,
 .order-status-text,
 .order-cn-text {
