@@ -90,49 +90,49 @@ $seoStranky = [
         'description' => 'Profesionalni oprava a servis sedacek, kresel, pohovek znacky Natuzzi. Cisteni kozenych i latkovych sedacek. Precalouneni, renovace, reklamace. Oprava moderni sedacky, designove kreslo, rohova sedacka. Autorizovany servis Praha, Brno, cela CR. Tel: +420 725 965 826',
         'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, oprava gauce, servis sedacky, servis nabytku, servis Natuzzi, cisteni sedacky, cisteni kozene sedacky, cisteni latkove sedacky, reklamace sedacky, reklamace nabytku, precalouneni sedacky, renovace sedacky, moderni sedacka, designova sedacka, trendy sedacka, luxusni sedacka, italska sedacka, rohova sedacka, kozena sedacka, latkova sedacka, rozkladaci sedacka, relaxacni kreslo, sedaci souprava, oprava mechanismu, oprava relaxu, cisteni koberce, koberec, polstare, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
         'canonical' => 'https://wgs-service.cz/',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'novareklamace' => [
         'title' => 'Objednat opravu sedacky, kresla, pohovky online | Reklamace Natuzzi | Servis nabytku',
         'description' => 'Objednejte opravu sedacky, kresla nebo pohovky online. Reklamace nabytku Natuzzi. Oprava kozene sedacky, latkove pohovky, designoveho kresla. Cisteni, precalouneni, renovace. Rychle vyrizeni Praha, Brno a okoli.',
         'keywords' => 'objednat opravu sedacky, objednat servis kresla, reklamace Natuzzi, oprava sedacky online, oprava kresla online, oprava pohovky online, servis nabytku online, formular reklamace, objednat cisteni sedacky, objednat precalouneni, moderni sedacka oprava, designove kreslo servis, rohova sedacka oprava, relaxacni kreslo servis, kozena sedacka cisteni, latkova pohovka oprava, Praha, Brno',
         'canonical' => 'https://wgs-service.cz/novareklamace',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'cenik' => [
         'title' => 'Cenik oprav sedacek, kresel, pohovek | Kolik stoji oprava sedacky | Servis Natuzzi ceny',
         'description' => 'Cenik oprav sedacek, kresel a nabytku Natuzzi. Kolik stoji oprava sedacky? Cena cisteni kozene sedacky, precalouneni, oprava mechanismu. Kalkulacka ceny servisu online. Od 110 EUR. Oprava moderni sedacky cena.',
         'keywords' => 'cenik oprava sedacky, kolik stoji oprava sedacky, cena opravy kresla, cenik servis Natuzzi, cena cisteni sedacky, cena precalouneni, cena opravy mechanismu, kalkulacka ceny servisu, oprava kozene sedacky cena, oprava latkove pohovky cena, cenik renovace nabytku, moderni sedacka cena opravy, designove kreslo cenik, rohova sedacka oprava cena, relaxacni kreslo servis cena',
         'canonical' => 'https://wgs-service.cz/cenik',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'seznam' => [
         'title' => 'Prehled reklamaci a servisnich zakazek | Stav opravy sedacky | WGS Natuzzi',
         'description' => 'Prehled servisnich zakazek a reklamaci nabytku Natuzzi. Sledovani stavu opravy sedacek, kresel a pohovek. White Glove Service - profesionalni servis luxusniho nabytku.',
         'keywords' => 'prehled reklamaci, stav opravy sedacky, stav opravy kresla, sledovani servisu, reklamace Natuzzi stav, servisni zakazky, prehled oprav nabytku',
         'canonical' => 'https://wgs-service.cz/seznam',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'protokol' => [
         'title' => 'Servisni protokol opravy nabytku | Dokumentace servisu sedacky | White Glove Service',
         'description' => 'Servisni protokol pro opravy a reklamace nabytku Natuzzi. Dokumentace servisu sedacek, kresel a pohovek. Profesionalni evidence oprav.',
         'keywords' => 'servisni protokol, protokol opravy sedacky, dokumentace servisu, reklamacni protokol Natuzzi, evidence oprav nabytku',
         'canonical' => 'https://wgs-service.cz/protokol',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'gdpr' => [
         'title' => 'Zpracovani osobnich udaju GDPR | White Glove Service',
         'description' => 'Informace o zpracovani osobnich udaju podle GDPR. White Glove Service - servis nabytku Natuzzi.',
         'keywords' => 'GDPR, osobni udaje, ochrana udaju, White Glove Service',
         'canonical' => 'https://wgs-service.cz/gdpr',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'aktuality' => [
         'title' => 'Aktuality Natuzzi | Novinky o luxusnim nabytku | Pece o sedacky a kresla | WGS',
         'description' => 'Denne aktuality o znacce Natuzzi. Novinky o luxusnim italskem nabytku, tipy na peci o kozene sedacky a kresla, showroomy v CR. Jak cistit kozenou sedacku, udrzba luxusniho nabytku, trendy v designu sedacek.',
         'keywords' => 'aktuality Natuzzi, novinky nabytek, luxusni nabytek novinky, pece o kozenou sedacku, jak cistit sedacku, udrzba kozene sedacky, tipy na peci o nabytek, Natuzzi showroom, italsky nabytek aktuality, trendy sedacky, designovy nabytek novinky, kozena sedacka pece, kreslo udrzba, pohovka cisteni, White Glove Service aktuality',
         'canonical' => 'https://wgs-service.cz/aktuality',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     // === NOVE SEO STRANKY PRO ORGANICKE VYHLEDAVANI ===
     'nasesluzby' => [
@@ -140,49 +140,49 @@ $seoStranky = [
         'description' => 'Autorizovany servis sedacek Natuzzi v CR a SR. Opravy kozenych i latkovych sedacek, reklamace, montaz, calouneni, renovace. Spoluprace s prednimi ceskymi prodejci. Tel: +420 725 965 826',
         'keywords' => 'servis Natuzzi, opravy sedacek, reklamace sedacky, montaz sedacky, calouneni, renovace sedacky, oprava kozene sedacky, oprava latkove sedacky, Natuzzi oprava, autorizovany servis',
         'canonical' => 'https://wgs-service.cz/nasesluzby',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'onas' => [
         'title' => 'O nas - White Glove Service | Autorizovany servis Natuzzi | Praha, Brno',
         'description' => 'White Glove Service - autorizovany servisni partner Natuzzi s vice nez 5 letou zkusenosti. Certifikovani technici, originalni dily, garance kvality. Servis po cele CR a SR.',
         'keywords' => 'White Glove Service, WGS, autorizovany servis Natuzzi, servis nabytku Praha, servis nabytku Brno, certifikovani technici, originalni dily Natuzzi',
         'canonical' => 'https://wgs-service.cz/onas',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'pozarucni-servis' => [
         'title' => 'Pozarucni servis sedacky | Mimozarucni oprava nabytku | Servis po zaruce',
         'description' => 'Pozarucni a mimozarucni servis sedacek, kresel a pohovek. Opravime vas nabytek i po skonceni zaruky. Profesionalni oprava, puvodni kvalita, dostupne ceny. Cela CR a SR.',
         'keywords' => 'pozarucni servis, mimozarucni servis, servis po zaruce, oprava po zaruce, pozarucni oprava sedacky, mimozarucni oprava kresla, servis nabytku po zaruce, oprava stare sedacky, renovace sedacky',
         'canonical' => 'https://wgs-service.cz/pozarucni-servis',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'neuznana-reklamace' => [
         'title' => 'Zamítnuta reklamace? | Cenově výhodná oprava nábytku | WGS',
         'description' => 'Reklamace nebyla uznána? Nabízíme profesionální opravu nábytku za férovou cenu. Originální díly Natuzzi, 12měsíční záruka. Diagnostika zdarma.',
         'keywords' => 'oprava nabytku, placena oprava sedacky, oprava po zaruce, oprava Natuzzi, oprava sedacky bez zaruky, servis nabytku',
         'canonical' => 'https://wgs-service.cz/neuznana-reklamace',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'oprava-sedacky' => [
         'title' => 'Oprava sedacky, gauce, pohovky | Profesionalni servis sedacich souprav',
         'description' => 'Profesionalni oprava sedacek, gaucu a pohovek vsech znacek. Opravujeme kozene i latkove sedacky, vymena mechanismu, calouneni, renovace. Svoz z cele CR. Od 205 EUR.',
         'keywords' => 'oprava sedacky, oprava gauce, oprava pohovky, oprava sedaci soupravy, oprava kozene sedacky, oprava latkove sedacky, servis sedacky, renovace sedacky Praha, oprava mechanismu sedacky',
         'canonical' => 'https://wgs-service.cz/oprava-sedacky',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'oprava-kresla' => [
         'title' => 'Oprava kresla | Servis relaxacnich a klasickych kresel | WGS',
         'description' => 'Profesionalni oprava kresel - relaxacnich, klasickych i designovych. Oprava mechanismu, vymena calouneni, renovace kuze. Specializace na Natuzzi. Svoz z cele CR.',
         'keywords' => 'oprava kresla, oprava relaxacniho kresla, servis kresla, oprava mechanismu kresla, renovace kresla, oprava kozeneho kresla, oprava latkoveho kresla, oprava Natuzzi kresla',
         'canonical' => 'https://wgs-service.cz/oprava-kresla',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ],
     'servis-natuzzi' => [
         'title' => 'Servis Natuzzi | Autorizovane opravy a reklamace Natuzzi | WGS',
         'description' => 'Autorizovany servis Natuzzi v Ceske republice a na Slovensku. Opravy, reklamace, montaz a udrzba nabytku Natuzzi Italia, Editions a Softaly. Originalni dily, certifikovani technici.',
         'keywords' => 'servis Natuzzi, Natuzzi servis, Natuzzi oprava, Natuzzi reklamace, autorizovany servis Natuzzi, Natuzzi Italia servis, Natuzzi Editions oprava, Natuzzi Softaly, oprava Natuzzi sedacky',
         'canonical' => 'https://wgs-service.cz/servis-natuzzi',
-        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+        'og_image' => 'https://wgs-service.cz/assets/img/natuzzi-hero.webp'
     ]
 ];
 
@@ -262,7 +262,7 @@ function renderSchemaOrg($stranka = 'index') {
         "url" => "https://wgs-service.cz",
         "telephone" => "+420725965826",
         "email" => WGS_EMAIL_INFO,
-        "image" => "https://wgs-service.cz/assets/img/og-image.png",
+        "image" => "https://wgs-service.cz/assets/img/natuzzi-hero.webp",
         "logo" => "https://wgs-service.cz/icon512.png",
         "priceRange" => "110-500 EUR",
         "currenciesAccepted" => "EUR, CZK",
