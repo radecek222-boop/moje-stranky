@@ -101,6 +101,7 @@ let SELECTED_DATE = null;
 let SELECTED_TIME = null;
 let EMAILS_S_CN = []; // Emaily zákazníků s cenovou nabídkou
 let STAVY_NABIDEK = {}; // Mapa email -> stav nabídky ('potvrzena' nebo 'odeslana')
+let _jeBackgroundRerender = false; // Guard proti vnořenému spuštění background fetchů
 
 // PAGINATION FIX: Tracking pagination state
 let CURRENT_PAGE = 1;
@@ -1004,6 +1005,8 @@ async function renderOrders(items = null) {
   window.UNREAD_COUNTS_MAP = unreadCountsMap;
 
   // Načíst čerstvá data NA POZADÍ — neblokuje render gridu
+  // Guard: nespouštět background fetch pokud jsme už v background re-renderu
+  if (_jeBackgroundRerender) return;
   const _filteredSnapshot = filtered;
   const _itemsSnapshot = items;
   Promise.all([
@@ -1049,7 +1052,9 @@ async function renderOrders(items = null) {
     }
     // Po načtení CN dat překreslit seznam aby karta ukazala správný stav (Odsouhlasena atd.)
     if (cnDataChanged && _itemsSnapshot) {
+      _jeBackgroundRerender = true;
       renderOrders(Utils.filterByUserRole(_itemsSnapshot));
+      _jeBackgroundRerender = false;
     }
 
     const totalUnread = Object.values(novyUnreadMap).reduce((sum, c) => sum + c, 0);
