@@ -1175,8 +1175,26 @@ function createCustomerHeader() {
                   style="cursor:pointer;display:inline-block;border-radius:10px;padding:0.18rem 0.5rem;font-size:0.58rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;transition:all 0.2s;${styl}">${s.text}</span>`;
   }).join('');
 
+  // Druhý řádek — POZ (CN) stavy
+  const cnStavyProVyber = [
+    { hodnota: 'cn_poslana',      text: 'Poslána CN',   barva: '#aaa',    stin: 'rgba(170,170,170,0.4)', textBarva: '#111' },
+    { hodnota: 'cn_odsouhlasena', text: 'Odsouhlasena', barva: '#28a745', stin: 'rgba(40,167,69,0.5)',   textBarva: '#fff' },
+    { hodnota: 'cn_cekame_nd',    text: 'Čekáme ND',    barva: '#888',    stin: 'rgba(136,136,136,0.4)', textBarva: '#fff' },
+    { hodnota: 'cn_zamitnuta',    text: 'Zamítnuta',    barva: '#dc3545', stin: 'rgba(220,53,69,0.5)',   textBarva: '#fff' },
+  ];
+
+  const cnBadgeButtonsHtml = cnStavyProVyber.map(s => {
+    const jeAktivni = aktualniHodnota === s.hodnota;
+    const styl = jeAktivni
+      ? `background:${s.barva};color:${s.textBarva};box-shadow:0 0 8px ${s.stin},0 0 16px ${s.stin};border:1px solid ${s.barva};`
+      : `background:transparent;color:${s.barva};border:1px solid ${s.barva};opacity:0.55;`;
+    return `<span onclick="zmenitStavZakazky('${CURRENT_RECORD.id}','${s.hodnota}','${zakaznikEmail}')"
+                  style="cursor:pointer;display:inline-block;border-radius:10px;padding:0.18rem 0.5rem;font-size:0.58rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;transition:all 0.2s;${styl}">${s.text}</span>`;
+  }).join('');
+
   const stavHtml = isAdmin ? `
     <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.2rem;">${stavBadgeButtonsHtml}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.25rem;padding-top:0.25rem;border-top:1px solid #333;">${cnBadgeButtonsHtml}</div>
   ` : `<span class="order-status-text status-${status.class}" style="font-size:0.65rem;padding:0.18rem 0.5rem;">${status.text}</span>`;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
