@@ -4789,6 +4789,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // Zavřít detail modal
       closeDetail();
 
+      // Překreslit seznam karet aby byl badge vidět ihned (i na mobilu)
+      renderOrders();
+
       // Zobrazit neonový toast (WGSToast pro důležité akce)
       if (typeof WGSToast !== 'undefined') {
         WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });

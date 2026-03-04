@@ -15,6 +15,10 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'seznam.php',
                 'header_label' => 'SEZNAM',
             ],
+            'posudky' => [
+                'href' => 'posudky.php',
+                'header_label' => 'POSUDKY',
+            ],
             'nabidka' => [
                 'href' => 'cenova-nabidka.php',
                 'header_label' => 'CENOVÁ NABÍDKA',
