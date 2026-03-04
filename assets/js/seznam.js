@@ -1243,6 +1243,7 @@ async function showDetail(recordOrId) {
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="openGalerie" data-id="${record.id}">Galerie</button>
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">KNIHOVNA PDF</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
@@ -5845,42 +5846,64 @@ window.zmenitStavZakazky = zmenitStavZakazky;
 // GALERIE — fototéka zakázky
 // ==========================================
 function openGalerie(id) {
-  const zaznam = WGS_DATA_CACHE[id] || CURRENT_RECORD;
-  if (!zaznam) return;
+  const reklamaceId = id || (CURRENT_RECORD && CURRENT_RECORD.id);
+  if (!reklamaceId) return;
 
-  const fotky = (zaznam.photos || []).filter(f => f && (f.url || f.path || f.src));
+  const zaznam = WGS_DATA_CACHE[reklamaceId] || CURRENT_RECORD;
+  const fotky = (zaznam && zaznam.photos || []).filter(f => f && (f.photo_path || f.url || f.path));
 
-  if (fotky.length === 0) {
-    ModalManager.show(`
-      <div style="padding: 2rem; text-align: center; color: #999; font-size: 0.9rem;">
-        Žádné fotografie k této zakázce.
-      </div>
-    `);
-    return;
-  }
-
-  const radky = fotky.map((f, idx) => {
-    const src = f.url || f.path || f.src || '';
-    const popis = f.popis || f.description || f.caption || '';
+  const renderGrid = (seznam) => seznam.map((f, i) => {
+    const photoPath = typeof f === 'object' ? (f.photo_path || f.url || f.path) : f;
+    const photoId   = typeof f === 'object' ? f.id : null;
+    const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
     return `
-      <div style="break-inside: avoid; margin-bottom: 0.75rem;">
-        <img src="${src}" alt="${popis || 'Fotografie ' + (idx + 1)}"
-             style="width: 100%; border-radius: 4px; cursor: pointer; display: block;"
-             data-action="showPhotoFullscreen" data-src="${src}">
-        ${popis ? `<div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">${popis}</div>` : ''}
+      <div class="foto-wrapper" style="position:relative;width:60px;height:60px;flex-shrink:0;">
+        <img src='${photoPath}'
+             style='width:60px;height:60px;object-fit:cover;border:1px solid #444;cursor:pointer;border-radius:4px;'
+             alt='Fotka ${i + 1}'
+             loading="lazy"
+             data-action="showPhotoFullscreen"
+             data-url="${escapedUrl}">
+        ${photoId ? `
+          <button class="foto-delete-btn"
+                  data-action="smazatFotku"
+                  data-photo-id="${photoId}"
+                  data-url="${escapedUrl}"
+                  title="Smazat fotku">x</button>
+        ` : ''}
       </div>
     `;
   }).join('');
 
   ModalManager.show(`
-    <div style="padding: 1rem;">
-      <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 1rem; text-align: center;">
-        Galerie · ${fotky.length} ${fotky.length === 1 ? 'fotografie' : (fotky.length < 5 ? 'fotografie' : 'fotografií')}
+    <div style="padding:1rem;">
+      <div style="background:#1a1a1a;border-radius:6px;padding:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <label style="color:#aaa;font-weight:600;font-size:0.85rem;" id="fototeka-nadpis">Fototeka (${fotky.length})</label>
+          <button type="button"
+                  data-action="otevritVyberFotek"
+                  data-id="${reklamaceId}"
+                  style="background:#333;color:#fff;border:1px solid #555;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.8rem;cursor:pointer;">
+            Přidat fotky
+          </button>
+        </div>
+        <input type="file"
+               id="fototeka-input-${reklamaceId}"
+               accept="image/*"
+               multiple
+               style="display:none;"
+               data-reklamace-id="${reklamaceId}">
+        <div id="fototeka-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
+          ${fotky.length > 0 ? renderGrid(fotky) : `<p style="color:#666;font-size:0.85rem;margin:0;padding:0.5rem 0;">Žádné fotografie</p>`}
+        </div>
+        <div id="fototeka-nahravani" style="display:none;margin-top:0.75rem;padding:0.5rem;background:#222;border-radius:4px;">
+          <p style="color:#aaa;font-size:0.8rem;margin:0;">Nahrávání fotek...</p>
+          <div style="background:#333;height:4px;border-radius:2px;margin-top:0.5rem;overflow:hidden;">
+            <div id="fototeka-progress" style="background:#fff;height:100%;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
       </div>
-      <div style="column-count: 2; column-gap: 0.5rem;">
-        ${radky}
-      </div>
-      <button class="btn" style="width: 100%; margin-top: 1rem; padding: 0.4rem; font-size: 0.78rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
+      <button class="btn" style="width:100%;margin-top:0.75rem;padding:0.4rem;font-size:0.78rem;background:#1a1a1a;color:white;" data-action="closeDetail">Zavřít</button>
     </div>
   `);
 }
