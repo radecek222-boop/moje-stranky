@@ -1311,7 +1311,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         <button class="detail-btn" style="background:#dc3545 !important;color:#fff !important;border:none;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #fff !important; color: #dc3545 !important; border: 1px solid #dc3545 !important; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
@@ -1347,7 +1347,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
-          <button class="detail-btn" style="background: #dc3545; color: #fff; border: none; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
+          <button class="detail-btn" style="background: #fff !important; color: #dc3545 !important; border: 1px solid #dc3545 !important; margin-top: 0.5rem;" data-action="deleteReklamace" data-id="${record.id}">Smazat reklamaci</button>
         ` : ''}
       </div>
     `;
