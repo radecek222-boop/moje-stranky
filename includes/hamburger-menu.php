@@ -229,10 +229,16 @@ if ($isAdmin) {
   white-space: nowrap;
 }
 
-/* ADMIN - neonově zelené písmo v menu */
+/* ADMIN - neonově zelené písmo v menu + menší font pro vejití více položek */
+.hamburger-nav.admin-nav-active {
+  gap: 1.1rem;
+}
+
 .hamburger-nav.admin-nav-active a {
   color: #39ff14 !important;
   text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+  font-size: 0.72rem !important;
+  letter-spacing: 0.04em;
 }
 
 .hamburger-nav.admin-nav-active a:hover {

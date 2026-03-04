@@ -938,10 +938,11 @@ async function renderOrders(items = null) {
     }
 
     // Sdílený badge stavu (používá se v obou šablonách)
-    const stavBadge = appointmentText
-      ? `<span class="order-appointment">${appointmentText}</span>`
-      : ((rec._sms_odeslana || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
-          ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
+    // POSLÁNA SMS má přednost před termínem i ostatními stavy
+    const stavBadge = (rec._sms_odeslana || _smsOdeslaneVRenderu.has(String(rec.id || rec.reklamace_id)))
+      ? `<span class="order-status-text status-poslana-sms">POSLÁNA SMS</span>`
+      : (appointmentText
+          ? `<span class="order-appointment">${appointmentText}</span>`
           : ((rec.je_odlozena == 1 || rec.je_odlozena === true)
               ? `<span class="order-status-text status-odlozena">ODLOŽENO</span>`
               : (status.class === 'cekame-na-dily'

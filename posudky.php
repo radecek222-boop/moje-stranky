@@ -132,7 +132,7 @@ document.querySelectorAll('.veta-kopirovat').forEach(function(tlacitko) {
 
     navigator.clipboard.writeText(veta).then(function() {
       var puvodniText = btn.textContent;
-      btn.textContent = 'Skopirovano';
+      btn.textContent = 'Zkopírováno';
       btn.classList.add('skopirovano');
       setTimeout(function() {
         btn.textContent = puvodniText;
@@ -150,7 +150,7 @@ document.querySelectorAll('.veta-kopirovat').forEach(function(tlacitko) {
       document.body.removeChild(tmp);
 
       var puvodniText = btn.textContent;
-      btn.textContent = 'Skopirovano';
+      btn.textContent = 'Zkopírováno';
       btn.classList.add('skopirovano');
       setTimeout(function() {
         btn.textContent = puvodniText;
