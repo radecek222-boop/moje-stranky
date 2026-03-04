@@ -88,9 +88,9 @@ test.describe('API endpointy - základní dostupnost', () => {
 
     test('debug skripty jsou chráněny (vrací 403)', async ({ page }) => {
         const chraneneNastroje = [
-            '/diagnostika_system.php',
+            '/tools/diagnostika_system.php',
             '/vsechny_tabulky.php',
-            '/debug_geocoding.php',
+            '/tools/debug_geocoding.php',
         ];
 
         for (const url of chraneneNastroje) {

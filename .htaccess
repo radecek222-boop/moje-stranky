@@ -12,6 +12,18 @@
     # ======================================
     RewriteRule ^assets/ - [L]
     RewriteRule ^uploads/ - [L]
+    RewriteRule ^tools/ - [L]
+
+    # ======================================
+    # Přesměrování debug/diagnostika nástrojů do /tools/
+    # (staré záložky → nová umístění)
+    # ======================================
+    RewriteRule ^(debug_[^/]+\.php)$ /tools/$1 [R=301,L]
+    RewriteRule ^(diagnostika_[^/]+\.php)$ /tools/$1 [R=301,L]
+    RewriteRule ^(check_[^/]+\.php)$ /tools/$1 [R=301,L]
+    RewriteRule ^(test_[^/]+\.php)$ /tools/$1 [R=301,L]
+    RewriteRule ^(analyza_[^/]+\.php)$ /tools/$1 [R=301,L]
+    RewriteRule ^(audit_[^/]+\.php)$ /tools/$1 [R=301,L]
 
     # ======================================
     # CRITICAL: Let's Encrypt - MUST be BEFORE Force HTTPS!

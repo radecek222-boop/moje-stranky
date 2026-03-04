@@ -1,0 +1,5 @@
+# /tools/.htaccess
+# Vývojářské nástroje — přístup pouze přihlášeným adminům (kontrola je v každém PHP souboru)
+# Tato složka není určena pro veřejný přístup.
+
+Options -Indexes
