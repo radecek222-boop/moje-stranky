@@ -1,6 +1,6 @@
 # DETAILNÍ AUDIT PROJEKTU: White Glove Service (WGS)
 
-**Datum auditu:** 4. března 2026
+**Datum auditu:** 4. března 2026 (aktualizováno)
 **Auditor:** Nezávislý senior expert (web development, UX/UI, produktový management)
 **Zdroj dat:** Přímá analýza zdrojového kódu projektu
 
@@ -12,30 +12,38 @@
 
 | Metrika | Hodnota |
 |---|---|
-| PHP soubory celkem | 263+ PHP souborů |
-| JavaScript soubory | 49 zdrojových + 49 minified = 98 JS souborů |
-| CSS soubory | 31 zdrojových + 30 minified = 61 CSS souborů |
-| Celkový objem kódu | ~203 000+ řádků |
-| API endpointů | 70 |
+| PHP soubory celkem | 355 PHP souborů |
+| JavaScript soubory | ~54 zdrojových + ~54 minified = 108 JS souborů |
+| CSS soubory | ~31 zdrojových + ~30 minified = 61 CSS souborů |
+| Celkový objem kódu | 206 313 řádků (PHP + JS + CSS) |
+| PHP řádků | 132 383 |
+| JavaScript řádků | 46 129 |
+| CSS řádků | 27 801 |
+| API endpointů | 77 |
 | Databázových tabulek | 50+ |
-| Hlavních veřejných stránek | 11 |
-| Admin karet / modulů | 10+ |
+| Hlavních provozních stránek | 15+ |
+| Admin karet / modulů | 12+ |
 
 ### Stránky a jejich typy
 
 **Provozní (interní systém):**
-- `seznam.php` — CRM dashboard všech reklamací (27 622+ řádků PHP, 5 883 řádků JS)
-- `novareklamace.php` — Formulář objednávky servisu (676 řádků PHP, 1 478 řádků JS)
-- `protokol.php` — Servisní protokol s PDF generováním (1 228 řádků API)
-- `statistiky.php` — Reporty, vyúčtování, grafy (716 řádků API, 40 891 řádků JS)
-- `admin.php` — Kontrolní panel s 10+ záložkami (API 128 KB+)
+- `seznam.php` — CRM dashboard všech reklamací (seznam.js: 5 983 řádků)
+- `novareklamace.php` — Formulář objednávky servisu
+- `protokol.php` — Servisní protokol (protokol.js: 4 183 řádků)
+- `statistiky.php` — Reporty, vyúčtování, grafy
+- `admin.php` — Kontrolní panel s 12+ záložkami (api/control_center_api.php 128 KB+)
+- `dnes.php` — Denní přehled technika (aktivní zakázky, skupiny, tisk)
+- `tisk.php` — Tisknutelný výtisk zakázky (zákazník, produkt, protokoly, fotky)
 
 **Veřejné (marketing / zákazník):**
-- `index.php` — Homepage (93 řádků, minimalistická)
-- `cenik.php` — Ceník se 3jazykovou kalkulačkou
+- `index.php` — Homepage (minimalistická, Schema.org JSON-LD)
+- `cenik.php` — Ceník se 3jazykovou kalkulačkou (CS/EN/IT)
 - `aktuality.php` — Blog / novinky
 - `onas.php`, `nasesluzby.php` — Informační stránky
 - `gdpr.php`, `gdpr-zadost.php`, `cookies.php`, `podminky.php` — Právní stránky
+
+**SEO landing pages:**
+- `pozarucni-servis.php`, `servis-natuzzi.php`, `oprava-kresla.php`, `oprava-sedacky.php`, `mimozarucniceny.php`
 
 **Uživatelská správa:**
 - `login.php`, `registration.php`, `password_reset.php`, `aktualizuj_ucet.php`
@@ -52,9 +60,9 @@
 Projekt není jednoduchý web. Je to plnohodnotný enterprise CRM systém s následujícími vrstvami:
 
 ```
-Prezentační vrstva     → 11 veřejných stránek
+Prezentační vrstva     → 15+ stránek (provozní + veřejné + SEO landing)
 Autentizační vrstva    → Role-based access (admin, technik, prodejce, supervizor)
-Business logika        → 70 API endpointů, 8 kontrolerů
+Business logika        → 77 API endpointů, 8 kontrolerů
 Datová vrstva          → MariaDB 50+ tabulek, PDO, transakce
 Komunikační vrstva     → Email queue, Web push, PHPMailer
 Bezpečnostní vrstva    → CSRF, rate limiting, audit log, CSP
@@ -83,10 +91,18 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 - `welcome-modal.js` — onboarding pro nové uživatele
 - Oddělené `.min.css` soubory pro každou stránku = výkonostně orientovaný přístup
 
+### Implementované UX funkce (2026)
+
+- **Denní přehled (`dnes.php`)** — Technik vidí všechny aktivní zakázky seskupené po stavu, s přímým voláním tel: linkem
+- **Autosave protokolu** — 30sekundový autosave do localStorage, obnovení po neúmyslném opuštění formuláře
+- **Hromadné akce** — Výběr více zakázek a hromadná změna stavu (toggle mode, checkbox na každé kartě)
+- **Unread badge pro poznámky** — červený pulsující badge CHAT na kartě zakázky s počtem nepřečtených zpráv
+- **Tisknutelný výtisk (`tisk.php`)** — Kompletní výtisk zakázky s protokoly a fotodokumentací, optimalizováno pro tisk
+- **Infrastruktura expirací klíčů** — Databázový sloupec `expires_at` na registračních klíčích (zatím volitelné, UI připraveno)
+
 ### Potenciální UX problémy
 
-- `seznam.php` má 27 622 řádků v jediném PHP souboru — indikuje možnou přehlcenost jedné stránky množstvím funkcí
-- `cenik-calculator.js` má 65 192 řádků — extrémní komplexita jednoho JS souboru naznačuje organický růst bez plánované architektury
+- `seznam.php` s komplexním seznam.js (5 983 řádků) — indikuje možnou přehlcenost jedné stránky množstvím funkcí
 - Absence React / Vue / Svelte — kompletní vanilla JS v projektu takového rozsahu zvyšuje riziko nekonzistentního chování UI
 
 ### Co nelze hodnotit bez živého webu
@@ -109,16 +125,16 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 | Email queue s retry logikou | Vysoká | EmailQueue.php 767 řádků, ACID transakce, retry s exponenciálním backoffem |
 | PDF generování protokolů | Vysoká | protokol_api.php 1 228 řádků, kalkulace provizí (33 % / 50 %) |
 | Web Push notifikace | Střední-vysoká | minishlink/web-push 9.0, service worker, push subscriptions v DB |
-| Audit logging | Střední | audit_logger.php 159 řádků, měsíční rotace, forensic záznamy |
+| Audit logging | Střední | audit_logger.php, měsíční rotace, forensic záznamy |
 | Geolokace a mapy | Střední-vysoká | GeolocationService.php 19 KB, Geoapify proxy, výpočet vzdálenosti |
 | Role-based access control | Vysoká | 4 role (admin, technik, prodejce, supervizor), supervizor-prodejce hierarchie |
 | Multi-tenant architektura | Vysoká | TenantManager.php, tenant_id sloupce v tabulkách |
 | GDPR compliance | Střední | Dedikované endpointy, opt-out emaily, data export |
 | PWA implementace | Střední | Service Worker, manifest, offline mode, push notifikace |
-| Statistiky a reporting | Vysoká | statistiky_api.php 716 řádků, statistiky.js 40 891 řádků |
+| Statistiky a reporting | Vysoká | statistiky_api.php, statistiky.js — grafy, filtry, export |
 | Herní systém | Střední | hry_api.php 45 KB, flight_api.php, leaderboards, real-time chat |
 | Video management | Střední | video_api.php 13 KB, upload, streaming, tracking |
-| Ceníkový kalkulátor | Vysoká | cenik-calculator.js 65 192 řádků, 3jazykový wizard |
+| Ceníkový kalkulátor | Vysoká | cenik-calculator.js, 3jazykový wizard |
 
 ### Bezpečnostní implementace
 
@@ -130,6 +146,7 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 - SHA256 hash admin klíče v `.env`
 - Email validace s MX záznamy
 - `security_scanner.php` — vlastní bezpečnostní scanner
+- Audit logger s forensic záznamy a měsíční rotací
 
 Úroveň bezpečnostní implementace je nadstandardní pro projekt tohoto typu.
 
@@ -139,7 +156,7 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 
 ### Jazykové pokrytí
 
-- Čeština — kompletní (primární jazyk)
+- Čeština — kompletní (primární jazyk, celý kód v češtině)
 - Angličtina — databázové překlady (`service_name_en`, `category_en`, `description_en`)
 - Italština — databázové překlady (`service_name_it`, `category_it`, `description_it`)
 
@@ -173,7 +190,7 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 | Push notifikace (Web Push, service worker backend) | 40–60 h |
 | Admin panel — všechny záložky | 150–200 h |
 | User management (auth, role, supervizor hierarchie) | 60–80 h |
-| 70 API endpointů | 200–300 h |
+| 77 API endpointů | 210–320 h |
 | Ceník + kalkulátor backend | 40–60 h |
 | GDPR compliance | 20–30 h |
 | Gaming zone backend | 40–60 h |
@@ -183,7 +200,8 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 | Mapy a geolokace | 40–60 h |
 | Video management | 30–40 h |
 | CI/CD (GitHub Actions, SFTP deployment) | 20–30 h |
-| **CELKEM backend** | **1 110–1 570 h** |
+| Denní přehled, tisk, hromadné akce, autosave (nové funkce 2026) | 30–50 h |
+| **CELKEM backend** | **1 150–1 640 h** |
 
 ### Seniorní frontend developer (JS, CSS, PWA)
 
@@ -192,18 +210,18 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 | Globální styly, responsivita, typografie | 40–60 h |
 | Homepage | 10–20 h |
 | Formulář nové reklamace (mapa, kalendář, foto, validace) | 80–120 h |
-| Dashboard seznam.js (5 883 řádků — filtry, vyhledávání, inline editace) | 100–140 h |
-| Statistiky frontend (40 891 řádků — grafy, filtry, export) | 80–120 h |
+| Dashboard seznam.js (5 983 řádků — filtry, vyhledávání, inline editace, hromadné akce) | 110–150 h |
+| Statistiky frontend | 80–120 h |
 | Admin panel frontend | 80–120 h |
-| Protokol formulář | 40–60 h |
-| Ceník + kalkulátor (cenik-calculator.js 65 192 řádků) | 100–150 h |
+| Protokol formulář s autosave (protokol.js: 4 183 řádků) | 50–70 h |
+| Ceník + kalkulátor | 100–150 h |
 | Gaming zone frontend | 40–60 h |
 | PWA (service worker, manifest, offline) | 30–50 h |
 | Toast systém, modály, loading stavy | 20–30 h |
 | Language switcher + překlady | 30–40 h |
 | 31 CSS modulů (page-specific) | 60–80 h |
 | Analytics, heatmap, replay player | 30–40 h |
-| **CELKEM frontend** | **740–1 090 h** |
+| **CELKEM frontend** | **760–1 110 h** |
 
 ### UX/UI Designer
 
@@ -211,10 +229,10 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 |---|---|
 | UX research, user flows, wireframy | 40–60 h |
 | UI design systém (komponenty, barvy, typografie) | 30–50 h |
-| Design 11+ stránek (desktop + mobil) | 80–120 h |
+| Design 15+ stránek (desktop + mobil) | 90–130 h |
 | Email šablony (HTML design) | 20–30 h |
 | Exporty pro frontend | 20–30 h |
-| **CELKEM design** | **190–290 h** |
+| **CELKEM design** | **200–300 h** |
 
 ### Copywriter (3 jazyky)
 
@@ -231,11 +249,11 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 
 | Role | Hodiny |
 |---|---|
-| Backend developer | 1 110–1 570 h |
-| Frontend developer | 740–1 090 h |
-| Designer | 190–290 h |
+| Backend developer | 1 150–1 640 h |
+| Frontend developer | 760–1 110 h |
+| Designer | 200–300 h |
 | Copywriter | 140–200 h |
-| **CELKEM** | **2 180–3 150 h** |
+| **CELKEM** | **2 250–3 250 h** |
 
 ---
 
@@ -245,29 +263,29 @@ Infrastruktura         → PWA, Service Worker, GitHub Actions CI/CD
 
 | Role | Sazba / hod | Hodiny | Náklady |
 |---|---|---|---|
-| Backend developer | 1 200 Kč | 1 110–1 570 h | 1 332 000 – 1 884 000 Kč |
-| Frontend developer | 1 000 Kč | 740–1 090 h | 740 000 – 1 090 000 Kč |
-| UX/UI designer | 1 100 Kč | 190–290 h | 209 000 – 319 000 Kč |
+| Backend developer | 1 200 Kč | 1 150–1 640 h | 1 380 000 – 1 968 000 Kč |
+| Frontend developer | 1 000 Kč | 760–1 110 h | 760 000 – 1 110 000 Kč |
+| UX/UI designer | 1 100 Kč | 200–300 h | 220 000 – 330 000 Kč |
 | Copywriter | 600 Kč | 140–200 h | 84 000 – 120 000 Kč |
-| **CELKEM CZ freelance** | | | **2 365 000 – 3 413 000 Kč** |
+| **CELKEM CZ freelance** | | | **2 444 000 – 3 528 000 Kč** |
 
 ### Česká republika — Agentura (marže 1,4–1,8×)
 
-**3 300 000 – 6 100 000 Kč**
+**3 400 000 – 6 400 000 Kč**
 
 ### Evropská unie — Freelance (DE/AT/NL trh)
 
 | Role | Sazba / hod | Hodiny | Náklady |
 |---|---|---|---|
-| Backend developer | 80–100 € | 1 110–1 570 h | 88 800 – 157 000 € |
-| Frontend developer | 65–80 € | 740–1 090 h | 48 100 – 87 200 € |
-| UX/UI designer | 70–90 € | 190–290 h | 13 300 – 26 100 € |
+| Backend developer | 80–100 € | 1 150–1 640 h | 92 000 – 164 000 € |
+| Frontend developer | 65–80 € | 760–1 110 h | 49 400 – 88 800 € |
+| UX/UI designer | 70–90 € | 200–300 h | 14 000 – 27 000 € |
 | Copywriter | 50–60 € | 140–200 h | 7 000 – 12 000 € |
-| **CELKEM EU freelance** | | | **157 000 – 282 000 €** |
+| **CELKEM EU freelance** | | | **162 000 – 292 000 €** |
 
 ### Evropská unie — Agentura
 
-**230 000 – 500 000 €**
+**240 000 – 520 000 €**
 
 ---
 
@@ -309,19 +327,20 @@ Toto ocenění je podmíněno existencí platících zákazníků.
 8. **Role-based access control s supervizor hierarchií** — 4 role s podporou supervizor→prodejce relací.
 9. **Specializace na prémiový segment** — White Glove Service + Natuzzi branding v profitabilním segmentu.
 10. **SEO-first landing pages** — `pozarucni-servis.php`, `servis-natuzzi.php`, `oprava-kresla.php` pro organický traffic.
+11. **Technik-first funkce** — Denní přehled, tisk výtisků, hromadné akce, autosave protokolu — systém je použitelný v terénu.
 
 ---
 
 ## 9. SLABÉ STRÁNKY PROJEKTU
 
-1. **Monolitická architektura** — 136 PHP souborů v rootu, žádný MVC framework. `seznam.php` se 27 622 řádky je symptom.
-2. **Frontend bez komponentové architektury** — `cenik-calculator.js` se 65 192 řádky a `statistiky.js` se 40 891 řádky jsou nepřijatelné velikosti pro long-term maintainability.
+1. **Monolitická architektura** — 355 PHP souborů, žádný MVC framework. seznam.js s 5 983 řádky je symptom organického růstu.
+2. **Frontend bez komponentové architektury** — Velké JS soubory (seznam.js 5 983, protokol.js 4 183 řádků) jsou udržovatelné, ale bez modularizace.
 3. **Migrační skripty v rootu** — `kontrola_*.php`, `migrace_*.php`, `pridej_*.php` jsou potenciálně veřejně dostupné bez admin ochrany.
-4. **Žádné automatizované testy** — U projektu s 70 API endpointy a business logikou (kalkulace provizí, email queue) je absence testů riziko.
-5. **Absence live API dokumentace** — `api-docs.php` bez testovacího prostředí (Swagger/Postman) ztěžuje správu 70 endpointů.
+4. **Žádné automatizované testy** — U projektu s 77 API endpointy a business logikou (kalkulace provizí, email queue) je absence testů riziko.
+5. **Absence live API dokumentace** — `api-docs.php` bez testovacího prostředí (Swagger/Postman) ztěžuje správu 77 endpointů.
 6. **Herní zóna jako nesouvisející feature** — `hry.php` + `hry_api.php` (45 KB) nesouvisí s core produktem.
 7. **Úzká závislost na jednom klientovi** — Bez generalizace pro jiné značky je trh velmi omezený.
-8. **Homepage příliš minimalistická** — `index.php` se 93 řádky nestačí jako prodejní nástroj. Chybí social proof, case studies, demo, pricing.
+8. **Homepage příliš minimalistická** — `index.php` nestačí jako prodejní nástroj. Chybí social proof, case studies, demo, pricing.
 9. **Absence veřejného demo** — Pro SaaS konverzi je klíčové umožnit potenciálním zákazníkům vyzkoušet systém bez kontaktu s prodejcem.
 
 ---
@@ -344,8 +363,8 @@ Základní SEO prerequisite.
 
 ### Střednědobé (3–9 měsíců)
 
-**5. Refaktoring největších JS souborů**
-`cenik-calculator.js` a `statistiky.js` rozdělit do modulů (ES6 import/export). Přidá testovatelnost.
+**5. Modularizace největších JS souborů**
+`seznam.js` a `protokol.js` rozdělit do modulů (ES6 import/export). Přidá testovatelnost.
 
 **6. Automatizované testy pro kritické API**
 PHPUnit testy pro `save.php` (workflow ID, enum mapping, rate limiting) a `protokol_api.php` (kalkulace provizí). Odhadovaný čas: 60–80 h.
@@ -373,16 +392,16 @@ Samostatný pohled pro koncového zákazníka (stav reklamace, fotodokumentace, 
 
 | Dimenze | Hodnocení | Poznámka |
 |---|---|---|
-| Technická komplexita | 9/10 | Enterprise-level systém, bezpečnost, email queue, PWA |
-| Bezpečnost | 8/10 | Nadstandardní implementace, drobná rizika v rootu |
-| Kódová kvalita | 6/10 | Konzistentní konvence, ale monolity v JS souborech |
+| Technická komplexita | 9/10 | Enterprise-level systém, bezpečnost, email queue, PWA, 206K řádků |
+| Bezpečnost | 8/10 | Nadstandardní implementace, drobná rizika v rootu (migrační skripty) |
+| Kódová kvalita | 7/10 | Konzistentní konvence, dodržovaná pravidla, organický růst JS souborů |
 | Obchodní potenciál | 7/10 | Silná specializace, omezený trh bez generalizace |
 | SEO připravenost | 7/10 | Landing pages, Schema.org, seo_meta.php — dobrý základ |
-| Maintainability | 5/10 | Bez testů a s 65K-řádkovými JS soubory je rozvoj riskantnější |
+| Maintainability | 6/10 | Bez testů, ale kódová konvence disciplinovaná a velikosti souborů pod kontrolou |
 
-**Celkový závěr:** Technicky sofistikovaný a bezpečně implementovaný CRM/service management systém s jasnou doménovou specializací. Vývojové náklady v ČR by dnes činily **2,4 – 3,4 milionu Kč** při freelance sazbách. Prodejní hodnota jako hotový produkt bez zákaznické základny: **1,5 – 5 milionů Kč**. Se zákaznickou základnou a při SaaS modelu: **6 – 40 milionů Kč** v závislosti na MRR a trakci.
+**Celkový závěr:** Technicky sofistikovaný a bezpečně implementovaný CRM/service management systém s jasnou doménovou specializací. 355 PHP souborů, 108 JS souborů, 77 API endpointů a 206 313 řádků kódu. Vývojové náklady v ČR by dnes činily **2,4 – 3,5 milionu Kč** při freelance sazbách. Prodejní hodnota jako hotový produkt bez zákaznické základny: **1,5 – 5 milionů Kč**. Se zákaznickou základnou a při SaaS modelu: **6 – 40 milionů Kč** v závislosti na MRR a trakci.
 
 ---
 
 *Audit provedl: Claude AI (claude-sonnet-4-6) na základě přímé analýzy zdrojového kódu*
-*Datum: 4. března 2026*
+*Datum: 4. března 2026 (přepracováno na základě aktuálního stavu projektu)*

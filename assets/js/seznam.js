@@ -959,12 +959,6 @@ async function renderOrders(items = null) {
     const stavDot = `<div class="order-status status-${(jeCekameNd || status.class === 'cekame-na-dily') ? 'cekame-na-dily' : status.class}"></div>`;
     const chatBadge = `<div class="order-notes-badge ${hasUnread ? 'has-unread pulse unread-cerveny' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Chat'}">CHAT${unreadCount > 0 ? ` ${unreadCount}` : ''}</div>`;
 
-    // U9: Počet fotek
-    const pocetFotek = (rec.photos || []).length;
-    const fotoBadge  = pocetFotek > 0
-      ? `<span class="foto-pocet-badge" title="${pocetFotek} fotek">${pocetFotek} F</span>`
-      : '';
-
     // U8: Checkbox pro hromadné akce
     const hromadneCheck = `<input type="checkbox" class="hromadne-check" data-id="${rec.id}" onclick="event.stopPropagation(); hromadneToggle(${rec.id}, this.checked);" style="width:16px;height:16px;cursor:pointer;display:none;" title="Vybrat">`;
 
@@ -978,7 +972,7 @@ async function renderOrders(items = null) {
           <div class="order-row-product">${highlightedProduct}</div>
           <div class="order-row-date">${date}</div>
           <div class="order-row-badge">${stavBadge}</div>
-          <div class="order-row-chat">${fotoBadge}${chatBadge}</div>
+          <div class="order-row-chat">${chatBadge}</div>
         </div>
       `;
     }
@@ -989,7 +983,6 @@ async function renderOrders(items = null) {
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
             ${hromadneCheck}
-            ${fotoBadge}
             ${chatBadge}
             ${stavDot}
           </div>
