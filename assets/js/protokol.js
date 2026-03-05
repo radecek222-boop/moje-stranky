@@ -3939,12 +3939,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // EXPORT FUNKCÍ DO WINDOW (pro data-action tlačítka)
-  // ═══════════════════════════════════════════════════════════
-  window.sendToCustomer = sendToCustomer;
-  window.exportBothPDFs = exportBothPDFs;
-  window.attachPhotos = attachPhotos;
+  // EXPORT funkcí do window přesunut za IIFE (níže), aby nebyl blokován early return výše
 
   // ═══════════════════════════════════════════════════════════
   // DEBUG FUNKCE - Zobrazí kalkulaci bez konzole
@@ -4021,6 +4016,14 @@ document.addEventListener('DOMContentLoaded', () => {
     wgsToast.info('Debug data kalkulace zobrazena v konzoli'); console.info(info);
   };
 })();
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT FUNKCÍ DO WINDOW (pro data-action tlačítka)
+// Musí být mimo IIFE, aby bylo dostupné i bez btnPodepsatProtokol
+// ═══════════════════════════════════════════════════════════
+window.sendToCustomer = sendToCustomer;
+window.exportBothPDFs = exportBothPDFs;
+window.attachPhotos = attachPhotos;
 
 // ==========================================
 // AUTOSAVE PROTOKOLU DO LOCALSTORAGE (U6)
