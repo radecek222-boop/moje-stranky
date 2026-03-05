@@ -1,6 +1,6 @@
 <?php
 /**
- * Aktuality o znacce Natuzzi
+ * Naše tipy - péče o nábytek a užitečné rady
  * Zobrazeni vsech clanku ve 2 sloupcich v nahodnem poradi
  */
 
@@ -448,21 +448,21 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title"
-        data-lang-cs="Aktuality"
-        data-lang-en="News"
-        data-lang-it="Notizie">
+        data-lang-cs="Naše tipy"
+        data-lang-en="Our Tips"
+        data-lang-it="I Nostri Consigli">
         <?php
-        echo $jazyk === 'en' ? 'News' : ($jazyk === 'it' ? 'Notizie' : 'Aktuality');
+        echo $jazyk === 'en' ? 'Our Tips' : ($jazyk === 'it' ? 'I Nostri Consigli' : 'Naše tipy');
         ?>
     </h1>
     <div class="hero-subtitle"
-         data-lang-cs="Denní novinky o luxusním italském nábytku"
-         data-lang-en="Daily news about luxury Italian furniture"
-         data-lang-it="Notizie quotidiane sui mobili italiani di lusso">
+         data-lang-cs="Péče o nábytek, užitečné rady a novinky ze světa interiérů"
+         data-lang-en="Furniture care, useful tips and interior design news"
+         data-lang-it="Cura dei mobili, consigli utili e novità dal mondo degli interni">
         <?php
-        echo $jazyk === 'en' ? 'Daily news about luxury Italian furniture' :
-             ($jazyk === 'it' ? 'Notizie quotidiane sui mobili italiani di lusso' :
-              'Denní novinky o luxusním italském nábytku');
+        echo $jazyk === 'en' ? 'Furniture care, useful tips and interior design news' :
+             ($jazyk === 'it' ? 'Cura dei mobili, consigli utili e novità dal mondo degli interni' :
+              'Péče o nábytek, užitečné rady a novinky ze světa interiérů');
         ?>
     </div>
   </div>
