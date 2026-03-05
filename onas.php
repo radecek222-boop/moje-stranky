@@ -154,7 +154,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
         <img src="assets/img/partners/logo4.png" alt="Logo Natuzzi Italia – autorizovaný servisní partner pro opravy a reklamace luxusního nábytku Natuzzi v ČR a SR" loading="lazy">
       </a>
       <a href="https://natuzzidesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
-        <img src="assets/img/partners/logo3.png" alt="Logo Natuzzi Editions – servis, opravy a reklamace sedacích souprav Natuzzi Editions, autorizovaný partner White Glove Service" loading="lazy" style="filter: invert(1);">
+        <img src="assets/img/partners/logo3.png" alt="Logo Natuzzi Editions – servis, opravy a reklamace sedacích souprav Natuzzi Editions, autorizovaný partner White Glove Service" loading="lazy" style="filter: invert(1) grayscale(1);">
       </a>
       <a href="https://www.italydesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo2.png" alt="Logo Softaly Natuzzi – prémiové čalouněné sedačky a křesla, servis a opravy v České republice" loading="lazy">

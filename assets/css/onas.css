@@ -315,9 +315,13 @@ h6 {
   transition: opacity 0.25s;
   user-select: none;
   -webkit-user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.partner-logo-polozka:hover {
+.partner-logo-polozka:hover,
+.partner-logo-polozka:focus {
   opacity: 1;
+  outline: none;
 }
 .partner-logo-polozka img {
   max-height: 38px;
@@ -326,12 +330,13 @@ h6 {
   object-fit: contain;
   display: block;
   filter: grayscale(1);
+  mix-blend-mode: multiply;
   transition: filter 0.25s;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 .partner-logo-polozka:hover img {
-  filter: grayscale(0.2);
+  filter: grayscale(0.15);
 }
 @media (max-width: 768px) {
   .partner-loga {
