@@ -11,17 +11,17 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="cs" data-page="novareklamace">
+<html lang="cs" data-page="objednatservis">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <meta name="description" content="<?php echo getSeoDescription('novareklamace'); ?>">
+  <meta name="description" content="<?php echo getSeoDescription('objednatservis'); ?>">
   <meta name="theme-color" content="#000000">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
-  <?php renderSeoMeta('novareklamace'); ?>
-  <?php renderSchemaOrg('novareklamace'); ?>
-  <?php renderFaqSchema('novareklamace'); ?>
-  <title><?php echo getSeoTitle('novareklamace'); ?></title>
+  <?php renderSeoMeta('objednatservis'); ?>
+  <?php renderSchemaOrg('objednatservis'); ?>
+  <?php renderFaqSchema('objednatservis'); ?>
+  <title><?php echo getSeoTitle('objednatservis'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->
   <link rel="preconnect" href="https://unpkg.com">
@@ -35,8 +35,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/novareklamace.min.css">
-  <!-- novareklamace-mobile-fixes.css sloučen do novareklamace.min.css (Step 49) -->
+  <link rel="stylesheet" href="assets/css/objednatservis.min.css">
+  <!-- novareklamace-mobile-fixes.css sloučen do objednatservis.min.css (Step 49) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -653,7 +653,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/page-transitions.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
-<script src="assets/js/novareklamace.min.js?v=1764635649" defer></script>
+<script src="assets/js/objednatservis.min.js?v=1764635649" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>

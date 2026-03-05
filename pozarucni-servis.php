@@ -213,7 +213,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Contattaci per una consulenza senza impegno. Valuteremo le condizioni dei tuoi mobili e prepareremo un preventivo. Ripareremo il tuo divano in modo rapido e professionale.">
       Kontaktujte nas pro nezavaznou konzultaci. Posoudime stav vaseho nabytku a pripravime cenovou nabidku. Opravime vasi sedacku rychle a profesionalne.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Objednat pozarucni servis"
        data-lang-en="Order Out-of-Warranty Service"
        data-lang-it="Ordina Servizio Fuori Garanzia">Objednat pozarucni servis</a>

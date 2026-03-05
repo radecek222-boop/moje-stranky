@@ -104,7 +104,7 @@ Navštivte naše webové stránky [www.wgs-service.cz](https://www.wgs-service.c
                 'infobox' => '💡 **Tip:** Pravidelné čištění a údržba kožených sedaček 1-2× ročně výrazně prodlouží jejich životnost a zachová luxusní vzhled.',
                 'tlacitko' => [
                     'text' => 'Objednat servis online',
-                    'url' => 'https://www.wgs-service.cz/novareklamace.php'
+                    'url' => 'https://www.wgs-service.cz/objednatservis.php'
                 ]
             ];
 

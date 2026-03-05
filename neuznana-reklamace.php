@@ -233,7 +233,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Contattaci per un preventivo di riparazione. La diagnosi in loco è gratuita e conoscerai il prezzo in anticipo.">
       Kontaktujte nás pro cenovou nabídku na opravu. Diagnostika při návštěvě je zdarma a cenu znáte předem.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Objednat opravu"
        data-lang-en="Order Repair"
        data-lang-it="Ordina Riparazione">Objednat opravu</a>

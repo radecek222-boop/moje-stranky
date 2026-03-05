@@ -227,7 +227,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Ordina la riparazione online o contattaci. Organizzeremo il ritiro del divano, eseguiremo la riparazione e lo consegneremo. Servizio professionale con garanzia di 12 mesi.">
       Objednejte opravu online nebo nas kontaktujte. Zajistime svoz sedacky, provedeme opravu a dovezeme zpet. Profesionalni servis s 12mesicni zarukou.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Objednat opravu sedacky"
        data-lang-en="Order Sofa Repair"
        data-lang-it="Ordina Riparazione Divano">Objednat opravu sedacky</a>

@@ -177,7 +177,7 @@
         <h3>2.1 Způsob objednání</h3>
         <p>Servisní služby lze objednat:</p>
         <ul>
-          <li>Prostřednictvím online formuláře na webových stránkách <a href="novareklamace.php" class="podminky-link">Objednat servis</a></li>
+          <li>Prostřednictvím online formuláře na webových stránkách <a href="objednatservis.php" class="podminky-link">Objednat servis</a></li>
           <li>E-mailem na adrese <a href="mailto:reklamace@wgs-service.cz" class="podminky-link">reklamace@wgs-service.cz</a></li>
           <li>Telefonicky na čísle <a href="tel:+420725965826" class="podminky-link">+420 725 965 826</a></li>
         </ul>

@@ -233,7 +233,7 @@
         en: 'White Glove Service – Home',
         it: 'White Glove Service – Home'
       },
-      'novareklamace': {
+      'objednatservis': {
         cs: 'Nová reklamace | White Glove Service',
         en: 'New Claim | White Glove Service',
         it: 'Nuovo Reclamo | White Glove Service'

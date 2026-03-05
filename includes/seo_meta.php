@@ -92,11 +92,11 @@ $seoStranky = [
         'canonical' => 'https://wgs-service.cz/',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
-    'novareklamace' => [
+    'objednatservis' => [
         'title' => 'Objednat opravu sedacky, kresla, pohovky online | Reklamace Natuzzi | Servis nabytku',
         'description' => 'Objednejte opravu sedacky, kresla nebo pohovky online. Reklamace nabytku Natuzzi. Oprava kozene sedacky, latkove pohovky, designoveho kresla. Cisteni, precalouneni, renovace. Rychle vyrizeni Praha, Brno a okoli.',
         'keywords' => 'objednat opravu sedacky, objednat servis kresla, reklamace Natuzzi, oprava sedacky online, oprava kresla online, oprava pohovky online, servis nabytku online, formular reklamace, objednat cisteni sedacky, objednat precalouneni, moderni sedacka oprava, designove kreslo servis, rohova sedacka oprava, relaxacni kreslo servis, kozena sedacka cisteni, latkova pohovka oprava, Praha, Brno',
-        'canonical' => 'https://wgs-service.cz/novareklamace',
+        'canonical' => 'https://wgs-service.cz/objednatservis',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     'cenik' => [
@@ -533,13 +533,13 @@ function renderSchemaOrg($stranka = 'index') {
                 ]
             ];
             break;
-        case 'novareklamace':
+        case 'objednatservis':
             $breadcrumbs = [
                 "@context" => "https://schema.org",
                 "@type" => "BreadcrumbList",
                 "itemListElement" => [
                     ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
-                    ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/novareklamace"]
+                    ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/objednatservis"]
                 ]
             ];
             break;
@@ -638,7 +638,7 @@ function renderFaqSchema($stranka = 'index') {
                 'odpoved' => 'Diagnostika stoji 110 EUR a zahrnuje kompletni posouzeni stavu nabytku a detailni cenovou kalkulaci opravy. Pri realizaci opravy se cena diagnostiky odecita z celkove ceny.'
             ]
         ],
-        'novareklamace' => [
+        'objednatservis' => [
             [
                 'otazka' => 'Jak podat reklamaci na nabytek Natuzzi?',
                 'odpoved' => 'Reklamaci nabytku Natuzzi podejte pres nas online formular. Vyplnte kontaktni udaje, popis problemu a prilozte fotografie. Reklamaci vyridime jako autorizovany servis.'

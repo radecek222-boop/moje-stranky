@@ -65,7 +65,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
         Prémiový servis pro luxusní nábytek.<br>Profesionální montáž, údržba a opravy s maximální péčí o každý detail.
       </p>
       
-      <a href="novareklamace.php" class="cta-button"
+      <a href="objednatservis.php" class="cta-button"
          data-lang-cs="Objednat servis"
          data-lang-en="Order service"
          data-lang-it="Ordina assistenza">Objednat servis</a>

@@ -25,6 +25,9 @@
     # Přesměrování staré URL aktuality → nasetipy (SEO 301)
     RewriteRule ^aktuality(\.php)?$ /nasetipy [R=301,L]
 
+    # Přesměrování staré URL novareklamace → objednatservis (SEO 301)
+    RewriteRule ^novareklamace(\.php)?$ /objednatservis [R=301,L]
+
     RewriteRule ^(debug_[^/]+\.php)$ /tools/$1 [R=301,L]
     RewriteRule ^(diagnostika_[^/]+\.php)$ /tools/$1 [R=301,L]
     RewriteRule ^(check_[^/]+\.php)$ /tools/$1 [R=301,L]
