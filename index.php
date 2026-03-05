@@ -246,7 +246,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
                data-lang-cs="Stručný popis spolupráce"
                data-lang-en="Brief description of cooperation"
                data-lang-it="Breve descrizione della collaborazione">Stručný popis spolupráce</label>
-        <textarea id="b2bZprava" name="zprava" rows="4" required
+        <textarea id="b2bZprava" name="zprava" rows="3" required
                   placeholder="Popište, jaký typ spolupráce hledáte – počet reklamací měsíčně, značky nábytku, oblast působení..."
                   data-placeholder-cs="Popište, jaký typ spolupráce hledáte – počet reklamací měsíčně, značky nábytku, oblast působení..."
                   data-placeholder-en="Describe what type of cooperation you are looking for – number of complaints per month, furniture brands, area of operation..."
