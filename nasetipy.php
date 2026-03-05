@@ -88,9 +88,9 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
   <meta name="apple-mobile-web-app-title" content="WGS">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="<?php echo getSeoDescription('aktuality'); ?>">
-  <?php renderSeoMeta('aktuality'); ?>
-  <?php renderFaqSchema('aktuality'); ?>
+  <meta name="description" content="<?php echo getSeoDescription('nasetipy'); ?>">
+  <?php renderSeoMeta('nasetipy'); ?>
+  <?php renderFaqSchema('nasetipy'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
@@ -98,8 +98,8 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-  <title><?php echo getSeoTitle('aktuality'); ?></title>
-  <?php renderSchemaOrg('aktuality'); ?>
+  <title><?php echo getSeoTitle('nasetipy'); ?></title>
+  <?php renderSchemaOrg('nasetipy'); ?>
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
