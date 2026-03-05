@@ -1485,7 +1485,7 @@ async function generateProtocolPDF() {
 
   const canvas = await html2canvas(clone, {
     scale: 3,
-    backgroundColor: "var(--wgs-white)",
+    backgroundColor: "#ffffff",
     useCORS: true,
     logging: false,
     imageTimeout: 0,
