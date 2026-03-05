@@ -36,10 +36,17 @@ require_once __DIR__ . '/includes/seo_meta.php';
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/onas.min.css">
+  <link rel="stylesheet" href="assets/css/onas.min.css?v=4">
   <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
+  <style>
+    /* Partner loga - bez boxů */
+    .partner-logo-polozka{display:flex;align-items:center;justify-content:center;text-decoration:none;user-select:none;-webkit-user-select:none;outline:none!important;border:none!important;box-shadow:none!important;background:none!important;padding:0!important;-webkit-tap-highlight-color:transparent;}
+    .partner-logo-polozka:hover,.partner-logo-polozka:focus{outline:none!important;border:none!important;box-shadow:none!important;}
+    .partner-logo-polozka img{max-height:38px;max-width:110px;width:auto;object-fit:contain;display:block;opacity:.45;filter:grayscale(1);mix-blend-mode:multiply;transition:opacity .25s,filter .25s;pointer-events:none;}
+    .partner-logo-polozka:hover img,.partner-logo-polozka:focus img{opacity:1;filter:grayscale(0);}
+  </style>
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
   <link rel="stylesheet" href="assets/css/poppins-font.css">
@@ -154,7 +161,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
         <img src="assets/img/partners/logo4.png" alt="Logo Natuzzi Italia – autorizovaný servisní partner pro opravy a reklamace luxusního nábytku Natuzzi v ČR a SR" loading="lazy">
       </a>
       <a href="https://natuzzidesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
-        <img src="assets/img/partners/logo3.png" alt="Logo Natuzzi Editions – servis, opravy a reklamace sedacích souprav Natuzzi Editions, autorizovaný partner White Glove Service" loading="lazy" style="filter: invert(1);">
+        <img src="assets/img/partners/logo3.png" alt="Logo Natuzzi Editions – servis, opravy a reklamace sedacích souprav Natuzzi Editions, autorizovaný partner White Glove Service" loading="lazy" style="filter: invert(1) grayscale(1);">
       </a>
       <a href="https://www.italydesign.cz" target="_blank" rel="noopener noreferrer" class="partner-logo-polozka">
         <img src="assets/img/partners/logo2.png" alt="Logo Softaly Natuzzi – prémiové čalouněné sedačky a křesla, servis a opravy v České republice" loading="lazy">

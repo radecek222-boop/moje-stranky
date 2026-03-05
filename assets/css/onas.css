@@ -311,13 +311,20 @@ h6 {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  opacity: 0.5;
-  transition: opacity 0.25s;
   user-select: none;
   -webkit-user-select: none;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: none !important;
+  padding: 0 !important;
+  -webkit-tap-highlight-color: transparent;
 }
-.partner-logo-polozka:hover {
-  opacity: 1;
+.partner-logo-polozka:hover,
+.partner-logo-polozka:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 .partner-logo-polozka img {
   max-height: 38px;
@@ -325,13 +332,17 @@ h6 {
   width: auto;
   object-fit: contain;
   display: block;
+  opacity: 0.45;
   filter: grayscale(1);
-  transition: filter 0.25s;
+  mix-blend-mode: multiply;
+  transition: opacity 0.25s, filter 0.25s;
   pointer-events: none;
   -webkit-user-drag: none;
 }
-.partner-logo-polozka:hover img {
-  filter: grayscale(0.2);
+.partner-logo-polozka:hover img,
+.partner-logo-polozka:focus img {
+  opacity: 1;
+  filter: grayscale(0);
 }
 @media (max-width: 768px) {
   .partner-loga {
