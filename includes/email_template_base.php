@@ -27,10 +27,21 @@ function renderujGrafickyEmail(array $data): string {
     $baseUrl = 'https://www.wgs-service.cz';
 
     // Výchozí hodnoty + Markdown + nl2br pro zachování zalomení řádků
-    // Markdown se převádí na HTML, pak nl2br pro řádky
+    // nl2br se NEPOUŽIJE pokud obsah již obsahuje blokové HTML elementy
     $nadpis = $data['nadpis'] ?? '';
-    $osloveni = nl2br(markdownNaHtml($data['osloveni'] ?? 'Vážený zákazníku,'));
-    $obsah = nl2br(markdownNaHtml($data['obsah'] ?? ''));
+    $bezZaveru = $data['bez_zaveru'] ?? false;
+
+    $osloveniRaw = markdownNaHtml($data['osloveni'] ?? 'Vážený zákazníku,');
+    $osloveni = nl2br($osloveniRaw);
+
+    $obsahRaw = markdownNaHtml($data['obsah'] ?? '');
+    // Pokud obsah obsahuje blokové HTML tagy, nl2br by přidávalo nadbytečné <br> → přeskočit
+    $obsah = preg_match('/<(p|ul|ol|li|div|h[1-6]|table|tr|td)\b/i', $obsahRaw)
+        ? $obsahRaw
+        : nl2br($obsahRaw);
+    // Normalizace marginů odstavců pro konzistentní vzhled v emailových klientech
+    $obsah = preg_replace('/<p(?![^>]*style=)>/', '<p style="margin: 0 0 10px 0;">', $obsah);
+
     $tlacitko = $data['tlacitko'] ?? null;
     $infobox = nl2br(markdownNaHtml($data['infobox'] ?? ''));
     $upozorneni = nl2br(markdownNaHtml($data['upozorneni'] ?? ''));
@@ -42,8 +53,8 @@ function renderujGrafickyEmail(array $data): string {
     if (!empty($nadpis)) {
         $nadpisHtml = "
         <!-- Nadpis -->
-        <div style='background: #f8f9fa; padding: 25px 40px; border-bottom: 1px solid #e5e5e5;'>
-            <h2 style='margin: 0; font-size: 20px; font-weight: 600; color: #333;'>{$nadpis}</h2>
+        <div style='background: #f8f9fa; padding: 16px 40px; border-bottom: 1px solid #e5e5e5;'>
+            <h2 style='margin: 0; font-size: 18px; font-weight: 600; color: #333;'>{$nadpis}</h2>
         </div>";
     }
 
@@ -62,9 +73,9 @@ function renderujGrafickyEmail(array $data): string {
     if (!empty($infobox)) {
         $infoboxHtml = "
         <!-- Info box -->
-        <div style='padding: 0 40px 25px 40px;'>
-            <div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 16px 20px;'>
-                <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.6;'>{$infobox}</p>
+        <div style='padding: 0 40px 16px 40px;'>
+            <div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px 16px;'>
+                <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.5;'>{$infobox}</p>
             </div>
         </div>";
     }
@@ -128,9 +139,9 @@ function renderujGrafickyEmail(array $data): string {
                             {$nadpisHtml}
 
                             <!-- Oslovení a obsah -->
-                            <div style='padding: 30px 40px 25px 40px;'>
-                                <p style='margin: 0 0 15px 0; font-size: 15px; color: #333;'>{$osloveni}</p>
-                                <div style='font-size: 14px; color: #555; line-height: 1.7;'>
+                            <div style='padding: 25px 40px 20px 40px;'>
+                                <p style='margin: 0 0 12px 0; font-size: 15px; color: #333;'>{$osloveni}</p>
+                                <div style='font-size: 14px; color: #555; line-height: 1.6;'>
                                     {$obsah}
                                 </div>
                             </div>
@@ -140,12 +151,13 @@ function renderujGrafickyEmail(array $data): string {
                             {$tlacitkoHtml}
 
                             <!-- Závěrečná sekce -->
-                            <div style='padding: 25px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
+                            " . (!$bezZaveru && stripos($obsahRaw, 'S pozdravem') === false ? "
+                            <div style='padding: 20px 40px; background: #f8f9fa; border-top: 1px solid #e5e5e5;'>
                                 <p style='margin: 0; font-size: 13px; color: #666; line-height: 1.6;'>
                                     S pozdravem,<br>
                                     <strong>Tým White Glove Service</strong>
                                 </p>
-                            </div>
+                            </div>" : "") . "
 
                         </td>
                     </tr>
