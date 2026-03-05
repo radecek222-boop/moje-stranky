@@ -891,6 +891,8 @@ if ($initialBootstrapData) {
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <!-- Utils - obsahuje fetchCsrfToken a další pomocné funkce -->
 <script src="assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
+<!-- WGS Toast - notifikace -->
+<script src="assets/js/wgs-toast.min.js?v=<?= filemtime(__DIR__ . '/assets/js/wgs-toast.min.js') ?>" defer></script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>

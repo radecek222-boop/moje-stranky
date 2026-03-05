@@ -714,7 +714,7 @@ function inicializovatFullscreenCanvas(canvas) {
 
 function potvrdirFullscreenPodpis() {
   if (!fullscreenSignaturePad || fullscreenSignaturePad.isEmpty()) {
-    wgsToast.warning('Prosim podepiste se pred potvrzenim');
+    showNotif("error", 'Prosím podepište se před potvrzením');
     return;
   }
 
@@ -2534,32 +2534,8 @@ async function exportBothPDFs() {
       window.open(URL.createObjectURL(pdfBlob), "_blank");
     }
 
-    // Uložit textová data do DB
+    // Uložit textová data do DB (bez označení jako hotové - to dělá jen "Odeslat zákazníkovi")
     await saveProtokolToDB();
-
-    // Označit jako hotovou
-    logger.log('[List] Označuji reklamaci jako hotovou...');
-    try {
-      const csrfToken = await fetchCsrfToken();
-      const markResponse = await fetch('app/controllers/save.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'update',
-          id: currentReklamaceId,
-          mark_as_completed: '1',
-          csrf_token: csrfToken
-        })
-      });
-
-      const markResult = await markResponse.json();
-
-      if (markResult.status === 'success') {
-        logger.log('Reklamace označena jako hotová');
-      }
-    } catch (err) {
-      logger.error('Chyba při označování:', err);
-    }
 
   } catch (error) {
     logger.error('Chyba při generování PDF:', error);
