@@ -36,10 +36,17 @@ require_once __DIR__ . '/includes/seo_meta.php';
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/onas.min.css">
+  <link rel="stylesheet" href="assets/css/onas.min.css?v=3">
   <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
+  <style>
+    /* Partner loga - bez boxů */
+    .partner-logo-polozka{display:flex;align-items:center;justify-content:center;text-decoration:none;user-select:none;-webkit-user-select:none;outline:none;-webkit-tap-highlight-color:transparent;padding:0;background:none;border:none;width:auto;height:auto;flex:none;box-shadow:none;}
+    .partner-logo-polozka:hover,.partner-logo-polozka:focus{outline:none;opacity:1;}
+    .partner-logo-polozka img{max-height:38px;max-width:110px;width:auto;object-fit:contain;display:block;opacity:.45;filter:grayscale(1);mix-blend-mode:multiply;transition:opacity .25s,filter .25s;pointer-events:none;}
+    .partner-logo-polozka:hover img,.partner-logo-polozka:focus img{opacity:1;filter:grayscale(0);}
+  </style>
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
   <link rel="stylesheet" href="assets/css/poppins-font.css">
