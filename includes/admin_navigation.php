@@ -33,7 +33,7 @@ if (!function_exists('loadAdminNavigation')) {
             ],
             'aktuality' => [
                 'href' => 'aktuality.php',
-                'header_label' => 'AKTUALITY',
+                'header_label' => 'NAŠE TIPY',
             ],
             'dashboard' => [
                 'href' => 'admin.php',
