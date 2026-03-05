@@ -72,24 +72,24 @@ require_once __DIR__ . '/includes/seo_meta.php';
           data-lang-it="Il Tuo Partner per il Servizio di Arredamento di Lusso">Váš partner pro servis luxusního nábytku</h2>
       
       <p class="section-text"
-         data-lang-cs="White Glove Service je autorizovaný servisní partner pro opravy a reklamace čalouněného nábytku s více než pětiletou zkušeností. Opravujeme kožené i látkové sedací soupravy, křesla a pohovky všech prémiových značek — bez ohledu na výrobce."
-         data-lang-en="White Glove Service is an authorized service partner for repairs and complaints of upholstered furniture with over five years of experience. We repair leather and fabric sofas, armchairs and couches of all premium brands — regardless of the manufacturer."
-         data-lang-it="White Glove Service è un partner autorizzato per la riparazione e i reclami di mobili imbottiti con oltre cinque anni di esperienza. Ripariamo divani, poltrone e divanetti in pelle e tessuto di tutti i marchi premium — indipendentemente dal produttore.">
-        White Glove Service je autorizovaný servisní partner pro opravy a reklamace čalouněného nábytku s více než pětiletou zkušeností. Opravujeme kožené i látkové sedací soupravy, křesla a pohovky všech prémiových značek — bez ohledu na výrobce.
+         data-lang-cs="White Glove Service je autorizovaný servisní partner pro opravy a reklamace čalouněného nábytku s více než pětiletou zkušeností. Opravujeme kožené i látkové sedací soupravy, křesla a pohovky všech prémiových značek — bez ohledu na výrobce nebo zemi původu."
+         data-lang-en="White Glove Service is an authorized service partner for repairs and complaints of upholstered furniture with over five years of experience. We repair leather and fabric sofas, armchairs and couches of all premium brands — regardless of the manufacturer or country of origin."
+         data-lang-it="White Glove Service è un partner autorizzato per la riparazione e i reclami di mobili imbottiti con oltre cinque anni di esperienza. Ripariamo divani, poltrone e divanetti in pelle e tessuto di tutti i marchi premium — indipendentemente dal produttore o dal paese di origine.">
+        White Glove Service je autorizovaný servisní partner pro opravy a reklamace čalouněného nábytku s více než pětiletou zkušeností. Opravujeme kožené i látkové sedací soupravy, křesla a pohovky všech prémiových značek — bez ohledu na výrobce nebo zemi původu.
       </p>
       
       <p class="section-text"
-         data-lang-cs="Jsme certifikovaní technici s odbornou kvalifikací v oblasti čalounění, renovace kožených povrchů a oprav mechanismů relaxačních křesel. Naše dílna je vybavena profesionálním nářadím a pracujeme výhradně s originálními náhradními díly a materiály schválenými výrobcem."
-         data-lang-en="We are certified technicians with professional qualifications in upholstery, leather surface renovation and recliner mechanism repairs. Our workshop is equipped with professional tools and we work exclusively with original spare parts and materials approved by the manufacturer."
-         data-lang-it="Siamo tecnici certificati con qualifiche professionali nella tappezzeria, nel restauro di superfici in pelle e nella riparazione di meccanismi per poltrone reclinabili. La nostra officina è dotata di strumenti professionali e lavoriamo esclusivamente con ricambi e materiali originali approvati dal produttore.">
-        Jsme certifikovaní technici s odbornou kvalifikací v oblasti čalounění, renovace kožených povrchů a oprav mechanismů relaxačních křesel. Naše dílna je vybavena profesionálním nářadím a pracujeme výhradně s originálními náhradními díly a materiály schválenými výrobcem.
+         data-lang-cs="Jsme certifikovaní technici s odbornou kvalifikací v oblasti čalounění, renovace kožených povrchů a oprav mechanismů relaxačních křesel. Naše dílna je vybavena profesionálním nářadím a pracujeme výhradně s originálními náhradními díly a certifikovanými materiály schválenými přímo výrobcem."
+         data-lang-en="We are certified technicians with professional qualifications in upholstery, leather surface renovation and recliner mechanism repairs. Our workshop is equipped with professional tools and we work exclusively with original spare parts and certified materials approved directly by the manufacturer."
+         data-lang-it="Siamo tecnici certificati con qualifiche professionali nella tappezzeria, nel restauro di superfici in pelle e nella riparazione di meccanismi per poltrone reclinabili. La nostra officina è dotata di strumenti professionali e lavoriamo esclusivamente con ricambi originali e materiali certificati approvati direttamente dal produttore.">
+        Jsme certifikovaní technici s odbornou kvalifikací v oblasti čalounění, renovace kožených povrchů a oprav mechanismů relaxačních křesel. Naše dílna je vybavena profesionálním nářadím a pracujeme výhradně s originálními náhradními díly a certifikovanými materiály schválenými přímo výrobcem.
       </p>
       
       <p class="section-text"
-         data-lang-cs="Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku a poskytujeme servis i pro další prémiové značky. Naše služby jsou dostupné v celé České republice i na Slovensku s rychlou odezvou a flexibilním přístupem k zákazníkům."
-         data-lang-en="We cooperate with leading Czech and Slovak luxury furniture retailers and provide service for other premium brands. Our services are available throughout the Czech Republic and Slovakia with a quick response and flexible approach to customers."
-         data-lang-it="Collaboriamo con i principali rivenditori di mobili di lusso cechi e slovacchi e forniamo assistenza anche ad altri marchi premium. I nostri servizi sono disponibili in tutta la Repubblica Ceca e in Slovacchia, con una risposta rapida e un approccio flessibile al cliente.">
-        Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku a poskytujeme servis i pro další prémiové značky. Naše služby jsou dostupné v celé České republice i na Slovensku s rychlou odezvou a flexibilním přístupem k zákazníkům.
+         data-lang-cs="Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku a poskytujeme servis i pro další prémiové značky. Naše služby jsou dostupné v celé České republice i na Slovensku s rychlou odezvou a osobním přístupem ke každému zákazníkovi."
+         data-lang-en="We cooperate with leading Czech and Slovak luxury furniture retailers and provide service for other premium brands. Our services are available throughout the Czech Republic and Slovakia with a quick response and personal approach to every customer."
+         data-lang-it="Collaboriamo con i principali rivenditori di mobili di lusso cechi e slovacchi e forniamo assistenza anche ad altri marchi premium. I nostri servizi sono disponibili in tutta la Repubblica Ceca e in Slovacchia, con una risposta rapida e un approccio personale per ogni cliente.">
+        Spolupracujeme s předními českými a slovenskými prodejci luxusního nábytku a poskytujeme servis i pro další prémiové značky. Naše služby jsou dostupné v celé České republice i na Slovensku s rychlou odezvou a osobním přístupem ke každému zákazníkovi.
       </p>
     </div>
 
