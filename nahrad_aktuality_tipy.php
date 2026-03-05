@@ -85,13 +85,13 @@ Profesionální impregnace v naší dílně zahrnuje také ošetření švů a z
 
 ## CO DĚLAT KDYŽ SE KŮŽE ODÍRÁ NEBO PRASKÁ
 
-Odřená nebo popraskající kůže není nutně důvod k výměně celé sedačky. Lokální poškození — odřeniny na područkách, praskliny v záhybech nebo ztráta barvy — lze profesionálně opravit.
+Odřená nebo popraskající kůže není nutně důvod ke koupi nové sedačky. V takových případech je nejlepším krokem **kontaktovat výrobce nebo dodavatele nábytku** — u prémiových značek je totiž možné nechat vyměnit pouze potah přímo u zákazníka doma, bez nutnosti odvážet sedačku.
 
-Při opravě se použije speciální zálivková hmota v barvě kůže, která prasklinu vyplní a zpevní. Následuje přebarvení a ochranný lak. **Výsledek je vizuálně téměř nerozeznatelný** od originálního povrchu a výrazně levnější než výměna čalounění.
+Výměna potahu na místě je výrazně úspornější řešení než nákup nového kusu. Technik přiveze nový potah ve správné kůži a barevném provedení a provede výměnu v pohodlí vašeho domova. Celý zásah trvá zpravidla několik hodin.
 
-Nečekejte, až se popraskání rozšíří — čím dříve zasáhnete, tím levnější a jednodušší oprava bude.
+Pokud si nejste jisti, zda váš výrobce tuto možnost nabízí, obraťte se na prodejce — nebo nás kontaktujte, rádi vám poradíme, jak postupovat.
 
-[Poptávka opravy kůže](/novareklamace.php)
+[Kontaktovat nás pro poradenství](/novareklamace.php)
 EOT;
 
     $obsahEn1 = <<<'EOT'
@@ -118,13 +118,13 @@ Professional waterproofing at our workshop also includes treating seams and fold
 
 ## WHAT TO DO WHEN LEATHER WEARS OR CRACKS
 
-Worn or cracking leather is not necessarily a reason to replace the entire sofa. Local damage — worn armrests, cracks in folds or colour loss — can be professionally repaired.
+Worn or cracking leather is not necessarily a reason to buy a new sofa. In such cases, the best step is to **contact the furniture manufacturer or retailer** — with premium brands it is often possible to have only the cover replaced on-site at the customer's home, without the need to transport the sofa.
 
-During repair, a special filling compound in the colour of the leather is used to fill and strengthen the crack. This is followed by recolouring and a protective lacquer. **The result is visually almost indistinguishable** from the original surface and significantly cheaper than replacing the upholstery.
+On-site cover replacement is a significantly more economical solution than purchasing a new piece. The technician brings a new cover in the correct leather and colour specification and carries out the replacement in the comfort of your home. The entire procedure typically takes a few hours.
 
-Don't wait until the cracking spreads — the sooner you act, the cheaper and simpler the repair will be.
+If you are unsure whether your manufacturer offers this option, contact your retailer — or get in touch with us and we will be happy to advise you on how to proceed.
 
-[Request leather repair](/novareklamace.php)
+[Contact us for advice](/novareklamace.php)
 EOT;
 
     $obsahIt1 = <<<'EOT'
@@ -149,11 +149,13 @@ Applicare il prodotto uniformemente sulla pelle pulita e asciutta. Lasciare asso
 
 ## COSA FARE QUANDO LA PELLE SI CONSUMA O SI CREPOLA
 
-La pelle consumata o screpolata non è necessariamente un motivo per sostituire l'intero divano. I danni locali — braccioli consumati, crepe nelle pieghe o perdita di colore — possono essere riparati professionalmente.
+La pelle consumata o screpolata non è necessariamente un motivo per acquistare un nuovo divano. In questi casi, il passo migliore è **contattare il produttore o il rivenditore del mobile** — con i marchi premium è spesso possibile far sostituire solo il rivestimento direttamente a casa del cliente, senza necessità di trasportare il divano.
 
-Durante la riparazione viene utilizzato un composto di riempimento speciale nel colore della pelle, che riempie e rinforza la crepa. Segue la ricolorazione e una lacca protettiva. **Il risultato è visivamente quasi indistinguibile** dalla superficie originale e significativamente più economico della sostituzione della tappezzeria.
+La sostituzione del rivestimento in loco è una soluzione significativamente più economica rispetto all'acquisto di un nuovo pezzo. Il tecnico porta il nuovo rivestimento nella pelle e nella colorazione corretta e lo sostituisce comodamente a casa vostra. L'intera procedura richiede generalmente poche ore.
 
-[Richiesta riparazione pelle](/novareklamace.php)
+Se non siete sicuri che il vostro produttore offra questa opzione, contattate il rivenditore — o mettetevi in contatto con noi e saremo felici di consigliarvi su come procedere.
+
+[Contattateci per una consulenza](/novareklamace.php)
 EOT;
 
     $aktuality[] = [
