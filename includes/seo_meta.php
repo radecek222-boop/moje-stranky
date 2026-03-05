@@ -86,9 +86,9 @@ $seoKlicovaSlova = implode(', ', [
 // Konfigurace SEO pro jednotlive stranky - MAXIMALNI POKRYTI KLICOVYCH SLOV
 $seoStranky = [
     'index' => [
-        'title' => 'Oprava sedacky, kresla, pohovky, gauce | Servis nabytku Natuzzi | Praha, Brno, CR',
-        'description' => 'Profesionalni oprava a servis sedacek, kresel, pohovek znacky Natuzzi. Cisteni kozenych i latkovych sedacek. Precalouneni, renovace, reklamace. Oprava moderni sedacky, designove kreslo, rohova sedacka. Autorizovany servis Praha, Brno, cela CR. Tel: +420 725 965 826',
-        'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, oprava gauce, servis sedacky, servis nabytku, servis Natuzzi, cisteni sedacky, cisteni kozene sedacky, cisteni latkove sedacky, reklamace sedacky, reklamace nabytku, precalouneni sedacky, renovace sedacky, moderni sedacka, designova sedacka, trendy sedacka, luxusni sedacka, italska sedacka, rohova sedacka, kozena sedacka, latkova sedacka, rozkladaci sedacka, relaxacni kreslo, sedaci souprava, oprava mechanismu, oprava relaxu, cisteni koberce, koberec, polstare, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
+        'title' => 'Oprava sedacky, kresla, pohovky | Autorizovany servis Natuzzi | B2B partner pro reklamace | Praha, Brno, CR',
+        'description' => 'Profesionalni oprava a servis sedacek znacky Natuzzi. Autorizovany servisni partner pro prodejce, vyrobce a dovozce nabytku - prebirame kompletni reklamacni agendu. Cisteni, precalouneni, renovace. Praha, Brno, cela CR a SR. Tel: +420 725 965 826',
+        'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, servis Natuzzi, reklamace sedacky, reklamace nabytku, B2B partner reklamace, servisni partner prodejce nabytku, outsourcing reklamaci nabytku, reklamacni servis pro prodejce, smluvni servis nabytku, autorizovany servisni partner, servisni pokryti CR, technicke posudky nabytku, pozarucni servis nabytku, B2B spoluprace nabytek, cisteni kozene sedacky, precalouneni sedacky, renovace sedacky, moderni sedacka, rohova sedacka, kozena sedacka, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
         'canonical' => 'https://wgs-service.cz/',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
@@ -143,9 +143,9 @@ $seoStranky = [
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     'onas' => [
-        'title' => 'O nas - White Glove Service | Autorizovany servis Natuzzi | Praha, Brno',
-        'description' => 'White Glove Service - autorizovany servisni partner Natuzzi s vice nez 5 letou zkusenosti. Certifikovani technici, originalni dily, garance kvality. Servis po cele CR a SR.',
-        'keywords' => 'White Glove Service, WGS, autorizovany servis Natuzzi, servis nabytku Praha, servis nabytku Brno, certifikovani technici, originalni dily Natuzzi',
+        'title' => 'O nas - White Glove Service | B2B servisni partner pro prodejce nabytku | Autorizovany servis Natuzzi',
+        'description' => 'White Glove Service - autorizovany servisni partner Natuzzi. Hledate spolehlivou firmu pro reklamacni servis? Spolupracujeme s prodejci, vyrobci a dovozci caloune neho nabytku. Prebirame reklamacni agendu, zajistujeme technicke posudky a servisni zasahy po cele CR a SR.',
+        'keywords' => 'White Glove Service, WGS, autorizovany servis Natuzzi, B2B partner reklamace, servisni partner pro prodejce nabytku, outsourcing reklamaci, reklamacni servis outsourcing, spoluprace s prodejcem nabytku, smluvni servisni partner nabytek, servisni pokryti CR SR, technicke posudky nabytku, B2B spoluprace nabytek, servis nabytku Praha, servis nabytku Brno, certifikovani technici, originalni dily Natuzzi',
         'canonical' => 'https://wgs-service.cz/onas',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
@@ -455,6 +455,71 @@ function renderSchemaOrg($stranka = 'index') {
         ]
     ];
 
+    // B2B Service schema - pro stranky index a onas
+    $b2bSchema = null;
+    if ($stranka === 'index' || $stranka === 'onas') {
+        $b2bSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "Service",
+            "serviceType" => "B2B reklamacni servis a outsourcing",
+            "name" => "B2B spoluprace - reklamacni servis pro prodejce nabytku",
+            "description" => "Prebirame kompletni reklamacni agendu pro prodejce, vyrobce a dovozce calouneneho nabytku. Zajistujeme technicke posudky, servisni zasahy a opravy po cele CR a SR. Autorizovany servisni partner Natuzzi.",
+            "provider" => [
+                "@type" => "LocalBusiness",
+                "name" => "White Glove Service",
+                "url" => "https://wgs-service.cz",
+                "telephone" => "+420725965826",
+                "email" => "info@wgs-service.cz"
+            ],
+            "areaServed" => [
+                ["@type" => "Country", "name" => "Ceska republika"],
+                ["@type" => "Country", "name" => "Slovensko"]
+            ],
+            "audience" => [
+                "@type" => "Audience",
+                "audienceType" => "Prodejci, vyrobci a dovozci calouneneho nabytku"
+            ],
+            "hasOfferCatalog" => [
+                "@type" => "OfferCatalog",
+                "name" => "B2B servisni sluzby",
+                "itemListElement" => [
+                    [
+                        "@type" => "Offer",
+                        "itemOffered" => [
+                            "@type" => "Service",
+                            "name" => "Outsourcing reklamaci nabytku",
+                            "description" => "Kompletni prevzeti reklamacni agendy pro prodejce. Vyridi me reklamace za vas vcetne komunikace se zakaznikem."
+                        ]
+                    ],
+                    [
+                        "@type" => "Offer",
+                        "itemOffered" => [
+                            "@type" => "Service",
+                            "name" => "Technicke posudky nabytku",
+                            "description" => "Odborne technicke posudky pro uplatneni reklamaci vuci vyrobci. Certifikovani technici."
+                        ]
+                    ],
+                    [
+                        "@type" => "Offer",
+                        "itemOffered" => [
+                            "@type" => "Service",
+                            "name" => "Servisni zasahy u zakaznika",
+                            "description" => "Mobilni technici zajistujici servisni zasahy u koncovych zakazniku po cele CR a SR."
+                        ]
+                    ],
+                    [
+                        "@type" => "Offer",
+                        "itemOffered" => [
+                            "@type" => "Service",
+                            "name" => "Pozarucni servis pro prodejce",
+                            "description" => "Zajisteni pozarucnich oprav pro zakazniky prodejce. Transparentni cenik, rychle vyrizeni."
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
     // BreadcrumbList pro specificke stranky
     $breadcrumbs = null;
     switch ($stranka) {
@@ -507,6 +572,12 @@ function renderSchemaOrg($stranka = 'index') {
     if ($breadcrumbs !== null) {
         echo "  <script type=\"application/ld+json\">\n";
         echo "  " . json_encode($breadcrumbs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        echo "\n  </script>\n";
+    }
+
+    if ($b2bSchema !== null) {
+        echo "  <script type=\"application/ld+json\">\n";
+        echo "  " . json_encode($b2bSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         echo "\n  </script>\n";
     }
 }
