@@ -313,12 +313,18 @@ h6 {
   text-decoration: none;
   user-select: none;
   -webkit-user-select: none;
-  outline: none;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: none !important;
+  padding: 0 !important;
   -webkit-tap-highlight-color: transparent;
 }
 .partner-logo-polozka:hover,
 .partner-logo-polozka:focus {
-  outline: none;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 .partner-logo-polozka img {
   max-height: 38px;
