@@ -5014,7 +5014,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
-      const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
+      const smsText = data.sms_text || `Dobrý den,\n\npokoušeli jsme se Vás kontaktovat.\n\nNepodařilo se nám Vás zastihnout. Zavolejte prosím zpět na tel. +420 725 965 826.\n\nDěkujeme,\nWhite Glove Servis`;
 
       // Počkat 2 sekundy, aby technik viděl potvrzení, pak otevřít SMS aplikaci
       setTimeout(() => {
