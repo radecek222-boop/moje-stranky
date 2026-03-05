@@ -498,6 +498,13 @@ h6 {
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .services-section,
+  .content-section {
+    padding: 1.5rem 1rem;
+  }
+  .section-intro {
+    margin-bottom: 1rem;
+  }
 }
 @media (max-width: 600px) {
   .services-grid {
@@ -505,7 +512,7 @@ h6 {
   }
   .services-section,
   .content-section {
-    padding: 2rem 1rem;
+    padding: 1.2rem 1rem;
   }
   .section-title {
     font-size: 1rem;
