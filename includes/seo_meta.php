@@ -128,9 +128,9 @@ $seoStranky = [
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     'aktuality' => [
-        'title' => 'Aktuality Natuzzi | Novinky o luxusnim nabytku | Pece o sedacky a kresla | WGS',
-        'description' => 'Denne aktuality o znacce Natuzzi. Novinky o luxusnim italskem nabytku, tipy na peci o kozene sedacky a kresla, showroomy v CR. Jak cistit kozenou sedacku, udrzba luxusniho nabytku, trendy v designu sedacek.',
-        'keywords' => 'aktuality Natuzzi, novinky nabytek, luxusni nabytek novinky, pece o kozenou sedacku, jak cistit sedacku, udrzba kozene sedacky, tipy na peci o nabytek, Natuzzi showroom, italsky nabytek aktuality, trendy sedacky, designovy nabytek novinky, kozena sedacka pece, kreslo udrzba, pohovka cisteni, White Glove Service aktuality',
+        'title' => 'Naše tipy | Péče o nábytek, kůži a látku | Rady pro udržení kvality sedaček | WGS',
+        'description' => 'Praktické tipy jak pečovat o čalouněný nábytek. Jak čistit kůži, jak udržovat látkové sedačky, střídání sedu pro výplně, péče o mechanismy. Novinky z veletrhů nábytku a trendů interiérového designu.',
+        'keywords' => 'pece o kozenou sedacku, jak cistit kozenu sedacku, udrzba latkove sedacky, stridani sedu vycpavky, pece o calouneny nabytek, jak cistit sedacku doma, udrzba nabytku tipy, renovace kozene sedacky, pece o kreslo, cisteni nabytku, veletrh nabytku, trendy interier, tipy pece o nabytek, jak prodlouzit zivotnost sedacky, impregnace kůže sedačky',
         'canonical' => 'https://wgs-service.cz/aktuality',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
@@ -658,16 +658,24 @@ function renderFaqSchema($stranka = 'index') {
         ],
         'aktuality' => [
             [
-                'otazka' => 'Kde najdu showroom Natuzzi v Cesku?',
-                'odpoved' => 'Showroomy Natuzzi najdete v Praze (KARE Design, Centrum nabytku) a v Brne. Aktualni seznam a oteviraci doby najdete v nasich aktualitach nebo na oficialnim webu Natuzzi.'
+                'otazka' => 'Jak casto cistit kozenou sedacku?',
+                'odpoved' => 'Kozenou sedacku doporucujeme cistit specialnim pripravkem kazdych 3-6 mesicu. Pro beznou udrzbu staci vlhky hadrik. Pravidelna pece prodluzuje zivotnost kuze a zachovava jeji vzhled a pruznost.'
             ],
             [
-                'otazka' => 'Jak casto udrzovat kozenou sedacku?',
-                'odpoved' => 'Kozenou sedacku doporucujeme cistit a osetrit specialnim pripravkem kazdych 3-6 mesicu. Pravidelna udrzba prodluzuje zivotnost kuze a zachovava jeji vzhled.'
+                'otazka' => 'Jak pecovat o latkovou sedacku?',
+                'odpoved' => 'Latkovou sedacku vysavame pravidelne, skvrny odstranjujeme co nejdrive vlhkym hadirem. Jednou rocne doporucujeme hluboke cisteni parou nebo specialnim pripravkem na textil. Vyhybejte se mokremu cisteni bez navodu.'
             ],
             [
-                'otazka' => 'Jake jsou trendy v designu sedacek?',
-                'odpoved' => 'Aktualni trendy zahrnuji modularni sedacky, minimalisticky design, prirodni materialy a neutralni barvy. Natuzzi nabizi kolekce kombinujici italsky design s modernimi trendy.'
+                'otazka' => 'Jak prodlouzit zivotnost vycpavek sedacky?',
+                'odpoved' => 'Klicove je stridani mist sezeni - pokud sedite stale na stejnem miste, vycpavky se deformuji. Otacejte perne polstare, abyste rovnomerne rozlozili zatez. Vyhnete se sezeni na okrajich sedakunabytku.'
+            ],
+            [
+                'otazka' => 'Lze opravit popraskanu kuzi na sedacce?',
+                'odpoved' => 'Ano, popraskana kuze se da opravit. Mene rozsahle praskliny lze osetrit specialnim regeneracnim pripravkem na kuzi. Rozsahlejsi poskozeni resi profesionalni oprava nebo vymena panelu. Nechte nas posoudit stav - diagnostika je dostupna od 110 EUR.'
+            ],
+            [
+                'otazka' => 'Jake jsou trendy v designu nabytku?',
+                'odpoved' => 'Aktualni trendy zahrnuji modulovani sedacky, minimalisticky design, prirodni materialy jako kuze a lnen a neutralni barvy. Oblibene jsou take multi-funkcni kusy s uloznym prostorem a elektrickym polohovani.'
             ]
         ],
         // === FAQ PRO NOVE SEO LANDING PAGES ===

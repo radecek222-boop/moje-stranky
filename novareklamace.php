@@ -375,7 +375,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <div class="form-card">
     
     <?php if (!$isLoggedIn): ?>
-    <div id="calculatorBox" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #000000; background: #ffffff; display: none;">
+    <div id="calculatorBox" style="padding: 0.8rem 1rem; margin-bottom: 0.8rem; border: 2px solid #000000; background: #ffffff; display: none;">
       <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h2>
       <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;" data-lang-cs="Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky." data-lang-en="Calculate the preliminary price of out-of-warranty service including shipping before submitting your order." data-lang-it="Calcola il prezzo preliminare del servizio fuori garanzia inclusa la spedizione prima di inviare l'ordine.">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
       <a href="cenik.php#kalkulacka" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;" data-lang-cs="Kalkulačka ceny" data-lang-en="Price Calculator" data-lang-it="Calcolatore di Prezzo">Kalkulačka ceny</a>
@@ -383,14 +383,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <?php endif; ?>
 
     <?php if (!$isLoggedIn): ?>
-    <div id="modeInfo" style="display:none; padding: 0.8rem; margin-bottom: 1.5rem; border-left: 4px solid #555555; background: #f5f5f5; font-size: 0.85rem;">
+    <div id="modeInfo" style="display:none; padding: 0.5rem 0.8rem; margin-bottom: 0.6rem; border-left: 4px solid #555555; background: #f5f5f5; font-size: 0.85rem;">
       <strong id="modeTitle"></strong>
       <p id="modeDescription" style="margin-top: 0.4rem; color: #666;"></p>
     </div>
     <?php endif; ?>
 
     <?php if (!$isLoggedIn): ?>
-    <div id="calculationBox" style="display:none; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #555555; background: #f5f5f5;">
+    <div id="calculationBox" style="display:none; padding: 0.8rem 1rem; margin-bottom: 0.8rem; border: 2px solid #555555; background: #f5f5f5;">
       <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.8rem; color: #555555;">
         ✓ <span>Vaše kalkulace z cenové kalkulačky</span>
       </h3>
@@ -406,7 +406,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
       <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
       <?php if ($isLoggedIn): ?>
-      <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
+      <div id="povereniBox" style="padding: 0.8rem 1rem; margin-bottom: 0.8rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
         <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -417,7 +417,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           </svg>
           <span data-lang-cs="Pověření k reklamaci" data-lang-en="Power of Attorney for Claim" data-lang-it="Procura per Reclamo">Pověření k reklamaci</span>
         </h3>
-        <p style="color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.2rem;" data-lang-cs="Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce." data-lang-en="Upload the power of attorney from the seller for this claim in PDF format. The document will be attached to the order." data-lang-it="Carica la procura del venditore per questo reclamo in formato PDF. Il documento verrà allegato all'ordine.">
+        <p style="color: #555; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.6rem;" data-lang-cs="Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce." data-lang-en="Upload the power of attorney from the seller for this claim in PDF format. The document will be attached to the order." data-lang-it="Carica la procura del venditore per questo reclamo in formato PDF. Il documento verrà allegato all'ordine.">
           Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce.
         </p>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
@@ -470,7 +470,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
         <?php if ($isLoggedIn): ?>
         <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) - pouze pro přihlášené -->
-        <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
           <div style="display: flex; flex-direction: column;">
             <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
               <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
@@ -560,7 +560,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         </div>
 
         <?php if ($isLoggedIn): ?>
-        <div class="form-grid" style="margin-top:1.5rem;">
+        <div class="form-grid" style="margin-top:0.6rem;">
           <div class="form-group">
             <label class="form-label" for="info_prodejce" data-lang-cs="Doplňující informace od prodejce" data-lang-en="Additional Information from Seller" data-lang-it="Informazioni Aggiuntive dal Venditore">Doplňující informace od prodejce</label>
             <textarea class="form-control" id="doplnujici_info" name="doplnujici_info" data-lang-cs-placeholder="Doplňující informace od prodejce..." data-lang-en-placeholder="Additional information from seller..." data-lang-it-placeholder="Informazioni aggiuntive dal venditore..." placeholder="Doplňující informace od prodejce..."></textarea>

@@ -368,19 +368,14 @@ h6 {
   color: var(--wgs-white) !important;
 }
 .cta-text {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #888888 !important;
   margin-bottom: 1.5rem;
-  max-width: 900px;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
-  white-space: nowrap;
-}
-@media (max-width: 960px) {
-  .cta-text {
-    white-space: normal;
-    font-size: 0.8rem;
-  }
+  text-align: center;
+  display: block;
 }
 .cta-button {
   display: inline-block;
