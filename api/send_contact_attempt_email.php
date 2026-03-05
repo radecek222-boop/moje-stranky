@@ -238,7 +238,7 @@ try {
 
     // Fallback pokud SMS sablona neexistuje
     if (!$smsText) {
-        $smsText = "Dobry den {$customerName}, kontaktujeme Vas v zastoupeni Natuzzi ohledne servisni zakazky c. {$orderId}. Nepodarilo se nam Vas zastihnout. Zavolejte prosim zpet {$technicianName} na tel. {$technicianPhone}. Dekujeme, WGS Service";
+        $smsText = "Dobrý den {$customerName},\n\npokoušeli jsme se Vás kontaktovat ohledně servisní zakázky č. {$orderId}.\n\nNepodařilo se nám Vás zastihnout. Zavolejte prosím zpět techniku {$technicianName} na tel. {$technicianPhone}.\n\nDěkujeme,\nWhite Glove Servis";
     }
 
     // Přidání emailu do fronty

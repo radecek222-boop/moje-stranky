@@ -136,13 +136,13 @@ function closeWelcomeModal(userRole) {
 
       // Přesměrování podle role
       // Technici => seznam.php (vidět zakázky)
-      // Prodejci/ostatní => novareklamace.php (objednat servis)
+      // Prodejci/ostatní => objednatservis.php (objednat servis)
       const normalizedRole = (userRole || '').toLowerCase().trim();
 
       if (normalizedRole === 'technik' || normalizedRole === 'technician') {
         window.location.href = "seznam.php";
       } else {
-        window.location.href = "novareklamace.php";
+        window.location.href = "objednatservis.php";
       }
     }, 300);
   }

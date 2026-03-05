@@ -31,9 +31,9 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'analytics.php',
                 'header_label' => 'ANALYTICS',
             ],
-            'aktuality' => [
-                'href' => 'aktuality.php',
-                'header_label' => 'AKTUALITY',
+            'nasetipy' => [
+                'href' => 'nasetipy.php',
+                'header_label' => 'NAŠE TIPY',
             ],
             'dashboard' => [
                 'href' => 'admin.php',

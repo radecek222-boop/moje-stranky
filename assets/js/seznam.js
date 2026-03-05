@@ -2672,6 +2672,9 @@ async function saveSelectedDate() {
 function showContactMenu(id) {
   const phone = CURRENT_RECORD.telefon || '';
   const address = Utils.getAddress(CURRENT_RECORD);
+  const technikJmeno = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER.name) ? CURRENT_USER.name : 'Technik';
+
+  const textPrijedu = `Dobrý den,\n\njsem na cestě k vám na adresu:\n${address}\n\nohledně domluvené servisní návštěvy.\nPřijedu za zhruba 30 min podle situace v dopravě.\n\nTechnik ${technikJmeno}\nWhite Glove Servis`;
 
   const content = `
     ${createCustomerHeader()}
@@ -2679,10 +2682,11 @@ function showContactMenu(id) {
     <div class="modal-body">
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
-        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}" style="color: #dc3545;">NEZVEDA SMS</button>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
         ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
+        ${phone ? `<a href="sms:${phone}?body=${encodeURIComponent(textPrijedu)}" class="detail-btn detail-btn-primary" style="text-decoration: none;">PŘIJEDU ZA 30</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
       </div>
     </div>
@@ -5010,7 +5014,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
-      const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
+      const smsText = data.sms_text || `Dobrý den,\n\npokoušeli jsme se Vás kontaktovat.\n\nNepodařilo se nám Vás zastihnout. Zavolejte prosím zpět na tel. +420 725 965 826.\n\nDěkujeme,\nWhite Glove Servis`;
 
       // Počkat 2 sekundy, aby technik viděl potvrzení, pak otevřít SMS aplikaci
       setTimeout(() => {

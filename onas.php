@@ -248,7 +248,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Contattaci per una consulenza senza impegno o prenota un intervento di assistenza. Garantiamo una riparazione rapida e di alta qualità del tuo sedile.">
       Kontaktujte nás pro nezávaznou konzultaci nebo objednejte servisní zásah. Garantujeme rychlou a kvalitní opravu vaší sedačky.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Objednat servis"
        data-lang-en="Order Service"
        data-lang-it="Servizio di Ordinazione">Objednat servis</a>

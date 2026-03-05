@@ -92,11 +92,11 @@ $seoStranky = [
         'canonical' => 'https://wgs-service.cz/',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
-    'novareklamace' => [
+    'objednatservis' => [
         'title' => 'Objednat opravu sedacky, kresla, pohovky online | Reklamace Natuzzi | Servis nabytku',
         'description' => 'Objednejte opravu sedacky, kresla nebo pohovky online. Reklamace nabytku Natuzzi. Oprava kozene sedacky, latkove pohovky, designoveho kresla. Cisteni, precalouneni, renovace. Rychle vyrizeni Praha, Brno a okoli.',
         'keywords' => 'objednat opravu sedacky, objednat servis kresla, reklamace Natuzzi, oprava sedacky online, oprava kresla online, oprava pohovky online, servis nabytku online, formular reklamace, objednat cisteni sedacky, objednat precalouneni, moderni sedacka oprava, designove kreslo servis, rohova sedacka oprava, relaxacni kreslo servis, kozena sedacka cisteni, latkova pohovka oprava, Praha, Brno',
-        'canonical' => 'https://wgs-service.cz/novareklamace',
+        'canonical' => 'https://wgs-service.cz/objednatservis',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     'cenik' => [
@@ -127,11 +127,11 @@ $seoStranky = [
         'canonical' => 'https://wgs-service.cz/gdpr',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
-    'aktuality' => [
+    'nasetipy' => [
         'title' => 'Naše tipy | Péče o nábytek, kůži a látku | Rady pro udržení kvality sedaček | WGS',
         'description' => 'Praktické tipy jak pečovat o čalouněný nábytek. Jak čistit kůži, jak udržovat látkové sedačky, střídání sedu pro výplně, péče o mechanismy. Novinky z veletrhů nábytku a trendů interiérového designu.',
         'keywords' => 'pece o kozenou sedacku, jak cistit kozenu sedacku, udrzba latkove sedacky, stridani sedu vycpavky, pece o calouneny nabytek, jak cistit sedacku doma, udrzba nabytku tipy, renovace kozene sedacky, pece o kreslo, cisteni nabytku, veletrh nabytku, trendy interier, tipy pece o nabytek, jak prodlouzit zivotnost sedacky, impregnace kůže sedačky',
-        'canonical' => 'https://wgs-service.cz/aktuality',
+        'canonical' => 'https://wgs-service.cz/nasetipy',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
     // === NOVE SEO STRANKY PRO ORGANICKE VYHLEDAVANI ===
@@ -533,23 +533,23 @@ function renderSchemaOrg($stranka = 'index') {
                 ]
             ];
             break;
-        case 'novareklamace':
+        case 'objednatservis':
             $breadcrumbs = [
                 "@context" => "https://schema.org",
                 "@type" => "BreadcrumbList",
                 "itemListElement" => [
                     ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
-                    ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/novareklamace"]
+                    ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/objednatservis"]
                 ]
             ];
             break;
-        case 'aktuality':
+        case 'nasetipy':
             $breadcrumbs = [
                 "@context" => "https://schema.org",
                 "@type" => "BreadcrumbList",
                 "itemListElement" => [
                     ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
-                    ["@type" => "ListItem", "position" => 2, "name" => "Aktuality Natuzzi", "item" => "https://wgs-service.cz/aktuality"]
+                    ["@type" => "ListItem", "position" => 2, "name" => "Naše tipy", "item" => "https://wgs-service.cz/nasetipy"]
                 ]
             ];
             break;
@@ -638,7 +638,7 @@ function renderFaqSchema($stranka = 'index') {
                 'odpoved' => 'Diagnostika stoji 110 EUR a zahrnuje kompletni posouzeni stavu nabytku a detailni cenovou kalkulaci opravy. Pri realizaci opravy se cena diagnostiky odecita z celkove ceny.'
             ]
         ],
-        'novareklamace' => [
+        'objednatservis' => [
             [
                 'otazka' => 'Jak podat reklamaci na nabytek Natuzzi?',
                 'odpoved' => 'Reklamaci nabytku Natuzzi podejte pres nas online formular. Vyplnte kontaktni udaje, popis problemu a prilozte fotografie. Reklamaci vyridime jako autorizovany servis.'
@@ -656,7 +656,7 @@ function renderFaqSchema($stranka = 'index') {
                 'odpoved' => 'Ano, pri svozu nabytku je nutna pritomnost dospele osoby, ktera preda nabytek a podepise predavaci protokol. Termin svozu si domluvime predem.'
             ]
         ],
-        'aktuality' => [
+        'nasetipy' => [
             [
                 'otazka' => 'Jak casto cistit kozenou sedacku?',
                 'odpoved' => 'Kozenou sedacku doporucujeme cistit specialnim pripravkem kazdych 3-6 mesicu. Pro beznou udrzbu staci vlhky hadrik. Pravidelna pece prodluzuje zivotnost kuze a zachovava jeji vzhled a pruznost.'

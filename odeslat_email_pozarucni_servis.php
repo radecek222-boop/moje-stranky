@@ -89,7 +89,7 @@ function getEmailHTML($osloveni = 'Vážená paní, vážený pane,') {
                                 </div>
                             </div>
                             <div style='padding: 5px 30px 20px 30px; text-align: center;'>
-                                <a href='{$baseUrl}/novareklamace.php' style='display: inline-block; background: linear-gradient(135deg, #333 0%, #1a1a1a 100%); color: #ffffff; padding: 12px 35px; text-decoration: none; border-radius: 5px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;'>
+                                <a href='{$baseUrl}/objednatservis.php' style='display: inline-block; background: linear-gradient(135deg, #333 0%, #1a1a1a 100%); color: #ffffff; padding: 12px 35px; text-decoration: none; border-radius: 5px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;'>
                                     Objednat servis online
                                 </a>
                             </div>

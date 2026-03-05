@@ -937,7 +937,7 @@ $zemeNazvy = [
                     <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.3rem;">Stranka</label>
                     <select id="heatmap-page" style="width: 100%; padding: 0.6rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px;">
                         <option value="https://www.wgs-service.cz/" data-path="/">DOMU</option>
-                        <option value="https://www.wgs-service.cz/novareklamace" data-path="/novareklamace">OBJEDNAT SERVIS</option>
+                        <option value="https://www.wgs-service.cz/objednatservis" data-path="/objednatservis">OBJEDNAT SERVIS</option>
                         <option value="https://www.wgs-service.cz/nasesluzby" data-path="/nasesluzby">NASE SLUZBY</option>
                         <option value="https://www.wgs-service.cz/cenik" data-path="/cenik">CENIK</option>
                         <option value="https://www.wgs-service.cz/onas" data-path="/onas">O NAS</option>

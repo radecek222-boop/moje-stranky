@@ -211,6 +211,10 @@ h6 {
   margin-bottom: 0.9rem;
   text-align: left;
 }
+.section-intro .section-text {
+  text-align: justify;
+  text-align-last: left;
+}
 .section-text strong {
   color: var(--c-black);
   font-weight: 600;
