@@ -760,7 +760,7 @@ async function exportovatPDF() {
         // Renderovat pomocí html2canvas
         const canvas = await html2canvas(pdfContainer, {
             scale: 2,
-            backgroundColor: 'var(--wgs-white)',
+            backgroundColor: '#ffffff',
             useCORS: true,
             logging: false
         });

@@ -2225,8 +2225,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     <button class="view-toggle-btn" data-view="karty">KARTY</button>
     <span class="view-toggle-sep">|</span>
     <button class="view-toggle-btn" data-view="radky">ŘÁDKY</button>
-    <span class="view-toggle-sep">|</span>
-    <button class="view-toggle-btn" id="btnHromadneToggle" onclick="typeof hromadneZapnout === 'function' && (HROMADNE_MOD ? hromadneVypnout() : hromadneZapnout())">Výběr</button>
   </div>
 
   <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->

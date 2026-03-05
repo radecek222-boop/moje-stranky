@@ -700,7 +700,7 @@
             // Vyrenderovat pomocí html2canvas
             const canvas = await html2canvas(pdfWrapper, {
                 scale: 2,
-                backgroundColor: 'var(--wgs-white)',
+                backgroundColor: '#ffffff',
                 useCORS: true,
                 logging: false,
                 imageTimeout: 0,
