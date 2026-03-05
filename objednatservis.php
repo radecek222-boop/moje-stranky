@@ -5,6 +5,10 @@ require_once __DIR__ . '/includes/seo_meta.php';
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
+// Uživatelé s přístupem k funkci předvyplnění formuláře z PDF
+$povoleniUzivateleZPDF = ['natalie.vimrova@natuzzidesign.cz', 'simon.strejcek@natuzzidesign.cz'];
+$muzeNahratPovereniPDF = in_array(strtolower($_SESSION['user_email'] ?? ''), $povoleniUzivateleZPDF);
+
 // Bezpecnostni kontrola: CSRF token se generuje pouze pokud je session aktivni
 if (session_status() !== PHP_SESSION_ACTIVE) {
     die('Session neni aktivni. Obnovte stranku.');
@@ -404,8 +408,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <!-- FIX M-4: Pridat action attribute pro fallback (pokud JS selze) -->
     <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
 
-      <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
-      <?php if ($isLoggedIn): ?>
+      <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro vybrané uživatele -->
+      <?php if ($muzeNahratPovereniPDF): ?>
       <div id="povereniBox" style="padding: 0.8rem 1rem; margin-bottom: 0.8rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
         <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

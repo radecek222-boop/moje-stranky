@@ -23,9 +23,14 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     sendJsonError('Neplatný CSRF token', 403);
 }
 
-// Kontrola přihlášení - pouze pro přihlášené uživatele
+// Kontrola přihlášení a oprávnění
 if (!isset($_SESSION['user_id'])) {
     sendJsonError('Uživatel není přihlášen', 401);
+}
+
+$povoleniUzivateleZPDF = ['natalie.vimrova@natuzzidesign.cz', 'simon.strejcek@natuzzidesign.cz'];
+if (!in_array(strtolower($_SESSION['user_email'] ?? ''), $povoleniUzivateleZPDF)) {
+    sendJsonError('Přístup odepřen', 403);
 }
 
 // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
