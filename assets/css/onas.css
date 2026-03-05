@@ -209,7 +209,11 @@ h6 {
   color: var(--c-grey);
   line-height: 1.8;
   margin-bottom: 0.9rem;
+  text-align: left;
+}
+.section-intro .section-text {
   text-align: justify;
+  text-align-last: left;
 }
 .section-text strong {
   color: var(--c-black);
