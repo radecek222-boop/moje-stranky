@@ -191,7 +191,7 @@ h6 {
   background: transparent;
 }
 .section-intro {
-  max-width: 900px;
+  max-width: 760px;
   margin: 0 auto 2rem;
 }
 .section-title {
@@ -199,16 +199,17 @@ h6 {
   font-size: clamp(1.1rem, 2.5vw, 1.7rem);
   font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  text-align: center;
+  text-align: left;
 }
 .section-text {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--c-grey);
-  line-height: 1.7;
-  margin-bottom: 1rem;
+  line-height: 1.8;
+  margin-bottom: 0.9rem;
+  text-align: left;
 }
 .section-text strong {
   color: var(--c-black);
