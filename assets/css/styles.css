@@ -1147,7 +1147,7 @@ tbody tr:last-child td {
 footer,
 .footer {
   background-color: #0a0a0a !important;
-  color: #ffffff !important;
+  color: #666666 !important;
   font-family:
     "Poppins",
     system-ui,
@@ -1155,110 +1155,88 @@ footer,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif !important;
-  padding: 40px 0 0 0;
-  text-align: center;
-  border-top: 1px solid #1e1e1e;
-}
-footer h3,
-.footer h3,
-.footer-title {
-  color: #ffffff !important;
-  font-family:
-    "Poppins",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif !important;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #2a2a2a;
-}
-footer p,
-footer a,
-footer li,
-.footer p,
-.footer a,
-.footer li,
-.footer-text {
-  color: #999999 !important;
-  font-family:
-    "Poppins",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif !important;
-  font-weight: 400;
-  font-size: 0.8rem;
-  line-height: 1.7;
+  padding: 0;
+  border-top: 1px solid #1a1a1a;
 }
 footer a:hover,
 .footer a:hover {
-  color: #ffffff !important;
+  color: #cccccc !important;
 }
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  align-items: start;
-  text-align: left;
+.footer-radek {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 1.8rem;
+  padding: 18px 0;
+  border-bottom: 1px solid #141414;
 }
-.footer-column {
-  padding: 0 2rem 32px 2rem;
+.footer-znacka {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aaaaaa !important;
+  white-space: nowrap;
 }
-.footer-column:not(:last-child) {
-  border-right: 1px solid #1a1a1a;
+.footer-oddelovac {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background: #2a2a2a;
+  flex-shrink: 0;
 }
-.footer-column:first-child {
-  padding-left: 0;
+.footer-info {
+  font-size: 0.72rem;
+  color: #666666 !important;
+  white-space: nowrap;
 }
-.footer-column:last-child {
-  padding-right: 0;
+.footer-info a,
+footer .footer-link {
+  color: #666666 !important;
+  text-decoration: none;
+  font-size: 0.72rem;
+  transition: color 0.2s;
 }
-@media (max-width: 768px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .footer-column {
-    padding: 24px 0;
-    border-right: none !important;
-    border-bottom: 1px solid #1a1a1a;
-    text-align: center;
-  }
-  .footer-column:last-child {
-    border-bottom: none;
-  }
+.footer-info a:hover,
+footer .footer-link:hover {
+  color: #cccccc !important;
 }
 .footer-bottom {
-  border-top: 1px solid #1a1a1a;
-  margin-top: 0;
-  padding: 14px 0;
-  color: #555555 !important;
-  font-size: 0.72rem;
+  padding: 12px 0;
   text-align: center;
+  font-size: 0.68rem;
+  color: #444444 !important;
   letter-spacing: 0.02em;
 }
-.footer-bottom p {
-  color: #555555 !important;
-  font-size: 0.72rem !important;
-}
+.footer-bottom span,
 .footer-bottom a {
-  color: #666666 !important;
-  font-size: 0.72rem !important;
+  color: #444444 !important;
+  font-size: 0.68rem !important;
+  text-decoration: none;
 }
 .footer-bottom a:hover {
-  color: #aaaaaa !important;
+  color: #888888 !important;
+}
+@media (max-width: 768px) {
+  .footer-radek {
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 0;
+    text-align: center;
+  }
+  .footer-oddelovac {
+    display: none;
+  }
+  .footer-info {
+    white-space: normal;
+    text-align: center;
+  }
 }
 .admin-status {
   position: fixed;
@@ -1315,29 +1293,9 @@ footer a:hover,
   }
 }
 @media (max-width: 768px) {
-  footer,
-  .footer {
-    padding: 28px 0 0 !important;
-  }
-  footer h3,
-  .footer h3,
-  .footer-title {
-    font-size: 0.7rem !important;
-    margin-bottom: 10px !important;
-  }
-  footer p,
-  footer a,
-  footer li,
-  .footer p,
-  .footer a,
-  .footer li,
-  .footer-text {
-    font-size: 0.78rem !important;
-    line-height: 1.6 !important;
-  }
   .footer-bottom {
-    padding: 12px 0 !important;
-    font-size: 0.65rem !important;
+    padding: 10px 0 !important;
+    font-size: 0.62rem !important;
   }
 }
 /* WELCOME MODAL S VTIPEM */
