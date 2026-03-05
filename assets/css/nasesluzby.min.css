@@ -221,7 +221,8 @@ h6 {
   font-size: 0.9rem;
   color: var(--c-grey);
   line-height: 1.7;
-  margin-bottom: 1rem;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
