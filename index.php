@@ -40,6 +40,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
+  <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <!-- Analytics Tracker -->
@@ -72,6 +73,92 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
     <!-- Background image je nyní v CSS (.hero background-image) -->
   </section>
+
+<!-- SEKCE SLUŽEB -->
+<section class="services-section">
+  <div class="container">
+
+    <div class="section-intro">
+      <h2 class="section-title"
+          data-lang-cs="SERVIS A OPRAVY LUXUSNÍHO NÁBYTKU"
+          data-lang-en="LUXURY FURNITURE SERVICE AND REPAIRS"
+          data-lang-it="ASSISTENZA E RIPARAZIONI DI MOBILI DI LUSSO">SERVIS A OPRAVY LUXUSNÍHO NÁBYTKU</h2>
+      <p class="section-description"
+         data-lang-cs="Jsme autorizovaný servisní partner značek Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase. Provádíme opravy, reklamace a montáž luxusního nábytku v Praze, Brně, Bratislavě a po celé ČR a SR."
+         data-lang-en="We are an authorized service partner for Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly and Phase. We carry out repairs, complaints and installation of luxury furniture in Prague, Brno, Bratislava and throughout the Czech Republic and Slovakia."
+         data-lang-it="Siamo un partner autorizzato per Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly e Phase. Eseguiamo riparazioni, reclami e installazioni di mobili di lusso a Praga, Brno, Bratislava e in tutta la Repubblica Ceca e Slovacchia.">
+        Jsme autorizovaný servisní partner značek Natuzzi Italia, Natuzzi Editions, Natuzzi Softaly a Phase. Provádíme opravy, reklamace a montáž luxusního nábytku v Praze, Brně, Bratislavě a po celé ČR a SR.
+      </p>
+    </div>
+
+    <div class="services-grid">
+
+      <div class="service-card">
+        <h3 class="service-title"
+            data-lang-cs="Opravy a reklamace"
+            data-lang-en="Repairs and Complaints"
+            data-lang-it="Riparazioni e Reclami">Opravy a reklamace</h3>
+        <ul class="service-list">
+          <li data-lang-cs="Oprava kožených a látkových sedaček"
+              data-lang-en="Repair of leather and fabric sofas"
+              data-lang-it="Riparazione divani in pelle e tessuto">Oprava kožených a látkových sedaček</li>
+          <li data-lang-cs="Výměna mechanismů a nosných konstrukcí"
+              data-lang-en="Replacement of mechanisms and structures"
+              data-lang-it="Sostituzione meccanismi e strutture">Výměna mechanismů a nosných konstrukcí</li>
+          <li data-lang-cs="Reklamační řízení Natuzzi a dalších značek"
+              data-lang-en="Complaints procedure for Natuzzi and other brands"
+              data-lang-it="Procedura reclami Natuzzi e altri marchi">Reklamační řízení Natuzzi a dalších značek</li>
+          <li data-lang-cs="Posouzení škod pro pojišťovny"
+              data-lang-en="Damage assessment for insurance companies"
+              data-lang-it="Valutazione danni per assicurazioni">Posouzení škod pro pojišťovny</li>
+        </ul>
+      </div>
+
+      <div class="service-card">
+        <h3 class="service-title"
+            data-lang-cs="Montáž a instalace"
+            data-lang-en="Assembly and Installation"
+            data-lang-it="Montaggio e Installazione">Montáž a instalace</h3>
+        <ul class="service-list">
+          <li data-lang-cs="Montáž sedacích souprav a rohových sedaček"
+              data-lang-en="Assembly of sofas and corner sofas"
+              data-lang-it="Montaggio divani e divani angolari">Montáž sedacích souprav a rohových sedaček</li>
+          <li data-lang-cs="Instalace elektrických a manuálních mechanismů"
+              data-lang-en="Installation of electrical and manual mechanisms"
+              data-lang-it="Installazione meccanismi elettrici e manuali">Instalace elektrických a manuálních mechanismů</li>
+          <li data-lang-cs="Seřízení relaxačních funkcí křesel"
+              data-lang-en="Adjusting relaxation functions of chairs"
+              data-lang-it="Regolazione funzioni relax delle poltrone">Seřízení relaxačních funkcí křesel</li>
+          <li data-lang-cs="Dovoz a odborná přeprava nábytku"
+              data-lang-en="Delivery and professional transportation"
+              data-lang-it="Consegna e trasporto professionale">Dovoz a odborná přeprava nábytku</li>
+        </ul>
+      </div>
+
+      <div class="service-card">
+        <h3 class="service-title"
+            data-lang-cs="Poradenství a posudky"
+            data-lang-en="Consulting and Expert Opinions"
+            data-lang-it="Consulenza e Perizie">Poradenství a posudky</h3>
+        <ul class="service-list">
+          <li data-lang-cs="Znalecké posudky pro pojišťovny a soudy"
+              data-lang-en="Expert opinions for insurance companies and courts"
+              data-lang-it="Perizie per assicurazioni e tribunali">Znalecké posudky pro pojišťovny a soudy</li>
+          <li data-lang-cs="Odhad rozsahu škod a nákladů na opravu"
+              data-lang-en="Estimate of damage and repair costs"
+              data-lang-it="Stima danni e costi di riparazione">Odhad rozsahu škod a nákladů na opravu</li>
+          <li data-lang-cs="Konzultace při výběru sedací soupravy"
+              data-lang-en="Consultation when choosing a sofa"
+              data-lang-it="Consulenza nella scelta del divano">Konzultace při výběru sedací soupravy</li>
+          <li data-lang-cs="Doporučení péče o kožený nábytek"
+              data-lang-en="Leather furniture care recommendations"
+              data-lang-it="Consigli per la cura dei mobili in pelle">Doporučení péče o kožený nábytek</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
 
 
 </main>

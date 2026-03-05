@@ -37,6 +37,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/onas.min.css">
+  <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <!-- Analytics Tracker -->
@@ -165,6 +166,75 @@ require_once __DIR__ . '/includes/seo_meta.php';
   </div>
 </section>
 
+<!-- SEKCE ODKAZŮ NA KONKRÉTNÍ SLUŽBY -->
+<section class="sluzby-odkazy-sekce">
+  <div class="sluzby-odkazy-kontejner">
+
+    <h2 class="sluzby-odkazy-titulek"
+        data-lang-cs="Konkrétní služby"
+        data-lang-en="Specific Services"
+        data-lang-it="Servizi Specifici">Konkrétní služby</h2>
+
+    <div class="sluzby-odkazy-mrizka">
+
+      <a href="oprava-sedacky.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Oprava sedačky"
+            data-lang-en="Sofa Repair"
+            data-lang-it="Riparazione Divano">Oprava sedačky</h3>
+        <p data-lang-cs="Profesionální opravy sedaček, gaučů a pohovek. Kožené i látkové."
+           data-lang-en="Professional sofa, couch and settee repairs. Leather and fabric."
+           data-lang-it="Riparazioni professionali di divani e sofà. Pelle e tessuto.">Profesionální opravy sedaček, gaučů a pohovek. Kožené i látkové.</p>
+      </a>
+
+      <a href="oprava-kresla.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Oprava křesla"
+            data-lang-en="Armchair Repair"
+            data-lang-it="Riparazione Poltrona">Oprava křesla</h3>
+        <p data-lang-cs="Servis relaxačních a klasických křesel. Oprava mechanismu."
+           data-lang-en="Service for recliners and classic armchairs. Mechanism repair."
+           data-lang-it="Servizio per poltrone relax e classiche. Riparazione meccanismo.">Servis relaxačních a klasických křesel. Oprava mechanismu.</p>
+      </a>
+
+      <a href="servis-natuzzi.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Servis Natuzzi"
+            data-lang-en="Natuzzi Service"
+            data-lang-it="Servizio Natuzzi">Servis Natuzzi</h3>
+        <p data-lang-cs="Autorizovaný servis Natuzzi. Reklamace, opravy, originální díly."
+           data-lang-en="Authorized Natuzzi service. Warranty claims, repairs, original parts."
+           data-lang-it="Servizio Natuzzi autorizzato. Reclami, riparazioni, ricambi originali.">Autorizovaný servis Natuzzi. Reklamace, opravy, originální díly.</p>
+      </a>
+
+      <a href="pozarucni-servis.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Pozáruční servis"
+            data-lang-en="Out-of-Warranty Service"
+            data-lang-it="Servizio Fuori Garanzia">Pozáruční servis</h3>
+        <p data-lang-cs="Opravíme váš nábytek i po skončení záruky. Fer ceny."
+           data-lang-en="We repair your furniture even after the warranty expires. Fair prices."
+           data-lang-it="Ripariamo i vostri mobili anche dopo la scadenza della garanzia. Prezzi equi.">Opravíme váš nábytek i po skončení záruky. Fer ceny.</p>
+      </a>
+
+      <a href="neuznana-reklamace.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Zamítnutá reklamace?"
+            data-lang-en="Claim Not Covered?"
+            data-lang-it="Reclamo Non Coperto?">Zamítnutá reklamace?</h3>
+        <p data-lang-cs="Nabízíme cenově výhodnou opravu jako alternativu. Pomůžeme vám."
+           data-lang-en="We offer affordable repair as an alternative. We can help."
+           data-lang-it="Offriamo riparazione conveniente come alternativa. Possiamo aiutarti.">Nabízíme cenově výhodnou opravu jako alternativu. Pomůžeme vám.</p>
+      </a>
+
+      <a href="cenik.php" class="sluzba-odkaz-karta">
+        <h3 data-lang-cs="Ceník služeb"
+            data-lang-en="Price List"
+            data-lang-it="Listino Prezzi">Ceník služeb</h3>
+        <p data-lang-cs="Přehled cen a online kalkulačka ceny opravy."
+           data-lang-en="Price overview and online repair cost calculator."
+           data-lang-it="Panoramica prezzi e calcolatore online del costo di riparazione.">Přehled cen a online kalkulačka ceny opravy.</p>
+      </a>
+
+    </div>
+  </div>
+</section>
+
 <!-- CTA SEKCE -->
 <section class="cta-section">
   <div class="container">
@@ -183,9 +253,8 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-en="Order Service"
        data-lang-it="Servizio di Ordinazione">Objednat servis</a>
   </div>
-</main>
-</main>
 </section>
+</main>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 

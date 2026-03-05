@@ -18,6 +18,10 @@
     # Přesměrování debug/diagnostika nástrojů do /tools/
     # (staré záložky → nová umístění)
     # ======================================
+    # Přesměrování zrušené stránky nasesluzby na domovskou
+    RewriteRule ^nasesluzby(\.php)?$ / [R=301,L]
+    RewriteRule ^nasesluzby$ / [R=301,L]
+
     RewriteRule ^(debug_[^/]+\.php)$ /tools/$1 [R=301,L]
     RewriteRule ^(diagnostika_[^/]+\.php)$ /tools/$1 [R=301,L]
     RewriteRule ^(check_[^/]+\.php)$ /tools/$1 [R=301,L]
