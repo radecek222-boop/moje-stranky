@@ -141,7 +141,7 @@ body {
     padding: 0;
     margin-bottom: 0.6rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    overflow: hidden;
+    /* overflow: hidden odstraněno — jinak ořezává multiselect dropdown */
 }
 
 .filters-title {
@@ -152,10 +152,12 @@ body {
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     margin-bottom: 0;
+    border-radius: 8px 8px 0 0;
 }
 
 .filters-inner {
     padding: 0.65rem 0.85rem;
+    border-radius: 0 0 8px 8px;
 }
 
 .filters-grid {
@@ -179,18 +181,26 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* Tmavé inputy/selecty */
 .filter-select {
     padding: 0.4rem 0.6rem;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 0.85rem;
-    background: white;
+    background: #222;
+    color: #fff;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
 }
 
 .filter-select:focus {
     outline: none;
-    border-color: #333333;
+    border-color: #666;
+}
+
+.filter-select option {
+    background: #222;
+    color: #fff;
 }
 
 /* Multi-select checkboxy */
@@ -200,18 +210,20 @@ body {
 
 .multiselect-trigger {
     padding: 0.4rem 0.6rem;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
-    background: white;
+    background: #222;
+    color: #fff;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .multiselect-trigger:hover {
-    border-color: #333333;
+    border-color: #666;
 }
 
 .multiselect-dropdown {
@@ -219,15 +231,15 @@ body {
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
-    border: 1px solid #ddd;
+    background: #222;
+    border: 1px solid #444;
     border-radius: 4px;
     margin-top: 0.25rem;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 9999;
     display: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
 .multiselect-dropdown.active {
@@ -235,15 +247,17 @@ body {
 }
 
 .multiselect-option {
-    padding: 0.6rem;
+    padding: 0.45rem 0.6rem;
     display: flex;
     align-items: center;
     cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #333;
+    color: #fff;
+    font-size: 0.8rem;
 }
 
 .multiselect-option:hover {
-    background: #f9f9f9;
+    background: #2a2a2a;
 }
 
 .multiselect-option:last-child {
