@@ -529,7 +529,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
 
       if (result.status === 'success') {
         alert('Aktualita byla úspěšně vytvořena!\n\nBudete přesměrováni na stránku s aktualitami.');
-        window.location.href = 'aktuality.php?datum=' + formData.get('datum');
+        window.location.href = 'nasetipy.php?datum=' + formData.get('datum');
       } else {
         alert('Chyba: ' + result.message);
         submitBtn.disabled = false;

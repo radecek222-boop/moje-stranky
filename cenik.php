@@ -163,6 +163,12 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="result-box">
             <p><strong data-lang-cs="Vzdálenost z dílny:" data-lang-en="Distance from workshop:" data-lang-it="Distanza dall'officina:">Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
             <p><strong data-lang-cs="Dopravné (tam a zpět):" data-lang-en="Transportation (round trip):" data-lang-it="Trasporto (andata e ritorno):">Dopravné (tam a zpět):</strong> <span id="transport-cost" class="highlight-price">-</span> €</p>
+            <p style="font-size: 13px; color: #666; margin-top: 4px;"
+               data-lang-cs="Trasa tam a zpět do 100 km: paušál 20 € (cca 500 Kč). Nad 100 km: 0,28 €/km."
+               data-lang-en="Round trip up to 100 km: flat fee 20 € (approx. 500 CZK). Above 100 km: 0.28 €/km."
+               data-lang-it="Andata e ritorno fino a 100 km: tariffa fissa 20 € (circa 500 CZK). Oltre 100 km: 0,28 €/km.">
+              Trasa tam a zpět do 100 km: paušál 20 € (cca 500 Kč). Nad 100 km: 0,28 €/km.
+            </p>
           </div>
         </div>
 
@@ -390,6 +396,13 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
       </p>
 
+      <p class="section-text" style="border-left: 3px solid #333; padding-left: 15px; margin-top: 15px;">
+        <strong data-lang-cs="Dopravné:" data-lang-en="Transportation:" data-lang-it="Trasporto:">Dopravné:</strong>
+        <span data-lang-cs="Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km." data-lang-en="Round trip up to 100 km total: flat fee 500 CZK / 20 €. Above 100 km round trip: 0.28 €/km." data-lang-it="Andata e ritorno fino a 100 km totali: tariffa fissa 500 CZK / 20 €. Oltre 100 km andata e ritorno: 0,28 €/km.">
+          Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km.
+        </span>
+      </p>
+
       <p class="section-text note">
         <strong data-lang-cs="Poznámka:" data-lang-en="Note:" data-lang-it="Nota:">Poznámka:</strong> <span data-lang-cs="Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny. Pro přesnou cenovou nabídku nás prosím kontaktujte." data-lang-en="All prices are for labor WITHOUT material. Material is charged separately. The final price may be influenced by repair complexity, material availability, and distance from our workshop. For an accurate quote, please contact us." data-lang-it="Tutti i prezzi sono per la manodopera SENZA materiale. Il materiale viene addebitato separatamente. Il prezzo finale può essere influenzato dalla complessità della riparazione, dalla disponibilità del materiale e dalla distanza dalla nostra officina. Per un preventivo accurato, contattaci.">Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť.
         Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny.
@@ -535,7 +548,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<script src="assets/js/cenik-calculator.min.js" defer></script>
+<script src="assets/js/cenik-calculator.js?v=<?= filemtime(__DIR__ . '/assets/js/cenik-calculator.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>

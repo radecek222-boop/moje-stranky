@@ -1445,7 +1445,48 @@ async function showQrPlatbaModal(reklamaceId) {
     await ensureQrLibraryLoaded();
 
     // Vytvořit modal s QR kódem a editovatelnou částkou
-    const initialCastka = data.castka || 0;
+    // Počáteční částka: pokud je záloha uhrazena, zobrazit zbývající částku
+    const initialCastka = data.castka_platba ?? data.castka ?? 0;
+    const maZalohu = data.zf_uhrazena && data.zalohova_castka_czk > 0;
+    const zalohaOdeslana = data.zf_odeslana && !data.zf_uhrazena && data.zalohova_castka_czk > 0;
+
+    // Blok zálohy - zobrazit pouze pokud je ZF odeslána nebo uhrazena
+    const celkemCzk = data.nabidka_celkem_czk > 0 ? data.nabidka_celkem_czk : (data.castka || 0);
+    const celkemEur = data.nabidka_celkem_eur || 0;
+    const zalohaCzk = data.zalohova_castka_czk || 0;
+    const zalohaEur = data.zalohova_castka_eur || 0;
+    const doplatekCzk = data.doplatek_czk ?? (data.castka_platba || 0);
+    const doplatekEur = data.doplatek_eur ?? 0;
+
+    let zalohaBlok = '';
+    if (maZalohu) {
+      zalohaBlok = `
+        <div style="background: #111; border: 1px solid #39ff14; border-radius: 6px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.87rem;">
+          <div style="color: #39ff14; font-weight: bold; margin-bottom: 0.6rem; font-size: 0.9rem;">Vypocet doplatku (ZF uhrazena)</div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; padding-bottom: 0.35rem; border-bottom: 1px solid #222;">
+            <span style="color: #888;">Celkova cena zakázky:</span>
+            <span style="color: #ccc; font-weight: 500;">${celkemCzk.toLocaleString('cs-CZ')} Kč&nbsp;<span style="color:#666;">(${celkemEur.toFixed(2)} €)</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; padding-bottom: 0.35rem; border-bottom: 1px solid #222;">
+            <span style="color: #888;">Záloha za náhradní díly (uhrazeno):</span>
+            <span style="color: #aaa; font-weight: 500;">- ${zalohaCzk.toLocaleString('cs-CZ')} Kč&nbsp;<span style="color:#666;">(${zalohaEur.toFixed(2)} €)</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding-top: 0.1rem;">
+            <span style="color: #fff; font-weight: bold; font-size: 0.95rem;">Zbývá k doplacení:</span>
+            <span style="color: #39ff14; font-weight: bold; font-size: 0.95rem;">${doplatekCzk.toLocaleString('cs-CZ')} Kč&nbsp;<span style="font-size:0.8rem; color:#39ff14; opacity:0.8;">(${doplatekEur.toFixed(2)} €)</span></span>
+          </div>
+        </div>`;
+    } else if (zalohaOdeslana) {
+      zalohaBlok = `
+        <div style="background: #111; border: 1px solid #666; border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.88rem;">
+          <div style="color: #ccc; font-weight: bold; margin-bottom: 0.35rem;">Záloha (ZF) odeslána – čeká na úhradu</div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #888;">Výše zálohy za náhradní díly:</span>
+            <span style="color: #fff; font-weight: 500;">${zalohaCzk.toLocaleString('cs-CZ')} Kč&nbsp;<span style="color:#888;">(${zalohaEur.toFixed(2)} €)</span></span>
+          </div>
+        </div>`;
+    }
+
     const content = `
       ${createCustomerHeader()}
 
@@ -1454,6 +1495,7 @@ async function showQrPlatbaModal(reklamaceId) {
           <h3 style="color: #39ff14; margin: 0 0 0.5rem 0; font-size: 1.2rem;">QR kód pro platbu</h3>
           <p style="color: #888; margin: 0; font-size: 0.85rem;">Naskenujte QR kód bankovní aplikací</p>
         </div>
+        ${zalohaBlok}
 
         <!-- QR kód -->
         <div id="qrPlatbaContainer" style="
@@ -1604,8 +1646,8 @@ function regenerovatQrKod() {
         text: spdString,
         width: 220,
         height: 220,
-        colorDark: 'var(--wgs-black)',
-        colorLight: 'var(--wgs-white)',
+        colorDark: '#000000',
+        colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.L
       });
     }
@@ -2672,6 +2714,9 @@ async function saveSelectedDate() {
 function showContactMenu(id) {
   const phone = CURRENT_RECORD.telefon || '';
   const address = Utils.getAddress(CURRENT_RECORD);
+  const technikJmeno = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER.name) ? CURRENT_USER.name : 'Technik';
+
+  const textPrijedu = `Dobrý den,\n\njsem na cestě k vám na adresu:\n${address}\n\nohledně domluvené servisní návštěvy.\nPřijedu za zhruba 30 min podle situace v dopravě.\n\nTechnik ${technikJmeno}\nWhite Glove Servis`;
 
   const content = `
     ${createCustomerHeader()}
@@ -2679,10 +2724,11 @@ function showContactMenu(id) {
     <div class="modal-body">
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
-        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}" style="color: #ff2233; border: 2px solid #ff2233; box-shadow: 0 0 6px #ff2233, 0 0 14px rgba(255,34,51,0.7), 0 0 28px rgba(255,34,51,0.3);">NEZVEDA SMS</button>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
+        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none; color: #00aaff; border: 2px solid #00aaff; box-shadow: 0 0 6px #00aaff, 0 0 14px rgba(0,170,255,0.7), 0 0 28px rgba(0,170,255,0.3);" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
+        ${phone ? `<a href="sms:${phone}?body=${encodeURIComponent(textPrijedu)}" class="detail-btn detail-btn-primary" style="text-decoration: none; color: #39ff14; border: 2px solid #39ff14; box-shadow: 0 0 6px #39ff14, 0 0 14px rgba(57,255,20,0.7), 0 0 28px rgba(57,255,20,0.3);">PŘIJEDU ZA 30</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
       </div>
     </div>
@@ -5010,7 +5056,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
-      const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
+      const smsText = data.sms_text || `Dobrý den,\n\npokoušeli jsme se Vás kontaktovat.\n\nNepodařilo se nám Vás zastihnout. Zavolejte prosím zpět na tel. +420 725 965 826.\n\nDěkujeme,\nWhite Glove Servis`;
 
       // Počkat 2 sekundy, aby technik viděl potvrzení, pak otevřít SMS aplikaci
       setTimeout(() => {

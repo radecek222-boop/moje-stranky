@@ -129,10 +129,11 @@ h6 {
   position: relative;
   height: 85vh;
   display: flex;
-  align-items: center;
+  align-items: flex-end !important;
   justify-content: center;
   overflow: hidden;
   background: #000000;
+  padding-bottom: 14vh;
 }
 .hero::after {
   content: "";
@@ -150,7 +151,7 @@ h6 {
   z-index: var(--z-content, 2);
   text-align: center;
   max-width: 900px;
-  padding: 2rem;
+  padding: 2rem 2rem 5rem;
 }
 .hero-image {
   display: none;

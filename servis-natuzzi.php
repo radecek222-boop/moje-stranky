@@ -245,7 +245,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Contatta il servizio autorizzato. Gestiremo i reclami in garanzia, eseguiremo riparazioni o forniremo ricambi. Cura professionale per i vostri mobili Natuzzi.">
       Kontaktujte autorizovany servis. Vyridime reklamaci, provedeme opravu nebo zajistime nahradni dily. Profesionalni pece o vas nabytek Natuzzi.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Kontaktovat servis Natuzzi"
        data-lang-en="Contact Natuzzi Service"
        data-lang-it="Contatta Servizio Natuzzi">Kontaktovat servis Natuzzi</a>

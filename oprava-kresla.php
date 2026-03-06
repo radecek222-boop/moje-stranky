@@ -213,7 +213,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
        data-lang-it="Ordina la riparazione della poltrona online o contattaci. Organizzeremo il ritiro, eseguiremo la riparazione e la consegneremo. Servizio professionale con garanzia di 12 mesi.">
       Objednejte opravu kresla online nebo nas kontaktujte. Zajistime svoz, provedeme opravu a dovezeme zpet. Profesionalni servis s 12mesicni zarukou.
     </p>
-    <a href="novareklamace.php" class="cta-button"
+    <a href="objednatservis.php" class="cta-button"
        data-lang-cs="Objednat opravu kresla"
        data-lang-en="Order Armchair Repair"
        data-lang-it="Ordina Riparazione Poltrona">Objednat opravu kresla</a>

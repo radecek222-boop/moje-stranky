@@ -26,9 +26,9 @@
   "categories": ["business", "service", "productivity"],
   "shortcuts": [
     {
-      "name": "Nová reklamace",
-      "short_name": "Reklamace",
-      "url": "/novareklamace",
+      "name": "Objednat servis",
+      "short_name": "Servis",
+      "url": "/objednatservis",
       "icons": [{ "src": "./icon192.png", "sizes": "192x192" }]
     },
     {

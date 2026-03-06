@@ -86,7 +86,7 @@ if ($isAdmin) {
           </a>
         </div>
       <?php endif; ?>
-      <a href="/novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
+      <a href="/objednatservis.php" <?php if($current == "objednatservis.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="/seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/posudky.php" <?php if($current == "posudky.php") echo 'class="active" aria-current="page"'; ?>>POSUDKY</a>
       <a href="/hry.php" <?php if($current == "hry.php" || strpos($current, 'hry/') !== false) echo 'class="active" aria-current="page"'; ?> class="play-link" data-lang-cs="PLAY" data-lang-en="PLAY" data-lang-it="PLAY">PLAY<span class="play-badge" id="playBadge" style="display:none;">0</span></a>
@@ -118,10 +118,10 @@ if ($isAdmin) {
     else:
     ?>
       <a href="/" <?php if($current == "index.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="DOMŮ" data-lang-en="HOME" data-lang-it="CASA">DOMŮ</a>
-      <a href="/novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
+      <a href="/objednatservis.php" <?php if($current == "objednatservis.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="/cenik.php" <?php if($current == "cenik.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="CENÍK" data-lang-en="PRICE LIST" data-lang-it="LISTINO PREZZI">CENÍK</a>
 <a href="/onas.php" <?php if($current == "onas.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="O NÁS" data-lang-en="ABOUT US" data-lang-it="CHI SIAMO">O NÁS</a>
-      <a href="/aktuality.php" <?php if($current == "aktuality.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="NAŠE TIPY" data-lang-en="TIPS" data-lang-it="CONSIGLI">NAŠE TIPY</a>
+      <a href="/nasetipy.php" <?php if($current == "nasetipy.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="NAŠE TIPY" data-lang-en="TIPS" data-lang-it="CONSIGLI">NAŠE TIPY</a>
       <a href="/login.php" <?php if($current == "login.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština"><img src="/assets/img/flags/cz.svg" alt="Česká vlajka – přepnout jazyk webu na češtinu" width="24" height="16"></span>

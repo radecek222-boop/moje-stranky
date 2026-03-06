@@ -5,23 +5,27 @@ require_once __DIR__ . '/includes/seo_meta.php';
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
+// Uživatelé s přístupem k funkci předvyplnění formuláře z PDF
+$povoleniUzivateleZPDF = ['natalie.vimrova@natuzzidesign.cz', 'simon.strejcek@natuzzidesign.cz'];
+$muzeNahratPovereniPDF = in_array(strtolower($_SESSION['user_email'] ?? ''), $povoleniUzivateleZPDF);
+
 // Bezpecnostni kontrola: CSRF token se generuje pouze pokud je session aktivni
 if (session_status() !== PHP_SESSION_ACTIVE) {
     die('Session neni aktivni. Obnovte stranku.');
 }
 ?>
 <!DOCTYPE html>
-<html lang="cs" data-page="novareklamace">
+<html lang="cs" data-page="objednatservis">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <meta name="description" content="<?php echo getSeoDescription('novareklamace'); ?>">
+  <meta name="description" content="<?php echo getSeoDescription('objednatservis'); ?>">
   <meta name="theme-color" content="#000000">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
-  <?php renderSeoMeta('novareklamace'); ?>
-  <?php renderSchemaOrg('novareklamace'); ?>
-  <?php renderFaqSchema('novareklamace'); ?>
-  <title><?php echo getSeoTitle('novareklamace'); ?></title>
+  <?php renderSeoMeta('objednatservis'); ?>
+  <?php renderSchemaOrg('objednatservis'); ?>
+  <?php renderFaqSchema('objednatservis'); ?>
+  <title><?php echo getSeoTitle('objednatservis'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->
   <link rel="preconnect" href="https://unpkg.com">
@@ -35,8 +39,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/novareklamace.min.css">
-  <!-- novareklamace-mobile-fixes.css sloučen do novareklamace.min.css (Step 49) -->
+  <link rel="stylesheet" href="assets/css/objednatservis.min.css">
+  <!-- novareklamace-mobile-fixes.css sloučen do objednatservis.min.css (Step 49) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -404,8 +408,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <!-- FIX M-4: Pridat action attribute pro fallback (pokud JS selze) -->
     <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
 
-      <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
-      <?php if ($isLoggedIn): ?>
+      <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro vybrané uživatele -->
+      <?php if ($muzeNahratPovereniPDF): ?>
       <div id="povereniBox" style="padding: 0.8rem 1rem; margin-bottom: 0.8rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
         <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -653,7 +657,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/page-transitions.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
-<script src="assets/js/novareklamace.min.js?v=1764635649" defer></script>
+<script src="assets/js/objednatservis.min.js?v=1764635649" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>

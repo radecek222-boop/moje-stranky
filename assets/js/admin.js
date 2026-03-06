@@ -973,7 +973,7 @@ function loadClaimsModal() {
         </div>
         <div class="cc-actions">
             <a href="seznam.php" class="btn btn-sm">Otevřít seznam reklamací</a>
-            <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
+            <a href="objednatservis.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
         </div>
     \`;
 

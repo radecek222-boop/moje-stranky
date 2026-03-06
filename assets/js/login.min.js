@@ -361,7 +361,7 @@ async function handleUserLogin() {
           if (normalizedRole === 'technik' || normalizedRole === 'technician') {
             window.location.href = 'seznam.php';
           } else {
-            window.location.href = 'novareklamace.php';
+            window.location.href = 'objednatservis.php';
           }
         }, 1000);
       }

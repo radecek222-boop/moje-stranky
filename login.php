@@ -15,7 +15,7 @@ if (isset($_SESSION['user_id'])) {
             'seznam.php',
             'protokol.php',
             'statistiky.php',
-            'novareklamace.php',
+            'objednatservis.php',
             'admin.php'
         ];
         $redirectFile = basename($_GET['redirect']);
@@ -32,7 +32,7 @@ if (isset($_SESSION['user_id'])) {
     } elseif (!empty($_SESSION['is_admin'])) {
         header('Location: admin.php');
     } else {
-        header('Location: novareklamace.php');
+        header('Location: objednatservis.php');
     }
     exit;
 }
