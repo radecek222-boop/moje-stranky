@@ -494,26 +494,34 @@ body {
   font-size: 0.6rem;
   line-height: 1.1;
 }
-.modal-close {
+.modal-close,
+.modal-close-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #f0f0f0;
   border: none;
-  font-size: 1.5rem;
+  border-radius: 50%;
+  font-size: 1.1rem;
   cursor: pointer;
-  color: var(--c-grey);
+  color: #cc0000;
   line-height: 1;
-  padding: 0.3rem;
-  width: 32px;
-  height: 32px;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  z-index: 10;
 }
-.modal-close:hover {
-  color: var(--c-black);
-  background: var(--c-bg);
+.modal-close:hover,
+.modal-close-btn:hover {
+  background: #e0e0e0;
+  color: #990000;
 }
 .modal-body {
   padding: 2rem;
@@ -1522,14 +1530,16 @@ body {
     font-size: 0.7rem !important;
   }
 
-  /* Modal Close Button 44px */
+  /* Modal Close Button 44px - zvětšení pro dotyk */
   .modal-close-btn,
+  .modal-close,
   #detailOverlay .close-btn,
   .close-btn {
     width: 44px !important;
     height: 44px !important;
     min-width: 44px;
     min-height: 44px;
+    font-size: 1.3rem !important;
     border-radius: 50%;
     display: flex !important;
     align-items: center;

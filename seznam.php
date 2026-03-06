@@ -461,18 +461,19 @@ body.modal-open {
   position: relative !important; /* Pro absolutní pozici close tlačítka */
 }
 
-/* Tlačítko zavřít (X) v hlavičce - vždy viditelné */
+/* Tlačítko zpět (X) v hlavičce - kolečko s červeným křížkem */
 #detailOverlay .modal-close-btn {
   position: absolute !important;
-  top: 0.75rem !important;
-  right: 0.75rem !important;
-  width: 36px !important;
-  height: 36px !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
   border: none !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #cccccc !important;
-  font-size: 1.5rem !important;
-  font-weight: 300 !important;
+  background: #f0f0f0 !important;
+  color: #cc0000 !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
   line-height: 1 !important;
   cursor: pointer !important;
   border-radius: 50% !important;
@@ -485,12 +486,12 @@ body.modal-open {
 }
 
 #detailOverlay .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: #ffffff !important;
+  background: #e0e0e0 !important;
+  color: #990000 !important;
 }
 
 #detailOverlay .modal-close-btn:active {
-  background: rgba(255, 255, 255, 0.3) !important;
+  background: #d0d0d0 !important;
   transform: scale(0.95) !important;
 }
 
@@ -962,14 +963,16 @@ body.modal-open {
   border-top-color: #333333 !important;
 }
 
-/* Zavírací tlačítko */
+/* Zpět tlačítko - kolečko s červeným křížkem */
 #detailOverlay .modal-close {
-  color: #ffffff !important;
-  background: #333333 !important;
+  background: #f0f0f0 !important;
+  color: #cc0000 !important;
+  font-weight: 700 !important;
 }
 
 #detailOverlay .modal-close:hover {
-  background: #444444 !important;
+  background: #e0e0e0 !important;
+  color: #990000 !important;
 }
 
 /* Mapa - tmavé pozadí */
@@ -1782,12 +1785,13 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   }
 
   .modal-close {
-    width: 35px !important;
-    height: 35px !important;
-    font-size: 1.75rem !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    font-size: 1.3rem !important;
     top: 0.3rem !important;
     right: 0.3rem !important;
-    padding: 0.35rem !important;
+    padding: 0 !important;
   }
 
   /* Modal body - ultra kompaktní padding */
@@ -2246,7 +2250,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
      x-data="detailModal" x-init="init" @click="overlayClick">
   <div class="modal-content">
     <h2 id="detailModalTitle" class="sr-only">Detail reklamace</h2>
-    <button class="modal-close" data-action="closeDetail" @click="close" aria-label="Zavřít">×</button>
     <div id="modalContent"></div>
   </div>
 </div>
