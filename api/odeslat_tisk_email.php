@@ -97,15 +97,22 @@ try {
     $emailQueue = new EmailQueue($pdo);
     $predmet = 'Přehled zakázky ' . $cisloZakazky . ' – White Glove Service';
 
-    // Odeslat zákazníkovi
+    // Přidat do fronty
     $emailQueue->add($emailZakaznika, $predmet, $emailTelo);
 
-    // Odeslat kopii přihlášenému uživateli (pokud má platný email a liší se od zákazníka)
     if ($emailOdesílatele
         && filter_var($emailOdesílatele, FILTER_VALIDATE_EMAIL)
         && strtolower($emailOdesílatele) !== strtolower($emailZakaznika)
     ) {
         $emailQueue->add($emailOdesílatele, '[Kopie] ' . $predmet, $emailTelo);
+    }
+
+    // Okamžitě zpracovat frontu (nečekat na cron)
+    $vysledekFronty = $emailQueue->processQueue(5);
+
+    if ($vysledekFronty['sent'] === 0 && $vysledekFronty['processed'] > 0) {
+        error_log('odeslat_tisk_email.php: email zařazen do fronty, ale odeslání selhalo. processed=' . $vysledekFronty['processed'] . ' failed=' . $vysledekFronty['failed']);
+        sendJsonError('Email se nepodařilo odeslat. Zkontrolujte SMTP nastavení.');
     }
 
     $zprava = 'Email odeslán zákazníkovi (' . $emailZakaznika . ')';
