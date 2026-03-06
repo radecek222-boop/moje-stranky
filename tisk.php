@@ -449,6 +449,8 @@ function wygStav(string $stav): string {
                             <span class="cn-zf-odznak">Uhrazena</span>
                         <?php elseif ($nabidkaZfOdeslana): ?>
                             <span class="cn-zf-odznak">Odeslána</span>
+                        <?php else: ?>
+                            <br><span style="font-size:0.72rem; color:#999; font-style:italic;">nebylo požadováno / uhrazeno</span>
                         <?php endif; ?>
                     </td>
                     <td style="padding:0.5rem 0.75rem; text-align:right; font-weight:600;">- <?= number_format($zalohaEur, 2, ',', ' ') ?> €</td>
