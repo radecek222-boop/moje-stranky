@@ -2944,24 +2944,22 @@ async function showCustomerDetail(id) {
             <span style="color: #aaa; font-weight: 600;">Jméno:</span>
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-            <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-            <div style="position:relative;">
-              <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 2rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000; width:100%;" value="${phone}">
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Telefon:</span>
               <button onclick="
                 const tel = document.getElementById('edit_telefon').value;
-                if (tel) {
-                  navigator.clipboard.writeText(tel).then(() => {
-                    this.style.opacity = '0.4';
-                    setTimeout(() => { this.style.opacity = '1'; }, 1000);
-                  });
-                }
-              " title="Kopírovat číslo" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;padding:2px;cursor:pointer;opacity:0.5;line-height:1;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                if (tel) navigator.clipboard.writeText(tel).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                });
+              " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </div>
+            </span>
+            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
             <span style="color: #aaa; font-weight: 600;">Email:</span>
             <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
