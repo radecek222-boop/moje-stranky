@@ -443,10 +443,11 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
 
         // Vytvořit dialog HTML
         modal.innerHTML = `
-            <div class="wgs-confirm-dialog" style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+            <div class="wgs-confirm-dialog" style="position:relative;background: #1a1a1a; padding: 25px; border-radius: 12px;
                         max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                         border: 1px solid #333; text-align: center; font-family: 'Poppins', sans-serif;">
-                <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">${escapeHtml(titulek)}</h3>
+                <button type="button" id="wgsConfirmBtnX" style="position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border-radius:50%;background:rgba(180,180,180,0.25);color:#cc0000;border:none;font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+                <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600; padding-right: 2rem;">${escapeHtml(titulek)}</h3>
                 <p id="wgs-confirm-message" class="wgs-confirm-message" style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${escapeHtml(zprava)}</p>
                 <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: center;">
                     <button type="button" id="wgsConfirmBtnZrusit" class="wgs-confirm-btn wgs-confirm-cancel"
@@ -471,6 +472,7 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
         // Event listenery
         document.getElementById('wgsConfirmBtnZrusit')?.addEventListener('click', () => zavrit(false));
         document.getElementById('wgsConfirmBtnPotvrdit')?.addEventListener('click', () => zavrit(true));
+        document.getElementById('wgsConfirmBtnX')?.addEventListener('click', () => zavrit(false));
         modal.addEventListener('click', (e) => { if (e.target === modal) zavrit(false); });
 
         // Keyboard handler
