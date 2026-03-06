@@ -94,7 +94,9 @@ try {
         $nabidkaCelkemEur = floatval($nabidka['celkova_cena']);
         $polozky = json_decode($nabidka['polozky_json'], true) ?? [];
         foreach ($polozky as $polozka) {
-            if (($polozka['skupina'] ?? '') === 'dily') {
+            $jeNahradniDil = ($polozka['skupina'] ?? '') === 'dily'
+                || str_starts_with($polozka['nazev'] ?? '', 'Náhradní díl:');
+            if ($jeNahradniDil) {
                 $zalohaCastkaEur += floatval($polozka['cena']) * intval($polozka['pocet'] ?? 1);
             }
         }

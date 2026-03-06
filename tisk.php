@@ -98,7 +98,9 @@ try {
             $nabidkaZfUhrazena = !empty($nabidka['zf_uhrazena_at']);
             $nabidkaPolozky = json_decode($nabidka['polozky_json'] ?? '[]', true) ?? [];
             foreach ($nabidkaPolozky as $pol) {
-                if (($pol['skupina'] ?? '') === 'dily') {
+                $jeNahradniDil = ($pol['skupina'] ?? '') === 'dily'
+                    || str_starts_with($pol['nazev'] ?? '', 'Náhradní díl:');
+                if ($jeNahradniDil) {
                     $nabidkaZalohaEur += floatval($pol['cena']) * intval($pol['pocet'] ?? 1);
                 }
             }
@@ -432,31 +434,46 @@ function wygStav(string $stav): string {
             </tbody>
         </table>
 
+        <?php if ($zalohaEur > 0): ?>
+        <!-- Záloha + doplatek - výrazný blok -->
+        <div style="margin-top:1rem; border:2px solid #111; border-radius:4px; overflow:hidden;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td style="padding:0.5rem 0.75rem; color:#333;">Celková cena nabídky:</td>
+                    <td style="padding:0.5rem 0.75rem; text-align:right; font-weight:600;"><?= number_format($celkemEur, 2, ',', ' ') ?> €</td>
+                </tr>
+                <tr style="border-bottom:2px solid #111; background:#f5f5f5;">
+                    <td style="padding:0.5rem 0.75rem; color:#333;">
+                        Záloha – náhradní díly
+                        <?php if ($nabidkaZfUhrazena): ?>
+                            <span class="cn-zf-odznak">Uhrazena</span>
+                        <?php elseif ($nabidkaZfOdeslana): ?>
+                            <span class="cn-zf-odznak">Odeslána</span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="padding:0.5rem 0.75rem; text-align:right; font-weight:600;">- <?= number_format($zalohaEur, 2, ',', ' ') ?> €</td>
+                </tr>
+                <?php if ($nabidkaZfUhrazena): ?>
+                <tr style="background:#111;">
+                    <td style="padding:0.65rem 0.75rem; color:#fff; font-weight:700; font-size:1rem;">Zbývá k doplacení:</td>
+                    <td style="padding:0.65rem 0.75rem; text-align:right; color:#fff; font-weight:700; font-size:1rem;"><?= number_format($doplatekEur, 2, ',', ' ') ?> €<br><span style="font-size:0.75rem; font-weight:400; opacity:0.7;">cca <?= number_format($doplatekEur * 25, 0, ',', ' ') ?> Kč</span></td>
+                </tr>
+                <?php else: ?>
+                <tr>
+                    <td style="padding:0.65rem 0.75rem; color:#333; font-weight:700; font-size:1rem;">Celková cena nabídky:</td>
+                    <td style="padding:0.65rem 0.75rem; text-align:right; font-weight:700; font-size:1rem;"><?= number_format($celkemEur, 2, ',', ' ') ?> €</td>
+                </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+        <?php else: ?>
         <div class="cn-celkem-blok">
             <div class="cn-celkem-radek hlavni">
                 <span>Celková cena nabídky:</span>
                 <span><?= number_format($celkemEur, 2, ',', ' ') ?> €</span>
             </div>
-            <?php if ($zalohaEur > 0): ?>
-            <div class="cn-celkem-radek" style="color:#555;">
-                <span>
-                    Záloha za náhradní díly
-                    <?php if ($nabidkaZfUhrazena): ?>
-                        <span class="cn-zf-odznak">Uhrazena</span>
-                    <?php elseif ($nabidkaZfOdeslana): ?>
-                        <span class="cn-zf-odznak">Odeslána</span>
-                    <?php endif; ?>
-                </span>
-                <span><?= number_format($zalohaEur, 2, ',', ' ') ?> € (cca <?= number_format($zalohaEur * 25, 0, ',', ' ') ?> Kč)</span>
-            </div>
-            <?php if ($nabidkaZfUhrazena): ?>
-            <div class="cn-celkem-radek hlavni" style="border-top:1px solid #ccc;margin-top:0.3rem;padding-top:0.3rem;">
-                <span>Zbývá k doplacení:</span>
-                <span><?= number_format($doplatekEur, 2, ',', ' ') ?> € (cca <?= number_format($doplatekEur * 25, 0, ',', ' ') ?> Kč)</span>
-            </div>
-            <?php endif; ?>
-            <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
