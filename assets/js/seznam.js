@@ -2945,20 +2945,22 @@ async function showCustomerDetail(id) {
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
             <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-            <div style="display:flex;gap:0.4rem;align-items:center;">
-              <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000; flex:1;" value="${phone}">
+            <div style="position:relative;">
+              <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 2rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000; width:100%;" value="${phone}">
               <button onclick="
                 const tel = document.getElementById('edit_telefon').value;
                 if (tel) {
                   navigator.clipboard.writeText(tel).then(() => {
-                    const btn = this;
-                    const puvodni = btn.textContent;
-                    btn.textContent = 'Zkopírováno';
-                    btn.style.background = '#28a745';
-                    setTimeout(() => { btn.textContent = puvodni; btn.style.background = '#444'; }, 1500);
+                    this.style.opacity = '0.4';
+                    setTimeout(() => { this.style.opacity = '1'; }, 1000);
                   });
                 }
-              " style="background:#444;color:#fff;border:none;padding:0.25rem 0.6rem;border-radius:3px;font-size:0.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Kopírovat</button>
+              " title="Kopírovat číslo" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;padding:2px;cursor:pointer;opacity:0.5;line-height:1;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
             </div>
 
             <span style="color: #aaa; font-weight: 600;">Email:</span>
