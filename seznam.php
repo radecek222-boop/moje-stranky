@@ -451,7 +451,7 @@ body.modal-open {
 /* Hlavička modalu - větší a vše vycentrováno */
 #detailOverlay .modal-header {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
-  padding: 1.5rem 2rem !important;
+  padding: 0.6rem 1.5rem !important;
   text-align: center !important;
   border-bottom: 1px solid #333333 !important;
   display: flex !important;

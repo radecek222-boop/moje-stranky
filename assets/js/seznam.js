@@ -2885,6 +2885,11 @@ async function showCustomerDetail(id) {
         <!-- LEVÝ SLOUPEC: informace o zákazníkovi -->
         <div class="detail-sloupec-levy">
 
+          <!-- TLAČÍTKO ULOŽIT - nahoře na desktopu -->
+          <div class="detail-buttons-top">
+            <button class="detail-btn detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+          </div>
+
           <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
           <button id="btn-rozkrit-detail" onclick="
             const obsah = document.getElementById('rozkryvaci-detail');
@@ -2969,10 +2974,6 @@ async function showCustomerDetail(id) {
             <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
               </div>
             </div>
-          </div>
-
-          <div class="detail-buttons" style="margin-top: 0.5rem;">
-            <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
           </div>
 
         </div><!-- /levy sloupec -->

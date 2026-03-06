@@ -2287,6 +2287,26 @@ a.detail-btn-primary:active {
   }
 }
 
+/* Tlačítko Uložit nahoře - zelené */
+.detail-btn-ulozit {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+.detail-btn-ulozit:hover {
+  background: #218838;
+}
+
 /* Dvousloupcový layout detailu zákazníka */
 /* Přebití max-width: 400px z pravidla #detailOverlay .modal-body > * */
 #detailOverlay .modal-body > .detail-dvousloupce {
