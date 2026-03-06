@@ -119,8 +119,9 @@ try {
     error_log('odeslat_tisk_email.php chyba DB: ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
     sendJsonError('Chyba při zpracování požadavku');
 } catch (\Throwable $e) {
-    error_log('odeslat_tisk_email.php chyba: ' . get_class($e) . ': ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
-    sendJsonError('Chyba při odesílání emailu');
+    $podrobnost = get_class($e) . ': ' . $e->getMessage() . ' v ' . basename($e->getFile()) . ':' . $e->getLine();
+    error_log('odeslat_tisk_email.php chyba: ' . $podrobnost);
+    sendJsonError('Chyba: ' . $podrobnost);
 }
 
 /**
