@@ -163,6 +163,12 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="result-box">
             <p><strong data-lang-cs="Vzdálenost z dílny:" data-lang-en="Distance from workshop:" data-lang-it="Distanza dall'officina:">Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
             <p><strong data-lang-cs="Dopravné (tam a zpět):" data-lang-en="Transportation (round trip):" data-lang-it="Trasporto (andata e ritorno):">Dopravné (tam a zpět):</strong> <span id="transport-cost" class="highlight-price">-</span> €</p>
+            <p style="font-size: 13px; color: #666; margin-top: 4px;"
+               data-lang-cs="Trasa tam a zpět do 100 km: paušál 20 € (cca 500 Kč). Nad 100 km: 0,28 €/km."
+               data-lang-en="Round trip up to 100 km: flat fee 20 € (approx. 500 CZK). Above 100 km: 0.28 €/km."
+               data-lang-it="Andata e ritorno fino a 100 km: tariffa fissa 20 € (circa 500 CZK). Oltre 100 km: 0,28 €/km.">
+              Trasa tam a zpět do 100 km: paušál 20 € (cca 500 Kč). Nad 100 km: 0,28 €/km.
+            </p>
           </div>
         </div>
 
@@ -388,6 +394,13 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       <p class="section-text">
         Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026.
         Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
+      </p>
+
+      <p class="section-text" style="border-left: 3px solid #333; padding-left: 15px; margin-top: 15px;">
+        <strong data-lang-cs="Dopravné:" data-lang-en="Transportation:" data-lang-it="Trasporto:">Dopravné:</strong>
+        <span data-lang-cs="Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km." data-lang-en="Round trip up to 100 km total: flat fee 500 CZK / 20 €. Above 100 km round trip: 0.28 €/km." data-lang-it="Andata e ritorno fino a 100 km totali: tariffa fissa 500 CZK / 20 €. Oltre 100 km andata e ritorno: 0,28 €/km.">
+          Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km.
+        </span>
       </p>
 
       <p class="section-text note">
