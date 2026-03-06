@@ -2983,7 +2983,7 @@ async function showCustomerDetail(id) {
             <textarea id="edit_popis_problemu" class="detail-textarea-popis"
                       style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte popis problému od zákazníka"
-                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',this.scrollHeight+'px','important')">${Utils.escapeHtml(description)}</textarea>
+                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',(this.scrollHeight+12)+'px','important')">${Utils.escapeHtml(description)}</textarea>
           </div>
 
           <div style="margin-bottom: 0.75rem;">
@@ -2991,7 +2991,7 @@ async function showCustomerDetail(id) {
             <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
                       style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte doplňující informace od prodejce"
-                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',this.scrollHeight+'px','important')">${Utils.escapeHtml(doplnujici_info)}</textarea>
+                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',(this.scrollHeight+12)+'px','important')">${Utils.escapeHtml(doplnujici_info)}</textarea>
           </div>
 
         </div><!-- /pravy sloupec -->
@@ -3022,7 +3022,7 @@ async function showCustomerDetail(id) {
         ta.style.setProperty('min-height', '0', 'important');
         ta.style.setProperty('height', 'auto', 'important');
         void ta.offsetHeight; // vynutí reflow před měřením scrollHeight
-        ta.style.setProperty('height', ta.scrollHeight + 'px', 'important');
+        ta.style.setProperty('height', (ta.scrollHeight + 12) + 'px', 'important');
       }
     });
   }, 400);
