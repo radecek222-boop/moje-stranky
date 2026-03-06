@@ -1943,10 +1943,10 @@ function showCalendar(id) {
   const content = `
     ${createCustomerHeader('showDetail')}
 
-    <!-- Vybraný termín - fixní nad kalendářem, s tlačítkem Uložit -->
-    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; margin: 0 1rem; border-radius: 4px; font-family: inherit; flex-direction: row; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem 0.75rem;">
-      <span id="selectedDateText" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
-      <button data-action="saveSelectedDate" style="flex-shrink: 0; background: #39ff14; color: #000; border: none; border-radius: 4px; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap;">Uložit</button>
+    <!-- Vybraný termín - fixní nad kalendářem -->
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0 1rem;">
+      <div id="selectedDateDisplay" style="display: none; flex: 1; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+      <button id="btnUlozitTerminHore" data-action="saveSelectedDate" style="display: none; background: #39ff14; color: #000; border: none; padding: 0.4rem 1rem; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; white-space: nowrap; font-family: inherit; letter-spacing: 0.03em; flex-shrink: 0;">Uložit</button>
     </div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
