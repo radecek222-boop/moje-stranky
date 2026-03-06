@@ -181,13 +181,33 @@
             it: 'Da'
         };
 
+        // Kurz EUR → CZK
+        const KURZ_EUR_CZK = 25;
+
+        function formatCZK(eur) {
+            const czk = Math.round(parseFloat(eur) * KURZ_EUR_CZK);
+            return czk.toLocaleString('cs-CZ') + ' Kč';
+        }
+
+        function formatEUR(val, jednotka) {
+            return `${parseFloat(val) % 1 === 0 ? parseInt(val) : parseFloat(val)} ${jednotka}`;
+        }
+
         if (item.price_from && item.price_to) {
-            priceEl.innerHTML = `${item.price_from} - ${item.price_to} ${item.price_unit}`;
+            const eurText = `${formatEUR(item.price_from, item.price_unit)} – ${formatEUR(item.price_to, item.price_unit)}`;
+            const czkFrom = formatCZK(item.price_from);
+            const czkTo = formatCZK(item.price_to);
+            priceEl.innerHTML = `<span class="cena-eur">${eurText}</span><span class="cena-czk">${czkFrom} – ${czkTo}</span>`;
         } else if (item.price_from) {
             priceEl.className += ' range';
-            priceEl.innerHTML = `${odPrefix[jazyk] || 'Od'} ${item.price_from} ${item.price_unit}`;
+            const prefix = odPrefix[jazyk] || 'Od';
+            const eurText = `${prefix} ${formatEUR(item.price_from, item.price_unit)}`;
+            const czkText = formatCZK(item.price_from);
+            priceEl.innerHTML = `<span class="cena-eur">${eurText}</span><span class="cena-czk">${prefix} ${czkText}</span>`;
         } else if (item.price_to) {
-            priceEl.innerHTML = `${item.price_to} ${item.price_unit}`;
+            const eurText = formatEUR(item.price_to, item.price_unit);
+            const czkText = formatCZK(item.price_to);
+            priceEl.innerHTML = `<span class="cena-eur">${eurText}</span><span class="cena-czk">${czkText}</span>`;
         }
 
         headerEl.appendChild(nameEl);
