@@ -64,7 +64,7 @@ try {
             LIMIT 1
         ');
         $nStmt->execute([':rid' => $reklamaceId]);
-        $nabidka = $nStmt->fetch(PDO::FETCH_ASSOC);
+        $nabidka = $nStmt->fetch(PDO::FETCH_ASSOC) ?: null;
         if ($nabidka) {
             $nabidkaPolozky = json_decode($nabidka['polozky_json'] ?? '[]', true) ?? [];
             foreach ($nabidkaPolozky as $pol) {
@@ -119,9 +119,8 @@ try {
     error_log('odeslat_tisk_email.php chyba DB: ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
     sendJsonError('Chyba při zpracování požadavku');
 } catch (\Throwable $e) {
-    $podrobnost = get_class($e) . ': ' . $e->getMessage() . ' v ' . basename($e->getFile()) . ':' . $e->getLine();
-    error_log('odeslat_tisk_email.php chyba: ' . $podrobnost);
-    sendJsonError('Chyba: ' . $podrobnost);
+    error_log('odeslat_tisk_email.php chyba: ' . get_class($e) . ': ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
+    sendJsonError('Chyba při odesílání emailu');
 }
 
 /**
