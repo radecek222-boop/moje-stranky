@@ -187,10 +187,11 @@ body {
     border: 1px solid #444;
     border-radius: 4px;
     font-size: 0.85rem;
-    background: #222;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    background: #000;
     color: #fff;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
 }
 
 .filter-select:focus {
@@ -199,8 +200,10 @@ body {
 }
 
 .filter-select option {
-    background: #222;
+    background: #000;
     color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
 
 /* Multi-select checkboxy */
@@ -212,7 +215,7 @@ body {
     padding: 0.4rem 0.6rem;
     border: 1px solid #444;
     border-radius: 4px;
-    background: #222;
+    background: #000;
     color: #fff;
     cursor: pointer;
     display: flex;
@@ -220,6 +223,7 @@ body {
     align-items: center;
     font-size: 0.85rem;
     font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
 
 .multiselect-trigger:hover {
@@ -231,7 +235,7 @@ body {
     top: 100%;
     left: 0;
     right: 0;
-    background: #222;
+    background: #000;
     border: 1px solid #444;
     border-radius: 4px;
     margin-top: 0.25rem;
@@ -239,7 +243,7 @@ body {
     overflow-y: auto;
     z-index: 9999;
     display: none;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
 }
 
 .multiselect-dropdown.active {
@@ -251,13 +255,15 @@ body {
     display: flex;
     align-items: center;
     cursor: pointer;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #222;
     color: #fff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
 
 .multiselect-option:hover {
-    background: #2a2a2a;
+    background: #111;
 }
 
 .multiselect-option:last-child {
@@ -273,6 +279,8 @@ body {
     cursor: pointer;
     flex: 1;
     font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
 
 /* Akční tlačítka */
