@@ -489,14 +489,23 @@ h6 {
   }
   .hero {
     height: auto;
-    min-height: 95vh;
-    padding: 3rem 0;
+    min-height: 60vh;
+    padding: 1rem 0;
+  }
+  .hero-subtitle {
+    margin-bottom: 1rem;
+  }
+  .hero-description {
+    margin: 0 auto 2rem;
+  }
+  .hero-title {
+    margin: 0.5rem 0;
   }
   .hero::after {
     background: transparent;
   }
   .hero-content {
-    padding: 2rem 1rem;
+    padding: 1rem 1.5rem;
   }
   /* Footer kompaktni na mobilech */
   .footer {
