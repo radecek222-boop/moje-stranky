@@ -355,96 +355,114 @@ if ($reklamaceId > 0) {
             width: 100%;
             border-collapse: collapse;
         }
-        .nabidky-tabulka th,
-        .nabidky-tabulka td {
-            padding: 8px 10px;
-            text-align: left;
-            vertical-align: top;
-        }
         .nabidky-tabulka th {
-            background: #1a1a1a;
-            color: #fff;
-            font-weight: 500;
-            font-size: 0.7rem;
+            padding: 10px 12px;
+            text-align: left;
+            background: #111;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.68rem;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.06em;
             white-space: nowrap;
-            border-bottom: 2px solid #333;
+            border-bottom: 1px solid #2a2a2a;
         }
         .nabidky-tabulka td {
-            font-size: 0.75rem;
-            background: #fff;
-            color: #333;
-            border-bottom: 1px solid #eee;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 0.82rem;
+            background: #0d0d0d;
+            color: #ccc;
+            border-bottom: 1px solid #1e1e1e;
         }
         .nabidky-tabulka tr:hover td {
-            background: #f8f8f8;
+            background: #161616;
         }
-        .nabidka-cena {
-            font-weight: 700;
-            color: #dc3545 !important;
+        .nabidky-tabulka tbody tr:first-child td {
+            border-top: none;
+        }
+        .nabidka-cn {
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: #888;
             white-space: nowrap;
         }
-        .stav-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+        .nabidka-zakaznik {
             font-weight: 500;
+            color: #ddd;
         }
-        .stav-nova { background: #eee; color: #666; }
-        .stav-odeslana { background: #ddd; color: #555; }
-        .stav-potvrzena { background: #333; color: #fff; }
+        .nabidka-cena {
+            font-weight: 600;
+            color: #eee;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .nabidka-platnost {
+            color: #555;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
 
         /* Workflow kroky */
         .workflow-container {
             display: flex;
             gap: 3px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
         }
         .workflow-btn {
-            padding: 3px 6px;
-            border: 1px solid #666;
+            padding: 3px 7px;
+            border: 1px solid #2e2e2e;
             border-radius: 3px;
-            background: #888;
-            color: #fff;
-            font-size: 0.65rem;
+            background: #1c1c1c;
+            color: #555;
+            font-size: 0.63rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
             white-space: nowrap;
+            font-family: inherit;
         }
         .workflow-btn:hover {
-            border-color: #999;
-            background: #777;
+            border-color: #444;
+            color: #aaa;
+            background: #222;
         }
         .workflow-btn.aktivni {
-            background: #1a1a1a;
-            border: 2px solid #39ff14;
-            color: #fff;
-            box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+            background: #111;
+            border: 1px solid #39ff14;
+            color: #39ff14;
+            box-shadow: 0 0 6px rgba(57, 255, 20, 0.25);
         }
         .workflow-btn.auto {
             cursor: default;
-            opacity: 0.7;
         }
-        .workflow-btn.auto.aktivni {
-            opacity: 1;
+        .workflow-btn.auto:hover {
+            background: #1c1c1c;
+            border-color: #2e2e2e;
+            color: #555;
+        }
+        .workflow-btn.auto.aktivni:hover {
+            background: #111;
+            border-color: #39ff14;
+            color: #39ff14;
         }
 
         /* Tlačítko smazat */
         .btn-smazat {
             padding: 4px 8px;
             background: transparent;
-            border: 1px solid #dc3545;
+            border: 1px solid #333;
             border-radius: 3px;
-            color: #dc3545;
+            color: #555;
             font-size: 0.7rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
         .btn-smazat:hover {
             background: #dc3545;
+            border-color: #dc3545;
             color: #fff;
         }
 
@@ -751,20 +769,20 @@ tým White Glove Service</textarea>
 
         <!-- Seznam nabídek -->
         <section class="nabidka-section" id="section-seznam">
-            <div class="form-card">
+            <div style="border: 1px solid #222; border-radius: 10px; overflow: hidden;">
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th style="width: 120px; white-space: nowrap;">CN</th>
-                            <th style="width: 200px;">Zákazník</th>
-                            <th style="width: 90px;">Cena</th>
-                            <th style="white-space: nowrap;">Workflow</th>
+                            <th style="width: 130px;">CN</th>
+                            <th style="width: 180px;">Zákazník</th>
+                            <th style="width: 100px;">Cena</th>
+                            <th>Workflow</th>
                             <th style="width: 90px;">Platnost</th>
-                            <th style="width: 60px;">Akce</th>
+                            <th style="width: 46px;">Akce</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
-                        <tr><td colspan="6" style="text-align: center; color: #666;">Načítám...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: #555; padding: 30px;">Načítám...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2224,8 +2242,8 @@ tým White Glove Service</textarea>
                 const jeFaUhrazena = !!n.fa_uhrazena_at;
 
                 html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
-                    <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
-                    <td>${n.zakaznik_jmeno}</td>
+                    <td class="nabidka-cn">${n.cislo_nabidky || n.id}</td>
+                    <td class="nabidka-zakaznik">${n.zakaznik_jmeno}</td>
                     <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${ziskejSymbolMeny(n.mena)}</td>
                     <td>
                         <div class="workflow-container">
@@ -2265,7 +2283,7 @@ tým White Glove Service</textarea>
                             </button>
                         </div>
                     </td>
-                    <td style="color: #888; font-size: 0.85rem;">${platnost}</td>
+                    <td class="nabidka-platnost">${platnost}</td>
                     <td>
                         <button class="btn-smazat" onclick="smazatNabidku(${n.id}, '${n.cislo_nabidky || n.id}', event)" title="Smazat nabídku">
                             X
