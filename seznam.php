@@ -120,7 +120,7 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 1.5rem !important;
   }
   #detailOverlay .modal-content {
-    max-width: 560px !important;
+    max-width: 800px !important;
     width: 100% !important;
     max-height: 88vh !important;
     overflow-y: auto !important;
