@@ -2951,6 +2951,14 @@ async function showCustomerDetail(id) {
                 if (tel) navigator.clipboard.writeText(tel).then(() => {
                   this.style.filter = 'brightness(2)';
                   setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
               " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
