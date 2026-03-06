@@ -758,7 +758,7 @@ h6 {
   background: #fff;
   color: #000;
   border: none;
-  padding: 0.9rem 2.5rem;
+  padding: 0.55rem 2.5rem;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
