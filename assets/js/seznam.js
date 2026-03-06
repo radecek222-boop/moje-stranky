@@ -3853,11 +3853,17 @@ function showTextOverlay(fieldName) {
   overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem;';
 
   const contentBox = document.createElement('div');
-  contentBox.style.cssText = 'background: white; padding: 1.5rem; border-radius: 6px; max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column;';
+  contentBox.style.cssText = 'position:relative;background: white; padding: 1.5rem; border-radius: 6px; max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column;';
   contentBox.onclick = (e) => e.stopPropagation();
 
+  const btnXText = document.createElement('button');
+  btnXText.innerHTML = '&times;';
+  btnXText.style.cssText = 'position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border-radius:50%;background:rgba(180,180,180,0.25);color:#cc0000;border:none;font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;';
+  btnXText.onclick = () => { overlay.remove(); document.removeEventListener('keydown', escTextHandler); };
+  contentBox.appendChild(btnXText);
+
   const header = document.createElement('div');
-  header.style.cssText = 'font-weight: 600; font-size: 1rem; color: #1a1a1a; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #dee2e6;';
+  header.style.cssText = 'font-weight: 600; font-size: 1rem; color: #1a1a1a; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #dee2e6; padding-right: 2rem;';
   header.textContent = nadpis;
 
   const textareaWrapper = document.createElement('div');
@@ -3916,7 +3922,7 @@ function showTextOverlay(fieldName) {
   const cancelBtn = document.createElement('button');
   cancelBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer;';
   cancelBtn.textContent = t('cancel');
-  cancelBtn.onclick = () => overlay.remove();
+  cancelBtn.onclick = () => { overlay.remove(); document.removeEventListener('keydown', escTextHandler); };
 
   buttonRow.appendChild(saveBtn);
   buttonRow.appendChild(cancelBtn);
@@ -3931,8 +3937,14 @@ function showTextOverlay(fieldName) {
   overlay.onclick = (e) => {
     if (e.target === overlay) {
       overlay.remove();
+      document.removeEventListener('keydown', escTextHandler);
     }
   };
+
+  const escTextHandler = (e) => {
+    if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escTextHandler); }
+  };
+  document.addEventListener('keydown', escTextHandler);
 
   // Focus na textarea
   setTimeout(() => textarea.focus(), 100);
@@ -4420,15 +4432,17 @@ function showDeleteConfirmModal(reklamaceNumber) {
     modalDiv.appendChild(modalContent);
     document.body.appendChild(modalDiv);
 
-    document.getElementById('deleteConfirmNo').onclick = () => {
-      document.body.removeChild(modalDiv);
-      resolve(false);
+    const zavritConfirm = (vysledek) => {
+      modalDiv.remove();
+      document.removeEventListener('keydown', escConfirmHandler);
+      resolve(vysledek);
     };
 
-    document.getElementById('deleteConfirmYes').onclick = () => {
-      document.body.removeChild(modalDiv);
-      resolve(true);
-    };
+    document.getElementById('deleteConfirmNo').onclick = () => zavritConfirm(false);
+    document.getElementById('deleteConfirmYes').onclick = () => zavritConfirm(true);
+    modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) zavritConfirm(false); });
+    const escConfirmHandler = (e) => { if (e.key === 'Escape') zavritConfirm(false); };
+    document.addEventListener('keydown', escConfirmHandler);
   });
 }
 
@@ -4467,25 +4481,22 @@ function showDeleteInputModal(reklamaceNumber) {
     const inputField = document.getElementById('deleteInputField');
     inputField.focus();
 
-    document.getElementById('deleteInputCancel').onclick = () => {
-      document.body.removeChild(modalDiv);
-      resolve('');
+    const zavritInput = (hodnota) => {
+      modalDiv.remove();
+      document.removeEventListener('keydown', escInputHandler);
+      resolve(hodnota);
     };
 
-    document.getElementById('deleteInputConfirm').onclick = () => {
-      const value = inputField.value.trim();
-      document.body.removeChild(modalDiv);
-      resolve(value);
-    };
+    document.getElementById('deleteInputCancel').onclick = () => zavritInput('');
+    document.getElementById('deleteInputConfirm').onclick = () => zavritInput(inputField.value.trim());
 
     // Enter key pro potvrzení
     inputField.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const value = inputField.value.trim();
-        document.body.removeChild(modalDiv);
-        resolve(value);
-      }
+      if (e.key === 'Enter') zavritInput(inputField.value.trim());
     });
+
+    const escInputHandler = (e) => { if (e.key === 'Escape') zavritInput(''); };
+    document.addEventListener('keydown', escInputHandler);
   });
 }
 
@@ -4512,7 +4523,8 @@ async function deleteReklamace(reklamaceId) {
     errorModal.id = 'errorModal';
     errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
     errorModal.innerHTML = `
-      <div style="background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;">
+      <div style="position:relative;background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;">
+        <button onclick="document.getElementById('errorModal').remove();" style="position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border-radius:50%;background:rgba(180,180,180,0.25);color:#cc0000;border:none;font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
         <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Nesprávné číslo!</h3>
         <p style="margin:0 0 20px 0;color:#ccc;font-size:0.95rem;line-height:1.5;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
         <button onclick="document.getElementById('errorModal').remove();" style="padding:10px 20px;background:#fff;color:#000;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
@@ -4520,6 +4532,9 @@ async function deleteReklamace(reklamaceId) {
         </button>
       </div>
     `;
+    errorModal.addEventListener('click', (e) => { if (e.target === errorModal) errorModal.remove(); });
+    const escErrorHandler = (e) => { if (e.key === 'Escape') { errorModal.remove(); document.removeEventListener('keydown', escErrorHandler); } };
+    document.addEventListener('keydown', escErrorHandler);
     document.body.appendChild(errorModal);
     return;
   }
@@ -4593,18 +4608,28 @@ async function smazatFotku(photoId, photoUrl) {
     modalDiv.appendChild(modalContent);
     document.body.appendChild(modalDiv);
 
+    const zavritFoto = (vysledek) => {
+      modalDiv.remove();
+      document.removeEventListener('keydown', escFotoHandler);
+      resolve(vysledek);
+    };
+
     document.getElementById('deleteFotoNo').onclick = () => {
       logger.log('[smazatFotku] Uživatel zrušil');
-      document.body.removeChild(modalDiv);
-      resolve(false);
+      zavritFoto(false);
     };
 
     document.getElementById('deleteFotoYes').onclick = async () => {
       logger.log('[smazatFotku] Uživatel potvrdil, mazám...');
-      document.body.removeChild(modalDiv);
+      modalDiv.remove();
+      document.removeEventListener('keydown', escFotoHandler);
       await pokracovatSmazaniFotky(photoId, photoUrl);
       resolve(true);
     };
+
+    modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) zavritFoto(false); });
+    const escFotoHandler = (e) => { if (e.key === 'Escape') zavritFoto(false); };
+    document.addEventListener('keydown', escFotoHandler);
   });
 }
 
@@ -5694,18 +5719,15 @@ function prehratVideo(videoPath, videoName) {
   title.style.cssText = 'color: white; font-size: 1rem; margin-top: 16px; text-align: center;';
   title.textContent = videoName || 'Video';
 
-  // Tlačítko Zavřít
-  const btnClose = document.createElement('button');
-  btnClose.textContent = 'Zavřít';
-  btnClose.style.cssText = 'margin-top: 16px; padding: 10px 24px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;';
-  btnClose.onclick = () => {
-    video.pause();
-    overlay.remove();
-  };
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnCloseX = document.createElement('button');
+  btnCloseX.innerHTML = '&times;';
+  btnCloseX.style.cssText = 'position:fixed;top:12px;right:12px;z-index:10010;width:30px;height:30px;border-radius:50%;background:rgba(180,180,180,0.35);color:#cc0000;border:none;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;';
+  btnCloseX.onclick = () => { video.pause(); overlay.remove(); };
 
+  overlay.appendChild(btnCloseX);
   overlay.appendChild(video);
   overlay.appendChild(title);
-  overlay.appendChild(btnClose);
 
   // Zavřít při kliknutí mimo video
   overlay.onclick = (e) => {
@@ -5742,11 +5764,18 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
 
   // Kontejner
   const container = document.createElement('div');
-  container.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; border: 2px solid #444;';
+  container.style.cssText = 'position:relative;background: #2a2a2a; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; border: 2px solid #444;';
+
+  // Tlačítko X (zavřít)
+  const btnXUpload = document.createElement('button');
+  btnXUpload.innerHTML = '&times;';
+  btnXUpload.style.cssText = 'position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border-radius:50%;background:rgba(180,180,180,0.25);color:#cc0000;border:none;font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;';
+  btnXUpload.onclick = () => overlay.remove();
+  container.appendChild(btnXUpload);
 
   // Nadpis
   const nadpis = document.createElement('h3');
-  nadpis.style.cssText = 'color: white; margin: 0 0 20px 0; font-size: 1.1rem;';
+  nadpis.style.cssText = 'color: white; margin: 0 0 20px 0; font-size: 1.1rem; padding-right: 2rem;';
   nadpis.textContent = 'Nahrát video';
 
   // File input
@@ -5919,6 +5948,8 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
   container.appendChild(progressContainer);
   container.appendChild(buttonContainer);
   overlay.appendChild(container);
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay && !btnNahrat.disabled) overlay.remove(); });
 
   // Zavřít při ESC
   const escHandler = (e) => {
