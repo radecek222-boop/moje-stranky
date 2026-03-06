@@ -2287,27 +2287,39 @@ a.detail-btn-primary:active {
   }
 }
 
-/* Dvousloupcový layout detailu zákazníka - desktop */
+/* Dvousloupcový layout detailu zákazníka */
 .detail-dvousloupce {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
+.detail-sloupec-levy,
+.detail-sloupec-pravy {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .detail-modal-body {
   max-height: 80vh;
+  overflow-y: auto;
 }
 
 @media (min-width: 769px) {
   .detail-dvousloupce {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 1.25rem;
-    align-items: start;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: flex-start;
   }
 
-  .detail-sloupec-levy .detail-info-grid {
-    grid-template-columns: 110px 1fr;
+  .detail-sloupec-levy {
+    flex: 0 0 50%;
+    width: 50%;
+  }
+
+  .detail-sloupec-pravy {
+    flex: 1 1 0;
+    width: 0;
   }
 
   .detail-sloupec-pravy .detail-textarea-popis {
@@ -2316,13 +2328,12 @@ a.detail-btn-primary:active {
 
   .detail-modal-body {
     max-height: 85vh;
-    overflow-y: auto;
   }
 }
 
-/* Mobil - jeden sloupec */
 @media (max-width: 768px) {
-  .detail-dvousloupce {
-    flex-direction: column;
+  .detail-sloupec-levy,
+  .detail-sloupec-pravy {
+    width: 100%;
   }
 }
