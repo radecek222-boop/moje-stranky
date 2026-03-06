@@ -189,6 +189,13 @@ try {
                 error_log("nabidka_api vytvorit: Sloupec cislo_nabidky byl přidán");
             }
 
+            // Zkontrolovat a přidat sloupec uvodni_text (průvodní dopis emailu)
+            $stmtUvodni = $pdo->query("SHOW COLUMNS FROM wgs_nabidky LIKE 'uvodni_text'");
+            if (!$stmtUvodni->fetch(PDO::FETCH_ASSOC)) {
+                $pdo->exec("ALTER TABLE wgs_nabidky ADD COLUMN uvodni_text TEXT NULL AFTER poznamka");
+                error_log("nabidka_api vytvorit: Sloupec uvodni_text byl přidán");
+            }
+
             // Generovat unikátní číslo nabídky: CN-RRRR-DD-M-XX (AŽ PO kontrole sloupce!)
             $cisloNabidky = generujCisloNabidky($pdo);
             error_log("nabidka_api vytvorit: Vygenerováno číslo {$cisloNabidky}");
@@ -200,8 +207,8 @@ try {
                 INSERT INTO wgs_nabidky (
                     reklamace_id, cislo_nabidky, zakaznik_jmeno, zakaznik_email, zakaznik_telefon, zakaznik_adresa,
                     polozky_json, celkova_cena, mena, platnost_do, token,
-                    poznamka, vytvoril_user_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    poznamka, uvodni_text, vytvoril_user_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             error_log("nabidka_api vytvorit: Provádím INSERT s reklamace_id=" . ($reklamaceId ?? 'NULL'));
@@ -219,6 +226,7 @@ try {
                 $platnostDo,
                 $token,
                 $_POST['poznamka'] ?? null,
+                !empty($_POST['uvodni_text']) ? trim($_POST['uvodni_text']) : null,
                 $_SESSION['user_id'] ?? null
             ]);
 

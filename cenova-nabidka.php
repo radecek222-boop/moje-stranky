@@ -60,24 +60,25 @@ if ($reklamaceId > 0) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
             border-bottom: 1px solid #333;
         }
         .nabidka-header h1 {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            color: #eee;
         }
         .nabidka-tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 16px;
         }
         .nabidka-tab {
-            padding: 10px 20px;
+            padding: 7px 16px;
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #888;
             cursor: pointer;
             transition: all 0.2s;
@@ -95,7 +96,7 @@ if ($reklamaceId > 0) {
         .nabidka-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 20px;
         }
         @media (max-width: 768px) {
             .nabidka-form { grid-template-columns: 1fr; }
@@ -103,37 +104,41 @@ if ($reklamaceId > 0) {
         .form-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 12px;
-            padding: 25px;
+            border-radius: 10px;
+            padding: 18px;
         }
         .form-card h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #333;
             color: #aaa;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 9px;
         }
         .form-group label {
             display: block;
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 5px;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #aaa;
+            margin-bottom: 3px;
         }
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 7px 10px;
             background: #111;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #fff;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
         }
         .form-group input:focus,
         .form-group textarea:focus,
@@ -141,20 +146,22 @@ if ($reklamaceId > 0) {
             outline: none;
             border-color: #39ff14;
         }
-        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group textarea { min-height: 58px; resize: vertical; }
 
         /* Kalkulace sekce */
         .kalkulace-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 12px;
-            padding: 25px;
+            border-radius: 10px;
+            padding: 18px;
         }
         .kalkulace-card h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #333;
             color: #aaa;
         }
@@ -164,14 +171,14 @@ if ($reklamaceId > 0) {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            padding: 20px 30px;
+            padding: 12px 20px;
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             border: 2px dashed #39ff14;
-            border-radius: 12px;
+            border-radius: 8px;
             color: #39ff14;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
@@ -184,8 +191,8 @@ if ($reklamaceId > 0) {
 
         /* Výsledek kalkulace */
         .kalkulace-vysledek {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 12px;
+            padding: 14px;
             background: #111;
             border-radius: 8px;
             display: none;
@@ -244,17 +251,17 @@ if ($reklamaceId > 0) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 12px 14px;
             background: #111;
             border-radius: 8px;
-            margin-top: 20px;
+            margin-top: 12px;
         }
         .celkova-cena-label {
-            font-size: 1rem;
+            font-size: 0.875rem;
             color: #888;
         }
         .celkova-cena-hodnota {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #39ff14;
         }
@@ -262,15 +269,15 @@ if ($reklamaceId > 0) {
         /* Tlačítka */
         .nabidka-actions {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 16px;
             justify-content: flex-end;
             flex-wrap: wrap;
         }
         .btn {
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 9px 22px;
+            border-radius: 6px;
+            font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
@@ -348,96 +355,124 @@ if ($reklamaceId > 0) {
             width: 100%;
             border-collapse: collapse;
         }
-        .nabidky-tabulka th,
-        .nabidky-tabulka td {
-            padding: 8px 10px;
-            text-align: left;
-            vertical-align: top;
-        }
         .nabidky-tabulka th {
-            background: #1a1a1a;
-            color: #fff;
-            font-weight: 500;
-            font-size: 0.7rem;
+            padding: 10px 12px;
+            text-align: left;
+            background: #111;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.68rem;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.06em;
             white-space: nowrap;
-            border-bottom: 2px solid #333;
+            border-bottom: 1px solid #2a2a2a;
         }
         .nabidky-tabulka td {
-            font-size: 0.75rem;
-            background: #fff;
-            color: #333;
-            border-bottom: 1px solid #eee;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 0.82rem;
+            background: #0d0d0d;
+            color: #ccc;
+            border-bottom: 1px solid #1e1e1e;
         }
         .nabidky-tabulka tr:hover td {
-            background: #f8f8f8;
+            background: #161616;
         }
-        .nabidka-cena {
-            font-weight: 700;
-            color: #dc3545 !important;
+        .nabidky-tabulka tbody tr:first-child td {
+            border-top: none;
+        }
+        .nabidka-cn {
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: #888;
             white-space: nowrap;
         }
-        .stav-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+        .nabidka-zakaznik {
             font-weight: 500;
+            color: #ddd;
         }
-        .stav-nova { background: #eee; color: #666; }
-        .stav-odeslana { background: #ddd; color: #555; }
-        .stav-potvrzena { background: #333; color: #fff; }
+        .nabidka-cena {
+            font-weight: 600;
+            color: #eee;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .nabidka-platnost {
+            color: #555;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+        /* Expirovaná nabídka - zákazník nepotvrdil ve lhůtě */
+        tr.nabidka-expirovana .nabidka-cn,
+        tr.nabidka-expirovana .nabidka-zakaznik,
+        tr.nabidka-expirovana .nabidka-cena {
+            color: #dc3545;
+        }
+        tr.nabidka-expirovana .nabidka-platnost {
+            color: #a02030;
+            font-weight: 600;
+        }
 
         /* Workflow kroky */
         .workflow-container {
             display: flex;
             gap: 3px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
         }
         .workflow-btn {
-            padding: 3px 6px;
-            border: 1px solid #666;
+            padding: 3px 7px;
+            border: 1px solid #2e2e2e;
             border-radius: 3px;
-            background: #888;
-            color: #fff;
-            font-size: 0.65rem;
+            background: #1c1c1c;
+            color: #555;
+            font-size: 0.63rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
             white-space: nowrap;
+            font-family: inherit;
         }
         .workflow-btn:hover {
-            border-color: #999;
-            background: #777;
+            border-color: #444;
+            color: #aaa;
+            background: #222;
         }
         .workflow-btn.aktivni {
-            background: #1a1a1a;
-            border: 2px solid #39ff14;
-            color: #fff;
-            box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+            background: #111;
+            border: 1px solid #39ff14;
+            color: #39ff14;
+            box-shadow: 0 0 6px rgba(57, 255, 20, 0.25);
         }
         .workflow-btn.auto {
             cursor: default;
-            opacity: 0.7;
         }
-        .workflow-btn.auto.aktivni {
-            opacity: 1;
+        .workflow-btn.auto:hover {
+            background: #1c1c1c;
+            border-color: #2e2e2e;
+            color: #555;
+        }
+        .workflow-btn.auto.aktivni:hover {
+            background: #111;
+            border-color: #39ff14;
+            color: #39ff14;
         }
 
         /* Tlačítko smazat */
         .btn-smazat {
             padding: 4px 8px;
             background: transparent;
-            border: 1px solid #dc3545;
+            border: 1px solid #333;
             border-radius: 3px;
-            color: #dc3545;
+            color: #555;
             font-size: 0.7rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
         .btn-smazat:hover {
             background: #dc3545;
+            border-color: #dc3545;
             color: #fff;
         }
 
@@ -470,14 +505,17 @@ if ($reklamaceId > 0) {
 
         /* Dodatečné položky */
         .dodatecne-polozky {
-            margin-top: 20px;
-            padding-top: 20px;
+            margin-top: 14px;
+            padding-top: 14px;
             border-top: 1px solid #333;
         }
         .dodatecne-polozky h3 {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             color: #888;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .dodatecna-polozka {
             display: grid;
@@ -630,6 +668,21 @@ if ($reklamaceId > 0) {
 
         <!-- Nová nabídka -->
         <section class="nabidka-section active" id="section-nova">
+
+            <!-- Úvodní text emailu pro zákazníka -->
+            <div class="form-card" style="margin-bottom: 20px;">
+                <h2 style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; color: #ccc;">Text průvodního dopisu</h2>
+                <p style="margin: 0 0 14px 0; font-size: 0.8rem; color: #888;">Tento text bude součástí emailu odeslaného zákazníkovi. Upravte dle potřeby.</p>
+                <textarea id="uvodni_text" style="width: 100%; min-height: 160px; font-size: 0.875rem; line-height: 1.6; padding: 14px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; font-family: inherit; color: #222; box-sizing: border-box;">Vážený zákazníku,
+
+na základě Vaší poptávky Vám zasíláme cenovou nabídku za servisní práce na Vašem nábytku značky Natuzzi.
+
+Prosíme, potvrďte nabídku kliknutím na tlačítko níže. Po potvrzení Vás budeme kontaktovat ohledně dalšího postupu. V případě dotazů jsme Vám plně k dispozici.
+
+S pozdravem,
+tým White Glove Service</textarea>
+            </div>
+
             <div class="nabidka-form">
                 <!-- Levá strana - zákazník -->
                 <div class="form-card">
@@ -726,20 +779,20 @@ if ($reklamaceId > 0) {
 
         <!-- Seznam nabídek -->
         <section class="nabidka-section" id="section-seznam">
-            <div class="form-card">
+            <div style="border: 1px solid #222; border-radius: 10px; overflow: hidden;">
                 <table class="nabidky-tabulka">
                     <thead>
                         <tr>
-                            <th style="width: 120px; white-space: nowrap;">CN</th>
-                            <th style="width: 200px;">Zákazník</th>
-                            <th style="width: 90px;">Cena</th>
-                            <th style="white-space: nowrap;">Workflow</th>
+                            <th style="width: 130px;">CN</th>
+                            <th style="width: 180px;">Zákazník</th>
+                            <th style="width: 100px;">Cena</th>
+                            <th>Workflow</th>
                             <th style="width: 90px;">Platnost</th>
-                            <th style="width: 60px;">Akce</th>
+                            <th style="width: 46px;">Akce</th>
                         </tr>
                     </thead>
                     <tbody id="nabidky-tbody">
-                        <tr><td colspan="6" style="text-align: center; color: #666;">Načítám...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: #555; padding: 30px;">Načítám...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1660,6 +1713,7 @@ if ($reklamaceId > 0) {
             formData.append('zakaznik_telefon', document.getElementById('zakaznik_telefon').value);
             formData.append('zakaznik_adresa', document.getElementById('zakaznik_adresa').value);
             formData.append('poznamka', document.getElementById('poznamka').value);
+            formData.append('uvodni_text', document.getElementById('uvodni_text').value);
             formData.append('mena', mena);
             formData.append('polozky', JSON.stringify(vsechnyPolozky));
 
@@ -2197,9 +2251,14 @@ if ($reklamaceId > 0) {
                 const jeDokonceno = !!n.dokonceno_at;
                 const jeFaUhrazena = !!n.fa_uhrazena_at;
 
-                html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
-                    <td style="white-space: nowrap;">${n.cislo_nabidky || n.id}</td>
-                    <td>${n.zakaznik_jmeno}</td>
+                // Expirovaná nabídka = platnost_do je v minulosti a zákazník nepotvrdil
+                const jeExpirovana = !jePotvrzena && !jeDokonceno
+                    && n.platnost_do && new Date(n.platnost_do) < new Date();
+                const expClass = jeExpirovana ? ' nabidka-expirovana' : '';
+
+                html += `<tr class="nabidka-radek${expClass}" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
+                    <td class="nabidka-cn">${n.cislo_nabidky || n.id}</td>
+                    <td class="nabidka-zakaznik">${n.zakaznik_jmeno}</td>
                     <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${ziskejSymbolMeny(n.mena)}</td>
                     <td>
                         <div class="workflow-container">
@@ -2239,7 +2298,7 @@ if ($reklamaceId > 0) {
                             </button>
                         </div>
                     </td>
-                    <td style="color: #888; font-size: 0.85rem;">${platnost}</td>
+                    <td class="nabidka-platnost">${platnost}</td>
                     <td>
                         <button class="btn-smazat" onclick="smazatNabidku(${n.id}, '${n.cislo_nabidky || n.id}', event)" title="Smazat nabídku">
                             X

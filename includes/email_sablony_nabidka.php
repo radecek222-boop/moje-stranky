@@ -71,6 +71,12 @@ function vygenerujEmailNabidky($nabidka) {
     // Použít číslo nabídky nebo fallback na padované ID
     $nabidkaCislo = $nabidka['cislo_nabidky'] ?? ('CN-' . str_pad($nabidka['id'], 6, '0', STR_PAD_LEFT));
 
+    // Průvodní text emailu - použít uložený text nebo výchozí
+    $uvodniTextRaw = !empty($nabidka['uvodni_text'])
+        ? $nabidka['uvodni_text']
+        : "Vážený zákazníku,\n\nna základě Vaší poptávky Vám zasíláme cenovou nabídku za servisní práce na Vašem nábytku značky Natuzzi.\n\nProsíme, potvrďte nabídku kliknutím na tlačítko níže. Po potvrzení Vás budeme kontaktovat ohledně dalšího postupu. V případě dotazů jsme Vám plně k dispozici.\n\nS pozdravem,\ntým White Glove Service";
+    $uvodniTextHtml = nl2br(htmlspecialchars($uvodniTextRaw, ENT_QUOTES, 'UTF-8'));
+
     // Adresa zákazníka (pokud existuje)
     $adresaHtml = '';
     if (!empty($nabidka['zakaznik_adresa'])) {
@@ -127,12 +133,9 @@ function vygenerujEmailNabidky($nabidka) {
                                 </table>
                             </div>
 
-                            <!-- Oslovení -->
+                            <!-- Průvodní dopis -->
                             <div style='padding: 30px 40px 20px 40px;'>
-                                <p style='margin: 0; font-size: 15px; color: #333;'>Vážený/á <strong>{$nabidka['zakaznik_jmeno']}</strong>,</p>
-                                <p style='margin: 15px 0 0 0; font-size: 14px; color: #555; line-height: 1.6;'>
-                                    děkujeme za Váš zájem o naše služby. Na základě Vašeho požadavku jsme pro Vás připravili následující cenovou nabídku:
-                                </p>
+                                <p style='margin: 0; font-size: 14px; color: #333; line-height: 1.8; white-space: pre-line;'>{$uvodniTextHtml}</p>
                             </div>
 
                             <!-- Údaje zákazníka -->

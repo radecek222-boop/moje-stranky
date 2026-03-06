@@ -198,10 +198,11 @@ function wygStav(string $stav): string {
         .cn-zf-odznak { display: inline-block; background: #111; color: #fff; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 2px; margin-left: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .btn-tisk {
-            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
             background: #000; color: #fff; border: none;
             padding: 0.75rem 1.5rem; border-radius: 4px;
             font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            white-space: nowrap;
         }
         .btn-tisk:hover { background: #333; }
         .btn-zavrit {
@@ -211,10 +212,26 @@ function wygStav(string $stav): string {
             font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .btn-zavrit:hover { background: #f0f0f0; }
+        .btn-odeslat {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: #999; color: #fff; border: none;
+            padding: 0.75rem 1.5rem; border-radius: 4px;
+            font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+        .btn-odeslat:hover { background: #777; }
+        .btn-odeslat:disabled { background: #ccc; cursor: not-allowed; }
+
+        .tisk-pravni-poznamka {
+            margin-top: 0.75rem; padding-top: 0.6rem;
+            font-size: 0.65rem; color: #bbb;
+            text-align: center; white-space: nowrap;
+        }
 
         @media print {
             .btn-tisk { display: none !important; }
             .btn-zavrit { display: none !important; }
+            .btn-odeslat { display: none !important; }
             body { background: #fff; }
             .tisk-obal { padding: 1rem; max-width: 100%; }
             @page { margin: 1.5cm; }
@@ -449,6 +466,8 @@ function wygStav(string $stav): string {
                             <span class="cn-zf-odznak">Uhrazena</span>
                         <?php elseif ($nabidkaZfOdeslana): ?>
                             <span class="cn-zf-odznak">Odeslána</span>
+                        <?php else: ?>
+                            <br><span style="font-size:0.72rem; color:#999; font-style:italic;">nebylo požadováno / uhrazeno</span>
                         <?php endif; ?>
                     </td>
                     <td style="padding:0.5rem 0.75rem; text-align:right; font-weight:600;">- <?= number_format($zalohaEur, 2, ',', ' ') ?> €</td>
@@ -502,10 +521,53 @@ function wygStav(string $stav): string {
         <span><?= wygHtml($zakázka['reklamace_id'] ?? $zakázka['cislo'] ?? '#' . $idParam) ?> | <?= date('d.m.Y') ?></span>
     </div>
 
+    <?php if ($nabidka): ?>
+    <p class="tisk-pravni-poznamka">Informační dokument – nepředstavuje výzvu k úhradě. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
+    <?php endif; ?>
+
 </div>
 
 <button class="btn-zavrit" onclick="window.close()">Zavřít</button>
 <button class="btn-tisk" onclick="window.print()">Tisknout</button>
+<button class="btn-odeslat" id="btn-dale-odeslat" onclick="odeslatEmailem()">Dále odeslat</button>
+
+<input type="hidden" id="csrf-token-tisk" value="<?= htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') ?>">
+<input type="hidden" id="reklamace-id-tisk" value="<?= (int)$idParam ?>">
+
+<script>
+async function odeslatEmailem() {
+    const tlacitko = document.getElementById('btn-dale-odeslat');
+    const puvodniText = tlacitko.textContent;
+    tlacitko.disabled = true;
+    tlacitko.textContent = 'Odesílám...';
+
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', document.getElementById('csrf-token-tisk').value);
+        formData.append('reklamace_id', document.getElementById('reklamace-id-tisk').value);
+
+        const odpoved = await fetch('/api/odeslat_tisk_email.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const vysledek = await odpoved.json();
+
+        if (vysledek.status === 'success') {
+            tlacitko.textContent = 'Odesláno';
+            alert(vysledek.message);
+        } else {
+            tlacitko.disabled = false;
+            tlacitko.textContent = puvodniText;
+            alert('Chyba: ' + (vysledek.message || 'Nepodařilo se odeslat email.'));
+        }
+    } catch (chyba) {
+        tlacitko.disabled = false;
+        tlacitko.textContent = puvodniText;
+        alert('Síťová chyba: ' + chyba.message);
+    }
+}
+</script>
 
 </body>
 </html>
