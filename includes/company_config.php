@@ -97,5 +97,5 @@ function wgsEmailLink(string $typ = 'info', string $class = 'footer-link'): stri
  */
 function wgsFooterKontakt(string $emailTyp = 'info'): string {
     $email = wgsEmail($emailTyp);
-    return '<strong>Email:</strong> <a href="mailto:' . $email . '" class="footer-link">' . $email . '</a>';
+    return '<a href="mailto:' . $email . '" class="footer-link">' . $email . '</a>';
 }

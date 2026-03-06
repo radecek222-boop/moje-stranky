@@ -1153,10 +1153,11 @@ const ModalManager = {
     SELECTED_TIME = null;
   },
   
-  createHeader: (title, subtitle) => {
+  createHeader: (title, subtitle, backAction = 'closeDetail', backId = '') => {
+    const idAttr = backId ? ` data-id="${backId}"` : '';
     return `
       <div class="modal-header">
-        <button class="modal-close-btn" data-action="closeDetail" aria-label="Zavřít" title="Zavřít">×</button>
+        <button class="modal-close-btn" data-action="${backAction}"${idAttr} aria-label="Zpět" title="Zpět">×</button>
         <h2 class="modal-title">${title}</h2>
         ${subtitle ? `<p class="modal-subtitle">${subtitle}</p>` : ''}
       </div>
@@ -1173,7 +1174,7 @@ const ModalManager = {
 };
 
 // === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
-function createCustomerHeader() {
+function createCustomerHeader(backAction = 'closeDetail') {
   if (!CURRENT_RECORD) return '';
 
   const customerName = Utils.getCustomerName(CURRENT_RECORD);
@@ -1247,12 +1248,13 @@ function createCustomerHeader() {
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
 
+  const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
     <strong>Stav:</strong> ${stavHtml}
     ${smsBylKontaktovan ? `<div style="margin-top:0.5rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
-  `);
+  `, backAction, backId);
 }
 
 // === DETAIL ===
@@ -1421,7 +1423,7 @@ async function showQrPlatbaModal(reklamaceId) {
 
   // Zobrazit loading modal
   const loadingContent = `
-    ${createCustomerHeader()}
+    ${createCustomerHeader('showDetail')}
     <div class="modal-body" style="text-align: center; padding: 3rem;">
       <div style="font-size: 1.2rem; color: #888;">Načítám QR platební data...</div>
     </div>
@@ -1488,7 +1490,7 @@ async function showQrPlatbaModal(reklamaceId) {
     }
 
     const content = `
-      ${createCustomerHeader()}
+      ${createCustomerHeader('showDetail')}
 
       <div class="modal-body" style="padding: 1.5rem;">
         <div style="text-align: center; margin-bottom: 1.5rem;">
@@ -1552,10 +1554,6 @@ async function showQrPlatbaModal(reklamaceId) {
           </div>
         </div>
 
-        <!-- Tlačítka -->
-        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
-          <button class="btn" style="flex: 1; padding: 0.75rem; background: #333; color: #fff;" data-action="showDetail" data-id="${reklamaceId}">Zpět</button>
-        </div>
       </div>
     `;
 
@@ -1570,12 +1568,11 @@ async function showQrPlatbaModal(reklamaceId) {
     logger.error('QR platba - chyba:', error);
 
     const errorContent = `
-      ${createCustomerHeader()}
+      ${createCustomerHeader('showDetail')}
       <div class="modal-body" style="padding: 2rem; text-align: center;">
         <div style="color: #ff4444; font-size: 1.1rem; margin-bottom: 1rem;">
           ${Utils.escapeHtml(error.message)}
         </div>
-        <button class="btn" style="padding: 0.75rem 2rem; background: #333; color: #fff;" data-action="showDetail" data-id="${reklamaceId}">Zpět</button>
       </div>
     `;
     ModalManager.show(errorContent);
@@ -1956,7 +1953,7 @@ function showCalendar(id) {
   SELECTED_TIME = null;
 
   const content = `
-    ${createCustomerHeader()}
+    ${createCustomerHeader('showDetail')}
 
     <!-- Vybraný termín - fixní nad kalendářem -->
     <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0 1rem;">
@@ -1974,11 +1971,6 @@ function showCalendar(id) {
         <div id="dayBookings"></div>
         <div id="timeGrid"></div>
       </div>
-    </div>
-
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveSelectedDate">Uložit termín</button>
-      <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
     </div>
   `;
 
@@ -2117,7 +2109,8 @@ function renderCalendar(m, y) {
       el.classList.add('selected');
 
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
-      document.getElementById('selectedDateDisplay').textContent = displayText;
+      const spanEl = document.getElementById('selectedDateText');
+      if (spanEl) spanEl.textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -2412,7 +2405,7 @@ function showBookingDetail(bookingOrId) {
   const description = booking.popis_problemu || '—';
   
   const content = `
-    ${ModalManager.createHeader('Detail obsazeného termínu', '<p style="color: var(--c-error); font-weight: 600;">Tento termín je již obsazen</p>')}
+    ${ModalManager.createHeader('Detail obsazeného termínu', '<p style="color: var(--c-error); font-weight: 600;">Tento termín je již obsazen</p>', 'showCalendarBack')}
     
     <div class="modal-body">
       <div style="padding: 1.5rem; background: rgba(139, 0, 0, 0.05); border: 2px solid var(--c-error); margin-bottom: 1.5rem;">
@@ -2435,9 +2428,6 @@ function showBookingDetail(bookingOrId) {
       </div>
     </div>
 
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>
-    </div>
   `;
 
   ModalManager.show(content);
@@ -2731,7 +2721,7 @@ function showContactMenu(id) {
   const textPrijedu = `Dobrý den,\n\njsem na cestě k vám na adresu:\n${address}\n\nohledně domluvené servisní návštěvy.\nPřijedu za zhruba 30 min podle situace v dopravě.\n\nTechnik ${technikJmeno}\nWhite Glove Servis`;
 
   const content = `
-    ${createCustomerHeader()}
+    ${createCustomerHeader('showDetail')}
 
     <div class="modal-body">
       <div class="detail-buttons">
@@ -2741,7 +2731,6 @@ function showContactMenu(id) {
         ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none; color: #00aaff; border: 2px solid #00aaff; box-shadow: 0 0 6px #00aaff, 0 0 14px rgba(0,170,255,0.7), 0 0 28px rgba(0,170,255,0.3);" target="_blank">Navigovat (Waze)</a>` : ''}
         ${address && address !== '—' ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(address)}&layer=c" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Google Street View</a>` : ''}
         ${phone ? `<a href="sms:${phone}?body=${encodeURIComponent(textPrijedu)}" class="detail-btn detail-btn-primary" style="text-decoration: none; color: #39ff14; border: 2px solid #39ff14; box-shadow: 0 0 6px #39ff14, 0 0 14px rgba(57,255,20,0.7), 0 0 28px rgba(57,255,20,0.3);">PŘIJEDU ZA 30</a>` : ''}
-        <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
       </div>
     </div>
   `;
@@ -2888,7 +2877,7 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${createCustomerHeader()}
+    ${createCustomerHeader('showDetail')}
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
@@ -2958,7 +2947,6 @@ async function showCustomerDetail(id) {
 
       <div class="detail-buttons">
         <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-        <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
       </div>
 
     </div>
@@ -4833,17 +4821,16 @@ async function otevritGalerii(reklamaceId) {
 
   // Zobrazit loading stav uvnitř modalu (ne jako samostatnou overlay)
   ModalManager.show(`
-    ${ModalManager.createHeader('Galerie', '')}
+    ${ModalManager.createHeader('Galerie', '', 'zpetDoDetailu', effectiveId)}
     <div class="modal-body"><p style="color:#aaa;padding:1rem 0;">Načítání fotek...</p></div>
   `);
 
   const fotky = await loadPhotosFromDB(effectiveId);
 
   const content = `
-    ${ModalManager.createHeader(`Galerie (${fotky.length})`, '')}
+    ${ModalManager.createHeader(`Galerie (${fotky.length})`, '', 'zpetDoDetailu', reklamaceId)}
     <div class="modal-body">
       <div class="detail-buttons" style="margin-bottom:1rem;">
-        <button class="detail-btn detail-btn-primary" data-action="zpetDoDetailu" data-id="${reklamaceId}">Zpět do detailu</button>
         <button class="detail-btn detail-btn-primary" id="galerie-pridat-btn">Přidat fotky</button>
       </div>
       <div id="galerie-grid" style="display:flex;flex-wrap:wrap;gap:8px;min-height:60px;">
@@ -6205,7 +6192,6 @@ function openGalerie(id) {
           </div>
         </div>
       </div>
-      <button class="btn" style="width:100%;margin-top:0.75rem;padding:0.4rem;font-size:0.78rem;background:#1a1a1a;color:white;" data-action="closeDetail">Zavřít</button>
     </div>
   `);
 }
