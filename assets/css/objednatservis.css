@@ -188,7 +188,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Hero Section */
 .hero {
   position: relative;
-  min-height: 22vh;
+  min-height: 38vh;
   display: flex;
   align-items: center;
   justify-content: center;
