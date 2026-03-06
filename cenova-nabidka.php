@@ -403,6 +403,16 @@ if ($reklamaceId > 0) {
             font-size: 0.78rem;
             white-space: nowrap;
         }
+        /* Expirovaná nabídka - zákazník nepotvrdil ve lhůtě */
+        tr.nabidka-expirovana .nabidka-cn,
+        tr.nabidka-expirovana .nabidka-zakaznik,
+        tr.nabidka-expirovana .nabidka-cena {
+            color: #dc3545;
+        }
+        tr.nabidka-expirovana .nabidka-platnost {
+            color: #a02030;
+            font-weight: 600;
+        }
 
         /* Workflow kroky */
         .workflow-container {
@@ -2241,7 +2251,12 @@ tým White Glove Service</textarea>
                 const jeDokonceno = !!n.dokonceno_at;
                 const jeFaUhrazena = !!n.fa_uhrazena_at;
 
-                html += `<tr class="nabidka-radek" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
+                // Expirovaná nabídka = platnost_do je v minulosti a zákazník nepotvrdil
+                const jeExpirovana = !jePotvrzena && !jeDokonceno
+                    && n.platnost_do && new Date(n.platnost_do) < new Date();
+                const expClass = jeExpirovana ? ' nabidka-expirovana' : '';
+
+                html += `<tr class="nabidka-radek${expClass}" onclick="otevritNahledNabidky(${n.id}, event)" data-id="${n.id}">
                     <td class="nabidka-cn">${n.cislo_nabidky || n.id}</td>
                     <td class="nabidka-zakaznik">${n.zakaznik_jmeno}</td>
                     <td class="nabidka-cena">${parseFloat(n.celkova_cena).toFixed(2)} ${ziskejSymbolMeny(n.mena)}</td>
