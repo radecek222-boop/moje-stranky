@@ -2100,9 +2100,13 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      let displayText = `Den: ${SELECTED_DATE}`;
-      const spanEl = document.getElementById('selectedDateText');
-      if (spanEl) spanEl.textContent = displayText;
+      const displayEl2 = document.getElementById('selectedDateDisplay');
+      if (displayEl2) {
+        displayEl2.textContent = `Den: ${SELECTED_DATE}`;
+        displayEl2.style.display = 'flex';
+      }
+      const btnUlozit2 = document.getElementById('btnUlozitTerminHore');
+      if (btnUlozit2) btnUlozit2.style.display = 'none';
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -2464,9 +2468,12 @@ function renderTimeGrid() {
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
         const displayEl = document.getElementById('selectedDateDisplay');
-        const textEl = document.getElementById('selectedDateText');
-        if (textEl) textEl.textContent = `Termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
-        displayEl.style.display = 'flex';
+        if (displayEl) {
+          displayEl.textContent = `Termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+          displayEl.style.display = 'flex';
+        }
+        const btnUlozit = document.getElementById('btnUlozitTerminHore');
+        if (btnUlozit) btnUlozit.style.display = 'inline-block';
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
