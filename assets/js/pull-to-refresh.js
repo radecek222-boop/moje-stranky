@@ -228,6 +228,8 @@
 
   // Touch move
   function onTouchMove(e) {
+    // Ignorovat multi-touch (pinch-zoom) - nesmime blokovat zoom
+    if (e.touches.length !== 1) return;
     // Ignorovat pokud je otevreny modal
     if (jeModalOtevreny()) return;
     if (!jeNaVrchu()) return;
