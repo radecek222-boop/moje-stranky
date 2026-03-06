@@ -2292,6 +2292,9 @@ a.detail-btn-primary:active {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  width: 100% !important;
+  align-self: stretch !important;
+  box-sizing: border-box;
 }
 
 .detail-sloupec-levy,
