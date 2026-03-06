@@ -3015,10 +3015,11 @@ async function showCustomerDetail(id) {
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
     const jeMobil = window.innerWidth <= 768;
+    alert('DEBUG: jeMobil=' + jeMobil + ' textareas=' + textareas.length + ' innerWidth=' + window.innerWidth);
     textareas.forEach(ta => {
       if (ta) {
-        ta.style.fontSize = jeMobil ? '22px' : '0.85rem';
-        ta.style.color = jeMobil ? '#28a745' : '';
+        ta.style.setProperty('font-size', jeMobil ? '22px' : '0.85rem', 'important');
+        ta.style.setProperty('color', jeMobil ? '#28a745' : '#000', 'important');
         ta.style.height = 'auto';
         ta.style.height = ta.scrollHeight + 'px';
       }
