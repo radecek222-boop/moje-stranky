@@ -3021,6 +3021,7 @@ async function showCustomerDetail(id) {
         ta.style.setProperty('color', '#000', 'important');
         ta.style.setProperty('min-height', '0', 'important');
         ta.style.setProperty('height', 'auto', 'important');
+        void ta.offsetHeight; // vynutí reflow před měřením scrollHeight
         ta.style.setProperty('height', ta.scrollHeight + 'px', 'important');
       }
     });
