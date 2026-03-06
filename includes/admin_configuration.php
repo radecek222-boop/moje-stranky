@@ -180,19 +180,6 @@ $groupNames = [
 
 <script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
-// Toggle password visibility
-/**
- * TogglePasswordVisibility
- */
-function togglePasswordVisibility(configId) {
-    const input = document.getElementById(`config-${configId}`);
-    if (input.type === 'password') {
-        input.type = 'text';
-    } else {
-        input.type = 'password';
-    }
-}
-
 // Save config
 /**
  * SaveConfig
