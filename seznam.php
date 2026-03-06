@@ -2250,7 +2250,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
      x-data="detailModal" x-init="init" @click="overlayClick">
   <div class="modal-content">
     <h2 id="detailModalTitle" class="sr-only">Detail reklamace</h2>
-    <button class="modal-close" data-action="closeDetail" @click="close" aria-label="Zavřít">×</button>
     <div id="modalContent"></div>
   </div>
 </div>
