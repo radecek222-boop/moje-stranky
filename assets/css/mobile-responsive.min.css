@@ -843,29 +843,25 @@ body.modal-open {
   }
 
   /* Scrollovatelny obsah v modalu - explicitni nastaveni */
-  .modal-overlay.active .modal-body,
-  .cc-modal-overlay.active .cc-modal-body,
-  #detailOverlay.active .detail-content,
-  #detailOverlay:not(.hidden) .detail-content,
-  #notesModal:not(.hidden) .notes-modal-body {
+  .modal-overlay.active,
+  .cc-modal-overlay.active,
+  #detailOverlay.active {
     overscroll-behavior: contain;
     overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 80vh;
-    /* FIX: Povolit vertikalni scroll gesture */
-    touch-action: pan-y;
+    /* FIX: Povolit scroll i pinch-zoom v modalu */
+    touch-action: pan-y pinch-zoom;
     -webkit-overflow-scrolling: touch;
   }
 }
 
 /* iOS Safari specificke opravy */
 @supports (-webkit-touch-callout: none) {
-  .modal-body,
-  .cc-modal-body,
-  .detail-content,
-  .notes-modal-body {
+  .modal-overlay.active,
+  .cc-modal-overlay.active,
+  #detailOverlay.active {
     /* iOS potrebuje explicitni -webkit-overflow-scrolling */
     -webkit-overflow-scrolling: touch;
-    overflow-y: scroll;
+    overflow-y: auto;
+    touch-action: pan-y pinch-zoom;
   }
 }

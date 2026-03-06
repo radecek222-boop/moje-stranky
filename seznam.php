@@ -132,40 +132,36 @@ if (!$isLoggedIn && !$isAdmin) {
    FIX: iOS/Safari/PWA Modal Scroll Lock
    ============================================ */
 
-/* Scroll lock pro html a body když je modal otevřený */
-html.modal-open {
-  overflow: hidden !important;
-}
-
-/* Omezit scroll lock jen na body, aby layout headeru nezkracoval ani při otevřeném modalu */
+/* Scroll lock - zabraní scrollu stránky při otevřeném modalu */
+body.scroll-locked,
 body.modal-open {
   overflow: hidden !important;
   touch-action: pan-y pinch-zoom !important;
 }
 
-/* PWA Standalone mode detekce */
+/* PWA Standalone mode - NESMÍ být position:fixed, způsobuje zamrznutí scrollu v modalu */
 @media all and (display-mode: standalone) {
+  body.scroll-locked,
   body.modal-open {
-    /* PWA má jiné viewport chování */
-    height: 100vh !important;
-    position: fixed !important;
+    position: static !important;
+    overflow: hidden !important;
   }
 }
 
-/* iOS Safari specifické fixy */
+/* iOS Safari - modal overlay musí být scrollovatelný */
 @supports (-webkit-touch-callout: none) {
-  /* Tohle targetuje pouze iOS Safari */
-  body.modal-open {
-    overflow: hidden !important;
-    touch-action: pan-y pinch-zoom !important;
-  }
-
   #detailOverlay.active {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #detailOverlay.active .modal-content {
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 }
