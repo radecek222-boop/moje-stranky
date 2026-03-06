@@ -135,7 +135,13 @@ function wygStav(string $stav): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Výtisk zakázky – <?= wygHtml($zakázka['reklamace_id'] ?? $zakázka['cislo'] ?? '#' . $idParam) ?></title>
+    <link rel="stylesheet" href="assets/css/wgs-loading.min.css">
     <style>
+        :root {
+            --wgs-darkest: #1a1a1a;
+            --wgs-neon-green: #39ff14;
+            --wgs-light-grey: #999;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #111; background: #fff; font-size: 13px; }
 
@@ -236,6 +242,58 @@ function wygStav(string $stav): string {
             .tisk-obal { padding: 1rem; max-width: 100%; }
             @page { margin: 1.5cm; }
         }
+
+
+        /* ── WGS Modal ── */
+        #wgs-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 10001;
+        }
+        .wgs-modal-karta {
+            background: #fff; border-radius: 8px; overflow: hidden;
+            max-width: 480px; width: 90%;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+        }
+        .wgs-modal-hlavicka {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 22px 28px;
+        }
+        .wgs-modal-titulek {
+            margin: 0; font-size: 13px; font-weight: 700; color: #fff;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .wgs-modal-podtitulek {
+            margin: 5px 0 0; font-size: 11px; color: #888;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .wgs-modal-telo {
+            padding: 24px 28px 16px;
+        }
+        .wgs-modal-zprava {
+            margin: 0; font-size: 14px; color: #333; line-height: 1.65;
+        }
+        .wgs-modal-paticka {
+            padding: 8px 28px 22px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .wgs-modal-countdown {
+            font-size: 12px; color: #999;
+        }
+        .wgs-modal-btn {
+            background: #111; color: #fff; border: none;
+            padding: 10px 24px; border-radius: 4px; font-size: 13px;
+            font-weight: 700; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .wgs-modal-btn:hover { background: #333; }
+        .wgs-modal-btn-sekundarni {
+            background: transparent; color: #666; border: 1px solid #ddd;
+            padding: 10px 20px; border-radius: 4px; font-size: 13px;
+            font-weight: 600; cursor: pointer; margin-right: 8px;
+        }
+        .wgs-modal-btn-sekundarni:hover { background: #f5f5f5; }
     </style>
 </head>
 <body>
@@ -522,7 +580,7 @@ function wygStav(string $stav): string {
     </div>
 
     <?php if ($nabidka): ?>
-    <p class="tisk-pravni-poznamka">Informační dokument – nepředstavuje výzvu k úhradě. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
+    <p class="tisk-pravni-poznamka">Informační dokument. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
     <?php endif; ?>
 
 </div>
@@ -534,12 +592,106 @@ function wygStav(string $stav): string {
 <input type="hidden" id="csrf-token-tisk" value="<?= htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') ?>">
 <input type="hidden" id="reklamace-id-tisk" value="<?= (int)$idParam ?>">
 
+<!-- WGS Loading Dialog - stejný styl jako protokol.php -->
+<div class="wgs-loading-overlay" id="loadingOverlay">
+  <div class="wgs-loading-box">
+    <div class="wgs-loading-hourglass">
+      <svg class="wgs-hourglass-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,10 L80,10 L80,20 L60,45 L60,55 L80,80 L80,90 L20,90 L20,80 L40,55 L40,45 L20,20 Z"
+              fill="none" stroke="#39ff14" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M25,15 L75,15 L75,20 L57,42 L43,42 L25,20 Z" fill="#39ff14" opacity="0.6"/>
+        <path d="M25,85 L75,85 L75,80 L57,58 L43,58 L25,80 Z" fill="#39ff14" opacity="0.3"/>
+        <circle class="wgs-sand-particle" cx="50" cy="45" r="1.5" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="48" cy="43" r="1.2" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="52" cy="44" r="1.3" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="49" cy="46" r="1.1" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="51" cy="45" r="1.4" fill="#39ff14"/>
+      </svg>
+    </div>
+    <div class="wgs-loading-message" id="loadingText">Odesílám email</div>
+    <div class="wgs-loading-submessage" id="loadingSubtext">Prosím čekejte...</div>
+  </div>
+</div>
+
+<!-- WGS modal (úspěch / chyba) -->
+<div id="wgs-modal-overlay">
+    <div class="wgs-modal-karta">
+        <div class="wgs-modal-hlavicka">
+            <p class="wgs-modal-titulek">WHITE GLOVE SERVICE</p>
+            <p class="wgs-modal-podtitulek" id="wgs-modal-podtitulek">Odeslání přehledu zakázky</p>
+        </div>
+        <div class="wgs-modal-telo">
+            <p class="wgs-modal-zprava" id="wgs-modal-zprava"></p>
+        </div>
+        <div class="wgs-modal-paticka">
+            <span class="wgs-modal-countdown" id="wgs-modal-countdown"></span>
+            <div>
+                <button class="wgs-modal-btn-sekundarni" id="wgs-modal-btn-zavrit" onclick="wgsModalZavrit()" style="display:none;">Zavřít</button>
+                <button class="wgs-modal-btn" id="wgs-modal-btn-akce" onclick="wgsModalAkce()">Přejít na seznam</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let _wgsModalInterval = null;
+let _wgsModalUspech = false;
+
+function wgsZobrazLoading(zobrazit) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (zobrazit) {
+        overlay.style.display = '';
+        overlay.classList.add('show');
+    } else {
+        overlay.classList.remove('show');
+    }
+}
+
+function wgsZobrazModal(podtitulek, zprava, jeUspech) {
+    _wgsModalUspech = jeUspech;
+    document.getElementById('wgs-modal-podtitulek').textContent = podtitulek;
+    document.getElementById('wgs-modal-zprava').textContent = zprava;
+    document.getElementById('wgs-modal-btn-zavrit').style.display = jeUspech ? 'none' : 'inline-block';
+    document.getElementById('wgs-modal-btn-akce').textContent = jeUspech ? 'Přejít na seznam' : 'Zkusit znovu';
+    document.getElementById('wgs-modal-overlay').style.display = 'flex';
+
+    if (jeUspech) {
+        let zbyvaSekund = 4;
+        const countdown = document.getElementById('wgs-modal-countdown');
+        countdown.textContent = 'Přesměrování za ' + zbyvaSekund + ' s';
+        _wgsModalInterval = setInterval(function () {
+            zbyvaSekund--;
+            if (zbyvaSekund <= 0) {
+                clearInterval(_wgsModalInterval);
+                window.location.href = '/seznam.php';
+            } else {
+                countdown.textContent = 'Přesměrování za ' + zbyvaSekund + ' s';
+            }
+        }, 1000);
+    } else {
+        document.getElementById('wgs-modal-countdown').textContent = '';
+    }
+}
+
+function wgsModalAkce() {
+    if (_wgsModalInterval) clearInterval(_wgsModalInterval);
+    if (_wgsModalUspech) {
+        window.location.href = '/seznam.php';
+    } else {
+        document.getElementById('wgs-modal-overlay').style.display = 'none';
+    }
+}
+
+function wgsModalZavrit() {
+    if (_wgsModalInterval) clearInterval(_wgsModalInterval);
+    document.getElementById('wgs-modal-overlay').style.display = 'none';
+}
+
 async function odeslatEmailem() {
     const tlacitko = document.getElementById('btn-dale-odeslat');
-    const puvodniText = tlacitko.textContent;
     tlacitko.disabled = true;
     tlacitko.textContent = 'Odesílám...';
+    wgsZobrazLoading(true);
 
     try {
         const formData = new FormData();
@@ -552,19 +704,21 @@ async function odeslatEmailem() {
         });
 
         const vysledek = await odpoved.json();
+        wgsZobrazLoading(false);
 
         if (vysledek.status === 'success') {
             tlacitko.textContent = 'Odesláno';
-            alert(vysledek.message);
+            wgsZobrazModal('Email odeslán', vysledek.message, true);
         } else {
             tlacitko.disabled = false;
-            tlacitko.textContent = puvodniText;
-            alert('Chyba: ' + (vysledek.message || 'Nepodařilo se odeslat email.'));
+            tlacitko.textContent = 'Dále odeslat';
+            wgsZobrazModal('Chyba při odesílání', vysledek.message || 'Nepodařilo se odeslat email.', false);
         }
     } catch (chyba) {
+        wgsZobrazLoading(false);
         tlacitko.disabled = false;
-        tlacitko.textContent = puvodniText;
-        alert('Síťová chyba: ' + chyba.message);
+        tlacitko.textContent = 'Dále odeslat';
+        wgsZobrazModal('Síťová chyba', chyba.message, false);
     }
 }
 </script>

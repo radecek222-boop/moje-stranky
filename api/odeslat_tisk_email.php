@@ -64,7 +64,7 @@ try {
             LIMIT 1
         ');
         $nStmt->execute([':rid' => $reklamaceId]);
-        $nabidka = $nStmt->fetch(PDO::FETCH_ASSOC);
+        $nabidka = $nStmt->fetch(PDO::FETCH_ASSOC) ?: null;
         if ($nabidka) {
             $nabidkaPolozky = json_decode($nabidka['polozky_json'] ?? '[]', true) ?? [];
             foreach ($nabidkaPolozky as $pol) {
@@ -97,15 +97,22 @@ try {
     $emailQueue = new EmailQueue($pdo);
     $predmet = 'Přehled zakázky ' . $cisloZakazky . ' – White Glove Service';
 
-    // Odeslat zákazníkovi
+    // Přidat do fronty
     $emailQueue->add($emailZakaznika, $predmet, $emailTelo);
 
-    // Odeslat kopii přihlášenému uživateli (pokud má platný email a liší se od zákazníka)
     if ($emailOdesílatele
         && filter_var($emailOdesílatele, FILTER_VALIDATE_EMAIL)
         && strtolower($emailOdesílatele) !== strtolower($emailZakaznika)
     ) {
         $emailQueue->add($emailOdesílatele, '[Kopie] ' . $predmet, $emailTelo);
+    }
+
+    // Okamžitě zpracovat frontu (nečekat na cron)
+    $vysledekFronty = $emailQueue->processQueue(5);
+
+    if ($vysledekFronty['sent'] === 0 && $vysledekFronty['processed'] > 0) {
+        error_log('odeslat_tisk_email.php: email zařazen do fronty, ale odeslání selhalo. processed=' . $vysledekFronty['processed'] . ' failed=' . $vysledekFronty['failed']);
+        sendJsonError('Email se nepodařilo odeslat. Zkontrolujte SMTP nastavení.');
     }
 
     $zprava = 'Email odeslán zákazníkovi (' . $emailZakaznika . ')';
@@ -138,6 +145,19 @@ function sestavEmailVytisku(array $zakázka, ?array $nabidka, array $nabidkaPolo
     ), ENT_QUOTES, 'UTF-8');
     $model   = htmlspecialchars($zakázka['model']   ?? '', ENT_QUOTES, 'UTF-8');
     $popis   = htmlspecialchars($zakázka['popis_problemu'] ?? $zakázka['popis'] ?? '', ENT_QUOTES, 'UTF-8');
+
+    $barva   = htmlspecialchars($zakázka['barva'] ?? $zakázka['provedeni'] ?? '', ENT_QUOTES, 'UTF-8');
+    $typ     = htmlspecialchars($zakázka['typ']   ?? '', ENT_QUOTES, 'UTF-8');
+    $termin  = htmlspecialchars($zakázka['termin'] ?? '', ENT_QUOTES, 'UTF-8');
+    $casNavstevy = htmlspecialchars($zakázka['cas_navstevy'] ?? '', ENT_QUOTES, 'UTF-8');
+    $zadal   = htmlspecialchars($zakázka['zadavatel_jmeno'] ?? $zakázka['created_by'] ?? '', ENT_QUOTES, 'UTF-8');
+    $technik = htmlspecialchars($zakázka['technik_jmeno'] ?? '', ENT_QUOTES, 'UTF-8');
+    $vytvoreno = '';
+    if (!empty($zakázka['created_at'])) {
+        $vytvoreno = date('d.m.Y H:i', strtotime($zakázka['created_at']));
+    } elseif (!empty($zakázka['datum_vytvoreni'])) {
+        $vytvoreno = htmlspecialchars($zakázka['datum_vytvoreni'], ENT_QUOTES, 'UTF-8');
+    }
 
     $stavMapa = [
         'wait'           => 'Čeká na zpracování',
@@ -296,9 +316,56 @@ function sestavEmailVytisku(array $zakázka, ?array $nabidka, array $nabidkaPolo
                 <p style='margin: 0 0 14px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #111; border-bottom: 2px solid #111; padding-bottom: 6px;'>Produkt</p>
                 <div style='background: #f8f9fa; border-radius: 8px; padding: 14px 20px;'>
                     <p style='margin: 0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Model</p>
-                    <p style='margin: 5px 0 0; font-size: 14px; font-weight: 600; color: #333;'>{$model}</p>
+                    <p style='margin: 5px 0 0; font-size: 14px; font-weight: 600; color: #333;'>{$model}" . ($barva ? " <span style='font-weight:400;color:#666;'>· {$barva}</span>" : '') . "</p>
                 </div>
             </div>" : '') . "
+
+            <!-- Zakázka -->
+            <div style='padding: 0 40px 20px;'>
+                <p style='margin: 0 0 14px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #111; border-bottom: 2px solid #111; padding-bottom: 6px;'>Zakázka</p>
+                <table role='presentation' cellspacing='0' cellpadding='0' border='0' width='100%'>
+                    <tr>
+                        <td width='50%' style='padding: 6px 0; border-bottom: 1px solid #f0f0f0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Číslo zakázky</p>
+                            <p style='margin: 3px 0 0; font-size: 14px; font-weight: 600; color: #333;'>{$cisloZakazky}</p>
+                        </td>
+                        <td width='50%' style='padding: 6px 0 6px 16px; border-bottom: 1px solid #f0f0f0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Stav</p>
+                            <p style='margin: 3px 0 0; font-size: 14px; font-weight: 600; color: #333;'>{$stav}</p>
+                        </td>
+                    </tr>
+                    " . ($typ ? "
+                    <tr>
+                        <td width='50%' style='padding: 8px 0; border-bottom: 1px solid #f0f0f0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Typ</p>
+                            <p style='margin: 3px 0 0; font-size: 13px; color: #333;'>{$typ}</p>
+                        </td>
+                        <td width='50%' style='padding: 8px 0 8px 16px; border-bottom: 1px solid #f0f0f0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Zadal</p>
+                            <p style='margin: 3px 0 0; font-size: 13px; color: #333;'>{$zadal}</p>
+                        </td>
+                    </tr>" : "") . "
+                    " . ($termin ? "
+                    <tr>
+                        <td colspan='2' style='padding: 8px 0; border-bottom: 1px solid #f0f0f0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Termín návštěvy</p>
+                            <p style='margin: 3px 0 0; font-size: 13px; color: #333;'>{$termin}" . ($casNavstevy ? " · {$casNavstevy}" : '') . "</p>
+                        </td>
+                    </tr>" : "") . "
+                    " . ($vytvoreno ? "
+                    <tr>
+                        <td width='50%' style='padding: 8px 0;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Vytvořeno</p>
+                            <p style='margin: 3px 0 0; font-size: 13px; color: #333;'>{$vytvoreno}</p>
+                        </td>
+                        " . ($technik ? "
+                        <td width='50%' style='padding: 8px 0 8px 16px;'>
+                            <p style='margin:0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;'>Technik</p>
+                            <p style='margin: 3px 0 0; font-size: 13px; color: #333;'>{$technik}</p>
+                        </td>" : "<td></td>") . "
+                    </tr>" : "") . "
+                </table>
+            </div>
 
         </td>
     </tr>
@@ -326,7 +393,7 @@ function sestavEmailVytisku(array $zakázka, ?array $nabidka, array $nabidkaPolo
     <tr>
         <td style='padding: 16px 40px; text-align: center;'>
             <p style='margin: 0; font-size: 10px; color: #bbb; line-height: 1.7;'>
-                Tento dokument má pouze informační charakter a nepředstavuje výzvu k úhradě.
+                Tento dokument má pouze informační charakter.
                 Fakturu nebo potvrzení o provedené platbě Vám zašleme obratem na základě Vaší žádosti.
             </p>
         </td>
