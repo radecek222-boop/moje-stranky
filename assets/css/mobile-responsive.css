@@ -825,7 +825,7 @@ body.scroll-locked,
 body.modal-open {
   overflow: hidden;
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: pan-y pinch-zoom; /* pan-y = scroll v modalu, pinch-zoom = zoom dvema prsty */
 }
 
 /* PWA standalone mode - dodatecne opravy */
