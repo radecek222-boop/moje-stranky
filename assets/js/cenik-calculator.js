@@ -11,6 +11,7 @@
     // ========================================
     const WORKSHOP_COORDS = { lat: 50.056725, lon: 14.577261 }; // Běchovice
     const TRANSPORT_RATE = 0.28; // €/km
+    const PAUSAL_DO_100KM = 20; // € - paušál pro trasu tam a zpět do 100 km (cca 500 Kč)
 
     // Režim kalkulačky: 'standalone' nebo 'protokol'
     let kalkulackaRezim = 'standalone';
@@ -76,12 +77,22 @@
         return PREKLADY[klic] || klic;
     }
 
+    // Výpočet dopravného - paušál do 100 km tam a zpět, jinak sazba za km
+    function vypoctatDopravne(distanceKm) {
+        const tamAZpet = distanceKm * 2;
+        if (tamAZpet <= 100) {
+            return PAUSAL_DO_100KM;
+        }
+        return Math.round(tamAZpet * TRANSPORT_RATE * 100) / 100;
+    }
+
     // Výchozí stav kalkulačky
     const VYCHOZI_STAV = {
         krok: 1,
         adresa: null,
         vzdalenost: 0,
         dopravne: 0,
+        pausalDopravne: false,
         reklamaceBezDopravy: false,
         vyzvednutiSklad: false,
         typServisu: 'calouneni', // diagnostika, calouneni, mechanika, kombinace
@@ -266,11 +277,12 @@
                 } else {
                     // Není reklamace - přepočítat dopravné podle vzdálenosti
                     if (stav.vzdalenost > 0) {
-                        stav.dopravne = Math.round(stav.vzdalenost * 2 * TRANSPORT_RATE * 100) / 100;
+                        stav.dopravne = vypoctatDopravne(stav.vzdalenost);
+                        stav.pausalDopravne = stav.vzdalenost * 2 <= 100;
 
                         const transportCost = document.getElementById('transport-cost');
                         if (transportCost) {
-                            transportCost.textContent = stav.dopravne.toFixed(2);
+                            transportCost.textContent = stav.dopravne.toFixed(2) + (stav.pausalDopravne ? ' (paušál do 100 km)' : '');
                         }
                     }
                 }
@@ -409,14 +421,20 @@
 
                 if (jeReklamace) {
                     stav.dopravne = 0;
+                    stav.pausalDopravne = false;
                     stav.reklamaceBezDopravy = true;
                 } else {
-                    stav.dopravne = Math.round(distanceKm * 2 * TRANSPORT_RATE * 100) / 100;
+                    stav.dopravne = vypoctatDopravne(distanceKm);
+                    stav.pausalDopravne = distanceKm * 2 <= 100;
                     stav.reklamaceBezDopravy = false;
                 }
 
                 document.getElementById('distance-value').textContent = distanceKm;
-                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (' + preklad('summary.claim') + ')' : '');
+                let dopravneZobrazeni = stav.dopravne.toFixed(2);
+                if (!jeReklamace && stav.pausalDopravne) {
+                    dopravneZobrazeni += ' (paušál do 100 km)';
+                }
+                document.getElementById('transport-cost').textContent = dopravneZobrazeni + (jeReklamace ? ' (' + preklad('summary.claim') + ')' : '');
                 document.getElementById('distance-result').classList.remove('hidden');
 
                 // Uživatel pokračuje ručně tlačítkem "Pokračovat"
@@ -748,8 +766,11 @@
         }
 
         // Dopravné
+        const dopravneNazev = stav.pausalDopravne
+            ? `${preklad('summary.transportation')} (paušál do 100 km)`
+            : `${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${zobrazCenu(TRANSPORT_RATE)})`;
         html += `<div class="summary-line">
-            <span>${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${zobrazCenu(TRANSPORT_RATE)}):</span>
+            <span>${dopravneNazev}:</span>
             <span class="summary-price">${zobrazCenu(stav.dopravne)}</span>
         </div>`;
         celkem += stav.dopravne;
@@ -938,6 +959,7 @@
             adresa: null,
             vzdalenost: 0,
             dopravne: 0,
+            pausalDopravne: false,
             reklamaceBezDopravy: false,
             vyzvednutiSklad: false,
             typServisu: 'calouneni',
@@ -1202,7 +1224,7 @@
 
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 15px;">
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px 0;">Dopravné / Transport (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€)</td>
+                            <td style="padding: 8px 0;">Dopravné / Transport (${stav.pausalDopravne ? 'paušál / flat fee \u2264 100 km' : `${stav.vzdalenost} km \xd7 2 \xd7 ${TRANSPORT_RATE}\u20ac`})</td>
                             <td style="padding: 8px 0; text-align: right; font-weight: bold;">${stav.dopravne.toFixed(2)} €</td>
                         </tr>
             `;
