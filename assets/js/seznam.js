@@ -2877,52 +2877,36 @@ async function showCustomerDetail(id) {
   const content = `
     ${createCustomerHeader('showDetail')}
 
-    <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
+    <div class="modal-body detail-modal-body" style="padding: 1rem; overflow-y: auto;">
 
-      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA - vždy viditelný -->
-      <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
-        <textarea id="edit_popis_problemu" class="detail-textarea-popis"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte popis problému od zákazníka"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
-      </div>
+      <!-- DVOUSLOUPCOVÝ GRID - desktop: vlevo zákazník, vpravo popisy -->
+      <div class="detail-dvousloupce">
 
-      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE - vždy viditelná -->
-      <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
-        <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte doplňující informace od prodejce"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
-      </div>
+        <!-- LEVÝ SLOUPEC: informace o zákazníkovi -->
+        <div class="detail-sloupec-levy">
 
-      <div class="detail-buttons" style="margin-bottom: 0.75rem;">
-        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      </div>
+          <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
+          <button id="btn-rozkrit-detail" onclick="
+            const obsah = document.getElementById('rozkryvaci-detail');
+            const sipka = document.getElementById('sipka-detail');
+            const jeOtevreno = obsah.style.display !== 'none';
+            obsah.style.display = jeOtevreno ? 'none' : 'block';
+            sipka.textContent = jeOtevreno ? '▼' : '▲';
+          " style="
+            width: 100%; background: #1a1a1a; border: 1px solid #444;
+            color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            display: none; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem; text-align: left;
+          " class="accordion-pouze-mobil">
+            <span>Informace o zákazníkovi</span>
+            <span id="sipka-detail">▼</span>
+          </button>
 
-      <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
-      <button id="btn-rozkrit-detail" onclick="
-        const obsah = document.getElementById('rozkryvaci-detail');
-        const sipka = document.getElementById('sipka-detail');
-        const jeOtevreno = obsah.style.display !== 'none';
-        obsah.style.display = jeOtevreno ? 'none' : 'block';
-        sipka.textContent = jeOtevreno ? '▼' : '▲';
-      " style="
-        width: 100%; background: #1a1a1a; border: 1px solid #444;
-        color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
-        font-size: 0.85rem; font-weight: 600; cursor: pointer;
-        display: none; justify-content: space-between; align-items: center;
-        margin-bottom: 0.5rem; text-align: left;
-      " class="accordion-pouze-mobil">
-        <span>Informace o zákazníkovi</span>
-        <span id="sipka-detail">▼</span>
-      </button>
-
-      <!-- ROZKRÝVACÍ OBSAH - na desktopu vždy viditelný, na mobilu skrytý -->
-      <div id="rozkryvaci-detail" class="rozkryvaci-detail-wrap">
-        <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
-          <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
+          <!-- ROZKRÝVACÍ OBSAH - na desktopu vždy viditelný, na mobilu skrytý -->
+          <div id="rozkryvaci-detail" class="rozkryvaci-detail-wrap">
+            <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 0.75rem;">
+              <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem; font-size: 0.82rem;">
             <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
             <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
@@ -2983,19 +2967,49 @@ async function showCustomerDetail(id) {
 
             <span style="color: #aaa; font-weight: 600;">Barva:</span>
             <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div class="detail-buttons" style="margin-top: 0.5rem;">
+            <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+          </div>
+
+        </div><!-- /levy sloupec -->
+
+        <!-- PRAVÝ SLOUPEC: popis problému + doplňující informace -->
+        <div class="detail-sloupec-pravy">
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
+            <textarea id="edit_popis_problemu" class="detail-textarea-popis"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      placeholder="Zadejte popis problému od zákazníka"
+                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
+          </div>
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
+            <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      placeholder="Zadejte doplňující informace od prodejce"
+                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+          </div>
+
+        </div><!-- /pravy sloupec -->
+
+      </div><!-- /dvousloupce -->
 
     </div>
   `;
 
   ModalManager.show(content);
 
-  // Zúžit modal pro detail zákazníka (je užší než hlavní detail zakázky)
+  // Rozšířit modal pro detail zákazníka na desktopu (dvousloupcový layout)
   const obsahDetailZakaznika = document.querySelector('#detailOverlay .modal-content');
   if (obsahDetailZakaznika) {
-    obsahDetailZakaznika.style.setProperty('max-width', '520px', 'important');
+    const sirka = window.innerWidth > 768 ? '860px' : '520px';
+    obsahDetailZakaznika.style.setProperty('max-width', sirka, 'important');
   }
 
   // Auto-resize textarea pri prvnim zobrazeni
