@@ -3017,7 +3017,8 @@ async function showCustomerDetail(id) {
     const jeMobil = window.innerWidth <= 768;
     textareas.forEach(ta => {
       if (ta) {
-        ta.style.fontSize = jeMobil ? '1rem' : '0.85rem';
+        ta.style.fontSize = jeMobil ? '22px' : '0.85rem';
+        ta.style.color = jeMobil ? '#28a745' : '';
         ta.style.height = 'auto';
         ta.style.height = ta.scrollHeight + 'px';
       }
