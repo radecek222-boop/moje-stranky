@@ -42,84 +42,129 @@ body {
 
 /* Header */
 .stats-header {
-    background: white;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.75rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 0 0 0.6rem 0;
+    border-bottom: 1px solid #ddd;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
 }
 
 .stats-header h1 {
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     color: #333333;
     font-weight: 600;
 }
 
 .stats-header p {
-    margin: 0.25rem 0 0 0;
-    color: #666;
-    font-size: 0.9rem;
+    display: none;
 }
 
-/* Summary karty */
+/* Summary karty — analytics styl */
 .stats-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
 }
 
 .summary-card {
     background: white;
     border-radius: 8px;
-    padding: 0.85rem 1rem;
+    padding: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border-left: 4px solid #333333;
+    text-align: center;
+    border-left: 3px solid #ccc;
+}
+
+.summary-card:first-child {
+    background: #333;
+    color: #fff;
+    border-left-color: #111;
+}
+
+.summary-card:last-child {
+    background: #1a1a1a;
+    color: #fff;
+    border-left-color: #444;
 }
 
 .summary-card-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
     font-weight: 600;
+    opacity: 0.8;
+}
+
+.summary-card:first-child .summary-card-label,
+.summary-card:last-child .summary-card-label {
+    color: rgba(255,255,255,0.65);
+    opacity: 1;
 }
 
 .summary-card-value {
     font-size: 1.5rem;
     font-weight: 700;
     color: #333333;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.1rem;
+    line-height: 1;
+}
+
+.summary-card:first-child .summary-card-value,
+.summary-card:last-child .summary-card-value {
+    color: #fff;
 }
 
 .summary-card-sub {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #999;
+    opacity: 0.7;
 }
 
-/* Filtry */
+.summary-card:first-child .summary-card-sub,
+.summary-card:last-child .summary-card-sub {
+    color: rgba(255,255,255,0.5);
+    opacity: 1;
+}
+
+/* Filtry — dark header bar */
 .stats-filters {
     background: white;
     border-radius: 8px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.75rem;
+    padding: 0;
+    margin-bottom: 0.6rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* overflow: hidden odstraněno — jinak ořezává multiselect dropdown */
 }
 
 .filters-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #333333;
-    margin-bottom: 0.5rem;
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 0.85rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.filters-inner {
+    padding: 0.65rem 0.85rem;
+    border-radius: 0 0 8px 8px;
 }
 
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
 }
 
 .filter-group {
@@ -128,26 +173,34 @@ body {
 }
 
 .filter-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #666;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+/* Tmavé inputy/selecty */
 .filter-select {
-    padding: 0.6rem;
-    border: 1px solid #ddd;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #444;
     border-radius: 4px;
-    font-size: 0.9rem;
-    background: white;
+    font-size: 0.85rem;
+    background: #222;
+    color: #fff;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
 }
 
 .filter-select:focus {
     outline: none;
-    border-color: #333333;
+    border-color: #666;
+}
+
+.filter-select option {
+    background: #222;
+    color: #fff;
 }
 
 /* Multi-select checkboxy */
@@ -156,79 +209,6 @@ body {
 }
 
 .multiselect-trigger {
-    padding: 0.6rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.9rem;
-}
-
-.multiselect-trigger:hover {
-    border-color: #333333;
-}
-
-.multiselect-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-top: 0.25rem;
-    max-height: 250px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.multiselect-dropdown.active {
-    display: block;
-}
-
-.multiselect-option {
-    padding: 0.6rem;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.multiselect-option:hover {
-    background: #f9f9f9;
-}
-
-.multiselect-option:last-child {
-    border-bottom: none;
-}
-
-.multiselect-option input[type="checkbox"] {
-    margin-right: 0.5rem;
-    cursor: pointer;
-}
-
-.multiselect-option label {
-    cursor: pointer;
-    flex: 1;
-    font-size: 0.8rem;
-    color: #fff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 400;
-    letter-spacing: normal;
-    text-transform: none;
-}
-
-/* Custom single-select dropdown (ROK, MĚSÍC) */
-.filter-singleselect {
-    position: relative;
-}
-
-.singleselect-trigger {
     padding: 0.4rem 0.6rem;
     border: 1px solid #444;
     border-radius: 4px;
@@ -238,17 +218,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-family: 'Poppins', sans-serif;
-    font-weight: 400;
-    user-select: none;
 }
 
-.singleselect-trigger:hover {
+.multiselect-trigger:hover {
     border-color: #666;
 }
 
-.singleselect-dropdown {
+.multiselect-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
@@ -264,30 +242,37 @@ body {
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
-.singleselect-dropdown.active {
+.multiselect-dropdown.active {
     display: block;
 }
 
-.singleselect-option {
+.multiselect-option {
     padding: 0.45rem 0.6rem;
+    display: flex;
+    align-items: center;
     cursor: pointer;
     border-bottom: 1px solid #333;
     color: #fff;
     font-size: 0.8rem;
-    font-family: 'Poppins', sans-serif;
 }
 
-.singleselect-option:hover {
+.multiselect-option:hover {
     background: #2a2a2a;
 }
 
-.singleselect-option:last-child {
+.multiselect-option:last-child {
     border-bottom: none;
 }
 
-.singleselect-option.selected {
-    background: #333;
-    font-weight: 600;
+.multiselect-option input[type="checkbox"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.multiselect-option label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.85rem;
 }
 
 /* Akční tlačítka */
@@ -319,44 +304,53 @@ body {
 }
 
 .btn-primary:hover {
-    background: #1a300d;
+    background: #111;
 }
 
 .btn-export {
-    background: #0066cc;
+    background: #333333;
     color: white;
-    border-color: #0066cc;
+    border-color: #333333;
 }
 
 .btn-export:hover {
-    background: #004499;
+    background: #111;
 }
 
-/* Hlavní tabulka zakázek */
+/* Hlavní tabulka zakázek — dark header bar */
 .stats-table-wrapper {
     background: white;
     border-radius: 8px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.75rem;
+    padding: 0;
+    margin-bottom: 0.6rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden;
 }
 
 .table-header {
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 0.85rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
 .table-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333333;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.5px;
 }
 
 .table-count {
-    font-size: 0.85rem;
-    color: #666;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.65);
+}
+
+.table-inner {
+    padding: 0.65rem 0.85rem;
 }
 
 .stats-table {
@@ -382,10 +376,9 @@ body {
 }
 
 .stats-table td {
-    padding: 0.2rem 0.4rem;
+    padding: 0.5rem 0.4rem;
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.75rem;
-    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -433,31 +426,36 @@ body {
     color: #666;
 }
 
-/* Grafy sekce */
+/* Grafy sekce — dark header bar */
 .stats-charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
 }
 
 .chart-card {
     background: white;
     border-radius: 8px;
-    padding: 0.85rem 1rem;
+    padding: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden;
 }
 
 .chart-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #333333;
-    margin-bottom: 0.5rem;
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
 }
 
 .chart-content {
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
+    padding: 0.5rem 0.85rem;
 }
 
 .chart-item {
@@ -507,6 +505,15 @@ body {
 @media (max-width: 768px) {
     .stats-summary {
         grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+    }
+
+    .summary-card {
+        padding: 0.6rem;
+    }
+
+    .summary-card-value {
+        font-size: 1.25rem;
     }
 
     .filters-grid {
@@ -864,47 +871,37 @@ body {
   <!-- Filtry -->
   <div class="stats-filters">
     <div class="filters-title">Filtry</div>
-
+    <div class="filters-inner">
     <div class="filters-grid">
       <!-- Rok -->
-      <?php $initRok = (date('Y') >= 2024 && date('Y') <= 2026) ? date('Y') : ''; ?>
       <div class="filter-group">
-        <label class="filter-label">Rok</label>
-        <div class="filter-singleselect">
-          <div class="singleselect-trigger" data-hidden-id="filter-year">
-            <span><?php echo $initRok ? $initRok : 'Všechny'; ?></span>
-            <span>▼</span>
-          </div>
-          <div class="singleselect-dropdown">
-            <div class="singleselect-option<?php echo !$initRok ? ' selected' : ''; ?>" data-value="">Všechny</div>
-            <div class="singleselect-option<?php echo $initRok == '2024' ? ' selected' : ''; ?>" data-value="2024">2024</div>
-            <div class="singleselect-option<?php echo $initRok == '2025' ? ' selected' : ''; ?>" data-value="2025">2025</div>
-            <div class="singleselect-option<?php echo $initRok == '2026' ? ' selected' : ''; ?>" data-value="2026">2026</div>
-          </div>
-        </div>
-        <input type="hidden" id="filter-year" value="<?php echo htmlspecialchars($initRok); ?>">
+        <label class="filter-label" for="filter-year">Rok</label>
+        <select class="filter-select" id="filter-year">
+          <option value="">Všechny</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026" <?php echo (date('Y') == '2026') ? 'selected' : ''; ?>>2026</option>
+        </select>
       </div>
 
       <!-- Měsíc -->
-      <?php
-        $mesicNazvy = ['','Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
-        $aktMesic = (int)date('n');
-      ?>
       <div class="filter-group">
-        <label class="filter-label">Měsíc</label>
-        <div class="filter-singleselect">
-          <div class="singleselect-trigger" data-hidden-id="filter-month">
-            <span><?php echo $mesicNazvy[$aktMesic]; ?></span>
-            <span>▼</span>
-          </div>
-          <div class="singleselect-dropdown">
-            <div class="singleselect-option" data-value="">Všechny</div>
-            <?php for ($i = 1; $i <= 12; $i++): ?>
-            <div class="singleselect-option<?php echo $aktMesic === $i ? ' selected' : ''; ?>" data-value="<?php echo $i; ?>"><?php echo $mesicNazvy[$i]; ?></div>
-            <?php endfor; ?>
-          </div>
-        </div>
-        <input type="hidden" id="filter-month" value="<?php echo $aktMesic; ?>">
+        <label class="filter-label" for="filter-month">Měsíc</label>
+        <select class="filter-select" id="filter-month">
+          <option value="">Všechny</option>
+          <option value="1" <?php echo (date('n') == 1) ? 'selected' : ''; ?>>Leden</option>
+          <option value="2" <?php echo (date('n') == 2) ? 'selected' : ''; ?>>Únor</option>
+          <option value="3" <?php echo (date('n') == 3) ? 'selected' : ''; ?>>Březen</option>
+          <option value="4" <?php echo (date('n') == 4) ? 'selected' : ''; ?>>Duben</option>
+          <option value="5" <?php echo (date('n') == 5) ? 'selected' : ''; ?>>Květen</option>
+          <option value="6" <?php echo (date('n') == 6) ? 'selected' : ''; ?>>Červen</option>
+          <option value="7" <?php echo (date('n') == 7) ? 'selected' : ''; ?>>Červenec</option>
+          <option value="8" <?php echo (date('n') == 8) ? 'selected' : ''; ?>>Srpen</option>
+          <option value="9" <?php echo (date('n') == 9) ? 'selected' : ''; ?>>Září</option>
+          <option value="10" <?php echo (date('n') == 10) ? 'selected' : ''; ?>>Říjen</option>
+          <option value="11" <?php echo (date('n') == 11) ? 'selected' : ''; ?>>Listopad</option>
+          <option value="12" <?php echo (date('n') == 12) ? 'selected' : ''; ?>>Prosinec</option>
+        </select>
       </div>
 
       <!-- Prodejci (multi-select) -->
@@ -958,23 +955,24 @@ body {
     </div>
 
     <div class="filter-actions">
-      <div style="display: flex; align-items: center; gap: 20px; margin-right: auto; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
-          <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor: pointer;">
-          <label for="zobrazitMimozarucni" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit mimozáruční servisy</label>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor: pointer;">
-          <label for="zobrazitPouzeDokoncene" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit pouze dokončené</label>
-        </div>
+      <div style="display: flex; align-items: center; gap: 12px; margin-right: auto; flex-wrap: wrap;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor:pointer;margin:0;">
+          Odměna technika v PDF
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor:pointer;margin:0;">
+          Mimozáruční servisy
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor:pointer;margin:0;">
+          Pouze dokončené
+        </label>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
     </div>
+    </div><!-- /.filters-inner -->
   </div>
 
   <!-- Hlavní tabulka zakázek -->
@@ -984,6 +982,7 @@ body {
       <div class="table-count" id="table-count">0 zakázek</div>
     </div>
 
+    <div class="table-inner">
     <div id="table-container" aria-live="polite">
       <div class="loading" role="status">Načítání dat...</div>
     </div>
@@ -994,6 +993,7 @@ body {
       <span class="page-info" id="page-info" aria-live="polite">Strana 1 z 1</span>
       <button id="next-page" data-action="dalsiStranka" aria-label="Další strana">Další →</button>
     </nav>
+    </div><!-- /.table-inner -->
   </div>
 
   <!-- Grafy a statistiky -->
@@ -1053,69 +1053,6 @@ body {
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
-
-<!-- Custom single-select dropdowny (ROK, MĚSÍC) -->
-<script>
-(function() {
-    function inicializovatSingleSelecty() {
-        document.querySelectorAll('.filter-singleselect').forEach(function(wrapper) {
-            var trigger = wrapper.querySelector('.singleselect-trigger');
-            var dropdown = wrapper.querySelector('.singleselect-dropdown');
-            if (!trigger || !dropdown) return;
-
-            trigger.addEventListener('click', function(e) {
-                e.stopPropagation();
-                document.querySelectorAll('.singleselect-dropdown.active, .multiselect-dropdown.active').forEach(function(d) {
-                    if (d !== dropdown) d.classList.remove('active');
-                });
-                dropdown.classList.toggle('active');
-            });
-
-            dropdown.querySelectorAll('.singleselect-option').forEach(function(option) {
-                option.addEventListener('click', function() {
-                    var value = this.dataset.value;
-                    var text = this.textContent.trim();
-                    var hiddenId = trigger.dataset.hiddenId;
-                    var hiddenInput = document.getElementById(hiddenId);
-                    if (hiddenInput) {
-                        hiddenInput.value = value;
-                        hiddenInput.dispatchEvent(new Event('change'));
-                    }
-                    trigger.querySelector('span:first-child').textContent = text;
-                    dropdown.querySelectorAll('.singleselect-option').forEach(function(o) {
-                        o.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    dropdown.classList.remove('active');
-                });
-            });
-        });
-
-        document.addEventListener('click', function() {
-            document.querySelectorAll('.singleselect-dropdown.active').forEach(function(d) {
-                d.classList.remove('active');
-            });
-        });
-    }
-
-    // Globální funkce pro reset ze statistiky.js
-    window.aktualizovatSingleSelectDisplay = function(hiddenId, value) {
-        var trigger = document.querySelector('.singleselect-trigger[data-hidden-id="' + hiddenId + '"]');
-        if (!trigger) return;
-        var dropdown = trigger.closest('.filter-singleselect').querySelector('.singleselect-dropdown');
-        var option = dropdown.querySelector('[data-value="' + value + '"]');
-        trigger.querySelector('span:first-child').textContent = option ? option.textContent.trim() : 'Všechny';
-        dropdown.querySelectorAll('.singleselect-option').forEach(function(o) { o.classList.remove('selected'); });
-        if (option) option.classList.add('selected');
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', inicializovatSingleSelecty);
-    } else {
-        inicializovatSingleSelecty();
-    }
-})();
-</script>
 
 <!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146)
      Pořadí listenerů DOMContentLoaded:
