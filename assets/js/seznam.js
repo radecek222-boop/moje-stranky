@@ -2906,7 +2906,7 @@ async function showCustomerDetail(id) {
           <!-- ROZKRÝVACÍ OBSAH - na desktopu vždy viditelný, na mobilu skrytý -->
           <div id="rozkryvaci-detail" class="rozkryvaci-detail-wrap">
             <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 0.75rem;">
-              <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem; font-size: 0.82rem;">
+              <div class="detail-info-grid" style="display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem; font-size: 0.82rem;">
             <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
             <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 

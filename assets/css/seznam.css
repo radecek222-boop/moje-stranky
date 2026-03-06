@@ -2301,13 +2301,17 @@ a.detail-btn-primary:active {
 @media (min-width: 769px) {
   .detail-dvousloupce {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem;
     align-items: start;
   }
 
+  .detail-sloupec-levy .detail-info-grid {
+    grid-template-columns: 110px 1fr;
+  }
+
   .detail-sloupec-pravy .detail-textarea-popis {
-    min-height: 120px !important;
+    min-height: 150px !important;
   }
 
   .detail-modal-body {
