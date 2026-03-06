@@ -3662,17 +3662,120 @@ function showPhotoFullscreen(photoUrl, zdrojovyElement) {
     }
   }
 
+  // Stav zoomu a posunu
+  let zoomUroven = 1;
+  let posunX = 0, posunY = 0;
+  let tazeni = false, bylTazen = false;
+  let tazeniStartX = 0, tazeniStartY = 0;
+
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10010;display:flex;align-items:center;justify-content:center;';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10010;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+
+  const obalImg = document.createElement('div');
+  obalImg.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;';
 
   const img = document.createElement('img');
   img.alt = 'Zvětšená fotka reklamace';
   img.src = vsechnyFotky[aktualniIndex];
-  img.style.cssText = 'max-width:90%;max-height:90%;object-fit:contain;border-radius:4px;user-select:none;';
+  img.style.cssText = 'max-width:90%;max-height:90%;object-fit:contain;border-radius:4px;user-select:none;transform-origin:center center;cursor:zoom-in;';
+
+  const aktualizujTransform = (prechod) => {
+    img.style.transition = prechod ? 'transform 0.2s ease' : 'none';
+    img.style.transform = `scale(${zoomUroven}) translate(${posunX / zoomUroven}px, ${posunY / zoomUroven}px)`;
+    img.style.cursor = zoomUroven > 1 ? (tazeni ? 'grabbing' : 'grab') : 'zoom-in';
+  };
+
+  const resetujZoom = () => {
+    zoomUroven = 1; posunX = 0; posunY = 0;
+    aktualizujTransform(true);
+  };
+
+  // Kolečko myši pro zoom
+  obalImg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const koef = e.deltaY < 0 ? 1.2 : 1 / 1.2;
+    zoomUroven = Math.min(5, Math.max(1, zoomUroven * koef));
+    if (zoomUroven <= 1) resetujZoom();
+    else aktualizujTransform(false);
+  }, { passive: false });
+
+  // Klik na obrázek — zoom in/out
+  img.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (bylTazen) { bylTazen = false; return; }
+    if (zoomUroven === 1) { zoomUroven = 2; aktualizujTransform(true); }
+    else resetujZoom();
+  });
+
+  // Drag pro posun při zoom
+  img.addEventListener('mousedown', (e) => {
+    if (zoomUroven <= 1) return;
+    e.preventDefault();
+    tazeni = true; bylTazen = false;
+    tazeniStartX = e.clientX - posunX;
+    tazeniStartY = e.clientY - posunY;
+    img.style.cursor = 'grabbing';
+  });
+
+  const onMouseMove = (e) => {
+    if (!tazeni) return;
+    const nx = e.clientX - tazeniStartX;
+    const ny = e.clientY - tazeniStartY;
+    if (Math.abs(nx - posunX) > 3 || Math.abs(ny - posunY) > 3) bylTazen = true;
+    posunX = nx; posunY = ny;
+    aktualizujTransform(false);
+  };
+
+  const onMouseUp = () => {
+    tazeni = false;
+    if (zoomUroven > 1) img.style.cursor = 'grab';
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+
+  // Touch pinch-to-zoom a posun
+  let dotykZoomZacatek = 1, pocatecniRoztaz = 0;
+  let dotyk1StartX = 0, dotyk1StartY = 0;
+
+  obalImg.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      pocatecniRoztaz = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      dotykZoomZacatek = zoomUroven;
+    } else if (e.touches.length === 1) {
+      dotyk1StartX = e.touches[0].clientX - posunX;
+      dotyk1StartY = e.touches[0].clientY - posunY;
+    }
+  }, { passive: false });
+
+  obalImg.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const aktRoztaz = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      zoomUroven = Math.min(5, Math.max(1, dotykZoomZacatek * (aktRoztaz / pocatecniRoztaz)));
+      aktualizujTransform(false);
+    } else if (e.touches.length === 1 && zoomUroven > 1) {
+      e.preventDefault();
+      posunX = e.touches[0].clientX - dotyk1StartX;
+      posunY = e.touches[0].clientY - dotyk1StartY;
+      aktualizujTransform(false);
+    }
+  }, { passive: false });
+
+  obalImg.addEventListener('touchend', () => {
+    if (zoomUroven < 1.05) resetujZoom();
+  });
 
   // Počítadlo fotek (jen pokud víc než 1)
   const pocitadlo = document.createElement('div');
-  pocitadlo.style.cssText = 'position:absolute;top:1rem;left:50%;transform:translateX(-50%);color:#fff;font-size:0.9rem;opacity:0.7;pointer-events:none;';
+  pocitadlo.style.cssText = 'position:absolute;top:1rem;left:50%;transform:translateX(-50%);color:#fff;font-size:0.9rem;opacity:0.7;pointer-events:none;z-index:1;';
   const aktualizujPocitadlo = () => {
     pocitadlo.textContent = vsechnyFotky.length > 1 ? `${aktualniIndex + 1} / ${vsechnyFotky.length}` : '';
   };
@@ -3681,20 +3784,21 @@ function showPhotoFullscreen(photoUrl, zdrojovyElement) {
   const prejitNa = (novyIndex) => {
     aktualniIndex = (novyIndex + vsechnyFotky.length) % vsechnyFotky.length;
     img.src = vsechnyFotky[aktualniIndex];
+    resetujZoom();
     aktualizujPocitadlo();
   };
 
   // Tlačítko zavřít
   const btnZavrit = document.createElement('button');
   btnZavrit.textContent = 'x';
-  btnZavrit.style.cssText = 'position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;opacity:0.7;padding:0.25rem 0.5rem;line-height:1;';
+  btnZavrit.style.cssText = 'position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;opacity:0.7;padding:0.25rem 0.5rem;line-height:1;z-index:1;';
   btnZavrit.onclick = (e) => { e.stopPropagation(); zavrit(); };
 
   // Šipky navigace (jen pokud víc než 1 fotka)
   const tlacitkoSipky = (text, smer) => {
     const btn = document.createElement('button');
     btn.textContent = text;
-    btn.style.cssText = `position:absolute;top:50%;${smer}:1rem;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:1.8rem;cursor:pointer;padding:0.5rem 0.9rem;border-radius:4px;line-height:1;user-select:none;`;
+    btn.style.cssText = `position:absolute;top:50%;${smer}:1rem;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:1.8rem;cursor:pointer;padding:0.5rem 0.9rem;border-radius:4px;line-height:1;user-select:none;z-index:1;`;
     btn.onmouseenter = () => { btn.style.background = 'rgba(255,255,255,0.25)'; };
     btn.onmouseleave = () => { btn.style.background = 'rgba(255,255,255,0.1)'; };
     return btn;
@@ -3709,25 +3813,30 @@ function showPhotoFullscreen(photoUrl, zdrojovyElement) {
     btnNext.onclick = (e) => { e.stopPropagation(); prejitNa(aktualniIndex + 1); };
   }
 
-  // Klik na pozadí zavře
+  // Klik na pozadí zavře (jen bez zoomu)
   overlay.onclick = (e) => {
-    if (e.target === overlay) zavrit();
+    if (e.target === overlay && zoomUroven === 1) zavrit();
   };
 
   const zavrit = () => {
-    overlay.remove();
     document.removeEventListener('keydown', klavesyHandler);
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    overlay.remove();
   };
 
   const klavesyHandler = (e) => {
-    if (e.key === 'Escape') { zavrit(); }
-    else if (e.key === 'ArrowLeft' && vsechnyFotky.length > 1) { prejitNa(aktualniIndex - 1); }
-    else if (e.key === 'ArrowRight' && vsechnyFotky.length > 1) { prejitNa(aktualniIndex + 1); }
+    if (e.key === 'Escape') zavrit();
+    else if (e.key === 'ArrowLeft' && vsechnyFotky.length > 1) prejitNa(aktualniIndex - 1);
+    else if (e.key === 'ArrowRight' && vsechnyFotky.length > 1) prejitNa(aktualniIndex + 1);
+    else if (e.key === '+' || e.key === '=') { zoomUroven = Math.min(5, zoomUroven * 1.3); aktualizujTransform(true); }
+    else if (e.key === '-') { zoomUroven = Math.max(1, zoomUroven / 1.3); if (zoomUroven <= 1.05) resetujZoom(); else aktualizujTransform(true); }
   };
   document.addEventListener('keydown', klavesyHandler);
 
+  obalImg.appendChild(img);
   overlay.appendChild(pocitadlo);
-  overlay.appendChild(img);
+  overlay.appendChild(obalImg);
   overlay.appendChild(btnZavrit);
   if (btnPrev) overlay.appendChild(btnPrev);
   if (btnNext) overlay.appendChild(btnNext);
