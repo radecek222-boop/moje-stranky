@@ -1959,7 +1959,10 @@ function showCalendar(id) {
     ${createCustomerHeader()}
 
     <!-- Vybraný termín - fixní nad kalendářem -->
-    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0 1rem;">
+      <div id="selectedDateDisplay" style="display: none; flex: 1; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.75rem; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+      <button id="btnUlozitTerminHore" data-action="saveSelectedDate" style="display: none; background: #39ff14; color: #000; border: none; padding: 0.4rem 1rem; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; white-space: nowrap; font-family: inherit; letter-spacing: 0.03em; flex-shrink: 0;">Uložit</button>
+    </div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
     <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
@@ -2481,6 +2484,8 @@ function renderTimeGrid() {
         const displayEl = document.getElementById('selectedDateDisplay');
         displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
         displayEl.style.display = 'block';
+        const btnUlozit = document.getElementById('btnUlozitTerminHore');
+        if (btnUlozit) btnUlozit.style.display = 'block';
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
