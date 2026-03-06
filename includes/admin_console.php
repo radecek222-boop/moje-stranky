@@ -495,15 +495,6 @@ function exportLog() {
     logSuccess('Log exportován');
 }
 
-/**
- * EscapeHtml
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // ============================================
 // MAIN DIAGNOSTICS FUNCTION
 // ============================================

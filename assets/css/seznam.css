@@ -2283,7 +2283,7 @@ a.detail-btn-primary:active {
 
 @media (max-width: 768px) {
   .detail-textarea-popis {
-    font-size: 1rem !important;
+    font-size: 1.375rem !important; /* 22px */
   }
 }
 

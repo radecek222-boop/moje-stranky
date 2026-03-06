@@ -1028,18 +1028,15 @@ document.addEventListener('keydown', function(e) {
 </style>
 
 <script>
-// Switch mezi sekcemi
+// Switch mezi sekcemi (jednodušší verze bez section-specific načítání, přepíše admin_security.php)
 function switchSection(section) {
-    // Update URL
     const url = new URL(window.location);
     url.searchParams.set('section', section);
     window.history.pushState({}, '', url);
 
-    // Update tabs
     document.querySelectorAll('.cc-tab').forEach(tab => tab.classList.remove('active'));
     event.target?.classList.add('active');
 
-    // Update sections
     document.querySelectorAll('.cc-section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('section-' + section)?.classList.add('active');
 }
@@ -1086,20 +1083,6 @@ async function toggleNotifikaceActive(notificationId, element) {
         element.dataset.active = currentActive ? '1' : '0';
         console.error('Chyba toggle notifikace:', error);
         alert('Chyba pri zmene stavu notifikace');
-    }
-}
-
-// Toggle password visibility
-function togglePasswordVisibility(configId) {
-    const input = document.getElementById('config-' + configId);
-    const btn = event.target;
-
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = 'Skrýt';
-    } else {
-        input.type = 'password';
-        btn.textContent = 'Zobrazit';
     }
 }
 
@@ -1523,12 +1506,6 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
-}
-
-// Escape HTML
-function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // Obnovit náhled

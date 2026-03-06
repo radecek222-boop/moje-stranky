@@ -80,7 +80,7 @@ body {
   input[type="time"],
   select,
   textarea {
-    font-size: 16px !important; /* 16px zabrání iOS auto-zoom */
+    font-size: 22px !important; /* 22px - čitelnost na mobilu */
     min-height: 44px;
     padding: 0.75rem;
   }
