@@ -2313,13 +2313,13 @@ a.detail-btn-primary:active {
   }
 
   .detail-sloupec-levy {
-    flex: 0 0 50%;
-    width: 50%;
+    flex: 0 0 48%;
+    width: 48%;
   }
 
   .detail-sloupec-pravy {
     flex: 1 1 0;
-    width: 0;
+    min-width: 0;
   }
 
   .detail-sloupec-pravy .detail-textarea-popis {

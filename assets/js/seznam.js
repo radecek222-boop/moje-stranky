@@ -2981,7 +2981,7 @@ async function showCustomerDetail(id) {
         <div class="detail-sloupec-pravy">
 
           <div style="margin-bottom: 0.75rem;">
-            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Popis problému od zákazníka:</label>
             <textarea id="edit_popis_problemu" class="detail-textarea-popis"
                       style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte popis problému od zákazníka"
@@ -2989,7 +2989,7 @@ async function showCustomerDetail(id) {
           </div>
 
           <div style="margin-bottom: 0.75rem;">
-            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Doplňující informace od prodejce:</label>
             <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
                       style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte doplňující informace od prodejce"
