@@ -135,7 +135,13 @@ function wygStav(string $stav): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Výtisk zakázky – <?= wygHtml($zakázka['reklamace_id'] ?? $zakázka['cislo'] ?? '#' . $idParam) ?></title>
+    <link rel="stylesheet" href="assets/css/wgs-loading.min.css">
     <style>
+        :root {
+            --wgs-darkest: #1a1a1a;
+            --wgs-neon-green: #39ff14;
+            --wgs-light-grey: #999;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #111; background: #fff; font-size: 13px; }
 
@@ -237,33 +243,6 @@ function wygStav(string $stav): string {
             @page { margin: 1.5cm; }
         }
 
-        /* ── Loading overlay ── */
-        #wgs-loading-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.75);
-            display: none; align-items: center; justify-content: center;
-            z-index: 10000;
-        }
-        .wgs-loading-karta {
-            background: #fff; border-radius: 8px; padding: 40px 50px;
-            text-align: center; min-width: 240px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-        }
-        .wgs-hourglass-wrap {
-            width: 48px; height: 48px; margin: 0 auto 18px;
-            animation: wgs-hourgl-rot 1.6s ease-in-out infinite;
-        }
-        @keyframes wgs-hourgl-rot {
-            0%, 40%   { transform: rotate(0deg); }
-            60%, 100% { transform: rotate(180deg); }
-        }
-        .wgs-loading-text {
-            margin: 0; font-size: 14px; font-weight: 700; color: #111;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .wgs-loading-sub {
-            margin: 6px 0 0; font-size: 12px; color: #888;
-        }
 
         /* ── WGS Modal ── */
         #wgs-modal-overlay {
@@ -613,17 +592,25 @@ function wygStav(string $stav): string {
 <input type="hidden" id="csrf-token-tisk" value="<?= htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') ?>">
 <input type="hidden" id="reklamace-id-tisk" value="<?= (int)$idParam ?>">
 
-<!-- Loading overlay s přesýpacími hodinami -->
-<div id="wgs-loading-overlay">
-    <div class="wgs-loading-karta">
-        <div class="wgs-hourglass-wrap">
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="#111">
-                <path d="M6 2v6l4 4-4 4v6h12v-6l-4-4 4-4V2H6zm10 14.5V20H8v-3.5l4-4 4 4zm-4-5l-4-4V4h8v3.5l-4 4z"/>
-            </svg>
-        </div>
-        <p class="wgs-loading-text">Odesílám email</p>
-        <p class="wgs-loading-sub">Prosím čekejte...</p>
+<!-- WGS Loading Dialog - stejný styl jako protokol.php -->
+<div class="wgs-loading-overlay" id="loadingOverlay">
+  <div class="wgs-loading-box">
+    <div class="wgs-loading-hourglass">
+      <svg class="wgs-hourglass-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,10 L80,10 L80,20 L60,45 L60,55 L80,80 L80,90 L20,90 L20,80 L40,55 L40,45 L20,20 Z"
+              fill="none" stroke="#39ff14" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M25,15 L75,15 L75,20 L57,42 L43,42 L25,20 Z" fill="#39ff14" opacity="0.6"/>
+        <path d="M25,85 L75,85 L75,80 L57,58 L43,58 L25,80 Z" fill="#39ff14" opacity="0.3"/>
+        <circle class="wgs-sand-particle" cx="50" cy="45" r="1.5" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="48" cy="43" r="1.2" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="52" cy="44" r="1.3" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="49" cy="46" r="1.1" fill="#39ff14"/>
+        <circle class="wgs-sand-particle" cx="51" cy="45" r="1.4" fill="#39ff14"/>
+      </svg>
     </div>
+    <div class="wgs-loading-message" id="loadingText">Odesílám email</div>
+    <div class="wgs-loading-submessage" id="loadingSubtext">Prosím čekejte...</div>
+  </div>
 </div>
 
 <!-- WGS modal (úspěch / chyba) -->
@@ -651,7 +638,13 @@ let _wgsModalInterval = null;
 let _wgsModalUspech = false;
 
 function wgsZobrazLoading(zobrazit) {
-    document.getElementById('wgs-loading-overlay').style.display = zobrazit ? 'flex' : 'none';
+    const overlay = document.getElementById('loadingOverlay');
+    if (zobrazit) {
+        overlay.style.display = '';
+        overlay.classList.add('show');
+    } else {
+        overlay.classList.remove('show');
+    }
 }
 
 function wgsZobrazModal(podtitulek, zprava, jeUspech) {
