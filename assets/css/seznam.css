@@ -499,28 +499,33 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: #f0f0f0;
+  background: rgba(180, 180, 180, 0.35);
   border: none;
   border-radius: 50%;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   color: #cc0000;
-  line-height: 1;
+  line-height: 30px;
   padding: 0;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
   z-index: 10;
 }
 .modal-close:hover,
 .modal-close-btn:hover {
-  background: #e0e0e0;
+  background: rgba(160, 160, 160, 0.5);
   color: #990000;
 }
 .modal-body {
@@ -1537,10 +1542,13 @@ body {
   .close-btn {
     width: 44px !important;
     height: 44px !important;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    aspect-ratio: 1 / 1 !important;
     font-size: 1.3rem !important;
-    border-radius: 50%;
+    border-radius: 50% !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
