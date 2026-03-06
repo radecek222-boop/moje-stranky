@@ -132,40 +132,36 @@ if (!$isLoggedIn && !$isAdmin) {
    FIX: iOS/Safari/PWA Modal Scroll Lock
    ============================================ */
 
-/* Scroll lock pro html a body když je modal otevřený */
-html.modal-open {
-  overflow: hidden !important;
-}
-
-/* Omezit scroll lock jen na body, aby layout headeru nezkracoval ani při otevřeném modalu */
+/* Scroll lock - zabraní scrollu stránky při otevřeném modalu */
+body.scroll-locked,
 body.modal-open {
   overflow: hidden !important;
   touch-action: pan-y pinch-zoom !important;
 }
 
-/* PWA Standalone mode detekce */
+/* PWA Standalone mode - NESMÍ být position:fixed, způsobuje zamrznutí scrollu v modalu */
 @media all and (display-mode: standalone) {
+  body.scroll-locked,
   body.modal-open {
-    /* PWA má jiné viewport chování */
-    height: 100vh !important;
-    position: fixed !important;
+    position: static !important;
+    overflow: hidden !important;
   }
 }
 
-/* iOS Safari specifické fixy */
+/* iOS Safari - modal overlay musí být scrollovatelný */
 @supports (-webkit-touch-callout: none) {
-  /* Tohle targetuje pouze iOS Safari */
-  body.modal-open {
-    overflow: hidden !important;
-    touch-action: pan-y pinch-zoom !important;
-  }
-
   #detailOverlay.active {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #detailOverlay.active .modal-content {
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 }
@@ -2783,5 +2779,69 @@ async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
 }
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
+
+<!-- DEBUG TOUCH: Docasny diagnosticky panel (smazat po vyreseni) -->
+<div id="dbg-btn" onclick="dbgUkaz()" style="position:fixed;bottom:80px;left:10px;z-index:99999;background:#39ff14;color:#000;font-size:11px;font-weight:bold;padding:6px 10px;border-radius:4px;cursor:pointer;font-family:monospace;">DBG</div>
+<div id="dbg-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:10px;font-family:monospace;font-size:12px;color:#eee;">
+  <button onclick="document.getElementById('dbg-panel').style.display='none'" style="background:#333;color:#fff;border:1px solid #666;padding:6px 12px;margin-bottom:10px;border-radius:4px;">ZAVRIT</button>
+  <button onclick="dbgOtevritModal()" style="background:#333;color:#39ff14;border:1px solid #39ff14;padding:6px 12px;margin-bottom:10px;border-radius:4px;margin-left:6px;">TEST MODAL</button>
+  <div id="dbg-obsah"></div>
+</div>
+<script>
+function dbgInfo() {
+  var b = document.body, h = document.documentElement;
+  var bc = window.getComputedStyle(b), hc = window.getComputedStyle(h);
+  var ok = '<span style="color:#39ff14">✓</span>', no = '<span style="color:#ff4444">✗</span>';
+  function chk(val, spatne) { return spatne.indexOf(val) >= 0 ? no + ' <b style="color:#ff4444">' + val + '</b>' : ok + ' ' + val; }
+  return '<b style="color:#39ff14">== ZARIZENI ==</b><br>' +
+    'iOS: ' + (/iPad|iPhone|iPod/.test(navigator.userAgent) ? '<b style="color:#39ff14">ANO</b>' : 'NE') + '<br>' +
+    'PWA: ' + (window.navigator.standalone ? '<b>ANO</b>' : 'NE') + '<br>' +
+    'innerWidth: ' + window.innerWidth + '<br><br>' +
+    '<b style="color:#39ff14">== HTML ELEMENT ==</b><br>' +
+    'overflow: ' + chk(h.style.overflow || hc.overflow, ['hidden']) + '<br>' +
+    'touchAction: ' + chk(h.style.touchAction || hc.touchAction, ['none','manipulation']) + '<br><br>' +
+    '<b style="color:#39ff14">== BODY ==</b><br>' +
+    'overflow: ' + (b.style.overflow) + ' (inline)<br>' +
+    'overflow computed: ' + chk(bc.overflow, ['hidden']) + '<br>' +
+    'position: ' + chk(b.style.position || bc.position, ['fixed']) + '<br>' +
+    'touchAction inline: ' + (b.style.touchAction || '(prazdne)') + '<br>' +
+    'touchAction computed: ' + chk(bc.touchAction, ['none','manipulation']) + '<br>' +
+    'classList: ' + b.className + '<br><br>' +
+    '<b style="color:#39ff14">== SCROLL-LOCK ==</b><br>' +
+    (window.scrollLock ? 'isIOS: ' + window.scrollLock.isIOS + '<br>isPWA: ' + window.scrollLock.isPWA + '<br>isLocked: ' + window.scrollLock.isLocked() : '<span style="color:#ff4444">NENALEZEN</span>') + '<br>';
+}
+function dbgModalInfo() {
+  var ov = document.getElementById('detailOverlay');
+  var mc = ov ? ov.querySelector('.modal-content') : null;
+  var ok = '<span style="color:#39ff14">✓</span>', no = '<span style="color:#ff4444">✗</span>';
+  function chk(val, spatne) { return spatne.indexOf(val) >= 0 ? no + ' <b style="color:#ff4444">' + val + '</b>' : ok + ' ' + val; }
+  if (!ov) return '<span style="color:#ff4444">detailOverlay NENALEZEN</span><br>';
+  var ovc = window.getComputedStyle(ov);
+  var mcc = mc ? window.getComputedStyle(mc) : null;
+  return '<b style="color:#39ff14">== #detailOverlay ==</b><br>' +
+    'touchAction: ' + chk(ovc.touchAction, ['none','manipulation']) + '<br>' +
+    'pointerEvents: ' + ovc.pointerEvents + '<br>' +
+    'overflow: ' + ovc.overflow + '<br>' +
+    (mc ? '<br><b style="color:#39ff14">== .modal-content ==</b><br>' +
+    'touchAction: ' + chk(mcc.touchAction, ['none','manipulation']) + '<br>' +
+    'overflowY: ' + mcc.overflowY + '<br>' +
+    'height: ' + mcc.height + '<br>' : '');
+}
+function dbgUkaz() {
+  document.getElementById('dbg-obsah').innerHTML = dbgInfo();
+  document.getElementById('dbg-panel').style.display = 'block';
+}
+function dbgOtevritModal() {
+  // Otevri prvni zaznam z cache
+  if (window.WGS_DATA_CACHE && WGS_DATA_CACHE.length > 0) {
+    showDetail(WGS_DATA_CACHE[0].id || WGS_DATA_CACHE[0].reklamace_id);
+    setTimeout(function() {
+      document.getElementById('dbg-obsah').innerHTML = dbgInfo() + '<br>' + dbgModalInfo();
+    }, 600);
+  } else {
+    document.getElementById('dbg-obsah').innerHTML += '<br><span style="color:#ff4444">Cache je prazdna - nejprve nacti stranku</span>';
+  }
+}
+</script>
 </body>
 </html>

@@ -57,10 +57,10 @@
             ulozenyScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
 
             if (pouzitOverflowMetodu) {
-                // FIX PWA: Použít overflow: hidden pro PWA/iOS
-                // Tato metoda je spolehlivější a nezpůsobuje zaseknutí scrollu
-                document.documentElement.style.overflow = 'hidden';
+                // FIX iOS: Pouze body overflow (NE html) - html overflow:hidden
+                // blokuje scroll i v child elementech (modaly, overlaye)
                 document.body.style.overflow = 'hidden';
+                document.body.style.touchAction = 'pan-y pinch-zoom';
                 // Zachovat pozici pomocí scroll-behavior
                 document.documentElement.style.scrollBehavior = 'auto';
             } else {
@@ -104,8 +104,8 @@
         if (aktivniZamky.length === 0) {
             if (pouzitOverflowMetodu) {
                 // FIX PWA: Obnovit overflow
-                document.documentElement.style.overflow = '';
                 document.body.style.overflow = '';
+                document.body.style.touchAction = '';
                 document.documentElement.style.scrollBehavior = '';
 
                 // FIX PWA: Použít requestAnimationFrame pro spolehlivé obnovení scrollu
@@ -154,8 +154,8 @@
         aktivniZamky = [];
 
         // Vyčistit oba typy stylů
-        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
+        document.body.style.touchAction = '';
         document.documentElement.style.scrollBehavior = '';
         document.body.style.position = '';
         document.body.style.top = '';
