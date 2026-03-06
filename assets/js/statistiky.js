@@ -416,11 +416,7 @@ function renderTabulka(data) {
                 <td>${z.zeme}</td>
                 <td>${z.datum}</td>
                 <td>
-                    <button data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}" style="
-                        padding: 2px 8px; font-size: 0.75rem; font-weight: 500;
-                        background: #555; color: white; border: none;
-                        border-radius: 3px; cursor: pointer; line-height: 1.4;
-                    ">Upravit</button>
+                    <button class="btn-upravit" data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}">Upravit</button>
                 </td>
             </tr>
         `;
@@ -617,6 +613,11 @@ function resetovitFiltry() {
     // Reset year, month - na "Všechny" (prázdná hodnota)
     document.getElementById('filter-year').value = '';
     document.getElementById('filter-month').value = '';
+    // Aktualizovat custom singleselect displeje
+    if (typeof window.aktualizovatSingleSelectDisplay === 'function') {
+        window.aktualizovatSingleSelectDisplay('filter-year', '');
+        window.aktualizovatSingleSelectDisplay('filter-month', '');
+    }
 
     // Reset prodejci
     document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]').forEach(cb => {
