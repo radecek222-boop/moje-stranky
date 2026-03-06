@@ -2261,3 +2261,17 @@ a.detail-btn-primary:active {
     border-left-width: 3px;
   }
 }
+
+/* Accordion detail zákazníka - desktop vždy viditelný, mobil skrytý */
+.rozkryvaci-detail-wrap {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .accordion-pouze-mobil {
+    display: flex !important;
+  }
+  .rozkryvaci-detail-wrap {
+    display: none;
+  }
+}

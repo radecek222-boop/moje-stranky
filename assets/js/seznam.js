@@ -2901,7 +2901,7 @@ async function showCustomerDetail(id) {
         <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
       </div>
 
-      <!-- ACCORDION PŘEPÍNAČ -->
+      <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
       <button id="btn-rozkrit-detail" onclick="
         const obsah = document.getElementById('rozkryvaci-detail');
         const sipka = document.getElementById('sipka-detail');
@@ -2912,15 +2912,15 @@ async function showCustomerDetail(id) {
         width: 100%; background: #1a1a1a; border: 1px solid #444;
         color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
         font-size: 0.85rem; font-weight: 600; cursor: pointer;
-        display: flex; justify-content: space-between; align-items: center;
+        display: none; justify-content: space-between; align-items: center;
         margin-bottom: 0.5rem; text-align: left;
-      ">
+      " class="accordion-pouze-mobil">
         <span>Informace o zákazníkovi</span>
         <span id="sipka-detail">▼</span>
       </button>
 
-      <!-- ROZKRÝVACÍ OBSAH - skrytý -->
-      <div id="rozkryvaci-detail" style="display: none;">
+      <!-- ROZKRÝVACÍ OBSAH - na desktopu vždy viditelný, na mobilu skrytý -->
+      <div id="rozkryvaci-detail" class="rozkryvaci-detail-wrap">
         <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
           <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
             <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
