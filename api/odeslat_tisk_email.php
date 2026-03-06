@@ -393,7 +393,7 @@ function sestavEmailVytisku(array $zakázka, ?array $nabidka, array $nabidkaPolo
     <tr>
         <td style='padding: 16px 40px; text-align: center;'>
             <p style='margin: 0; font-size: 10px; color: #bbb; line-height: 1.7;'>
-                Tento dokument má pouze informační charakter a nepředstavuje výzvu k úhradě.
+                Tento dokument má pouze informační charakter.
                 Fakturu nebo potvrzení o provedené platbě Vám zašleme obratem na základě Vaší žádosti.
             </p>
         </td>

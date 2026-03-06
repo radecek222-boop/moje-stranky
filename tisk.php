@@ -580,7 +580,7 @@ function wygStav(string $stav): string {
     </div>
 
     <?php if ($nabidka): ?>
-    <p class="tisk-pravni-poznamka">Informační dokument – nepředstavuje výzvu k úhradě. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
+    <p class="tisk-pravni-poznamka">Informační dokument. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
     <?php endif; ?>
 
 </div>
