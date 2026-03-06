@@ -1217,7 +1217,7 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   };
 
   const stavHtml = isAdmin ? `
-    <div class="stav-workflow" style="margin-top:0.5rem;">
+    <div class="stav-workflow" style="margin-top:0.1rem;">
       <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
         ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
         ${pill('open',           'DOML',   '#00e5ff', '#000')}
@@ -1235,15 +1235,15 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
-  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="margin-top:0.5rem;width:auto;padding:0.35rem 1.5rem;min-height:unset;display:inline-block;">Uložit změny</button>` : '';
+  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.3rem 0.7rem;white-space:nowrap;">POSLÁNA SMS</span>` : '';
+  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.3rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
     <strong>Stav:</strong> ${stavHtml}
-    ${smsBylKontaktovan ? `<div style="margin-top:0.25rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
-    ${ulozitBtn}
+    ${(smsHtml || ulozitBtn) ? `<div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:0.25rem;">${smsHtml}${ulozitBtn}</div>` : ''}
   `, backAction, backId);
 }
 
