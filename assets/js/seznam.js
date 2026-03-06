@@ -1162,7 +1162,7 @@ const ModalManager = {
 };
 
 // === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
-function createCustomerHeader(backAction = 'closeDetail') {
+function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   if (!CURRENT_RECORD) return '';
 
   const customerName = Utils.getCustomerName(CURRENT_RECORD);
@@ -1235,13 +1235,15 @@ function createCustomerHeader(backAction = 'closeDetail') {
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
+  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="margin-top:0.5rem;width:auto;padding:0.35rem 1.5rem;min-height:unset;display:inline-block;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
     <strong>Stav:</strong> ${stavHtml}
-    ${smsBylKontaktovan ? `<div style="margin-top:0.5rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
+    ${smsBylKontaktovan ? `<div style="margin-top:0.25rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
+    ${ulozitBtn}
   `, backAction, backId);
 }
 
@@ -2875,7 +2877,7 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${createCustomerHeader('showDetail')}
+    ${createCustomerHeader('showDetail', id)}
 
     <div class="modal-body detail-modal-body" style="padding: 1rem; overflow-y: auto;">
 
@@ -2884,11 +2886,6 @@ async function showCustomerDetail(id) {
 
         <!-- LEVÝ SLOUPEC: informace o zákazníkovi -->
         <div class="detail-sloupec-levy">
-
-          <!-- TLAČÍTKO ULOŽIT - nahoře na desktopu -->
-          <div class="detail-buttons-top">
-            <button class="detail-btn detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-          </div>
 
           <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
           <button id="btn-rozkrit-detail" onclick="
