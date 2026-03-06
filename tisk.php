@@ -223,9 +223,9 @@ function wygStav(string $stav): string {
         .btn-odeslat:disabled { background: #ccc; cursor: not-allowed; }
 
         .tisk-pravni-poznamka {
-            margin-top: 1rem; padding-top: 0.75rem;
-            font-size: 0.68rem; color: #bbb; line-height: 1.7;
-            text-align: center;
+            margin-top: 0.75rem; padding-top: 0.6rem;
+            font-size: 0.65rem; color: #bbb;
+            text-align: center; white-space: nowrap;
         }
 
         @media print {
@@ -522,10 +522,7 @@ function wygStav(string $stav): string {
     </div>
 
     <?php if ($nabidka): ?>
-    <p class="tisk-pravni-poznamka">
-        Tento dokument má pouze informační charakter a nepředstavuje výzvu k úhradě.
-        Fakturu nebo potvrzení o provedené platbě zašleme obratem na základě Vaší žádosti.
-    </p>
+    <p class="tisk-pravni-poznamka">Informační dokument – nepředstavuje výzvu k úhradě. Fakturu nebo potvrzení o platbě zašleme obratem na vyžádání.</p>
     <?php endif; ?>
 
 </div>
