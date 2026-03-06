@@ -3012,11 +3012,13 @@ async function showCustomerDetail(id) {
     obsahDetailZakaznika.style.setProperty('max-width', sirka, 'important');
   }
 
-  // Auto-resize textarea pri prvnim zobrazeni
+  // Auto-resize + nastavení fontu podle zařízení
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
+    const jeMobil = window.innerWidth <= 768;
     textareas.forEach(ta => {
       if (ta) {
+        ta.style.fontSize = jeMobil ? '1rem' : '0.85rem';
         ta.style.height = 'auto';
         ta.style.height = ta.scrollHeight + 'px';
       }
