@@ -27,10 +27,6 @@ $csrfToken = generateCSRFToken();
   <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
   <link rel="stylesheet" href="assets/css/poppins-font.css">
-  <style>
-    /* Oprava backdrop modalu - universal-modal-theme přepíše .modal gradient, chceme poloprůhledné tmavé pozadí */
-    .modal { background: rgba(0, 0, 0, 0.75) !important; }
-  </style>
 </head>
 <body>
 <main id="main-content">
