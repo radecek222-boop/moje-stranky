@@ -204,7 +204,7 @@ $zemeNazvy = [
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+            background: #f5f5f5;
             color: #222;
             min-height: 100vh;
         }
@@ -219,12 +219,12 @@ $zemeNazvy = [
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.25rem;
-            padding-bottom: 1rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.6rem;
             border-bottom: 1px solid #ddd;
         }
         .header h1 {
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #333;
         }
@@ -256,25 +256,25 @@ $zemeNazvy = [
         /* Období selector */
         .obdobi-selector {
             display: flex;
-            gap: 0.35rem;
-            margin-bottom: 1rem;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
             background: #fff;
-            padding: 0.35rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 0.25rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             width: fit-content;
         }
         .obdobi-btn {
-            padding: 0.4rem 0.85rem;
+            padding: 0.3rem 0.75rem;
             border: none;
             background: transparent;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
             cursor: pointer;
             text-decoration: none;
             color: #666;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
         .obdobi-btn.active, .obdobi-btn:hover {
             background: #333;
@@ -284,41 +284,39 @@ $zemeNazvy = [
         /* Metriky grid */
         .metriky-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.6rem;
+            margin-bottom: 0.75rem;
         }
         .metrika-card {
             background: #fff;
             border: none;
             border-radius: 8px;
-            padding: 1rem;
+            padding: 0.75rem;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .metrika-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border-left: 3px solid #ccc;
         }
         .metrika-card.highlight {
-            background: linear-gradient(135deg, #333 0%, #111 100%);
+            background: #333;
             color: #fff;
+            border-left-color: #111;
         }
         .metrika-card.online {
-            background: linear-gradient(135deg, #2d5a27 0%, #1a3518 100%);
+            background: #1a1a1a;
             color: #fff;
+            border-left-color: #444;
         }
         .metrika-hodnota {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             line-height: 1;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
         .metrika-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             opacity: 0.7;
         }
 
@@ -327,20 +325,20 @@ $zemeNazvy = [
             background: #fff;
             border: none;
             border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            margin-bottom: 0.6rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             overflow: hidden;
         }
         .sekce-header {
-            background: linear-gradient(135deg, #444 0%, #222 100%);
+            background: #333;
             color: #fff;
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 0.85rem;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             letter-spacing: 0.5px;
         }
         .sekce-content {
-            padding: 0.85rem;
+            padding: 0.65rem 0.85rem;
         }
 
         /* Tabulky */
@@ -375,12 +373,12 @@ $zemeNazvy = [
         .grid-2 {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.6rem;
         }
         .grid-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.6rem;
         }
         @media (max-width: 900px) {
             .container {
@@ -434,36 +432,36 @@ $zemeNazvy = [
 
             .metriky-grid {
                 grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-                margin-bottom: 1.25rem;
+                gap: 0.4rem;
+                margin-bottom: 0.6rem;
             }
 
             .metrika-card {
-                padding: 0.75rem;
-                border-radius: 10px;
+                padding: 0.6rem;
+                border-radius: 8px;
             }
 
             .metrika-hodnota {
-                font-size: 1.5rem;
-                margin-bottom: 0.25rem;
+                font-size: 1.25rem;
+                margin-bottom: 0.15rem;
             }
 
             .metrika-label {
-                font-size: 0.6rem;
-                letter-spacing: 0.5px;
+                font-size: 0.55rem;
+                letter-spacing: 0.3px;
             }
 
             .sekce {
-                border-radius: 10px;
-                margin-bottom: 0.75rem;
+                border-radius: 8px;
+                margin-bottom: 0.5rem;
             }
 
             .sekce-header {
-                padding: 0.75rem 1rem;
+                padding: 0.4rem 0.75rem;
             }
 
             .sekce-header h2 {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
             }
 
             .grid-row {
@@ -737,9 +735,9 @@ $zemeNazvy = [
     <!-- OBDOBÍ SELECTOR -->
     <div class="obdobi-selector">
         <a href="?obdobi=dnes" class="obdobi-btn <?= $obdobi === 'dnes' ? 'active' : '' ?>">Dnes</a>
-        <a href="?obdobi=vcera" class="obdobi-btn <?= $obdobi === 'vcera' ? 'active' : '' ?>">Vcera</a>
-        <a href="?obdobi=tyden" class="obdobi-btn <?= $obdobi === 'tyden' ? 'active' : '' ?>">Tyden</a>
-        <a href="?obdobi=mesic" class="obdobi-btn <?= $obdobi === 'mesic' ? 'active' : '' ?>">Mesic</a>
+        <a href="?obdobi=vcera" class="obdobi-btn <?= $obdobi === 'vcera' ? 'active' : '' ?>">Včera</a>
+        <a href="?obdobi=tyden" class="obdobi-btn <?= $obdobi === 'tyden' ? 'active' : '' ?>">Týden</a>
+        <a href="?obdobi=mesic" class="obdobi-btn <?= $obdobi === 'mesic' ? 'active' : '' ?>">Měsíc</a>
         <a href="?obdobi=rok" class="obdobi-btn <?= $obdobi === 'rok' ? 'active' : '' ?>">Rok</a>
     </div>
 
