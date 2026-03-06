@@ -317,6 +317,11 @@ body {
     background: #111;
 }
 
+.btn-upravit {
+    padding: 0.5625rem 1.25rem !important;
+    min-height: 33px !important;
+}
+
 /* Hlavní tabulka zakázek — dark header bar */
 .stats-table-wrapper {
     background: white;
