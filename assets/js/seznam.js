@@ -2981,17 +2981,17 @@ async function showCustomerDetail(id) {
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Popis problému od zákazníka:</label>
             <textarea id="edit_popis_problemu" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: ${window.innerWidth <= 768 ? '#28a745' : '#000'}; font-size: ${window.innerWidth <= 768 ? '22px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte popis problému od zákazníka"
-                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
+                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',this.scrollHeight+'px','important')">${Utils.escapeHtml(description)}</textarea>
           </div>
 
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Doplňující informace od prodejce:</label>
             <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: ${window.innerWidth <= 768 ? '#28a745' : '#000'}; font-size: ${window.innerWidth <= 768 ? '22px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte doplňující informace od prodejce"
-                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+                      oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',this.scrollHeight+'px','important')">${Utils.escapeHtml(doplnujici_info)}</textarea>
           </div>
 
         </div><!-- /pravy sloupec -->
@@ -3011,20 +3011,20 @@ async function showCustomerDetail(id) {
     obsahDetailZakaznika.style.setProperty('width', '100%', 'important');
   }
 
-  // Auto-resize + nastavení fontu podle zařízení
+  // Auto-resize + nastavení fontu podle zařízení (400ms - iOS potřebuje čas na render)
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
     const jeMobil = window.innerWidth <= 768;
-    alert('DEBUG: jeMobil=' + jeMobil + ' textareas=' + textareas.length + ' innerWidth=' + window.innerWidth);
     textareas.forEach(ta => {
       if (ta) {
-        ta.style.setProperty('font-size', jeMobil ? '22px' : '0.85rem', 'important');
-        ta.style.setProperty('color', jeMobil ? '#28a745' : '#000', 'important');
-        ta.style.height = 'auto';
-        ta.style.height = ta.scrollHeight + 'px';
+        ta.style.setProperty('font-size', jeMobil ? '14px' : '0.85rem', 'important');
+        ta.style.setProperty('color', '#000', 'important');
+        ta.style.setProperty('min-height', '0', 'important');
+        ta.style.setProperty('height', 'auto', 'important');
+        ta.style.setProperty('height', ta.scrollHeight + 'px', 'important');
       }
     });
-  }, 50);
+  }, 400);
 }
 
 /**
