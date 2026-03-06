@@ -23,6 +23,15 @@ try {
         exit;
     }
 
+    // Přečíst vše ze session a ihned uvolnit zámek souboru session.
+    // Paralelní AJAX požadavky (load.php + notes_api + nabidka_api) se totiž
+    // serialisují kvůli PHP session file lock — každý čeká na předchozí.
+    // session_write_close() zámek uvolní a requesty pak běží skutečně paralelně.
+    $userId    = $_SESSION['user_id']    ?? null;
+    $userEmail = $_SESSION['user_email'] ?? null;
+    $userRole  = strtolower(trim($_SESSION['role'] ?? 'guest'));
+    session_write_close();
+
     $status = $_GET['status'] ?? 'all';
 
     $pdo = getDbConnection();
@@ -37,9 +46,6 @@ try {
 
     // ŠKÁLOVATELNÁ LOGIKA PRO VÍCE PRODEJCŮ A TECHNIKŮ
     if (!$isAdmin) {
-        $userId = $_SESSION['user_id'] ?? null;
-        $userEmail = $_SESSION['user_email'] ?? null;  // SPRÁVNĚ: login_controller používá 'user_email'
-        $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
         // Rozlišení podle role:
         // - 'prodejce' → vidí SVÉ reklamace + reklamace SUPERVIZOVANÝCH prodejců

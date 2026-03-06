@@ -26,8 +26,15 @@ try {
     $pdo = getDbConnection();
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-    // Vytvořit tabulku pokud neexistuje
-    vytvorTabulkuNabidky($pdo);
+    // Uvolnit session lock – paralelní requesty (load.php, notes_api) se jinak serialisují
+    session_write_close();
+
+    // Vytvořit tabulku pouze jednou za životnost PHP-FPM workeru (static přetrvá)
+    static $tabulkaOverena = false;
+    if (!$tabulkaOverena) {
+        vytvorTabulkuNabidky($pdo);
+        $tabulkaOverena = true;
+    }
 
     $action = $_GET['action'] ?? $_POST['action'] ?? 'cenik';
 
