@@ -75,6 +75,38 @@ try {
         // Tabulka nemusí existovat — ignorovat
     }
 
+    // Načíst spojenou cenovou nabídku (pokud existuje)
+    $nabidka = null;
+    $nabidkaPolozky = [];
+    $nabidkaZalohaEur = 0.0;
+    $nabidkaZfOdeslana = false;
+    $nabidkaZfUhrazena = false;
+    try {
+        $nStmt = $pdo->prepare('
+            SELECT cislo_nabidky, celkova_cena, mena, polozky_json,
+                   zf_odeslana_at, zf_uhrazena_at, potvrzeno_at, stav
+            FROM wgs_nabidky
+            WHERE reklamace_id = :rid
+              AND stav NOT IN (\'zamitnuta\', \'expirovana\', \'zrusena\')
+            ORDER BY vytvoreno_at DESC
+            LIMIT 1
+        ');
+        $nStmt->execute([':rid' => $idParam]);
+        $nabidka = $nStmt->fetch(PDO::FETCH_ASSOC);
+        if ($nabidka) {
+            $nabidkaZfOdeslana = !empty($nabidka['zf_odeslana_at']);
+            $nabidkaZfUhrazena = !empty($nabidka['zf_uhrazena_at']);
+            $nabidkaPolozky = json_decode($nabidka['polozky_json'] ?? '[]', true) ?? [];
+            foreach ($nabidkaPolozky as $pol) {
+                if (($pol['skupina'] ?? '') === 'dily') {
+                    $nabidkaZalohaEur += floatval($pol['cena']) * intval($pol['pocet'] ?? 1);
+                }
+            }
+        }
+    } catch (PDOException $e) {
+        // Nabídka nemusí existovat — ignorovat
+    }
+
 } catch (Exception $e) {
     $chyba = $e->getMessage();
     error_log('tisk.php chyba: ' . $e->getMessage());
@@ -151,6 +183,17 @@ function wygStav(string $stav): string {
             font-size: 0.72rem; color: #888;
             display: flex; justify-content: space-between;
         }
+
+        .cn-tabulka { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .cn-tabulka th { background: #f0f0f0; padding: 0.35rem 0.6rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555; }
+        .cn-tabulka td { padding: 0.3rem 0.6rem; border-bottom: 1px solid #f0f0f0; }
+        .cn-tabulka tr:last-child td { border-bottom: none; }
+        .cn-skupina-radek td { background: #f5f5f5; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: #888; padding: 0.2rem 0.6rem; }
+        .cn-celkem-blok { margin-top: 0.75rem; border-top: 2px solid #111; padding-top: 0.5rem; }
+        .cn-celkem-radek { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.85rem; }
+        .cn-celkem-radek.hlavni { font-size: 1rem; font-weight: 700; }
+        .cn-zaloh-info { font-size: 0.75rem; color: #555; margin-top: 0.3rem; }
+        .cn-zf-odznak { display: inline-block; background: #111; color: #fff; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 2px; margin-left: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .btn-tisk {
             position: fixed; bottom: 1.5rem; right: 1.5rem;
@@ -319,6 +362,101 @@ function wygStav(string $stav): string {
             <?php endif; ?>
         </div>
         <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Cenová nabídka (pokud existuje) -->
+    <?php if ($nabidka && !empty($nabidkaPolozky)): ?>
+    <?php
+        // Seskupit položky podle skupiny
+        $skupinyNazvy = [
+            'doprava'   => 'Dopravné',
+            'calouneni' => 'Čalounické práce',
+            'mechanika' => 'Mechanické opravy',
+            'priplatky' => 'Příplatky',
+            'dily'      => 'Náhradní díly',
+            'prace'     => 'Práce',
+            'ostatni'   => 'Ostatní',
+        ];
+        $skupiny = [];
+        foreach ($nabidkaPolozky as $pol) {
+            $sk = $pol['skupina'] ?? 'ostatni';
+            $skupiny[$sk][] = $pol;
+        }
+        $celkemEur = floatval($nabidka['celkova_cena']);
+        $zalohaEur = $nabidkaZalohaEur;
+        $doplatekEur = $nabidkaZfUhrazena ? max(0, $celkemEur - $zalohaEur) : null;
+    ?>
+    <div class="tisk-sekce">
+        <div class="tisk-sekce-nadpis">
+            Cenová nabídka <?= wygHtml($nabidka['cislo_nabidky'] ?? '') ?>
+            <?php if ($nabidkaZfUhrazena): ?>
+                <span class="cn-zf-odznak">Záloha uhrazena</span>
+            <?php elseif ($nabidkaZfOdeslana): ?>
+                <span class="cn-zf-odznak">Záloha odeslána</span>
+            <?php endif; ?>
+        </div>
+
+        <table class="cn-tabulka">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th style="text-align:center;width:50px;">Ks</th>
+                    <th style="text-align:right;width:80px;">Cena/ks</th>
+                    <th style="text-align:right;width:80px;">Celkem</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+            $poradi = ['doprava', 'calouneni', 'mechanika', 'priplatky', 'dily', 'prace', 'ostatni'];
+            foreach ($poradi as $sk):
+                if (empty($skupiny[$sk])) continue;
+                $nazevSkupiny = $skupinyNazvy[$sk] ?? ucfirst($sk);
+            ?>
+                <tr class="cn-skupina-radek">
+                    <td colspan="4"><?= htmlspecialchars($nazevSkupiny, ENT_QUOTES, 'UTF-8') ?></td>
+                </tr>
+                <?php foreach ($skupiny[$sk] as $pol):
+                    $pocet = intval($pol['pocet'] ?? 1);
+                    $cena = floatval($pol['cena']);
+                    $radekCelkem = $cena * $pocet;
+                ?>
+                <tr>
+                    <td><?= wygHtml($pol['nazev'] ?? '') ?></td>
+                    <td style="text-align:center;"><?= $pocet ?></td>
+                    <td style="text-align:right;"><?= number_format($cena, 2, ',', ' ') ?> €</td>
+                    <td style="text-align:right;font-weight:500;"><?= number_format($radekCelkem, 2, ',', ' ') ?> €</td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <div class="cn-celkem-blok">
+            <div class="cn-celkem-radek hlavni">
+                <span>Celková cena nabídky:</span>
+                <span><?= number_format($celkemEur, 2, ',', ' ') ?> €</span>
+            </div>
+            <?php if ($zalohaEur > 0): ?>
+            <div class="cn-celkem-radek" style="color:#555;">
+                <span>
+                    Záloha za náhradní díly
+                    <?php if ($nabidkaZfUhrazena): ?>
+                        <span class="cn-zf-odznak">Uhrazena</span>
+                    <?php elseif ($nabidkaZfOdeslana): ?>
+                        <span class="cn-zf-odznak">Odeslána</span>
+                    <?php endif; ?>
+                </span>
+                <span><?= number_format($zalohaEur, 2, ',', ' ') ?> € (cca <?= number_format($zalohaEur * 25, 0, ',', ' ') ?> Kč)</span>
+            </div>
+            <?php if ($nabidkaZfUhrazena): ?>
+            <div class="cn-celkem-radek hlavni" style="border-top:1px solid #ccc;margin-top:0.3rem;padding-top:0.3rem;">
+                <span>Zbývá k doplacení:</span>
+                <span><?= number_format($doplatekEur, 2, ',', ' ') ?> € (cca <?= number_format($doplatekEur * 25, 0, ',', ' ') ?> Kč)</span>
+            </div>
+            <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
     <?php endif; ?>
 
