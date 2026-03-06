@@ -2083,15 +2083,22 @@ function renderCalendar(m, y) {
 
     // Disable past dates
     const isPast = dayDate < today;
+    const isToday = dayDate.getTime() === today.getTime();
     if (isPast) {
       el.classList.add('disabled');
       el.title = 'Nelze vybrat minulé datum';
       el.style.opacity = '0.3';
       el.style.cursor = 'not-allowed';
       el.style.backgroundColor = 'var(--wgs-gray-f0)';
-    } else if (occupiedDays.has(d)) {
-      el.classList.add('occupied');
-      el.title = 'Tento den má již nějaké termíny';
+    } else {
+      if (isToday) {
+        el.classList.add('dnes');
+        el.title = 'Dnes';
+      }
+      if (occupiedDays.has(d)) {
+        el.classList.add('occupied');
+        if (!isToday) el.title = 'Tento den má již nějaké termíny';
+      }
     }
 
     el.textContent = d;
