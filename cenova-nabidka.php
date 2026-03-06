@@ -1622,7 +1622,8 @@ if ($reklamaceId > 0) {
                     vsechnyPolozky.push({
                         nazev: 'Náhradní díl: ' + d.nazev,
                         cena: d.cena,
-                        pocet: d.pocet
+                        pocet: d.pocet,
+                        skupina: 'dily'
                     });
                 }
             });

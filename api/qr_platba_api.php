@@ -77,7 +77,7 @@ try {
     $zfUhrazena = false;
 
     $stmtNabidka = $pdo->prepare("
-        SELECT polozky_json, zf_odeslana_at, zf_uhrazena_at
+        SELECT polozky_json, zf_odeslana_at, zf_uhrazena_at, celkova_cena, mena
         FROM wgs_nabidky
         WHERE reklamace_id = :reklamace_id
           AND stav NOT IN ('zamitnuta', 'expirovana', 'zrusena')
@@ -87,12 +87,16 @@ try {
     $stmtNabidka->execute(['reklamace_id' => $reklamaceId]);
     $nabidka = $stmtNabidka->fetch(PDO::FETCH_ASSOC);
 
+    $nabidkaCelkemEur = 0.0;
     if ($nabidka) {
         $zfOdeslana = !empty($nabidka['zf_odeslana_at']);
         $zfUhrazena = !empty($nabidka['zf_uhrazena_at']);
+        $nabidkaCelkemEur = floatval($nabidka['celkova_cena']);
         $polozky = json_decode($nabidka['polozky_json'], true) ?? [];
         foreach ($polozky as $polozka) {
-            if (($polozka['skupina'] ?? '') === 'dily') {
+            $jeNahradniDil = ($polozka['skupina'] ?? '') === 'dily'
+                || str_starts_with($polozka['nazev'] ?? '', 'Náhradní díl:');
+            if ($jeNahradniDil) {
                 $zalohaCastkaEur += floatval($polozka['cena']) * intval($polozka['pocet'] ?? 1);
             }
         }
@@ -100,6 +104,12 @@ try {
 
     // Záloha v Kč (kurz 25)
     $zalohaCastkaCzk = (int) round($zalohaCastkaEur * 25);
+
+    // Celková cena v Kč: preferovat nabídku, fallback na reklamaci
+    $nabidkaCelkemCzk = (int) round($nabidkaCelkemEur * 25);
+    if ($castka <= 0 && $nabidkaCelkemCzk > 0) {
+        $castka = $nabidkaCelkemCzk;
+    }
 
     // Částka k úhradě - po odečtení zálohy pokud je záloha uhrazena
     $castkaPlatba = $castka;
@@ -136,8 +146,12 @@ try {
         'castka' => $castka,
         'castka_platba' => $castkaPlatba,
         'castka_formatovana' => number_format($castkaPlatba, 2, ',', ' ') . ' CZK',
+        'nabidka_celkem_eur' => $nabidkaCelkemEur,
+        'nabidka_celkem_czk' => $nabidkaCelkemCzk,
         'zalohova_castka_eur' => $zalohaCastkaEur,
         'zalohova_castka_czk' => $zalohaCastkaCzk,
+        'doplatek_eur' => $zfUhrazena && $zalohaCastkaEur > 0 ? max(0.0, $nabidkaCelkemEur - $zalohaCastkaEur) : null,
+        'doplatek_czk' => $zfUhrazena && $zalohaCastkaCzk > 0 ? max(0, $castka - $zalohaCastkaCzk) : null,
         'zf_odeslana' => $zfOdeslana,
         'zf_uhrazena' => $zfUhrazena,
         'vs' => $vs,
