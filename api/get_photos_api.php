@@ -36,7 +36,7 @@ try {
     $pdo = getDbConnection();
 
     // BEZPEČNOST: Ověření existence reklamace
-    $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, reklamace_id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
     $stmt->execute([
         ':reklamace_id' => $reklamaceId,
         ':cislo' => $reklamaceId
@@ -47,8 +47,9 @@ try {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Načtení fotek z databáze - použít numerické ID z wgs_reklamace
-    $numericId = $reklamace['id'];
+    // wgs_photos.reklamace_id uchovává WGS string (ne numerické ID)
+    // Hledáme podle původního WGS stringu z DB
+    $wgsId = $reklamace['reklamace_id'];
     $stmt = $pdo->prepare("
         SELECT
             id, section_name, photo_path, file_path, file_name,
@@ -57,7 +58,7 @@ try {
         WHERE reklamace_id = :reklamace_id
         ORDER BY photo_order ASC, id ASC
     ");
-    $stmt->execute([':reklamace_id' => $numericId]);
+    $stmt->execute([':reklamace_id' => $wgsId]);
     $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Připravit oba formáty: sections (pro zpětnou kompatibilitu) a photos (pro seznam.js)
