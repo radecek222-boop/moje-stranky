@@ -222,6 +222,12 @@ function wygStav(string $stav): string {
         .btn-odeslat:hover { background: #777; }
         .btn-odeslat:disabled { background: #ccc; cursor: not-allowed; }
 
+        .tisk-pravni-poznamka {
+            margin-top: 1rem; padding-top: 0.75rem;
+            font-size: 0.68rem; color: #bbb; line-height: 1.7;
+            text-align: center;
+        }
+
         @media print {
             .btn-tisk { display: none !important; }
             .btn-zavrit { display: none !important; }
@@ -514,6 +520,11 @@ function wygStav(string $stav): string {
         <span>White Glove Service — Natuzzi Italy</span>
         <span><?= wygHtml($zakázka['reklamace_id'] ?? $zakázka['cislo'] ?? '#' . $idParam) ?> | <?= date('d.m.Y') ?></span>
     </div>
+
+    <p class="tisk-pravni-poznamka">
+        Tento dokument má pouze informační charakter a nepředstavuje výzvu k úhradě.
+        Fakturu nebo potvrzení o provedené platbě zašleme obratem na základě Vaší žádosti.
+    </p>
 
 </div>
 
