@@ -391,6 +391,22 @@ body {
     background: #111;
 }
 
+/* Tlačítko Upravit v tabulce — přebíjí globální line-height: 1.6 */
+.btn-upravit {
+    padding: 1px 6px !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    background: #555 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 3px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
 /* Hlavní tabulka zakázek — dark header bar */
 .stats-table-wrapper {
     background: white;
