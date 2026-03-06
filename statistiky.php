@@ -117,9 +117,9 @@ body {
 
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
 }
 
 .filter-group {
@@ -128,19 +128,19 @@ body {
 }
 
 .filter-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #666;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .filter-select {
-    padding: 0.6rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     background: white;
     cursor: pointer;
 }
@@ -156,7 +156,7 @@ body {
 }
 
 .multiselect-trigger {
-    padding: 0.6rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     background: white;
@@ -164,7 +164,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .multiselect-trigger:hover {
@@ -247,17 +247,17 @@ body {
 }
 
 .btn-primary:hover {
-    background: #1a300d;
+    background: #111;
 }
 
 .btn-export {
-    background: #0066cc;
+    background: #333333;
     color: white;
-    border-color: #0066cc;
+    border-color: #333333;
 }
 
 .btn-export:hover {
-    background: #004499;
+    background: #111;
 }
 
 /* Hlavní tabulka zakázek */
@@ -273,7 +273,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .table-title {
@@ -383,7 +383,7 @@ body {
 }
 
 .chart-content {
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
 }
 
@@ -875,19 +875,19 @@ body {
     </div>
 
     <div class="filter-actions">
-      <div style="display: flex; align-items: center; gap: 20px; margin-right: auto; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
-          <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor: pointer;">
-          <label for="zobrazitMimozarucni" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit mimozáruční servisy</label>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor: pointer;">
-          <label for="zobrazitPouzeDokoncene" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit pouze dokončené</label>
-        </div>
+      <div style="display: flex; align-items: center; gap: 12px; margin-right: auto; flex-wrap: wrap;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor:pointer;margin:0;">
+          Odměna technika v PDF
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor:pointer;margin:0;">
+          Mimozáruční servisy
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
+          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor:pointer;margin:0;">
+          Pouze dokončené
+        </label>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
