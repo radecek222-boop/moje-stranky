@@ -4,6 +4,16 @@
  * Datum: 2025-11-22
  */
 
+/**
+ * Převede text z VERZALEK na normální velikost (Proper Case)
+ * "ITALY DESIGN" → "Italy Design", "JAN VESELÝ" → "Jan Veselý"
+ */
+function naProperCase(retezec) {
+    return retezec.toLowerCase().replace(/(?:^|\s|-)\S/g, function(pismeno) {
+        return pismeno.toUpperCase();
+    });
+}
+
 // Globální proměnné
 let aktualniStranka = 1;
 let vybraneProdejci = [];
@@ -186,9 +196,10 @@ async function nactiProdejce() {
             result.data.forEach(prodejce => {
                 const option = document.createElement('div');
                 option.className = 'multiselect-option';
+                const zobrazeneJmeno = naProperCase(prodejce.name);
                 option.innerHTML = `
                     <input type="checkbox" id="prodejce-${prodejce.id}" value="${prodejce.id}">
-                    <label for="prodejce-${prodejce.id}">${prodejce.name}</label>
+                    <label for="prodejce-${prodejce.id}">${zobrazeneJmeno}</label>
                 `;
 
                 // Listener na checkbox
@@ -219,9 +230,10 @@ async function nactiTechniky() {
             result.data.forEach(technik => {
                 const option = document.createElement('div');
                 option.className = 'multiselect-option';
+                const zobrazeneJmeno = naProperCase(technik.name);
                 option.innerHTML = `
                     <input type="checkbox" id="technik-${technik.id}" value="${technik.id}">
-                    <label for="technik-${technik.id}">${technik.name}</label>
+                    <label for="technik-${technik.id}">${zobrazeneJmeno}</label>
                 `;
 
                 // Listener na checkbox
