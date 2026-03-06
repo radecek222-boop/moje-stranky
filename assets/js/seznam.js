@@ -2945,7 +2945,21 @@ async function showCustomerDetail(id) {
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
             <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
+            <div style="display:flex;gap:0.4rem;align-items:center;">
+              <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000; flex:1;" value="${phone}">
+              <button onclick="
+                const tel = document.getElementById('edit_telefon').value;
+                if (tel) {
+                  navigator.clipboard.writeText(tel).then(() => {
+                    const btn = this;
+                    const puvodni = btn.textContent;
+                    btn.textContent = 'Zkopírováno';
+                    btn.style.background = '#28a745';
+                    setTimeout(() => { btn.textContent = puvodni; btn.style.background = '#444'; }, 1500);
+                  });
+                }
+              " style="background:#444;color:#fff;border:none;padding:0.25rem 0.6rem;border-radius:3px;font-size:0.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Kopírovat</button>
+            </div>
 
             <span style="color: #aaa; font-weight: 600;">Email:</span>
             <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
