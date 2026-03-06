@@ -521,10 +521,12 @@ function wygStav(string $stav): string {
         <span><?= wygHtml($zakázka['reklamace_id'] ?? $zakázka['cislo'] ?? '#' . $idParam) ?> | <?= date('d.m.Y') ?></span>
     </div>
 
+    <?php if ($nabidka): ?>
     <p class="tisk-pravni-poznamka">
         Tento dokument má pouze informační charakter a nepředstavuje výzvu k úhradě.
         Fakturu nebo potvrzení o provedené platbě zašleme obratem na základě Vaší žádosti.
     </p>
+    <?php endif; ?>
 
 </div>
 
