@@ -2881,18 +2881,18 @@ async function showCustomerDetail(id) {
 
       <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA - vždy viditelný -->
       <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1.3rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
         <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 1.5rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                   placeholder="Zadejte popis problému od zákazníka"
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
       </div>
 
       <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE - vždy viditelná -->
       <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1.3rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
         <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 1.5rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                   placeholder="Zadejte doplňující informace od prodejce"
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
