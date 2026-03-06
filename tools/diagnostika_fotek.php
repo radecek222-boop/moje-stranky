@@ -3,10 +3,14 @@
  * Diagnostika fotek - kontrola DB záznamy vs soubory na disku
  */
 
-require_once __DIR__ . '/init.php';
+if (file_exists(__DIR__ . '/init.php')) {
+    require_once __DIR__ . '/init.php';
+} else {
+    require_once __DIR__ . '/../init.php';
+}
 
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    die('PŘÍSTUP ODEPŘEN');
+    die('PŘÍSTUP ODEPŘEN - musíte být přihlášen jako administrátor');
 }
 
 $pdo = getDbConnection();
