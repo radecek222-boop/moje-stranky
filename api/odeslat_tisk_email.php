@@ -116,10 +116,10 @@ try {
     sendJsonSuccess($zprava);
 
 } catch (PDOException $e) {
-    error_log('odeslat_tisk_email.php chyba DB: ' . $e->getMessage());
+    error_log('odeslat_tisk_email.php chyba DB: ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
     sendJsonError('Chyba při zpracování požadavku');
-} catch (Exception $e) {
-    error_log('odeslat_tisk_email.php chyba: ' . $e->getMessage());
+} catch (\Throwable $e) {
+    error_log('odeslat_tisk_email.php chyba: ' . get_class($e) . ': ' . $e->getMessage() . ' v ' . $e->getFile() . ':' . $e->getLine());
     sendJsonError('Chyba při odesílání emailu');
 }
 
