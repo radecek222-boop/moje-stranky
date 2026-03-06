@@ -47,7 +47,8 @@ try {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Načtení fotek z databáze
+    // Načtení fotek z databáze - použít numerické ID z wgs_reklamace
+    $numericId = $reklamace['id'];
     $stmt = $pdo->prepare("
         SELECT
             id, section_name, photo_path, file_path, file_name,
@@ -56,7 +57,7 @@ try {
         WHERE reklamace_id = :reklamace_id
         ORDER BY photo_order ASC, id ASC
     ");
-    $stmt->execute([':reklamace_id' => $reklamaceId]);
+    $stmt->execute([':reklamace_id' => $numericId]);
     $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Připravit oba formáty: sections (pro zpětnou kompatibilitu) a photos (pro seznam.js)
