@@ -5179,14 +5179,20 @@ async function zobrazVideotekaArchiv(claimId) {
       const customerName = result.customer_name || 'Neznámý zákazník';
       const reklamaceNum = result.reklamace_cislo || claimId;
       if (isMobileHeader) {
-        // Mobil: jméno nahoře, číslo pod tím menší, centrované
         header.innerHTML = `
-          <span style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${customerName}</span>
-          <span style="font-size: 0.75rem; opacity: 0.6;">${reklamaceNum}</span>
+          <div style="padding-right: 2.5rem; overflow: hidden;">
+            <div style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${customerName}</div>
+            <div style="font-size: 0.75rem; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${reklamaceNum}</div>
+          </div>
         `;
       } else {
-        // Desktop: vedle sebe
-        header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+        // Desktop: jméno + číslo za sebou, s odsazením od X tlačítka
+        header.innerHTML = `
+          <div style="padding-right: 2.5rem; overflow: hidden;">
+            <span style="font-weight: 600;">${customerName}</span>
+            <span style="font-size: 0.85rem; opacity: 0.7; margin-left: 0.75rem;">${reklamaceNum}</span>
+          </div>
+        `;
       }
 
       if (result.videos && result.videos.length > 0) {
