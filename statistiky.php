@@ -206,13 +206,16 @@ body {
     font-weight: 400;
 }
 
-/* Jasně bílé písmo + zrušení globálního text-transform:uppercase z styles.min.css */
+/* Jasně bílé písmo + zrušení globálního text-transform a letter-spacing z styles.min.css */
 .multiselect-option,
 .multiselect-option label,
 .multiselect-trigger,
 .multiselect-trigger span {
     color: #fff !important;
     text-transform: none !important;
+    letter-spacing: normal !important;
+    font-size: 0.85rem !important;
+    font-weight: 400 !important;
 }
 
 /* Single-select položky (Rok, Měsíc) */
