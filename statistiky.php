@@ -42,129 +42,84 @@ body {
 
 /* Header */
 .stats-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
     margin-bottom: 0.75rem;
-    padding: 0 0 0.6rem 0;
-    border-bottom: 1px solid #ddd;
-    background: none;
-    box-shadow: none;
-    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .stats-header h1 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     color: #333333;
     font-weight: 600;
 }
 
 .stats-header p {
-    display: none;
+    margin: 0.25rem 0 0 0;
+    color: #666;
+    font-size: 0.9rem;
 }
 
-/* Summary karty — analytics styl */
+/* Summary karty */
 .stats-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.6rem;
-    margin-bottom: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-card {
     background: white;
     border-radius: 8px;
-    padding: 0.75rem;
+    padding: 0.85rem 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    text-align: center;
-    border-left: 3px solid #ccc;
-}
-
-.summary-card:first-child {
-    background: #333;
-    color: #fff;
-    border-left-color: #111;
-}
-
-.summary-card:last-child {
-    background: #1a1a1a;
-    color: #fff;
-    border-left-color: #444;
+    border-left: 4px solid #333333;
 }
 
 .summary-card-label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.5rem;
     font-weight: 600;
-    opacity: 0.8;
-}
-
-.summary-card:first-child .summary-card-label,
-.summary-card:last-child .summary-card-label {
-    color: rgba(255,255,255,0.65);
-    opacity: 1;
 }
 
 .summary-card-value {
     font-size: 1.5rem;
     font-weight: 700;
     color: #333333;
-    margin-bottom: 0.1rem;
-    line-height: 1;
-}
-
-.summary-card:first-child .summary-card-value,
-.summary-card:last-child .summary-card-value {
-    color: #fff;
+    margin-bottom: 0.15rem;
 }
 
 .summary-card-sub {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #999;
-    opacity: 0.7;
 }
 
-.summary-card:first-child .summary-card-sub,
-.summary-card:last-child .summary-card-sub {
-    color: rgba(255,255,255,0.5);
-    opacity: 1;
-}
-
-/* Filtry — dark header bar */
+/* Filtry */
 .stats-filters {
     background: white;
     border-radius: 8px;
-    padding: 0;
-    margin-bottom: 0.6rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    /* overflow: hidden odstraněno — jinak ořezává multiselect dropdown */
 }
 
 .filters-title {
-    background: #333;
-    color: #fff;
-    padding: 0.5rem 0.85rem;
-    font-weight: 500;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    margin-bottom: 0;
-    border-radius: 8px 8px 0 0;
-}
-
-.filters-inner {
-    padding: 0.65rem 0.85rem;
-    border-radius: 0 0 8px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 0.5rem;
 }
 
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.6rem;
-    margin-bottom: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .filter-group {
@@ -173,34 +128,26 @@ body {
 }
 
 .filter-label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #666;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* Tmavé inputy/selecty */
 .filter-select {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #444;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.85rem;
-    background: #222;
-    color: #fff;
+    font-size: 0.9rem;
+    background: white;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
 }
 
 .filter-select:focus {
     outline: none;
-    border-color: #666;
-}
-
-.filter-select option {
-    background: #222;
-    color: #fff;
+    border-color: #333333;
 }
 
 /* Multi-select checkboxy */
@@ -209,22 +156,19 @@ body {
 }
 
 .multiselect-trigger {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #444;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    background: #222;
-    color: #fff;
+    background: white;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 400;
+    font-size: 0.9rem;
 }
 
 .multiselect-trigger:hover {
-    border-color: #666;
+    border-color: #333333;
 }
 
 .multiselect-dropdown {
@@ -232,15 +176,15 @@ body {
     top: 100%;
     left: 0;
     right: 0;
-    background: #222;
-    border: 1px solid #444;
+    background: white;
+    border: 1px solid #ddd;
     border-radius: 4px;
     margin-top: 0.25rem;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 9999;
+    z-index: 1000;
     display: none;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .multiselect-dropdown.active {
@@ -248,18 +192,15 @@ body {
 }
 
 .multiselect-option {
-    padding: 0.45rem 0.6rem;
+    padding: 0.6rem;
     display: flex;
     align-items: center;
     cursor: pointer;
-    border-bottom: 1px solid #333;
-    color: #fff;
-    font-size: 0.8rem;
-    font-family: 'Poppins', sans-serif;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .multiselect-option:hover {
-    background: #2a2a2a;
+    background: #f9f9f9;
 }
 
 .multiselect-option:last-child {
@@ -378,69 +319,44 @@ body {
 }
 
 .btn-primary:hover {
-    background: #111;
+    background: #1a300d;
 }
 
 .btn-export {
-    background: #333333;
+    background: #0066cc;
     color: white;
-    border-color: #333333;
+    border-color: #0066cc;
 }
 
 .btn-export:hover {
-    background: #111;
+    background: #004499;
 }
 
-/* Tlačítko Upravit v tabulce — přebíjí globální line-height: 1.6 */
-.btn-upravit {
-    padding: 1px 6px !important;
-    font-size: 0.7rem !important;
-    font-weight: 500 !important;
-    line-height: 1.2 !important;
-    background: #555 !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 3px !important;
-    cursor: pointer !important;
-    display: inline-block !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-}
-
-/* Hlavní tabulka zakázek — dark header bar */
+/* Hlavní tabulka zakázek */
 .stats-table-wrapper {
     background: white;
     border-radius: 8px;
-    padding: 0;
-    margin-bottom: 0.6rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    overflow: hidden;
 }
 
 .table-header {
-    background: #333;
-    color: #fff;
-    padding: 0.5rem 0.85rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0;
+    margin-bottom: 1rem;
 }
 
 .table-title {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #fff;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333333;
 }
 
 .table-count {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.65);
-}
-
-.table-inner {
-    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    color: #666;
 }
 
 .stats-table {
@@ -517,36 +433,31 @@ body {
     color: #666;
 }
 
-/* Grafy sekce — dark header bar */
+/* Grafy sekce */
 .stats-charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 0.6rem;
-    margin-bottom: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .chart-card {
     background: white;
     border-radius: 8px;
-    padding: 0;
+    padding: 0.85rem 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    overflow: hidden;
 }
 
 .chart-title {
-    background: #333;
-    color: #fff;
-    padding: 0.5rem 0.85rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    margin-bottom: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 0.5rem;
 }
 
 .chart-content {
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
-    padding: 0.5rem 0.85rem;
 }
 
 .chart-item {
@@ -596,15 +507,6 @@ body {
 @media (max-width: 768px) {
     .stats-summary {
         grid-template-columns: 1fr 1fr;
-        gap: 0.4rem;
-    }
-
-    .summary-card {
-        padding: 0.6rem;
-    }
-
-    .summary-card-value {
-        font-size: 1.25rem;
     }
 
     .filters-grid {
@@ -962,7 +864,7 @@ body {
   <!-- Filtry -->
   <div class="stats-filters">
     <div class="filters-title">Filtry</div>
-    <div class="filters-inner">
+
     <div class="filters-grid">
       <!-- Rok -->
       <?php $initRok = (date('Y') >= 2024 && date('Y') <= 2026) ? date('Y') : ''; ?>
@@ -1056,24 +958,23 @@ body {
     </div>
 
     <div class="filter-actions">
-      <div style="display: flex; align-items: center; gap: 12px; margin-right: auto; flex-wrap: wrap;">
-        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
-          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor:pointer;margin:0;">
-          Odměna technika v PDF
-        </label>
-        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
-          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor:pointer;margin:0;">
-          Mimozáruční servisy
-        </label>
-        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;color:#666;white-space:nowrap;">
-          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor:pointer;margin:0;">
-          Pouze dokončené
-        </label>
+      <div style="display: flex; align-items: center; gap: 20px; margin-right: auto; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
+          <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitMimozarucni" checked style="cursor: pointer;">
+          <label for="zobrazitMimozarucni" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit mimozáruční servisy</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="zobrazitPouzeDokoncene" style="cursor: pointer;">
+          <label for="zobrazitPouzeDokoncene" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit pouze dokončené</label>
+        </div>
       </div>
       <button class="btn" data-action="resetovitFiltry">Reset</button>
       <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
     </div>
-    </div><!-- /.filters-inner -->
   </div>
 
   <!-- Hlavní tabulka zakázek -->
@@ -1083,7 +984,6 @@ body {
       <div class="table-count" id="table-count">0 zakázek</div>
     </div>
 
-    <div class="table-inner">
     <div id="table-container" aria-live="polite">
       <div class="loading" role="status">Načítání dat...</div>
     </div>
@@ -1094,7 +994,6 @@ body {
       <span class="page-info" id="page-info" aria-live="polite">Strana 1 z 1</span>
       <button id="next-page" data-action="dalsiStranka" aria-label="Další strana">Další →</button>
     </nav>
-    </div><!-- /.table-inner -->
   </div>
 
   <!-- Grafy a statistiky -->

@@ -416,7 +416,11 @@ function renderTabulka(data) {
                 <td>${z.zeme}</td>
                 <td>${z.datum}</td>
                 <td>
-                    <button class="btn-upravit" data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}">Upravit</button>
+                    <button data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}" style="
+                        padding: 6px 12px; font-size: 0.85rem; font-weight: 600;
+                        background: #555; color: white; border: none;
+                        border-radius: 4px; cursor: pointer;
+                    ">Upravit</button>
                 </td>
             </tr>
         `;
