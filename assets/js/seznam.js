@@ -1646,8 +1646,8 @@ function regenerovatQrKod() {
         text: spdString,
         width: 220,
         height: 220,
-        colorDark: 'var(--wgs-black)',
-        colorLight: 'var(--wgs-white)',
+        colorDark: '#000000',
+        colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.L
       });
     }
