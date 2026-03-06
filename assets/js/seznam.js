@@ -1162,7 +1162,7 @@ const ModalManager = {
 };
 
 // === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
-function createCustomerHeader(backAction = 'closeDetail') {
+function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   if (!CURRENT_RECORD) return '';
 
   const customerName = Utils.getCustomerName(CURRENT_RECORD);
@@ -1217,7 +1217,7 @@ function createCustomerHeader(backAction = 'closeDetail') {
   };
 
   const stavHtml = isAdmin ? `
-    <div class="stav-workflow" style="margin-top:0.5rem;">
+    <div class="stav-workflow" style="margin-top:0.1rem;">
       <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
         ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
         ${pill('open',           'DOML',   '#00e5ff', '#000')}
@@ -1235,13 +1235,15 @@ function createCustomerHeader(backAction = 'closeDetail') {
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
+  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.3rem 0.7rem;white-space:nowrap;">POSLÁNA SMS</span>` : '';
+  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.3rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `
     <strong>Adresa:</strong> ${address}<br>
     <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
     <strong>Stav:</strong> ${stavHtml}
-    ${smsBylKontaktovan ? `<div style="margin-top:0.5rem;"><span class="order-status-text status-poslana-sms" style="display:inline-block;font-size:0.75rem;padding:0.25rem 0.6rem;">POSLÁNA SMS</span></div>` : ''}
+    ${(smsHtml || ulozitBtn) ? `<div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:0.25rem;">${smsHtml}${ulozitBtn}</div>` : ''}
   `, backAction, backId);
 }
 
@@ -2875,54 +2877,38 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${createCustomerHeader('showDetail')}
+    ${createCustomerHeader('showDetail', id)}
 
-    <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
+    <div class="modal-body detail-modal-body" style="padding: 1rem; overflow-y: auto;">
 
-      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA - vždy viditelný -->
-      <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1.3rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
-        <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 1.5rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte popis problému od zákazníka"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
-      </div>
+      <!-- DVOUSLOUPCOVÝ GRID - desktop: vlevo zákazník, vpravo popisy -->
+      <div class="detail-dvousloupce">
 
-      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE - vždy viditelná -->
-      <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1.3rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
-        <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 1.5rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte doplňující informace od prodejce"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
-      </div>
+        <!-- LEVÝ SLOUPEC: informace o zákazníkovi -->
+        <div class="detail-sloupec-levy">
 
-      <div class="detail-buttons" style="margin-bottom: 0.75rem;">
-        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      </div>
+          <!-- ACCORDION PŘEPÍNAČ - pouze mobil -->
+          <button id="btn-rozkrit-detail" onclick="
+            const obsah = document.getElementById('rozkryvaci-detail');
+            const sipka = document.getElementById('sipka-detail');
+            const jeOtevreno = obsah.style.display !== 'none';
+            obsah.style.display = jeOtevreno ? 'none' : 'block';
+            sipka.textContent = jeOtevreno ? '▼' : '▲';
+          " style="
+            width: 100%; background: #1a1a1a; border: 1px solid #444;
+            color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            display: none; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem; text-align: left;
+          " class="accordion-pouze-mobil">
+            <span>Informace o zákazníkovi</span>
+            <span id="sipka-detail">▼</span>
+          </button>
 
-      <!-- ACCORDION PŘEPÍNAČ -->
-      <button id="btn-rozkrit-detail" onclick="
-        const obsah = document.getElementById('rozkryvaci-detail');
-        const sipka = document.getElementById('sipka-detail');
-        const jeOtevreno = obsah.style.display !== 'none';
-        obsah.style.display = jeOtevreno ? 'none' : 'block';
-        sipka.textContent = jeOtevreno ? '▼' : '▲';
-      " style="
-        width: 100%; background: #1a1a1a; border: 1px solid #444;
-        color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
-        font-size: 0.85rem; font-weight: 600; cursor: pointer;
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 0.5rem; text-align: left;
-      ">
-        <span>Informace o zákazníkovi</span>
-        <span id="sipka-detail">▼</span>
-      </button>
-
-      <!-- ROZKRÝVACÍ OBSAH - skrytý -->
-      <div id="rozkryvaci-detail" style="display: none;">
-        <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
-          <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
+          <!-- ROZKRÝVACÍ OBSAH - na desktopu vždy viditelný, na mobilu skrytý -->
+          <div id="rozkryvaci-detail" class="rozkryvaci-detail-wrap">
+            <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 0.75rem;">
+              <div style="display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 0.4rem; font-size: 0.82rem; overflow: hidden;">
             <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
             <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
@@ -2983,26 +2969,55 @@ async function showCustomerDetail(id) {
 
             <span style="color: #aaa; font-weight: 600;">Barva:</span>
             <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+        </div><!-- /levy sloupec -->
+
+        <!-- PRAVÝ SLOUPEC: popis problému + doplňující informace -->
+        <div class="detail-sloupec-pravy">
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Popis problému od zákazníka:</label>
+            <textarea id="edit_popis_problemu" class="detail-textarea-popis"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      placeholder="Zadejte popis problému od zákazníka"
+                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
+          </div>
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Doplňující informace od prodejce:</label>
+            <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      placeholder="Zadejte doplňující informace od prodejce"
+                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+          </div>
+
+        </div><!-- /pravy sloupec -->
+
+      </div><!-- /dvousloupce -->
 
     </div>
   `;
 
   ModalManager.show(content);
 
-  // Zúžit modal pro detail zákazníka (je užší než hlavní detail zakázky)
+  // Rozšířit modal pro detail zákazníka na desktopu (dvousloupcový layout)
   const obsahDetailZakaznika = document.querySelector('#detailOverlay .modal-content');
   if (obsahDetailZakaznika) {
-    obsahDetailZakaznika.style.setProperty('max-width', '520px', 'important');
+    const sirka = window.innerWidth > 768 ? '760px' : '95vw';
+    obsahDetailZakaznika.style.setProperty('max-width', sirka, 'important');
+    obsahDetailZakaznika.style.setProperty('width', '100%', 'important');
   }
 
-  // Auto-resize textarea pri prvnim zobrazeni
+  // Auto-resize + nastavení fontu podle zařízení
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
+    const jeMobil = window.innerWidth <= 768;
     textareas.forEach(ta => {
       if (ta) {
+        ta.style.fontSize = jeMobil ? '1rem' : '0.85rem';
         ta.style.height = 'auto';
         ta.style.height = ta.scrollHeight + 'px';
       }

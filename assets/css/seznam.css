@@ -2261,3 +2261,108 @@ a.detail-btn-primary:active {
     border-left-width: 3px;
   }
 }
+
+/* Accordion detail zákazníka - desktop vždy viditelný, mobil skrytý */
+.rozkryvaci-detail-wrap {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .accordion-pouze-mobil {
+    display: flex !important;
+  }
+  .rozkryvaci-detail-wrap {
+    display: none;
+  }
+}
+
+/* Font v textarea popis/doplňující info */
+.detail-textarea-popis {
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .detail-textarea-popis {
+    font-size: 1rem !important;
+  }
+}
+
+/* Tlačítko Uložit nahoře - zelené */
+.detail-btn-ulozit {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+.detail-btn-ulozit:hover {
+  background: #218838;
+}
+
+/* Dvousloupcový layout detailu zákazníka */
+/* Přebití max-width: 400px z pravidla #detailOverlay .modal-body > * */
+#detailOverlay .modal-body > .detail-dvousloupce {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.detail-dvousloupce {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100% !important;
+  align-self: stretch !important;
+  box-sizing: border-box;
+}
+
+.detail-sloupec-levy,
+.detail-sloupec-pravy {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.detail-modal-body {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 769px) {
+  .detail-dvousloupce {
+    flex-direction: row;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .detail-sloupec-levy {
+    flex: 0 0 48%;
+    width: 48%;
+  }
+
+  .detail-sloupec-pravy {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .detail-sloupec-pravy .detail-textarea-popis {
+    min-height: 150px !important;
+  }
+
+  .detail-modal-body {
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-sloupec-levy,
+  .detail-sloupec-pravy {
+    width: 100%;
+  }
+}

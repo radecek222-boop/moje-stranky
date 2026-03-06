@@ -103,7 +103,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260304-06">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260306-01">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -120,7 +120,7 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 1.5rem !important;
   }
   #detailOverlay .modal-content {
-    max-width: 560px !important;
+    max-width: 800px !important;
     width: 100% !important;
     max-height: 88vh !important;
     overflow-y: auto !important;
@@ -427,7 +427,7 @@ body.modal-open {
   background: #1a1a1a !important;
   border: none !important;
   box-shadow: none !important;
-  max-width: 500px !important;
+  max-width: 800px !important;
   width: 95% !important;
   color: #ffffff !important;
   margin: 0 auto !important;
@@ -451,7 +451,7 @@ body.modal-open {
 /* Hlavička modalu - větší a vše vycentrováno */
 #detailOverlay .modal-header {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
-  padding: 1.5rem 2rem !important;
+  padding: 0.4rem 1.5rem !important;
   text-align: center !important;
   border-bottom: 1px solid #333333 !important;
   display: flex !important;
@@ -626,9 +626,14 @@ body.modal-open {
 }
 
 /* Všechny prvky v body centrované */
-#detailOverlay .modal-body > * {
+#detailOverlay .modal-body > *:not(.detail-dvousloupce) {
   width: 100% !important;
   max-width: 400px !important;
+}
+/* Dvousloupcový layout - bez omezení max-width */
+#detailOverlay .modal-body > .detail-dvousloupce {
+  max-width: none !important;
+  width: 100% !important;
 }
 
 /* Tlačítka v body - centrované */
