@@ -719,8 +719,8 @@ if ($reklamaceId > 0) {
 
             <!-- Úvodní text emailu pro zákazníka -->
             <div class="form-card" style="margin-top: 20px;">
-                <h2 style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; color: #111;">Text průvodního dopisu</h2>
-                <p style="margin: 0 0 14px 0; font-size: 0.8rem; color: #666;">Tento text bude součástí emailu odeslaného zákazníkovi. Upravte dle potřeby.</p>
+                <h2 style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; color: #ccc;">Text průvodního dopisu</h2>
+                <p style="margin: 0 0 14px 0; font-size: 0.8rem; color: #888;">Tento text bude součástí emailu odeslaného zákazníkovi. Upravte dle potřeby.</p>
                 <textarea id="uvodni_text" style="width: 100%; min-height: 160px; font-size: 0.875rem; line-height: 1.6; padding: 14px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; font-family: inherit; color: #222; box-sizing: border-box;">Vážený zákazníku,
 
 na základě Vaší poptávky Vám zasíláme cenovou nabídku za servisní práce na Vašem nábytku značky Natuzzi.
