@@ -2354,3 +2354,122 @@
     font-size: 1rem !important;
   }
 }
+
+/* ========================================
+   KOMPAKTNÍ CENÍK - FINÁLNÍ OVERRIDE
+   Musí být jako poslední v souboru,
+   aby přebilo všechny předchozí konflikty.
+   ======================================== */
+
+.content-section {
+  padding: 1rem 15px !important;
+}
+
+.section-intro {
+  margin-bottom: 1rem !important;
+}
+
+.section-title {
+  font-size: 1.15rem !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.section-text {
+  font-size: 0.78rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 0.4rem !important;
+}
+
+#pricing-grid {
+  gap: 10px !important;
+}
+
+.pricing-category {
+  margin-bottom: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+
+.category-header {
+  padding: 7px 14px !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+.category-items {
+  padding: 0 !important;
+}
+
+.pricing-item {
+  padding: 7px 14px !important;
+}
+
+.item-header {
+  margin-bottom: 3px !important;
+}
+
+.item-name {
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+.item-price {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  margin-left: 12px !important;
+}
+
+.item-description {
+  font-size: 0.72rem !important;
+  line-height: 1.4 !important;
+  margin-top: 2px !important;
+  color: #666 !important;
+}
+
+.pricing-footer {
+  padding: 14px 20px !important;
+  margin-top: 16px !important;
+}
+
+.pricing-footer h3 {
+  font-size: 1rem !important;
+  margin-bottom: 6px !important;
+}
+
+.pricing-footer p {
+  font-size: 0.78rem !important;
+  margin: 3px 0 !important;
+}
+
+.contact-info {
+  font-size: 0.82rem !important;
+  margin-top: 10px !important;
+}
+
+.admin-actions {
+  margin-top: 16px !important;
+  padding: 16px 0 !important;
+}
+
+.btn-admin {
+  padding: 8px 20px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Oprava na mobilu - zachovat čitelnost */
+@media (max-width: 768px) {
+  .item-name {
+    font-size: 0.9rem !important;
+  }
+
+  .item-price {
+    font-size: 1rem !important;
+    margin-left: 0 !important;
+    margin-top: 2px !important;
+  }
+
+  .item-description {
+    font-size: 0.75rem !important;
+  }
+}

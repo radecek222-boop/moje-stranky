@@ -43,7 +43,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/cenik.min.css?v=2">
+  <link rel="stylesheet" href="assets/css/cenik.min.css?v=3">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
