@@ -15,26 +15,38 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 
+// Zjistit strukturu wgs_photos - typ sloupce reklamace_id
+$stmtStruktura = $pdo->query("DESCRIBE wgs_photos");
+$strukturaFotek = $stmtStruktura->fetchAll(PDO::FETCH_ASSOC);
+$celkemVsechFotek = $pdo->query("SELECT COUNT(*) FROM wgs_photos")->fetchColumn();
+
+// Ukázka prvních 5 záznamů RAW (bez joinu) pro diagnostiku
+$stmtRaw = $pdo->query("SELECT * FROM wgs_photos ORDER BY id DESC LIMIT 5");
+$rawFotky = $stmtRaw->fetchAll(PDO::FETCH_ASSOC);
+
+// Kořenový adresář projektu
+$projektDir = dirname(__DIR__);
+
 // Parametry
 $reklamaceFilter = $_GET['reklamace_id'] ?? null;
 $limitFotek = (int)($_GET['limit'] ?? 50);
 
-// Načíst fotky z DB
+// Načíst fotky - zkusíme oba typy joinu (numeric i string reklamace_id)
 if ($reklamaceFilter) {
-    // Nejdřív najít numerické ID
     $stmtR = $pdo->prepare("SELECT id, reklamace_id, cislo, jmeno FROM wgs_reklamace WHERE reklamace_id = :rid OR cislo = :cislo OR id = :nid LIMIT 1");
     $stmtR->execute([':rid' => $reklamaceFilter, ':cislo' => $reklamaceFilter, ':nid' => (int)$reklamaceFilter]);
     $reklamace = $stmtR->fetch(PDO::FETCH_ASSOC);
 
     if ($reklamace) {
-        $stmt = $pdo->prepare("SELECT p.*, r.reklamace_id as wgs_cislo, r.cislo as prodejce_cislo, r.jmeno FROM wgs_photos p JOIN wgs_reklamace r ON r.id = p.reklamace_id WHERE p.reklamace_id = :id ORDER BY p.id ASC");
-        $stmt->execute([':id' => $reklamace['id']]);
+        // Zkusit oba způsoby napojení
+        $stmt = $pdo->prepare("SELECT p.* FROM wgs_photos p WHERE p.reklamace_id = :nid OR p.reklamace_id = :sid ORDER BY p.id ASC");
+        $stmt->execute([':nid' => $reklamace['id'], ':sid' => $reklamace['reklamace_id']]);
     } else {
         $stmt = $pdo->prepare("SELECT 1 WHERE 0=1");
         $stmt->execute();
     }
 } else {
-    $stmt = $pdo->prepare("SELECT p.*, r.reklamace_id as wgs_cislo, r.cislo as prodejce_cislo, r.jmeno FROM wgs_photos p JOIN wgs_reklamace r ON r.id = p.reklamace_id ORDER BY p.id DESC LIMIT :lim");
+    $stmt = $pdo->prepare("SELECT * FROM wgs_photos ORDER BY id DESC LIMIT :lim");
     $stmt->bindValue(':lim', $limitFotek, PDO::PARAM_INT);
     $stmt->execute();
 }
@@ -44,31 +56,34 @@ $fotky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $celkem = count($fotky);
 $existujici = 0;
 $chybejici = 0;
-$chybejiciSoubory = [];
 
 foreach ($fotky as $f) {
-    $plnaCesta = __DIR__ . '/' . $f['photo_path'];
+    $plnaCesta = $projektDir . '/' . ltrim($f['photo_path'], '/');
     if (file_exists($plnaCesta)) {
         $existujici++;
     } else {
         $chybejici++;
-        $chybejiciSoubory[] = $f;
     }
 }
 
-// Načíst přehled reklamací s počtem fotek
-$stmtPrehled = $pdo->prepare("
-    SELECT r.id, r.reklamace_id, r.cislo, r.jmeno,
-           COUNT(p.id) as pocet_fotek_db
-    FROM wgs_reklamace r
-    LEFT JOIN wgs_photos p ON p.reklamace_id = r.id
-    GROUP BY r.id
-    HAVING pocet_fotek_db > 0
-    ORDER BY r.id DESC
-    LIMIT 30
-");
-$stmtPrehled->execute();
-$prehled = $stmtPrehled->fetchAll(PDO::FETCH_ASSOC);
+// Přehled reklamací - zkusit oba typy joinu
+$prehled = [];
+try {
+    // Varianta A: numeric join
+    $stmtA = $pdo->query("SELECT r.id, r.reklamace_id, r.cislo, r.jmeno, COUNT(p.id) as pocet FROM wgs_reklamace r LEFT JOIN wgs_photos p ON CAST(p.reklamace_id AS UNSIGNED) = r.id GROUP BY r.id HAVING pocet > 0 ORDER BY r.id DESC LIMIT 30");
+    $prehled = $stmtA->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $prehled = [];
+}
+if (empty($prehled)) {
+    // Varianta B: string join
+    try {
+        $stmtB = $pdo->query("SELECT r.id, r.reklamace_id, r.cislo, r.jmeno, COUNT(p.id) as pocet FROM wgs_reklamace r LEFT JOIN wgs_photos p ON p.reklamace_id = r.reklamace_id GROUP BY r.id HAVING pocet > 0 ORDER BY r.id DESC LIMIT 30");
+        $prehled = $stmtB->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        $prehled = [];
+    }
+}
 
 ?><!DOCTYPE html>
 <html lang="cs">
@@ -102,12 +117,25 @@ $prehled = $stmtPrehled->fetchAll(PDO::FETCH_ASSOC);
     <h1>Diagnostika fotek</h1>
 
     <div class="uploads-info">
-        Uploads složka: <?= realpath(__DIR__ . '/uploads') ?: (__DIR__ . '/uploads — SLOŽKA NEEXISTUJE!') ?>
-        <br>
-        Existuje: <?= is_dir(__DIR__ . '/uploads') ? 'ANO' : 'NE — PROBLÉM!' ?>
-        <br>
-        Obsah: <?= implode(', ', array_diff(scandir(__DIR__ . '/uploads') ?: [], ['.', '..'])) ?: '(prázdná)' ?>
+        Projekt root: <?= $projektDir ?><br>
+        Uploads složka: <?= realpath($projektDir . '/uploads') ?: ($projektDir . '/uploads — NEEXISTUJE') ?><br>
+        Existuje: <?= is_dir($projektDir . '/uploads') ? 'ANO' : 'NE — PROBLÉM!' ?><br>
+        Obsah uploads: <?= implode(', ', array_diff(scandir($projektDir . '/uploads') ?: [], ['.', '..'])) ?: '(prázdná)' ?>
     </div>
+
+    <div class="uploads-info" style="margin-top:10px;">
+        <strong>wgs_photos — celkem záznamů: <?= $celkemVsechFotek ?></strong><br>
+        Struktura sloupců: <?= implode(', ', array_column($strukturaFotek, 'Field')) ?>
+    </div>
+
+    <?php if (!empty($rawFotky)): ?>
+    <div class="uploads-info" style="margin-top:10px;">
+        <strong>Ukázka posledních záznamů v wgs_photos:</strong><br>
+        <?php foreach ($rawFotky as $r): ?>
+        ID: <?= $r['id'] ?> | reklamace_id: "<?= htmlspecialchars((string)$r['reklamace_id']) ?>" | photo_path: <?= htmlspecialchars($r['photo_path'] ?? '—') ?><br>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
 </div>
 
 <!-- FILTR -->
@@ -138,7 +166,7 @@ $prehled = $stmtPrehled->fetchAll(PDO::FETCH_ASSOC);
             <td><?= htmlspecialchars($r['reklamace_id'] ?? '—') ?></td>
             <td><?= htmlspecialchars($r['cislo'] ?? '—') ?></td>
             <td><?= htmlspecialchars($r['jmeno'] ?? '—') ?></td>
-            <td><strong><?= $r['pocet_fotek_db'] ?></strong></td>
+            <td><strong><?= $r['pocet'] ?? $r['pocet_fotek_db'] ?></strong></td>
             <td>
                 <a href="?reklamace_id=<?= $r['id'] ?>" class="btn">Zkontrolovat</a>
             </td>
