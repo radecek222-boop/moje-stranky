@@ -215,7 +215,7 @@ if (empty($prehled)) {
             <th>Soubor na disku</th>
         </tr>
         <?php foreach ($fotky as $f):
-            $plnaCesta = __DIR__ . '/' . $f['photo_path'];
+            $plnaCesta = $projektDir . '/' . ltrim($f['photo_path'], '/');
             $existuje = file_exists($plnaCesta);
         ?>
         <tr class="<?= $existuje ? 'ok' : 'chybi' ?>">
