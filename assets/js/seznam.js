@@ -2947,7 +2947,7 @@ async function showCustomerDetail(id) {
                   setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
               " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
