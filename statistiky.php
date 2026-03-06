@@ -206,12 +206,13 @@ body {
     font-weight: 400;
 }
 
-/* Jasně bílé písmo ve všech dropdownech */
+/* Jasně bílé písmo + zrušení globálního text-transform:uppercase z styles.min.css */
 .multiselect-option,
 .multiselect-option label,
 .multiselect-trigger,
 .multiselect-trigger span {
     color: #fff !important;
+    text-transform: none !important;
 }
 
 /* Single-select položky (Rok, Měsíc) */
