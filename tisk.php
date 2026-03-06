@@ -585,9 +585,9 @@ function wygStav(string $stav): string {
 
 </div>
 
-<button class="btn-zavrit" onclick="window.close()">Zavřít</button>
 <button class="btn-tisk" onclick="window.print()">Tisknout</button>
-<button class="btn-odeslat" id="btn-dale-odeslat" onclick="odeslatEmailem()">Dále odeslat</button>
+<button class="btn-odeslat" id="btn-dale-odeslat" onclick="odeslatEmailem()">Odeslat</button>
+<button class="btn-zavrit" onclick="window.close()">Zavřít</button>
 
 <input type="hidden" id="csrf-token-tisk" value="<?= htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') ?>">
 <input type="hidden" id="reklamace-id-tisk" value="<?= (int)$idParam ?>">
@@ -711,13 +711,13 @@ async function odeslatEmailem() {
             wgsZobrazModal('Email odeslán', vysledek.message, true);
         } else {
             tlacitko.disabled = false;
-            tlacitko.textContent = 'Dále odeslat';
+            tlacitko.textContent = 'Odeslat';
             wgsZobrazModal('Chyba při odesílání', vysledek.message || 'Nepodařilo se odeslat email.', false);
         }
     } catch (chyba) {
         wgsZobrazLoading(false);
         tlacitko.disabled = false;
-        tlacitko.textContent = 'Dále odeslat';
+        tlacitko.textContent = 'Odeslat';
         wgsZobrazModal('Síťová chyba', chyba.message, false);
     }
 }

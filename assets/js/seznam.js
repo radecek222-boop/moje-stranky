@@ -311,12 +311,8 @@ function initSearch() {
 
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
-    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-      _htmxAktualizujGrid();
-    } else {
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
-    }
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
   });
   
   searchInput.addEventListener('keydown', (e) => {
@@ -406,12 +402,8 @@ function initFilters() {
         }
       }
 
-      if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-        _htmxAktualizujGrid();
-      } else {
-        let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-        renderOrders(userItems);
-      }
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
     });
   });
 
@@ -646,12 +638,8 @@ function sestavAdminProdejceBox() {
     ADMIN_PRODEJCE_FILTER = id || null;
     novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-      _htmxAktualizujGrid();
-    } else {
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
-    }
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
   });
 }
 
@@ -2096,7 +2084,11 @@ function renderCalendar(m, y) {
       }
     }
 
-    el.textContent = d;
+    if (isToday) {
+      el.innerHTML = `<span class="cal-day-num">${d}</span>`;
+    } else {
+      el.textContent = d;
+    }
     el.onclick = () => {
       // Prevent selection of past dates
       if (isPast) {
@@ -2108,9 +2100,13 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      let displayText = `Vybraný den: ${SELECTED_DATE}`;
-      const spanEl = document.getElementById('selectedDateText');
-      if (spanEl) spanEl.textContent = displayText;
+      const displayEl2 = document.getElementById('selectedDateDisplay');
+      if (displayEl2) {
+        displayEl2.textContent = `Den: ${SELECTED_DATE}`;
+        displayEl2.style.display = 'flex';
+      }
+      const btnUlozit2 = document.getElementById('btnUlozitTerminHore');
+      if (btnUlozit2) btnUlozit2.style.display = 'none';
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -2472,10 +2468,12 @@ function renderTimeGrid() {
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
         const displayEl = document.getElementById('selectedDateDisplay');
-        displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
-        displayEl.style.display = 'block';
+        if (displayEl) {
+          displayEl.textContent = `Termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+          displayEl.style.display = 'flex';
+        }
         const btnUlozit = document.getElementById('btnUlozitTerminHore');
-        if (btnUlozit) btnUlozit.style.display = 'block';
+        if (btnUlozit) btnUlozit.style.display = 'inline-block';
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
@@ -2881,72 +2879,112 @@ async function showCustomerDetail(id) {
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
-      <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
-          <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
-          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
-
-          <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
-          ${zadavatelSelectHtml}
-
-          <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
-          <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
-
-          <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
-          <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
-
-          <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
-          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
-
-          <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
-          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
-
-          <span style="color: #aaa; font-weight: 600;">Jméno:</span>
-          <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
-
-          <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-          <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
-
-          <span style="color: #aaa; font-weight: 600;">Email:</span>
-          <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
-
-          <span style="color: #aaa; font-weight: 600;">Adresa:</span>
-          <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
-
-          <span style="color: #aaa; font-weight: 600;">Model:</span>
-          <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
-
-          <span style="color: #aaa; font-weight: 600;">Provedení:</span>
-          <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
-
-          <span style="color: #aaa; font-weight: 600;">Barva:</span>
-          <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
-        </div>
-      </div>
-
-      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
-        <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte doplňující informace od prodejce"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
-      </div>
-
-      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
-      <div style="margin-bottom: 2rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA - vždy viditelný -->
+      <div style="margin-bottom: 0.75rem;">
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
         <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 1.05rem; min-height: 60px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                   placeholder="Zadejte popis problému od zákazníka"
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
       </div>
 
+      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE - vždy viditelná -->
+      <div style="margin-bottom: 0.75rem;">
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+        <textarea id="edit_doplnujici_info"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 1.05rem; min-height: 60px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  placeholder="Zadejte doplňující informace od prodejce"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+      </div>
 
-
-      <div class="detail-buttons">
+      <div class="detail-buttons" style="margin-bottom: 0.75rem;">
         <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+      </div>
+
+      <!-- ACCORDION PŘEPÍNAČ -->
+      <button id="btn-rozkrit-detail" onclick="
+        const obsah = document.getElementById('rozkryvaci-detail');
+        const sipka = document.getElementById('sipka-detail');
+        const jeOtevreno = obsah.style.display !== 'none';
+        obsah.style.display = jeOtevreno ? 'none' : 'block';
+        sipka.textContent = jeOtevreno ? '▼' : '▲';
+      " style="
+        width: 100%; background: #1a1a1a; border: 1px solid #444;
+        color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
+        font-size: 0.85rem; font-weight: 600; cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.5rem; text-align: left;
+      ">
+        <span>Informace o zákazníkovi</span>
+        <span id="sipka-detail">▼</span>
+      </button>
+
+      <!-- ROZKRÝVACÍ OBSAH - skrytý -->
+      <div id="rozkryvaci-detail" style="display: none;">
+        <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+          <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
+            <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
+            <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+
+            <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
+            ${zadavatelSelectHtml}
+
+            <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
+            <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
+
+            <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
+            <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
+
+            <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
+            <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+
+            <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
+            <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+
+            <span style="color: #aaa; font-weight: 600;">Jméno:</span>
+            <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
+
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+              <button onclick="
+                const tel = document.getElementById('edit_telefon').value;
+                if (tel) navigator.clipboard.writeText(tel).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
+                });
+              " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </span>
+            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
+
+            <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
+
+            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
+
+            <span style="color: #aaa; font-weight: 600;">Model:</span>
+            <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
+
+            <span style="color: #aaa; font-weight: 600;">Provedení:</span>
+            <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+
+            <span style="color: #aaa; font-weight: 600;">Barva:</span>
+            <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
+          </div>
+        </div>
       </div>
 
     </div>
@@ -2991,12 +3029,18 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
     display: flex; flex-direction: column;
   `;
 
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnXPdf = document.createElement('button');
+  btnXPdf.innerHTML = '&times;';
+  btnXPdf.style.cssText = 'position: fixed; top: 12px; right: 12px; z-index: 10010; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
+  btnXPdf.onclick = () => overlay.remove();
+
   // === HLAVIČKA (fixní nahoře) ===
   const header = document.createElement('div');
   header.style.cssText = `
     flex-shrink: 0; padding: 12px 16px;
     background: #222; color: white;
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; align-items: center;
     border-bottom: 1px solid #444;
   `;
   header.innerHTML = `
@@ -3004,11 +3048,6 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
       <div style="font-weight: 600; font-size: 1rem;">${titulek}</div>
       <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId || '-'}</div>
     </div>
-    <button id="pdfCloseBtn" style="
-      background: #555; color: white; border: none;
-      padding: 10px 20px; border-radius: 6px;
-      font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    ">Zavřít</button>
   `;
 
   // === PDF NÁHLED (zabere zbytek místa) ===
@@ -3065,23 +3104,14 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
     }
   };
 
-  // Tlačítko Zavřít
-  const btnZavrit = document.createElement('button');
-  btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;';
-  btnZavrit.onclick = () => overlay.remove();
-
   footer.appendChild(btnStahnout);
   footer.appendChild(btnSdilet);
-  footer.appendChild(btnZavrit);
 
   // Sestavení
+  overlay.appendChild(btnXPdf);
   overlay.appendChild(header);
   overlay.appendChild(pdfContainer);
   overlay.appendChild(footer);
-
-  // Event handlery
-  header.querySelector('#pdfCloseBtn').onclick = () => overlay.remove();
 
   // Zavřít při ESC
   const escHandler = (e) => {
@@ -3118,18 +3148,23 @@ async function zobrazKnihovnuPDF(claimId) {
   // Vnitřní kontejner s omezenou šířkou
   const modalBox = document.createElement('div');
   modalBox.style.cssText = `
-    width: 100%; max-width: 600px; max-height: 90vh;
+    position: relative; width: 100%; max-width: 600px; max-height: 90vh;
     background: #1a1a1a; border-radius: 12px;
     display: flex; flex-direction: column;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   `;
+
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnXKnihovna = document.createElement('button');
+  btnXKnihovna.innerHTML = '&times;';
+  btnXKnihovna.style.cssText = 'position: absolute; top: 8px; right: 8px; z-index: 10; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
 
   // === HLAVIČKA ===
   const header = document.createElement('div');
   header.style.cssText = `
     flex-shrink: 0; padding: 12px 16px;
     background: #222; color: white;
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; align-items: center;
     border-bottom: 1px solid #444;
     border-radius: 12px 12px 0 0;
   `;
@@ -3138,11 +3173,6 @@ async function zobrazKnihovnuPDF(claimId) {
       <div style="font-weight: 600; font-size: 1rem;">KNIHOVNA PDF</div>
       <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId}</div>
     </div>
-    <button id="knihovnaCloseBtn" style="
-      background: #555; color: white; border: none;
-      padding: 10px 20px; border-radius: 6px;
-      font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    ">Zavrit</button>
   `;
 
   // === OBSAH ===
@@ -3171,28 +3201,23 @@ async function zobrazKnihovnuPDF(claimId) {
       background: #333; color: white; border: 1px solid #555;
       border-radius: 6px; cursor: pointer;
     ">+ Nahrat interni PDF</button>
-    <button id="btnZavritKnihovnu" style="
-      padding: 12px 24px; font-size: 0.9rem; font-weight: 600;
-      background: #666; color: white; border: none;
-      border-radius: 6px; cursor: pointer;
-    ">Zavrit</button>
   `;
 
   // Sestavení - elementy jdou do modalBox
   modalBox.appendChild(header);
   modalBox.appendChild(content);
   modalBox.appendChild(footer);
+  modalBox.appendChild(btnXKnihovna);
   overlay.appendChild(modalBox);
 
   // Event handlery
   const zavritKnihovnu = () => overlay.remove();
-  header.querySelector('#knihovnaCloseBtn').onclick = zavritKnihovnu;
+  btnXKnihovna.onclick = zavritKnihovnu;
 
   // Zavřít kliknutím mimo modal
   overlay.onclick = (e) => {
     if (e.target === overlay) zavritKnihovnu();
   };
-  footer.querySelector('#btnZavritKnihovnu').onclick = zavritKnihovnu;
 
   // ESC pro zavření
   const escHandler = (e) => {
@@ -5097,7 +5122,13 @@ async function zobrazVideotekaArchiv(claimId) {
 
   // Kontejner
   const container = document.createElement('div');
-  container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+  container.style.cssText = 'position: relative; width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnX = document.createElement('button');
+  btnX.innerHTML = '&times;';
+  btnX.style.cssText = 'position: absolute; top: 8px; right: 8px; z-index: 10; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
+  btnX.onclick = () => overlay.remove();
 
   // Header (bude aktualizován po načtení dat z API)
   const isMobileHeader = window.innerWidth < 600;
@@ -5174,14 +5205,20 @@ async function zobrazVideotekaArchiv(claimId) {
       const customerName = result.customer_name || 'Neznámý zákazník';
       const reklamaceNum = result.reklamace_cislo || claimId;
       if (isMobileHeader) {
-        // Mobil: jméno nahoře, číslo pod tím menší, centrované
         header.innerHTML = `
-          <span style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${customerName}</span>
-          <span style="font-size: 0.75rem; opacity: 0.6;">${reklamaceNum}</span>
+          <div style="padding-right: 2.5rem; overflow: hidden;">
+            <div style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${customerName}</div>
+            <div style="font-size: 0.75rem; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${reklamaceNum}</div>
+          </div>
         `;
       } else {
-        // Desktop: vedle sebe
-        header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+        // Desktop: jméno + číslo za sebou, s odsazením od X tlačítka
+        header.innerHTML = `
+          <div style="padding-right: 2.5rem; overflow: hidden;">
+            <span style="font-weight: 600;">${customerName}</span>
+            <span style="font-size: 0.85rem; opacity: 0.7; margin-left: 0.75rem;">${reklamaceNum}</span>
+          </div>
+        `;
       }
 
       if (result.videos && result.videos.length > 0) {
@@ -5221,17 +5258,10 @@ async function zobrazVideotekaArchiv(claimId) {
   // Tlačítko Nahrát video
   const btnNahrat = document.createElement('button');
   btnNahrat.textContent = 'Nahrát video';
-  btnNahrat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #2D5016; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
+  btnNahrat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #39ff14; color: #000; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
   btnNahrat.onclick = () => otevritNahravaniVidea(claimId, overlay);
 
-  // Tlačítko Zavřít
-  const btnZavrit = document.createElement('button');
-  btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
-  btnZavrit.onclick = () => overlay.remove();
-
   footer.appendChild(btnNahrat);
-  footer.appendChild(btnZavrit);
 
   // Přidat drop overlay do content
   content.appendChild(dropOverlay);
@@ -5240,6 +5270,7 @@ async function zobrazVideotekaArchiv(claimId) {
   container.appendChild(header);
   container.appendChild(content);
   container.appendChild(footer);
+  container.appendChild(btnX);
   overlay.appendChild(container);
 
   // Zavřít při kliknutí mimo

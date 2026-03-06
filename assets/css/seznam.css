@@ -493,34 +493,41 @@ body {
   color: var(--c-grey);
   font-size: 0.6rem;
   line-height: 1.1;
+  margin: 0;
+  padding-bottom: 0.35rem;
 }
 .modal-close,
 .modal-close-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: #f0f0f0;
+  background: rgba(180, 180, 180, 0.35);
   border: none;
   border-radius: 50%;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   color: #cc0000;
-  line-height: 1;
+  line-height: 30px;
   padding: 0;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
   z-index: 10;
 }
 .modal-close:hover,
 .modal-close-btn:hover {
-  background: #e0e0e0;
+  background: rgba(160, 160, 160, 0.5);
   color: #990000;
 }
 .modal-body {
@@ -529,11 +536,11 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
-/* PWA FIX: Modal overlay scrollovatelny s containment */
+/* PWA FIX: Modal overlay scrollovatelny s containment + pinch zoom povolen */
 .modal-overlay {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 .modal-section {
   margin-bottom: 2rem;
@@ -746,25 +753,31 @@ body {
   font-weight: 600;
 }
 .cal-day.dnes {
-  background: #e8e8e8;
-  border-color: #666;
-  color: #000;
+  background: transparent;
+  border-color: #888;
+  color: #111;
   font-weight: 700;
-  flex-direction: column;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.cal-day.dnes::after {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  background: #555;
+.cal-day.dnes .cal-day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  margin: 3px auto 0;
-  animation: wgs-teckaPuls 2s ease-in-out infinite;
+  background: #555;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  animation: dnes-pulse 2s ease-in-out infinite;
 }
-@keyframes wgs-teckaPuls {
-  0%, 100% { background: #555; box-shadow: 0 0 0 0 rgba(0,0,0,0.3); transform: scale(1); }
-  50% { background: #111; box-shadow: 0 0 0 4px rgba(0,0,0,0.1); transform: scale(1.4); }
+@keyframes dnes-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(100,100,100,0.6); }
+  50% { box-shadow: 0 0 0 5px rgba(100,100,100,0); }
 }
 #timeGrid {
   display: grid;
@@ -1543,10 +1556,13 @@ body {
   .close-btn {
     width: 44px !important;
     height: 44px !important;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    aspect-ratio: 1 / 1 !important;
     font-size: 1.3rem !important;
-    border-radius: 50%;
+    border-radius: 50% !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -1895,15 +1911,15 @@ button,
 .detail-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
   padding: 0.25rem 0;
 }
 
 /* Základní styl tlačítka v detail modalu */
 .detail-btn {
   width: 100%;
-  padding: 0.55rem 1rem;
-  min-height: 38px;
+  padding: 0.75rem 1rem;
+  min-height: 44px;
   font-size: 0.85rem;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
@@ -2037,13 +2053,13 @@ a.detail-btn-primary:active {
 /* DESKTOP */
 @media (min-width: 769px) {
   .detail-buttons {
-    gap: 0.2rem;
+    gap: 0.5rem;
     padding: 0.25rem 0;
   }
 
   .detail-btn {
-    padding: 0.55rem 1rem;
-    min-height: 38px;
+    padding: 0.7rem 1rem;
+    min-height: 42px;
     font-size: 0.85rem;
     border-radius: 6px;
   }
@@ -2052,13 +2068,13 @@ a.detail-btn-primary:active {
 /* MOBILNÍ - optimalizace pro dotyk */
 @media (max-width: 768px) {
   .detail-buttons {
-    gap: 0.2rem;
+    gap: 0.6rem;
     padding: 0.25rem 0;
   }
 
   .detail-btn {
-    padding: 0.55rem 0.875rem;
-    min-height: 38px;
+    padding: 0.8rem 0.875rem;
+    min-height: 46px;
     font-size: 0.82rem;
     border-radius: 5px;
   }
@@ -2080,12 +2096,12 @@ a.detail-btn-primary:active {
 /* Extra malé displeje */
 @media (max-width: 375px) {
   .detail-buttons {
-    gap: 0.2rem;
+    gap: 0.5rem;
   }
 
   .detail-btn {
-    padding: 0.5rem 0.75rem;
-    min-height: 36px;
+    padding: 0.7rem 0.75rem;
+    min-height: 42px;
     font-size: 0.75rem;
   }
 }

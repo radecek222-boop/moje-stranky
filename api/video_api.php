@@ -262,14 +262,14 @@ try {
             $reklamaceNum = '';
             if (!empty($videos)) {
                 $customerName = $videos[0]['customer_name'] ?? '';
-                $reklamaceNum = $videos[0]['reklamace_id'] ?? $videos[0]['cislo'] ?? '';
+                $reklamaceNum = $videos[0]['cislo'] ?? $videos[0]['reklamace_id'] ?? '';
             } else {
                 // Pokud nejsou videa, načíst info o zakázce samostatně
                 $stmtClaim = $pdo->prepare("SELECT jmeno, reklamace_id, cislo FROM wgs_reklamace WHERE id = :id");
                 $stmtClaim->execute(['id' => $claimId]);
                 $claim = $stmtClaim->fetch(PDO::FETCH_ASSOC);
                 $customerName = $claim['jmeno'] ?? '';
-                $reklamaceNum = $claim['reklamace_id'] ?? $claim['cislo'] ?? '';
+                $reklamaceNum = $claim['cislo'] ?? $claim['reklamace_id'] ?? '';
             }
 
             echo json_encode([

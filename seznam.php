@@ -466,15 +466,21 @@ body.modal-open {
   position: absolute !important;
   top: 0.5rem !important;
   right: 0.5rem !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  aspect-ratio: 1 / 1 !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
   border: none !important;
-  background: #f0f0f0 !important;
+  background: rgba(180, 180, 180, 0.35) !important;
   color: #cc0000 !important;
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   font-weight: 700 !important;
-  line-height: 1 !important;
+  line-height: 30px !important;
   cursor: pointer !important;
   border-radius: 50% !important;
   display: flex !important;
@@ -483,15 +489,16 @@ body.modal-open {
   transition: all 0.2s ease !important;
   z-index: 10 !important;
   padding: 0 !important;
+  overflow: hidden !important;
 }
 
 #detailOverlay .modal-close-btn:hover {
-  background: #e0e0e0 !important;
+  background: rgba(160, 160, 160, 0.5) !important;
   color: #990000 !important;
 }
 
 #detailOverlay .modal-close-btn:active {
-  background: #d0d0d0 !important;
+  background: rgba(140, 140, 140, 0.6) !important;
   transform: scale(0.95) !important;
 }
 
@@ -1758,7 +1765,7 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   .modal-overlay:not(#detailOverlay) {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-y !important;
+    touch-action: pan-y pinch-zoom !important;
     align-items: center !important;
     padding: 2rem 0.5rem !important;
   }
