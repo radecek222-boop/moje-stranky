@@ -316,13 +316,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control {
-  padding: 0.7rem 0.9rem; /* ZMĚNA: z 0.9rem 1rem na 0.7rem 0.9rem */
-  border: 1px solid #999999;
+  padding: 0.38rem 0.75rem !important;
+  min-height: unset !important;
+  border: 1px solid #cccccc;
   background: #ffffff;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
   color: #000000;
-  transition: all 0.3s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control:focus {
@@ -390,17 +392,18 @@ textarea.form-control {
 }
 
 .btn-select {
-  padding: 0.7rem 1.5rem; /* ZMĚNA: z 0.9rem 2rem na 0.7rem 1.5rem */
+  padding: 0.38rem 1.2rem !important;
+  min-height: unset !important;
   background: var(--c-grey);
   color: var(--c-white);
   border: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.2s;
 }
 
 .btn-select:hover {
@@ -415,18 +418,19 @@ textarea.form-control {
 
 .btn-photo {
   display: inline-block;
-  padding: 0.7rem 1.5rem; /* ZMĚNA: z 0.85rem 2rem na 0.7rem 1.5rem */
+  padding: 0.5rem 1.5rem !important;
+  min-height: unset !important;
   background: var(--c-grey);
   color: var(--c-white);
   border: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-bottom: 0.8rem;
+  transition: background 0.2s;
+  margin-bottom: 0.6rem;
 }
 
 .btn-photo:hover {
@@ -485,17 +489,18 @@ textarea.form-control {
 }
 
 .btn {
-  padding: 0.7rem 2rem; /* ZMĚNA: z 1rem 3rem na 0.7rem 2rem */
+  padding: 0.5rem 2rem !important;
+  min-height: unset !important;
   background: var(--c-black);
   color: var(--c-white);
-  border: 2px solid var(--c-black);
+  border: 1px solid var(--c-black);
   font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem; /* ZMĚNA: z 0.9rem na 0.85rem */
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.2s;
 }
 
 .btn:hover {
