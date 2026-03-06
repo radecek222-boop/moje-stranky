@@ -2288,6 +2288,12 @@ a.detail-btn-primary:active {
 }
 
 /* Dvousloupcový layout detailu zákazníka */
+/* Přebití max-width: 400px z pravidla #detailOverlay .modal-body > * */
+#detailOverlay .modal-body > .detail-dvousloupce {
+  max-width: none !important;
+  width: 100% !important;
+}
+
 .detail-dvousloupce {
   display: flex;
   flex-direction: column;

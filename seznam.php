@@ -427,7 +427,7 @@ body.modal-open {
   background: #1a1a1a !important;
   border: none !important;
   box-shadow: none !important;
-  max-width: 500px !important;
+  max-width: 800px !important;
   width: 95% !important;
   color: #ffffff !important;
   margin: 0 auto !important;
@@ -626,9 +626,14 @@ body.modal-open {
 }
 
 /* Všechny prvky v body centrované */
-#detailOverlay .modal-body > * {
+#detailOverlay .modal-body > *:not(.detail-dvousloupce) {
   width: 100% !important;
   max-width: 400px !important;
+}
+/* Dvousloupcový layout - bez omezení max-width */
+#detailOverlay .modal-body > .detail-dvousloupce {
+  max-width: none !important;
+  width: 100% !important;
 }
 
 /* Tlačítka v body - centrované */
