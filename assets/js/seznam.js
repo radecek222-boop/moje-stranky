@@ -1955,8 +1955,11 @@ function showCalendar(id) {
   const content = `
     ${createCustomerHeader('showDetail')}
 
-    <!-- Vybraný termín - fixní nad kalendářem -->
-    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+    <!-- Vybraný termín - fixní nad kalendářem, s tlačítkem Uložit -->
+    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; margin: 0 1rem; border-radius: 4px; font-family: inherit; flex-direction: row; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem 0.75rem;">
+      <span id="selectedDateText" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+      <button data-action="saveSelectedDate" style="flex-shrink: 0; background: #39ff14; color: #000; border: none; border-radius: 4px; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap;">Uložit</button>
+    </div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
     <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
@@ -1968,10 +1971,6 @@ function showCalendar(id) {
         <div id="dayBookings"></div>
         <div id="timeGrid"></div>
       </div>
-    </div>
-
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveSelectedDate">Uložit termín</button>
     </div>
   `;
 
@@ -2110,7 +2109,8 @@ function renderCalendar(m, y) {
       el.classList.add('selected');
 
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
-      document.getElementById('selectedDateDisplay').textContent = displayText;
+      const spanEl = document.getElementById('selectedDateText');
+      if (spanEl) spanEl.textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -2472,8 +2472,9 @@ function renderTimeGrid() {
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
         const displayEl = document.getElementById('selectedDateDisplay');
-        displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
-        displayEl.style.display = 'block';
+        const textEl = document.getElementById('selectedDateText');
+        if (textEl) textEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        displayEl.style.display = 'flex';
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
