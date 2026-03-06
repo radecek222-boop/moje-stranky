@@ -417,9 +417,9 @@ function renderTabulka(data) {
                 <td>${z.datum}</td>
                 <td>
                     <button data-action="upravitZakazku" data-zakazka-id="${z.id}" data-reklamace-id="${z.cislo_reklamace}" style="
-                        padding: 2px 8px; font-size: 0.75rem; font-weight: 500;
+                        padding: 6px 12px; font-size: 0.85rem; font-weight: 600;
                         background: #555; color: white; border: none;
-                        border-radius: 3px; cursor: pointer; line-height: 1.4;
+                        border-radius: 4px; cursor: pointer;
                     ">Upravit</button>
                 </td>
             </tr>
