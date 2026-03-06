@@ -2084,7 +2084,11 @@ function renderCalendar(m, y) {
       }
     }
 
-    el.textContent = d;
+    if (isToday) {
+      el.innerHTML = `<span class="cal-day-num">${d}</span>`;
+    } else {
+      el.textContent = d;
+    }
     el.onclick = () => {
       // Prevent selection of past dates
       if (isPast) {
@@ -2912,28 +2916,49 @@ async function showCustomerDetail(id) {
         </div>
       </div>
 
-      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
-        <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte doplňující informace od prodejce"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
-      </div>
+      <!-- ACCORDION PŘEPÍNAČ -->
+      <button id="btn-rozkrit-detail" onclick="
+        const obsah = document.getElementById('rozkryvaci-detail');
+        const sipka = document.getElementById('sipka-detail');
+        const jeOtevreno = obsah.style.display !== 'none';
+        obsah.style.display = jeOtevreno ? 'none' : 'block';
+        sipka.textContent = jeOtevreno ? '▼' : '▲';
+      " style="
+        width: 100%; background: #1a1a1a; border: 1px solid #444;
+        color: #ccc; padding: 0.6rem 1rem; border-radius: 4px;
+        font-size: 0.85rem; font-weight: 600; cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.5rem; text-align: left;
+      ">
+        <span>Doplňující informace</span>
+        <span id="sipka-detail">▼</span>
+      </button>
 
-      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
-      <div style="margin-bottom: 2rem;">
-        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
-        <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                  placeholder="Zadejte popis problému od zákazníka"
-                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
-      </div>
+      <!-- ROZKRÝVACÍ OBSAH -->
+      <div id="rozkryvaci-detail" style="display: none;">
 
+        <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+          <textarea id="edit_doplnujici_info"
+                    style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                    placeholder="Zadejte doplňující informace od prodejce"
+                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+        </div>
 
+        <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+          <textarea id="edit_popis_problemu"
+                    style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                    placeholder="Zadejte popis problému od zákazníka"
+                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
+        </div>
 
-      <div class="detail-buttons">
-        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+        <div class="detail-buttons" style="margin-bottom: 0.5rem;">
+          <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+        </div>
+
       </div>
 
     </div>
@@ -2978,12 +3003,18 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
     display: flex; flex-direction: column;
   `;
 
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnXPdf = document.createElement('button');
+  btnXPdf.innerHTML = '&times;';
+  btnXPdf.style.cssText = 'position: fixed; top: 12px; right: 12px; z-index: 10010; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
+  btnXPdf.onclick = () => overlay.remove();
+
   // === HLAVIČKA (fixní nahoře) ===
   const header = document.createElement('div');
   header.style.cssText = `
     flex-shrink: 0; padding: 12px 16px;
     background: #222; color: white;
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; align-items: center;
     border-bottom: 1px solid #444;
   `;
   header.innerHTML = `
@@ -2991,11 +3022,6 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
       <div style="font-weight: 600; font-size: 1rem;">${titulek}</div>
       <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId || '-'}</div>
     </div>
-    <button id="pdfCloseBtn" style="
-      background: #555; color: white; border: none;
-      padding: 10px 20px; border-radius: 6px;
-      font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    ">Zavřít</button>
   `;
 
   // === PDF NÁHLED (zabere zbytek místa) ===
@@ -3052,23 +3078,14 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
     }
   };
 
-  // Tlačítko Zavřít
-  const btnZavrit = document.createElement('button');
-  btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;';
-  btnZavrit.onclick = () => overlay.remove();
-
   footer.appendChild(btnStahnout);
   footer.appendChild(btnSdilet);
-  footer.appendChild(btnZavrit);
 
   // Sestavení
+  overlay.appendChild(btnXPdf);
   overlay.appendChild(header);
   overlay.appendChild(pdfContainer);
   overlay.appendChild(footer);
-
-  // Event handlery
-  header.querySelector('#pdfCloseBtn').onclick = () => overlay.remove();
 
   // Zavřít při ESC
   const escHandler = (e) => {
@@ -3105,18 +3122,23 @@ async function zobrazKnihovnuPDF(claimId) {
   // Vnitřní kontejner s omezenou šířkou
   const modalBox = document.createElement('div');
   modalBox.style.cssText = `
-    width: 100%; max-width: 600px; max-height: 90vh;
+    position: relative; width: 100%; max-width: 600px; max-height: 90vh;
     background: #1a1a1a; border-radius: 12px;
     display: flex; flex-direction: column;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   `;
+
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnXKnihovna = document.createElement('button');
+  btnXKnihovna.innerHTML = '&times;';
+  btnXKnihovna.style.cssText = 'position: absolute; top: 8px; right: 8px; z-index: 10; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
 
   // === HLAVIČKA ===
   const header = document.createElement('div');
   header.style.cssText = `
     flex-shrink: 0; padding: 12px 16px;
     background: #222; color: white;
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; align-items: center;
     border-bottom: 1px solid #444;
     border-radius: 12px 12px 0 0;
   `;
@@ -3125,11 +3147,6 @@ async function zobrazKnihovnuPDF(claimId) {
       <div style="font-weight: 600; font-size: 1rem;">KNIHOVNA PDF</div>
       <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId}</div>
     </div>
-    <button id="knihovnaCloseBtn" style="
-      background: #555; color: white; border: none;
-      padding: 10px 20px; border-radius: 6px;
-      font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    ">Zavrit</button>
   `;
 
   // === OBSAH ===
@@ -3158,28 +3175,23 @@ async function zobrazKnihovnuPDF(claimId) {
       background: #333; color: white; border: 1px solid #555;
       border-radius: 6px; cursor: pointer;
     ">+ Nahrat interni PDF</button>
-    <button id="btnZavritKnihovnu" style="
-      padding: 12px 24px; font-size: 0.9rem; font-weight: 600;
-      background: #666; color: white; border: none;
-      border-radius: 6px; cursor: pointer;
-    ">Zavrit</button>
   `;
 
   // Sestavení - elementy jdou do modalBox
   modalBox.appendChild(header);
   modalBox.appendChild(content);
   modalBox.appendChild(footer);
+  modalBox.appendChild(btnXKnihovna);
   overlay.appendChild(modalBox);
 
   // Event handlery
   const zavritKnihovnu = () => overlay.remove();
-  header.querySelector('#knihovnaCloseBtn').onclick = zavritKnihovnu;
+  btnXKnihovna.onclick = zavritKnihovnu;
 
   // Zavřít kliknutím mimo modal
   overlay.onclick = (e) => {
     if (e.target === overlay) zavritKnihovnu();
   };
-  footer.querySelector('#btnZavritKnihovnu').onclick = zavritKnihovnu;
 
   // ESC pro zavření
   const escHandler = (e) => {
@@ -5084,7 +5096,13 @@ async function zobrazVideotekaArchiv(claimId) {
 
   // Kontejner
   const container = document.createElement('div');
-  container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+  container.style.cssText = 'position: relative; width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+
+  // Tlačítko X (zavřít) - fixní v pravém horním rohu
+  const btnX = document.createElement('button');
+  btnX.innerHTML = '&times;';
+  btnX.style.cssText = 'position: absolute; top: 8px; right: 8px; z-index: 10; width: 30px; height: 30px; max-width: 30px; max-height: 30px; aspect-ratio: 1/1; border-radius: 50%; background: rgba(180,180,180,0.35); color: #cc0000; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; overflow: hidden; flex-shrink: 0;';
+  btnX.onclick = () => overlay.remove();
 
   // Header (bude aktualizován po načtení dat z API)
   const isMobileHeader = window.innerWidth < 600;
@@ -5208,17 +5226,10 @@ async function zobrazVideotekaArchiv(claimId) {
   // Tlačítko Nahrát video
   const btnNahrat = document.createElement('button');
   btnNahrat.textContent = 'Nahrát video';
-  btnNahrat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #2D5016; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
+  btnNahrat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #39ff14; color: #000; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
   btnNahrat.onclick = () => otevritNahravaniVidea(claimId, overlay);
 
-  // Tlačítko Zavřít
-  const btnZavrit = document.createElement('button');
-  btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
-  btnZavrit.onclick = () => overlay.remove();
-
   footer.appendChild(btnNahrat);
-  footer.appendChild(btnZavrit);
 
   // Přidat drop overlay do content
   content.appendChild(dropOverlay);
@@ -5227,6 +5238,7 @@ async function zobrazVideotekaArchiv(claimId) {
   container.appendChild(header);
   container.appendChild(content);
   container.appendChild(footer);
+  container.appendChild(btnX);
   overlay.appendChild(container);
 
   // Zavřít při kliknutí mimo
