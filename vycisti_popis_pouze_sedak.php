@@ -1,11 +1,10 @@
 <?php
 /**
  * Migrace: Smazání nesmyslného popisu u položky "Příklad: Pouze sedák"
- *
- * Odstraní text "První díl 205€ = 105€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU."
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/wgs_cache.php';
 
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die("PŘÍSTUP ODEPŘEN: Pouze administrátor může spustit migraci.");
@@ -15,48 +14,73 @@ header('Content-Type: text/html; charset=utf-8');
 
 $pdo = getDbConnection();
 
-// Načtení aktuálního stavu
-$stmt = $pdo->prepare("SELECT id, service_name, description FROM wgs_pricing WHERE service_name LIKE '%Pouze sedák%' LIMIT 5");
-$stmt->execute();
-$polozky = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 echo "<!DOCTYPE html><html lang='cs'><head><meta charset='UTF-8'><title>Oprava popisu ceníku</title>
 <style>
-body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
 .box { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 6px rgba(0,0,0,.1); margin-bottom: 16px; }
-.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px; border-radius: 4px; }
+.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px; border-radius: 4px; margin-top:10px; }
 .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; border-radius: 4px; }
-.btn { display: inline-block; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 12px; }
-pre { background: #eee; padding: 10px; border-radius: 4px; font-size: 0.85em; white-space: pre-wrap; }
+.btn { display: inline-block; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 4px; margin: 4px; }
+pre { background: #eee; padding: 8px; border-radius: 4px; font-size: 0.82em; white-space: pre-wrap; word-break: break-all; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #333; color: #fff; }
 </style></head><body><div class='box'>
 <h2>Oprava popisu: Příklad: Pouze sedák</h2>";
 
-if (empty($polozky)) {
-    echo "<div class='info'>Položka 'Pouze sedák' nebyla nalezena v databázi.</div>";
-    echo "</div></body></html>";
-    exit;
+// Hledáme podle kategorie "MODELOV" nebo "sedák"
+$stmt = $pdo->query("SELECT id, category, service_name, description FROM wgs_pricing ORDER BY category, display_order");
+$vsechny = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Filtrovat relevantní
+$relevantni = array_filter($vsechny, function($r) {
+    $hledat = strtolower($r['service_name'] . ' ' . $r['category'] . ' ' . $r['description']);
+    return strpos($hledat, 'sedák') !== false
+        || strpos($hledat, 'sedak') !== false
+        || strpos($hledar = strtolower($r['category']), 'model') !== false
+        || strpos($hledat, 'příklad') !== false
+        || strpos($hledat, 'priklad') !== false;
+});
+
+if (empty($relevantni)) {
+    echo "<div class='info'>Žádné relevantní položky nenalezeny. Zobrazuji všechny kategorie:</div><br>";
+    $kategorie = array_unique(array_column($vsechny, 'category'));
+    echo "<pre>" . htmlspecialchars(implode("\n", $kategorie)) . "</pre>";
+} else {
+    echo "<table><tr><th>ID</th><th>Kategorie</th><th>Název</th><th>Popis</th><th>Akce</th></tr>";
+    foreach ($relevantni as $r) {
+        echo "<tr>
+            <td>{$r['id']}</td>
+            <td>" . htmlspecialchars($r['category']) . "</td>
+            <td>" . htmlspecialchars($r['service_name']) . "</td>
+            <td><pre>" . htmlspecialchars($r['description']) . "</pre></td>
+            <td><a href='?smazat_id={$r['id']}' class='btn'>Smazat popis</a></td>
+        </tr>";
+    }
+    echo "</table>";
 }
 
-foreach ($polozky as $polozka) {
-    echo "<p><strong>ID:</strong> {$polozka['id']}<br>
-    <strong>Název:</strong> " . htmlspecialchars($polozka['service_name']) . "<br>
-    <strong>Aktuální popis:</strong></p>
-    <pre>" . htmlspecialchars($polozka['description']) . "</pre>";
+// Vymazání cache
+if (isset($_GET['cache'])) {
+    WgsCache::smaz('cenik_list_v1');
+    echo "<div class='success'>Cache ceníku vymazána. <a href='?' class='btn'>Obnovit</a></div>";
 }
 
-if (isset($_GET['spustit']) && $_GET['spustit'] === '1') {
+// Smazání konkrétního ID
+if (isset($_GET['smazat_id']) && is_numeric($_GET['smazat_id'])) {
+    $id = (int)$_GET['smazat_id'];
     try {
-        $stmt = $pdo->prepare("UPDATE wgs_pricing SET description = '', description_en = '', description_it = '' WHERE service_name LIKE '%Pouze sedák%'");
-        $stmt->execute();
-        $pocet = $stmt->rowCount();
-        echo "<div class='success'>Hotovo: Popis byl smazán u {$pocet} položky/položek.</div>";
+        $stmt = $pdo->prepare("UPDATE wgs_pricing SET description = '', description_en = '', description_it = '' WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        WgsCache::smaz('cenik_list_v1');
+        echo "<div class='success'>Popis u položky ID {$id} smazán a cache vymazána. <a href='?' class='btn'>Obnovit</a></div>";
     } catch (PDOException $e) {
         error_log("Migrace chyba: " . $e->getMessage());
-        echo "<div style='background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;padding:12px;border-radius:4px;'>Chyba při aktualizaci.</div>";
+        echo "<div style='background:#f8d7da;padding:12px;border-radius:4px;color:#721c24;'>Chyba při aktualizaci.</div>";
     }
-} else {
-    echo "<a href='?spustit=1' class='btn'>Smazat popis</a>";
 }
+
+echo "<br><a href='?cache=1' class='btn'>Vymazat cache ceníku</a>";
 
 echo "</div></body></html>";
 ?>
