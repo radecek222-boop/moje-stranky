@@ -60,25 +60,25 @@ if ($reklamaceId > 0) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
             border-bottom: 1px solid #333;
         }
         .nabidka-header h1 {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #eee;
         }
         .nabidka-tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 16px;
         }
         .nabidka-tab {
-            padding: 10px 20px;
+            padding: 7px 16px;
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #888;
             cursor: pointer;
             transition: all 0.2s;
@@ -96,7 +96,7 @@ if ($reklamaceId > 0) {
         .nabidka-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 20px;
         }
         @media (max-width: 768px) {
             .nabidka-form { grid-template-columns: 1fr; }
@@ -104,37 +104,41 @@ if ($reklamaceId > 0) {
         .form-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 12px;
-            padding: 25px;
+            border-radius: 10px;
+            padding: 18px;
         }
         .form-card h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #333;
             color: #aaa;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 9px;
         }
         .form-group label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
             color: #aaa;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 7px 10px;
             background: #111;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #fff;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
         }
         .form-group input:focus,
         .form-group textarea:focus,
@@ -142,20 +146,22 @@ if ($reklamaceId > 0) {
             outline: none;
             border-color: #39ff14;
         }
-        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group textarea { min-height: 58px; resize: vertical; }
 
         /* Kalkulace sekce */
         .kalkulace-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 12px;
-            padding: 25px;
+            border-radius: 10px;
+            padding: 18px;
         }
         .kalkulace-card h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #333;
             color: #aaa;
         }
@@ -165,14 +171,14 @@ if ($reklamaceId > 0) {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            padding: 20px 30px;
+            padding: 12px 20px;
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             border: 2px dashed #39ff14;
-            border-radius: 12px;
+            border-radius: 8px;
             color: #39ff14;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
@@ -185,8 +191,8 @@ if ($reklamaceId > 0) {
 
         /* Výsledek kalkulace */
         .kalkulace-vysledek {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 12px;
+            padding: 14px;
             background: #111;
             border-radius: 8px;
             display: none;
@@ -245,17 +251,17 @@ if ($reklamaceId > 0) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 12px 14px;
             background: #111;
             border-radius: 8px;
-            margin-top: 20px;
+            margin-top: 12px;
         }
         .celkova-cena-label {
-            font-size: 1rem;
+            font-size: 0.875rem;
             color: #888;
         }
         .celkova-cena-hodnota {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #39ff14;
         }
@@ -263,15 +269,15 @@ if ($reklamaceId > 0) {
         /* Tlačítka */
         .nabidka-actions {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 16px;
             justify-content: flex-end;
             flex-wrap: wrap;
         }
         .btn {
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 9px 22px;
+            border-radius: 6px;
+            font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
@@ -471,14 +477,17 @@ if ($reklamaceId > 0) {
 
         /* Dodatečné položky */
         .dodatecne-polozky {
-            margin-top: 20px;
-            padding-top: 20px;
+            margin-top: 14px;
+            padding-top: 14px;
             border-top: 1px solid #333;
         }
         .dodatecne-polozky h3 {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             color: #888;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .dodatecna-polozka {
             display: grid;
