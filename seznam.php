@@ -2781,64 +2781,140 @@ async function prepnoutOdlozeni(reklamaceId, novaHodnota) {
 
 <!-- DEBUG TOUCH: Docasny diagnosticky panel (smazat po vyreseni) -->
 <div id="dbg-btn" onclick="dbgUkaz()" style="position:fixed;bottom:80px;left:10px;z-index:99999;background:#39ff14;color:#000;font-size:11px;font-weight:bold;padding:6px 10px;border-radius:4px;cursor:pointer;font-family:monospace;">DBG</div>
-<div id="dbg-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:10px;font-family:monospace;font-size:12px;color:#eee;">
-  <button onclick="document.getElementById('dbg-panel').style.display='none'" style="background:#333;color:#fff;border:1px solid #666;padding:6px 12px;margin-bottom:10px;border-radius:4px;">ZAVRIT</button>
-  <button onclick="dbgOtevritModal()" style="background:#333;color:#39ff14;border:1px solid #39ff14;padding:6px 12px;margin-bottom:10px;border-radius:4px;margin-left:6px;">TEST MODAL</button>
+<div id="dbg-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.95);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;padding:10px;font-family:monospace;font-size:12px;color:#eee;">
+  <button onclick="document.getElementById('dbg-panel').style.display='none'" style="background:#333;color:#fff;border:1px solid #666;padding:6px 12px;margin-bottom:6px;border-radius:4px;">ZAVRIT</button>
+  <button onclick="dbgRefresh()" style="background:#333;color:#39ff14;border:1px solid #39ff14;padding:6px 10px;margin-bottom:6px;border-radius:4px;margin-left:4px;">REFRESH</button>
+  <button onclick="dbgOtevritModal()" style="background:#333;color:#39ff14;border:1px solid #39ff14;padding:6px 10px;margin-bottom:6px;border-radius:4px;margin-left:4px;">TEST MODAL</button>
+  <button onclick="dbgClearLog()" style="background:#333;color:#aaa;border:1px solid #555;padding:6px 10px;margin-bottom:6px;border-radius:4px;margin-left:4px;">CLEAR LOG</button>
+  <div id="dbg-scroll-test" style="background:#1a1a1a;border:1px solid #39ff14;padding:8px;margin-bottom:8px;border-radius:4px;">
+    <b style="color:#39ff14">SCROLL TEST - zkus scrollovat zde:</b><br>
+    <div style="height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;background:#111;border:1px solid #333;padding:8px;margin-top:4px;">
+      <div style="height:800px;background:linear-gradient(#222,#333);display:flex;align-items:flex-start;padding:10px;color:#555;">
+        Scrolluj dolu → pokud tohle jde scrollovat ale real modal ne, problem je v CSS na overlay.<br><br>
+        Radek 2<br>Radek 3<br>Radek 4<br>Radek 5<br>Radek 6<br>Radek 7<br>Radek 8<br>Radek 9<br>Radek 10
+      </div>
+    </div>
+  </div>
   <div id="dbg-obsah"></div>
+  <div id="dbg-log" style="margin-top:8px;background:#0a0a0a;border:1px solid #333;padding:6px;border-radius:4px;min-height:40px;max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-size:11px;color:#888;"></div>
 </div>
 <script>
+var dbgLogEl = null;
+function dbgLog(msg) {
+  if (!dbgLogEl) dbgLogEl = document.getElementById('dbg-log');
+  if (dbgLogEl) { dbgLogEl.innerHTML += '<br>' + msg; dbgLogEl.scrollTop = 9999; }
+}
+function dbgClearLog() { if (!dbgLogEl) dbgLogEl = document.getElementById('dbg-log'); if(dbgLogEl) dbgLogEl.innerHTML=''; }
+
+// Touch event monitoring na overlay
+(function() {
+  var ov = null;
+  function pripojListenery() {
+    ov = document.getElementById('detailOverlay');
+    if (!ov) return;
+    ov.addEventListener('touchstart', function(e) {
+      dbgLog('<span style="color:#39ff14">touchstart</span> na overlay, touches:'+e.touches.length+', target:'+e.target.tagName+'#'+e.target.id+', cancelable:'+e.cancelable);
+    }, {passive:true});
+    ov.addEventListener('touchmove', function(e) {
+      dbgLog('<span style="color:#aaa">touchmove</span> na overlay, defaultPrevented:'+e.defaultPrevented+', cancelable:'+e.cancelable);
+    }, {passive:true});
+    ov.addEventListener('scroll', function() {
+      dbgLog('<span style="color:#39ff14">SCROLL EVENT</span> na overlay, scrollTop:'+ov.scrollTop);
+    }, {passive:true});
+    dbgLog('Touch listenery pripojeny na overlay');
+  }
+  setTimeout(pripojListenery, 500);
+  document.addEventListener('DOMContentLoaded', pripojListenery);
+})();
+
 function dbgInfo() {
   var b = document.body, h = document.documentElement;
   var bc = window.getComputedStyle(b), hc = window.getComputedStyle(h);
-  var ok = '<span style="color:#39ff14">✓</span>', no = '<span style="color:#ff4444">✗</span>';
-  function chk(val, spatne) { return spatne.indexOf(val) >= 0 ? no + ' <b style="color:#ff4444">' + val + '</b>' : ok + ' ' + val; }
+  var ok = '<span style="color:#39ff14">ok</span>', no = '<span style="color:#ff4444">!</span>';
+
+  // Detekce verze scroll-lock: nova verze pouziva position:fixed, stara overflow:hidden
+  var slVerze = 'N/A';
+  if (window.scrollLock) {
+    slVerze = (typeof window.scrollLock.jeZamknout !== 'undefined') ? 'NOVA (v1.2)' : 'STARA (v1.1)';
+  }
+
   return '<b style="color:#39ff14">== ZARIZENI ==</b><br>' +
     'iOS: ' + (/iPad|iPhone|iPod/.test(navigator.userAgent) ? '<b style="color:#39ff14">ANO</b>' : 'NE') + '<br>' +
     'PWA: ' + (window.navigator.standalone ? '<b>ANO</b>' : 'NE') + '<br>' +
-    'innerWidth: ' + window.innerWidth + '<br><br>' +
-    '<b style="color:#39ff14">== HTML ELEMENT ==</b><br>' +
-    'overflow: ' + chk(h.style.overflow || hc.overflow, ['hidden']) + '<br>' +
-    'touchAction: ' + chk(h.style.touchAction || hc.touchAction, ['none','manipulation']) + '<br><br>' +
-    '<b style="color:#39ff14">== BODY ==</b><br>' +
-    'overflow: ' + (b.style.overflow) + ' (inline)<br>' +
-    'overflow computed: ' + chk(bc.overflow, ['hidden']) + '<br>' +
-    'position: ' + chk(b.style.position || bc.position, ['fixed']) + '<br>' +
-    'touchAction inline: ' + (b.style.touchAction || '(prazdne)') + '<br>' +
-    'touchAction computed: ' + chk(bc.touchAction, ['none','manipulation']) + '<br>' +
+    'UA: ' + navigator.userAgent.substring(0,60) + '<br><br>' +
+    '<b style="color:#39ff14">== HTML ELEMENT (inline) ==</b><br>' +
+    'overflow: "' + h.style.overflow + '"<br>' +
+    'overflow computed: ' + hc.overflow + '<br>' +
+    'touchAction: "' + h.style.touchAction + '"<br><br>' +
+    '<b style="color:#39ff14">== BODY INLINE STYLY ==</b><br>' +
+    'overflow: "' + b.style.overflow + '"<br>' +
+    'position: "' + b.style.position + '"<br>' +
+    'top: "' + b.style.top + '"<br>' +
+    'width: "' + b.style.width + '"<br>' +
+    'touchAction: "' + b.style.touchAction + '"<br>' +
+    '<b style="color:#39ff14">== BODY COMPUTED ==</b><br>' +
+    'overflow: ' + bc.overflow + '<br>' +
+    'position: ' + bc.position + '<br>' +
+    'touchAction: ' + bc.touchAction + '<br>' +
     'classList: ' + b.className + '<br><br>' +
     '<b style="color:#39ff14">== SCROLL-LOCK ==</b><br>' +
-    (window.scrollLock ? 'isIOS: ' + window.scrollLock.isIOS + '<br>isPWA: ' + window.scrollLock.isPWA + '<br>isLocked: ' + window.scrollLock.isLocked() : '<span style="color:#ff4444">NENALEZEN</span>') + '<br>';
+    (window.scrollLock ?
+      'verze: <b style="color:#ff0">' + slVerze + '</b><br>' +
+      'isIOS: ' + window.scrollLock.isIOS + '<br>' +
+      'isPWA: ' + window.scrollLock.isPWA + '<br>' +
+      'isLocked: ' + window.scrollLock.isLocked() + '<br>' +
+      'activeLocks: ' + JSON.stringify(window.scrollLock.getActiveLocks())
+      : '<span style="color:#ff4444">NENALEZEN</span>') + '<br>';
 }
-function dbgModalInfo() {
+
+function dbgOverlayInfo() {
   var ov = document.getElementById('detailOverlay');
   var mc = ov ? ov.querySelector('.modal-content') : null;
-  var ok = '<span style="color:#39ff14">✓</span>', no = '<span style="color:#ff4444">✗</span>';
-  function chk(val, spatne) { return spatne.indexOf(val) >= 0 ? no + ' <b style="color:#ff4444">' + val + '</b>' : ok + ' ' + val; }
+  var mb = ov ? ov.querySelector('.modal-body') : null;
   if (!ov) return '<span style="color:#ff4444">detailOverlay NENALEZEN</span><br>';
   var ovc = window.getComputedStyle(ov);
   var mcc = mc ? window.getComputedStyle(mc) : null;
+  var mbc = mb ? window.getComputedStyle(mb) : null;
   return '<b style="color:#39ff14">== #detailOverlay ==</b><br>' +
-    'touchAction: ' + chk(ovc.touchAction, ['none','manipulation']) + '<br>' +
-    'pointerEvents: ' + ovc.pointerEvents + '<br>' +
+    'display: ' + ovc.display + '<br>' +
+    'position: ' + ovc.position + '<br>' +
     'overflow: ' + ovc.overflow + '<br>' +
-    (mc ? '<br><b style="color:#39ff14">== .modal-content ==</b><br>' +
-    'touchAction: ' + chk(mcc.touchAction, ['none','manipulation']) + '<br>' +
+    'overflowY: ' + ovc.overflowY + '<br>' +
+    'touchAction: ' + ovc.touchAction + '<br>' +
+    'pointerEvents: ' + ovc.pointerEvents + '<br>' +
+    'height: ' + ovc.height + '<br>' +
+    'scrollHeight: ' + ov.scrollHeight + '<br>' +
+    'clientHeight: ' + ov.clientHeight + '<br>' +
+    'classList: ' + ov.className + '<br>' +
+    (mcc ? '<br><b style="color:#39ff14">== .modal-content ==</b><br>' +
+    'position: ' + mcc.position + '<br>' +
+    'overflow: ' + mcc.overflow + '<br>' +
     'overflowY: ' + mcc.overflowY + '<br>' +
-    'height: ' + mcc.height + '<br>' : '');
+    'touchAction: ' + mcc.touchAction + '<br>' +
+    'height: ' + mcc.height + '<br>' +
+    'maxHeight: ' + mcc.maxHeight + '<br>' : '') +
+    (mbc ? '<br><b style="color:#39ff14">== .modal-body ==</b><br>' +
+    'overflow: ' + mbc.overflow + '<br>' +
+    'overflowY: ' + mbc.overflowY + '<br>' +
+    'touchAction: ' + mbc.touchAction + '<br>' +
+    'height: ' + mbc.height + '<br>' : '');
+}
+
+function dbgRefresh() {
+  document.getElementById('dbg-obsah').innerHTML = dbgInfo();
 }
 function dbgUkaz() {
   document.getElementById('dbg-obsah').innerHTML = dbgInfo();
   document.getElementById('dbg-panel').style.display = 'block';
 }
 function dbgOtevritModal() {
-  // Otevri prvni zaznam z cache
   if (window.WGS_DATA_CACHE && WGS_DATA_CACHE.length > 0) {
     showDetail(WGS_DATA_CACHE[0].id || WGS_DATA_CACHE[0].reklamace_id);
     setTimeout(function() {
-      document.getElementById('dbg-obsah').innerHTML = dbgInfo() + '<br>' + dbgModalInfo();
-    }, 600);
+      document.getElementById('dbg-obsah').innerHTML = dbgInfo() + '<br>' + dbgOverlayInfo();
+    }, 700);
   } else {
-    document.getElementById('dbg-obsah').innerHTML += '<br><span style="color:#ff4444">Cache je prazdna - nejprve nacti stranku</span>';
+    document.getElementById('dbg-obsah').innerHTML += '<br><span style="color:#ff4444">Cache prazdna - nejprve nacti stranku</span>';
   }
 }
 </script>
