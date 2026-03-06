@@ -3011,11 +3011,10 @@ async function showCustomerDetail(id) {
     obsahDetailZakaznika.style.setProperty('width', '100%', 'important');
   }
 
-  // Auto-resize + nastavení fontu podle zařízení
+  // Auto-resize + nastavení fontu podle zařízení (400ms - iOS potřebuje čas na render)
   setTimeout(() => {
     const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
     const jeMobil = window.innerWidth <= 768;
-    alert('DEBUG: jeMobil=' + jeMobil + ' textareas=' + textareas.length + ' innerWidth=' + window.innerWidth);
     textareas.forEach(ta => {
       if (ta) {
         ta.style.setProperty('font-size', jeMobil ? '22px' : '0.85rem', 'important');
@@ -3024,7 +3023,7 @@ async function showCustomerDetail(id) {
         ta.style.height = ta.scrollHeight + 'px';
       }
     });
-  }, 50);
+  }, 400);
 }
 
 /**
