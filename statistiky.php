@@ -215,7 +215,79 @@ body {
 .multiselect-option label {
     cursor: pointer;
     flex: 1;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* Custom single-select dropdown (ROK, MĚSÍC) */
+.filter-singleselect {
+    position: relative;
+}
+
+.singleselect-trigger {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    user-select: none;
+}
+
+.singleselect-trigger:hover {
+    border-color: #666;
+}
+
+.singleselect-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 9999;
+    display: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.singleselect-dropdown.active {
+    display: block;
+}
+
+.singleselect-option {
+    padding: 0.45rem 0.6rem;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    color: #fff;
+    font-size: 0.8rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.singleselect-option:hover {
+    background: #2a2a2a;
+}
+
+.singleselect-option:last-child {
+    border-bottom: none;
+}
+
+.singleselect-option.selected {
+    background: #333;
+    font-weight: 600;
 }
 
 /* Akční tlačítka */
@@ -310,9 +382,10 @@ body {
 }
 
 .stats-table td {
-    padding: 0.5rem 0.4rem;
+    padding: 0.2rem 0.4rem;
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.75rem;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -794,34 +867,44 @@ body {
 
     <div class="filters-grid">
       <!-- Rok -->
+      <?php $initRok = (date('Y') >= 2024 && date('Y') <= 2026) ? date('Y') : ''; ?>
       <div class="filter-group">
-        <label class="filter-label" for="filter-year">Rok</label>
-        <select class="filter-select" id="filter-year">
-          <option value="">Všechny</option>
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
-          <option value="2026" <?php echo (date('Y') == '2026') ? 'selected' : ''; ?>>2026</option>
-        </select>
+        <label class="filter-label">Rok</label>
+        <div class="filter-singleselect">
+          <div class="singleselect-trigger" data-hidden-id="filter-year">
+            <span><?php echo $initRok ? $initRok : 'Všechny'; ?></span>
+            <span>▼</span>
+          </div>
+          <div class="singleselect-dropdown">
+            <div class="singleselect-option<?php echo !$initRok ? ' selected' : ''; ?>" data-value="">Všechny</div>
+            <div class="singleselect-option<?php echo $initRok == '2024' ? ' selected' : ''; ?>" data-value="2024">2024</div>
+            <div class="singleselect-option<?php echo $initRok == '2025' ? ' selected' : ''; ?>" data-value="2025">2025</div>
+            <div class="singleselect-option<?php echo $initRok == '2026' ? ' selected' : ''; ?>" data-value="2026">2026</div>
+          </div>
+        </div>
+        <input type="hidden" id="filter-year" value="<?php echo htmlspecialchars($initRok); ?>">
       </div>
 
       <!-- Měsíc -->
+      <?php
+        $mesicNazvy = ['','Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+        $aktMesic = (int)date('n');
+      ?>
       <div class="filter-group">
-        <label class="filter-label" for="filter-month">Měsíc</label>
-        <select class="filter-select" id="filter-month">
-          <option value="">Všechny</option>
-          <option value="1" <?php echo (date('n') == 1) ? 'selected' : ''; ?>>Leden</option>
-          <option value="2" <?php echo (date('n') == 2) ? 'selected' : ''; ?>>Únor</option>
-          <option value="3" <?php echo (date('n') == 3) ? 'selected' : ''; ?>>Březen</option>
-          <option value="4" <?php echo (date('n') == 4) ? 'selected' : ''; ?>>Duben</option>
-          <option value="5" <?php echo (date('n') == 5) ? 'selected' : ''; ?>>Květen</option>
-          <option value="6" <?php echo (date('n') == 6) ? 'selected' : ''; ?>>Červen</option>
-          <option value="7" <?php echo (date('n') == 7) ? 'selected' : ''; ?>>Červenec</option>
-          <option value="8" <?php echo (date('n') == 8) ? 'selected' : ''; ?>>Srpen</option>
-          <option value="9" <?php echo (date('n') == 9) ? 'selected' : ''; ?>>Září</option>
-          <option value="10" <?php echo (date('n') == 10) ? 'selected' : ''; ?>>Říjen</option>
-          <option value="11" <?php echo (date('n') == 11) ? 'selected' : ''; ?>>Listopad</option>
-          <option value="12" <?php echo (date('n') == 12) ? 'selected' : ''; ?>>Prosinec</option>
-        </select>
+        <label class="filter-label">Měsíc</label>
+        <div class="filter-singleselect">
+          <div class="singleselect-trigger" data-hidden-id="filter-month">
+            <span><?php echo $mesicNazvy[$aktMesic]; ?></span>
+            <span>▼</span>
+          </div>
+          <div class="singleselect-dropdown">
+            <div class="singleselect-option" data-value="">Všechny</div>
+            <?php for ($i = 1; $i <= 12; $i++): ?>
+            <div class="singleselect-option<?php echo $aktMesic === $i ? ' selected' : ''; ?>" data-value="<?php echo $i; ?>"><?php echo $mesicNazvy[$i]; ?></div>
+            <?php endfor; ?>
+          </div>
+        </div>
+        <input type="hidden" id="filter-month" value="<?php echo $aktMesic; ?>">
       </div>
 
       <!-- Prodejci (multi-select) -->
@@ -970,6 +1053,69 @@ body {
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
+
+<!-- Custom single-select dropdowny (ROK, MĚSÍC) -->
+<script>
+(function() {
+    function inicializovatSingleSelecty() {
+        document.querySelectorAll('.filter-singleselect').forEach(function(wrapper) {
+            var trigger = wrapper.querySelector('.singleselect-trigger');
+            var dropdown = wrapper.querySelector('.singleselect-dropdown');
+            if (!trigger || !dropdown) return;
+
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.querySelectorAll('.singleselect-dropdown.active, .multiselect-dropdown.active').forEach(function(d) {
+                    if (d !== dropdown) d.classList.remove('active');
+                });
+                dropdown.classList.toggle('active');
+            });
+
+            dropdown.querySelectorAll('.singleselect-option').forEach(function(option) {
+                option.addEventListener('click', function() {
+                    var value = this.dataset.value;
+                    var text = this.textContent.trim();
+                    var hiddenId = trigger.dataset.hiddenId;
+                    var hiddenInput = document.getElementById(hiddenId);
+                    if (hiddenInput) {
+                        hiddenInput.value = value;
+                        hiddenInput.dispatchEvent(new Event('change'));
+                    }
+                    trigger.querySelector('span:first-child').textContent = text;
+                    dropdown.querySelectorAll('.singleselect-option').forEach(function(o) {
+                        o.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    dropdown.classList.remove('active');
+                });
+            });
+        });
+
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.singleselect-dropdown.active').forEach(function(d) {
+                d.classList.remove('active');
+            });
+        });
+    }
+
+    // Globální funkce pro reset ze statistiky.js
+    window.aktualizovatSingleSelectDisplay = function(hiddenId, value) {
+        var trigger = document.querySelector('.singleselect-trigger[data-hidden-id="' + hiddenId + '"]');
+        if (!trigger) return;
+        var dropdown = trigger.closest('.filter-singleselect').querySelector('.singleselect-dropdown');
+        var option = dropdown.querySelector('[data-value="' + value + '"]');
+        trigger.querySelector('span:first-child').textContent = option ? option.textContent.trim() : 'Všechny';
+        dropdown.querySelectorAll('.singleselect-option').forEach(function(o) { o.classList.remove('selected'); });
+        if (option) option.classList.add('selected');
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', inicializovatSingleSelecty);
+    } else {
+        inicializovatSingleSelecty();
+    }
+})();
+</script>
 
 <!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146)
      Pořadí listenerů DOMContentLoaded:

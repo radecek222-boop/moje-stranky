@@ -63,7 +63,7 @@ body {
 .top-bar {
   background: var(--c-black);
   color: var(--c-white);
-  padding: 1.2rem 0;
+  padding: 0.6rem 0;
   border-bottom: 1px solid var(--c-black);
   position: sticky;
   top: 0;
@@ -107,7 +107,7 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 /* === PAGE HEADER === */
@@ -160,26 +160,49 @@ body {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .stat-card {
   background: var(--c-white);
-  border: 1px solid var(--c-border);
-  padding: 0.75rem 0.5rem;
-  transition: all 0.3s ease;
+  border: none;
+  border-radius: 8px;
+  border-left: 3px solid #ccc;
+  padding: 0.6rem 0.5rem;
+  transition: all 0.2s ease;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.stat-card:first-child {
+  background: #333;
+  color: #fff;
+  border-left-color: #111;
+}
+
+.stat-card:last-child {
+  background: #1a1a1a;
+  color: #fff;
+  border-left-color: #444;
+}
+
+.stat-card:first-child .stat-value,
+.stat-card:last-child .stat-value { color: #fff; }
+
+.stat-card:first-child .stat-label,
+.stat-card:last-child .stat-label { color: rgba(255,255,255,0.65); }
+
+.stat-card:first-child .stat-info,
+.stat-card:last-child .stat-info { color: rgba(255,255,255,0.45); }
+
 .stat-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--c-grey);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .stat-card.highlight {
-  border-color: var(--c-success);
-  background: linear-gradient(to bottom, var(--c-white) 0%, rgba(51, 51, 51, 0.03) 100%);
+  border-left-color: #333;
+  background: #f9f9f9;
 }
 
 .stat-icon {
@@ -213,38 +236,42 @@ body {
 /* === CARD === */
 .card {
   background: var(--c-white);
-  border: 1px solid var(--c-border);
-  margin-bottom: 2rem;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: visible;
 }
 
 .card-header {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--c-border);
+  padding: 0.5rem 0.85rem;
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
-  background: var(--c-bg);
+  gap: 0.5rem;
+  background: #333;
+  border-radius: 8px 8px 0 0;
 }
 
 .card-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--c-black);
+  letter-spacing: 0.5px;
+  color: #fff;
 }
 
 .card-body {
-  padding: 1.5rem;
+  padding: 0.65rem 0.85rem;
 }
 
 /* === FORM ELEMENTS === */
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  gap: 0.75rem;
   margin-bottom: 0;
 }
 
@@ -254,19 +281,19 @@ body {
 }
 
 .form-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
   color: var(--c-grey);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   font-weight: 600;
 }
 
 .form-input,
 .form-select {
-  padding: 0.7rem 1rem;
+  padding: 0.4rem 0.7rem;
   border: 1px solid var(--c-border);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 400;
   background: var(--c-white);
   color: var(--c-black);
@@ -294,7 +321,7 @@ body {
 /* === TABLE === */
 .table-container {
   overflow-x: auto;
-  padding: 1rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .data-table {
@@ -304,17 +331,18 @@ body {
 
 .data-table thead {
   background: var(--c-bg);
+  border-bottom: 2px solid #333;
 }
 
 .data-table th {
-  padding: 0.9rem;
+  padding: 0.4rem 0.5rem;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--c-grey);
+  letter-spacing: 0.3px;
+  color: #333;
   font-weight: 700;
-  border-bottom: 2px solid var(--c-border);
+  border-bottom: 2px solid #333;
 }
 
 .data-table tbody tr {
@@ -327,20 +355,22 @@ body {
 }
 
 .data-table td {
-  padding: 0.9rem;
-  font-size: 0.9rem;
+  padding: 0.55rem 0.5rem;
+  font-size: 0.8rem;
   font-weight: 400;
   vertical-align: middle;
+  line-height: 1.4;
 }
 
 .table-input {
-  padding: 0.5rem 0.8rem !important;
+  padding: 0.2rem 0.5rem !important;
   border: 1px solid var(--c-border) !important;
   background: var(--c-white) !important;
-  font-size: 0.85rem !important;
+  font-size: 0.8rem !important;
   width: 100%;
   transition: all 0.2s ease !important;
   color: var(--c-black) !important;
+  line-height: 1.3 !important;
 }
 
 /* Placeholder - černý text */
@@ -374,8 +404,10 @@ textarea::placeholder {
 
 .total-row td {
   color: var(--c-white) !important;
-  padding: 1rem !important;
+  padding: 0.4rem 0.5rem !important;
   border-top: 2px solid var(--c-black);
+  font-size: 0.8rem !important;
+  line-height: 1.3 !important;
 }
 
 /* === BUTTONS === */
@@ -386,16 +418,17 @@ textarea::placeholder {
 }
 
 .btn {
-  padding: 0.7rem 1.5rem;
+  padding: 0.4rem 1rem;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.2s ease;
   border: 1px solid var(--c-black);
   background: var(--c-black);
   color: var(--c-white);
+  line-height: 1.3;
 }
 
 .btn:hover {
@@ -435,16 +468,17 @@ textarea::placeholder {
 }
 
 .btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
 }
 
 /* === ACTION BUTTONS === */
 .action-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 0.6rem;
   flex-wrap: wrap;
 }
 
@@ -813,11 +847,13 @@ textarea::placeholder {
 .period-filter-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
   background: var(--c-white);
-  border: 2px solid var(--c-black);
-  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 0.6rem;
 }
 
 .period-filter-label {
@@ -836,21 +872,22 @@ textarea::placeholder {
 .period-display.clickable {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 1rem;
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--c-black);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
   transition: all 0.2s ease;
   user-select: none;
 }
 
 .period-display.clickable:hover {
-  background: var(--c-white);
-  border-color: var(--c-grey);
+  background: #333;
+  border-color: #666;
 }
 
 .period-display.clickable:focus {
