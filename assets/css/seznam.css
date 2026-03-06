@@ -738,17 +738,25 @@ body {
   font-weight: 600;
 }
 .cal-day.dnes {
-  background: #e0e0e0;
-  border-color: #888;
-  color: #111;
-  font-weight: 700;
+  background: #d0d0d0;
+  border-color: #555;
+  color: #000;
+  font-weight: 800;
+  font-size: 1.15em;
+  animation: wgs-dnes-pulse 2s ease-in-out infinite;
+  position: relative;
+  flex-direction: column;
+}
+@keyframes wgs-dnes-pulse {
+  0%, 100% { background: #d0d0d0; border-color: #555; box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
+  50% { background: #b8b8b8; border-color: #222; box-shadow: 0 0 0 4px rgba(0,0,0,0.1); }
 }
 .cal-day.dnes::after {
   content: '';
   display: block;
-  width: 4px;
-  height: 4px;
-  background: #666;
+  width: 5px;
+  height: 5px;
+  background: #333;
   border-radius: 50%;
   margin: 2px auto 0;
 }
