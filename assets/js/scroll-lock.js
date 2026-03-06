@@ -9,12 +9,12 @@
  *   scrollLock.disable('nazev-overlay'); // Odemknout scroll
  *   scrollLock.isLocked();               // Zkontrolovat stav
  *
- * FIX PWA: Přidána speciální logika pro PWA mód
- * - PWA mód používá overflow: hidden místo position: fixed
- * - Řeší problém se zaseknutým scrollem v iOS Safari PWA
+ * METODA: position: fixed + top: -scrollY pro všechny platformy
+ * - iOS/PWA: overflow:hidden na body blokuje scroll v fixed modalech
+ * - position:fixed přístup tento problém obchází
  *
  * @author Claude Code
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 (function(window) {
@@ -38,10 +38,6 @@
     // Detekce iOS
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // FIX PWA: Pro PWA mód použít jednodušší metodu (overflow: hidden)
-    // position: fixed způsobuje problémy se scrollem v iOS Safari PWA
-    var pouzitOverflowMetodu = isPWA || isIOS;
-
     /**
      * Zamkne scroll stránky
      * @param {string} idOverlaye - Unikátní identifikátor overlay/modalu
@@ -56,21 +52,13 @@
         if (aktivniZamky.length === 0) {
             ulozenyScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
 
-            if (pouzitOverflowMetodu) {
-                // FIX iOS: Pouze body overflow (NE html) - html overflow:hidden
-                // blokuje scroll i v child elementech (modaly, overlaye)
-                document.body.style.overflow = 'hidden';
-                document.body.style.touchAction = 'pan-y pinch-zoom';
-                // Zachovat pozici pomocí scroll-behavior
-                document.documentElement.style.scrollBehavior = 'auto';
-            } else {
-                // Desktop: Použít position: fixed (původní metoda)
-                document.body.style.position = 'fixed';
-                document.body.style.top = '-' + ulozenyScroll + 'px';
-                document.body.style.left = '0';
-                document.body.style.right = '0';
-                document.body.style.width = '100%';
-            }
+            // Použít position:fixed pro všechny platformy včetně iOS/PWA
+            // overflow:hidden na body blokuje touch scroll v fixed modalech na iOS
+            document.body.style.position = 'fixed';
+            document.body.style.top = '-' + ulozenyScroll + 'px';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
 
             document.body.classList.add(CSS_TRIDA_ZAMKNUTO);
 
@@ -102,29 +90,19 @@
 
         // Pokud je stack prázdný, odemknout scroll
         if (aktivniZamky.length === 0) {
-            if (pouzitOverflowMetodu) {
-                // FIX PWA: Obnovit overflow
-                document.body.style.overflow = '';
-                document.body.style.touchAction = '';
-                document.documentElement.style.scrollBehavior = '';
-
-                // FIX PWA: Použít requestAnimationFrame pro spolehlivé obnovení scrollu
-                requestAnimationFrame(function() {
-                    window.scrollTo(0, ulozenyScroll);
-                });
-            } else {
-                // Desktop: Obnovit position
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.left = '';
-                document.body.style.right = '';
-                document.body.style.width = '';
-
-                // Obnovit pozici scrollu
-                window.scrollTo(0, ulozenyScroll);
-            }
+            // Obnovit position a scroll
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
 
             document.body.classList.remove(CSS_TRIDA_ZAMKNUTO);
+
+            // Obnovit pozici scrollu (requestAnimationFrame pro spolehlivost na iOS)
+            requestAnimationFrame(function() {
+                window.scrollTo(0, ulozenyScroll);
+            });
 
             // Vyčistit CSS proměnnou
             document.documentElement.style.removeProperty('--scroll-locked-position');
@@ -153,15 +131,12 @@
     function odemknoutVse() {
         aktivniZamky = [];
 
-        // Vyčistit oba typy stylů
-        document.body.style.overflow = '';
-        document.body.style.touchAction = '';
-        document.documentElement.style.scrollBehavior = '';
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.left = '';
         document.body.style.right = '';
         document.body.style.width = '';
+        document.body.style.overflow = '';
 
         document.body.classList.remove(CSS_TRIDA_ZAMKNUTO);
 
@@ -173,21 +148,19 @@
         document.documentElement.style.removeProperty('--scroll-locked-position');
     }
 
-    // FIX PWA: Přidat listener pro případ, že uživatel opustí stránku se zamknutým scrollem
+    // Odemknout scroll při opuštění stránky
     window.addEventListener('pagehide', function() {
         if (aktivniZamky.length > 0) {
             odemknoutVse();
         }
     });
 
-    // FIX PWA: Odemknout scroll při návratu na stránku (pro případ že se PWA "probudí")
+    // Odemknout scroll při návratu na stránku (pro případ že se PWA "probudí")
     window.addEventListener('pageshow', function(event) {
-        // Pokud stránka přichází z bfcache a scroll je zamknutý bez aktivních overlayů
         if (event.persisted && aktivniZamky.length === 0) {
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = '';
             document.body.style.position = '';
             document.body.style.top = '';
+            document.body.style.overflow = '';
             document.body.classList.remove(CSS_TRIDA_ZAMKNUTO);
         }
     });
@@ -202,7 +175,7 @@
         // České aliasy
         zamknout: zamknoutScroll,
         odemknout: odemknoutScroll,
-        jeZamknuto: jeZamknuto,
+        jeZamknout: jeZamknuto,
         // Debug info
         isPWA: isPWA,
         isIOS: isIOS

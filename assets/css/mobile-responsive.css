@@ -835,10 +835,9 @@ body.modal-open {
     overscroll-behavior-y: contain;
   }
 
-  /* FIX: V PWA modu NEpoužívat position:fixed - způsobuje zamrznutí scrollu */
+  /* scroll-lock.js nastavuje position:fixed inline - CSS nesmí přepisovat position */
   body.scroll-locked,
   body.modal-open {
-    position: static !important;
     overflow: hidden;
   }
 

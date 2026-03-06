@@ -139,11 +139,10 @@ body.modal-open {
   touch-action: pan-y pinch-zoom !important;
 }
 
-/* PWA Standalone mode - NESMÍ být position:fixed, způsobuje zamrznutí scrollu v modalu */
+/* PWA Standalone mode - scroll-lock.js nastavuje position:fixed inline, nesmíme přepisovat */
 @media all and (display-mode: standalone) {
   body.scroll-locked,
   body.modal-open {
-    position: static !important;
     overflow: hidden !important;
   }
 }
