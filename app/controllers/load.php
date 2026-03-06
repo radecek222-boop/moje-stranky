@@ -5,7 +5,6 @@
  */
 
 require_once __DIR__ . '/../../init.php';
-require_once __DIR__ . '/../../includes/db_metadata.php';
 
 header('Content-Type: application/json');
 // Zakázat cachování pro PWA
@@ -24,33 +23,29 @@ try {
         exit;
     }
 
+    // Přečíst vše ze session a ihned uvolnit zámek souboru session.
+    // Paralelní AJAX požadavky (load.php + notes_api + nabidka_api) se totiž
+    // serialisují kvůli PHP session file lock — každý čeká na předchozí.
+    // session_write_close() zámek uvolní a requesty pak běží skutečně paralelně.
+    $userId    = $_SESSION['user_id']    ?? null;
+    $userEmail = $_SESSION['user_email'] ?? null;
+    $userRole  = strtolower(trim($_SESSION['role'] ?? 'guest'));
+    session_write_close();
+
     $status = $_GET['status'] ?? 'all';
 
     $pdo = getDbConnection();
-    $columns = db_get_table_columns($pdo, 'wgs_reklamace');
 
     $whereParts = [];
     $params = [];
 
     if ($status !== 'all') {
-        // DB používá anglické hodnoty: 'wait', 'open', 'done' (lowercase)
-        // URL parametry také používají anglické hodnoty
-        // NESMÍME mapovat na české hodnoty - SQL dotaz by nic nenašel!
-        $statusValue = $status;
-
-        if (in_array('stav', $columns, true)) {
-            $whereParts[] = 'r.stav = :stav';
-        } elseif (in_array('status', $columns, true)) {
-            $whereParts[] = 'r.status = :stav';
-        }
-        $params[':stav'] = $statusValue;
+        $whereParts[] = 'r.stav = :stav';
+        $params[':stav'] = $status;
     }
 
     // ŠKÁLOVATELNÁ LOGIKA PRO VÍCE PRODEJCŮ A TECHNIKŮ
     if (!$isAdmin) {
-        $userId = $_SESSION['user_id'] ?? null;
-        $userEmail = $_SESSION['user_email'] ?? null;  // SPRÁVNĚ: login_controller používá 'user_email'
-        $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
         // Rozlišení podle role:
         // - 'prodejce' → vidí SVÉ reklamace + reklamace SUPERVIZOVANÝCH prodejců
@@ -62,17 +57,10 @@ try {
 
         if ($isProdejce) {
             // PRODEJCE: Vidí SVÉ reklamace + reklamace SUPERVIZOVANÝCH prodejců
-            if ($userId !== null && in_array('created_by', $columns, true)) {
+            if ($userId !== null) {
                 // Načíst supervizované uživatele
                 $supervisedUserIds = [];
                 try {
-                    // Zjistit strukturu tabulky wgs_users
-                    $stmtCols = $pdo->query("SHOW COLUMNS FROM wgs_users");
-                    $userColumns = $stmtCols->fetchAll(PDO::FETCH_COLUMN);
-                    $idCol = in_array('user_id', $userColumns) ? 'user_id' : 'id';
-                    $numericIdCol = 'id';
-
-                    // Získat numerické ID aktuálního uživatele
                     $currentNumericId = $userId;
                     if (!is_numeric($userId)) {
                         $stmtNum = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
@@ -83,17 +71,15 @@ try {
                         }
                     }
 
-                    // Načíst user_id supervizovaných prodejců
                     $stmtSup = $pdo->prepare("
-                        SELECT u.{$idCol}
+                        SELECT u.user_id
                         FROM wgs_supervisor_assignments sa
-                        JOIN wgs_users u ON u.{$numericIdCol} = sa.salesperson_user_id
+                        JOIN wgs_users u ON u.id = sa.salesperson_user_id
                         WHERE sa.supervisor_user_id = :user_id
                     ");
                     $stmtSup->execute([':user_id' => $currentNumericId]);
                     $supervisedUserIds = $stmtSup->fetchAll(PDO::FETCH_COLUMN);
                 } catch (Exception $e) {
-                    // Tabulka možná neexistuje - pokračovat bez supervizorů
                     error_log("Supervisor assignments check: " . $e->getMessage());
                 }
 
@@ -124,15 +110,13 @@ try {
             // GUEST nebo NEZNÁMÁ ROLE: Vidí pouze své (email match)
             $guestConditions = [];
 
-            // Filter podle created_by
-            if ($userId !== null && in_array('created_by', $columns, true)) {
+            if ($userId !== null) {
                 $guestConditions[] = 'r.created_by = :created_by';
                 $params[':created_by'] = $userId;
             }
 
-            // Filter podle customer email (case-insensitive)
-            if ($userEmail && in_array('email', $columns, true)) {
-                $guestConditions[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:user_email))';
+            if ($userEmail) {
+                $guestConditions[] = 'r.email = :user_email';
                 $params[':user_email'] = $userEmail;
             }
 

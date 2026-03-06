@@ -1235,8 +1235,8 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
-  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.3rem 0.7rem;white-space:nowrap;">POSLÁNA SMS</span>` : '';
-  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.3rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
+  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.2rem 0.7rem;white-space:nowrap;border-radius:6px;">POSLÁNA SMS</span>` : '';
+  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.2rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `
@@ -2947,7 +2947,7 @@ async function showCustomerDetail(id) {
                   setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
               " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>

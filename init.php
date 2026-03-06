@@ -225,13 +225,20 @@ if (session_status() === PHP_SESSION_NONE) {
 // Aktivní pouze pokud byl spuštěn migrace_multi_tenant.php
 // ============================================================
 require_once INCLUDES_PATH . '/TenantManager.php';
+// Pokud je tenant_id v session, TenantManager nepotřebuje DB dotaz (rychlá cesta v inicializovat())
+// Pokud není v session, dotaz proběhne jen jednou a výsledek se uloží do session
 if (function_exists('getDbConnection')) {
     try {
         $pdo = getDbConnection();
         TenantManager::getInstance()->inicializovat($pdo);
     } catch (Exception $e) {
         // Tenant tabulka neexistuje → výchozí tenant ID=1, bez přerušení
-        error_log('TenantManager init přeskočen: ' . $e->getMessage());
+        // Logovat jen jednou za hodinu aby se nezahlcoval disk
+        $posledniLog = $_SESSION['_tenant_err_log'] ?? 0;
+        if ((time() - $posledniLog) > 3600) {
+            error_log('TenantManager init přeskočen: ' . $e->getMessage());
+            $_SESSION['_tenant_err_log'] = time();
+        }
     }
     unset($pdo);
 }

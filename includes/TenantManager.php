@@ -56,6 +56,14 @@ class TenantManager
             return;
         }
 
+        // Rychlá cesta: tenant_id je již uložen v session z minulého requestu
+        if (!empty($_SESSION['tenant_id']) && !empty($_SESSION['tenant_slug'])) {
+            $this->tenantId = (int) $_SESSION['tenant_id'];
+            $this->slug     = $_SESSION['tenant_slug'];
+            $this->nacten   = true;
+            return;
+        }
+
         $slug = $this->detekujSlug();
         $this->nactiTenanta($pdo, $slug);
         $this->nacten = true;
@@ -223,9 +231,10 @@ class TenantManager
             return;
         }
 
-        // Uložit do session pro následující requesty
+        // Uložit do session pro následující requesty (včetně tenant_id pro cache)
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION['tenant_slug'] = $this->slug;
+            $_SESSION['tenant_id']   = $this->tenantId;
         }
     }
 
