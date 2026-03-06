@@ -2275,3 +2275,10 @@ a.detail-btn-primary:active {
     display: none;
   }
 }
+
+/* Větší font v textarea popis/doplňující info na mobilu */
+@media (max-width: 768px) {
+  .detail-textarea-popis {
+    font-size: 1rem !important;
+  }
+}
