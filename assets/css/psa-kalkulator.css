@@ -18,6 +18,28 @@
   --shadow-md: 0 2px 8px rgba(0,0,0,0.12);
   --shadow-lg: 0 4px 16px rgba(0,0,0,0.15);
   --z-topbar: 100;
+  /* WGS proměnné vyžadované universal-modal-theme.min.css */
+  --wgs-white: #ffffff;
+  --wgs-black: #000000;
+  --wgs-midnight: #0a0a0a;
+  --wgs-near-black: #111111;
+  --wgs-darkest: #1a1a1a;
+  --wgs-dark-grey: #222222;
+  --wgs-gray-2a: #2a2a2a;
+  --wgs-gray-2d: #2d2d2d;
+  --wgs-gray-33: #333333;
+  --wgs-gray-44: #444444;
+  --wgs-grey: #555555;
+  --wgs-gray-66: #666666;
+  --wgs-gray-88: #888888;
+  --wgs-light-grey: #999999;
+  --wgs-gray-aa: #aaaaaa;
+  --c-border-medium: #cccccc;
+  --wgs-neon-green: #39ff14;
+  --wgs-danger: #dc3545;
+  --wgs-danger-hover: #c82333;
+  --wgs-delete: #cc0000;
+  --wgs-delete-hover: #ff0000;
 }
 
 * {
