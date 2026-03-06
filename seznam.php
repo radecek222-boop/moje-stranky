@@ -140,11 +140,7 @@ html.modal-open {
 /* Omezit scroll lock jen na body, aby layout headeru nezkracoval ani při otevřeném modalu */
 body.modal-open {
   overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-  top: calc(var(--scroll-y, 0px) * -1) !important;
-  left: 0 !important;
-  right: 0 !important;
+  touch-action: pan-y pinch-zoom !important;
 }
 
 /* PWA Standalone mode detekce */
@@ -160,9 +156,8 @@ body.modal-open {
 @supports (-webkit-touch-callout: none) {
   /* Tohle targetuje pouze iOS Safari */
   body.modal-open {
-    position: fixed !important;
     overflow: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
   }
 
   #detailOverlay.active {
@@ -421,6 +416,7 @@ body.modal-open {
   #detailOverlay.active {
     display: flex !important;
     pointer-events: auto !important;
+    touch-action: pan-y pinch-zoom !important;
   }
 
 #detailOverlay .modal-content {
@@ -440,6 +436,7 @@ body.modal-open {
 
   /* FIX: iOS momentum scrolling - plynulý scroll */
   -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y pinch-zoom !important;
 
   /* FIX: Safari scrollbar fix */
   overscroll-behavior: contain !important;
