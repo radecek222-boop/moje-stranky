@@ -2879,48 +2879,26 @@ async function showCustomerDetail(id) {
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
-      <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
-          <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
-          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA - vždy viditelný -->
+      <div style="margin-bottom: 0.75rem;">
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+        <textarea id="edit_popis_problemu"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  placeholder="Zadejte popis problému od zákazníka"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
+      </div>
 
-          <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
-          ${zadavatelSelectHtml}
+      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE - vždy viditelná -->
+      <div style="margin-bottom: 0.75rem;">
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+        <textarea id="edit_doplnujici_info"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                  placeholder="Zadejte doplňující informace od prodejce"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+      </div>
 
-          <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
-          <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
-
-          <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
-          <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
-
-          <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
-          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
-
-          <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
-          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
-
-          <span style="color: #aaa; font-weight: 600;">Jméno:</span>
-          <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
-
-          <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-          <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
-
-          <span style="color: #aaa; font-weight: 600;">Email:</span>
-          <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
-
-          <span style="color: #aaa; font-weight: 600;">Adresa:</span>
-          <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
-
-          <span style="color: #aaa; font-weight: 600;">Model:</span>
-          <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
-
-          <span style="color: #aaa; font-weight: 600;">Provedení:</span>
-          <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
-
-          <span style="color: #aaa; font-weight: 600;">Barva:</span>
-          <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
-        </div>
+      <div class="detail-buttons" style="margin-bottom: 0.75rem;">
+        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
       </div>
 
       <!-- ACCORDION PŘEPÍNAČ -->
@@ -2937,35 +2915,54 @@ async function showCustomerDetail(id) {
         display: flex; justify-content: space-between; align-items: center;
         margin-bottom: 0.5rem; text-align: left;
       ">
-        <span>Doplňující informace</span>
+        <span>Informace o zákazníkovi</span>
         <span id="sipka-detail">▼</span>
       </button>
 
-      <!-- ROZKRÝVACÍ OBSAH -->
+      <!-- ROZKRÝVACÍ OBSAH - skrytý -->
       <div id="rozkryvaci-detail" style="display: none;">
+        <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+          <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
+            <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
+            <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
-        <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
-          <textarea id="edit_doplnujici_info"
-                    style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                    placeholder="Zadejte doplňující informace od prodejce"
-                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
+            <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
+            ${zadavatelSelectHtml}
+
+            <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
+            <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
+
+            <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
+            <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
+
+            <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
+            <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+
+            <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
+            <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+
+            <span style="color: #aaa; font-weight: 600;">Jméno:</span>
+            <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
+
+            <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
+
+            <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
+
+            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
+
+            <span style="color: #aaa; font-weight: 600;">Model:</span>
+            <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
+
+            <span style="color: #aaa; font-weight: 600;">Provedení:</span>
+            <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+
+            <span style="color: #aaa; font-weight: 600;">Barva:</span>
+            <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
+          </div>
         </div>
-
-        <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
-          <textarea id="edit_popis_problemu"
-                    style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 40px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
-                    placeholder="Zadejte popis problému od zákazníka"
-                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
-        </div>
-
-        <div class="detail-buttons" style="margin-bottom: 0.5rem;">
-          <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-        </div>
-
       </div>
 
     </div>
