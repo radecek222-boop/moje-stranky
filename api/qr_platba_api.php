@@ -71,13 +71,49 @@ try {
     // Částka (může být 0 - uživatel ji zadá v modalu)
     $castka = floatval($reklamace['cena_celkem']);
 
+    // Hledat spojenou nabídku pro zálohu (náhradní díly)
+    $zalohaCastkaEur = 0.0;
+    $zfOdeslana = false;
+    $zfUhrazena = false;
+
+    $stmtNabidka = $pdo->prepare("
+        SELECT polozky_json, zf_odeslana_at, zf_uhrazena_at
+        FROM wgs_nabidky
+        WHERE reklamace_id = :reklamace_id
+          AND stav NOT IN ('zamitnuta', 'expirovana', 'zrusena')
+        ORDER BY vytvoreno_at DESC
+        LIMIT 1
+    ");
+    $stmtNabidka->execute(['reklamace_id' => $reklamaceId]);
+    $nabidka = $stmtNabidka->fetch(PDO::FETCH_ASSOC);
+
+    if ($nabidka) {
+        $zfOdeslana = !empty($nabidka['zf_odeslana_at']);
+        $zfUhrazena = !empty($nabidka['zf_uhrazena_at']);
+        $polozky = json_decode($nabidka['polozky_json'], true) ?? [];
+        foreach ($polozky as $polozka) {
+            if (($polozka['skupina'] ?? '') === 'dily') {
+                $zalohaCastkaEur += floatval($polozka['cena']) * intval($polozka['pocet'] ?? 1);
+            }
+        }
+    }
+
+    // Záloha v Kč (kurz 25)
+    $zalohaCastkaCzk = (int) round($zalohaCastkaEur * 25);
+
+    // Částka k úhradě - po odečtení zálohy pokud je záloha uhrazena
+    $castkaPlatba = $castka;
+    if ($zfUhrazena && $zalohaCastkaCzk > 0) {
+        $castkaPlatba = max(0, $castka - $zalohaCastkaCzk);
+    }
+
     // Generovat SPD string pouze pokud je částka > 0
     $spdString = null;
-    if ($castka > 0) {
+    if ($castkaPlatba > 0) {
         try {
             $spdString = QRPaymentHelper::generateSPD([
                 'acc' => $iban,
-                'am' => $castka,
+                'am' => $castkaPlatba,
                 'cc' => 'CZK',
                 'vs' => $vs,
                 'msg' => 'WGS servis - zakázka ' . $vs
@@ -98,7 +134,12 @@ try {
         'iban' => $iban,
         'iban_formatovany' => $ibanFormatovany,
         'castka' => $castka,
-        'castka_formatovana' => number_format($castka, 2, ',', ' ') . ' CZK',
+        'castka_platba' => $castkaPlatba,
+        'castka_formatovana' => number_format($castkaPlatba, 2, ',', ' ') . ' CZK',
+        'zalohova_castka_eur' => $zalohaCastkaEur,
+        'zalohova_castka_czk' => $zalohaCastkaCzk,
+        'zf_odeslana' => $zfOdeslana,
+        'zf_uhrazena' => $zfUhrazena,
         'vs' => $vs,
         'mena' => 'CZK',
         'qr_string' => $spdString

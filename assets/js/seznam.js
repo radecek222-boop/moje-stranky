@@ -1445,7 +1445,41 @@ async function showQrPlatbaModal(reklamaceId) {
     await ensureQrLibraryLoaded();
 
     // Vytvořit modal s QR kódem a editovatelnou částkou
-    const initialCastka = data.castka || 0;
+    // Počáteční částka: pokud je záloha uhrazena, zobrazit zbývající částku
+    const initialCastka = data.castka_platba ?? data.castka ?? 0;
+    const maZalohu = data.zf_uhrazena && data.zalohova_castka_czk > 0;
+    const zalohaOdeslana = data.zf_odeslana && !data.zf_uhrazena && data.zalohova_castka_czk > 0;
+
+    // Blok zálohy - zobrazit pouze pokud je ZF odeslána nebo uhrazena
+    let zalohaBlok = '';
+    if (maZalohu) {
+      zalohaBlok = `
+        <div style="background: #111; border: 1px solid #39ff14; border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.88rem;">
+          <div style="color: #39ff14; font-weight: bold; margin-bottom: 0.5rem;">Záloha (ZF) uhrazena - odečteno</div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+            <span style="color: #888;">Celková cena zakázky:</span>
+            <span style="color: #ccc;">${(data.castka || 0).toLocaleString('cs-CZ')} Kč</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+            <span style="color: #888;">Záloha za náhradní díly:</span>
+            <span style="color: #39ff14;">- ${(data.zalohova_castka_czk || 0).toLocaleString('cs-CZ')} Kč&nbsp;(${(data.zalohova_castka_eur || 0).toFixed(2)} €)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-top: 1px solid #333; padding-top: 0.4rem; margin-top: 0.2rem;">
+            <span style="color: #fff; font-weight: bold;">Zbývá k úhradě:</span>
+            <span style="color: #39ff14; font-weight: bold;">${(data.castka_platba || 0).toLocaleString('cs-CZ')} Kč</span>
+          </div>
+        </div>`;
+    } else if (zalohaOdeslana) {
+      zalohaBlok = `
+        <div style="background: #111; border: 1px solid #666; border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.88rem;">
+          <div style="color: #ccc; font-weight: bold; margin-bottom: 0.25rem;">Záloha (ZF) odeslána - čeká na úhradu</div>
+          <div>
+            <span style="color: #888;">Výše zálohy za náhradní díly: </span>
+            <span style="color: #fff;">${(data.zalohova_castka_czk || 0).toLocaleString('cs-CZ')} Kč&nbsp;(${(data.zalohova_castka_eur || 0).toFixed(2)} €)</span>
+          </div>
+        </div>`;
+    }
+
     const content = `
       ${createCustomerHeader()}
 
@@ -1454,6 +1488,7 @@ async function showQrPlatbaModal(reklamaceId) {
           <h3 style="color: #39ff14; margin: 0 0 0.5rem 0; font-size: 1.2rem;">QR kód pro platbu</h3>
           <p style="color: #888; margin: 0; font-size: 0.85rem;">Naskenujte QR kód bankovní aplikací</p>
         </div>
+        ${zalohaBlok}
 
         <!-- QR kód -->
         <div id="qrPlatbaContainer" style="
