@@ -2276,7 +2276,11 @@ a.detail-btn-primary:active {
   }
 }
 
-/* Větší font v textarea popis/doplňující info na mobilu */
+/* Font v textarea popis/doplňující info */
+.detail-textarea-popis {
+  font-size: 0.85rem;
+}
+
 @media (max-width: 768px) {
   .detail-textarea-popis {
     font-size: 1rem !important;

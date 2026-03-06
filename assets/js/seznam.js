@@ -2983,7 +2983,7 @@ async function showCustomerDetail(id) {
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Popis problému od zákazníka:</label>
             <textarea id="edit_popis_problemu" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte popis problému od zákazníka"
                       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(description)}</textarea>
           </div>
@@ -2991,7 +2991,7 @@ async function showCustomerDetail(id) {
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.7rem; margin-bottom: 0.3rem;">Doplňující informace od prodejce:</label>
             <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; font-size: 0.85rem; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; min-height: 80px; background: #fff; color: #000; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte doplňující informace od prodejce"
                       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${Utils.escapeHtml(doplnujici_info)}</textarea>
           </div>
