@@ -1235,8 +1235,8 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
-  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.3rem 0.7rem;white-space:nowrap;">POSLÁNA SMS</span>` : '';
-  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.3rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
+  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.2rem 0.7rem;white-space:nowrap;border-radius:6px;">POSLÁNA SMS</span>` : '';
+  const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.2rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
   return ModalManager.createHeader(customerName, `

@@ -2290,12 +2290,12 @@ a.detail-btn-primary:active {
 /* Tlačítko Uložit nahoře - zelené */
 .detail-btn-ulozit {
   width: 100%;
-  padding: 0.6rem 1rem;
+  padding: 0.25rem 1rem;
   background: #28a745;
   color: #fff;
   border: none;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   font-family: inherit;
   text-transform: uppercase;
