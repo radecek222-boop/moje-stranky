@@ -43,7 +43,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/page-transitions.min.css">
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/cenik.min.css?v=2">
+  <link rel="stylesheet" href="assets/css/cenik.min.css?v=5">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -393,20 +393,16 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
       <p class="section-text">
         Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026.
-        Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
       </p>
 
-      <p class="section-text" style="border-left: 3px solid #333; padding-left: 15px; margin-top: 15px;">
-        <strong data-lang-cs="Dopravné:" data-lang-en="Transportation:" data-lang-it="Trasporto:">Dopravné:</strong>
-        <span data-lang-cs="Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km." data-lang-en="Round trip up to 100 km total: flat fee 500 CZK / 20 €. Above 100 km round trip: 0.28 €/km." data-lang-it="Andata e ritorno fino a 100 km totali: tariffa fissa 500 CZK / 20 €. Oltre 100 km andata e ritorno: 0,28 €/km.">
-          Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km.
-        </span>
+      <p class="section-text cenik-dopravne">
+        <strong data-lang-cs="Dopravné: Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km." data-lang-en="Transportation: Round trip up to 100 km total: flat fee 500 CZK / 20 €. Above 100 km round trip: 0.28 €/km." data-lang-it="Trasporto: Andata e ritorno fino a 100 km totali: tariffa fissa 500 CZK / 20 €. Oltre 100 km andata e ritorno: 0,28 €/km.">
+          Dopravné: Trasa tam a zpět do 100 km celkem: paušál 500 Kč / 20 €. Nad 100 km (tam a zpět): 0,28 €/km.
+        </strong>
       </p>
 
-      <p class="section-text note">
-        <strong data-lang-cs="Poznámka:" data-lang-en="Note:" data-lang-it="Nota:">Poznámka:</strong> <span data-lang-cs="Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny. Pro přesnou cenovou nabídku nás prosím kontaktujte." data-lang-en="All prices are for labor WITHOUT material. Material is charged separately. The final price may be influenced by repair complexity, material availability, and distance from our workshop. For an accurate quote, please contact us." data-lang-it="Tutti i prezzi sono per la manodopera SENZA materiale. Il materiale viene addebitato separatamente. Il prezzo finale può essere influenzato dalla complessità della riparazione, dalla disponibilità del materiale e dalla distanza dalla nostra officina. Per un preventivo accurato, contattaci.">Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť.
-        Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny.
-        Pro přesnou cenovou nabídku nás prosím kontaktujte.</span>
+      <p class="section-text cenik-poznamka">
+        <span data-lang-cs="Poznámka: Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny. Pro přesnou cenovou nabídku nás prosím kontaktujte." data-lang-en="Note: All prices are for labor WITHOUT material. Material is charged separately. The final price may be influenced by repair complexity, material availability, and distance from our workshop. For an accurate quote, please contact us." data-lang-it="Nota: Tutti i prezzi sono per la manodopera SENZA materiale. Il materiale viene addebitato separatamente. Il prezzo finale può essere influenzato dalla complessità della riparazione, dalla disponibilità del materiale e dalla distanza dalla nostra officina. Per un preventivo accurato, contattaci.">Poznámka: Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny. Pro přesnou cenovou nabídku nás prosím kontaktujte.</span>
       </p>
     </div>
 
