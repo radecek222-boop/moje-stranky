@@ -548,7 +548,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<script src="assets/js/cenik-calculator.min.js" defer></script>
+<script src="assets/js/cenik-calculator.js?v=<?= filemtime(__DIR__ . '/assets/js/cenik-calculator.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>
