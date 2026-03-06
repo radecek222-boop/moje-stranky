@@ -4,6 +4,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/wgs_cache.php';
 
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die("PŘÍSTUP ODEPŘEN: Pouze administrátor může spustit migraci.");
@@ -59,18 +60,27 @@ if (empty($relevantni)) {
     echo "</table>";
 }
 
+// Vymazání cache
+if (isset($_GET['cache'])) {
+    WgsCache::smaz('cenik_list_v1');
+    echo "<div class='success'>Cache ceníku vymazána. <a href='?' class='btn'>Obnovit</a></div>";
+}
+
 // Smazání konkrétního ID
 if (isset($_GET['smazat_id']) && is_numeric($_GET['smazat_id'])) {
     $id = (int)$_GET['smazat_id'];
     try {
         $stmt = $pdo->prepare("UPDATE wgs_pricing SET description = '', description_en = '', description_it = '' WHERE id = :id");
         $stmt->execute(['id' => $id]);
-        echo "<div class='success'>Popis u položky ID {$id} byl smazán. <a href='?' class='btn'>Obnovit</a></div>";
+        WgsCache::smaz('cenik_list_v1');
+        echo "<div class='success'>Popis u položky ID {$id} smazán a cache vymazána. <a href='?' class='btn'>Obnovit</a></div>";
     } catch (PDOException $e) {
         error_log("Migrace chyba: " . $e->getMessage());
         echo "<div style='background:#f8d7da;padding:12px;border-radius:4px;color:#721c24;'>Chyba při aktualizaci.</div>";
     }
 }
+
+echo "<br><a href='?cache=1' class='btn'>Vymazat cache ceníku</a>";
 
 echo "</div></body></html>";
 ?>
