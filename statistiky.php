@@ -218,8 +218,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
 
 .multiselect-trigger:hover {
@@ -273,9 +274,12 @@ body {
 .multiselect-option label {
     cursor: pointer;
     flex: 1;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #fff;
     font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
 }
 
 /* Custom single-select dropdown (ROK, MĚSÍC) */
@@ -293,8 +297,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-family: 'Poppins', sans-serif;
+    font-weight: 400;
     user-select: none;
 }
 
@@ -445,9 +450,10 @@ body {
 }
 
 .stats-table td {
-    padding: 0.3rem 0.4rem;
+    padding: 0.2rem 0.4rem;
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.75rem;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
