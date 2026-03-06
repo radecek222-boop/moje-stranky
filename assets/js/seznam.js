@@ -311,12 +311,8 @@ function initSearch() {
 
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
-    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-      _htmxAktualizujGrid();
-    } else {
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
-    }
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
   });
   
   searchInput.addEventListener('keydown', (e) => {
@@ -406,12 +402,8 @@ function initFilters() {
         }
       }
 
-      if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-        _htmxAktualizujGrid();
-      } else {
-        let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-        renderOrders(userItems);
-      }
+      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+      renderOrders(userItems);
     });
   });
 
@@ -646,12 +638,8 @@ function sestavAdminProdejceBox() {
     ADMIN_PRODEJCE_FILTER = id || null;
     novySeznam.querySelectorAll('.admin-prodejce-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (typeof htmx !== 'undefined' && ACTIVE_FILTERS.size <= 1) {
-      _htmxAktualizujGrid();
-    } else {
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      renderOrders(userItems);
-    }
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
+    renderOrders(userItems);
   });
 }
 
@@ -2108,7 +2096,7 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      let displayText = `Vybraný den: ${SELECTED_DATE}`;
+      let displayText = `Den: ${SELECTED_DATE}`;
       const spanEl = document.getElementById('selectedDateText');
       if (spanEl) spanEl.textContent = displayText;
 
@@ -2473,7 +2461,7 @@ function renderTimeGrid() {
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
         const displayEl = document.getElementById('selectedDateDisplay');
         const textEl = document.getElementById('selectedDateText');
-        if (textEl) textEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        if (textEl) textEl.textContent = `Termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
         displayEl.style.display = 'flex';
 
         // Zobrazit/skrýt varování o kolizi

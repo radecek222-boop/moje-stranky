@@ -1765,7 +1765,7 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
   .modal-overlay:not(#detailOverlay) {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-y !important;
+    touch-action: pan-y pinch-zoom !important;
     align-items: center !important;
     padding: 2rem 0.5rem !important;
   }

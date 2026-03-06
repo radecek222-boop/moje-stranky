@@ -534,11 +534,11 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
-/* PWA FIX: Modal overlay scrollovatelny s containment */
+/* PWA FIX: Modal overlay scrollovatelny s containment + pinch zoom povolen */
 .modal-overlay {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 .modal-section {
   margin-bottom: 2rem;
