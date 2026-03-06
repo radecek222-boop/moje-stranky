@@ -103,10 +103,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20260306-01">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=<?= filemtime(__DIR__ . '/assets/css/seznam.min.css') ?>">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=<?= filemtime(__DIR__ . '/assets/css/mobile-responsive.min.css') ?>">
 <?php if ($isAdmin): ?>
 <link rel="stylesheet" href="assets/css/admin-header.min.css">
 <?php endif; ?>
