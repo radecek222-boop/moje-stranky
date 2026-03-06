@@ -617,6 +617,11 @@ function resetovitFiltry() {
     // Reset year, month - na "Všechny" (prázdná hodnota)
     document.getElementById('filter-year').value = '';
     document.getElementById('filter-month').value = '';
+    // Aktualizovat custom singleselect displeje
+    if (typeof window.aktualizovatSingleSelectDisplay === 'function') {
+        window.aktualizovatSingleSelectDisplay('filter-year', '');
+        window.aktualizovatSingleSelectDisplay('filter-month', '');
+    }
 
     // Reset prodejci
     document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]').forEach(cb => {
