@@ -1495,12 +1495,15 @@ async function maRozdelanouNavstevu(zaznam) {
 
     db.close();
 
-    // Porovnat s ID záznamu (IndexedDB ukládá reklamaceId jako parseInt)
+    // Porovnat s ID záznamu — klíč může být string ("WGS251116-001") nebo číslo (123)
+    const idReklamace = zaznam.reklamace_id || zaznam.cislo || String(zaznam.id);
     const numericId = parseInt(zaznam.id);
+    const numericReklamace = parseInt(idReklamace);
     const nalezeno = vsechnyZaznamy.find(z =>
+      z.reklamaceId === idReklamace ||
       z.reklamaceId === numericId ||
-      (zaznam.reklamace_id && z.reklamaceId === parseInt(zaznam.reklamace_id)) ||
-      (zaznam.cislo && z.reklamaceId === parseInt(zaznam.cislo))
+      (!isNaN(numericReklamace) && z.reklamaceId === numericReklamace) ||
+      String(z.reklamaceId) === String(zaznam.id)
     );
 
     if (!nalezeno || !nalezeno.sections) return false;
