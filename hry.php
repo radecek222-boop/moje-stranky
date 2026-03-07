@@ -52,18 +52,27 @@ try {
     ");
     $chatZpravy = array_reverse($stmtChat->fetchAll(PDO::FETCH_ASSOC));
 
-    // Načíst jména kdo dal like ke každé zprávě
-    foreach ($chatZpravy as &$zprava) {
-        $stmt = $pdo->prepare("
-            SELECT u.name
+    // Načíst jména kdo dal like ke všem zprávám najednou (1 dotaz místo N)
+    $likesPodleZpravy = [];
+    if (!empty($chatZpravy)) {
+        $zpravyIds = array_column($chatZpravy, 'id');
+        $placeholdery = implode(',', array_fill(0, count($zpravyIds), '?'));
+        $stmtLikes = $pdo->prepare("
+            SELECT l.zprava_id, u.name
             FROM wgs_hry_chat_likes l
             LEFT JOIN wgs_users u ON l.user_id COLLATE utf8mb4_czech_ci = u.user_id
-            WHERE l.zprava_id = :zprava_id
+            WHERE l.zprava_id IN ($placeholdery)
             ORDER BY l.created_at ASC
         ");
-        $stmt->execute(['zprava_id' => $zprava['id']]);
-        $zprava['liked_by'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmtLikes->execute($zpravyIds);
+        foreach ($stmtLikes->fetchAll(PDO::FETCH_ASSOC) as $like) {
+            $likesPodleZpravy[$like['zprava_id']][] = $like['name'];
+        }
     }
+    foreach ($chatZpravy as &$zprava) {
+        $zprava['liked_by'] = $likesPodleZpravy[$zprava['id']] ?? [];
+    }
+    unset($zprava);
 
     // Zalogovat návštěvu herní zóny (tabulka se vytvoří migrací pridej_hry_logy.php)
     try {

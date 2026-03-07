@@ -34,12 +34,10 @@ set_time_limit(300);
 // Logování
 $logFile = __DIR__ . '/../logs/email_queue_cron.log';
 $logDir = dirname($logFile);
-if (!file_exists($logDir)) {
-    if (!is_dir($logDir, 0755, true)) {
-    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
-        error_log('Failed to create directory: ' . $logDir, 0755, true);
+if (!is_dir($logDir)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+        error_log('Nepodařilo se vytvořit adresář pro logy: ' . $logDir);
     }
-}
 }
 
 /**

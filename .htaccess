@@ -8,6 +8,11 @@
     RewriteBase /
 
     # ======================================
+    # SECURITY: Blokovat přístup k citlivým adresářům
+    # ======================================
+    RewriteRule ^(logs|config|backups|migrations|setup|scripts|temp)(/|$) - [F,L]
+
+    # ======================================
     # CRITICAL: Static assets - NO REWRITE (must be FIRST!)
     # ======================================
     RewriteRule ^assets/ - [L]

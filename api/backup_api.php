@@ -90,6 +90,11 @@ try {
             $totalRows = 0;
 
             foreach ($tables as $table) {
+                // Validace názvu tabulky - pouze alfanumerické znaky a podtržítka
+                if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+                    continue;
+                }
+
                 // DROP TABLE IF EXISTS
                 gzwrite($gzFile, "\n-- ==========================================\n");
                 gzwrite($gzFile, "-- Table: $table\n");
