@@ -1594,11 +1594,12 @@ async function saveData(data, successMsg) {
       body: formData
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${result.message || response.statusText}`);
+      const chybovaData = await response.json().catch(() => ({}));
+      throw new Error(`HTTP ${response.status}: ${chybovaData.message || response.statusText}`);
     }
+
+    const result = await response.json();
 
     if (result.status === 'success') {
       // Update cache with new data

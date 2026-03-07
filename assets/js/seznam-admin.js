@@ -42,6 +42,10 @@ async function zmenitStavZakazky(reklamaceId, novyStav, zakaznikEmail) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params
     });
+    if (!resp.ok) {
+      const chyba = await resp.json().catch(() => ({}));
+      throw new Error(`HTTP ${resp.status}: ${chyba.message || resp.statusText}`);
+    }
     return resp.json();
   };
 
