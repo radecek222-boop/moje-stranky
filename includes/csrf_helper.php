@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CSRF Protection Helper
  * Requires init.php to be loaded first (which includes config.php)

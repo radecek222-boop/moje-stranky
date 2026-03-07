@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /**
  * Jednotná JSON odpověď pro admin/api endpointy
