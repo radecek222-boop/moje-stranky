@@ -666,12 +666,13 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #333333 !important;
 }
 
-/* iOS FIX: textarea nesmí zachytávat touch scroll - modal scrolluje místo textareje */
-/* Auto-height JS expanduje textarea na celý obsah, overflow:hidden je bezpečné */
+/* iOS FIX: textarea nesmí zachytávat touch scroll - overlay scrolluje místo textareje */
+/* overflow:hidden = iOS nepovažuje textareu za scrollovatelnou → scroll bubbluje na overlay */
+/* pan-y pinch-zoom = povoluje scroll i pinch-zoom (samotné pan-y by blokovalo zoom) */
 #detailOverlay textarea,
 #detailOverlay .detail-textarea-popis {
   overflow: hidden !important;
-  touch-action: pan-y !important;
+  touch-action: pan-y pinch-zoom !important;
   resize: none !important;
 }
 
@@ -2836,48 +2837,8 @@ function dbgModalInfo() {
     'height: ' + mc.offsetHeight + 'px / scrollH: ' + mc.scrollHeight + 'px<br>' : '') +
     taInfo;
 }
-/* iOS modal scroll fix - JS je spolehlivější než @supports CSS hack */
-(function() {
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  if (!isIOS) return;
-
-  /* Sleduj #detailOverlay a po každém otevření nastav display:block + scroll */
-  var ov = document.getElementById('detailOverlay');
-  if (!ov) return;
-
-  var observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      if (m.type === 'attributes' && m.attributeName === 'class') {
-        if (ov.classList.contains('active')) {
-          /* Modal právě otevřen - nastavit iOS-friendly scroll */
-          ov.style.setProperty('display', 'block', 'important');
-          ov.style.setProperty('overflow-y', 'scroll', 'important');
-          ov.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-          ov.style.setProperty('position', 'fixed', 'important');
-          ov.style.setProperty('top', '0', 'important');
-          ov.style.setProperty('left', '0', 'important');
-          ov.style.setProperty('right', '0', 'important');
-          ov.style.setProperty('bottom', '0', 'important');
-          /* Textareas nesmí zachytávat scroll */
-          var tas = ov.querySelectorAll('textarea');
-          tas.forEach(function(ta) {
-            ta.style.setProperty('overflow', 'hidden', 'important');
-            ta.style.setProperty('touch-action', 'pan-y', 'important');
-          });
-          /* Posunout scroll na začátek */
-          ov.scrollTop = 0;
-        } else {
-          /* Modal zavřen - vyčistit inline styly */
-          ov.style.removeProperty('display');
-          ov.style.removeProperty('overflow-y');
-          ov.style.removeProperty('-webkit-overflow-scrolling');
-        }
-      }
-    });
-  });
-
-  observer.observe(ov, { attributes: true, attributeFilter: ['class'] });
-})();
+/* iOS modal scroll: řídí openModal() v hamburger-menu.php (display:block + overflow:scroll) */
+/* Textareas: CSS pravidlo výše (#detailOverlay textarea) řídí overflow:hidden automaticky */
 
 function dbgUkaz() {
   document.getElementById('dbg-obsah').innerHTML = dbgInfo();
