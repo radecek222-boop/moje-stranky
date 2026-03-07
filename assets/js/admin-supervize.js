@@ -161,12 +161,7 @@ async function ulozitSupervizorPrirazeni(userId) {
   }
 }
 
-// Zpřístupnit funkce globálně
-window.zobrazDetailUzivatele = zobrazDetailUzivatele;
-window.zavritDetailUzivatele = zavritDetailUzivatele;
-window.ulozitZmenyUzivatele = ulozitZmenyUzivatele;
-window.zmenitHesloUzivatele = zmenitHesloUzivatele;
-window.prepnoutStatusUzivatele = prepnoutStatusUzivatele;
+// Zpřístupnit supervizor funkce globálně
 window.nactiSupervizorPrirazeni = nactiSupervizorPrirazeni;
 window.otevritSpravuSupervize = otevritSpravuSupervize;
 window.zavritSupervizorOverlay = zavritSupervizorOverlay;

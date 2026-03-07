@@ -97,7 +97,7 @@ async function otevritEditaciZakazky(zakazkaId, reklamaceId) {
                             <button type="button" id="cancel-edit-zakazka" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">
                                 Zrušit
                             </button>
-                            <button type="submit" style="padding: 10px 20px; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+                            <button type="submit" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600;">
                                 Uložit změny
                             </button>
                         </div>
