@@ -699,28 +699,27 @@
      overlay.classList.add('ios-fullscreen')
    ============================================ */
 
-/* Overlay v iOS fullscreen režimu — přepíše display:flex
-   Overlay NEPOSUNUJE (overflow:hidden), scroll řídí .modal-content */
+/* Overlay v iOS fullscreen režimu */
 #detailOverlay.ios-fullscreen {
   display: block !important;
   overflow: hidden !important;
 }
 
-/* Modal-content v iOS fullscreen — zabere celou výšku, posunutý pod status bar */
+/* Modal-content v iOS — mezera od vrchu, scroll funguje přes absolutní hranice */
 #detailOverlay.ios-fullscreen .modal-content {
   position: absolute !important;
-  top: env(safe-area-inset-top, 44px) !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  max-width: 100% !important;
+  top: 60px !important;
+  left: 0.75rem !important;
+  right: 0.75rem !important;
+  bottom: 1rem !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
   overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior-y: contain !important;
-  border-radius: 0 !important;
+  border-radius: 12px !important;
   margin: 0 !important;
 }
 
@@ -792,13 +791,6 @@ body.ios-device #detailOverlay .modal-actions .btn {
     min-height: 44px !important;
     max-height: 44px !important;
     font-size: 1.3rem !important;
-  }
-
-  /* iOS fullscreen na mobilu — bez border-radius a padding */
-  #detailOverlay.ios-fullscreen {
-    padding: 0;
-    height: 100vh;
-    height: 100dvh;
   }
 
 }
