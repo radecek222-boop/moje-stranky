@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 'claude/**'  # Deploy i z claude/* větví
   workflow_dispatch:
 
 jobs:
