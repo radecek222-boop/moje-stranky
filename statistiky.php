@@ -1131,7 +1131,8 @@ body {
         crossorigin="anonymous"></script>
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
-<script src="assets/js/statistiky.min.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.min.js') ?>" defer></script>
+<script src="assets/js/statistiky.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky.js') ?>" defer></script>
+<script src="assets/js/statistiky-editace.js?v=<?= filemtime(__DIR__ . '/assets/js/statistiky-editace.js') ?>" defer></script>
 
 <!-- HTMX: Přepsat nactiSummary pro server-rendered HTML karty (Step 146)
      Pořadí listenerů DOMContentLoaded:
