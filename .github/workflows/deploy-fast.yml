@@ -1,10 +1,9 @@
 name: ⚡ Fast Deploy (No Tests)
 
 on:
-  push:
-    branches:
-      - 'claude/**'  # Všechny Claude branches
   workflow_dispatch:
+    # Pouze ruční spuštění — automatický deploy z claude/** zakázán
+    # Produkce se deployuje výhradně z main větve (deploy.yml)
 
 jobs:
   deploy:
