@@ -204,7 +204,10 @@ $csrfToken = generateCSRFToken();
 <script src="assets/js/qrcode.min.js" defer data-qr-lib="1"></script>
 
 <!-- Main JavaScript -->
-<script src="assets/js/psa-kalkulator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.min.js') ?>" defer></script>
+<script src="assets/js/psa-kalkulator.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.js') ?>" defer></script>
+<!-- Moduly psa-kalkulator.js -->
+<script src="assets/js/psa-zamestnanci.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-zamestnanci.js') ?>" defer></script>
+<script src="assets/js/psa-qr-platby.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-qr-platby.js') ?>" defer></script>
 
 </body>
 </html>
