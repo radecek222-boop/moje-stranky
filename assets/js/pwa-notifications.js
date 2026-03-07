@@ -483,11 +483,12 @@
    */
   function onVisibilityChange() {
     if (document.visibilityState === 'visible') {
-      // Stranka je videt - okamzite aktualizovat
+      // Stranka je videt - okamzite aktualizovat a spustit polling
       aktualizovatPocetNeprectenych();
       spustitPolling();
     } else {
-      // Stranka neni videt - polling pokracuje
+      // Stranka neni videt - zastavit polling, setrit sit a baterii
+      zastavitPolling();
     }
   }
 
