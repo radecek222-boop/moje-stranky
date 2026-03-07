@@ -2809,15 +2809,76 @@ function dbgModalInfo() {
   if (!ov) return '<span style="color:#ff4444">detailOverlay NENALEZEN</span><br>';
   var ovc = window.getComputedStyle(ov);
   var mcc = mc ? window.getComputedStyle(mc) : null;
+  var tas = ov.querySelectorAll('textarea');
+  var taInfo = '';
+  if (tas.length > 0) {
+    var ta = tas[0], tac = window.getComputedStyle(ta);
+    taInfo = '<br><b style="color:#39ff14">== TEXTAREA[0] ==</b><br>' +
+      'overflow: ' + chk(tac.overflow, ['auto','scroll']) + '<br>' +
+      'height: ' + ta.offsetHeight + 'px / scrollH: ' + ta.scrollHeight + 'px<br>' +
+      'touchAction: ' + chk(tac.touchAction, ['none']) + '<br>';
+    if (tas.length > 1) {
+      var ta2 = tas[1], ta2c = window.getComputedStyle(ta2);
+      taInfo += '<br><b style="color:#39ff14">== TEXTAREA[1] ==</b><br>' +
+        'overflow: ' + chk(ta2c.overflow, ['auto','scroll']) + '<br>' +
+        'height: ' + ta2.offsetHeight + 'px / scrollH: ' + ta2.scrollHeight + 'px<br>';
+    }
+  }
   return '<b style="color:#39ff14">== #detailOverlay ==</b><br>' +
-    'touchAction: ' + chk(ovc.touchAction, ['none','manipulation']) + '<br>' +
-    'pointerEvents: ' + ovc.pointerEvents + '<br>' +
-    'overflow: ' + ovc.overflow + '<br>' +
+    'classList: ' + ov.className + '<br>' +
+    'display: ' + chk(ovc.display, ['flex']) + '<br>' +
+    'overflowY: ' + chk(ovc.overflowY, ['hidden','visible']) + '<br>' +
+    'scrollH: ' + ov.scrollHeight + ' / clientH: ' + ov.clientHeight + '<br>' +
+    'touchAction: ' + chk(ovc.touchAction, ['none']) + '<br>' +
     (mc ? '<br><b style="color:#39ff14">== .modal-content ==</b><br>' +
-    'touchAction: ' + chk(mcc.touchAction, ['none','manipulation']) + '<br>' +
-    'overflowY: ' + mcc.overflowY + '<br>' +
-    'height: ' + mcc.height + '<br>' : '');
+    'display: ' + ovc.display + '<br>' +
+    'overflowY: ' + chk(mcc.overflowY, ['hidden','visible']) + '<br>' +
+    'height: ' + mc.offsetHeight + 'px / scrollH: ' + mc.scrollHeight + 'px<br>' : '') +
+    taInfo;
 }
+/* iOS modal scroll fix - JS je spolehlivější než @supports CSS hack */
+(function() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (!isIOS) return;
+
+  /* Sleduj #detailOverlay a po každém otevření nastav display:block + scroll */
+  var ov = document.getElementById('detailOverlay');
+  if (!ov) return;
+
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.type === 'attributes' && m.attributeName === 'class') {
+        if (ov.classList.contains('active')) {
+          /* Modal právě otevřen - nastavit iOS-friendly scroll */
+          ov.style.setProperty('display', 'block', 'important');
+          ov.style.setProperty('overflow-y', 'scroll', 'important');
+          ov.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+          ov.style.setProperty('position', 'fixed', 'important');
+          ov.style.setProperty('top', '0', 'important');
+          ov.style.setProperty('left', '0', 'important');
+          ov.style.setProperty('right', '0', 'important');
+          ov.style.setProperty('bottom', '0', 'important');
+          /* Textareas nesmí zachytávat scroll */
+          var tas = ov.querySelectorAll('textarea');
+          tas.forEach(function(ta) {
+            ta.style.setProperty('overflow', 'hidden', 'important');
+            ta.style.setProperty('touch-action', 'pan-y', 'important');
+          });
+          /* Posunout scroll na začátek */
+          ov.scrollTop = 0;
+        } else {
+          /* Modal zavřen - vyčistit inline styly */
+          ov.style.removeProperty('display');
+          ov.style.removeProperty('overflow-y');
+          ov.style.removeProperty('-webkit-overflow-scrolling');
+        }
+      }
+    });
+  });
+
+  observer.observe(ov, { attributes: true, attributeFilter: ['class'] });
+})();
+
 function dbgUkaz() {
   document.getElementById('dbg-obsah').innerHTML = dbgInfo();
   document.getElementById('dbg-panel').style.display = 'block';
