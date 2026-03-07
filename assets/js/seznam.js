@@ -1094,45 +1094,41 @@ function filterUnreadNotes() {
 // Step 43: Migrace na Alpine.js - open/close/overlay click/ESC nyní řeší detailModal komponenta
 const ModalManager = {
   show: (content) => {
-    // Nastavit obsah modalu
-    document.getElementById('modalContent').innerHTML = content;
+    // Nastavit obsah modalu přes ModalDetail (modal-detail.js)
+    if (window.ModalDetail) {
+      window.ModalDetail.nastavitObsah(content);
+    } else {
+      // Fallback pokud modal-detail.js ještě není načten
+      const kontejner = document.getElementById('modalContent');
+      if (kontejner) kontejner.innerHTML = content;
+    }
 
-    // Step 43: Otevřít modal přes Alpine.js API
-    if (window.detailModal && window.detailModal.open) {
+    // Otevřít modal — preferujeme ModalDetail, pak Alpine API
+    if (window.ModalDetail) {
+      window.ModalDetail.otevrit();
+    } else if (window.detailModal && window.detailModal.open) {
       window.detailModal.open();
     } else {
       // Fallback pro zpětnou kompatibilitu
-      if (window.scrollLock) {
-        window.scrollLock.enable('detail-overlay');
-      }
+      if (window.scrollLock) window.scrollLock.enable('detail-overlay');
       document.body.classList.add('modal-open');
       document.getElementById('detailOverlay').classList.add('active');
     }
-
-    // Reset scroll pozice po načtení obsahu
-    // iOS layout řídí CSS třídy .ios-fullscreen (viz modal-detail.css) — ne JS inline styly
-    setTimeout(() => {
-      const obsah = document.querySelector('#detailOverlay .modal-content');
-      if (obsah) {
-        obsah.scrollTop = 0;
-      }
-    }, 50);
   },
 
   close: () => {
-    // Step 43: Zavřít modal přes Alpine.js API
-    if (window.detailModal && window.detailModal.close) {
+    // Zavřít modal — preferujeme ModalDetail, pak Alpine API
+    if (window.ModalDetail) {
+      window.ModalDetail.zavrit();
+    } else if (window.detailModal && window.detailModal.close) {
       window.detailModal.close();
     } else {
       // Fallback pro zpětnou kompatibilitu
       const overlay = document.getElementById('detailOverlay');
-      overlay.classList.remove('active');
-
+      if (overlay) overlay.classList.remove('active');
       setTimeout(() => {
         document.body.classList.remove('modal-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('detail-overlay');
-        }
+        if (window.scrollLock) window.scrollLock.disable('detail-overlay');
       }, 50);
     }
 

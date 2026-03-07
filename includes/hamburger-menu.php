@@ -1138,48 +1138,20 @@ document.addEventListener('alpine:init', () => {
       console.log('[detailModal] Inicializován (Alpine.js CSP-safe)');
     },
 
-    // Otevřít modal - layout řídí CSS třídy (modal-detail.css), ne JS inline styly
+    // Otevřít modal — deleguje na ModalDetail.otevrit() (modal-detail.js)
     openModal() {
       this.open = true;
-      const overlay = document.getElementById('detailOverlay');
-      if (overlay) {
-        overlay.classList.add('active');
-
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const jeMobil = window.innerWidth < 769;
-
-        if (isIOS && jeMobil) {
-          // iOS mobil: CSS třída .ios-fullscreen aplikuje position:absolute + overflow-y:scroll
-          // (pravidla definována v modal-detail.css — neupravovat zde)
-          document.body.classList.add('ios-device');
-          overlay.classList.add('ios-fullscreen');
-          const obsah = overlay.querySelector('.modal-content');
-          if (obsah) {
-            obsah.scrollTop = 0;
-          }
-        }
+      if (window.ModalDetail) {
+        window.ModalDetail.otevrit();
       }
-      // Scroll lock přes centralizovanou utilitu
-      if (window.scrollLock) {
-        window.scrollLock.enable('detail-overlay');
-      }
-      document.body.classList.add('modal-open');
     },
 
-    // Zavřít modal
+    // Zavřít modal — deleguje na ModalDetail.zavrit() (modal-detail.js)
     close() {
       this.open = false;
-      const overlay = document.getElementById('detailOverlay');
-      if (overlay) {
-        overlay.classList.remove('active');
+      if (window.ModalDetail) {
+        window.ModalDetail.zavrit();
       }
-      // Počkat na CSS transition než odemkneme scroll
-      setTimeout(() => {
-        document.body.classList.remove('modal-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('detail-overlay');
-        }
-      }, 50);
       // Volat closeDetail() z seznam.js pro cleanup (reset CURRENT_RECORD atd.)
       if (typeof closeDetail === 'function') {
         // Poznámka: closeDetail() volá ModalManager.close() který už dělá classList.remove
