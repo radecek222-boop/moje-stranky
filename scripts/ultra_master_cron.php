@@ -25,6 +25,24 @@
 // Absolutní cesta k root složce
 $rootDir = dirname(__DIR__);
 
+// Načíst .env (nutné pro CRON_SECRET_KEY)
+require_once $rootDir . '/includes/env_loader.php';
+
+// === BEZPEČNOSTNÍ KONTROLA (web přístup) ===
+if (php_sapi_name() !== 'cli') {
+    $tajnyKlic = getenv('CRON_SECRET_KEY');
+    if (!$tajnyKlic) {
+        http_response_code(500);
+        error_log("CRON ultra_master_cron: CRON_SECRET_KEY není nastaven v .env");
+        die('Chyba konfigurace: CRON_SECRET_KEY musí být nastaven v .env');
+    }
+    if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
+        http_response_code(403);
+        error_log("CRON ultra_master_cron: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        die('Forbidden');
+    }
+}
+
 // Načíst firemní konfiguraci
 require_once $rootDir . '/includes/company_config.php';
 

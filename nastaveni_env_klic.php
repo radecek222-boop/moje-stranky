@@ -73,8 +73,36 @@ $navrhKlice = bin2hex(random_bytes(32)); // 64 znaků hex
 // Sestavit webcron URL
 $protokol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz';
-$webcronUrlReminders = $protokol . '://' . $host . '/cron/send-reminders.php?key=';
-$webcronUrlEmail = $protokol . '://' . $host . '/cron/process-email-queue.php?key=';
+$zaklad = $protokol . '://' . $host;
+
+// Všechny 5 webcron URL (odpovídá nastavení na hostingu)
+$webcronUrl = [
+    [
+        'popis'    => 'Aktuality Natuzzi',
+        'cas'      => 'denně v 06:00',
+        'url'      => $zaklad . '/api/generuj_aktuality.php?key=',
+    ],
+    [
+        'popis'    => 'Fronta emailů',
+        'cas'      => 'každých 15 minut',
+        'url'      => $zaklad . '/cron/process-email-queue.php?key=',
+    ],
+    [
+        'popis'    => 'Cleanup tokenů a sessions',
+        'cas'      => 'každých 15 minut',
+        'url'      => $zaklad . '/scripts/cleanup_realtime_sessions.php?key=',
+    ],
+    [
+        'popis'    => 'Ultra master cron (cleanup, skóre, GDPR, AI)',
+        'cas'      => 'denně v 02:00',
+        'url'      => $zaklad . '/scripts/ultra_master_cron.php?key=',
+    ],
+    [
+        'popis'    => 'Připomínky termínů zákazníkům',
+        'cas'      => 'denně v 10:00',
+        'url'      => $zaklad . '/webcron-send-reminders.php?key=',
+    ],
+];
 
 ?><!DOCTYPE html>
 <html lang="cs">
@@ -253,21 +281,24 @@ $webcronUrlEmail = $protokol . '://' . $host . '/cron/process-email-queue.php?ke
     <!-- Webcron URL -->
     <?php if ($aktualniKlic): ?>
     <div class="sekce">
-        <h2>Webcron URL (nastavte na hostingu)</h2>
-        <p class="poznamka">Tyto URL zadejte do administrace webhostingu (sekce Cron / Webcron):</p>
+        <h2>Webcron URL - zkopírujte do hostingu</h2>
+        <p class="poznamka">
+            Kliknutím na pole URL se vybere celý text. Aktualizujte <strong>existující</strong> cron záznamy na hostingu
+            přidáním <code>?key=KLIC</code> na konec URL.
+        </p>
 
-        <p class="poznamka" style="margin-top:15px;"><strong>1. Připomínky termínů</strong> (spouštět denně v 10:00):</p>
+        <?php foreach ($webcronUrl as $i => $cron): ?>
+        <p class="poznamka" style="margin-top:14px;">
+            <strong><?= ($i + 1) ?>. <?= htmlspecialchars($cron['popis'], ENT_QUOTES, 'UTF-8') ?></strong>
+            <span style="color:#888;"> — <?= htmlspecialchars($cron['cas'], ENT_QUOTES, 'UTF-8') ?></span>
+        </p>
         <input type="text" class="url-pole" readonly
-            value="<?= htmlspecialchars($webcronUrlReminders . $aktualniKlic, ENT_QUOTES, 'UTF-8') ?>"
+            value="<?= htmlspecialchars($cron['url'] . $aktualniKlic, ENT_QUOTES, 'UTF-8') ?>"
             onclick="this.select()">
+        <?php endforeach; ?>
 
-        <p class="poznamka" style="margin-top:12px;"><strong>2. Fronta emailů</strong> (spouštět každých 15 minut):</p>
-        <input type="text" class="url-pole" readonly
-            value="<?= htmlspecialchars($webcronUrlEmail . $aktualniKlic, ENT_QUOTES, 'UTF-8') ?>"
-            onclick="this.select()">
-
-        <p class="poznamka" style="margin-top:10px;">
-            Kliknutím na pole URL se vybere celý text pro snadné kopírování.
+        <p class="poznamka" style="margin-top:12px;">
+            Kliknete na pole a zmackete Ctrl+A (nebo Cmd+A) pro vyber, pak Ctrl+C pro zkopirování.
         </p>
     </div>
     <?php endif; ?>
