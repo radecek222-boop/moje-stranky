@@ -215,75 +215,7 @@ if (!$isLoggedIn && !$isAdmin) {
   display: none !important; /* Všechny karty se načítají najednou */
 }
 
-/* MINIATURY FOTEK v detailu */
-#detailOverlay .foto-wrapper {
-  position: relative !important;
-  width: 120px !important;
-  height: 120px !important;
-  min-width: 120px !important;
-  min-height: 120px !important;
-  max-width: 120px !important;
-  max-height: 120px !important;
-  flex-shrink: 0 !important;
-  display: inline-block !important;
-  overflow: hidden !important;
-  border-radius: 4px !important;
-}
-
-#detailOverlay .foto-wrapper img {
-  width: 120px !important;
-  height: 120px !important;
-  min-width: 120px !important;
-  min-height: 120px !important;
-  max-width: 120px !important;
-  max-height: 120px !important;
-  object-fit: cover !important;
-  border: 1px solid #444 !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  display: block !important;
-}
-
-#detailOverlay .foto-wrapper img:hover {
-  opacity: 0.8;
-  border-color: #666;
-}
-
-/* MAZÁNÍ FOTEK: Malý křížek na miniatuře */
-#detailOverlay .foto-wrapper button.foto-delete-btn {
-  position: absolute !important;
-  top: 2px !important;
-  right: 2px !important;
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  max-width: 18px !important;
-  max-height: 18px !important;
-  background: rgba(220, 38, 38, 0.9) !important;
-  color: white !important;
-  border: 1px solid white !important;
-  border-radius: 50% !important;
-  font-size: 12px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  z-index: 10 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-}
-
-#detailOverlay .foto-wrapper button.foto-delete-btn:hover {
-  background: rgba(185, 28, 28, 1) !important;
-  transform: scale(1.1);
-}
-
-#detailOverlay .foto-wrapper button.foto-delete-btn:active {
-  transform: scale(0.95);
-}
+/* MINIATURY FOTEK v detailu — přesunuto do assets/css/modal-detail.css */
 
 /* MINIMALISTICKÝ REDESIGN: Zmenšení info panelů a nadpisů */
 .info-grid {
