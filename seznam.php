@@ -1433,9 +1433,14 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <script src="/assets/js/modal-detail.js?v=<?= filemtime(__DIR__ . '/assets/js/modal-detail.js') ?>" defer></script>
 <script src="/assets/js/seznam.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam.js') ?>" defer></script>
 <!-- Moduly seznam.js (načteny po seznam.js, sdílejí globální stav) -->
+<script src="/assets/js/seznam-qr-platba.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-qr-platba.js') ?>" defer></script>
+<script src="/assets/js/seznam-kalendar.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-kalendar.js') ?>" defer></script>
+<script src="/assets/js/seznam-vzdalenost.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-vzdalenost.js') ?>" defer></script>
 <script src="/assets/js/seznam-mapa.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-mapa.js') ?>" defer></script>
+<script src="/assets/js/seznam-admin.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-admin.js') ?>" defer></script>
 <script src="/assets/js/seznam-fototeka.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-fototeka.js') ?>" defer></script>
 <script src="/assets/js/seznam-videoteka.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-videoteka.js') ?>" defer></script>
+<script src="/assets/js/seznam-hromadne.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-hromadne.js') ?>" defer></script>
 
 <!-- DIAGNOSTIKA: Debug log pro prodejce -->
 <script>
