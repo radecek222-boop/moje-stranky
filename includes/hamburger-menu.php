@@ -1138,50 +1138,20 @@ document.addEventListener('alpine:init', () => {
       console.log('[detailModal] Inicializován (Alpine.js CSP-safe)');
     },
 
-    // Otevřít modal - používá classList.add('active') pro zachování původních animací
+    // Otevřít modal — deleguje na ModalDetail.otevrit() (modal-detail.js)
     openModal() {
       this.open = true;
-      const overlay = document.getElementById('detailOverlay');
-      if (overlay) {
-        overlay.classList.add('active');
-
-        // Vycentrovat modal na desktopu - setProperty s important přebíjí universal-modal-theme
-        if (window.innerWidth >= 769) {
-          overlay.style.setProperty('display', 'flex', 'important');
-          overlay.style.setProperty('align-items', 'center', 'important');
-          overlay.style.setProperty('justify-content', 'center', 'important');
-          overlay.style.setProperty('padding', '1.5rem', 'important');
-          const obsah = overlay.querySelector('.modal-content');
-          if (obsah) {
-            obsah.style.setProperty('max-width', '860px', 'important');
-            obsah.style.setProperty('width', '100%', 'important');
-            obsah.style.setProperty('max-height', '88vh', 'important');
-            obsah.style.setProperty('overflow-y', 'auto', 'important');
-            obsah.style.setProperty('margin', '0 auto', 'important');
-          }
-        }
+      if (window.ModalDetail) {
+        window.ModalDetail.otevrit();
       }
-      // Scroll lock přes centralizovanou utilitu
-      if (window.scrollLock) {
-        window.scrollLock.enable('detail-overlay');
-      }
-      document.body.classList.add('modal-open');
     },
 
-    // Zavřít modal
+    // Zavřít modal — deleguje na ModalDetail.zavrit() (modal-detail.js)
     close() {
       this.open = false;
-      const overlay = document.getElementById('detailOverlay');
-      if (overlay) {
-        overlay.classList.remove('active');
+      if (window.ModalDetail) {
+        window.ModalDetail.zavrit();
       }
-      // Počkat na CSS transition než odemkneme scroll
-      setTimeout(() => {
-        document.body.classList.remove('modal-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('detail-overlay');
-        }
-      }, 50);
       // Volat closeDetail() z seznam.js pro cleanup (reset CURRENT_RECORD atd.)
       if (typeof closeDetail === 'function') {
         // Poznámka: closeDetail() volá ModalManager.close() který už dělá classList.remove
