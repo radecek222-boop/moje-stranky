@@ -119,10 +119,10 @@ endif;
 <?php endif; ?>
 
 <style>
-/* Security - Minimalistický černobílý design */
+/* Security - Redesign (statistiky.php styl) */
 .security-container {
     padding: 1rem;
-    background: #fff;
+    background: #f5f5f5;
     min-height: calc(100vh - 200px);
     font-family: 'Poppins', sans-serif;
 }
@@ -167,47 +167,71 @@ endif;
     display: block;
 }
 
-/* Stats - Minimální černobílý grid */
+/* Stats - Redesign (statistiky.php styl) */
 .security-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .stat-card {
-    background: #fff;
-    border: 1px solid #000;
-    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     text-align: center;
+    border-left: 3px solid #ccc;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.stat-card:first-child {
+    background: #333;
+    color: #fff;
+    border-left-color: #111;
 }
 
 .stat-card-value {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     font-family: 'Poppins', sans-serif;
-    color: #000;
-    margin-bottom: 0.25rem;
+    color: #333;
+    margin-bottom: 0.1rem;
+    line-height: 1;
+}
+
+.stat-card:first-child .stat-card-value {
+    color: #fff;
 }
 
 .stat-card-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-family: 'Poppins', sans-serif;
-    color: #666;
+    color: #999;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
-/* Alert - Minimální design */
+.stat-card:first-child .stat-card-label {
+    color: rgba(255,255,255,0.65);
+}
+
+/* Alert - redesign */
 .security-alert {
     background: #f5f5f5;
-    border: 1px solid #000;
-    border-left: 3px solid #000;
+    border-left: 3px solid #333;
     color: #000;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
     font-family: 'Poppins', sans-serif;
+    border-radius: 0 4px 4px 0;
 }
 
 .security-alert strong {
@@ -299,30 +323,44 @@ endif;
     background: #f5f5f5;
 }
 
-/* Setting group minimální */
+/* Setting group - redesign (karta statistiky.php styl) */
 .setting-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .setting-group-title {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
-    color: #000;
+    color: #fff;
+    background: #333;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #000;
+    padding: 0.5rem 0.85rem;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 0;
+}
+
+.setting-group-body {
+    background: white;
+    padding: 0 0.85rem;
 }
 
 .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid #f0f0f0;
     font-size: 0.85rem;
+    background: white;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
 }
 
 .setting-item-label {
@@ -590,7 +628,7 @@ endif;
 
     <!-- SEKCE: PŘEHLED -->
     <div id="section-prehled" class="cc-section <?= $currentSection === 'prehled' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Security Dashboard</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">Security Dashboard</div>
 
         <!-- Security Alert -->
         <div class="security-alert">
@@ -634,31 +672,33 @@ endif;
         <!-- Quick Actions -->
         <div class="setting-group">
             <h3 class="setting-group-title">Rychlé akce</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
-                <button class="cc-btn cc-btn-primary" data-action="switchSecuritySection" data-section="registracni_klice" style="font-size: 0.8rem; padding: 0.5rem;">
-                    Spravovat klíče
-                </button>
-                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="uzivatele" style="font-size: 0.8rem; padding: 0.5rem;">
-                    Zobrazit uživatele
-                </button>
-                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="audit" style="font-size: 0.8rem; padding: 0.5rem;">
-                    Audit Log
-                </button>
-                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="api_klice" style="font-size: 0.8rem; padding: 0.5rem;">
-                    API Klíče
-                </button>
+            <div class="setting-group-body" style="padding: 0.75rem 0.85rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+                    <button class="cc-btn cc-btn-primary" data-action="switchSecuritySection" data-section="registracni_klice" style="font-size: 0.8rem; padding: 0.5rem;">
+                        Spravovat klíče
+                    </button>
+                    <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="uzivatele" style="font-size: 0.8rem; padding: 0.5rem;">
+                        Zobrazit uživatele
+                    </button>
+                    <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="audit" style="font-size: 0.8rem; padding: 0.5rem;">
+                        Audit Log
+                    </button>
+                    <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="api_klice" style="font-size: 0.8rem; padding: 0.5rem;">
+                        API Klíče
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- SEKCE: REGISTRAČNÍ KLÍČE -->
     <div id="section-registracni_klice" class="cc-section <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-            <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
-            <div style="display: flex; gap: 0.5rem;">
-                <button data-action="otevritPozvanku" class="cc-btn cc-btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Pozvat</button>
-                <button data-action="vytvorNovyKlic" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
-                <button data-action="nactiRegistracniKlice" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Registrační klíče</span>
+            <div style="display: flex; gap: 0.4rem;">
+                <button data-action="otevritPozvanku" class="cc-btn cc-btn-sm cc-btn-primary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;">Pozvat</button>
+                <button data-action="vytvorNovyKlic" class="cc-btn cc-btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: #fff;">+ Nový</button>
+                <button data-action="nactiRegistracniKlice" class="cc-btn cc-btn-sm cc-btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8);">Obnovit</button>
             </div>
         </div>
 
@@ -675,7 +715,7 @@ endif;
 
     <!-- SEKCE: API KLÍČE -->
     <div id="section-api_klice" class="cc-section <?= $currentSection === 'api_klice' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">API Klíče</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">API Klíče</div>
 
         <div class="security-alert">
             <div>
@@ -869,7 +909,7 @@ endif;
 
     <!-- SEKCE: BEZPEČNOSTNÍ NASTAVENÍ -->
     <div id="section-bezpecnost" class="cc-section <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Bezpečnostní nastavení</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">Bezpečnostní nastavení</div>
 
         <div class="security-alert">
             <div>
@@ -988,7 +1028,7 @@ endif;
 
     <!-- SEKCE: UŽIVATELÉ & PŘÍSTUPY -->
     <div id="section-uzivatele" class="cc-section <?= $currentSection === 'uzivatele' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Uživatelé & Přístupy</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">Uživatelé & Přístupy</div>
 
         <div class="security-alert">
             <div>
@@ -1020,7 +1060,7 @@ endif;
 
     <!-- SEKCE: AUDIT LOG -->
     <div id="section-audit" class="cc-section <?= $currentSection === 'audit' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Audit Log</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">Audit Log</div>
 
         <div class="security-alert">
             <div>
@@ -1029,7 +1069,7 @@ endif;
         </div>
 
         <!-- Filtry -->
-        <div style="margin: 1rem 0; padding: 1rem; background: #fff; border: 1px solid #000;">
+        <div style="margin: 0 0 0.75rem 0; padding: 0.75rem 0.85rem; background: #fff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum od:</label>
@@ -1077,7 +1117,7 @@ endif;
 
     <!-- SEKCE: ONLINE UŽIVATELÉ -->
     <div id="section-online" class="cc-section <?= $currentSection === 'online' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Online uživatelé</h2>
+        <div class="setting-group-title" style="border-radius: 6px; margin-bottom: 0.75rem;">Online uživatelé</div>
 
         <div class="security-alert">
             <div>

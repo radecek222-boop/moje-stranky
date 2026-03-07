@@ -227,6 +227,132 @@ try {
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
+<style>
+/* ============================================
+   EMAIL & SMS MANAGEMENT - VIZUÁLNÍ REDESIGN
+   Inspirace: statistiky.php / analytics.php
+   ============================================ */
+
+/* Souhrnné karty statistik */
+.wgs-email-souhrn {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.wgs-email-karta {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    text-align: center;
+    border-left: 3px solid #ccc;
+    transition: all 0.2s;
+}
+
+.wgs-email-karta:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.wgs-email-karta--tmava {
+    background: #333;
+    color: #fff;
+    border-left-color: #111;
+}
+
+.wgs-email-karta--tlacitko {
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    border-left: 3px solid #ccc;
+}
+
+.wgs-email-karta--aktivni {
+    background: #000;
+    color: #fff;
+    border-left-color: #333;
+}
+
+.wgs-email-karta-cislo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.1rem;
+    line-height: 1;
+}
+
+.wgs-email-karta--tmava .wgs-email-karta-cislo,
+.wgs-email-karta--aktivni .wgs-email-karta-cislo {
+    color: #fff;
+}
+
+.wgs-email-karta-popis {
+    font-size: 0.7rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.wgs-email-karta--tmava .wgs-email-karta-popis,
+.wgs-email-karta--aktivni .wgs-email-karta-popis {
+    color: rgba(255,255,255,0.6);
+}
+
+/* Tmavý pruhový header sekce (jako .filters-title ze statistiky) */
+.wgs-sekce-bar {
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 0.85rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-radius: 6px 6px 0 0;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wgs-sekce-obsah {
+    background: white;
+    border-radius: 0 0 6px 6px;
+    padding: 0.75rem 0.85rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 0.75rem;
+}
+
+/* Toolbar v management sekci */
+.wgs-toolbar {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e0e0e0;
+}
+
+/* Sekce nadpis pro templates/SMS */
+.wgs-sekce-nadpis {
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid #333;
+}
+</style>
+
 <div class="control-detail active">
     <?php if (!$directAccess): ?>
     <!-- Header -->
@@ -267,25 +393,25 @@ try {
 
         <!-- PŘEHLED -->
         <div id="section-overview" class="cc-section <?= $currentSection === 'overview' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Emailová fronta</h3>
-
-            <!-- Stats Grid - kompaktní -->
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <div style="background: #fff; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; min-width: 90px;">
-                    <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['all'] ?></span>
-                    <span style="font-size: 0.7rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Celkem</span>
-                </div>
-                <div style="background: #fff; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; min-width: 100px;">
-                    <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['sent'] ?></span>
-                    <span style="font-size: 0.7rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Odesláno</span>
-                </div>
-                <div style="background: #fff; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; min-width: 100px;">
-                    <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['pending'] ?></span>
-                    <span style="font-size: 0.7rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Ve frontě</span>
-                </div>
-                <div style="background: #fff; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; min-width: 90px;">
-                    <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['failed'] ?></span>
-                    <span style="font-size: 0.7rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Selhalo</span>
+            <div class="wgs-sekce-bar">Emailová fronta</div>
+            <div class="wgs-sekce-obsah">
+                <div class="wgs-email-souhrn">
+                    <div class="wgs-email-karta wgs-email-karta--tmava">
+                        <div class="wgs-email-karta-cislo"><?= $emailStats['all'] ?></div>
+                        <div class="wgs-email-karta-popis">Celkem</div>
+                    </div>
+                    <div class="wgs-email-karta">
+                        <div class="wgs-email-karta-cislo"><?= $emailStats['sent'] ?></div>
+                        <div class="wgs-email-karta-popis">Odesláno</div>
+                    </div>
+                    <div class="wgs-email-karta">
+                        <div class="wgs-email-karta-cislo"><?= $emailStats['pending'] ?></div>
+                        <div class="wgs-email-karta-popis">Ve frontě</div>
+                    </div>
+                    <div class="wgs-email-karta">
+                        <div class="wgs-email-karta-cislo"><?= $emailStats['failed'] ?></div>
+                        <div class="wgs-email-karta-popis">Selhalo</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -298,7 +424,7 @@ try {
                 </div>
             <?php else: ?>
                 <div style="margin-bottom: 1.5rem;">
-                    <h3 style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #000;">Email (SMTP) Konfigurace</h3>
+                    <div class="wgs-sekce-bar" style="margin-bottom: 0.75rem; border-radius: 6px;">Email (SMTP) Konfigurace</div>
 
                     <?php foreach ($smtpConfigs as $config): ?>
                         <div class="setting-item">
@@ -377,7 +503,7 @@ try {
 
         <!-- EMAIL ŠABLONY -->
         <div id="section-templates" class="cc-section <?= $currentSection === 'templates' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Email sablony</h3>
+            <div class="wgs-sekce-bar" style="margin-bottom: 0.75rem; border-radius: 6px;">Email šablony</div>
 
             <?php if (empty($emailSablony)): ?>
                 <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 1rem; font-family: 'Poppins', sans-serif;">
@@ -472,7 +598,7 @@ try {
 
         <!-- SMS -->
         <div id="section-sms" class="cc-section <?= $currentSection === 'sms' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">SMS sablony</h3>
+            <div class="wgs-sekce-bar" style="margin-bottom: 0.75rem; border-radius: 6px;">SMS šablony</div>
 
             <!-- Info box -->
             <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.75rem 1rem; margin-bottom: 1rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; color: #666;">
@@ -568,33 +694,42 @@ try {
         <!-- EMAIL MANAGEMENT -->
         <div id="section-management" class="cc-section <?= $currentSection === 'management' ? 'active' : '' ?>">
 
+            <div class="wgs-sekce-bar" style="margin-bottom: 0.75rem; border-radius: 6px;">
+                Email Management
+                <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.75; text-transform: none; letter-spacing: 0;"><?= $celkemEmailu ?> emailů celkem</span>
+            </div>
+
             <!-- Alert -->
-            <div id="email-alert" style="display: none; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;"></div>
+            <div id="email-alert" style="display: none; padding: 0.75rem; margin-bottom: 0.75rem; border-left: 3px solid #333; background: #f5f5f5; font-family: 'Poppins', sans-serif; font-size: 0.85rem; border-radius: 0 4px 4px 0;"></div>
 
             <!-- Filter Stats -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
-                <button type="button" data-action="filterEmaily" data-filter="all" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'all' ? '#fff' : '#000' ?>;"><?= $emailStats['all'] ?></div>
-                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
+            <div class="wgs-email-souhrn">
+                <button type="button" class="wgs-email-karta wgs-email-karta--tlacitko <?= $filterStatus === 'all' ? 'wgs-email-karta--aktivni' : '' ?>"
+                        data-action="filterEmaily" data-filter="all">
+                    <div class="wgs-email-karta-cislo"><?= $emailStats['all'] ?></div>
+                    <div class="wgs-email-karta-popis">Celkem</div>
                 </button>
-                <button type="button" data-action="filterEmaily" data-filter="sent" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'sent' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'sent' ? '#fff' : '#000' ?>;"><?= $emailStats['sent'] ?></div>
-                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'sent' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Odesláno</div>
+                <button type="button" class="wgs-email-karta wgs-email-karta--tlacitko <?= $filterStatus === 'sent' ? 'wgs-email-karta--aktivni' : '' ?>"
+                        data-action="filterEmaily" data-filter="sent">
+                    <div class="wgs-email-karta-cislo"><?= $emailStats['sent'] ?></div>
+                    <div class="wgs-email-karta-popis">Odesláno</div>
                 </button>
-                <button type="button" data-action="filterEmaily" data-filter="pending" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'pending' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'pending' ? '#fff' : '#000' ?>;"><?= $emailStats['pending'] ?></div>
-                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'pending' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Ve frontě</div>
+                <button type="button" class="wgs-email-karta wgs-email-karta--tlacitko <?= $filterStatus === 'pending' ? 'wgs-email-karta--aktivni' : '' ?>"
+                        data-action="filterEmaily" data-filter="pending">
+                    <div class="wgs-email-karta-cislo"><?= $emailStats['pending'] ?></div>
+                    <div class="wgs-email-karta-popis">Ve frontě</div>
                 </button>
-                <button type="button" data-action="filterEmaily" data-filter="failed" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'failed' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'failed' ? '#fff' : '#000' ?>;"><?= $emailStats['failed'] ?></div>
-                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'failed' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Selhalo</div>
+                <button type="button" class="wgs-email-karta wgs-email-karta--tlacitko <?= $filterStatus === 'failed' ? 'wgs-email-karta--aktivni' : '' ?>"
+                        data-action="filterEmaily" data-filter="failed">
+                    <div class="wgs-email-karta-cislo"><?= $emailStats['failed'] ?></div>
+                    <div class="wgs-email-karta-popis">Selhalo</div>
                 </button>
             </div>
 
             <!-- Toolbar -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f5f5f5; border: 1px solid #000; margin-bottom: 1rem;">
+            <div class="wgs-toolbar">
                 <div style="display: flex; gap: 1rem; align-items: center;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif; cursor: pointer;">
                         <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()">
                         <span>Vybrat vše</span>
                     </label>
@@ -603,7 +738,7 @@ try {
                     </span>
                 </div>
                 <button id="resend-emails-btn" data-action="resendVybraneEmaily" disabled
-                        style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;">
+                        style="padding: 0.4rem 0.85rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; border-radius: 4px; transition: background 0.2s; opacity: 0.5;">
                     Znovu odeslat vybrané
                 </button>
             </div>
@@ -686,8 +821,7 @@ try {
                 </table>
             </div>
             <?php else: ?>
-            <div style="text-align: center; padding: 3rem 2rem; color: #888; border: 1px solid #ddd; background: #f5f5f5;">
-                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">-</div>
+            <div style="text-align: center; padding: 3rem 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <h3 style="font-family: 'Poppins', sans-serif; font-size: 1rem; color: #666; margin-bottom: 0.5rem;">Žádné emaily nenalezeny</h3>
                 <p style="font-size: 0.85rem; color: #999;">Pro vybraný filtr neexistují žádné emaily.</p>
             </div>
@@ -695,7 +829,7 @@ try {
 
             <!-- Pagination Controls -->
             <?php if ($celkemEmailu > 0): ?>
-            <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
+            <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 0.85rem; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <!-- Informace o zobrazení -->
                 <div style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;">
                     <?php
