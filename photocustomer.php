@@ -69,10 +69,10 @@ if (!$isAdmin && !$isTechnik) {
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/photocustomer.min.css" as="style">
+  <link rel="preload" href="assets/css/photocustomer.min.css?v=<?= filemtime(__DIR__ . '/assets/css/photocustomer.min.css') ?>" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/photocustomer.min.css">
+  <link rel="stylesheet" href="assets/css/photocustomer.min.css?v=<?= filemtime(__DIR__ . '/assets/css/photocustomer.min.css') ?>">
   <link rel="stylesheet" href="assets/css/photocustomer-collapsible.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -221,7 +221,7 @@ if (!$isAdmin && !$isTechnik) {
 
 <!-- External JavaScript -->
 <script src="assets/js/customer-collapse.min.js" defer></script>
-<script src="assets/js/photo-storage-db.min.js" defer></script>
+<script src="assets/js/photo-storage-db.min.js?v=<?= filemtime(__DIR__ . '/assets/js/photo-storage-db.min.js') ?>" defer></script>
 <script src="assets/js/photocustomer.js?v=<?= filemtime(__DIR__ . '/assets/js/photocustomer.js') ?>" defer></script>
 <script src="assets/js/photocustomer-video.js?v=<?= filemtime(__DIR__ . '/assets/js/photocustomer-video.js') ?>" defer></script>
 
