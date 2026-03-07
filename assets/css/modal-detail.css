@@ -352,9 +352,10 @@
   overflow: hidden;
   touch-action: pan-y pinch-zoom;
   resize: none;
-  background: #ffffff;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+  background: #f0f0f0 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  border: 1px solid #999999 !important;
 }
 
 /* ============================================
@@ -756,7 +757,7 @@ body.ios-device #detailOverlay .modal-actions .btn {
 
 @media (max-width: 768px) {
   #detailOverlay {
-    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    padding: 2.5rem 0.5rem 0.5rem 0.5rem;
     height: 100vh;
     height: 100dvh;
   }
@@ -772,7 +773,7 @@ body.ios-device #detailOverlay .modal-actions .btn {
   }
 
   #detailOverlay .modal-header {
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 1rem;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -781,12 +782,15 @@ body.ios-device #detailOverlay .modal-actions .btn {
   }
 
   #detailOverlay .modal-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: 0;
+    margin-bottom: 0.15rem;
   }
 
   #detailOverlay .modal-subtitle {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    margin: 0;
   }
 
   /* 44px touch cíl pro close tlačítko na mobilu (Apple HIG) */
