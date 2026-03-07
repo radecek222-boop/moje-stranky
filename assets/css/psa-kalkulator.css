@@ -38,8 +38,8 @@
   --wgs-neon-green: #39ff14;
   --wgs-danger: #dc3545;
   --wgs-danger-hover: #c82333;
-  --wgs-delete: #cc0000;
-  --wgs-delete-hover: #ff0000;
+  --wgs-delete: #dc3545;
+  --wgs-delete-hover: #c82333;
 }
 
 * {
