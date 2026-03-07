@@ -1162,20 +1162,28 @@ document.addEventListener('alpine:init', () => {
             obsah.style.setProperty('margin', '0 auto', 'important');
           }
         } else if (isIOS) {
-          // iOS mobil: display:block je nutný pro nativní UIScrollView
-          // display:flex + overflow-y na iOS nevytvoří scrollovatelný kontejner
+          // iOS mobil: overlay = backdrop, modal-content = jediný scroll kontejner
+          // Klíč: modal-content má position:absolute + výška 100% + overflow-y:scroll
+          // = iOS vytvoří nativní UIScrollView pro modal-content
           overlay.style.setProperty('display', 'block', 'important');
-          overlay.style.setProperty('overflow-y', 'scroll', 'important');
-          overlay.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-          overlay.style.setProperty('overscroll-behavior', 'contain', 'important');
-          overlay.scrollTop = 0;
+          overlay.style.setProperty('overflow', 'hidden', 'important');
 
           const obsah = overlay.querySelector('.modal-content');
           if (obsah) {
-            obsah.style.setProperty('overflow-y', 'visible', 'important');
-            obsah.style.setProperty('max-height', 'none', 'important');
-            obsah.style.setProperty('height', 'auto', 'important');
-            obsah.style.setProperty('margin', '0 auto', 'important');
+            obsah.style.setProperty('position', 'absolute', 'important');
+            obsah.style.setProperty('top', '0', 'important');
+            obsah.style.setProperty('left', '0', 'important');
+            obsah.style.setProperty('right', '0', 'important');
+            obsah.style.setProperty('bottom', '0', 'important');
+            obsah.style.setProperty('width', '100%', 'important');
+            obsah.style.setProperty('height', '100%', 'important');
+            obsah.style.setProperty('max-height', '100%', 'important');
+            obsah.style.setProperty('overflow-y', 'scroll', 'important');
+            obsah.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            obsah.style.setProperty('overscroll-behavior-y', 'contain', 'important');
+            obsah.style.setProperty('border-radius', '0', 'important');
+            obsah.style.setProperty('margin', '0', 'important');
+            obsah.scrollTop = 0;
           }
         }
       }
