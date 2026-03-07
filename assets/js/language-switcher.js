@@ -96,12 +96,26 @@
       `;
       document.body.appendChild(loadingDiv);
 
-      // Zavolat API pro překlad s timeoutem 30s
+      // Získat CSRF token — primárně z <meta name="csrf-token"> (generuje init.php),
+      // záložně z window.csrfTokenCache (cachuje csrf-auto-inject.js)
+      const csrfToken =
+        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        window.csrfTokenCache ||
+        '';
+
+      // Sestavit FormData pro POST požadavek
+      const formData = new FormData();
+      formData.append('jazyk', cilovyJazyk);
+      formData.append('csrf_token', csrfToken);
+
+      // Zavolat API pro překlad s timeoutem 30s (POST + CSRF token)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
-        const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`, {
+        const response = await fetch('/api/preloz_aktualitu.php', {
+          method: 'POST',
+          body: formData,
           signal: controller.signal
         });
         clearTimeout(timeoutId);
