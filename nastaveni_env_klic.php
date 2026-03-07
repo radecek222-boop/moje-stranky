@@ -75,32 +75,17 @@ $protokol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https'
 $host = $_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz';
 $zaklad = $protokol . '://' . $host;
 
-// Všechny 5 webcron URL (odpovídá nastavení na hostingu)
+// 2 konsolidované webcron URL
 $webcronUrl = [
     [
-        'popis'    => 'Aktuality Natuzzi',
-        'cas'      => 'denně v 06:00',
-        'url'      => $zaklad . '/api/generuj_aktuality.php?key=',
+        'popis'    => 'Denní úlohy (ultra master + aktuality + připomínky)',
+        'cas'      => 'každý den v 02:00',
+        'url'      => $zaklad . '/cron/cron_denni.php?key=',
     ],
     [
-        'popis'    => 'Fronta emailů',
+        'popis'    => 'Fronta emailů + cleanup tokenů',
         'cas'      => 'každých 15 minut',
-        'url'      => $zaklad . '/cron/process-email-queue.php?key=',
-    ],
-    [
-        'popis'    => 'Cleanup tokenů a sessions',
-        'cas'      => 'každých 15 minut',
-        'url'      => $zaklad . '/scripts/cleanup_realtime_sessions.php?key=',
-    ],
-    [
-        'popis'    => 'Ultra master cron (cleanup, skóre, GDPR, AI)',
-        'cas'      => 'denně v 02:00',
-        'url'      => $zaklad . '/scripts/ultra_master_cron.php?key=',
-    ],
-    [
-        'popis'    => 'Připomínky termínů zákazníkům',
-        'cas'      => 'denně v 10:00',
-        'url'      => $zaklad . '/webcron-send-reminders.php?key=',
+        'url'      => $zaklad . '/cron/cron_15min.php?key=',
     ],
 ];
 
