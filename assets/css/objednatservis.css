@@ -421,15 +421,24 @@ textarea.form-control {
   min-width: 0;
 }
 
-/* Video náhled */
+/* Video náhled - grid stejný jako fotky */
+#videoPreviewMain {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 6px;
+  margin-top: 0.5rem;
+}
+
 .video-thumb {
   position: relative;
-  margin-top: 0.5rem;
+  aspect-ratio: 16/9;
+  min-width: 0;
 }
 
 .video-thumb video {
   width: 100%;
-  max-height: 160px;
+  height: 100%;
+  object-fit: cover;
   border: 1px solid #444;
   border-radius: 4px;
   display: block;
