@@ -1148,8 +1148,9 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     const bg      = aktivni ? barva : 'transparent';
     const barvaText = aktivni ? textAktivni : barva;
     const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
-    const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const cls     = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar = aktivni ? `--pill-glow-barva:${barva};` : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glowVar}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
   // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
@@ -1157,8 +1158,9 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     const bg      = aktivni ? '#1a1a1a' : '#888';
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
-    const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const cls     = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar = aktivni ? '--pill-glow-barva:rgba(57,255,20,0.6);' : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glowVar}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `

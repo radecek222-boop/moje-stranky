@@ -1740,6 +1740,16 @@ body {
   filter: brightness(1.15);
 }
 
+/* Aktivní pill - pulzující záře */
+@keyframes pillPulse {
+  0%   { box-shadow: 0 0 6px 1px var(--pill-glow-barva), 0 0 0px 0px var(--pill-glow-barva); }
+  50%  { box-shadow: 0 0 14px 4px var(--pill-glow-barva), 0 0 22px 6px var(--pill-glow-barva); }
+  100% { box-shadow: 0 0 6px 1px var(--pill-glow-barva), 0 0 0px 0px var(--pill-glow-barva); }
+}
+.workflow-pill--aktivni {
+  animation: pillPulse 2s ease-in-out infinite;
+}
+
 .order-appointment,
 .order-status-text,
 .order-cn-text {
