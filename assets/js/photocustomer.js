@@ -45,6 +45,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('mediaInput').addEventListener('change', handleMediaSelect);
   document.getElementById('btnSaveToProtocol').addEventListener('click', saveToProtocol);
 
+  // Tlačítko "Nová návštěva" — smaže IndexedDB a začne od nuly
+  const btnNova = document.getElementById('btnNovaNavsteva');
+  if (btnNova) {
+    btnNova.addEventListener('click', async () => {
+      const potvrdit = confirm('Opravdu smazat všechny rozpracované fotky a začít novou návštěvu?');
+      if (!potvrdit) return;
+      window.location.href = 'photocustomer.php?new=true';
+    });
+  }
+
   // Video sekce - MUSÍ být po loadCustomerData() aby bylo správné ID zakázky
   await initVideoSection();
 
@@ -131,36 +141,24 @@ async function loadExistingMedia() {
   const urlParams = new URLSearchParams(window.location.search);
   const forceNew = urlParams.get('new');
 
+  // ?new=true — pouze při explicitním kliknutí na "Začít novou návštěvu" v UI
   if (forceNew === 'true') {
     await deleteFromServer();
-    sections = {
-      before: [],
-      id: [],
-      problem: [],
-      damage_part: [],
-      new_part: [],
-      repair: [],
-      after: []
-    };
-    logger.log('Zahájení nové návštěvy');
+    sections = { before: [], id: [], problem: [], damage_part: [], new_part: [], repair: [], after: [] };
+    logger.log('[Photo] Nová návštěva — IndexedDB vyčištěna');
     return;
   }
 
-  const serverData = await loadFromServer();
-  if (serverData) {
-    sections = serverData;
+  // Načíst rozpracované fotky z IndexedDB
+  const ulozenaData = await loadFromServer();
+  if (ulozenaData) {
+    sections = ulozenaData;
     renderAllPreviews();
-    logger.log('Načteny rozpracované fotky');
+    const celkem = Object.values(sections).reduce((s, a) => s + a.length, 0);
+    logger.log(`[Photo] Načteno ${celkem} rozpracovaných fotek z IndexedDB`);
   } else {
-    sections = {
-      before: [],
-      id: [],
-      problem: [],
-      damage_part: [],
-      new_part: [],
-      repair: [],
-      after: []
-    };
+    sections = { before: [], id: [], problem: [], damage_part: [], new_part: [], repair: [], after: [] };
+    logger.log('[Photo] Žádné rozpracované fotky — prázdné sekce');
   }
 }
 
@@ -754,49 +752,54 @@ async function downloadToGallery(imageData, section, index) {
   }
 }
 
+function getStorageKey() {
+  // Fallback: reklamace_id (formátované číslo) → cislo → numerické id
+  return currentCustomerData?.reklamace_id
+    || currentCustomerData?.cislo
+    || (currentCustomerData?.id ? String(currentCustomerData.id) : null);
+}
+
 async function saveToServer() {
-  // Uložit fotky do IndexedDB pro perzistenci
-  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+  const klic = getStorageKey();
+  if (typeof window.PhotoStorageDB !== 'undefined' && klic) {
     try {
-      await window.PhotoStorageDB.save(currentCustomerData.reklamace_id, sections);
-      logger.log('[IndexedDB] Fotky automaticky uloženy');
+      await window.PhotoStorageDB.save(klic, sections);
+      logger.log('[IndexedDB] Fotky uloženy, klíč:', klic);
       return { success: true };
-    } catch (error) {
-      logger.error('[IndexedDB] Chyba při ukládání:', error);
-      return { success: false, error: error.message };
+    } catch (chyba) {
+      logger.error('[IndexedDB] Chyba při ukládání:', chyba);
+      return { success: false, error: chyba.message };
     }
   }
-
-  logger.log('[Save] PhotoStorageDB není k dispozici');
+  logger.warn('[Save] PhotoStorageDB není k dispozici nebo chybí klíč');
   return { success: true };
 }
 
 async function loadFromServer() {
-  // Načíst fotky z IndexedDB
-  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+  const klic = getStorageKey();
+  if (typeof window.PhotoStorageDB !== 'undefined' && klic) {
     try {
-      const savedSections = await window.PhotoStorageDB.load(currentCustomerData.reklamace_id);
-      if (savedSections) {
-        logger.log('📂 Fotky obnoveny z IndexedDB');
-        return savedSections;
+      const ulozenaData = await window.PhotoStorageDB.load(klic);
+      if (ulozenaData) {
+        logger.log('[IndexedDB] Fotky načteny, klíč:', klic);
+        return ulozenaData;
       }
-    } catch (error) {
-      logger.error('[IndexedDB] Chyba při načítání:', error);
+    } catch (chyba) {
+      logger.error('[IndexedDB] Chyba při načítání:', chyba);
     }
   }
-
-  logger.log('📂 Žádné uložené fotky v IndexedDB');
+  logger.log('[IndexedDB] Žádná uložená data, klíč:', klic);
   return null;
 }
 
 async function deleteFromServer() {
-  // Smazat fotky z IndexedDB po úspěšném odeslání
-  if (typeof window.PhotoStorageDB !== 'undefined' && currentCustomerData?.reklamace_id) {
+  const klic = getStorageKey();
+  if (typeof window.PhotoStorageDB !== 'undefined' && klic) {
     try {
-      await window.PhotoStorageDB.delete(currentCustomerData.reklamace_id);
-      logger.log('🗑️ Fotky smazány z IndexedDB');
-    } catch (error) {
-      logger.error('[IndexedDB] Chyba při mazání:', error);
+      await window.PhotoStorageDB.delete(klic);
+      logger.log('[IndexedDB] Fotky smazány, klíč:', klic);
+    } catch (chyba) {
+      logger.error('[IndexedDB] Chyba při mazání:', chyba);
     }
   }
 }

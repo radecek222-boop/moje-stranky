@@ -173,6 +173,7 @@ if (!$isAdmin && !$isTechnik) {
   <div class="btn-group">
     <button class="btn" id="btnSaveToProtocol">Odeslat do protokolu</button>
     <button class="btn btn-secondary" data-navigate="seznam.php">Zpět</button>
+    <button class="btn btn-secondary" id="btnNovaNavsteva">Nová návštěva</button>
   </div>
   
 </div>
