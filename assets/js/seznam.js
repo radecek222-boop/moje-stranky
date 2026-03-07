@@ -1662,9 +1662,7 @@ async function showCustomerDetail(id) {
             <span style="color: #aaa; font-weight: 600;">Jméno:</span>
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-            <span style="color: #aaa; font-weight: 600;">Telefon:</span>
-            <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;">
-              <input type="tel" id="edit_telefon" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
+            <span style="color: #aaa; font-weight: 600; display:flex; align-items:center; gap:4px;">Telefon:
               <button onclick="
                 const tel = document.getElementById('edit_telefon').value;
                 if (tel) navigator.clipboard.writeText(tel).then(() => {
@@ -1685,11 +1683,10 @@ async function showCustomerDetail(id) {
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </div>
+            </span>
+            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-            <span style="color: #aaa; font-weight: 600;">E-mail:</span>
-            <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;">
-              <input type="email" id="edit_email" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
+            <span style="color: #aaa; font-weight: 600; display:flex; align-items:center; gap:4px;">E-mail:
               <button onclick="
                 const val = document.getElementById('edit_email').value;
                 if (val) navigator.clipboard.writeText(val).then(() => {
@@ -1710,11 +1707,10 @@ async function showCustomerDetail(id) {
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </div>
+            </span>
+            <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
-            <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;">
-              <input type="text" id="edit_adresa" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
+            <span style="color: #aaa; font-weight: 600; display:flex; align-items:center; gap:4px;">Adresa:
               <button onclick="
                 const val = document.getElementById('edit_adresa').value;
                 if (val) navigator.clipboard.writeText(val).then(() => {
@@ -1735,7 +1731,8 @@ async function showCustomerDetail(id) {
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </div>
+            </span>
+            <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
 
             <span style="color: #aaa; font-weight: 600;">Model:</span>
             <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
