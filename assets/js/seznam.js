@@ -1315,7 +1315,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
-        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.filter(f => f && (f.photo_path || f.url || f.path)).length > 0) ? ` (${record.photos.filter(f => f && (f.photo_path || f.url || f.path)).length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         <button class="detail-btn" style="background:#dc3545 !important;color:#fff !important;border:none;" data-action="zalozitZnovu" data-id="${record.id}">Založit znovu</button>
@@ -1352,7 +1352,7 @@ async function showDetail(recordOrId) {
         ${vytvorCNBtn}
         ${technickaFunkce}
         <button class="detail-btn detail-btn-primary" data-action="openKnihovnaPDF" data-id="${record.id}">Knihovna PDF${(record.documents && record.documents.length > 0) ? ` (${record.documents.length})` : ''}</button>
-        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.length > 0) ? ` (${record.photos.length})` : ''}</button>
+        <button class="detail-btn detail-btn-primary" data-action="otevritGalerii" data-id="${record.id}">Galerie${(record.photos && record.photos.filter(f => f && (f.photo_path || f.url || f.path)).length > 0) ? ` (${record.photos.filter(f => f && (f.photo_path || f.url || f.path)).length})` : ''}</button>
         <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="detail-btn detail-btn-secondary" data-action="tiskniVytisk" data-id="${record.id}">Tisk zakázky</button>
         ${CURRENT_USER && CURRENT_USER.is_admin ? `
