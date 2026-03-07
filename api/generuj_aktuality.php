@@ -13,9 +13,13 @@ require_once __DIR__ . '/../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// BEZPEČNOST: Pouze admin
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    sendJsonError('Neautorizovaný přístup - pouze administrátor', 403);
+// BEZPEČNOST: Admin session NEBO platný cron klíč
+// (webcron nemá session, takže kombinujeme oba způsoby přístupu)
+$tajnyKlic = getenv('CRON_SECRET_KEY');
+$maCronKlic = $tajnyKlic && isset($_GET['key']) && hash_equals($tajnyKlic, $_GET['key']);
+$jeAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+if (!$maCronKlic && !$jeAdmin) {
+    sendJsonError('Neautorizovaný přístup - vyžadován admin nebo platný cron klíč', 403);
 }
 
 // BEZPEČNOST: Rate limiting pro API volání

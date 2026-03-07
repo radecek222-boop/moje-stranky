@@ -13,9 +13,24 @@
  * den v týdnu: *
  */
 
-// Načíst konfiguraci
+// Načíst konfiguraci (.env se načte automaticky uvnitř config.php)
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/EmailQueue.php';
+
+// === BEZPEČNOSTNÍ KONTROLA ===
+if (php_sapi_name() !== 'cli') {
+    $tajnyKlic = getenv('CRON_SECRET_KEY');
+    if (!$tajnyKlic) {
+        http_response_code(500);
+        error_log("CRON webcron-send-reminders: CRON_SECRET_KEY není nastaven v .env");
+        die('Chyba konfigurace: CRON_SECRET_KEY musí být nastaven v .env');
+    }
+    if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
+        http_response_code(403);
+        error_log("CRON webcron-send-reminders: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        die('Forbidden');
+    }
+}
 
 // === LOGOVÁNÍ ===
 $logFile = __DIR__ . '/logs/cron_reminders.log';
