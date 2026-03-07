@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -31,15 +32,15 @@ try {
     // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
     session_write_close();
 
-    // Získat ID zakázky
-    $reklamaceId = $_GET['reklamace_id'] ?? $_GET['id'] ?? null;
-
-    if ($reklamaceId === null || $reklamaceId === '') {
+    // Získat a ověřit ID zakázky (whitelist znaků, max 120 znaků)
+    try {
+        $reklamaceId = sanitizeReklamaceId(
+            $_GET['reklamace_id'] ?? $_GET['id'] ?? null,
+            'reklamace_id'
+        );
+    } catch (Exception $e) {
         http_response_code(400);
-        die(json_encode([
-            'status' => 'error',
-            'message' => 'Chybí ID zakázky'
-        ]));
+        die(json_encode(['status' => 'error', 'message' => 'Chybí nebo neplatné ID zakázky']));
     }
 
     // Připojení k databázi

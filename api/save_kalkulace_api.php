@@ -10,6 +10,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -36,13 +37,13 @@ if (!$rateLimiter->checkLimit('save_kalkulace', $_SERVER['REMOTE_ADDR'], 30, 360
 try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Získat parametry
-    $reklamaceId = $_POST['reklamace_id'] ?? null;
-    $kalkulaceJson = $_POST['kalkulace_data'] ?? null;
-
-    if (!$reklamaceId) {
-        sendJsonError('Chybí parametr reklamace_id');
+    // Získat a ověřit parametry
+    try {
+        $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
+    } catch (Exception $e) {
+        sendJsonError('Chybí nebo neplatné reklamace_id', 400);
     }
+    $kalkulaceJson = $_POST['kalkulace_data'] ?? null;
 
     if (!$kalkulaceJson) {
         sendJsonError('Chybí parametr kalkulace_data');

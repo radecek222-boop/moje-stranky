@@ -14,6 +14,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -39,10 +40,13 @@ try {
         // SEZNAM - Načte dokumenty pro reklamaci
         // ========================================
         case 'seznam':
-            $reklamaceId = $_GET['reklamace_id'] ?? $_GET['id'] ?? null;
-
-            if (!$reklamaceId) {
-                sendJsonError('Chybí ID reklamace');
+            try {
+                $reklamaceId = sanitizeReklamaceId(
+                    $_GET['reklamace_id'] ?? $_GET['id'] ?? null,
+                    'reklamace_id'
+                );
+            } catch (Exception $e) {
+                sendJsonError('Chybí nebo neplatné ID reklamace', 400);
             }
 
             // Najít interní ID zakázky
@@ -142,11 +146,11 @@ try {
                 sendJsonError('Neplatný CSRF token', 403);
             }
 
-            $reklamaceId = $_POST['reklamace_id'] ?? null;
             $nazevDokumentu = trim($_POST['nazev'] ?? '');
-
-            if (!$reklamaceId) {
-                sendJsonError('Chybí ID reklamace');
+            try {
+                $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
+            } catch (Exception $e) {
+                sendJsonError('Chybí nebo neplatné ID reklamace', 400);
             }
 
             if (empty($nazevDokumentu)) {
