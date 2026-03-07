@@ -16,6 +16,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen - pouze pro administrátory', 403);
 }
 
+// Pouze POST požadavky (tato akce modifikuje data v DB)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    sendJsonError('Pouze POST požadavky jsou povoleny', 405);
+}
+
+// CSRF ochrana (session musí být aktivní)
+if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    sendJsonError('Neplatný CSRF token', 403);
+}
+
 // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
 session_write_close();
 
@@ -29,9 +39,9 @@ try {
         sendJsonError('Příliš mnoho požadavků na překlad', 429);
     }
 
-    // Validace vstupních dat (GET nebo POST)
-    $cilovyJazyk = $_REQUEST['jazyk'] ?? '';
-    $aktualitaId = filter_var($_REQUEST['aktualita_id'] ?? '', FILTER_VALIDATE_INT);
+    // Validace vstupních dat (pouze POST)
+    $cilovyJazyk = $_POST['jazyk'] ?? '';
+    $aktualitaId = filter_var($_POST['aktualita_id'] ?? '', FILTER_VALIDATE_INT);
 
     // Jazyk musí být 'en' nebo 'it'
     if (!in_array($cilovyJazyk, ['en', 'it'])) {

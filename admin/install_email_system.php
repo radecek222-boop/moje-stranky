@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 // Security: Admin only
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -17,6 +18,10 @@ $status = null;
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
+    // CSRF ochrana
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Neplatný CSRF token. Obnovte stránku a zkuste znovu.');
+    }
     try {
         $pdo = getDbConnection();
 
@@ -385,8 +390,9 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
             </ul>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
                 <button type="submit" name="install" class="btn btn-primary">
-                    🚀 Nainstalovat Email Queue
+                    Nainstalovat Email Queue
                 </button>
             </form>
         <?php endif; ?>

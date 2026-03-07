@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/EmailQueue.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 // Security: Admin only
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -19,6 +20,10 @@ $error = null;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF ochrana
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Neplatný CSRF token. Obnovte stránku a zkuste znovu.');
+    }
     try {
         if (isset($_POST['save'])) {
             // Save SMTP settings
@@ -196,6 +201,7 @@ try {
         <?php endif; ?>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
             <div class="form-group">
                 <label for="smtp_host">SMTP Server (Host)</label>
                 <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($settings['smtp_host'] ?? ''); ?>" required>
@@ -247,6 +253,7 @@ try {
             <h3>🧪 Otestovat SMTP připojení</h3>
             <p>Odešle testovací email pro ověření konfigurace.</p>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
                 <div class="form-group">
                     <label for="test_email">Testovací emailová adresa</label>
                     <input type="email" id="test_email" name="test_email" placeholder="vas-email@example.com" required>

@@ -246,7 +246,8 @@ try {
                 $stmt->execute(['zprava_id' => $zpravaId, 'user_id' => $userId]);
 
                 // Aktualizovat počet likes
-                $pdo->exec("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = $zpravaId) WHERE id = $zpravaId");
+                $stmtLikes = $pdo->prepare("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = :zprava_id) WHERE id = :id");
+                $stmtLikes->execute(['zprava_id' => $zpravaId, 'id' => $zpravaId]);
 
                 $akce = 'unlike';
             } else {
@@ -255,7 +256,8 @@ try {
                 $stmt->execute(['zprava_id' => $zpravaId, 'user_id' => $userId]);
 
                 // Aktualizovat počet likes
-                $pdo->exec("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = $zpravaId) WHERE id = $zpravaId");
+                $stmtLikes = $pdo->prepare("UPDATE wgs_hry_chat SET likes_count = (SELECT COUNT(*) FROM wgs_hry_chat_likes WHERE zprava_id = :zprava_id) WHERE id = :id");
+                $stmtLikes->execute(['zprava_id' => $zpravaId, 'id' => $zpravaId]);
 
                 $akce = 'like';
             }

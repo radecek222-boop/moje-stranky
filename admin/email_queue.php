@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/EmailQueue.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 // Security: Admin only
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -19,6 +20,10 @@ $error = null;
 
 // Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF ochrana
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die('Neplatný CSRF token. Obnovte stránku a zkuste znovu.');
+    }
     try {
         if (isset($_POST['retry'])) {
             $queue->retry($_POST['id']);
@@ -223,8 +228,9 @@ $stats = $queue->getStats();
             <?php endif; ?>
 
             <form method="POST" style="margin-top: 1rem;">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
                 <button type="submit" name="process_now" class="btn-primary">
-                    🚀 Zpracovat frontu nyní
+                    Zpracovat frontu nyní
                 </button>
                 <a href="/admin/smtp_settings.php" class="btn-primary" style="display: inline-block; text-decoration: none; background: #6c757d;">
                     ⚙️ SMTP Nastavení
@@ -294,13 +300,15 @@ $stats = $queue->getStats();
                         <div class="email-actions">
                             <?php if ($email['status'] === 'failed'): ?>
                                 <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="id" value="<?php echo $email['id']; ?>">
-                                    <button type="submit" name="retry" class="btn-small btn-retry">🔄 Zkusit znovu</button>
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
+                                    <input type="hidden" name="id" value="<?php echo (int)$email['id']; ?>">
+                                    <button type="submit" name="retry" class="btn-small btn-retry">Zkusit znovu</button>
                                 </form>
                             <?php endif; ?>
 
                             <form method="POST" style="display: inline;">
-                                <input type="hidden" name="id" value="<?php echo $email['id']; ?>">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
+                                <input type="hidden" name="id" value="<?php echo (int)$email['id']; ?>">
                                 <button type="submit" name="delete" class="btn-small btn-delete" data-action="confirmDelete" data-confirm="Opravdu smazat?">Smazat</button>
                             </form>
                         </div>
