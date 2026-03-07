@@ -13,10 +13,15 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/EmailQueue.php';
 
 // === BEZPEČNOSTNÍ KONTROLA ===
-$tajnyKlic = getenv('CRON_SECRET_KEY') ?: 'wgs2025reminder';  // Výchozí klíč - změňte v .env!
+$tajnyKlic = getenv('CRON_SECRET_KEY');
+if (!$tajnyKlic) {
+    http_response_code(500);
+    error_log("CRON send-reminders: CRON_SECRET_KEY není nastaven v .env - spuštění odmítnuto");
+    die('Chyba konfigurace: CRON_SECRET_KEY musí být nastaven v .env');
+}
 
-// Kontrola tajného klíče
-if (!isset($_GET['key']) || $_GET['key'] !== $tajnyKlic) {
+// Kontrola tajného klíče (hash_equals brání timing útokům)
+if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
     http_response_code(403);
     error_log("CRON send-reminders: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     die('Forbidden');

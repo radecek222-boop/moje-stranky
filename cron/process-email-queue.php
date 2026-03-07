@@ -13,20 +13,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die('Method Not Allowed');
 }
 
-// Volitelné: Kontrola IP adresy (uncomment pokud chceš)
-/*
-$allowedIPs = [
-    '127.0.0.1',
-    '::1',
-    // Přidej IP adresu Českého hostingu
-];
-
-$clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-if (!in_array($clientIP, $allowedIPs)) {
+// Bezpečnostní kontrola tajného klíče
+$tajnyKlic = getenv('CRON_SECRET_KEY');
+if (!$tajnyKlic) {
+    http_response_code(500);
+    error_log("CRON process-email-queue: CRON_SECRET_KEY není nastaven v .env - spuštění odmítnuto");
+    die('Chyba konfigurace: CRON_SECRET_KEY musí být nastaven v .env');
+}
+if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
     http_response_code(403);
+    error_log("CRON process-email-queue: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     die('Forbidden');
 }
-*/
 
 // Nastavit timeout na 5 minut (pro zpracování více emailů)
 set_time_limit(300);
@@ -34,12 +32,10 @@ set_time_limit(300);
 // Logování
 $logFile = __DIR__ . '/../logs/email_queue_cron.log';
 $logDir = dirname($logFile);
-if (!file_exists($logDir)) {
-    if (!is_dir($logDir, 0755, true)) {
-    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
-        error_log('Failed to create directory: ' . $logDir, 0755, true);
+if (!is_dir($logDir)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+        error_log('Nepodařilo se vytvořit adresář pro logy: ' . $logDir);
     }
-}
 }
 
 /**

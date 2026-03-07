@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /**
  * Jednotná JSON odpověď pro admin/api endpointy
@@ -38,7 +39,7 @@ class ApiResponse
     /**
      * Vrátí chybovou odpověď
      */
-    public static function error($message = 'Došlo k chybě.', int $httpCode = 400, $details = null): void
+    public static function error(string $message = 'Došlo k chybě.', int $httpCode = 400, mixed $details = null): void
     {
         // Diagnostika - logovat vsechny chyby s kontextem
         $action = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -70,14 +71,14 @@ class ApiResponse
 }
 
 if (!function_exists('respondSuccess')) {
-    function respondSuccess($data = [], $message = null, $httpCode = 200)
+    function respondSuccess(mixed $data = [], ?string $message = null, int $httpCode = 200): void
     {
         ApiResponse::success($data, $message, null, $httpCode);
     }
 }
 
 if (!function_exists('respondError')) {
-    function respondError($message, $httpCode = 400, $details = null)
+    function respondError(string $message, int $httpCode = 400, mixed $details = null): void
     {
         ApiResponse::error($message, $httpCode, $details);
     }
@@ -85,14 +86,14 @@ if (!function_exists('respondError')) {
 
 // Aliasy pro zpětnou kompatibilitu
 if (!function_exists('sendJsonSuccess')) {
-    function sendJsonSuccess($message = null, $data = [], $httpCode = 200)
+    function sendJsonSuccess(?string $message = null, mixed $data = [], int $httpCode = 200): void
     {
         ApiResponse::success($data, $message, null, $httpCode);
     }
 }
 
 if (!function_exists('sendJsonError')) {
-    function sendJsonError($message, $httpCode = 400, $details = null)
+    function sendJsonError(string $message, int $httpCode = 400, mixed $details = null): void
     {
         ApiResponse::error($message, $httpCode, $details);
     }

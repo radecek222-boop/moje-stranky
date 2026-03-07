@@ -2,6 +2,11 @@
 /**
  * CRON Job: Automatické odesílání připomínek termínů
  *
+ * @deprecated Nahrazen souborem cron/send-reminders.php
+ *             Nová verze podporuje webcron (secret key ?key=), JSON výstup a
+ *             fallback šablonu. Pro CLI spuštění lze tento skript stále použít,
+ *             ale preferujte cron/send-reminders.php přes webcron na hostingu.
+ *
  * Tento skript se spouští každý den v 10:00 a odesílá připomenutí
  * zákazníkům, kteří mají domluvenou návštěvu ZÍTRA.
  *

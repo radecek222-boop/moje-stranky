@@ -2,6 +2,11 @@
 /**
  * Master Cron Job - Unified Daily Cleanup & Maintenance
  *
+ * @deprecated Nahrazen skriptem scripts/ultra_master_cron.php (v1.1.0, 2025-11-24)
+ *             ultra_master_cron.php obsahuje vše co tento skript + navíc:
+ *             campaign stats, AI reports, notifikace nepřečtených poznámek.
+ *             Pokud máte tento skript nastaven v cron jobu, přepněte na ultra_master_cron.php.
+ *
  * Tento skript kombinuje několik cron jobů do jednoho pro splnění limitu 5 webcronů.
  *
  * Spouští se: Denně v 02:00

@@ -37,6 +37,7 @@ $csp = [
     "media-src 'self' blob:", // Povolit blob URLs pro audio prehravac (hlasove poznamky)
     "frame-src 'self' blob:", // Povolit blob URLs v iframe (PDF preview)
     "worker-src 'self' blob:", // Povolit PDF.js workers
+    "object-src 'none'", // Zakazat Flash/plugin embed elementy
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'"

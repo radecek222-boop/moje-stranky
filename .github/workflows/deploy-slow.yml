@@ -44,6 +44,11 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
+      - name: Příprava deploye (odstranění velkých adresářů)
+        run: |
+          rm -rf node_modules backups temp migrations
+          echo "Vyřazeno: node_modules, backups, temp, migrations"
+
       - name: 🚀 Deploy to Český hosting via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:

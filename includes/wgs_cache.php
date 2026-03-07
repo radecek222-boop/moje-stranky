@@ -236,7 +236,7 @@ class WgsCache
                 continue;
             }
 
-            $data = @unserialize($obsah);
+            $data = json_decode($obsah, true);
             if (!$data || !isset($data['klic'])) {
                 continue;
             }
@@ -352,7 +352,7 @@ class WgsCache
             return null;
         }
 
-        $data = @unserialize($obsah);
+        $data = json_decode($obsah, true);
         if (!$data || !isset($data['expirace'], $data['hodnota'])) {
             return null;
         }
@@ -370,11 +370,11 @@ class WgsCache
         $soubor   = self::cestkaSouboru($klic);
         $expirace = $ttl > 0 ? (time() + $ttl) : 0;
 
-        $data = serialize([
+        $data = json_encode([
             'klic'     => $klic,
             'expirace' => $expirace,
             'hodnota'  => $hodnota,
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
 
         @file_put_contents($soubor, $data, LOCK_EX);
     }

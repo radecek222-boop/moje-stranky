@@ -171,6 +171,17 @@ if (isset($_SESSION['user_id'])) {
 
 </main>
 
+<?php if (!empty($_GET['logged_out'])): ?>
+<script>
+// Vymazat citlivá data z localStorage po odhlášení
+(function() {
+    var citliveKlice = ['currentCustomer', 'currentUser', 'visitStartTime', 'psaData'];
+    for (var i = 0; i < citliveKlice.length; i++) {
+        try { localStorage.removeItem(citliveKlice[i]); } catch(e) {}
+    }
+})();
+</script>
+<?php endif; ?>
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>

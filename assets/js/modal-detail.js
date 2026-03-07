@@ -17,7 +17,7 @@
 
   // === PRIVÁTNÍ STAV ===
 
-  var jeIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const jeIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   function jeMobilniSirka() {
     return window.innerWidth < 769;
@@ -38,7 +38,7 @@
    * Volá: Alpine detailModal.openModal() v hamburger-menu.php
    */
   function otevrit() {
-    var overlay = ziskatOverlay();
+    const overlay = ziskatOverlay();
     if (!overlay) return;
 
     overlay.classList.add('active');
@@ -58,7 +58,7 @@
 
     // Reset scroll pozice
     setTimeout(function() {
-      var obsah = ziskatObsah();
+      const obsah = ziskatObsah();
       if (obsah) {
         obsah.scrollTop = 0;
       }
@@ -70,7 +70,7 @@
    * Volá: Alpine detailModal.close() v hamburger-menu.php
    */
   function zavrit() {
-    var overlay = ziskatOverlay();
+    const overlay = ziskatOverlay();
     if (overlay) {
       overlay.classList.remove('active');
       overlay.classList.remove('ios-fullscreen');
@@ -92,7 +92,7 @@
    * @param {string} html - HTML obsah pro #modalContent
    */
   function nastavitObsah(html) {
-    var kontejner = document.getElementById('modalContent');
+    const kontejner = document.getElementById('modalContent');
     if (kontejner) {
       kontejner.innerHTML = html;
     }
@@ -103,7 +103,7 @@
    * @returns {boolean}
    */
   function jeOtevreny() {
-    var overlay = ziskatOverlay();
+    const overlay = ziskatOverlay();
     return overlay ? overlay.classList.contains('active') : false;
   }
 
