@@ -93,7 +93,8 @@ async function loadSectionsFromIndexedDB(reklamaceId) {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const objectStore = transaction.objectStore(STORE_NAME);
 
-    const request = objectStore.get(parseInt(reklamaceId));
+    const parsovaneId = parseInt(reklamaceId);
+    const request = objectStore.get(isNaN(parsovaneId) ? reklamaceId : parsovaneId);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {
@@ -131,7 +132,8 @@ async function deleteSectionsFromIndexedDB(reklamaceId) {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const objectStore = transaction.objectStore(STORE_NAME);
 
-    const request = objectStore.delete(parseInt(reklamaceId));
+    const parsovaneId = parseInt(reklamaceId);
+    const request = objectStore.delete(isNaN(parsovaneId) ? reklamaceId : parsovaneId);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {

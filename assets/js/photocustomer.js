@@ -288,12 +288,54 @@ async function handleMediaSelect(e) {
     }
   }
 
-  await saveToServer();
+  // Zobrazit miniatury okamžitě se spinnerem ukládání
+  const pocetPredTim = sections[currentSection].length - files.length;
   renderAllPreviews();
   updateProgress();
   showWaitDialog(false);
-  // Neonový toast pro úspěšný upload fotek
-  if (typeof WGSToast !== 'undefined') {
+
+  // Přidat spinner na nové miniatury
+  const previewKontejner = document.getElementById('preview-' + currentSection);
+  if (previewKontejner) {
+    const thumbsVsechny = previewKontejner.querySelectorAll('.media-thumb');
+    thumbsVsechny.forEach((thumb, i) => {
+      if (i >= pocetPredTim) {
+        const overlay = document.createElement('div');
+        overlay.className = 'thumb-ukladam-overlay';
+        const spinner = document.createElement('div');
+        spinner.className = 'thumb-ukladam-spinner';
+        overlay.appendChild(spinner);
+        thumb.appendChild(overlay);
+      }
+    });
+  }
+
+  // Uložit do IndexedDB
+  const vysledek = await saveToServer();
+
+  // Nahradit spinner za checkmark nebo chybový stav
+  if (previewKontejner) {
+    const overlays = previewKontejner.querySelectorAll('.thumb-ukladam-overlay');
+    overlays.forEach(overlay => {
+      if (vysledek && vysledek.success !== false) {
+        const checkOverlay = document.createElement('div');
+        checkOverlay.className = 'thumb-ulozeno-overlay';
+        const check = document.createElement('div');
+        check.className = 'thumb-ulozeno-check';
+        check.textContent = '\u2713';
+        checkOverlay.appendChild(check);
+        overlay.parentNode.appendChild(checkOverlay);
+        overlay.remove();
+        setTimeout(() => checkOverlay.remove(), 2000);
+      } else {
+        overlay.remove();
+      }
+    });
+  }
+
+  if (vysledek && vysledek.success === false) {
+    showAlert('Chyba při ukládání do databáze!', 'error');
+  } else if (typeof WGSToast !== 'undefined') {
     WGSToast.zobrazit(`Přidáno ${files.length} soubor(ů)`, { titulek: 'WGS' });
   } else {
     showAlert(`Přidáno ${files.length} soubor(ů)`, 'success');
