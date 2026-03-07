@@ -8,6 +8,18 @@
     RewriteBase /
 
     # ======================================
+    # WHITE LABEL subdoména: wl.wgs-service.cz → white-label.php
+    # Všechny requesty na wl subdoménu jdou na landing page
+    # Výjimky: assets, api (formulář), .well-known
+    # ======================================
+    RewriteCond %{HTTP_HOST} ^wl\.wgs-service\.cz$ [NC]
+    RewriteCond %{REQUEST_URI} !^/assets/
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteCond %{REQUEST_URI} !^/white-label(\.php)?$
+    RewriteRule ^(.*)$ /white-label.php [L]
+
+    # ======================================
     # SECURITY: Blokovat přístup k citlivým adresářům
     # ======================================
     RewriteRule ^(logs|config|backups|migrations|setup|scripts|temp)(/|$) - [F,L]
