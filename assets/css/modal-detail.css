@@ -805,6 +805,11 @@ body.ios-device #detailOverlay .modal-actions .btn {
     height: 100vh;
     height: 100dvh;
   }
+
+  /* iOS safe area — header nesmí zasahovat pod status bar */
+  #detailOverlay.ios-fullscreen .modal-header {
+    padding-top: calc(env(safe-area-inset-top, 1.5rem) + 0.75rem);
+  }
 }
 
 /* ============================================
