@@ -39,7 +39,7 @@ async function buildJs() {
     outdir: JS_DIR,
     entryNames: '[name].min',
     logLevel: 'warning',
-    target: ['es2017'],   // Kompatibilita s moderními prohlížeči
+    target: ['es2020'],   // es2020+ kvůli BigInt literálům (97n, 98n) v QR platbách
   });
 
   console.log(`[JS] Hotovo: ${soubory.length} souborů → .min.js`);
