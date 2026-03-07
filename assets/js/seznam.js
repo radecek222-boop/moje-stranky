@@ -1495,6 +1495,9 @@ async function maRozdelanouNavstevu(zaznam) {
 
     db.close();
 
+    console.log('[NavstevaCheck] Všechny záznamy v IndexedDB:', vsechnyZaznamy);
+    console.log('[NavstevaCheck] Hledám pro záznam:', { id: zaznam.id, reklamace_id: zaznam.reklamace_id, cislo: zaznam.cislo });
+
     // Porovnat s ID záznamu — klíč může být string ("WGS251116-001") nebo číslo (123)
     const idReklamace = zaznam.reklamace_id || zaznam.cislo || String(zaznam.id);
     const numericId = parseInt(zaznam.id);
@@ -1506,11 +1509,15 @@ async function maRozdelanouNavstevu(zaznam) {
       String(z.reklamaceId) === String(zaznam.id)
     );
 
+    console.log('[NavstevaCheck] Nalezeno:', nalezeno);
+
     if (!nalezeno || !nalezeno.sections) return false;
 
-    // Zkontrolovat zda jsou skutečně nahrané fotky (alespoň v jedné sekci)
-    return Object.values(nalezeno.sections).some(arr => Array.isArray(arr) && arr.length > 0);
+    const maFotky = Object.values(nalezeno.sections).some(arr => Array.isArray(arr) && arr.length > 0);
+    console.log('[NavstevaCheck] Má fotky:', maFotky, nalezeno.sections);
+    return maFotky;
   } catch (chyba) {
+    console.error('[NavstevaCheck] Chyba:', chyba);
     logger.warn('[NavstevaCheck] Chyba při kontrole IndexedDB:', chyba.message);
     return false;
   }
