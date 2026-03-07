@@ -410,6 +410,50 @@ textarea.form-control {
   background: var(--c-black);
 }
 
+/* Foto / Video - 2 sloupce */
+.foto-video-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.foto-video-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Video náhled */
+.video-thumb {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.video-thumb video {
+  width: 100%;
+  max-height: 160px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  display: block;
+  background: #000;
+}
+
+.video-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Photo Upload - KOMPAKTNĚJŠÍ */
 .photo-upload-area {
   text-align: center;

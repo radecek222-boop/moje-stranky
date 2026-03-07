@@ -25,6 +25,7 @@ const CONSTANTS = {
 
 const WGS = {
   photos: [],
+  videoSoubor: null, // Video soubor (File nebo Blob po komprimaci)
   povereniPDF: null, // PDF soubor s pověřením k reklamaci
   map: null,
   // REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
@@ -44,6 +45,7 @@ const WGS = {
     this.initMap();
     this.initForm();
     this.initPhotos();
+    this.initVideos();
     this.initPovereniPDF(); // Inicializace nahrávání PDF pověření
     this.initProvedeni();
     this.initLanguage();
@@ -914,6 +916,10 @@ const WGS = {
           await this.uploadPhotos(workflowId, csrfToken);
         }
 
+        if (this.videoSoubor) {
+          await this.uploadVideo(workflowId, csrfToken);
+        }
+
         // Cleanup: Vyčistit PDF pověření po úspěšném uložení
         if (this.povereniPDF) {
           this.povereniPDF = null;
@@ -1018,7 +1024,90 @@ const WGS = {
       }
     });
   },
-  
+
+  initVideos() {
+    const btn = document.getElementById('uploadVideoBtn');
+    const videoInput = document.getElementById('videoInput');
+    if (!btn || !videoInput) return;
+
+    btn.addEventListener('click', () => videoInput.click());
+    videoInput.addEventListener('change', async (e) => {
+      const soubor = e.target.files[0];
+      if (!soubor) return;
+
+      const maxVelikost = 524288000; // 500 MB (stejně jako videotéka)
+      if (soubor.size > maxVelikost) {
+        this.toast('Video je příliš velké. Maximum je 500 MB.', 'error');
+        videoInput.value = '';
+        return;
+      }
+
+      // Komprese stejně jako ve videotéce (max 1920x1080, 2.5 Mbps, 30fps)
+      let zpracovanyVideo = soubor;
+      if (typeof MediaRecorder !== 'undefined') {
+        try {
+          this.toast('Komprimuji video...', 'info');
+          const komprimovany = await komprimovatVideoObjednavka(soubor);
+          zpracovanyVideo = new File([komprimovany], soubor.name.replace(/\.[^.]+$/, '.webm'), { type: komprimovany.type });
+        } catch (chyba) {
+          logger.warn('[Video] Komprese selhala, nahrávám originál:', chyba.message);
+          zpracovanyVideo = soubor;
+        }
+      }
+
+      this.videoSoubor = zpracovanyVideo;
+      this.renderVideo();
+
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Video přidáno', { titulek: 'WGS' });
+      } else {
+        this.toast('Video přidáno', 'success');
+      }
+    });
+  },
+
+  renderVideo() {
+    const kontejner = document.getElementById('videoPreviewMain');
+    if (!kontejner) return;
+    kontejner.innerHTML = '';
+    if (!this.videoSoubor) return;
+
+    const url = URL.createObjectURL(this.videoSoubor);
+    const obal = document.createElement('div');
+    obal.className = 'video-thumb';
+    obal.innerHTML = `
+      <video src="${url}" controls></video>
+      <button class="video-remove" title="Odebrat video">×</button>
+    `;
+    obal.querySelector('.video-remove').addEventListener('click', () => {
+      this.videoSoubor = null;
+      document.getElementById('videoInput').value = '';
+      this.renderVideo();
+    });
+    kontejner.appendChild(obal);
+  },
+
+  async uploadVideo(reklamaceId, csrfToken) {
+    if (!this.videoSoubor) return;
+    try {
+      const formData = new FormData();
+      formData.append('reklamace_id', reklamaceId);
+      formData.append('csrf_token', csrfToken);
+      formData.append('video', this.videoSoubor, this.videoSoubor.name);
+
+      const odpoved = await fetch('app/controllers/save_video.php', {
+        method: 'POST',
+        body: formData
+      });
+      const vysledek = await odpoved.json();
+      if (vysledek.status !== 'success') {
+        logger.warn('[Video] Upload selhal:', vysledek.message);
+      }
+    } catch (chyba) {
+      logger.warn('[Video] Chyba při uploadu:', chyba.message);
+    }
+  },
+
   // PRAVIDLO: Zadna rotace, zadna deformace, pouze komprese
   // Orientace se NIKDY nemeni - prohlizec aplikuje EXIF automaticky
   async compressImage(file) {
@@ -1475,5 +1564,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Komprimace videa - stejný princip jako ve videotéce
+// Max 1920x1080, 2.5 Mbps, 30 FPS
+async function komprimovatVideoObjednavka(videoSoubor) {
+  return new Promise((resolve, reject) => {
+    try {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.playsInline = true;
+
+      video.onloadedmetadata = () => {
+        const sirka = video.videoWidth;
+        const vyska = video.videoHeight;
+
+        let cilSirka = sirka;
+        let cilVyska = vyska;
+        if (sirka > 1920 || vyska > 1080) {
+          const pomer = Math.min(1920 / sirka, 1080 / vyska);
+          cilSirka = Math.round(sirka * pomer);
+          cilVyska = Math.round(vyska * pomer);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cilSirka;
+        canvas.height = cilVyska;
+        const ctx = canvas.getContext('2d');
+        const stream = canvas.captureStream(30);
+
+        const mimeTypy = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+        let vybranyMime = '';
+        for (const mime of mimeTypy) {
+          if (MediaRecorder.isTypeSupported(mime)) {
+            vybranyMime = mime;
+            break;
+          }
+        }
+
+        if (!vybranyMime) {
+          reject(new Error('Žádný video kodek není podporován'));
+          return;
+        }
+
+        let recorder;
+        try {
+          recorder = new MediaRecorder(stream, { mimeType: vybranyMime, videoBitsPerSecond: 2500000 });
+        } catch (e) {
+          recorder = new MediaRecorder(stream, { mimeType: vybranyMime });
+        }
+
+        const kusy = [];
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) kusy.push(e.data); };
+        recorder.onstop = () => resolve(new Blob(kusy, { type: vybranyMime }));
+
+        video.onplay = () => {
+          const kreslit = () => {
+            if (video.paused || video.ended) { recorder.stop(); return; }
+            ctx.drawImage(video, 0, 0, cilSirka, cilVyska);
+            requestAnimationFrame(kreslit);
+          };
+          recorder.start();
+          requestAnimationFrame(kreslit);
+        };
+
+        video.onended = () => { if (recorder.state === 'recording') recorder.stop(); };
+        video.onerror = () => reject(new Error('Chyba načítání videa'));
+
+        video.src = URL.createObjectURL(videoSoubor);
+        video.play().catch(reject);
+      };
+
+      video.onerror = () => reject(new Error('Nepodařilo se načíst video'));
+      video.src = URL.createObjectURL(videoSoubor);
+    } catch (chyba) {
+      reject(chyba);
+    }
+  });
+}
 
 // Dynamický text pro fakturaci
