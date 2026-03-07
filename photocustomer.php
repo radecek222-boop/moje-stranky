@@ -114,6 +114,15 @@ if (!$isAdmin && !$isTechnik) {
     </div>
   </div>
   
+  <!-- BANNER: PŘIDAT FOTKY K EXISTUJÍCÍ FOTODOKUMENTACI -->
+  <div class="pridej-banner" id="bannerPridej" style="display:none;"></div>
+
+  <!-- EXISTUJÍCÍ FOTKY ZE SERVERU (pouze zobrazení) -->
+  <div class="existujici-fotky-sekce" id="existujiciFotkySekce" style="display:none;">
+    <div class="section-header">Existující fotky</div>
+    <div id="existujiciFotkyMrizka" class="existujici-fotky-mrizka"></div>
+  </div>
+
   <!-- SEKCE VIDEO - Nahrání do videotéky -->
   <div class="video-section" id="videoSection">
     <div class="section-header">Video</div>

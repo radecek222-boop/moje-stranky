@@ -140,6 +140,7 @@ function loadCustomerData() {
 async function loadExistingMedia() {
   const urlParams = new URLSearchParams(window.location.search);
   const forceNew = urlParams.get('new');
+  const pridejMod = urlParams.get('pridej') === 'true';
 
   // ?new=true — pouze při explicitním kliknutí na "Začít novou návštěvu" v UI
   if (forceNew === 'true') {
@@ -147,6 +148,11 @@ async function loadExistingMedia() {
     sections = { before: [], id: [], problem: [], damage_part: [], new_part: [], repair: [], after: [] };
     logger.log('[Photo] Nová návštěva — IndexedDB vyčištěna');
     return;
+  }
+
+  // ?pridej=true — přidání fotek k existující fotodokumentaci
+  if (pridejMod) {
+    await zobrazExistujiciFotkyZDB();
   }
 
   // Načíst rozpracované fotky z IndexedDB
@@ -159,6 +165,74 @@ async function loadExistingMedia() {
   } else {
     sections = { before: [], id: [], problem: [], damage_part: [], new_part: [], repair: [], after: [] };
     logger.log('[Photo] Žádné rozpracované fotky — prázdné sekce');
+  }
+}
+
+// Načte existující fotky ze serveru a zobrazí je jako přehled (pouze čtení)
+async function zobrazExistujiciFotkyZDB() {
+  const reklamaceId = getStorageKey();
+  if (!reklamaceId) {
+    logger.warn('[PridejMod] Chybí reklamace ID, nelze načíst existující fotky');
+    return;
+  }
+
+  try {
+    const odpoved = await fetch(`/api/get_photos_api.php?reklamace_id=${encodeURIComponent(reklamaceId)}`);
+    const data = await odpoved.json();
+
+    if (!data.success || !data.photos || data.photos.length === 0) {
+      logger.log('[PridejMod] Žádné existující fotky v databázi');
+      return;
+    }
+
+    logger.log(`[PridejMod] Nalezeno ${data.photos.length} existujících fotek`);
+
+    // Zobrazit banner
+    const banner = document.getElementById('bannerPridej');
+    if (banner) {
+      banner.textContent = `Přidáváte fotky k existující fotodokumentaci (${data.photos.length} fotek)`;
+      banner.style.display = 'block';
+    }
+
+    // Zobrazit sekci s existujícími fotkami
+    const sekce = document.getElementById('existujiciFotkySekce');
+    const mrizka = document.getElementById('existujiciFotkyMrizka');
+    if (sekce && mrizka) {
+      sekce.style.display = 'block';
+      mrizka.innerHTML = '';
+
+      const nazvySekci = {
+        'before': 'Before',
+        'id': 'ID',
+        'problem': 'Detail Bug',
+        'damage_part': 'Damage Part',
+        'new_part': 'New Part',
+        'repair': 'Repair',
+        'after': 'After'
+      };
+
+      data.photos.forEach(foto => {
+        const obal = document.createElement('div');
+        obal.className = 'existujici-foto-obal';
+
+        const img = document.createElement('img');
+        img.className = 'existujici-foto-nahled';
+        img.src = '/' + foto.photo_path;
+        img.alt = nazvySekci[foto.section_name] || foto.section_name;
+        img.loading = 'lazy';
+
+        const popisek = document.createElement('div');
+        popisek.className = 'existujici-foto-popisek';
+        popisek.textContent = nazvySekci[foto.section_name] || foto.section_name;
+
+        obal.appendChild(img);
+        obal.appendChild(popisek);
+        mrizka.appendChild(obal);
+      });
+    }
+
+  } catch (chyba) {
+    logger.error('[PridejMod] Chyba při načítání existujících fotek:', chyba);
   }
 }
 
