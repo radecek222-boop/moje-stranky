@@ -1432,6 +1432,10 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <!-- modal-detail.js MUSÍ být před seznam.js (ModalManager volá ModalDetail) -->
 <script src="/assets/js/modal-detail.js?v=<?= filemtime(__DIR__ . '/assets/js/modal-detail.js') ?>" defer></script>
 <script src="/assets/js/seznam.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam.js') ?>" defer></script>
+<!-- Moduly seznam.js (načteny po seznam.js, sdílejí globální stav) -->
+<script src="/assets/js/seznam-mapa.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-mapa.js') ?>" defer></script>
+<script src="/assets/js/seznam-fototeka.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-fototeka.js') ?>" defer></script>
+<script src="/assets/js/seznam-videoteka.js?v=<?= filemtime(__DIR__ . '/assets/js/seznam-videoteka.js') ?>" defer></script>
 
 <!-- DIAGNOSTIKA: Debug log pro prodejce -->
 <script>
