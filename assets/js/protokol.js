@@ -1131,27 +1131,8 @@ function showNotif(type, message) {
 }
 
 async function attachPhotos() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.multiple = true;
-  input.capture = "environment";
-  input.classList.add("hidden");
-  document.body.appendChild(input);
-  input.onchange = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    showNotif("success", "Zpracovávám fotky...");
-    for (const file of files) {
-      const compressed = await compressImage(file, 0.6);
-      const base64 = await toBase64(compressed);
-      attachedPhotos.push(base64);
-    }
-    renderPhotoPreview(attachedPhotos);
-    showNotif("success", `${files.length} fotek přidáno`);
-    input.remove();
-  };
-  input.click();
+  // Přejít na photocustomer pro přidání fotek k existující fotodokumentaci
+  window.location.href = 'photocustomer.php?pridej=true';
 }
 
 async function compressImage(file, maxMB = 0.6) {
