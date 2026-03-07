@@ -21,11 +21,11 @@ try {
     $pdo = getDbConnection();
 
     // Validace vstupních dat
-    $id = $_GET['id'] ?? '';
+    $id = (int)($_GET['id'] ?? 0);
     $jazyk = $_GET['jazyk'] ?? 'cz';  // Vždy CZ
     $index = (int)($_GET['index'] ?? 0);
 
-    if (empty($id) || !is_numeric($id)) {
+    if ($id <= 0) {
         sendJsonError('Chybí nebo neplatné ID aktuality');
     }
 

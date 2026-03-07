@@ -6,13 +6,12 @@
  * Můžete jej spustit vícekrát - existující .env nebude přepsán bez potvrzení
  */
 
-// Bezpečnostní kontrola - pouze z localhostu nebo s admin přístupem
+// Bezpečnostní kontrola - vyžaduje admin přihlášení vždy
 session_start();
-$isLocalhost = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1', 'localhost']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-if (!$isLocalhost && !$isAdmin) {
-    die("<h1>PŘÍSTUP ODEPŘEN</h1><p>Tento skript může spustit pouze administrátor nebo z localhostu.</p>");
+if (!$isAdmin) {
+    die("<h1>PŘÍSTUP ODEPŘEN</h1><p>Tento skript může spustit pouze přihlášený administrátor.</p>");
 }
 
 $rootPath = __DIR__;

@@ -34,7 +34,9 @@ try {
 
     // Parametry
     $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
-    $itemId = $_GET['id'] ?? $_POST['id'] ?? null;
+    $itemId = isset($_GET['id']) || isset($_POST['id'])
+        ? intval($_GET['id'] ?? $_POST['id'] ?? 0)
+        : null;
 
     // ========================================
     // ACTION ROUTING

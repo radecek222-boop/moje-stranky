@@ -18,16 +18,20 @@ if (!$isAdmin) {
 
 $pdo = getDbConnection();
 
-// Získat časové období (výchozí = týden)
-$obdobi = $_GET['obdobi'] ?? 'tyden';
+// Získat časové období — whitelist validace (žádná interpolace user vstupu)
+$platnaObdobi = ['dnes', 'vcera', 'tyden', 'mesic', 'rok'];
+$obdobi = in_array($_GET['obdobi'] ?? '', $platnaObdobi, true)
+    ? $_GET['obdobi']
+    : 'tyden';
+
 $obdobiMap = [
-    'dnes' => 'DATE(created_at) = CURDATE()',
+    'dnes'  => 'DATE(created_at) = CURDATE()',
     'vcera' => 'DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)',
     'tyden' => 'created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)',
     'mesic' => 'created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)',
-    'rok' => 'created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
+    'rok'   => 'created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
 ];
-$whereObdobi = $obdobiMap[$obdobi] ?? $obdobiMap['tyden'];
+$whereObdobi = $obdobiMap[$obdobi];
 
 // === ZÍSKÁNÍ DAT ===
 
