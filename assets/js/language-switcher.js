@@ -115,12 +115,12 @@
         console.error('[WGS] Překlad aktualit přeskočen: CSRF token není dostupný.',
           'Zkontroluj, zda init.php generuje <meta name="csrf-token"> a zda se načítá csrf-auto-inject.js.');
         loadingDiv.remove();
-        const hlaška = 'Překlad nelze spustit: chybí bezpečnostní token.\nObnov stránku a zkus znovu.';
+        const hlaska = 'Překlad nelze spustit: chybí bezpečnostní token.\nObnov stránku a zkus znovu.';
         if (typeof window.wgsToast !== 'undefined') {
-          window.wgsToast.error(hlaška);
+          window.wgsToast.error(hlaska);
         } else {
           // Fallback — wgsToast nedostupný (např. stránka se teprve načítá)
-          alert(hlaška);
+          alert(hlaska);
         }
         return false;
       }
@@ -143,12 +143,15 @@
         clearTimeout(timeoutId);
         const data = await response.json();
 
-        if (data.status === 'success') {
-        } else {
+        if (data.status !== 'success') {
+          // Serverová chyba překladu — vrátit false, caller nepřepne jazyk
           console.error('Chyba překladu:', data.message);
+          loadingDiv.remove();
+          return false;
         }
       } catch (fetchError) {
         if (fetchError.name === 'AbortError') {
+          // Timeout — překlad mohl částečně proběhnout, nechat caller pokračovat
         } else {
           throw fetchError;
         }
