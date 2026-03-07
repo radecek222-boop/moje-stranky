@@ -726,9 +726,14 @@
   margin: 0 !important;
 }
 
-/* iOS safe area — header musí být pod status barem (notch/Dynamic Island) */
+/* iOS safe area — header musí být pod status barem (notch/Dynamic Island)
+   max() zajistí minimálně 2.5rem bez ohledu na to, co env() vrátí */
 #detailOverlay.ios-fullscreen .modal-header {
-  padding-top: calc(env(safe-area-inset-top, 44px) + 0.5rem) !important;
+  padding-top: 2.5rem !important; /* fallback pro prohlížeče bez max() */
+  padding-top: max(env(safe-area-inset-top, 0px), 2.5rem) !important; /* iOS safe area */
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 /* PWA touch cíle — větší pro prst */
@@ -832,6 +837,12 @@ body.ios-device #detailOverlay .modal-actions .btn {
     max-height: 90dvh;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+  }
+
+  /* PWA fullscreen — zaručit odsazení headeru od status baru (záloha bez JS) */
+  #detailOverlay.ios-fullscreen .modal-header {
+    padding-top: 2.5rem !important; /* fallback */
+    padding-top: max(env(safe-area-inset-top, 0px), 2.5rem) !important;
   }
 
   /* PWA — tlačítka větší pro lepší touch */
