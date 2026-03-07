@@ -706,10 +706,10 @@
   overflow: hidden !important;
 }
 
-/* Modal-content v iOS fullscreen — zabere celou výšku */
+/* Modal-content v iOS fullscreen — zabere celou výšku, posunutý pod status bar */
 #detailOverlay.ios-fullscreen .modal-content {
   position: absolute !important;
-  top: 0 !important;
+  top: env(safe-area-inset-top, 44px) !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
@@ -806,10 +806,6 @@ body.ios-device #detailOverlay .modal-actions .btn {
     height: 100dvh;
   }
 
-  /* iOS safe area — header nesmí zasahovat pod status bar */
-  #detailOverlay.ios-fullscreen .modal-header {
-    padding-top: calc(env(safe-area-inset-top, 1.5rem) + 2rem);
-  }
 }
 
 /* ============================================
