@@ -41,18 +41,22 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/vendor/**
             **/tests/**
             **/test/**
             **/.github/**
             **/.vscode/**
             **/README.md
             **/CONTRIBUTING.md
+            **/CLAUDE.md
             **/LICENSE
             **/*.log
             **/phpunit.xml
             **/composer.lock
             **/.env.example
             **/temp/**
+            **/backups/**
+            **/migrations/**
             **/uploads/screens
 
       - name: ✅ Hotovo!

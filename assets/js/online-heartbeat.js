@@ -11,12 +11,12 @@
     'use strict';
 
     // Konfigurace
-    var HEARTBEAT_INTERVAL = 30000; // 30 sekund
-    var API_ENDPOINT = '/api/heartbeat.php';
+    const HEARTBEAT_INTERVAL = 30000; // 30 sekund
+    const API_ENDPOINT = '/api/heartbeat.php';
 
     // Stav
-    var heartbeatTimer = null;
-    var isRunning = false;
+    let heartbeatTimer = null;
+    let isRunning = false;
 
     /**
      * Odesle heartbeat na server
