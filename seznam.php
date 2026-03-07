@@ -121,6 +121,29 @@ if (!$isLoggedIn && !$isAdmin) {
    Neupravovat #detailOverlay zde — jen v modal-detail.css
    ============================================ */
 
+/* Banner: Vrátit se na návštěvu */
+.navsteva-banner {
+  background: #dc3545;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: navstevaBlinkuj 1.2s ease-in-out infinite;
+  user-select: none;
+}
+.navsteva-banner:active {
+  opacity: 0.8;
+}
+@keyframes navstevaBlinkuj {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .search-bar {
   margin-top: 2rem !important;
 }

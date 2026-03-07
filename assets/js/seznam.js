@@ -1272,6 +1272,19 @@ async function showDetail(recordOrId) {
   const status = getStatus(record.stav);
   
   const isCompleted = Utils.isCompleted(record);
+  const jeRoleProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+
+  // Zkontrolovat rozpracovanou návštěvu (pouze technici, nehotové zakázky)
+  let bannerNavsteva = '';
+  if (!isCompleted && !jeRoleProdejce) {
+    const maRozdelano = await maRozdelanouNavstevu(record);
+    if (maRozdelano) {
+      bannerNavsteva = `
+        <div class="navsteva-banner" data-action="startVisit" data-id="${record.id}">
+          Vrátit se na návštěvu
+        </div>`;
+    }
+  }
 
   let buttonsHtml = '';
   let dokoncenoDatum, dokoncenoData, dokoncenoCas, jeProdejce;
@@ -1351,6 +1364,7 @@ async function showDetail(recordOrId) {
   
   const content = `
     ${createCustomerHeader()}
+    ${bannerNavsteva}
 
     <div class="modal-body">
       ${buttonsHtml}
@@ -1439,6 +1453,64 @@ function normalizeCustomerData(data) {
   }
   
   return normalized;
+}
+
+// === KONTROLA ROZPRACOVANÉ NÁVŠTĚVY ===
+// Zkontroluje zda má technik uložené fotky v IndexedDB pro daný záznam
+async function maRozdelanouNavstevu(zaznam) {
+  if (!window.indexedDB) return false;
+  try {
+    const db = await new Promise((resolve) => {
+      const pozadavek = indexedDB.open('WGS_PhotoStorage', 1);
+      pozadavek.onsuccess = () => resolve(pozadavek.result);
+      pozadavek.onerror = () => resolve(null);
+      pozadavek.onupgradeneeded = (udalost) => {
+        // Nová DB — vytvořit store aby onsuccess proběhl korektně
+        const novaDb = udalost.target.result;
+        if (!novaDb.objectStoreNames.contains('photoSections')) {
+          novaDb.createObjectStore('photoSections', { keyPath: 'reklamaceId' });
+        }
+      };
+    });
+    if (!db) return false;
+
+    // Pokud store neexistuje, žádná data nejsou uložena
+    if (!db.objectStoreNames.contains('photoSections')) {
+      db.close();
+      return false;
+    }
+
+    // Načíst všechny záznamy z IndexedDB
+    const vsechnyZaznamy = await new Promise((resolve) => {
+      try {
+        const transakce = db.transaction(['photoSections'], 'readonly');
+        const uloziste = transakce.objectStore('photoSections');
+        const pozadavek = uloziste.getAll();
+        pozadavek.onsuccess = () => resolve(pozadavek.result || []);
+        pozadavek.onerror = () => resolve([]);
+      } catch (chyba) {
+        resolve([]);
+      }
+    });
+
+    db.close();
+
+    // Porovnat s ID záznamu (IndexedDB ukládá reklamaceId jako parseInt)
+    const numericId = parseInt(zaznam.id);
+    const nalezeno = vsechnyZaznamy.find(z =>
+      z.reklamaceId === numericId ||
+      (zaznam.reklamace_id && z.reklamaceId === parseInt(zaznam.reklamace_id)) ||
+      (zaznam.cislo && z.reklamaceId === parseInt(zaznam.cislo))
+    );
+
+    if (!nalezeno || !nalezeno.sections) return false;
+
+    // Zkontrolovat zda jsou skutečně nahrané fotky (alespoň v jedné sekci)
+    return Object.values(nalezeno.sections).some(arr => Array.isArray(arr) && arr.length > 0);
+  } catch (chyba) {
+    logger.warn('[NavstevaCheck] Chyba při kontrole IndexedDB:', chyba.message);
+    return false;
+  }
 }
 
 // === ZAHÁJIT NÁVŠTĚVU ===
