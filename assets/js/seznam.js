@@ -1687,7 +1687,7 @@ async function showCustomerDetail(id) {
               </button>
             </div>
 
-            <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <span style="color: #aaa; font-weight: 600;">E-mail:</span>
             <div style="position:relative;">
               <input type="email" id="edit_email" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 1.6rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
               <button onclick="
