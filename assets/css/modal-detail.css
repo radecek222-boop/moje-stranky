@@ -94,8 +94,8 @@
    ============================================ */
 
 #detailOverlay .modal-header {
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
-  padding: 0.4rem 1.5rem !important;
+  /* Žádné explicitní pozadí — dědí #1a1a1a z .modal-content */
+  padding: 0.3rem 1rem !important;
   text-align: center !important;
   border-bottom: 1px solid #333333 !important;
   box-shadow: none !important;
@@ -309,7 +309,7 @@
 #detailOverlay select {
   background: #f8f8f8;
   border-color: #e0e0e0;
-  color: #333333;
+  color: #333333 !important; /* !important zabrání dočasnému bílému textu zděděnému z .modal-content */
 }
 
 #detailOverlay input:focus,
@@ -324,7 +324,7 @@
 #detailOverlay .field-textarea::placeholder,
 #detailOverlay input::placeholder,
 #detailOverlay textarea::placeholder {
-  color: #999999;
+  color: #999999 !important;
 }
 
 /* iOS FIX: textarea nesmí zachytávat touch scroll
@@ -680,12 +680,11 @@
      overlay.classList.add('ios-fullscreen')
    ============================================ */
 
-/* Overlay v iOS fullscreen režimu — přepíše display:flex */
+/* Overlay v iOS fullscreen režimu — přepíše display:flex
+   Overlay NEPOSUNUJE (overflow:hidden), scroll řídí .modal-content */
 #detailOverlay.ios-fullscreen {
   display: block !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
+  overflow: hidden !important;
 }
 
 /* Modal-content v iOS fullscreen — zabere celou výšku */
@@ -754,6 +753,11 @@ body.ios-device #detailOverlay .modal-actions .btn {
 
   #detailOverlay .modal-header {
     padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #1a1a1a; /* Sticky header musí mít explicitní pozadí */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 
   #detailOverlay .modal-title {
@@ -763,6 +767,17 @@ body.ios-device #detailOverlay .modal-actions .btn {
 
   #detailOverlay .modal-subtitle {
     font-size: 0.75rem;
+  }
+
+  /* 44px touch cíl pro close tlačítko na mobilu (Apple HIG) */
+  #detailOverlay .modal-close-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    font-size: 1.3rem !important;
   }
 
   /* iOS fullscreen na mobilu — bez border-radius a padding */

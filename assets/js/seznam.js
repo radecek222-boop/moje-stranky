@@ -1294,7 +1294,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-          <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+          <button class="detail-btn detail-btn-primary" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
@@ -1322,7 +1322,7 @@ async function showDetail(recordOrId) {
     technickaFunkce = !jeProdejceElse ? `
         <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+        <button class="detail-btn detail-btn-primary" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     const jeDesktopBtn = window.innerWidth >= 769;
