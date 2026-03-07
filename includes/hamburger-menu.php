@@ -1332,7 +1332,7 @@ document.addEventListener('alpine:init', () => {
 </script>
 
 <!-- Centralizovaná utilita pro zamykání scrollu -->
-<script src="/assets/js/scroll-lock.min.js" defer></script>
+<script src="/assets/js/scroll-lock.min.js?v=<?= filemtime(__DIR__ . '/../assets/js/scroll-lock.min.js') ?>" defer></script>
 
 <!-- Step 41: Hamburger Menu migrace na Alpine.js - vanilla JS odstraněn -->
 
