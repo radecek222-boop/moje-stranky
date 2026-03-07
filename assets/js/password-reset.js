@@ -5,28 +5,6 @@
 
 let currentUserData = null;
 
-async function getCsrfTokenFromForm(form) {
-  if (!form) return null;
-  const input = form.querySelector('input[name="csrf_token"]');
-  if (input && input.value) {
-    return input.value;
-  }
-
-  try {
-    const response = await fetch('app/controllers/get_csrf_token.php', {
-      credentials: 'same-origin'
-    });
-    const data = await response.json();
-    if ((data.status === 'success' || data.success === true) && data.token) {
-      if (input) input.value = data.token;
-      return data.token;
-    }
-  } catch (error) {
-    logger.error('CSRF fetch failed:', error);
-  }
-  return null;
-}
-
 // ============================================================
 // STEP 1: VERIFY IDENTITY
 // ============================================================
@@ -44,7 +22,7 @@ if (verifyForm) {
     }
     
     try {
-      const csrfToken = await getCsrfTokenFromForm(verifyForm);
+      const csrfToken = await fetchCsrfToken();
       if (!csrfToken) {
         showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.', 'error');
         return;
@@ -110,7 +88,7 @@ if (changePasswordForm) {
     }
     
     try {
-      const csrfToken = await getCsrfTokenFromForm(changePasswordForm);
+      const csrfToken = await fetchCsrfToken();
       if (!csrfToken) {
         showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.', 'error');
         return;
