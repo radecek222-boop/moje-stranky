@@ -22,10 +22,21 @@
      * Odesle heartbeat na server
      */
     function sendHeartbeat() {
+        // CSRF token - poskytnut csrf-auto-inject.js pri nacteni stranky
+        const csrfToken = window.csrfTokenCache || '';
+        if (!csrfToken) {
+            // Token jeste neni dostupny - preskocit tento cyklus
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+
         // Pouzit POST aby se obchazela cache
         fetch(API_ENDPOINT, {
             method: 'POST',
             credentials: 'same-origin',
+            body: formData,
             headers: {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache'

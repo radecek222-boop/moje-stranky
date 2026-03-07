@@ -13,8 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die('Method Not Allowed');
 }
 
-// Bezpečnostní kontrola tajného klíče (stejný vzor jako cron/send-reminders.php)
-$tajnyKlic = getenv('CRON_SECRET_KEY') ?: 'wgs2025emailqueue';
+// Bezpečnostní kontrola tajného klíče
+$tajnyKlic = getenv('CRON_SECRET_KEY');
+if (!$tajnyKlic) {
+    http_response_code(500);
+    error_log("CRON process-email-queue: CRON_SECRET_KEY není nastaven v .env - spuštění odmítnuto");
+    die('Chyba konfigurace: CRON_SECRET_KEY musí být nastaven v .env');
+}
 if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
     http_response_code(403);
     error_log("CRON process-email-queue: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));

@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -16,6 +17,12 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 // Pouze prihlaseni uzivatele
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Neprihlaseno']);
+    exit;
+}
+
+// Validace CSRF tokenu
+if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    echo json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']);
     exit;
 }
 
