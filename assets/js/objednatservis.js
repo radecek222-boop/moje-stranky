@@ -25,7 +25,7 @@ const CONSTANTS = {
 
 const WGS = {
   photos: [],
-  videoSoubor: null, // Video soubor (File nebo Blob po komprimaci)
+  videa: [], // Video soubory (max 5)
   povereniPDF: null, // PDF soubor s pověřením k reklamaci
   map: null,
   // REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
@@ -916,7 +916,7 @@ const WGS = {
           await this.uploadPhotos(workflowId, csrfToken);
         }
 
-        if (this.videoSoubor) {
+        if (this.videa && this.videa.length > 0) {
           await this.uploadVideo(workflowId, csrfToken);
         }
 
@@ -1032,36 +1032,47 @@ const WGS = {
 
     btn.addEventListener('click', () => videoInput.click());
     videoInput.addEventListener('change', async (e) => {
-      const soubor = e.target.files[0];
-      if (!soubor) return;
+      const soubory = Array.from(e.target.files);
+      if (!soubory.length) return;
 
-      const maxVelikost = 524288000; // 500 MB (stejně jako videotéka)
-      if (soubor.size > maxVelikost) {
-        this.toast('Video je příliš velké. Maximum je 500 MB.', 'error');
+      const maxVidei = 5;
+      if (this.videa.length + soubory.length > maxVidei) {
+        this.toast(`Maximálně ${maxVidei} videí`, 'error');
         videoInput.value = '';
         return;
       }
 
-      // Komprese stejně jako ve videotéce (max 1920x1080, 2.5 Mbps, 30fps)
-      let zpracovanyVideo = soubor;
-      if (typeof MediaRecorder !== 'undefined') {
-        try {
-          this.toast('Komprimuji video...', 'info');
-          const komprimovany = await komprimovatVideoObjednavka(soubor);
-          zpracovanyVideo = new File([komprimovany], soubor.name.replace(/\.[^.]+$/, '.webm'), { type: komprimovany.type });
-        } catch (chyba) {
-          logger.warn('[Video] Komprese selhala, nahrávám originál:', chyba.message);
-          zpracovanyVideo = soubor;
+      const maxVelikost = 524288000; // 500 MB
+      for (const soubor of soubory) {
+        if (soubor.size > maxVelikost) {
+          this.toast(`Video "${soubor.name}" je příliš velké. Maximum je 500 MB.`, 'error');
+          videoInput.value = '';
+          return;
         }
       }
 
-      this.videoSoubor = zpracovanyVideo;
+      this.toast(`Zpracovávám ${soubory.length} video(s)...`, 'info');
+
+      for (const soubor of soubory) {
+        let zpracovany = soubor;
+        if (typeof MediaRecorder !== 'undefined') {
+          try {
+            const komprimovany = await komprimovatVideoObjednavka(soubor);
+            zpracovany = new File([komprimovany], soubor.name.replace(/\.[^.]+$/, '.webm'), { type: komprimovany.type });
+          } catch (chyba) {
+            logger.warn('[Video] Komprese selhala, nahrávám originál:', chyba.message);
+          }
+        }
+        this.videa.push(zpracovany);
+      }
+
+      videoInput.value = '';
       this.renderVideo();
 
       if (typeof WGSToast !== 'undefined') {
-        WGSToast.zobrazit('Video přidáno', { titulek: 'WGS' });
+        WGSToast.zobrazit(`Přidáno ${soubory.length} video(s)`, { titulek: 'WGS' });
       } else {
-        this.toast('Video přidáno', 'success');
+        this.toast(`Přidáno ${soubory.length} video(s)`, 'success');
       }
     });
   },
@@ -1070,41 +1081,43 @@ const WGS = {
     const kontejner = document.getElementById('videoPreviewMain');
     if (!kontejner) return;
     kontejner.innerHTML = '';
-    if (!this.videoSoubor) return;
 
-    const url = URL.createObjectURL(this.videoSoubor);
-    const obal = document.createElement('div');
-    obal.className = 'video-thumb';
-    obal.innerHTML = `
-      <video src="${url}" controls></video>
-      <button class="video-remove" title="Odebrat video">×</button>
-    `;
-    obal.querySelector('.video-remove').addEventListener('click', () => {
-      this.videoSoubor = null;
-      document.getElementById('videoInput').value = '';
-      this.renderVideo();
+    this.videa.forEach((video, index) => {
+      const url = URL.createObjectURL(video);
+      const obal = document.createElement('div');
+      obal.className = 'video-thumb';
+      obal.innerHTML = `
+        <video src="${url}" controls></video>
+        <button class="video-remove" title="Odebrat video">×</button>
+      `;
+      obal.querySelector('.video-remove').addEventListener('click', () => {
+        this.videa.splice(index, 1);
+        this.renderVideo();
+      });
+      kontejner.appendChild(obal);
     });
-    kontejner.appendChild(obal);
   },
 
   async uploadVideo(reklamaceId, csrfToken) {
-    if (!this.videoSoubor) return;
-    try {
-      const formData = new FormData();
-      formData.append('reklamace_id', reklamaceId);
-      formData.append('csrf_token', csrfToken);
-      formData.append('video', this.videoSoubor, this.videoSoubor.name);
+    if (!this.videa || this.videa.length === 0) return;
+    for (const video of this.videa) {
+      try {
+        const formData = new FormData();
+        formData.append('reklamace_id', reklamaceId);
+        formData.append('csrf_token', csrfToken);
+        formData.append('video', video, video.name);
 
-      const odpoved = await fetch('app/controllers/save_video.php', {
-        method: 'POST',
-        body: formData
-      });
-      const vysledek = await odpoved.json();
-      if (vysledek.status !== 'success') {
-        logger.warn('[Video] Upload selhal:', vysledek.message);
+        const odpoved = await fetch('app/controllers/save_video.php', {
+          method: 'POST',
+          body: formData
+        });
+        const vysledek = await odpoved.json();
+        if (vysledek.status !== 'success') {
+          logger.warn('[Video] Upload selhal:', vysledek.message);
+        }
+      } catch (chyba) {
+        logger.warn('[Video] Chyba při uploadu:', chyba.message);
       }
-    } catch (chyba) {
-      logger.warn('[Video] Chyba při uploadu:', chyba.message);
     }
   },
 

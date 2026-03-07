@@ -461,7 +461,8 @@ textarea.form-control {
 }
 
 .btn-photo {
-  display: inline-block;
+  display: block;
+  width: 100%;
   padding: 0.5rem 1.5rem !important;
   min-height: unset !important;
   background: var(--c-grey);

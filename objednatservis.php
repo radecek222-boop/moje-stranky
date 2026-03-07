@@ -599,8 +599,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           <div class="foto-video-col">
             <div class="photo-upload-area">
               <button type="button" class="btn-photo" id="uploadVideoBtn" data-lang-cs="NAHRÁT VIDEO" data-lang-en="UPLOAD VIDEO" data-lang-it="CARICA VIDEO">NAHRÁT VIDEO</button>
-              <p class="photo-info" data-lang-cs="Max. 1 video • MP4 nebo MOV" data-lang-en="Max. 1 video • MP4 or MOV" data-lang-it="Max. 1 video • MP4 o MOV">Max. 1 video • MP4 nebo MOV</p>
-              <input type="file" id="videoInput" accept="video/mp4,video/quicktime,video/*" style="display:none;">
+              <p class="photo-info" data-lang-cs="Max. 5 videí • MP4 nebo MOV" data-lang-en="Max. 5 videos • MP4 or MOV" data-lang-it="Max. 5 video • MP4 o MOV">Max. 5 videí • MP4 nebo MOV</p>
+              <input type="file" id="videoInput" accept="video/mp4,video/quicktime,video/*" multiple style="display:none;">
             </div>
             <div id="videoPreviewMain"></div>
           </div>
