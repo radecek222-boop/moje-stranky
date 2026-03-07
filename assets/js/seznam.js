@@ -1148,8 +1148,9 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     const bg      = aktivni ? barva : 'transparent';
     const barvaText = aktivni ? textAktivni : barva;
     const border  = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
-    const glow    = aktivni ? `box-shadow:0 0 8px ${barva};` : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const cls     = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar = aktivni ? `--pill-glow-barva:${barva};` : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;background:${bg};color:${barvaText};border:${border};${glowVar}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
   // Helper: CN pill (spodní řada) - referenční styl workflow-btn z cenova-nabidka.php
   const pillCN = (stav, label) => {
@@ -1157,8 +1158,9 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     const bg      = aktivni ? '#1a1a1a' : '#888';
     const barvaText = '#fff';
     const border  = aktivni ? '2px solid #39ff14' : '1px solid #666';
-    const glow    = aktivni ? 'box-shadow:0 0 8px rgba(57,255,20,0.4);' : '';
-    return `<span class="workflow-pill" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glow}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
+    const cls     = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar = aktivni ? '--pill-glow-barva:rgba(57,255,20,0.6);' : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glowVar}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
   const stavHtml = isAdmin ? `
@@ -1685,10 +1687,54 @@ async function showCustomerDetail(id) {
             </span>
             <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-            <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Email:</span>
+              <button onclick="
+                const val = document.getElementById('edit_email').value;
+                if (val) navigator.clipboard.writeText(val).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
+                });
+              " title="Kopírovat email" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </span>
             <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+              <button onclick="
+                const val = document.getElementById('edit_adresa').value;
+                if (val) navigator.clipboard.writeText(val).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
+                });
+              " title="Kopírovat adresu" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </span>
             <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
 
             <span style="color: #aaa; font-weight: 600;">Model:</span>
