@@ -32,7 +32,12 @@
 
     // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku na stránce aktualit
     if (jeKliknuti && jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
-      await spustitPrekladAktualit(jazyk);
+      const prekladOk = await spustitPrekladAktualit(jazyk);
+      if (!prekladOk) {
+        // Překlad neproběhl (chybí CSRF token nebo kritická chyba) — přerušit přepnutí
+        jeKliknuti = false;
+        return;
+      }
     }
 
     aktualniJazyk = jazyk;
@@ -69,6 +74,7 @@
   /**
    * Spustí automatický překlad všech aktualit do cílového jazyka (pouze admin)
    * @param {string} cilovyJazyk - 'en' nebo 'it'
+   * @returns {boolean} true = překlad proběhl (nebo byl přeskočen serverem), false = nelze pokračovat
    */
   async function spustitPrekladAktualit(cilovyJazyk) {
     try {
@@ -96,23 +102,65 @@
       `;
       document.body.appendChild(loadingDiv);
 
-      // Zavolat API pro překlad s timeoutem 30s
+      // Získat CSRF token — primárně z <meta name="csrf-token"> (generuje init.php),
+      // záložně z window.csrfTokenCache (cachuje csrf-auto-inject.js)
+      const csrfToken =
+        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        window.csrfTokenCache ||
+        '';
+
+      // GUARD: Pokud CSRF token chybí, překlad nepouštět — zabránit 403 na serveru.
+      // Vrátíme false — caller přeruší přepnutí jazyka, dokud nebude session obnovena.
+      if (!csrfToken) {
+        console.error('[WGS] Překlad aktualit přeskočen: CSRF token není dostupný.',
+          'Zkontroluj, zda init.php generuje <meta name="csrf-token"> a zda se načítá csrf-auto-inject.js.');
+        loadingDiv.remove();
+        const hlaska = 'Překlad nelze spustit: chybí bezpečnostní token.\nObnov stránku a zkus znovu.';
+        if (typeof window.wgsToast !== 'undefined') {
+          window.wgsToast.error(hlaska);
+        } else {
+          // Fallback — wgsToast nedostupný (např. stránka se teprve načítá)
+          alert(hlaska);
+        }
+        return false;
+      }
+
+      // Sestavit FormData pro POST požadavek
+      const formData = new FormData();
+      formData.append('jazyk', cilovyJazyk);
+      formData.append('csrf_token', csrfToken);
+
+      // Zavolat API pro překlad s timeoutem 30s (POST + CSRF token)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
-        const response = await fetch(`/api/preloz_aktualitu.php?jazyk=${cilovyJazyk}`, {
+        const response = await fetch('/api/preloz_aktualitu.php', {
+          method: 'POST',
+          body: formData,
           signal: controller.signal
         });
         clearTimeout(timeoutId);
         const data = await response.json();
 
-        if (data.status === 'success') {
-        } else {
+        if (data.status !== 'success') {
+          // Serverová chyba překladu — vrátit false, caller nepřepne jazyk
           console.error('Chyba překladu:', data.message);
+          loadingDiv.remove();
+          return false;
         }
       } catch (fetchError) {
         if (fetchError.name === 'AbortError') {
+          // Timeout — překlad se nestihl potvrdit, nepřepínat jazyk
+          console.warn('[WGS] Překlad aktualit: timeout (30s). Jazyk nebude přepnut.');
+          loadingDiv.remove();
+          const hlaskaTimeout = 'Překlad se nestihl potvrdit. Zkus to znovu.';
+          if (typeof window.wgsToast !== 'undefined') {
+            window.wgsToast.error(hlaskaTimeout);
+          } else {
+            alert(hlaskaTimeout);
+          }
+          return false;
         } else {
           throw fetchError;
         }
@@ -120,12 +168,14 @@
 
       // Odstranit indikátor
       loadingDiv.remove();
+      return true;
 
     } catch (error) {
       console.error('Chyba při překladu aktualit:', error);
       // Odstranit loading pokud existuje
       const loading = document.getElementById('preklad-loading');
       if (loading) loading.remove();
+      return false;
     }
   }
 

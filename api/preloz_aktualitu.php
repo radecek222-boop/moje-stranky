@@ -16,6 +16,26 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen - pouze pro administrátory', 403);
 }
 
+// BEZPEČNOST: Pro POST vyžadujeme platný CSRF token.
+// GET je zachován pro zpětnou kompatibilitu (DEPRECATED od 2026-03-07).
+// TODO: Odstranit GET větev nejdříve 2026-06-01 po potvrzení produkce s POST.
+// Stačí smazat celou $jeGet větev a ponechat pouze POST + CSRF.
+$jePost = ($_SERVER['REQUEST_METHOD'] === 'POST');
+
+if ($jePost) {
+    // POST: standardní CSRF validace
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        sendJsonError('Neplatný CSRF token', 403);
+    }
+} else {
+    // GET: pouze admin session check (již ověřen výše).
+    // CSRF riziko je nízké — admin session brání praktickým cross-site útokům,
+    // přesto je GET pro data-modifying endpoint nespráná praxe.
+    // @deprecated GET volání — frontend opraven 2026-03-07, tato větev bude odstraněna.
+    error_log('[DEPRECATED] preloz_aktualitu.php volán přes GET. Mělo by být POST. IP: '
+        . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+}
+
 // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
 session_write_close();
 
@@ -29,9 +49,12 @@ try {
         sendJsonError('Příliš mnoho požadavků na překlad', 429);
     }
 
-    // Validace vstupních dat (GET nebo POST)
-    $cilovyJazyk = $_REQUEST['jazyk'] ?? '';
-    $aktualitaId = filter_var($_REQUEST['aktualita_id'] ?? '', FILTER_VALIDATE_INT);
+    // Vstupní data — POST (standard) nebo GET (deprecated)
+    $cilovyJazyk = $jePost ? ($_POST['jazyk'] ?? '') : ($_GET['jazyk'] ?? '');
+    $aktualitaId = filter_var(
+        $jePost ? ($_POST['aktualita_id'] ?? '') : ($_GET['aktualita_id'] ?? ''),
+        FILTER_VALIDATE_INT
+    );
 
     // Jazyk musí být 'en' nebo 'it'
     if (!in_array($cilovyJazyk, ['en', 'it'])) {
