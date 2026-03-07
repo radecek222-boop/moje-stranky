@@ -1163,7 +1163,21 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     return `<span class="${cls}" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glowVar}cursor:pointer;padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;" data-action="zmenaStavuPill" data-id="${CURRENT_RECORD.id}" data-stav="${stav}" data-email="${zakaznikEmail}">${label}</span>`;
   };
 
-  const stavHtml = isAdmin ? `
+  // Viditelnost badge dle role
+  const jeProdejce         = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+  const jeTechnikNeboAdmin = isAdmin || (CURRENT_USER && CURRENT_USER.role === 'technik');
+
+  // Pill jen pro zobrazení (prodejce) — bez akce, bez pointeru
+  const pillZobrazeni = (stav, label, barva, textAktivni = '#000') => {
+    const aktivni  = aktualniHodnota === stav;
+    const bg       = aktivni ? barva : 'transparent';
+    const border   = aktivni ? `2px solid ${barva}` : `1px solid ${barva}`;
+    const cls      = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar  = aktivni ? `--pill-glow-barva:${barva};` : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;background:${bg};color:${aktivni ? textAktivni : barva};border:${border};${glowVar}padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;">${label}</span>`;
+  };
+
+  const stavHtml = jeTechnikNeboAdmin ? `
     <div class="stav-workflow" style="margin-top:0.1rem;">
       <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
         ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
@@ -1179,10 +1193,21 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
         ${pillCN('cn_zamitnuta',    'Zamítnu.')}
       </div>
     </div>
+  ` : jeProdejce ? `
+    <div class="stav-workflow" style="margin-top:0.1rem;">
+      <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
+        ${pillZobrazeni('wait',           'NOVÁ',   '#ffdd00', '#000')}
+        ${pillZobrazeni('open',           'DOML',   '#00e5ff', '#000')}
+        ${pillZobrazeni('cekame_na_dily', 'DÍLY',   '#888888', '#fff')}
+        ${pillZobrazeni('odlozena',       'ODLOŽ',  '#9b59b6', '#fff')}
+        ${pillZobrazeni('done',           'HOTOVO', '#39ff14', '#000')}
+      </div>
+    </div>
   ` : status.text;
 
   const smsBylKontaktovan = CURRENT_RECORD._sms_odeslana || CURRENT_RECORD.sms_kontakt_datum;
-  const smsHtml = smsBylKontaktovan ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.2rem 0.7rem;white-space:nowrap;border-radius:6px;">POSLÁNA SMS</span>` : '';
+  // SMS badge pouze pro technika a admina (ne prodejce)
+  const smsHtml = smsBylKontaktovan && !jeProdejce ? `<span class="order-status-text status-poslana-sms" style="display:inline-flex;align-items:center;font-size:0.75rem;padding:0.2rem 0.7rem;white-space:nowrap;border-radius:6px;">POSLÁNA SMS</span>` : '';
   const ulozitBtn = ulozitId ? `<button class="detail-btn-ulozit" data-action="saveAllCustomerData" data-id="${ulozitId}" style="width:auto;padding:0.2rem 1.2rem;min-height:unset;display:inline-flex;align-items:center;">Uložit změny</button>` : '';
 
   const backId = backAction !== 'closeDetail' ? (CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || '') : '';
