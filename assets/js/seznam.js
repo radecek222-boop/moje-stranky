@@ -1164,10 +1164,10 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
   };
 
   // Viditelnost badge dle role
-  const jeProdejce         = CURRENT_USER && CURRENT_USER.role === 'prodejce';
-  const jeTechnikNeboAdmin = isAdmin || (CURRENT_USER && CURRENT_USER.role === 'technik');
+  const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+  const jeTechnik  = CURRENT_USER && CURRENT_USER.role === 'technik';
 
-  // Pill jen pro zobrazení (prodejce) — bez akce, bez pointeru
+  // Pill jen pro zobrazení (technik, prodejce) — bez akce, bez pointeru
   const pillZobrazeni = (stav, label, barva, textAktivni = '#000') => {
     const aktivni  = aktualniHodnota === stav;
     const bg       = aktivni ? barva : 'transparent';
@@ -1177,7 +1177,18 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
     return `<span class="${cls}" style="flex:1;text-align:center;background:${bg};color:${aktivni ? textAktivni : barva};border:${border};${glowVar}padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;">${label}</span>`;
   };
 
-  const stavHtml = jeTechnikNeboAdmin ? `
+  // CN pill jen pro zobrazení (technik) — bez akce, bez pointeru
+  const pillCNZobrazeni = (stav, label) => {
+    const aktivni   = aktualniHodnota === stav;
+    const bg        = aktivni ? '#1a1a1a' : '#888';
+    const barvaText = '#fff';
+    const border    = aktivni ? '2px solid #39ff14' : '1px solid #666';
+    const cls       = aktivni ? 'workflow-pill workflow-pill--aktivni' : 'workflow-pill';
+    const glowVar   = aktivni ? '--pill-glow-barva:rgba(57,255,20,0.6);' : '';
+    return `<span class="${cls}" style="flex:1;text-align:center;white-space:nowrap;background:${bg};color:${barvaText};border:${border};${glowVar}padding:0.35rem 0.8rem;border-radius:10px;font-size:0.6rem;font-weight:400;display:inline-flex;align-items:center;justify-content:center;">${label}</span>`;
+  };
+
+  const stavHtml = isAdmin ? `
     <div class="stav-workflow" style="margin-top:0.1rem;">
       <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
         ${pill('wait',           'NOVÁ',   '#ffdd00', '#000')}
@@ -1191,6 +1202,22 @@ function createCustomerHeader(backAction = 'closeDetail', ulozitId = '') {
         ${pillCN('cn_odsouhlasena', 'Odsouh.')}
         ${pillCN('cn_cekame_nd',    'Čeká ND')}
         ${pillCN('cn_zamitnuta',    'Zamítnu.')}
+      </div>
+    </div>
+  ` : jeTechnik ? `
+    <div class="stav-workflow" style="margin-top:0.1rem;">
+      <div style="display:flex;gap:0.25rem;width:100%;margin-bottom:0.25rem;">
+        ${pillZobrazeni('wait',           'NOVÁ',   '#ffdd00', '#000')}
+        ${pillZobrazeni('open',           'DOML',   '#00e5ff', '#000')}
+        ${pillZobrazeni('cekame_na_dily', 'DÍLY',   '#888888', '#fff')}
+        ${pillZobrazeni('odlozena',       'ODLOŽ',  '#9b59b6', '#fff')}
+        ${pillZobrazeni('done',           'HOTOVO', '#39ff14', '#000')}
+      </div>
+      <div style="display:flex;gap:0.2rem;width:100%;">
+        ${pillCNZobrazeni('cn_poslana',      'Pos.CN')}
+        ${pillCNZobrazeni('cn_odsouhlasena', 'Odsouh.')}
+        ${pillCNZobrazeni('cn_cekame_nd',    'Čeká ND')}
+        ${pillCNZobrazeni('cn_zamitnuta',    'Zamítnu.')}
       </div>
     </div>
   ` : jeProdejce ? `
