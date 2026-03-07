@@ -1109,13 +1109,41 @@ const ModalManager = {
       document.getElementById('detailOverlay').classList.add('active');
     }
 
-    // FIX: Safari focus fix - zajistí že modal je v DOM před scrollem
+    // iOS scroll fix - spustí se po Alpine.js + auto-height (100ms delay)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setTimeout(() => {
-      const modalContent = document.querySelector('#detailOverlay .modal-content');
-      if (modalContent) {
-        modalContent.scrollTop = 0; // Reset scroll pozice modalu
+      const obsah = document.querySelector('#detailOverlay .modal-content');
+      if (!obsah) return;
+      obsah.scrollTop = 0;
+
+      if (isIOS && window.innerWidth < 769) {
+        // Overlay: jen backdrop, NEscrolluje
+        const ov = document.getElementById('detailOverlay');
+        if (ov) {
+          ov.style.setProperty('display', 'block', 'important');
+          ov.style.setProperty('overflow', 'hidden', 'important');
+        }
+        // Modal-content: scroll kontejner s fixní výškou = iOS vytvoří UIScrollView
+        obsah.style.setProperty('position', 'absolute', 'important');
+        obsah.style.setProperty('top', '0', 'important');
+        obsah.style.setProperty('left', '0', 'important');
+        obsah.style.setProperty('right', '0', 'important');
+        obsah.style.setProperty('bottom', '0', 'important');
+        obsah.style.setProperty('width', '100%', 'important');
+        obsah.style.setProperty('height', '100%', 'important');
+        obsah.style.setProperty('max-height', '100%', 'important');
+        obsah.style.setProperty('overflow-y', 'scroll', 'important');
+        obsah.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+        obsah.style.setProperty('overscroll-behavior-y', 'contain', 'important');
+        obsah.style.setProperty('border-radius', '0', 'important');
+        obsah.style.setProperty('margin', '0', 'important');
+        // Textareas: overflow:hidden = iOS nepovažuje za scroll cíl → bubbluje na modal-content
+        obsah.querySelectorAll('textarea').forEach(ta => {
+          ta.style.setProperty('overflow', 'hidden', 'important');
+          ta.style.setProperty('touch-action', 'pan-y pinch-zoom', 'important');
+        });
       }
-    }, 10);
+    }, 100);
   },
 
   close: () => {
