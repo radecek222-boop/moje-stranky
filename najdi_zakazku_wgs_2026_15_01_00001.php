@@ -54,7 +54,7 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Vyhledání zakázky WGS/2026/15-01/00001</h1>";
+    echo "<h1>Vyhledání zakázky WGS/2026/15-01/00001</h1>";
 
     echo "<div class='info'>
         <strong>Kontext problému:</strong><br>
@@ -83,7 +83,7 @@ try {
 
     if (!$zakazka) {
         echo "<div class='warning'>
-            <strong>⚠️ Zakázka nebyla nalezena!</strong><br>
+            <strong>POZOR: Zakázka nebyla nalezena!</strong><br>
             Reklamace s ID <code>WGS/2026/15-01/00001</code> neexistuje v databázi.
         </div>";
 
@@ -127,7 +127,7 @@ try {
     } else {
         // Zakázka nalezena
         echo "<div class='success'>
-            <strong>✅ Zakázka nalezena v databázi!</strong>
+            <strong>OK: Zakázka nalezena v databázi!</strong>
         </div>";
 
         echo "<table>
@@ -181,7 +181,7 @@ try {
                     <td><strong>" . htmlspecialchars($user['full_name']) . "</strong></td>
                     <td>" . htmlspecialchars($user['email']) . "</td>
                     <td>" . htmlspecialchars($user['role']) . "</td>
-                    <td>" . ($user['is_active'] ? '✅ Ano' : '❌ Ne') . "</td>
+                    <td>" . ($user['is_active'] ? 'Ano' : 'Ne') . "</td>
                     <td>" . htmlspecialchars($user['created_at']) . "</td>
                 </tr>";
             }
@@ -192,13 +192,13 @@ try {
                 if ($tvurce) {
                     $tvurce = array_values($tvurce)[0];
                     echo "<div class='success'>
-                        <strong>✅ Potvrzeno:</strong> Zakázku vytvořil/a uživatel <strong>" . htmlspecialchars($tvurce['full_name']) . "</strong> (" . htmlspecialchars($tvurce['email']) . ")
+                        <strong>OK: Potvrzeno:</strong> Zakázku vytvořil/a uživatel <strong>" . htmlspecialchars($tvurce['full_name']) . "</strong> (" . htmlspecialchars($tvurce['email']) . ")
                     </div>";
                 }
             }
         } else {
             echo "<div class='warning'>
-                <strong>⚠️ Žádný uživatel s jménem 'Monika Jančová' nebyl nalezen v databázi!</strong>
+                <strong>POZOR: Žádný uživatel s jménem 'Monika Jančová' nebyl nalezen v databázi!</strong>
             </div>";
         }
 
@@ -285,7 +285,7 @@ try {
 
             if ($emails[0]['status'] == 'sent') {
                 echo "<div class='success'>
-                    <strong>✅ Email byl úspěšně odeslán na " . htmlspecialchars($zakazka['email']) . "</strong>
+                    <strong>OK: Email byl úspěšně odeslán na " . htmlspecialchars($zakazka['email']) . "</strong>
                 </div>";
             }
         } else {
@@ -298,7 +298,7 @@ try {
         echo "<h2>5. Závěr a doporučení</h2>";
 
         echo "<div class='warning'>
-            <strong>🔍 Analýza problému:</strong><br><br>
+            <strong>Analýza problému:</strong><br><br>
 
             <strong>Co se stalo:</strong><br>
             1. Zakázka <code>" . htmlspecialchars($zakazka['reklamace_id']) . "</code> byla vytvořena v databázi<br>

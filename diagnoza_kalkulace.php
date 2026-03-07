@@ -56,7 +56,7 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Diagnóza kalkulací v databázi</h1>";
+    echo "<h1>Diagnóza kalkulací v databázi</h1>";
 
     // 1. Zjistit kolik reklamací má kalkulaci
     $stmt = $pdo->query("
@@ -76,7 +76,7 @@ try {
     echo "</div>";
 
     // 2. Zobrazit 5 nejnovějších reklamací s kalkulací
-    echo "<h2>📋 Nejnovější reklamace s kalkulací</h2>";
+    echo "<h2>Nejnovější reklamace s kalkulací</h2>";
 
     $stmt = $pdo->query("
         SELECT
@@ -142,7 +142,7 @@ try {
             if ($detail['kalkulace_data']) {
                 $kalkulace = json_decode($detail['kalkulace_data'], true);
 
-                echo "<h3>📊 Struktura kalkulace:</h3>";
+                echo "<h3>Struktura kalkulace:</h3>";
 
                 // Kontrola formátu
                 $maRozpis = isset($kalkulace['rozpis']);
@@ -151,15 +151,15 @@ try {
 
                 echo "<div class='" . ($maRozpis || ($maSluzby && $maDilyPrace) ? "success" : "error") . "'>";
                 echo "<strong>Formát kalkulace:</strong><br>";
-                echo "✅ Má 'rozpis': " . ($maRozpis ? "ANO" : "NE") . "<br>";
-                echo "✅ Má 'sluzby': " . ($maSluzby ? "ANO (" . count($kalkulace['sluzby']) . " položek)" : "NE") . "<br>";
-                echo "✅ Má 'dilyPrace': " . ($maDilyPrace ? "ANO (" . count($kalkulace['dilyPrace']) . " položek)" : "NE") . "<br>";
-                echo "✅ Celková cena: " . (isset($kalkulace['celkovaCena']) ? number_format($kalkulace['celkovaCena'], 2) . " €" : "CHYBÍ") . "<br>";
+                echo "OK: Má 'rozpis': " . ($maRozpis ? "ANO" : "NE") . "<br>";
+                echo "OK: Má 'sluzby': " . ($maSluzby ? "ANO (" . count($kalkulace['sluzby']) . " položek)" : "NE") . "<br>";
+                echo "OK: Má 'dilyPrace': " . ($maDilyPrace ? "ANO (" . count($kalkulace['dilyPrace']) . " položek)" : "NE") . "<br>";
+                echo "OK: Celková cena: " . (isset($kalkulace['celkovaCena']) ? number_format($kalkulace['celkovaCena'], 2) . " €" : "CHYBÍ") . "<br>";
                 echo "</div>";
 
                 // Zobrazit rozpis pokud existuje
                 if ($maRozpis) {
-                    echo "<h3>🔍 Obsah rozpisu:</h3>";
+                    echo "<h3>Obsah rozpisu:</h3>";
                     echo "<pre>" . json_encode($kalkulace['rozpis'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
                 }
 
@@ -169,7 +169,7 @@ try {
                 }
 
                 if ($maDilyPrace) {
-                    echo "<h3>🔧 Díly a práce:</h3>";
+                    echo "<h3>Díly a práce:</h3>";
                     echo "<pre>" . json_encode($kalkulace['dilyPrace'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
                 }
 
@@ -178,7 +178,7 @@ try {
                 echo "<pre>" . json_encode($kalkulace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
 
                 // Simulovat PRICE LIST výstup
-                echo "<h3>🖨️ Simulace PRICE LIST výstupu:</h3>";
+                echo "<h3>Simulace PRICE LIST výstupu:</h3>";
                 echo "<div class='info'>";
 
                 // Dopravné
@@ -195,7 +195,7 @@ try {
                         echo "&nbsp;&nbsp;{$sluzba['nazev']}: " . number_format($sluzba['cena'], 2) . " EUR<br>";
                     }
                 } else {
-                    echo "<br><span style='color: #dc3545;'>❌ SLUŽBY NEJSOU - PRICELIST BUDE PRÁZDNÝ!</span><br>";
+                    echo "<br><span style='color: #dc3545;'>CHYBA: SLUŽBY NEJSOU - PRICELIST BUDE PRÁZDNÝ!</span><br>";
                 }
 
                 // Díly a práce
@@ -206,7 +206,7 @@ try {
                         echo "&nbsp;&nbsp;{$polozka['nazev']}: {$polozka['pocet']} ks × " . number_format($jednotkovaCena, 2) . " EUR = " . number_format($polozka['cena'], 2) . " EUR<br>";
                     }
                 } else {
-                    echo "<br><span style='color: #dc3545;'>❌ DÍLY A PRÁCE NEJSOU - PRICELIST BUDE PRÁZDNÝ!</span><br>";
+                    echo "<br><span style='color: #dc3545;'>CHYBA: DÍLY A PRÁCE NEJSOU - PRICELIST BUDE PRÁZDNÝ!</span><br>";
                 }
 
                 // Celkem

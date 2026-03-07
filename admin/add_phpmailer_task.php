@@ -27,7 +27,7 @@ try {
 
     if ($existing) {
         if ($existing['status'] === 'pending' || $existing['status'] === 'in_progress') {
-            echo "✓ Úkol na instalaci PHPMailer už existuje (ID: {$existing['id']})\n";
+            echo "OK Úkol na instalaci PHPMailer už existuje (ID: {$existing['id']})\n";
             echo "➜ Jdi do admin.php a klikni na 'Akce & Úkoly'\n";
             exit;
         } else {
@@ -47,7 +47,7 @@ try {
             status
         ) VALUES (
             'install_phpmailer',
-            '📧 Nainstalovat PHPMailer',
+            'Nainstalovat PHPMailer',
             'PHPMailer je potřeba pro odesílání emailů přes SMTP. Bez něj email queue používá pouze PHP mail() funkci, která často nefunguje na sdíleném hostingu.\n\nPo instalaci:\nEmaily budou odcházet spolehlivě přes SMTP\nEmail queue cron bude fungovat správně\nBudete vidět detailní chybové zprávy při problémech',
             'scripts/install_phpmailer.php',
             'high',
@@ -65,7 +65,7 @@ try {
     echo "==========================================\n";
     echo "1. Jdi do admin.php a klikni na 'Control Center'\n";
     echo "2. Otevři sekci 'Akce & Úkoly'\n";
-    echo "3. Najdi úkol '📧 Nainstalovat PHPMailer'\n";
+    echo "3. Najdi úkol 'Nainstalovat PHPMailer'\n";
     echo "4. Klikni na tlačítko '▶️ Spustit'\n";
     echo "5. Potvrd akci\n";
     echo "==========================================\n";

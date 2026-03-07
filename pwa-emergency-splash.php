@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #111;
             color: white;
             min-height: 100vh;
             padding: 20px;
@@ -49,7 +49,7 @@
 
     <div class="debug">
         <h2>1. PHP Works</h2>
-        <pre>✅ PHP funguje! Tento soubor se načetl.</pre>
+        <pre>OK: PHP funguje! Tento soubor se načetl.</pre>
         <pre>PHP Version: <?php echo PHP_VERSION; ?></pre>
         <pre>Current Time: <?php echo date('Y-m-d H:i:s'); ?></pre>
     </div>
@@ -61,13 +61,13 @@
             ob_start();
             require_once __DIR__ . '/init.php';
             $initOutput = ob_get_clean();
-            echo "✅ init.php načten úspěšně!\n";
+            echo "OK: init.php načten úspěšně!\n";
             if (!empty($initOutput)) {
-                echo "⚠️ init.php měl output (může způsobit problémy):\n";
+                echo "POZOR: init.php měl output (může způsobit problémy):\n";
                 echo htmlspecialchars($initOutput);
             }
         } catch (Exception $e) {
-            echo "❌ init.php SELHAL!\n";
+            echo "CHYBA: init.php SELHAL!\n";
             echo "Error: " . htmlspecialchars($e->getMessage()) . "\n";
             echo "File: " . htmlspecialchars($e->getFile()) . ":" . $e->getLine();
         }
@@ -77,9 +77,9 @@
     <div class="debug">
         <h2>3. Session Info</h2>
         <pre><?php
-        echo "Session Status: " . (session_status() === PHP_SESSION_ACTIVE ? '✅ Active' : '❌ Not Active') . "\n";
+        echo "Session Status: " . (session_status() === PHP_SESSION_ACTIVE ? 'OK: Active' : 'CHYBA: Not Active') . "\n";
         echo "Session ID: " . (session_id() ?: 'None') . "\n";
-        echo "Logged In: " . (isset($_SESSION['user_id']) ? '✅ Yes (User: ' . $_SESSION['user_id'] . ')' : '❌ No');
+        echo "Logged In: " . (isset($_SESSION['user_id']) ? 'OK: Yes (User: ' . $_SESSION['user_id'] . ')' : 'CHYBA: No');
         ?></pre>
     </div>
 
@@ -91,7 +91,7 @@
         if (strpos($_SERVER['REQUEST_URI'] ?? '', 'source=pwa') !== false) $isPWA = true;
         if (strpos($_SERVER['HTTP_REFERER'] ?? '', 'source=pwa') !== false) $isPWA = true;
 
-        echo "Is PWA: " . ($isPWA ? '✅ YES' : '❌ NO') . "\n";
+        echo "Is PWA: " . ($isPWA ? 'OK: YES' : 'CHYBA: NO') . "\n";
         echo "Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "\n";
         echo "Referer: " . ($_SERVER['HTTP_REFERER'] ?? 'N/A') . "\n";
         echo "User Agent: " . substr($_SERVER['HTTP_USER_AGENT'] ?? 'N/A', 0, 80) . "...";
@@ -109,7 +109,7 @@
         ];
         foreach ($files as $file) {
             $exists = file_exists(__DIR__ . '/' . $file);
-            echo ($exists ? '✅' : '❌') . " $file " . ($exists ? '(' . filesize(__DIR__ . '/' . $file) . ' bytes)' : '(MISSING)') . "\n";
+            echo ($exists ? 'OK' : 'CHYBA') . " $file " . ($exists ? '(' . filesize(__DIR__ . '/' . $file) . ' bytes)' : '(MISSING)') . "\n";
         }
         ?></pre>
     </div>
@@ -118,20 +118,20 @@
         <h2>6. Redirect Test</h2>
         <pre><?php
         echo "URL této stránky: " . $_SERVER['REQUEST_URI'] . "\n";
-        echo "Byla přesměrována? " . (isset($_SERVER['REDIRECT_STATUS']) ? '⚠️ YES' : '✅ NO');
+        echo "Byla přesměrována? " . (isset($_SERVER['REDIRECT_STATUS']) ? 'POZOR: YES' : 'OK: NO');
         ?></pre>
     </div>
 
     <div class="debug">
         <h2>JavaScript Test</h2>
-        <div id="jsTest">❌ JavaScript NEBĚŽÍ!</div>
+        <div id="jsTest">CHYBA: JavaScript NEBĚŽÍ!</div>
     </div>
 
     <a href="login.php?pwa=1" class="btn">➡️ Pokračovat na Login</a>
-    <a href="pwa-diagnostika.html" class="btn">🔍 Plná diagnostika</a>
+    <a href="pwa-diagnostika.html" class="btn">Plná diagnostika</a>
 
     <script>
-        document.getElementById('jsTest').innerHTML = '✅ JavaScript funguje!';
+        document.getElementById('jsTest').innerHTML = 'OK: JavaScript funguje!';
 
         // Detekce PWA módu z JS
         const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
@@ -141,7 +141,7 @@
         div.className = 'debug';
         div.innerHTML = `
             <h2>7. JavaScript PWA Detection</h2>
-            <pre>PWA Mode: ${isPWA ? '✅ YES (standalone)' : '❌ NO (browser)'}\nDisplay Mode: ${window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'}\nNavigator Standalone: ${window.navigator.standalone || 'undefined'}</pre>
+            <pre>PWA Mode: ${isPWA ? 'OK: YES (standalone)' : 'CHYBA: NO (browser)'}\nDisplay Mode: ${window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'}\nNavigator Standalone: ${window.navigator.standalone || 'undefined'}</pre>
         `;
         document.body.insertBefore(div, document.querySelector('.btn'));
 

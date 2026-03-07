@@ -35,12 +35,12 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Chybějící emaily v Natuzzi kampani</h1>";
+    echo "<h1>Chybějící emaily v Natuzzi kampani</h1>";
 
     // Načíst CSV
     $csvFile = __DIR__ . '/contacts_all.csv';
     if (!file_exists($csvFile)) {
-        echo "<div class='error'>❌ CSV soubor nenalezen: contacts_all.csv</div>";
+        echo "<div class='error'>CHYBA: CSV soubor nenalezen: contacts_all.csv</div>";
         exit;
     }
 
@@ -69,7 +69,7 @@ try {
     $chybejici = array_diff_key($csvSet, $queueSet);
 
     echo "<div class='section'>";
-    echo "<h2>📊 Shrnutí</h2>";
+    echo "<h2>Shrnutí</h2>";
 
     echo "<table>";
     echo "<tr><th>Metrika</th><th>Hodnota</th></tr>";
@@ -80,14 +80,14 @@ try {
 
     if (count($chybejici) == 0) {
         echo "<div class='success'>";
-        echo "<strong>✅ ŽÁDNÉ CHYBĚJÍCÍ EMAILY!</strong><br>";
+        echo "<strong>OK: ŽÁDNÉ CHYBĚJÍCÍ EMAILY!</strong><br>";
         echo "Všech " . count($csvEmails) . " emailů z CSV je v queue.";
         echo "</div>";
     } else {
         echo "<div class='counter' style='color: #721c24;'>" . count($chybejici) . "</div>";
 
         echo "<div class='error'>";
-        echo "<strong>❌ CHYBĚJÍCÍ EMAILY V QUEUE:</strong><br>";
+        echo "<strong>CHYBA: CHYBĚJÍCÍ EMAILY V QUEUE:</strong><br>";
         echo "Tyto emaily jsou v CSV ale NEBYLY vloženy do queue:";
         echo "</div>";
 
@@ -105,7 +105,7 @@ try {
 
         // Nabídnout doplnění
         echo "<div class='warning'>";
-        echo "<strong>⚠️ MOŽNOSTI:</strong><br>";
+        echo "<strong>POZOR: MOŽNOSTI:</strong><br>";
         echo "1. <strong>Doplnit chybějící emaily do queue</strong> - vloží tyto emaily s původním intervalem<br>";
         echo "2. Ignorovat - možná byly vyřazeny záměrně (invalid, duplicity, atd.)<br><br>";
 
@@ -121,7 +121,7 @@ try {
     // Zpracování doplnění
     if (isset($_POST['doplnit_chybejici'])) {
         echo "<div class='section'>";
-        echo "<h2>📥 Doplňování chybějících emailů</h2>";
+        echo "<h2>Doplňování chybějících emailů</h2>";
 
         $interval = isset($_POST['interval']) ? max(1, (int)$_POST['interval']) : 1;
 
@@ -131,7 +131,7 @@ try {
         $template = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$template) {
-            echo "<div class='error'>❌ Šablona 'marketing_natuzzi_pozarucni' nenalezena!</div>";
+            echo "<div class='error'>CHYBA: Šablona 'marketing_natuzzi_pozarucni' nenalezena!</div>";
         } else {
             // Najít poslední scheduled_at v queue
             $stmt = $pdo->query("
@@ -178,7 +178,7 @@ try {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
                     echo "<td>{$scheduledAt}</td>";
-                    echo "<td style='color: #155724;'>✅ Vloženo</td>";
+                    echo "<td style='color: #155724;'>OK: Vloženo</td>";
                     echo "</tr>";
 
                     $uspesne++;
@@ -187,7 +187,7 @@ try {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
                     echo "<td>-</td>";
-                    echo "<td style='color: #721c24;'>❌ " . htmlspecialchars($e->getMessage()) . "</td>";
+                    echo "<td style='color: #721c24;'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</td>";
                     echo "</tr>";
                     $chyby++;
                 }
@@ -196,7 +196,7 @@ try {
             echo "</table>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ DOPLNĚNÍ DOKONČENO!</strong><br>";
+            echo "<strong>OK: DOPLNĚNÍ DOKONČENO!</strong><br>";
             echo "Úspěšně vloženo: <strong>{$uspesne}</strong> emailů<br>";
             if ($chyby > 0) {
                 echo "Chyby: <strong>{$chyby}</strong><br>";

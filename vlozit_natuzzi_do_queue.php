@@ -189,10 +189,10 @@ try {
     $jizVlozeno = count($jizVQueue);
     $zbyva = count($zbyvajiciEmaily);
 
-    echo "<h1>📧 Vložení Natuzzi kampaně do email queue</h1>";
+    echo "<h1>Vložení Natuzzi kampaně do email queue</h1>";
 
     echo "<div class='info'>";
-    echo "<strong>📊 Statistika:</strong><br>";
+    echo "<strong>Statistika:</strong><br>";
     echo "• Celkem v CSV: <strong>{$celkem}</strong><br>";
     echo "• Již ve frontě: <strong>{$jizVlozeno}</strong><br>";
     echo "• Zbývá vložit: <strong>{$zbyva}</strong>";
@@ -200,7 +200,7 @@ try {
 
     if ($zbyva === 0) {
         echo "<div class='success'>";
-        echo "<strong>✅ HOTOVO!</strong><br>";
+        echo "<strong>OK: HOTOVO!</strong><br>";
         echo "Všechny emaily už jsou ve frontě.<br>";
         echo "Sledujte progress v Control Centre → EMAIL & SMS";
         echo "</div>";
@@ -208,7 +208,7 @@ try {
         echo "<a href='/admin.php' class='btn'>← Control Centre</a>";
     } else {
         echo "<div class='warning'>";
-        echo "<strong>⚠️ POZOR:</strong><br>";
+        echo "<strong>POZOR:</strong><br>";
         echo "Vloží se <strong>{$zbyva}</strong> emailů do email queue.<br>";
         echo "Odesílání probíhá automaticky přes existující dispatcher.<br>";
         echo "Progress uvidíte v <strong>Control Centre → EMAIL & SMS</strong>";
@@ -218,7 +218,7 @@ try {
         echo "<form method='POST'>";
         echo "<label>Interval mezi emaily (minuty): <input type='number' name='interval' value='1' min='1' max='60' style='padding: 8px; font-size: 16px;'></label><br><br>";
         echo "<input type='hidden' name='execute' value='1'>";
-        echo "<button type='submit' class='btn btn-danger' onclick='return confirm(\"Opravdu vložit {$zbyva} emailů do fronty?\");'>🚀 VLOŽIT DO QUEUE ({$zbyva} emailů)</button>";
+        echo "<button type='submit' class='btn btn-danger' onclick='return confirm(\"Opravdu vložit {$zbyva} emailů do fronty?\");'>VLOŽIT DO QUEUE ({$zbyva} emailů)</button>";
         echo "</form>";
 
         // KROK 2: Provést vložení
@@ -277,7 +277,7 @@ try {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
                     echo "<td>" . $scheduledAt . "</td>";
-                    echo "<td style='color: #155724;'>✅ Vloženo</td>";
+                    echo "<td style='color: #155724;'>OK: Vloženo</td>";
                     echo "</tr>";
 
                     $uspesne++;
@@ -292,7 +292,7 @@ try {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
                     echo "<td>-</td>";
-                    echo "<td style='color: #721c24;'>❌ " . htmlspecialchars($e->getMessage()) . "</td>";
+                    echo "<td style='color: #721c24;'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</td>";
                     echo "</tr>";
                     $chyby++;
                 }
@@ -301,7 +301,7 @@ try {
             echo "</table>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ VLOŽENÍ DOKONČENO!</strong><br>";
+            echo "<strong>OK: VLOŽENÍ DOKONČENO!</strong><br>";
             echo "Úspěšně vloženo: <strong>{$uspesne}</strong> emailů<br>";
             if ($chyby > 0) {
                 echo "Chyby: <strong>{$chyby}</strong><br>";
@@ -312,7 +312,7 @@ try {
             echo "</div>";
 
             echo "<div class='info'>";
-            echo "📊 <strong>Sledujte progress:</strong><br>";
+            echo "<strong>Sledujte progress:</strong><br>";
             echo "<a href='/admin.php' class='btn'>Control Centre → EMAIL & SMS</a>";
             echo "</div>";
         }

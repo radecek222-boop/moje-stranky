@@ -336,7 +336,7 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
             padding-left: 1.5rem;
         }
         .feature-list li:before {
-            content: "✓";
+            content: "";
             color: #28a745;
             font-weight: bold;
             margin-right: 0.5rem;
@@ -346,7 +346,7 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
 </head>
 <body>
     <div class="installer">
-        <h1>📧 Email System Installer</h1>
+        <h1>Email System Installer</h1>
 
         <?php if ($status === 'success'): ?>
             <div class="status success">
@@ -364,7 +364,7 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
 
         <?php elseif ($tablesExist): ?>
             <div class="status info">
-                <strong>ℹ️ Systém je již nainstalován</strong><br>
+                <strong>Systém je již nainstalován</strong><br>
                 Email queue tabulky již existují v databázi.
             </div>
             <a href="/admin/email_queue.php" class="btn btn-primary">Přejít na správu email fronty</a>

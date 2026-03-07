@@ -545,9 +545,9 @@ function buildFilterWhere() {
  * Detail zakázky pro editaci
  */
 function getDetailZakazky($pdo) {
-    $id = $_GET['id'] ?? '';
+    $id = (int)($_GET['id'] ?? 0);
 
-    if (empty($id)) {
+    if ($id <= 0) {
         echo json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']);
         return;
     }
@@ -633,13 +633,13 @@ function upravitZakazku($pdo) {
         return;
     }
 
-    $id = $_POST['id'] ?? '';
+    $id = (int)($_POST['id'] ?? 0);
     $assignedTo = $_POST['assigned_to'] ?? null;
     $createdBy = $_POST['created_by'] ?? null;
     $fakturaZeme = $_POST['faktura_zeme'] ?? 'CZ';
     $cenaCelkem = isset($_POST['cena_celkem']) && $_POST['cena_celkem'] !== '' ? floatval($_POST['cena_celkem']) : null;
 
-    if (empty($id)) {
+    if ($id <= 0) {
         echo json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']);
         return;
     }

@@ -177,10 +177,10 @@ try {
 
     // === KROK 1: Zobrazit náhled a počet příjemců ===
     if (!isset($_POST['execute']) || $_POST['execute'] !== '1') {
-        echo "<h1>📧 Hromadné odeslání emailu - Natuzzi pozáruční servis (CSV)</h1>";
+        echo "<h1>Hromadné odeslání emailu - Natuzzi pozáruční servis (CSV)</h1>";
 
         echo "<div class='warning'>";
-        echo "<strong>⚠️ UPOZORNĚNÍ:</strong><br>";
+        echo "<strong>POZOR: UPOZORNĚNÍ:</strong><br>";
         echo "Tento skript odešle email <strong>VŠEM emailům</strong> z CSV souboru <code>contacts_all.csv</code>.<br>";
         echo "Před odesláním si zkontrolujte náhled emailu a počet příjemců!<br><br>";
         echo "<strong>🛡️ Anti-spam ochrana:</strong><br>";
@@ -214,7 +214,7 @@ try {
         echo "<div class='counter'>{$pocet} příjemců</div>";
 
         echo "<div class='info'>";
-        echo "<strong>📋 Informace o odeslání:</strong><br>";
+        echo "<strong>Informace o odeslání:</strong><br>";
         echo "• <strong>Zdroj:</strong> contacts_all.csv<br>";
         echo "• <strong>Předmět:</strong> {$predmet}<br>";
         echo "• <strong>Od:</strong> WGS Service (reklamace@wgs-service.cz)<br>";
@@ -243,19 +243,19 @@ try {
 
         echo "<div style='margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;'>";
         echo "<h3>Možnosti:</h3>";
-        echo "<a href='/nahled_email_pozarucni_servis.php' target='_blank' class='btn btn-secondary'>📧 Zobrazit náhled emailu</a>";
+        echo "<a href='/nahled_email_pozarucni_servis.php' target='_blank' class='btn btn-secondary'>Zobrazit náhled emailu</a>";
         echo "<br><br>";
 
         echo "<form method='POST' onsubmit='return confirm(\"Opravdu chcete odeslat email {$pocet} příjemcům?\\n\\nKaždý email půjde samostatně s 1 sekundovou pauzou.\\nCelkový čas: cca {$casCelkem} minut.\\n\\nTato akce je nevratná!\");'>";
         echo "<input type='hidden' name='execute' value='1'>";
-        echo "<button type='submit' class='btn btn-danger'>🚀 ODESLAT EMAILY ({$pocet} příjemců)</button>";
+        echo "<button type='submit' class='btn btn-danger'>ODESLAT EMAILY ({$pocet} příjemců)</button>";
         echo "</form>";
         echo "</div>";
 
     }
     // === KROK 2: Provést odeslání ===
     else {
-        echo "<h1>📧 Odesílání emailů...</h1>";
+        echo "<h1>Odesílání emailů...</h1>";
 
         // Načíst příjemce z CSV souboru
         $prijemci = [];
@@ -301,13 +301,13 @@ try {
                 if ($vysledek === true) {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
-                    echo "<td style='color: #155724;'>✅ Odesláno</td>";
+                    echo "<td style='color: #155724;'>OK: Odesláno</td>";
                     echo "</tr>";
                     $uspesne++;
                 } else {
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
-                    echo "<td style='color: #721c24;'>❌ Chyba</td>";
+                    echo "<td style='color: #721c24;'>CHYBA: Chyba</td>";
                     echo "</tr>";
                     $chyby++;
                 }
@@ -315,7 +315,7 @@ try {
             } catch (Exception $e) {
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($email) . "</td>";
-                echo "<td style='color: #721c24;'>❌ " . htmlspecialchars($e->getMessage()) . "</td>";
+                echo "<td style='color: #721c24;'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</td>";
                 echo "</tr>";
                 $chyby++;
             }
@@ -333,7 +333,7 @@ try {
         echo "</table>";
 
         echo "<div class='success'>";
-        echo "<strong>✅ HOTOVO!</strong><br>";
+        echo "<strong>OK: HOTOVO!</strong><br>";
         echo "Úspěšně odesláno: <strong>{$uspesne}</strong> emailů<br>";
         if ($chyby > 0) {
             echo "Chyby: <strong>{$chyby}</strong> emailů<br>";

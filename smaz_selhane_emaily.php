@@ -139,7 +139,7 @@ try {
     $pdo = getDbConnection();
 
     // Kontrola před smazáním
-    echo "<h1>🗑️ Smazání selhaných emailů</h1>";
+    echo "<h1>Smazání selhaných emailů</h1>";
 
     // Spočítat selhané emaily
     $countStmt = $pdo->query("
@@ -156,7 +156,7 @@ try {
 
     if ($failedCount == 0) {
         echo "<div class='info'>";
-        echo "<strong>✓ Žádné selhané emaily</strong><br>";
+        echo "<strong>OK Žádné selhané emaily</strong><br>";
         echo "Ve frontě nejsou žádné selhané emaily k smazání.";
         echo "</div>";
 
@@ -193,7 +193,7 @@ try {
                 $pdo->commit();
 
                 echo "<div class='success'>";
-                echo "<strong>✓ SMAZÁNÍ DOKONČENO</strong><br>";
+                echo "<strong>OK SMAZÁNÍ DOKONČENO</strong><br>";
                 echo "Smazáno <strong>{$deletedCount}</strong> selhaných emailů z fronty.";
                 echo "</div>";
 
@@ -202,7 +202,7 @@ try {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA PŘI MAZÁNÍ:</strong><br>";
+                echo "<strong>CHYBA PŘI MAZÁNÍ:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
 
@@ -213,12 +213,12 @@ try {
             // Náhled - zobrazit seznam emailů které budou smazány
 
             echo "<div class='warning'>";
-            echo "<strong>⚠️ VAROVÁNÍ</strong><br>";
+            echo "<strong>POZOR: VAROVÁNÍ</strong><br>";
             echo "Chystáte se TRVALE smazat <strong>{$failedCount} selhaných emailů</strong> z fronty.<br>";
             echo "Tato akce je <strong>NEVRATNÁ</strong>!";
             echo "</div>";
 
-            echo "<h2>📋 Seznam emailů k smazání:</h2>";
+            echo "<h2>Seznam emailů k smazání:</h2>";
 
             echo "<div class='email-list'>";
             foreach ($failedEmails as $email) {
@@ -241,21 +241,21 @@ try {
             echo "</div>";
 
             echo "<div class='info'>";
-            echo "<strong>ℹ️ CO SE STANE:</strong><br>";
+            echo "<strong>CO SE STANE:</strong><br>";
             echo "• Všech {$failedCount} záznamů se statusem 'failed' bude TRVALE smazáno z databáze<br>";
             echo "• Tato akce je NEVRATNÁ - záznamy nelze obnovit<br>";
             echo "• Statistiky v Email Management se aktualizují<br>";
             echo "• Pokud chcete emaily znovu odeslat, nemazejte je - použijte tlačítko 'ZNOVU ODESLAT'";
             echo "</div>";
 
-            echo "<a href='?execute=1' class='btn' onclick='return confirm(\"OPRAVDU chcete smazat všech {$failedCount} selhaných emailů? Tato akce je NEVRATNÁ!\");'>🗑️ ANO, SMAZAT VŠECHNY SELHANÉ EMAILY</a>";
+            echo "<a href='?execute=1' class='btn' onclick='return confirm(\"OPRAVDU chcete smazat všech {$failedCount} selhaných emailů? Tato akce je NEVRATNÁ!\");'>ANO, SMAZAT VŠECHNY SELHANÉ EMAILY</a>";
             echo "<a href='admin.php?tab=notifications&section=management' class='btn btn-secondary'>← Zrušit a vrátit se zpět</a>";
         }
     }
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA:</strong><br>";
+    echo "<strong>CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

@@ -347,13 +347,13 @@ $totalEmails = count($uniqueEmails);
         <h1>Aktivní ověření existence emailů (SMTP verifikace)</h1>
 
         <div class="warning">
-            <strong>⚠️ UPOZORNĚNÍ:</strong> Tento nástroj provádí aktivní SMTP verifikaci emailových adres.
+            <strong>POZOR: UPOZORNĚNÍ:</strong> Tento nástroj provádí aktivní SMTP verifikaci emailových adres.
             Proces může trvat několik minut a může být detekován některými anti-spam systémy.
             Doporučujeme spustit ověření mimo špičku.
         </div>
 
         <div class="info">
-            <strong>ℹ️ Jak to funguje:</strong><br>
+            <strong>Jak to funguje:</strong><br>
             1. Načte všechny unikátní emaily z wgs_email_queue<br>
             2. Pro každý email provede:<br>
             &nbsp;&nbsp;&nbsp;• DNS MX record check (existuje mail server pro doménu?)<br>
@@ -419,8 +419,8 @@ $totalEmails = count($uniqueEmails);
         <div style="margin-top: 30px; padding: 20px; background: #f0f0f0; border-left: 3px solid #000;">
             <h3 style="margin-bottom: 10px;">Výsledky budou zobrazeny po ověření</h3>
             <div id="results" style="font-size: 14px;">
-                <div>✅ Platné emaily: <strong id="validCount">0</strong></div>
-                <div>❌ Neplatné/neexistující: <strong id="invalidCount">0</strong></div>
+                <div>OK: Platné emaily: <strong id="validCount">0</strong></div>
+                <div>CHYBA: Neplatné/neexistující: <strong id="invalidCount">0</strong></div>
                 <div>❓ Nejisté: <strong id="uncertainCount">0</strong></div>
             </div>
         </div>
@@ -452,10 +452,10 @@ $totalEmails = count($uniqueEmails);
             const result = await response.json();
 
             if (result.valid === true) {
-                statusCell.innerHTML = '<span class="status-valid">EXISTUJE ✓</span>';
+                statusCell.innerHTML = '<span class="status-valid">EXISTUJE OK</span>';
                 validCount++;
             } else if (result.valid === false) {
-                statusCell.innerHTML = '<span class="status-invalid">NEEXISTUJE ✗</span>';
+                statusCell.innerHTML = '<span class="status-invalid">NEEXISTUJE CHYBA</span>';
                 invalidCount++;
             } else {
                 statusCell.innerHTML = '<span class="status-uncertain">NEJISTÉ ?</span>';

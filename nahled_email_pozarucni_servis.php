@@ -6,6 +6,13 @@
  * Cíl: Informovat o dostupnosti pozáručního servisu
  */
 
+// Bezpečnostní kontrola - pouze admin
+require_once __DIR__ . '/init.php';
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die('Přístup odepřen');
+}
+
 // Kompaktní verze emailu - menší mezery
 $baseUrl = 'https://www.wgs-service.cz';
 

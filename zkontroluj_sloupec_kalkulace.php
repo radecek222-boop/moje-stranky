@@ -44,7 +44,7 @@ try {
 
         if ($nazev === 'kalkulace_data') {
             $maKalkulaceData = true;
-            echo "✅ <strong>{$nazev}</strong> - {$typ} - NULL: {$null}\n";
+            echo "OK: <strong>{$nazev}</strong> - {$typ} - NULL: {$null}\n";
         } else {
             echo "   {$nazev} - {$typ}\n";
         }
@@ -52,7 +52,7 @@ try {
     echo "</pre>";
 
     if ($maKalkulaceData) {
-        echo "<div class='success'><strong>✅ Sloupec 'kalkulace_data' EXISTUJE</strong></div>";
+        echo "<div class='success'><strong>OK: Sloupec 'kalkulace_data' EXISTUJE</strong></div>";
 
         // Zkusit INSERT test
         echo "<h2>Test zápisu:</h2>";
@@ -101,10 +101,10 @@ try {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result && $result['kalkulace_data']) {
-            echo "<div class='success'>✅ Kalkulace úspěšně načtena z databáze!</div>";
+            echo "<div class='success'>OK: Kalkulace úspěšně načtena z databáze!</div>";
             echo "<pre>" . json_encode(json_decode($result['kalkulace_data'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
         } else {
-            echo "<div class='error'>❌ Kalkulace se nepodařilo načíst!</div>";
+            echo "<div class='error'>CHYBA: Kalkulace se nepodařilo načíst!</div>";
         }
 
         // Smazat testovací záznam
@@ -113,7 +113,7 @@ try {
         echo "<div class='success'>Testovací záznam smazán</div>";
 
     } else {
-        echo "<div class='error'><strong>❌ Sloupec 'kalkulace_data' NEEXISTUJE!</strong></div>";
+        echo "<div class='error'><strong>CHYBA: Sloupec 'kalkulace_data' NEEXISTUJE!</strong></div>";
         echo "<p>Je potřeba vytvořit sloupec pomocí migrace:</p>";
         echo "<pre>ALTER TABLE wgs_reklamace ADD COLUMN kalkulace_data LONGTEXT NULL;</pre>";
     }

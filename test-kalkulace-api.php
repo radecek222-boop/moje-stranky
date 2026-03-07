@@ -115,7 +115,7 @@ echo "<!DOCTYPE html>
 <body>
 <div class='container'>";
 
-echo "<h1>🔍 Diagnostika načítání kalkulace z API</h1>";
+echo "<h1>Diagnostika načítání kalkulace z API</h1>";
 
 // Formulář pro zadání ID reklamace
 if (!isset($_GET['reklamace_id'])) {
@@ -156,11 +156,11 @@ try {
     $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$reklamace) {
-        echo "<div class='error'>❌ Reklamace NENALEZENA v databázi!</div>";
+        echo "<div class='error'>CHYBA: Reklamace NENALEZENA v databázi!</div>";
         exit;
     }
 
-    echo "<div class='success'>✅ Reklamace nalezena:</div>";
+    echo "<div class='success'>OK: Reklamace nalezena:</div>";
     echo "<pre>" . json_encode($reklamace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
 
     // 2. KONTROLA KALKULACE V wgs_kalkulace
@@ -180,22 +180,22 @@ try {
         $kalkulaceRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($kalkulaceRow) {
-            echo "<div class='success'>✅ Kalkulace NALEZENA v wgs_kalkulace:</div>";
+            echo "<div class='success'>OK: Kalkulace NALEZENA v wgs_kalkulace:</div>";
             echo "<pre>" . json_encode($kalkulaceRow, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
 
             if (!empty($kalkulaceRow['rozpis_json'])) {
                 $kalkulaceData = json_decode($kalkulaceRow['rozpis_json'], true);
-                echo "<div class='info'><strong>📊 Dekódovaný JSON rozpis:</strong></div>";
+                echo "<div class='info'><strong>Dekódovaný JSON rozpis:</strong></div>";
                 echo "<pre>" . json_encode($kalkulaceData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
             } else {
-                echo "<div class='warning'>⚠️ Sloupec rozpis_json je PRÁZDNÝ!</div>";
+                echo "<div class='warning'>POZOR: Sloupec rozpis_json je PRÁZDNÝ!</div>";
             }
         } else {
-            echo "<div class='warning'>⚠️ Kalkulace NENÍ v tabulce wgs_kalkulace</div>";
+            echo "<div class='warning'>POZOR: Kalkulace NENÍ v tabulce wgs_kalkulace</div>";
         }
     } else {
-        echo "<div class='error'>❌ Tabulka wgs_kalkulace NEEXISTUJE v databázi!</div>";
-        echo "<div class='info'>ℹ️ Kalkulace se pravděpodobně ukládá do wgs_nabidky</div>";
+        echo "<div class='error'>CHYBA: Tabulka wgs_kalkulace NEEXISTUJE v databázi!</div>";
+        echo "<div class='info'>Kalkulace se pravděpodobně ukládá do wgs_nabidky</div>";
     }
 
     // 3. KONTROLA NABÍDKY V wgs_nabidky
@@ -205,7 +205,7 @@ try {
     $stmt = $pdo->query("SHOW COLUMNS FROM wgs_nabidky");
     $sloupce = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "<div class='info'><strong>📋 Struktura tabulky wgs_nabidky:</strong></div>";
+    echo "<div class='info'><strong>Struktura tabulky wgs_nabidky:</strong></div>";
     echo "<pre>";
     foreach ($sloupce as $sloupec) {
         echo $sloupec['Field'] . " (" . $sloupec['Type'] . ")\n";
@@ -234,10 +234,10 @@ try {
     $nabidka = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($nabidka) {
-        echo "<div class='success'>✅ Nabídka NALEZENA v wgs_nabidky:</div>";
+        echo "<div class='success'>OK: Nabídka NALEZENA v wgs_nabidky:</div>";
         echo "<pre>" . json_encode($nabidka, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
     } else {
-        echo "<div class='warning'>⚠️ Nabídka NENÍ v tabulce wgs_nabidky</div>";
+        echo "<div class='warning'>POZOR: Nabídka NENÍ v tabulce wgs_nabidky</div>";
     }
 
     // 4. TEST API VOLÁNÍ
@@ -255,26 +255,26 @@ try {
     echo "<h2>5️⃣ Analýza výsledku</h2>";
 
     if (isset($apiResult['kalkulace']) && $apiResult['kalkulace'] !== null) {
-        echo "<div class='success'>✅ API VRACÍ kalkulaci!</div>";
+        echo "<div class='success'>OK: API VRACÍ kalkulaci!</div>";
 
         if (isset($apiResult['kalkulace']['sluzby']) && is_array($apiResult['kalkulace']['sluzby']) && count($apiResult['kalkulace']['sluzby']) > 0) {
-            echo "<div class='success'>✅ Kalkulace obsahuje pole 'sluzby' (" . count($apiResult['kalkulace']['sluzby']) . " položek)</div>";
+            echo "<div class='success'>OK: Kalkulace obsahuje pole 'sluzby' (" . count($apiResult['kalkulace']['sluzby']) . " položek)</div>";
             echo "<pre>" . json_encode($apiResult['kalkulace']['sluzby'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
         } else {
-            echo "<div class='error'>❌ Pole 'sluzby' je PRÁZDNÉ nebo NEEXISTUJE!</div>";
+            echo "<div class='error'>CHYBA: Pole 'sluzby' je PRÁZDNÉ nebo NEEXISTUJE!</div>";
         }
 
         if (isset($apiResult['kalkulace']['dilyPrace']) && is_array($apiResult['kalkulace']['dilyPrace']) && count($apiResult['kalkulace']['dilyPrace']) > 0) {
-            echo "<div class='success'>✅ Kalkulace obsahuje pole 'dilyPrace' (" . count($apiResult['kalkulace']['dilyPrace']) . " položek)</div>";
+            echo "<div class='success'>OK: Kalkulace obsahuje pole 'dilyPrace' (" . count($apiResult['kalkulace']['dilyPrace']) . " položek)</div>";
             echo "<pre>" . json_encode($apiResult['kalkulace']['dilyPrace'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
         } else {
-            echo "<div class='warning'>⚠️ Pole 'dilyPrace' je prázdné</div>";
+            echo "<div class='warning'>POZOR: Pole 'dilyPrace' je prázdné</div>";
         }
 
         echo "<div class='info'><strong>💰 Celková cena:</strong> " . ($apiResult['kalkulace']['celkovaCena'] ?? 'N/A') . " EUR</div>";
 
     } else {
-        echo "<div class='error'>❌ API NEVRACÍ kalkulaci! (klíč 'kalkulace' je null nebo neexistuje)</div>";
+        echo "<div class='error'>CHYBA: API NEVRACÍ kalkulaci! (klíč 'kalkulace' je null nebo neexistuje)</div>";
     }
 
     // 6. ZÁVĚR
@@ -282,7 +282,7 @@ try {
 
     if (!$kalkulaceRow && !$nabidka) {
         echo "<div class='error'>";
-        echo "❌ <strong>PROBLÉM:</strong> Reklamace NEMÁ ani kalkulaci v wgs_kalkulace, ani nabídku v wgs_nabidky!<br><br>";
+        echo "CHYBA: <strong>PROBLÉM:</strong> Reklamace NEMÁ ani kalkulaci v wgs_kalkulace, ani nabídku v wgs_nabidky!<br><br>";
         echo "<strong>ŘEŠENÍ:</strong><br>";
         echo "1. Otevři kalkulační wizard pro tuto reklamaci<br>";
         echo "2. Vyplň kalkulaci<br>";
@@ -291,13 +291,13 @@ try {
         echo "</div>";
     } elseif (isset($apiResult['kalkulace']) && isset($apiResult['kalkulace']['sluzby']) && count($apiResult['kalkulace']['sluzby']) > 0) {
         echo "<div class='success'>";
-        echo "✅ <strong>VŠE FUNGUJE SPRÁVNĚ!</strong><br><br>";
+        echo "OK: <strong>VŠE FUNGUJE SPRÁVNĚ!</strong><br><br>";
         echo "API vrací kalkulaci s vyplněným polem 'sluzby'.<br>";
         echo "PDF PRICELIST by měl zobrazovat kompletní rozpis.";
         echo "</div>";
     } else {
         echo "<div class='warning'>";
-        echo "⚠️ <strong>ČÁSTEČNÝ PROBLÉM:</strong><br><br>";
+        echo "POZOR: <strong>ČÁSTEČNÝ PROBLÉM:</strong><br><br>";
         echo "Data jsou v databázi, ale API je nevrací správně, nebo pole 'sluzby' je prázdné.<br>";
         echo "Zkontroluj funkci loadReklamace() v api/protokol_api.php";
         echo "</div>";

@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -34,15 +35,8 @@ try {
     $pdo = getDbConnection();
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Získat reklamace_id z GET parametru
-    $reklamaceId = $_GET['reklamace_id'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new Exception('Chybí parametr reklamace_id');
-    }
-
-    // Sanitizace
-    $reklamaceId = trim($reklamaceId);
+    // Získat a ověřit reklamace_id (whitelist znaků, max 120 znaků)
+    $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
 
     // Najít reklamaci v databázi včetně informace o vlastníkovi
     $stmt = $pdo->prepare("

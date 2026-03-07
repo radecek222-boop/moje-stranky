@@ -32,16 +32,14 @@ $jeAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 // Uvolnit session lock pro paralelní zpracování
 session_write_close();
 
-// Vstupní validace
-$reklamaceId = trim($_GET['reklamace_id'] ?? '');
-if (empty($reklamaceId)) {
+// Vstupní validace — whitelist znaky, max délka 120
+try {
+    $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
+} catch (Exception $e) {
     http_response_code(400);
-    echo '<div class="notes-chyba">Chybí ID reklamace.</div>';
+    echo '<div class="notes-chyba">Neplatné nebo chybějící ID reklamace.</div>';
     exit;
 }
-
-// Sanitizace ID
-$reklamaceId = htmlspecialchars($reklamaceId, ENT_QUOTES, 'UTF-8');
 
 try {
     $pdo = getDbConnection();

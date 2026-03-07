@@ -61,7 +61,7 @@ try {
 
         if ($milan['role'] !== 'technik') {
             echo "<div class='warning'>";
-            echo "<strong>⚠️ PROBLÉM NALEZEN:</strong><br>";
+            echo "<strong>POZOR: PROBLÉM NALEZEN:</strong><br>";
             echo "Milan Kolín má roli '<strong>{$milan['role']}</strong>', ale statistiky filtrují pouze uživatele s rolí '<strong>technik</strong>'.<br>";
             echo "Proto se v statistikách nezobrazuje jeho jméno správně.";
             echo "</div>";
