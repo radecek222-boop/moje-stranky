@@ -1662,8 +1662,9 @@ async function showCustomerDetail(id) {
             <span style="color: #aaa; font-weight: 600;">Jméno:</span>
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-              <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+            <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+            <div style="position:relative;">
+              <input type="tel" id="edit_telefon" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 1.6rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
               <button onclick="
                 const tel = document.getElementById('edit_telefon').value;
                 if (tel) navigator.clipboard.writeText(tel).then(() => {
@@ -1678,17 +1679,17 @@ async function showCustomerDetail(id) {
                   document.body.appendChild(tip);
                   setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
-              " title="Kopírovat číslo" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+              " title="Kopírovat číslo" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </span>
-            <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
+            </div>
 
-            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-              <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <span style="color: #aaa; font-weight: 600;">E-mail:</span>
+            <div style="position:relative;">
+              <input type="email" id="edit_email" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 1.6rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
               <button onclick="
                 const val = document.getElementById('edit_email').value;
                 if (val) navigator.clipboard.writeText(val).then(() => {
@@ -1703,17 +1704,17 @@ async function showCustomerDetail(id) {
                   document.body.appendChild(tip);
                   setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
-              " title="Kopírovat email" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+              " title="Kopírovat email" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </span>
-            <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
+            </div>
 
-            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-              <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <div style="position:relative;">
+              <input type="text" id="edit_adresa" style="width:100%;box-sizing:border-box;border: 1px solid #333; padding: 0.25rem 1.6rem 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
               <button onclick="
                 const val = document.getElementById('edit_adresa').value;
                 if (val) navigator.clipboard.writeText(val).then(() => {
@@ -1728,14 +1729,13 @@ async function showCustomerDetail(id) {
                   document.body.appendChild(tip);
                   setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
                 });
-              " title="Kopírovat adresu" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+              " title="Kopírovat adresu" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-            </span>
-            <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
+            </div>
 
             <span style="color: #aaa; font-weight: 600;">Model:</span>
             <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
