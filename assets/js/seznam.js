@@ -2981,7 +2981,7 @@ async function showCustomerDetail(id) {
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Popis problému od zákazníka:</label>
             <textarea id="edit_popis_problemu" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #444; padding: 0.6rem; border-radius: 3px; background: #2a2a2a; color: #fff; -webkit-text-fill-color: #fff; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte popis problému od zákazníka"
                       oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',(this.scrollHeight+12)+'px','important')">${Utils.escapeHtml(description)}</textarea>
           </div>
@@ -2989,7 +2989,7 @@ async function showCustomerDetail(id) {
           <div style="margin-bottom: 0.75rem;">
             <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.3rem; text-transform: none; letter-spacing: normal;">Doplňující informace od prodejce:</label>
             <textarea id="edit_doplnujici_info" class="detail-textarea-popis"
-                      style="width: 100%; border: 1px solid #333; padding: 0.6rem; border-radius: 3px; background: #fff; color: #000; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
+                      style="width: 100%; border: 1px solid #444; padding: 0.6rem; border-radius: 3px; background: #2a2a2a; color: #fff; -webkit-text-fill-color: #fff; font-size: ${window.innerWidth <= 768 ? '16px' : '0.85rem'}; resize: none; font-family: inherit; overflow: hidden;"
                       placeholder="Zadejte doplňující informace od prodejce"
                       oninput="this.style.setProperty('height','auto','important');this.style.setProperty('height',(this.scrollHeight+12)+'px','important')">${Utils.escapeHtml(doplnujici_info)}</textarea>
           </div>
@@ -3011,21 +3011,44 @@ async function showCustomerDetail(id) {
     obsahDetailZakaznika.style.setProperty('width', '100%', 'important');
   }
 
-  // Auto-resize + nastavení fontu podle zařízení (400ms - iOS potřebuje čas na render)
-  setTimeout(() => {
-    const textareas = document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu');
+  // Auto-resize + nastavení fontu podle zařízení
+  // iOS FIX: double requestAnimationFrame zajistí, že flexbox layout je dokončen
+  // před měřením scrollHeight — bez toho vrátí iOS nesprávnou (příliš malou) hodnotu.
+  const nastavVyskuTextarey = (ta) => {
+    if (!ta) return;
     const jeMobil = window.innerWidth <= 768;
-    textareas.forEach(ta => {
-      if (ta) {
-        ta.style.setProperty('font-size', jeMobil ? '14px' : '0.85rem', 'important');
-        ta.style.setProperty('color', '#000', 'important');
-        ta.style.setProperty('min-height', '0', 'important');
-        ta.style.setProperty('height', 'auto', 'important');
-        void ta.offsetHeight; // vynutí reflow před měřením scrollHeight
-        ta.style.setProperty('height', (ta.scrollHeight + 12) + 'px', 'important');
-      }
+    ta.style.setProperty('font-size', jeMobil ? '14px' : '0.85rem', 'important');
+    ta.style.setProperty('color', '#fff', 'important');
+    ta.style.setProperty('-webkit-text-fill-color', '#fff', 'important');
+    ta.style.setProperty('min-height', '0', 'important');
+    ta.style.setProperty('height', 'auto', 'important');
+    void ta.offsetHeight; // vynutí synchronní reflow
+    const vyska = ta.scrollHeight;
+    if (vyska > 20) {
+      ta.style.setProperty('height', (vyska + 12) + 'px', 'important');
+    }
+  };
+
+  // Primární průchod: double RAF zajistí settled layout na iOS (400ms + 2 framy)
+  setTimeout(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu').forEach(nastavVyskuTextarey);
+      });
     });
   }, 400);
+
+  // Záložní průchod: opraví špatné měření z prvního průchodu na pomalých iOS zařízeních
+  setTimeout(() => {
+    document.querySelectorAll('#edit_doplnujici_info, #edit_popis_problemu').forEach(ta => {
+      if (!ta) return;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nastavVyskuTextarey(ta);
+        });
+      });
+    });
+  }, 900);
 }
 
 /**
