@@ -362,12 +362,24 @@ async function loadAll(status = 'all', append = false) {
     const page = append ? CURRENT_PAGE + 1 : 1;
     // Cache-busting pro Safari PWA
     const cacheBuster = Date.now();
-    const response = await fetch(`/app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`, {
+    const nactiUrl = `/app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}&_t=${cacheBuster}`;
+    const moznostiNacitani = {
       cache: 'no-store',
       headers: {
         'Cache-Control': 'no-cache'
       }
-    });
+    };
+
+    // Retry při přechodném selhání (např. "Service Worker context closed" na iOS Safari)
+    let response;
+    try {
+      response = await fetch(nactiUrl, moznostiNacitani);
+    } catch (chybaNacitani) {
+      // Jeden pokus navíc po krátkém čekání
+      await new Promise(resolve => setTimeout(resolve, 800));
+      response = await fetch(nactiUrl, moznostiNacitani);
+    }
+
     if (!response.ok) throw new Error('Chyba načítání');
 
     const json = await response.json();
