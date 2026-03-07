@@ -206,6 +206,27 @@
   width: 100%;
 }
 
+/* KRITICKÁ OPRAVA SCROLL:
+   .detail-modal-body má v seznam.css max-height:80vh + overflow-y:auto (vnořený scroll kontejner).
+   V #detailOverlay scrolluje .modal-content — .modal-body nesmí mít vlastní scroll.
+   Inline style "overflow-y:auto" z JS přebíjeme pomocí !important. */
+#detailOverlay .detail-modal-body {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* detail-sloupec-pravy má overflow:hidden → ořezávalo textarey */
+#detailOverlay .detail-sloupec-levy,
+#detailOverlay .detail-sloupec-pravy {
+  overflow: visible !important;
+}
+
+/* Textarea flash fix: -webkit-text-fill-color má přednost před color v Safari/iOS */
+#detailOverlay textarea.detail-textarea-popis {
+  -webkit-text-fill-color: #000000;
+  color: #000000;
+}
+
 #detailOverlay .modal-section {
   background: #222222;
   border: 1px solid #333333;
