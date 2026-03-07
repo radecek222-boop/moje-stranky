@@ -399,3 +399,9 @@ async function prepnoutStatusUzivatele(userId, newStatus) {
   }
 }
 
+// Zpřístupnit uživatel funkce globálně
+window.zobrazDetailUzivatele = zobrazDetailUzivatele;
+window.zavritDetailUzivatele = zavritDetailUzivatele;
+window.ulozitZmenyUzivatele = ulozitZmenyUzivatele;
+window.zmenitHesloUzivatele = zmenitHesloUzivatele;
+window.prepnoutStatusUzivatele = prepnoutStatusUzivatele;
