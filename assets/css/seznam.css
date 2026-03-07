@@ -506,7 +506,7 @@ body {
   border-radius: 50%;
   font-size: 1rem;
   cursor: pointer;
-  color: #cc0000;
+  color: #dc3545;
   line-height: 30px;
   padding: 0;
   width: 30px;
@@ -528,7 +528,7 @@ body {
 .modal-close:hover,
 .modal-close-btn:hover {
   background: rgba(160, 160, 160, 0.5);
-  color: #990000;
+  color: #c82333;
 }
 .modal-body {
   padding: 2rem;

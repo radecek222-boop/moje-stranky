@@ -51,9 +51,9 @@
   --c-error-bg-light: #fff5f5;
   --c-text-secondary: #6c757d;
   --c-text-secondary-hover: #5a6268;
-  --c-dark-red: #990000;
+  --c-dark-red: #c82333;
   /* Stavové barvy seznam.css */
-  --c-status-dark-red: #8b0000;
+  --c-status-dark-red: #c82333;
   --c-status-dark-red-2: #6b0000;
   --c-status-gold: #b8860b;
   --c-status-yellow: #ffe100;
@@ -83,7 +83,7 @@
   --wgs-neon-green-rgb: 57, 255, 20;
   --wgs-danger: #dc3545;
   --wgs-danger-hover: #c82333;
-  --wgs-delete: #cc0000;
+  --wgs-delete: #dc3545;
   --wgs-delete-hover: #ff0000;
   --wgs-success: #28a745;
   --wgs-success-hover: #218838;

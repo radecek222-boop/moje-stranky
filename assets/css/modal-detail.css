@@ -122,7 +122,7 @@
   flex-shrink: 0;
   border: none;
   background: rgba(180, 180, 180, 0.35);
-  color: #cc0000;
+  color: #dc3545;
   font-size: 1rem;
   font-weight: 700;
   line-height: 30px;
@@ -139,7 +139,7 @@
 
 #detailOverlay .modal-close-btn:hover {
   background: rgba(160, 160, 160, 0.5);
-  color: #990000;
+  color: #c82333;
 }
 
 #detailOverlay .modal-close-btn:active {
@@ -150,13 +150,13 @@
 /* Záložní zavírací tlačítko (.modal-close) */
 #detailOverlay .modal-close {
   background: #f0f0f0;
-  color: #cc0000;
+  color: #dc3545;
   font-weight: 700;
 }
 
 #detailOverlay .modal-close:hover {
   background: #e0e0e0;
-  color: #990000;
+  color: #c82333;
 }
 
 #detailOverlay .modal-title {
@@ -394,14 +394,14 @@
 }
 
 #detailOverlay .btn-success {
-  background: #2a4a2a;
-  border-color: #3a6a3a;
+  background: #28a745;
+  border-color: #218838;
 }
 
 #detailOverlay .btn-danger {
-  background: #4a2a2a;
-  border-color: #8b0000;
-  color: #ff6666;
+  background: #dc3545;
+  border-color: #c82333;
+  color: #ffffff;
 }
 
 /* Smazat reklamaci — červené */
@@ -468,7 +468,7 @@
 #detailOverlay .cal-day.occupied {
   background: #ffeeee;
   border-color: #ffcccc;
-  color: #cc0000;
+  color: #dc3545;
 }
 
 /* --- Časové sloty --- */
@@ -492,17 +492,17 @@
 #detailOverlay .time-slot.occupied {
   background: #ffeeee;
   border-color: #ffcccc;
-  color: #cc0000;
+  color: #dc3545;
 }
 
 /* --- Rezervace na den --- */
 #detailOverlay .day-bookings {
   background: #2a1515;
-  border-color: #8b0000;
+  border-color: #c82333;
 }
 
 #detailOverlay .day-bookings h4 {
-  color: #ff6666;
+  color: #ffffff;
 }
 
 #detailOverlay .booking-item {
