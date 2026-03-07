@@ -17,9 +17,12 @@ header('Service-Worker-Allowed: /');
 $klicoveSoubory = [
     __DIR__ . '/assets/js/psa-kalkulator.min.js',
     __DIR__ . '/assets/js/seznam.min.js',
+    __DIR__ . '/assets/js/modal-detail.min.js',
     __DIR__ . '/assets/js/objednatservis.min.js',
     __DIR__ . '/assets/js/admin-dashboard.min.js',
     __DIR__ . '/assets/css/main.min.css',
+    __DIR__ . '/assets/css/modal-detail.min.css',
+    __DIR__ . '/assets/css/seznam.min.css',
     __DIR__ . '/assets/css/psa-kalkulator.min.css',
     __DIR__ . '/init.php',
     __FILE__ // sw.php sám
