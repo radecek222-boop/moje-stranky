@@ -1094,44 +1094,41 @@ function filterUnreadNotes() {
 // Step 43: Migrace na Alpine.js - open/close/overlay click/ESC nyní řeší detailModal komponenta
 const ModalManager = {
   show: (content) => {
-    // Nastavit obsah modalu
-    document.getElementById('modalContent').innerHTML = content;
+    // Nastavit obsah modalu přes ModalDetail (modal-detail.js)
+    if (window.ModalDetail) {
+      window.ModalDetail.nastavitObsah(content);
+    } else {
+      // Fallback pokud modal-detail.js ještě není načten
+      const kontejner = document.getElementById('modalContent');
+      if (kontejner) kontejner.innerHTML = content;
+    }
 
-    // Step 43: Otevřít modal přes Alpine.js API
-    if (window.detailModal && window.detailModal.open) {
+    // Otevřít modal — preferujeme ModalDetail, pak Alpine API
+    if (window.ModalDetail) {
+      window.ModalDetail.otevrit();
+    } else if (window.detailModal && window.detailModal.open) {
       window.detailModal.open();
     } else {
       // Fallback pro zpětnou kompatibilitu
-      if (window.scrollLock) {
-        window.scrollLock.enable('detail-overlay');
-      }
+      if (window.scrollLock) window.scrollLock.enable('detail-overlay');
       document.body.classList.add('modal-open');
       document.getElementById('detailOverlay').classList.add('active');
     }
-
-    // FIX: Safari focus fix - zajistí že modal je v DOM před scrollem
-    setTimeout(() => {
-      const modalContent = document.querySelector('#detailOverlay .modal-content');
-      if (modalContent) {
-        modalContent.scrollTop = 0; // Reset scroll pozice modalu
-      }
-    }, 10);
   },
 
   close: () => {
-    // Step 43: Zavřít modal přes Alpine.js API
-    if (window.detailModal && window.detailModal.close) {
+    // Zavřít modal — preferujeme ModalDetail, pak Alpine API
+    if (window.ModalDetail) {
+      window.ModalDetail.zavrit();
+    } else if (window.detailModal && window.detailModal.close) {
       window.detailModal.close();
     } else {
       // Fallback pro zpětnou kompatibilitu
       const overlay = document.getElementById('detailOverlay');
-      overlay.classList.remove('active');
-
+      if (overlay) overlay.classList.remove('active');
       setTimeout(() => {
         document.body.classList.remove('modal-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('detail-overlay');
-        }
+        if (window.scrollLock) window.scrollLock.disable('detail-overlay');
       }, 50);
     }
 
@@ -1297,7 +1294,7 @@ async function showDetail(recordOrId) {
         <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-          <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+          <button class="detail-btn detail-btn-primary" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
         ` : ''}
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
@@ -1325,7 +1322,7 @@ async function showDetail(recordOrId) {
     technickaFunkce = !jeProdejceElse ? `
         <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
         <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="detail-btn detail-btn-primary" style="background: #333; color: #39ff14; border: 1px solid #39ff14;" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
+        <button class="detail-btn detail-btn-primary" data-action="showQrPlatbaModal" data-id="${record.id}">QR Platba</button>
     ` : '';
 
     const jeDesktopBtn = window.innerWidth >= 769;
