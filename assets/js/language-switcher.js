@@ -103,6 +103,18 @@
         window.csrfTokenCache ||
         '';
 
+      // GUARD: Pokud CSRF token chybí, překlad nepouštět — zabránit 403 na serveru
+      if (!csrfToken) {
+        console.error('[WGS] Překlad aktualit přeskočen: CSRF token není dostupný.',
+          'Zkontroluj, zda init.php generuje <meta name="csrf-token"> a zda se načítá csrf-auto-inject.js.');
+        loadingDiv.remove();
+        // Zobrazit adminovi srozumitelnou hlášku (stránka se i tak přesměruje)
+        if (typeof window.wgsToast !== 'undefined') {
+          window.wgsToast.error('Překlad nelze spustit: chybí bezpečnostní token. Zkus obnovit stránku.');
+        }
+        return;
+      }
+
       // Sestavit FormData pro POST požadavek
       const formData = new FormData();
       formData.append('jazyk', cilovyJazyk);

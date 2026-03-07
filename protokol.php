@@ -906,7 +906,6 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-autosave.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-autosave.js') ?>" defer></script>
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js" defer></script>
-<script src="assets/js/language-switcher.min.js" defer></script>
 <!-- Mapa pro autocomplete adres v kalkulačce -->
 <script src="assets/js/wgs-map.min.js" defer></script>
 <!-- Kalkulačka integrace -->
