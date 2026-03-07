@@ -14,6 +14,7 @@ require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/audit_logger.php';
 require_once __DIR__ . '/../includes/admin_email_helpers.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -718,11 +719,11 @@ function handleGetApiKeys(PDO $pdo): void
  */
 function handleChangeReklamaceStatus(PDO $pdo, array $payload): void
 {
-    $reklamaceId = $payload['reklamace_id'] ?? null;
+    $reklamaceId = sanitizeReklamaceId($payload['reklamace_id'] ?? null, 'reklamace_id');
     $newStatus = $payload['new_status'] ?? null;
 
-    if (!$reklamaceId || !$newStatus) {
-        throw new InvalidArgumentException('Chybí reklamace_id nebo new_status.');
+    if (!$newStatus) {
+        throw new InvalidArgumentException('Chybí new_status.');
     }
 
     // Whitelist povolených stavů
@@ -757,11 +758,8 @@ function handleChangeReklamaceStatus(PDO $pdo, array $payload): void
  */
 function handleGetReklamaceDetail(PDO $pdo): void
 {
-    $reklamaceId = $_GET['reklamace_id'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new InvalidArgumentException('Chybí reklamace_id.');
-    }
+    // Validace reklamace_id — whitelist znaků, max 120 znaků
+    $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
 
     // Načíst detail reklamace
     $stmt = $pdo->prepare("
