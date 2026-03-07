@@ -32,7 +32,12 @@
 
     // ADMIN: Překlad POUZE při skutečném kliknutí na vlajku na stránce aktualit
     if (jeKliknuti && jeNaAktualitach && jeAdmin && (jazyk === 'en' || jazyk === 'it')) {
-      await spustitPrekladAktualit(jazyk);
+      const prekladOk = await spustitPrekladAktualit(jazyk);
+      if (!prekladOk) {
+        // Překlad neproběhl (chybí CSRF token nebo kritická chyba) — přerušit přepnutí
+        jeKliknuti = false;
+        return;
+      }
     }
 
     aktualniJazyk = jazyk;
@@ -69,6 +74,7 @@
   /**
    * Spustí automatický překlad všech aktualit do cílového jazyka (pouze admin)
    * @param {string} cilovyJazyk - 'en' nebo 'it'
+   * @returns {boolean} true = překlad proběhl (nebo byl přeskočen serverem), false = nelze pokračovat
    */
   async function spustitPrekladAktualit(cilovyJazyk) {
     try {
@@ -103,16 +109,20 @@
         window.csrfTokenCache ||
         '';
 
-      // GUARD: Pokud CSRF token chybí, překlad nepouštět — zabránit 403 na serveru
+      // GUARD: Pokud CSRF token chybí, překlad nepouštět — zabránit 403 na serveru.
+      // Vrátíme false — caller přeruší přepnutí jazyka, dokud nebude session obnovena.
       if (!csrfToken) {
         console.error('[WGS] Překlad aktualit přeskočen: CSRF token není dostupný.',
           'Zkontroluj, zda init.php generuje <meta name="csrf-token"> a zda se načítá csrf-auto-inject.js.');
         loadingDiv.remove();
-        // Zobrazit adminovi srozumitelnou hlášku (stránka se i tak přesměruje)
+        const hlaška = 'Překlad nelze spustit: chybí bezpečnostní token.\nObnov stránku a zkus znovu.';
         if (typeof window.wgsToast !== 'undefined') {
-          window.wgsToast.error('Překlad nelze spustit: chybí bezpečnostní token. Zkus obnovit stránku.');
+          window.wgsToast.error(hlaška);
+        } else {
+          // Fallback — wgsToast nedostupný (např. stránka se teprve načítá)
+          alert(hlaška);
         }
-        return;
+        return false;
       }
 
       // Sestavit FormData pro POST požadavek
@@ -146,12 +156,14 @@
 
       // Odstranit indikátor
       loadingDiv.remove();
+      return true;
 
     } catch (error) {
       console.error('Chyba při překladu aktualit:', error);
       // Odstranit loading pokud existuje
       const loading = document.getElementById('preklad-loading');
       if (loading) loading.remove();
+      return false;
     }
   }
 

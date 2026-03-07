@@ -1638,6 +1638,6 @@ document.addEventListener('alpine:init', () => {
 <!-- Translations - překladový slovník pro dynamický obsah -->
 <script src="/assets/js/translations.min.js" defer></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
-<script src="/assets/js/language-switcher.min.js?v=<?= filemtime(__DIR__ . '/../assets/js/language-switcher.min.js') ?>" defer></script>
+<script src="/assets/js/language-switcher.min.js?v=<?= file_exists(__DIR__ . '/../assets/js/language-switcher.min.js') ? filemtime(__DIR__ . '/../assets/js/language-switcher.min.js') : '0' ?>" defer></script>
 <!-- KRITICKA OPRAVA: logout-handler.min.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
 <script src="/assets/js/logout-handler.min.js" defer></script>
