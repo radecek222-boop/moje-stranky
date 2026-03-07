@@ -147,21 +147,16 @@ body.modal-open {
   }
 }
 
-/* iOS Safari - modal overlay musí být scrollovatelný */
+/* iOS FIX: display:flex + overflow-y:auto nevytvoří nativní UIScrollView na iOS
+   Řešení: display:block na iOS - pak overflow-y:auto funguje správně */
 @supports (-webkit-touch-callout: none) {
+  .modal-overlay.active,
   #detailOverlay.active {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    display: block !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-  }
-
-  #detailOverlay.active .modal-content {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+    padding: 0 !important;
   }
 }
 

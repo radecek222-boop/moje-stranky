@@ -542,6 +542,17 @@ body {
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y pinch-zoom;
 }
+/* iOS FIX: display:flex + overflow-y:auto nevytvoří nativní UIScrollView na iOS
+   display:block funguje správně */
+@supports (-webkit-touch-callout: none) {
+  .modal-overlay.active {
+    display: block !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+    padding: 0 !important;
+  }
+}
 .modal-section {
   margin-bottom: 2rem;
 }
