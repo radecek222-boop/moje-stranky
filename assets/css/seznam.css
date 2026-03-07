@@ -1742,9 +1742,9 @@ body {
 
 /* Aktivní pill - pulzující záře */
 @keyframes pillPulse {
-  0%   { box-shadow: 0 0 5px 1px var(--pill-glow-barva); }
-  50%  { box-shadow: 0 0 16px 5px var(--pill-glow-barva), 0 0 28px 8px var(--pill-glow-barva); }
-  100% { box-shadow: 0 0 5px 1px var(--pill-glow-barva); }
+  0%   { box-shadow: 0 0 3px 1px var(--pill-glow-barva); }
+  50%  { box-shadow: 0 0 8px 2px var(--pill-glow-barva); }
+  100% { box-shadow: 0 0 3px 1px var(--pill-glow-barva); }
 }
 .workflow-pill--aktivni {
   animation: pillPulse 2s ease-in-out infinite;

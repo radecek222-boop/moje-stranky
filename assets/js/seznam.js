@@ -1662,7 +1662,7 @@ async function showCustomerDetail(id) {
             <span style="color: #aaa; font-weight: 600;">Jméno:</span>
             <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-            <span style="display:flex;align-items:center;gap:0.3rem;">
+            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
               <span style="color: #aaa; font-weight: 600;">Telefon:</span>
               <button onclick="
                 const tel = document.getElementById('edit_telefon').value;
@@ -1687,7 +1687,7 @@ async function showCustomerDetail(id) {
             </span>
             <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-            <span style="display:flex;align-items:center;gap:0.3rem;">
+            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
               <span style="color: #aaa; font-weight: 600;">Email:</span>
               <button onclick="
                 const val = document.getElementById('edit_email').value;
@@ -1712,7 +1712,7 @@ async function showCustomerDetail(id) {
             </span>
             <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-            <span style="display:flex;align-items:center;gap:0.3rem;">
+            <span style="display:flex;align-items:center;justify-content:space-between;width:100%;">
               <span style="color: #aaa; font-weight: 600;">Adresa:</span>
               <button onclick="
                 const val = document.getElementById('edit_adresa').value;
