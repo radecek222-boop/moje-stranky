@@ -317,9 +317,9 @@ if ($initialBootstrapData) {
     <textarea id="problem-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
-  <div class="section-title">Řešení<span class="en-label">SOLUTION</span></div>
+  <div class="section-title" style="display:flex; align-items:center; gap:8px;">Řešení<span class="en-label">SOLUTION</span><button type="button" class="btn-vyber-posudek" onclick="posudkyPickerOtevrit()">Vyber</button></div>
   <div class="split-section">
-    <textarea id="repair-cz" placeholder="Kliknutím vyberte posudek nebo napište vlastní..." readonly></textarea>
+    <textarea id="repair-cz" placeholder="Napište vlastní posudek nebo použijte tlačítko Vyber..." style="height: 80px;"></textarea>
     <textarea id="repair-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
@@ -1051,7 +1051,6 @@ function posudkyPickerVybrat(el) {
   var veta = el.getAttribute('data-veta');
   var textarea = document.getElementById('repair-cz');
   textarea.value = veta;
-  textarea.readOnly = false;
   // Spustit event pro překlad
   textarea.dispatchEvent(new Event('input', { bubbles: true }));
   posudkyPickerZavrit();
@@ -1059,31 +1058,13 @@ function posudkyPickerVybrat(el) {
 
 function posudkyPickerVlastni() {
   var textarea = document.getElementById('repair-cz');
-  textarea.readOnly = false;
   textarea.value = '';
-  textarea.placeholder = 'Napište vlastní posudek...';
   posudkyPickerZavrit();
   textarea.focus();
 }
 
-// Inicializace – otevřít picker při kliknutí na textarea
+// Inicializace pickeru posudků
 document.addEventListener('DOMContentLoaded', function() {
-  var repairTextarea = document.getElementById('repair-cz');
-  if (repairTextarea) {
-    repairTextarea.addEventListener('click', function() {
-      if (this.readOnly) {
-        posudkyPickerOtevrit();
-      }
-    });
-    // Touch podpora pro mobil
-    repairTextarea.addEventListener('touchend', function(e) {
-      if (this.readOnly) {
-        e.preventDefault();
-        posudkyPickerOtevrit();
-      }
-    });
-  }
-
   // Zavřít picker kliknutím na overlay (mimo dialog)
   document.getElementById('posudkyPickerOverlay').addEventListener('click', function(e) {
     if (e.target === this) {

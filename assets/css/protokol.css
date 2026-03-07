@@ -588,8 +588,26 @@ button.btn:hover {
   background: white;
 }
 
+.btn-vyber-posudek {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.btn-vyber-posudek:hover {
+  background: #c82333;
+}
+
 @media print {
-  .btns, .btn-clear, .notif, .translate-btn, .pdf-preview-overlay { display: none !important; }
+  .btns, .btn-clear, .notif, .translate-btn, .pdf-preview-overlay, .btn-vyber-posudek { display: none !important; }
 }
 /* === MOBILNÍ RESPONSIVITA (PWA) === */
 @media (max-width: 768px) {
@@ -1033,7 +1051,8 @@ body.pdf-export-mode .section-title .en-label {
 }
 
 /* PDF export: Skrýt tlačítka */
-body.pdf-export-mode .btns {
+body.pdf-export-mode .btns,
+body.pdf-export-mode .btn-vyber-posudek {
   display: none !important;
 }
 
@@ -1171,7 +1190,8 @@ body.pdf-export-mode #signature-pad {
   display: block !important;
 }
 
-.pdf-clone-desktop .btns {
+.pdf-clone-desktop .btns,
+.pdf-clone-desktop .btn-vyber-posudek {
   display: none !important;
 }
 
