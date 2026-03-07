@@ -193,10 +193,3 @@ function vytvorKlicZModalu() {
     });
 }
 
-/**
- * ExecuteAction
- */
-async function executeAction(actionId) {
-    // Zachytit tlačítko PŘED jakýmkoliv await
-    const btn = event.target;
-    const originalText = btn.textContent;

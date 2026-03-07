@@ -1100,9 +1100,12 @@ async function loadConfigModal() {
 // === ACTION HANDLERS ===
 
 /**
- * DeleteKey
+ * ExecuteAction
  */
-// Správa klíčů přesunuta do admin-klice.js
+async function executeAction(actionId) {
+    // Zachytit tlačítko PŘED jakýmkoliv await
+    const btn = event.target;
+    const originalText = btn.textContent;
 
     const csrfToken = await getCSRFToken();
 
