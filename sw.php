@@ -135,6 +135,15 @@ self.addEventListener('activate', (event) => {
 // ============================================
 // FETCH - Network First strategie
 // ============================================
+
+// Dynamické API endpointy - SW je NESMÍ interceptovat
+// Pokud by SW kontext byl uzavřen, tyto requesty by selhaly s "Service Worker context closed"
+// Prohlížeč vyřídí tyto requesty přímo, nezávisle na životním cyklu SW
+const PASSTHROUGH_PATHS = [
+  '/app/controllers/',
+  '/api/'
+];
+
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -145,6 +154,13 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorovat external requesty (API, CDN)
   if (!url.origin.includes(self.location.origin)) {
+    return;
+  }
+
+  // API a dynamické endpointy - přeskočit, nechat prohlížeč vyřídit přímo
+  // Tím se předejde chybě "Service Worker context closed" při uzavření SW kontextu
+  const jeApiRequest = PASSTHROUGH_PATHS.some(cesta => url.pathname.startsWith(cesta));
+  if (jeApiRequest) {
     return;
   }
 
