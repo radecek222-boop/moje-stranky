@@ -352,9 +352,9 @@
   overflow: hidden;
   touch-action: pan-y pinch-zoom;
   resize: none;
-  background: #2a2a2a;
-  color: #ffffff;
-  -webkit-text-fill-color: #ffffff;
+  background: #ffffff;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
 }
 
 /* ============================================
