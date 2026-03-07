@@ -54,7 +54,7 @@ async function saveSectionsToIndexedDB(reklamaceId, sections) {
     const objectStore = transaction.objectStore(STORE_NAME);
 
     const data = {
-      reklamaceId: parseInt(reklamaceId),
+      reklamaceId: isNaN(parseInt(reklamaceId)) ? reklamaceId : parseInt(reklamaceId),
       sections: sections,
       timestamp: new Date().toISOString(),
       userEmail: JSON.parse(localStorage.getItem('currentUser') || '{}').email || 'unknown'
