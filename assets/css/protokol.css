@@ -589,19 +589,24 @@ button.btn:hover {
 }
 
 .btn-vyber-posudek {
-  font-size: 9px;
-  font-weight: 700;
-  padding: 0px 6px;
-  line-height: 1;
-  height: 14px;
-  background: #dc3545;
-  color: #fff;
-  border: none;
-  border-radius: 2px;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  padding: 0 5px !important;
+  line-height: 14px !important;
+  height: 14px !important;
+  min-height: 0 !important;
+  max-height: 14px !important;
+  background: #dc3545 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 2px !important;
   cursor: pointer;
   letter-spacing: 0.5px;
   flex-shrink: 0;
   align-self: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
 .btn-vyber-posudek:hover {
