@@ -3,6 +3,9 @@
  * TRANSPORT - Správa transportů
  * Přehled transportů pro řidiče
  */
+
+// Denní token pro transport_sync API
+$transportApiToken = hash('sha256', date('Y-m-d') . 'transport_sync_wgs_salt_2025');
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -1593,6 +1596,9 @@
 <script>
 // Heslo pro editaci
 const HESLO = '9545';
+
+// Token pro API synchronizaci
+const TRANSPORT_API_TOKEN = '<?= $transportApiToken ?>';
 
 // Texty v cestine
 const texty = {
@@ -3410,6 +3416,7 @@ async function ulozData() {
         formData.append('transporty', JSON.stringify(transporty));
         formData.append('ridici', JSON.stringify(ridici));
         formData.append('dokoncene', JSON.stringify(dokoncene));
+        formData.append('api_token', TRANSPORT_API_TOKEN);
         await fetch('api/transport_sync.php', {
             method: 'POST',
             body: formData
@@ -3430,7 +3437,7 @@ async function nactiData() {
 
     try {
         // Cache-busting - přidat timestamp k URL
-        const odpoved = await fetch('api/transport_sync.php?t=' + Date.now(), {
+        const odpoved = await fetch('api/transport_sync.php?t=' + Date.now() + '&token=' + TRANSPORT_API_TOKEN, {
             cache: 'no-store'
         });
         const data = await odpoved.json();

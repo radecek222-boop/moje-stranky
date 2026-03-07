@@ -5,16 +5,26 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
+
+// Denní token (stejná logika jako v transport.php)
+$ocekavanyToken = hash('sha256', date('Y-m-d') . 'transport_sync_wgs_salt_2025');
 
 // Soubory pro uložení dat (jednoduchá implementace bez databáze)
 $dataFile = __DIR__ . '/../logs/transport_data.json';
 
 // GET - načíst data
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Validace tokenu pro GET (v query parametru)
+    $token = $_GET['token'] ?? '';
+    if (!hash_equals($ocekavanyToken, $token)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Přístup odepřen']);
+        exit;
+    }
+
     if (file_exists($dataFile)) {
         $data = json_decode(file_get_contents($dataFile), true);
         // Vrátit stavy jako objekt (ne pole) - použít (object) pro prázdné
@@ -37,6 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 // POST - uložit data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validace tokenu
+    $token = $_POST['api_token'] ?? '';
+    if (!hash_equals($ocekavanyToken, $token)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Přístup odepřen']);
+        exit;
+    }
+
     // Načíst existující data
     $data = [];
     if (file_exists($dataFile)) {

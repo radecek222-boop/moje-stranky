@@ -45,6 +45,7 @@ if (!$isAdmin && !$isTechnik) {
 <head>
   <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
