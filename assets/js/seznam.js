@@ -1,98 +1,5 @@
 // VERSION: 20251210-01 - Skrytí technických tlačítek pro prodejce
 
-// BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
-window.csrfTokenCache = window.csrfTokenCache || null;
-
-// Uložit originální fetch PŘED jakýmkoliv přepsáním
-const originalFetch = window.fetch || fetch;
-
-async function getCSRFToken() {
-  if (window.csrfTokenCache) return window.csrfTokenCache;
-
-  try {
-    // OPRAVENO: Použít originalFetch místo window.fetch aby se předešlo rekurzi
-    const response = await originalFetch("/app/controllers/get_csrf_token.php");
-    const data = await response.json();
-    window.csrfTokenCache = data.token;
-    return data.token;
-  } catch (err) {
-    if (typeof logger !== 'undefined') {
-      logger.error("Chyba získání CSRF tokenu:", err);
-    }
-    return "";
-  }
-}
-
-// === TOAST NOTIFICATION FUNKCE ===
-function showToast(message, type = 'info') {
-  // Odstranit existující toast pokud existuje
-  const existingToast = document.getElementById('wgs-toast');
-  if (existingToast) {
-    existingToast.remove();
-  }
-
-  // Vytvořit nový toast element
-  const toast = document.createElement('div');
-  toast.id = 'wgs-toast';
-  toast.textContent = message;
-
-  // Styly pro toast
-  toast.style.cssText = `
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background: ${type === 'success' ? 'var(--wgs-gray-33)' : type === 'error' ? 'var(--wgs-gray-66)' : 'var(--wgs-gray-33)'};
-    color: white;
-    padding: 16px 24px;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 10000;
-    font-size: 14px;
-    font-weight: 600;
-    min-width: 250px;
-    max-width: 400px;
-    animation: slideIn 0.3s ease-out;
-  `;
-
-  // Přidat animaci
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    @keyframes slideOut {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-    }
-  `;
-
-  if (!document.getElementById('wgs-toast-styles')) {
-    style.id = 'wgs-toast-styles';
-    document.head.appendChild(style);
-  }
-
-  document.body.appendChild(toast);
-
-  // Automaticky odstranit po 3 sekundách
-  setTimeout(() => {
-    toast.style.animation = 'slideOut 0.3s ease-in';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let WGS_DATA_CACHE = [];
 let ACTIVE_FILTERS = new Set(); // Může být více filtrů najednou (toggle)
@@ -1858,7 +1765,7 @@ function vytvorCenovouNabidku(reklamaceId) {
 async function saveData(data, successMsg) {
   try {
     // Get CSRF token
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     const formData = new FormData();
     Object.keys(data).forEach(key => {
@@ -2117,9 +2024,6 @@ function renderCalendar(m, y) {
   
   grid.appendChild(daysGrid);
 }
-
-// fetchCsrfToken přesunuto do utils.js (Step 106)
-// Funkce je dostupná jako window.fetchCsrfToken() nebo Utils.fetchCsrfToken()
 
 // === VÝPOČET VZDÁLENOSTI ===
 async function getDistance(fromAddress, toAddress) {
@@ -2594,7 +2498,7 @@ async function saveSelectedDate() {
   try {
     // Get CSRF token
     const t1 = performance.now();
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
     const t2 = performance.now();
     logger.log(`⏱️ CSRF token získán za ${(t2 - t1).toFixed(0)}ms`);
 
@@ -3388,7 +3292,7 @@ async function zobrazKnihovnuPDF(claimId) {
   // Smazání dokumentu
   async function smazatDokument(dokumentId) {
     try {
-      const csrfToken = await getCSRFToken();
+      const csrfToken = await fetchCsrfToken();
       const formData = new FormData();
       formData.append('action', 'smazat');
       formData.append('dokument_id', dokumentId);
@@ -3520,7 +3424,7 @@ async function zobrazKnihovnuPDF(claimId) {
     if (novyNazev.trim() === stavajiciNazev) return; // Beze změny
 
     try {
-      const csrfToken = await getCSRFToken();
+      const csrfToken = await fetchCsrfToken();
       const formData = new FormData();
       formData.append('action', 'prejmenovat');
       formData.append('dokument_id', dokumentId);
@@ -3643,7 +3547,7 @@ function zobrazFormularNahraniPdf(claimId, onUspech) {
       btnUpload.textContent = 'Nahravam...';
       btnUpload.disabled = true;
 
-      const csrfToken = await getCSRFToken();
+      const csrfToken = await fetchCsrfToken();
       const formData = new FormData();
       formData.append('action', 'nahrat');
       formData.append('reklamace_id', claimId);
@@ -3924,7 +3828,7 @@ function showTextOverlay(fieldName) {
     const newValue = textarea.value;
 
     try {
-      const csrfToken = await getCSRFToken();
+      const csrfToken = await fetchCsrfToken();
       const formData = new FormData();
       formData.append('action', 'update');
       formData.append('id', CURRENT_RECORD.id);
@@ -4037,7 +3941,7 @@ async function sendAppointmentConfirmation(customer, date, time) {
 
   try {
     // Get CSRF token
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     const response = await fetch('app/notification_sender.php', {
       method: 'POST',
@@ -4083,7 +3987,7 @@ async function sendAppointmentConfirmation(customer, date, time) {
 // === AUTOMATICKÉ PŘIŘAZENÍ TECHNIKA ===
 async function autoAssignTechnician(reklamaceId) {
   try {
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     const response = await fetch('api/auto_assign_technician.php', {
       method: 'POST',
@@ -4581,7 +4485,7 @@ async function deleteReklamace(reklamaceId) {
 
   try {
     // Získat CSRF token
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     const response = await fetch('api/delete_reklamace.php', {
       method: 'POST',
@@ -4676,7 +4580,7 @@ async function pokracovatSmazaniFotky(photoId, photoUrl) {
 
   try {
     // Získat CSRF token
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     const formData = new FormData();
     formData.append('photo_id', photoId);
@@ -4841,7 +4745,7 @@ async function zpracujVybraneFotky(event) {
     }
 
     // Odeslat na server
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
     const response = await fetch('/app/save_photos.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -5206,7 +5110,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     // Najít záznam v cache
     const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
     if (!zaznam) {
-      showToast('Záznam nenalezen', 'error');
+      wgsToast.error('Záznam nenalezen');
       return;
     }
 
@@ -5214,7 +5118,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     showLoading('Odesílám email zákazníkovi... Prosím čekejte');
 
     // Získat CSRF token
-    const csrfToken = await getCSRFToken();
+    const csrfToken = await fetchCsrfToken();
 
     // Zavolat API pro odeslání emailu
     const odpoved = await fetch('/api/send_contact_attempt_email.php', {
@@ -5247,7 +5151,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       if (typeof WGSToast !== 'undefined') {
         WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
       } else {
-        showToast('Email odeslán zákazníkovi', 'success');
+        wgsToast.success('Email odeslán zákazníkovi');
       }
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
@@ -5262,12 +5166,12 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
     } else {
       logger.error('⚠ Chyba při odesílání emailu:', data.error || data.message);
-      showToast(data.error || 'Chyba při odesílání emailu', 'error');
+      wgsToast.error(data.error || 'Chyba při odesílání emailu');
     }
 
   } catch (chyba) {
     logger.error('Chyba při odesílání kontaktního emailu:', chyba);
-    showToast('Nepodařilo se odeslat email', 'error');
+    wgsToast.error('Nepodařilo se odeslat email');
     // Skrýt loading overlay i při chybě
     hideLoading();
   }
@@ -5362,7 +5266,7 @@ async function zobrazVideotekaArchiv(claimId) {
         logger.log(`[Videotéka] Drag & drop: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
         await nahratVideoDragDrop(file, claimId, overlay);
       } else {
-        showToast('Lze nahrát pouze video soubory', 'error');
+        wgsToast.error('Lze nahrát pouze video soubory');
       }
     }
   });
@@ -5708,14 +5612,14 @@ function vytvorVideoKartu(video, claimId) {
       const result = await response.json();
 
       if (result.status === 'success') {
-        showToast('Video bylo smazáno', 'success');
+        wgsToast.success('Video bylo smazáno');
         card.remove();
       } else {
         throw new Error(result.message || 'Chyba při mazání');
       }
     } catch (error) {
       logger.error('[Videotéka] Chyba při mazání videa:', error);
-      showToast('Chyba při mazání videa: ' + error.message, 'error');
+      wgsToast.error('Chyba při mazání videa: ' + error.message);
       // Vratit tlacitko
       btnSmazat.classList.remove('potvrzeni-video');
       btnSmazat.innerHTML = '&#10005;';
@@ -5913,7 +5817,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
 
           // Pokud je soubor příliš velký bez komprese, zobrazit varování
           if (file.size > 524288000) {
-            showToast('Video je příliš velké (max 500 MB). Komprese selhala.', 'error');
+            wgsToast.error('Video je příliš velké (max 500 MB). Komprese selhala.');
             throw new Error('Video příliš velké a komprese není dostupná');
           }
         }
@@ -5950,7 +5854,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         if (typeof WGSToast !== 'undefined') {
           WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
         } else {
-          showToast('Video bylo úspěšně nahráno', 'success');
+          wgsToast.success('Video bylo úspěšně nahráno');
         }
 
         // Zavřít upload modal
@@ -5972,7 +5876,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
       statusText.textContent = 'Chyba: ' + error.message;
       btnNahrat.disabled = false;
       btnZrusit.disabled = false;
-      showToast('Chyba při nahrávání videa: ' + error.message, 'error');
+      wgsToast.error('Chyba při nahrávání videa: ' + error.message);
     }
   };
 
@@ -6089,7 +5993,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       if (typeof WGSToast !== 'undefined') {
         WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
       } else {
-        showToast('Video bylo úspěšně nahráno', 'success');
+        wgsToast.success('Video bylo úspěšně nahráno');
       }
 
       // Zavřít progress a reload videotéky
@@ -6108,7 +6012,7 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
     progressBarInner.style.background = 'var(--c-progress-red)';
     progressBarInner.style.width = '100%';
     progressStatus.textContent = 'Chyba: ' + error.message;
-    showToast('Chyba při nahrávání videa: ' + error.message, 'error');
+    wgsToast.error('Chyba při nahrávání videa: ' + error.message);
 
     // Zavřít progress po 3 sekundách
     setTimeout(() => {
