@@ -352,8 +352,8 @@
   overflow: hidden;
   touch-action: pan-y pinch-zoom;
   resize: none;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* ============================================
