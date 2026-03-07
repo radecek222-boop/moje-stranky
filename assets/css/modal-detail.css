@@ -309,7 +309,7 @@
 #detailOverlay select {
   background: #f8f8f8;
   border-color: #e0e0e0;
-  color: #333333 !important; /* !important zabrání dočasnému bílému textu zděděnému z .modal-content */
+  /* color záměrně nenastaveno — inline styly v JS (color:#000) mají přednost */
 }
 
 #detailOverlay input:focus,
@@ -324,7 +324,7 @@
 #detailOverlay .field-textarea::placeholder,
 #detailOverlay input::placeholder,
 #detailOverlay textarea::placeholder {
-  color: #999999 !important;
+  color: #999999;
 }
 
 /* iOS FIX: textarea nesmí zachytávat touch scroll
