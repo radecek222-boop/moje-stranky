@@ -1687,10 +1687,54 @@ async function showCustomerDetail(id) {
             </span>
             <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-            <span style="color: #aaa; font-weight: 600;">Email:</span>
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Email:</span>
+              <button onclick="
+                const val = document.getElementById('edit_email').value;
+                if (val) navigator.clipboard.writeText(val).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
+                });
+              " title="Kopírovat email" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </span>
             <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-            <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+            <span style="display:flex;align-items:center;gap:0.3rem;">
+              <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+              <button onclick="
+                const val = document.getElementById('edit_adresa').value;
+                if (val) navigator.clipboard.writeText(val).then(() => {
+                  this.style.filter = 'brightness(2)';
+                  setTimeout(() => { this.style.filter = ''; }, 800);
+                  const tip = document.createElement('span');
+                  tip.textContent = 'Zkopírováno';
+                  tip.style.cssText = 'position:fixed;background:#222;color:#39ff14;font-size:0.7rem;padding:3px 8px;border-radius:4px;border:1px solid #39ff14;pointer-events:none;z-index:99999;opacity:1;transition:opacity 0.4s;';
+                  const r = this.getBoundingClientRect();
+                  tip.style.left = r.left + 'px';
+                  tip.style.top = (r.top - 24) + 'px';
+                  document.body.appendChild(tip);
+                  setTimeout(() => { tip.style.opacity = '0'; setTimeout(() => tip.remove(), 400); }, 1200);
+                });
+              " title="Kopírovat adresu" style="background:none;border:none;padding:0;cursor:pointer;line-height:1;display:flex;align-items:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </span>
             <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
 
             <span style="color: #aaa; font-weight: 600;">Model:</span>
