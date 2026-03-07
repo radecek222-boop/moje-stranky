@@ -151,7 +151,16 @@
         }
       } catch (fetchError) {
         if (fetchError.name === 'AbortError') {
-          // Timeout — překlad mohl částečně proběhnout, nechat caller pokračovat
+          // Timeout — překlad se nestihl potvrdit, nepřepínat jazyk
+          console.warn('[WGS] Překlad aktualit: timeout (30s). Jazyk nebude přepnut.');
+          loadingDiv.remove();
+          const hlaskaTimeout = 'Překlad se nestihl potvrdit. Zkus to znovu.';
+          if (typeof window.wgsToast !== 'undefined') {
+            window.wgsToast.error(hlaskaTimeout);
+          } else {
+            alert(hlaskaTimeout);
+          }
+          return false;
         } else {
           throw fetchError;
         }
