@@ -88,10 +88,9 @@ self.addEventListener('install', (event) => {
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        // NEPOUŽIVAT skipWaiting() automaticky!
-        // Čekáme na SKIP_WAITING zprávu od klienta,
-        // aby měl kontrolu nad tím kdy se aktualizace provede.
-        console.log(`[SW ${SW_VERSION}] Instalace dokončena - čekám na SKIP_WAITING`);
+        console.log(`[SW ${SW_VERSION}] Instalace dokončena - skipWaiting()`);
+        // Automaticky přeskočit čekání - nový SW nastoupí okamžitě
+        return self.skipWaiting();
       })
   );
 });

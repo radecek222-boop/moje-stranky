@@ -726,6 +726,11 @@
   margin: 0 !important;
 }
 
+/* iOS safe area — header musí být pod status barem (notch/Dynamic Island) */
+#detailOverlay.ios-fullscreen .modal-header {
+  padding-top: calc(env(safe-area-inset-top, 44px) + 0.5rem) !important;
+}
+
 /* PWA touch cíle — větší pro prst */
 body.ios-device #detailOverlay .modal-body .btn,
 body.ios-device #detailOverlay .modal-actions .btn {
