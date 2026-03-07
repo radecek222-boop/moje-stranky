@@ -1836,12 +1836,11 @@ function startVisit(id) {
   localStorage.setItem('currentCustomer', JSON.stringify(normalizedData));
   localStorage.setItem('visitStartTime', new Date().toISOString());
 
-  const photoKey = 'photoSections_' + normalizedData.id;
-  localStorage.removeItem(photoKey);
-
   logger.log('Normalizovaná data uložena:', normalizedData);
 
-  window.location.href = 'photocustomer.php?new=true';
+  // BEZ ?new=true — rozpracované fotky se načtou z IndexedDB automaticky
+  // Novou návštěvu (smazat vše) zahájí technik tlačítkem v photocustomer.php
+  window.location.href = 'photocustomer.php';
 }
 
 // === VYTVOŘIT CENOVOU NABÍDKU ===

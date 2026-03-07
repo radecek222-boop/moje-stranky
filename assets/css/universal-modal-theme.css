@@ -58,8 +58,7 @@
 #editNotificationModal .modal-content,
 #qrModal .modal-content,
 #notifModalOverlay .cc-modal,
-#adminModal,
-#detailOverlay .modal-content {
+#adminModal {
     /* Tmavý gradient pozadí (jako welcome modal) */
     background: linear-gradient(135deg, var(--wgs-darkest) 0%, var(--wgs-gray-2d) 100%) !important;
 
