@@ -16,7 +16,8 @@
     "minify:mobile-css": "cleancss -o assets/css/mobile-responsive.min.css assets/css/mobile-responsive.css",
     "minify:modal-js": "terser assets/js/modal-detail.js -o assets/js/modal-detail.min.js --compress --mangle",
     "minify:seznam-js": "terser assets/js/seznam.js -o assets/js/seznam.min.js --compress --mangle",
-    "minify:all": "npm run minify:modal-css && npm run minify:seznam-css && npm run minify:mobile-css && npm run minify:modal-js && npm run minify:seznam-js",
+    "minify:universal-css": "cleancss -o assets/css/universal-modal-theme.min.css assets/css/universal-modal-theme.css",
+    "minify:all": "npm run minify:modal-css && npm run minify:seznam-css && npm run minify:mobile-css && npm run minify:universal-css && npm run minify:modal-js && npm run minify:seznam-js",
     "minify:js": "terser assets/js/*.js -o assets/js/*.min.js",
     "minify:css": "csso assets/css/styles.css -o assets/css/styles.min.css"
   },
