@@ -701,39 +701,43 @@
      overlay.classList.add('ios-fullscreen')
    ============================================ */
 
-/* Overlay v iOS fullscreen režimu — přepíše display:flex
-   Overlay NEPOSUNUJE (overflow:hidden), scroll řídí .modal-content */
+/* Overlay v iOS fullscreen režimu — centrovaná kartička jako na desktopu
+   Overlay padding kryje safe area (status bar), scroll řídí .modal-content */
 #detailOverlay.ios-fullscreen {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* padding-top: safe area nebo min. 1rem — kryje status bar */
+  padding-top: 1rem !important;
+  padding-top: max(env(safe-area-inset-top, 0px), 1rem) !important;
+  padding-right: 1rem !important;
+  padding-bottom: 1rem !important;
+  padding-left: 1rem !important;
   overflow: hidden !important;
 }
 
-/* Modal-content v iOS fullscreen — zabere celou výšku */
+/* Modal-content v iOS fullscreen — centrovaná kartička, ne full-screen */
 #detailOverlay.ios-fullscreen .modal-content {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
   width: 100% !important;
-  height: 100% !important;
-  max-height: 100% !important;
+  height: auto !important;
+  max-height: 85vh !important;
+  max-height: 85dvh !important;
   max-width: 100% !important;
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior-y: contain !important;
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   margin: 0 !important;
 }
 
-/* iOS safe area — header musí být pod status barem (notch/Dynamic Island)
-   max() zajistí minimálně 2.5rem bez ohledu na to, co env() vrátí */
+/* iOS fullscreen — header: overlay padding kryje safe area, header má normální padding */
 #detailOverlay.ios-fullscreen .modal-header {
-  padding-top: 2.5rem !important; /* fallback pro prohlížeče bez max() */
-  padding-top: max(env(safe-area-inset-top, 0px), 2.5rem) !important; /* iOS safe area */
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  padding-bottom: 0.5rem !important;
+  padding: 0.5rem 1rem !important;
 }
 
 /* PWA touch cíle — větší pro prst */
@@ -768,7 +772,9 @@ body.ios-device #detailOverlay .modal-actions .btn {
 
 @media (max-width: 768px) {
   #detailOverlay {
-    padding: 2.5rem 0.5rem 0.5rem 0.5rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
     height: 100vh;
     height: 100dvh;
   }
@@ -776,8 +782,8 @@ body.ios-device #detailOverlay .modal-actions .btn {
   #detailOverlay .modal-content {
     max-width: 100%;
     width: 100%;
-    max-height: 90vh;
-    max-height: 90dvh;
+    max-height: 85vh;
+    max-height: 85dvh;
     border-radius: 8px;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
@@ -814,13 +820,6 @@ body.ios-device #detailOverlay .modal-actions .btn {
     max-height: 44px !important;
     font-size: 1.3rem !important;
   }
-
-  /* iOS fullscreen — padding přes safe area na modal-header, ne na overlay */
-  #detailOverlay.ios-fullscreen {
-    padding: 0 !important;
-    height: 100vh;
-    height: 100dvh;
-  }
 }
 
 /* ============================================
@@ -840,10 +839,10 @@ body.ios-device #detailOverlay .modal-actions .btn {
     overscroll-behavior-y: contain;
   }
 
-  /* PWA fullscreen — zaručit odsazení headeru od status baru (záloha bez JS) */
-  #detailOverlay.ios-fullscreen .modal-header {
-    padding-top: 2.5rem !important; /* fallback */
-    padding-top: max(env(safe-area-inset-top, 0px), 2.5rem) !important;
+  /* PWA — centrování stejné jako desktop (záloha bez JS) */
+  #detailOverlay {
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   /* PWA — tlačítka větší pro lepší touch */
