@@ -819,27 +819,16 @@ body {
   touch-action: pan-y;
 }
 
-/* Body v zamknutem stavu (modal otevreny) */
-/* FIX PWA: Nepoužívat position:fixed na iOS - zpusobuje problemy se scrollem */
+/* Body v zamknutem stavu - CSS neovlivnuje, ridi scroll-lock.min.js (position:fixed) */
 body.scroll-locked,
 body.modal-open {
-  overflow: hidden;
   overscroll-behavior: contain;
-  touch-action: pan-y pinch-zoom;
 }
 
-/* PWA standalone mode - dodatecne opravy */
+/* PWA standalone mode */
 @media all and (display-mode: standalone) {
-  /* Zabranit pull-to-refresh na celem body */
   body {
     overscroll-behavior-y: contain;
-  }
-
-  /* FIX: V PWA modu NEpoužívat position:fixed - způsobuje zamrznutí scrollu */
-  body.scroll-locked,
-  body.modal-open {
-    position: static !important;
-    overflow: hidden;
   }
 
   /* Scrollovatelny obsah v modalu - explicitni nastaveni */

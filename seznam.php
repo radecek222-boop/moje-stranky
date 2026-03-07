@@ -132,34 +132,13 @@ if (!$isLoggedIn && !$isAdmin) {
    FIX: iOS/Safari/PWA Modal Scroll Lock
    ============================================ */
 
-/* Scroll lock - zabraní scrollu stránky při otevřeném modalu */
-body.scroll-locked,
-body.modal-open {
-  overflow: hidden !important;
-  touch-action: pan-y pinch-zoom !important;
-}
-
-/* PWA Standalone mode - NESMÍ být position:fixed, způsobuje zamrznutí scrollu v modalu */
-@media all and (display-mode: standalone) {
-  body.scroll-locked,
-  body.modal-open {
-    position: static !important;
-    overflow: hidden !important;
-  }
-}
+/* Scroll lock - body styly řídí scroll-lock.min.js přes JS inline styly */
+/* CSS pravidla s !important by přebila JS inline styly a rozbila position:fixed metodu */
+/* Proto zde žádná CSS pravidla pro body.scroll-locked nejsou */
 
 /* iOS Safari - modal overlay musí být scrollovatelný */
+/* POZOR: tento blok je záloha, hlavní iOS fix je níže za display:flex pravidlem */
 @supports (-webkit-touch-callout: none) {
-  #detailOverlay.active {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
   #detailOverlay.active .modal-content {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
@@ -584,27 +563,30 @@ body.modal-open {
   }
 }
 
-/* iOS Safari v PWA módu - kombinace obou podmínek */
+/* iOS Safari - KLÍČOVÝ FIX: display:block umožní scroll (flex nefunguje na iOS) */
+/* Musí být ZA pravidlem #detailOverlay.active { display: flex !important } aby ho přebilo */
 @supports (-webkit-touch-callout: none) {
-  @media all and (display-mode: standalone) {
-    #detailOverlay {
-      /* iOS PWA specifický fix */
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-    }
+  #detailOverlay.active {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
 
-    #detailOverlay .modal-content {
-      /* iOS PWA modal (vráceno na 90vh, problém byl v align-items) */
-      margin: auto !important;
-      max-height: 90vh !important;
-      max-height: 90dvh !important;
-    }
+  #detailOverlay.active .modal-content {
+    display: block !important;
+    margin: 5vh auto !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 }
 
