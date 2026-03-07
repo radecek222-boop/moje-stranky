@@ -13,7 +13,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Hledám fotky pro Michala Kutzendorfera</h1>";
+    echo "<h1>Hledám fotky pro Michala Kutzendorfera</h1>";
     echo "<style>body { font-family: monospace; padding: 20px; background: #000; color: #0f0; }</style>";
 
     // Hledat reklamace
@@ -31,11 +31,11 @@ try {
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($reklamace)) {
-        echo "<p style='color: red;'>❌ Žádné reklamace nenalezeny</p>";
+        echo "<p style='color: red;'>CHYBA Žádné reklamace nenalezeny</p>";
         exit;
     }
 
-    echo "<h2>📋 Nalezené reklamace:</h2>";
+    echo "<h2>Nalezené reklamace:</h2>";
 
     foreach ($reklamace as $r) {
         echo "<div style='border: 2px solid #0f0; padding: 15px; margin: 10px 0;'>";
@@ -64,10 +64,10 @@ try {
                 }
                 echo "</ul>";
             } else {
-                echo "<span style='color: red;'>❌ Složka existuje ale je prázdná</span><br>";
+                echo "<span style='color: red;'>CHYBA Složka existuje ale je prázdná</span><br>";
             }
         } else {
-            echo "<span style='color: red;'>❌ Složka s fotkami neexistuje</span><br>";
+            echo "<span style='color: red;'>CHYBA Složka s fotkami neexistuje</span><br>";
         }
 
         echo "<br><a href='protokol.php?reklamace_id={$r['reklamace_id']}' style='color: #0ff;'>➜ Otevřít protokol</a><br>";
@@ -77,8 +77,8 @@ try {
 
     echo "<h2>💡 CO DĚLAT:</h2>";
     echo "<ol>";
-    echo "<li>Pokud FOTKY NALEZENY ✅ - otevřít protokol</li>";
-    echo "<li>Pokud FOTKY CHYBÍ ❌ - technik musí otevřít <a href='diagnostika_indexeddb.php' style='color: #ff0;'>diagnostika_indexeddb.php</a> NA SVÉM TELEFONU</li>";
+    echo "<li>Pokud FOTKY NALEZENY OK - otevřít protokol</li>";
+    echo "<li>Pokud FOTKY CHYBÍ CHYBA - technik musí otevřít <a href='diagnostika_indexeddb.php' style='color: #ff0;'>diagnostika_indexeddb.php</a> NA SVÉM TELEFONU</li>";
     echo "<li>IndexedDB uloží fotky i po vypršení session - stačí je obnovit</li>";
     echo "</ol>";
 

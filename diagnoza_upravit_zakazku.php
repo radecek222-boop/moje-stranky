@@ -57,7 +57,7 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Diagnostika: Úprava zakázky ve statistikách</h1>";
+    echo "<h1>Diagnostika: Úprava zakázky ve statistikách</h1>";
 
     // ========================================
     // 1. KONTROLA STRUKTURY TABULKY
@@ -75,7 +75,7 @@ try {
 
     foreach ($requiredColumns as $col) {
         $found = in_array($col, $foundColumns);
-        $status = $found ? "✅ OK" : "❌ CHYBÍ";
+        $status = $found ? "OK" : "CHYBA: CHYBÍ";
         $class = $found ? 'success' : 'error';
 
         $type = '';
@@ -133,12 +133,12 @@ try {
 
         if ($result && $result['status'] === 'success') {
             echo "<div class='success'>";
-            echo "<strong>✅ detail_zakazky endpoint OK</strong><br>";
+            echo "<strong>OK: detail_zakazky endpoint OK</strong><br>";
             echo "<pre>" . json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
             echo "</div>";
         } else {
             echo "<div class='error'>";
-            echo "<strong>❌ detail_zakazky endpoint CHYBA</strong><br>";
+            echo "<strong>CHYBA: detail_zakazky endpoint CHYBA</strong><br>";
             echo "<pre>$output</pre>";
             echo "</div>";
         }
@@ -237,7 +237,7 @@ try {
             $pdo->rollBack(); // ROLLBACK - neukládáme změny
 
             echo "<div class='success'>";
-            echo "<strong>✅ UPDATE dotaz proběhl úspěšně!</strong><br>";
+            echo "<strong>OK: UPDATE dotaz proběhl úspěšně!</strong><br>";
             echo "Počet ovlivněných řádků: <strong>$affected</strong><br>";
             echo "<em>(Transakce byla rollbacknuta - žádné změny v DB)</em>";
             echo "</div>";
@@ -245,7 +245,7 @@ try {
         } catch (PDOException $e) {
             $pdo->rollBack();
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA při UPDATE:</strong><br>";
+            echo "<strong>CHYBA při UPDATE:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
@@ -266,9 +266,9 @@ try {
 
     $isValid = validateCSRFToken($testToken);
     if ($isValid) {
-        echo "<div class='success'>✅ CSRF token validace OK</div>";
+        echo "<div class='success'>OK: CSRF token validace OK</div>";
     } else {
-        echo "<div class='error'>❌ CSRF token validace SELHALA</div>";
+        echo "<div class='error'>CHYBA: CSRF token validace SELHALA</div>";
     }
 
     // ========================================
@@ -303,12 +303,12 @@ try {
 
     if ($allOk) {
         echo "<div class='success'>";
-        echo "<h3>✅ VŠECHNY TESTY PROŠLY</h3>";
+        echo "<h3>OK: VŠECHNY TESTY PROŠLY</h3>";
         echo "<p>Systém by měl fungovat správně. Pokud stále máte problémy, zkontrolujte JavaScript konzoli v prohlížeči.</p>";
         echo "</div>";
     } else {
         echo "<div class='error'>";
-        echo "<h3>❌ NALEZENY PROBLÉMY:</h3>";
+        echo "<h3>CHYBA: NALEZENY PROBLÉMY:</h3>";
         echo "<ul>";
         foreach ($errors as $err) {
             echo "<li>$err</li>";

@@ -55,7 +55,7 @@ echo "<!DOCTYPE html>
 <div class='container'>";
 
 try {
-    echo "<h1>🔄 VRÁTIT VŠE ZPĚT</h1>";
+    echo "<h1>VRÁTIT VŠE ZPĚT</h1>";
 
     // Zkontrolovat dostupné backupy
     $backupDir = __DIR__ . '/backups';
@@ -63,7 +63,7 @@ try {
     $cleanupBackup = $backupDir . '/cleanup_scripts_2026-01-14_23-01-08';
 
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
-        echo "<div class='warning'><strong>⚠️ SPOUŠTÍM OBNOVU...</strong></div>";
+        echo "<div class='warning'><strong>POZOR: SPOUŠTÍM OBNOVU...</strong></div>";
 
         $restored = 0;
         $errors = 0;
@@ -99,9 +99,9 @@ try {
                 }
             }
 
-            echo "<div class='success'>✅ Obnoveno: {$restored} souborů ze složky archiv/</div>";
+            echo "<div class='success'>OK: Obnoveno: {$restored} souborů ze složky archiv/</div>";
         } else {
-            echo "<div class='error'>❌ Backup archiv/ nenalezen!</div>";
+            echo "<div class='error'>CHYBA: Backup archiv/ nenalezen!</div>";
         }
 
         // 2. Vrátit cleanup skripty (57 souborů)
@@ -124,9 +124,9 @@ try {
                 }
             }
 
-            echo "<div class='success'>✅ Obnoveno: {$restored2} cleanup skriptů</div>";
+            echo "<div class='success'>OK: Obnoveno: {$restored2} cleanup skriptů</div>";
         } else {
-            echo "<div class='error'>❌ Backup cleanup skriptů nenalezen!</div>";
+            echo "<div class='error'>CHYBA: Backup cleanup skriptů nenalezen!</div>";
         }
 
         // 3. Vrátit soubory z Git historie (první cleanup)
@@ -158,14 +158,14 @@ try {
                 }
             }
 
-            echo "<div class='success'>✅ Obnoveno z Gitu: {$gitRestored} souborů</div>";
+            echo "<div class='success'>OK: Obnoveno z Gitu: {$gitRestored} souborů</div>";
         }
 
         // Shrnutí
         $total = $restored + $restored2 + ($gitRestored ?? 0);
 
         echo "<div class='success'>";
-        echo "<h3>✅ OBNOVA DOKONČENA</h3>";
+        echo "<h3>OK: OBNOVA DOKONČENA</h3>";
         echo "<p><strong>Celkem obnoveno:</strong> {$total} souborů</p>";
         if ($errors > 0) {
             echo "<p><strong>Chyby:</strong> {$errors}</p>";
@@ -173,7 +173,7 @@ try {
         echo "</div>";
 
         echo "<div class='warning'>";
-        echo "<p><strong>⚠️ DŮLEŽITÉ:</strong> Soubory byly obnoveny, ale ještě nejsou commitnuty do Gitu.</p>";
+        echo "<p><strong>POZOR: DŮLEŽITÉ:</strong> Soubory byly obnoveny, ale ještě nejsou commitnuty do Gitu.</p>";
         echo "<p>Pokud chceš zachovat změny, proveď:</p>";
         echo "<pre>git add -A\ngit commit -m \"REVERT: Vrácení všech smazaných souborů\"\ngit push</pre>";
         echo "</div>";
@@ -181,7 +181,7 @@ try {
     } else {
         // Náhled co bude obnoveno
         echo "<div class='warning'>";
-        echo "<h3>⚠️ POZOR: Tato akce vrátí VŠECHNY smazané soubory!</h3>";
+        echo "<h3>POZOR: Tato akce vrátí VŠECHNY smazané soubory!</h3>";
         echo "<p>Budou obnoveny:</p>";
         echo "<ul>";
         echo "<li><strong>Složka archiv/</strong> - 186 souborů (1.85 MB)</li>";
@@ -207,24 +207,24 @@ try {
                 }
             }
             $sizeMB = round($size / 1024 / 1024, 2);
-            echo "<p>✅ <strong>Archiv backup:</strong> {$count} souborů ({$sizeMB} MB)</p>";
+            echo "<p>OK: <strong>Archiv backup:</strong> {$count} souborů ({$sizeMB} MB)</p>";
         } else {
-            echo "<p>❌ <strong>Archiv backup:</strong> Nenalezen</p>";
+            echo "<p>CHYBA: <strong>Archiv backup:</strong> Nenalezen</p>";
         }
 
         if (is_dir($cleanupBackup)) {
             $files = array_diff(scandir($cleanupBackup), ['.', '..']);
             $count2 = count($files);
-            echo "<p>✅ <strong>Cleanup backup:</strong> {$count2} souborů</p>";
+            echo "<p>OK: <strong>Cleanup backup:</strong> {$count2} souborů</p>";
         } else {
-            echo "<p>❌ <strong>Cleanup backup:</strong> Nenalezen</p>";
+            echo "<p>CHYBA: <strong>Cleanup backup:</strong> Nenalezen</p>";
         }
 
         echo "</div>";
 
         echo "<form method='get'>";
         echo "<input type='hidden' name='execute' value='1'>";
-        echo "<button type='submit' class='btn'>🔄 VRÁTIT VŠE ZPĚT</button>";
+        echo "<button type='submit' class='btn'>VRÁTIT VŠE ZPĚT</button>";
         echo "</form>";
 
         echo "<div class='info'>";

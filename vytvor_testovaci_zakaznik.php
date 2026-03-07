@@ -174,7 +174,7 @@ try {
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ TESTOVACÍ ZÁKAZNÍK VYTVOŘEN!</strong><br><br>";
+            echo "<strong>OK: TESTOVACÍ ZÁKAZNÍK VYTVOŘEN!</strong><br><br>";
             echo "<table>";
             echo "<tr><th>Pole</th><th>Hodnota</th></tr>";
             echo "<tr><td><strong>Reklamace ID</strong></td><td><strong>{$reklamaceId}</strong></td></tr>";
@@ -194,7 +194,7 @@ try {
         } catch (PDOException $e) {
             $pdo->rollBack();
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI VYTVÁŘENÍ:</strong><br>";
+            echo "<strong>CHYBA PŘI VYTVÁŘENÍ:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
@@ -203,7 +203,7 @@ try {
 
     // Formulář
     echo "<div class='section'>";
-    echo "<h2>📋 Vyplň údaje testovacího zákazníka</h2>";
+    echo "<h2>Vyplň údaje testovacího zákazníka</h2>";
 
     echo "<form method='post'>";
 

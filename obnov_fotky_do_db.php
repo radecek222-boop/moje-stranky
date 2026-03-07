@@ -51,14 +51,14 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔧 Obnovení fotek do databáze</h1>";
+    echo "<h1>Obnovení fotek do databáze</h1>";
 
     // Parametr pro zakázku
     $reklamaceId = $_GET['reklamace_id'] ?? null;
 
     if (!$reklamaceId) {
         echo "<div class='warning'>";
-        echo "<strong>⚠️ POUŽITÍ:</strong><br>";
+        echo "<strong>POZOR: POUŽITÍ:</strong><br>";
         echo "Tento skript obnoví fotky, které jsou na disku ale chybí v databázi.<br><br>";
         echo "URL: <code>obnov_fotky_do_db.php?reklamace_id=XXX&execute=1</code>";
         echo "</div>";
@@ -76,7 +76,7 @@ try {
     }
 
     echo "<div class='info'>";
-    echo "<strong>📋 Zakázka:</strong> " . htmlspecialchars($zakazka['cislo'] ?? $zakazka['reklamace_id']) . "<br>";
+    echo "<strong>Zakázka:</strong> " . htmlspecialchars($zakazka['cislo'] ?? $zakazka['reklamace_id']) . "<br>";
     echo "<strong>Zákazník:</strong> " . htmlspecialchars($zakazka['jmeno']);
     echo "</div>";
 
@@ -126,12 +126,12 @@ try {
     }
 
     if (empty($orphanedPhotos)) {
-        echo "<div class='success'>✅ Všechny fotky na disku mají záznam v databázi. Není co obnovovat.</div>";
+        echo "<div class='success'>OK: Všechny fotky na disku mají záznam v databázi. Není co obnovovat.</div>";
         die();
     }
 
     echo "<div class='warning'>";
-    echo "<strong>⚠️ Nalezeno fotek BEZ záznamu v DB:</strong> " . count($orphanedPhotos);
+    echo "<strong>POZOR: Nalezeno fotek BEZ záznamu v DB:</strong> " . count($orphanedPhotos);
     echo "</div>";
 
     // Zobrazit tabulku fotek
@@ -149,7 +149,7 @@ try {
 
     // Provést obnovení?
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
-        echo "<div class='info'><strong>🔄 SPOUŠTÍM OBNOVENÍ...</strong></div>";
+        echo "<div class='info'><strong>SPOUŠTÍM OBNOVENÍ...</strong></div>";
 
         $pdo->beginTransaction();
 
@@ -185,7 +185,7 @@ try {
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ ÚSPĚŠNĚ OBNOVENO:</strong> {$restored} fotek<br><br>";
+            echo "<strong>OK: ÚSPĚŠNĚ OBNOVENO:</strong> {$restored} fotek<br><br>";
             echo "Fotky jsou nyní viditelné v aplikaci pro zakázku <strong>" . htmlspecialchars($zakazka['cislo'] ?? $zakazka['reklamace_id']) . "</strong>";
             echo "</div>";
 
@@ -200,7 +200,7 @@ try {
     } else {
         // Zobrazit tlačítko pro potvrzení
         echo "<div class='warning'>";
-        echo "<strong>⚠️ POZOR:</strong><br>";
+        echo "<strong>POZOR:</strong><br>";
         echo "Tímto obnovíte " . count($orphanedPhotos) . " fotek do databáze pro zakázku <strong>" . htmlspecialchars($zakazka['cislo'] ?? $zakazka['reklamace_id']) . "</strong>.<br>";
         echo "Fotky budou přiřazeny podle názvů souborů k příslušným sekcím.";
         echo "</div>";
@@ -208,8 +208,8 @@ try {
         $currentUrl = $_SERVER['REQUEST_URI'];
         $separator = (strpos($currentUrl, '?') !== false) ? '&' : '?';
 
-        echo "<a href='{$currentUrl}{$separator}execute=1' class='btn btn-danger'>✅ OBNOVIT FOTKY DO DATABÁZE</a>";
-        echo "<a href='/admin.php' class='btn' style='background: #6c757d;'>❌ Zrušit</a>";
+        echo "<a href='{$currentUrl}{$separator}execute=1' class='btn btn-danger'>OK: OBNOVIT FOTKY DO DATABÁZE</a>";
+        echo "<a href='/admin.php' class='btn' style='background: #6c757d;'>CHYBA: Zrušit</a>";
     }
 
 } catch (Exception $e) {

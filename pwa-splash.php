@@ -189,7 +189,7 @@
 
     // Pokud NENÍ PWA režim, přesměruj na normální homepage
     if (!jePWA) {
-      console.log('⚠️ Přístup mimo PWA režim - přesměrování na index.php');
+      console.log('POZOR: Přístup mimo PWA režim - přesměrování na index.php');
       window.location.replace('index.php');
     }
 

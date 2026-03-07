@@ -89,7 +89,7 @@ try {
 
     if (!isset($_GET['vloz'])) {
         echo "<div class='info'>";
-        echo "<strong>📋 Reklamace:</strong> {$reklamaceId}<br><br>";
+        echo "<strong>Reklamace:</strong> {$reklamaceId}<br><br>";
         echo "<strong>🧪 Testovací kalkulace:</strong>";
         echo "<pre>" . json_encode($testKalkulace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "</pre>";
         echo "<a href='?vloz=1'><button>VLOŽIT KALKULACI DO DATABÁZE</button></a>";
@@ -101,7 +101,7 @@ try {
     }
 
     // VLOŽIT KALKULACI
-    echo "<div class='info'><strong>🔄 Vkládám testovací kalkulaci...</strong></div>";
+    echo "<div class='info'><strong>Vkládám testovací kalkulaci...</strong></div>";
 
     // Najít reklamaci
     $stmt = $pdo->prepare("
@@ -118,11 +118,11 @@ try {
     $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$reklamace) {
-        echo "<div class='error'>❌ Reklamace nenalezena!</div>";
+        echo "<div class='error'>CHYBA: Reklamace nenalezena!</div>";
         exit;
     }
 
-    echo "<div class='success'>✅ Reklamace nalezena (ID: {$reklamace['id']})</div>";
+    echo "<div class='success'>OK: Reklamace nalezena (ID: {$reklamace['id']})</div>";
 
     // UPDATE kalkulace_data
     $kalkulaceJson = json_encode($testKalkulace, JSON_UNESCAPED_UNICODE);
@@ -143,7 +143,7 @@ try {
 
     if ($affected > 0) {
         echo "<div class='success'>";
-        echo "<strong>✅ KALKULACE ÚSPĚŠNĚ VLOŽENA!</strong><br><br>";
+        echo "<strong>OK: KALKULACE ÚSPĚŠNĚ VLOŽENA!</strong><br><br>";
         echo "Reklamace ID: {$reklamace['id']}<br>";
         echo "Affected rows: {$affected}<br>";
         echo "JSON délka: " . strlen($kalkulaceJson) . " znaků";
@@ -155,14 +155,14 @@ try {
         $verify = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($verify && !empty($verify['kalkulace_data'])) {
-            echo "<div class='success'>✅ Ověřeno: Kalkulace je v databázi!</div>";
+            echo "<div class='success'>OK: Ověřeno: Kalkulace je v databázi!</div>";
             echo "<pre>" . $verify['kalkulace_data'] . "</pre>";
         } else {
-            echo "<div class='error'>❌ CHYBA: Kalkulace se neuložila!</div>";
+            echo "<div class='error'>CHYBA: Kalkulace se neuložila!</div>";
         }
 
     } else {
-        echo "<div class='error'>❌ UPDATE selhal (0 affected rows)</div>";
+        echo "<div class='error'>CHYBA: UPDATE selhal (0 affected rows)</div>";
     }
 
     echo "<br><br>";
@@ -187,7 +187,7 @@ if (isset($_GET['smazat'])) {
             ':cislo' => $reklamaceId
         ]);
 
-        echo "<div class='info'>🗑️ Kalkulace smazána</div>";
+        echo "<div class='info'>Kalkulace smazána</div>";
         echo "<a href='test-vloz-kalkulaci.php'><button>ZPĚT</button></a>";
     } catch (PDOException $e) {
         echo "<div class='error'>" . htmlspecialchars($e->getMessage()) . "</div>";

@@ -245,7 +245,7 @@ try {
                 <input type="text" id="smtp_from_name" name="smtp_from_name" value="<?php echo htmlspecialchars($settings['smtp_from_name'] ?? 'White Glove Service'); ?>" required>
             </div>
 
-            <button type="submit" name="save" class="btn btn-primary">💾 Uložit nastavení</button>
+            <button type="submit" name="save" class="btn btn-primary">Uložit nastavení</button>
             <a href="/admin.php" class="btn btn-secondary">← Zpět</a>
         </form>
 
@@ -258,7 +258,7 @@ try {
                     <label for="test_email">Testovací emailová adresa</label>
                     <input type="email" id="test_email" name="test_email" placeholder="vas-email@example.com" required>
                 </div>
-                <button type="submit" name="test" class="btn btn-success">📧 Odeslat testovací email</button>
+                <button type="submit" name="test" class="btn btn-success">Odeslat testovací email</button>
             </form>
         </div>
     </div>

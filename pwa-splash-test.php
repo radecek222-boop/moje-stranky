@@ -187,11 +187,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
       debug.innerHTML += msg + '<br>';
     }
 
-    log('✅ pwa-splash-test.php loaded');
+    log('OK: pwa-splash-test.php loaded');
 
     // Přesměrování na login stránku
     function presmerujNaLogin() {
-      log('🔄 Klik - přesměrování na login...');
+      log('Klik - přesměrování na login...');
       document.body.style.transition = 'opacity 0.3s ease';
       document.body.style.opacity = '0';
 
@@ -209,12 +209,12 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
     // Pokud NENÍ PWA režim, přesměruj na normální homepage
     if (!jePWA) {
-      log('⚠️ Přístup mimo PWA režim - přesměrování na index.php');
+      log('POZOR: Přístup mimo PWA režim - přesměrování na index.php');
       setTimeout(() => {
         window.location.replace('index.php');
       }, 2000);
     } else {
-      log('✅ Detekován PWA standalone režim');
+      log('OK: Detekován PWA standalone režim');
     }
 
     // Auto-redirect po 5 sekundách

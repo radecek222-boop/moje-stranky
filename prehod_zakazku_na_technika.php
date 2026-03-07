@@ -71,7 +71,7 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔄 Přehození zakázky na technika</h1>";
+    echo "<h1>Přehození zakázky na technika</h1>";
 
     // ==================================================
     // KROK 1: VYHLEDAT ZAKÁZKU
@@ -120,11 +120,11 @@ try {
 
         if (!$zakazka) {
             echo "<div class='warning'>";
-            echo "<strong>⚠️ NENALEZENO:</strong> Zakázka s přesným ID <code>$reklamaceId</code> nebyla nalezena.";
+            echo "<strong>POZOR: NENALEZENO:</strong> Zakázka s přesným ID <code>$reklamaceId</code> nebyla nalezena.";
             echo "</div>";
 
             // Zkusit vyhledat podle částečné shody
-            echo "<h2>🔍 Vyhledávání podobných zakázek</h2>";
+            echo "<h2>Vyhledávání podobných zakázek</h2>";
 
             $stmt = $pdo->prepare("
                 SELECT
@@ -151,7 +151,7 @@ try {
 
             if (empty($podobne)) {
                 echo "<div class='error'>";
-                echo "<strong>❌ Žádné zakázky nenalezeny</strong> obsahující \"$reklamaceId\"";
+                echo "<strong>CHYBA: Žádné zakázky nenalezeny</strong> obsahující \"$reklamaceId\"";
                 echo "</div>";
             } else {
                 echo "<div class='info'>";
@@ -182,7 +182,7 @@ try {
             echo "<a href='?' class='btn'>← Zkusit jiné hledání</a>";
         } else {
             // Zobrazit zakázku
-            echo "<h2>📋 Zakázka nalezena</h2>";
+            echo "<h2>Zakázka nalezena</h2>";
             echo "<div class='claim-card'>";
             echo "<h3>{$zakazka['reklamace_id']}</h3>";
             echo "<p><span class='label'>ID v databázi:</span> <span class='value'>{$zakazka['id']}</span></p>";
@@ -220,7 +220,7 @@ try {
 
                 if (empty($technicians)) {
                     echo "<div class='warning'>";
-                    echo "<strong>⚠️ VAROVÁNÍ:</strong> V databázi nejsou žádní technici.";
+                    echo "<strong>POZOR: VAROVÁNÍ:</strong> V databázi nejsou žádní technici.";
                     echo "</div>";
                 } else {
                     echo "<table>";
@@ -263,7 +263,7 @@ try {
 
                 if (!$novyTechnikId) {
                     echo "<div class='error'>";
-                    echo "<strong>❌ CHYBA:</strong> Chybí ID nového technika.";
+                    echo "<strong>CHYBA:</strong> Chybí ID nového technika.";
                     echo "</div>";
                     echo "<a href='?reklamace_id=" . urlencode($reklamaceId) . "' class='btn'>← Zpět</a>";
                 } else {
@@ -274,7 +274,7 @@ try {
 
                     if (!$novyTechnik) {
                         echo "<div class='error'>";
-                        echo "<strong>❌ CHYBA:</strong> Technik s ID $novyTechnikId nebyl nalezen.";
+                        echo "<strong>CHYBA:</strong> Technik s ID $novyTechnikId nebyl nalezen.";
                         echo "</div>";
                     } else {
                         echo "<h2>3. Potvrzení změny</h2>";
@@ -299,11 +299,11 @@ try {
                                 $pdo->commit();
 
                                 echo "<div class='success'>";
-                                echo "<strong>✅ ÚSPĚCH!</strong> Zakázka byla úspěšně přehozena.";
+                                echo "<strong>ÚSPĚCH!</strong> Zakázka byla úspěšně přehozena.";
                                 echo "</div>";
 
                                 echo "<div class='info'>";
-                                echo "<strong>📊 ZMĚNA:</strong><br>";
+                                echo "<strong>ZMĚNA:</strong><br>";
                                 echo "Zakázka: <code>{$zakazka['reklamace_id']}</code> ({$zakazka['zakaznik']})<br>";
                                 echo "Ze: <strong>" . ($zakazka['technik_jmeno'] ?: 'Nepřiřazeno') . "</strong><br>";
                                 echo "Na: <strong>{$novyTechnik['name']}</strong> ({$novyTechnik['email']})";
@@ -315,7 +315,7 @@ try {
                             } catch (PDOException $e) {
                                 $pdo->rollBack();
                                 echo "<div class='error'>";
-                                echo "<strong>❌ CHYBA PŘI UKLÁDÁNÍ:</strong><br>";
+                                echo "<strong>CHYBA PŘI UKLÁDÁNÍ:</strong><br>";
                                 echo htmlspecialchars($e->getMessage());
                                 echo "</div>";
                             }
@@ -323,11 +323,11 @@ try {
                         } else {
                             // ZOBRAZIT POTVRZENÍ
                             echo "<div class='warning'>";
-                            echo "<strong>⚠️ POZOR:</strong> Chystáte se přehodit zakázku na jiného technika.";
+                            echo "<strong>POZOR:</strong> Chystáte se přehodit zakázku na jiného technika.";
                             echo "</div>";
 
                             echo "<div class='user-card'>";
-                            echo "<h3>🔄 Změna přiřazení</h3>";
+                            echo "<h3>Změna přiřazení</h3>";
                             echo "<p><span class='label'>Zakázka:</span> <span class='value'><strong>{$zakazka['reklamace_id']}</strong></span></p>";
                             echo "<p><span class='label'>Zákazník:</span> <span class='value'>{$zakazka['zakaznik']}</span></p>";
                             echo "<hr style='margin: 15px 0;'>";
@@ -342,8 +342,8 @@ try {
                             echo "<input type='hidden' name='technik' value='" . htmlspecialchars($technikJmeno) . "'>";
                             echo "<input type='hidden' name='technik_id' value='" . htmlspecialchars($novyTechnikId) . "'>";
                             echo "<input type='hidden' name='potvrdit' value='1'>";
-                            echo "<button type='submit' class='btn'>✓ Potvrdit přehození</button>";
-                            echo "<a href='?reklamace_id=" . urlencode($reklamaceId) . "' class='btn btn-danger'>✗ Zrušit</a>";
+                            echo "<button type='submit' class='btn'>OK Potvrdit přehození</button>";
+                            echo "<a href='?reklamace_id=" . urlencode($reklamaceId) . "' class='btn btn-danger'>CHYBA Zrušit</a>";
                             echo "</form>";
                         }
                     }

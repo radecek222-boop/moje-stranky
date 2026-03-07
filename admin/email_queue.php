@@ -216,7 +216,7 @@ $stats = $queue->getStats();
 
     <div class="container">
         <div class="header">
-            <h1>📧 Email Fronta</h1>
+            <h1>Email Fronta</h1>
             <p>Správa asynchronního odesílání emailů</p>
 
             <?php if ($message): ?>

@@ -190,7 +190,7 @@ try {
     $aktuálníDavka = array_slice($vsechnyEmaily, $offset, $davkaVelikost);
     $pocetVDavce = count($aktuálníDavka);
 
-    echo "<h1>📧 Hromadné odeslání emailů - DÁVKOVÝ REŽIM</h1>";
+    echo "<h1>Hromadné odeslání emailů - DÁVKOVÝ REŽIM</h1>";
 
     // Progress
     $procento = ($celkemEmailu > 0) ? round(($offset / $celkemEmailu) * 100, 1) : 0;
@@ -203,12 +203,12 @@ try {
 
     if ($pocetVDavce === 0) {
         echo "<div class='success'>";
-        echo "<strong>✅ HOTOVO!</strong><br>";
+        echo "<strong>OK: HOTOVO!</strong><br>";
         echo "Všechny emaily byly odeslány.<br>";
         echo "Celkem: <strong>{$celkemEmailu}</strong> emailů";
         echo "</div>";
 
-        echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>📊 Zobrazit statistiky</a>";
+        echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>Zobrazit statistiky</a>";
         echo "<a href='/admin.php' class='btn'>← Zpět do Control Centre</a>";
 
     } else {
@@ -242,13 +242,13 @@ try {
                     if ($vysledek === true) {
                         echo "<tr>";
                         echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #155724;'>✅ Odesláno</td>";
+                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #155724;'>OK: Odesláno</td>";
                         echo "</tr>";
                         $uspesne++;
                     } else {
                         echo "<tr>";
                         echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>❌ Chyba</td>";
+                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>CHYBA: Chyba</td>";
                         echo "</tr>";
                         $chyby++;
                     }
@@ -256,7 +256,7 @@ try {
                 } catch (Exception $e) {
                     echo "<tr>";
                     echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                    echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>❌ " . htmlspecialchars($e->getMessage()) . "</td>";
+                    echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</td>";
                     echo "</tr>";
                     $chyby++;
                 }
@@ -272,7 +272,7 @@ try {
             echo "</table>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ Dávka dokončena</strong><br>";
+            echo "<strong>OK: Dávka dokončena</strong><br>";
             echo "Úspěšně: {$uspesne} | Chyby: {$chyby}";
             echo "</div>";
 
@@ -282,7 +282,7 @@ try {
             // Auto-redirect na další dávku
             if ($novyOffset < $celkemEmailu) {
                 echo "<div class='info'>";
-                echo "🔄 <strong>Automatické pokračování za 3 sekundy...</strong>";
+                echo "<strong>Automatické pokračování za 3 sekundy...</strong>";
                 echo "</div>";
 
                 echo "<script>
@@ -295,18 +295,18 @@ try {
                 echo "<strong>🎉 VŠECHNY EMAILY ODESLÁNY!</strong>";
                 echo "</div>";
 
-                echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>📊 Zobrazit statistiky</a>";
+                echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>Zobrazit statistiky</a>";
             }
 
         } else {
             // Zobrazit tlačítko pro spuštění
             echo "<div class='warning'>";
-            echo "<strong>⚠️ POZOR:</strong><br>";
+            echo "<strong>POZOR:</strong><br>";
             echo "Kliknutím níže spustíte automatické odesílání po 50 emailech.<br>";
             echo "Proces bude pokračovat automaticky až do konce.";
             echo "</div>";
 
-            echo "<a href='?offset={$offset}&auto=1' class='btn btn-danger'>🚀 SPUSTIT AUTOMATICKÉ ODESÍLÁNÍ</a>";
+            echo "<a href='?offset={$offset}&auto=1' class='btn btn-danger'>SPUSTIT AUTOMATICKÉ ODESÍLÁNÍ</a>";
         }
     }
 

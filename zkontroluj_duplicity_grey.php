@@ -68,11 +68,11 @@ try {
     $zaznamy = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($zaznamy) === 0) {
-        echo "<div class='warning'><strong>⚠️ NENALEZEN ŽÁDNÝ ZÁZNAM</strong></div>";
+        echo "<div class='warning'><strong>POZOR: NENALEZEN ŽÁDNÝ ZÁZNAM</strong></div>";
     } elseif (count($zaznamy) === 1) {
-        echo "<div class='info'><strong>✓ Nalezen právě 1 záznam (OK)</strong></div>";
+        echo "<div class='info'><strong>OK Nalezen právě 1 záznam (OK)</strong></div>";
     } else {
-        echo "<div class='warning'><strong>⚠️ NALEZENO " . count($zaznamy) . " ZÁZNAMŮ!</strong><br>";
+        echo "<div class='warning'><strong>POZOR: NALEZENO " . count($zaznamy) . " ZÁZNAMŮ!</strong><br>";
         echo "Může existovat duplicita.</div>";
     }
 

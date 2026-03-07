@@ -193,7 +193,7 @@ try {
     $odeslano = count($odeslanéEmaily);
     $zbyva = count($zbyvajiciEmaily);
 
-    echo "<h1>📧 Bezpečné odeslání Natuzzi kampaně</h1>";
+    echo "<h1>Bezpečné odeslání Natuzzi kampaně</h1>";
 
     // Progress
     $procento = ($celkem > 0) ? round(($odeslano / $celkem) * 100, 1) : 0;
@@ -211,12 +211,12 @@ try {
         echo "Celkem: <strong>{$celkem}</strong> emailů";
         echo "</div>";
 
-        echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>📊 Zobrazit statistiky</a>";
+        echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>Zobrazit statistiky</a>";
         echo "<a href='/admin.php' class='btn'>← Control Centre</a>";
 
     } else {
         echo "<div class='info'>";
-        echo "<strong>📊 Statistika:</strong><br>";
+        echo "<strong>Statistika:</strong><br>";
         echo "• Celkem v CSV: {$celkem}<br>";
         echo "• Již odesláno: {$odeslano}<br>";
         echo "• Zbývá odeslat: <strong>{$zbyva}</strong>";
@@ -256,7 +256,7 @@ try {
                     if ($vysledek === true) {
                         echo "<tr>";
                         echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #155724;'>✅ OK</td>";
+                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #155724;'>OK</td>";
                         echo "</tr>";
 
                         // Uložit do progress souboru
@@ -266,7 +266,7 @@ try {
                     } else {
                         echo "<tr>";
                         echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>❌ Chyba</td>";
+                        echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>CHYBA: Chyba</td>";
                         echo "</tr>";
                         $chyby++;
                     }
@@ -274,7 +274,7 @@ try {
                 } catch (Exception $e) {
                     echo "<tr>";
                     echo "<td style='border: 1px solid #ddd; padding: 8px;'>" . htmlspecialchars($email) . "</td>";
-                    echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>❌ " . htmlspecialchars($e->getMessage()) . "</td>";
+                    echo "<td style='border: 1px solid #ddd; padding: 8px; color: #721c24;'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</td>";
                     echo "</tr>";
                     $chyby++;
                 }
@@ -288,7 +288,7 @@ try {
             echo "</table>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ Dávka dokončena</strong><br>";
+            echo "<strong>OK: Dávka dokončena</strong><br>";
             echo "Úspěšně: {$uspesne} | Chyby: {$chyby}";
             echo "</div>";
 
@@ -296,7 +296,7 @@ try {
 
             if ($novyZbytek > 0) {
                 echo "<div class='info'>";
-                echo "🔄 <strong>Pokračuji na další dávku za 3 sekundy...</strong><br>";
+                echo "<strong>Pokračuji na další dávku za 3 sekundy...</strong><br>";
                 echo "Zbývá: {$novyZbytek} emailů";
                 echo "</div>";
 
@@ -310,18 +310,18 @@ try {
                 echo "<strong>🎉 VŠECHNO ODESLÁNO!</strong>";
                 echo "</div>";
 
-                echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>📊 Zobrazit statistiky</a>";
+                echo "<a href='/kontrola_odeslenych_emailu.php' class='btn'>Zobrazit statistiky</a>";
             }
 
         } else {
             // Tlačítko pro spuštění
             echo "<div class='warning'>";
-            echo "<strong>⚠️ POZOR:</strong><br>";
+            echo "<strong>POZOR:</strong><br>";
             echo "Kliknutím spustíte automatické odesílání.<br>";
             echo "Proces bude pokračovat až do konce (neopakuje odeslané).";
             echo "</div>";
 
-            echo "<a href='?auto=1' class='btn btn-danger'>🚀 SPUSTIT ODESÍLÁNÍ ({$zbyva} emailů)</a>";
+            echo "<a href='?auto=1' class='btn btn-danger'>SPUSTIT ODESÍLÁNÍ ({$zbyva} emailů)</a>";
         }
     }
 

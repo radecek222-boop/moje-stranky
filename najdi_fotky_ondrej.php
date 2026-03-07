@@ -47,7 +47,7 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>🔍 Hledání fotek - Ondřej Skoupý</h1>";
+    echo "<h1>Hledání fotek - Ondřej Skoupý</h1>";
 
     // 1. Najít všechny zakázky Ondřeje Skoupého
     $stmt = $pdo->prepare("
@@ -73,7 +73,7 @@ try {
     $zakazky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<div class='info'>";
-    echo "<strong>📋 Nalezeno zakázek:</strong> " . count($zakazky);
+    echo "<strong>Nalezeno zakázek:</strong> " . count($zakazky);
     echo "</div>";
 
     if (empty($zakazky)) {
@@ -123,7 +123,7 @@ try {
             echo "<td style='text-align: center;'><strong>" . $photoCount . "</strong></td>";
             echo "<td style='text-align: center;'><strong>" . $filesOnDisk . "</strong>";
             if ($filesOnDisk > $photoCount) {
-                echo " ⚠️";
+                echo " POZOR";
             }
             echo "</td>";
             echo "</tr>";
@@ -166,7 +166,7 @@ try {
             echo "<div class='info'>Žádné nedávné fotky (poslední 3 dny).</div>";
         } else {
             echo "<div class='success'>";
-            echo "<strong>✅ Nalezeno nedávných fotek:</strong> " . count($recentPhotos);
+            echo "<strong>OK Nalezeno nedávných fotek:</strong> " . count($recentPhotos);
             echo "</div>";
 
             echo "<table>";
@@ -199,7 +199,7 @@ try {
                 echo "<td>" . htmlspecialchars($photo['zakaznik']) . "</td>";
                 echo "<td><code>" . htmlspecialchars($filename) . "</code></td>";
                 echo "<td>" . round($photo['size'] / 1024, 1) . " KB</td>";
-                echo "<td style='text-align: center;'>" . ($inDb ? "✅" : "❌ CHYBÍ") . "</td>";
+                echo "<td style='text-align: center;'>" . ($inDb ? "OK" : "CHYBA CHYBÍ") . "</td>";
                 echo "</tr>";
             }
 
@@ -220,10 +220,10 @@ try {
         });
 
         if (empty($orphanedPhotos)) {
-            echo "<div class='success'>✅ Všechny fotky mají záznam v databázi.</div>";
+            echo "<div class='success'>OK Všechny fotky mají záznam v databázi.</div>";
         } else {
             echo "<div class='warning'>";
-            echo "<strong>⚠️ Nalezeno fotek BEZ záznamu v DB:</strong> " . count($orphanedPhotos);
+            echo "<strong>POZOR Nalezeno fotek BEZ záznamu v DB:</strong> " . count($orphanedPhotos);
             echo "<br><br>Tyto fotky jsou na disku, ale nebyly zapsány do databáze (pravděpodobně kvůli odhlášení).";
             echo "</div>";
 

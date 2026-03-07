@@ -66,14 +66,14 @@ echo "<!DOCTYPE html>
 <div class='container'>";
 
 // FÁZE 1: Kontrola stavu .env souboru
-echo "<h1>🔧 Nastavení .env souboru</h1>";
+echo "<h1>Nastavení .env souboru</h1>";
 
 $envExists = file_exists($envPath);
 $envExampleExists = file_exists($envExamplePath);
 
 if ($envExists) {
     echo "<div class='warning'>";
-    echo "<strong>⚠️ VAROVÁNÍ:</strong> Soubor .env již existuje!<br>";
+    echo "<strong>POZOR: VAROVÁNÍ:</strong> Soubor .env již existuje!<br>";
     echo "<small>Cesta: <code>{$envPath}</code></small><br><br>";
 
     if (!isset($_POST['overwrite'])) {
@@ -176,13 +176,13 @@ VAPID_SUBJECT=mailto:info@wgs-service.cz
                 chmod($envPath, 0600);
 
                 echo "<div class='success'>";
-                echo "<strong>✅ ÚSPĚCH:</strong> Soubor .env byl vytvořen!<br>";
+                echo "<strong>ÚSPĚCH:</strong> Soubor .env byl vytvořen!<br>";
                 echo "<small>Cesta: <code>{$envPath}</code></small><br>";
                 echo "<small>Oprávnění: 0600 (pouze vlastník může číst/zapisovat)</small>";
                 echo "</div>";
 
                 // FÁZE 3: Test databázového připojení
-                echo "<h2>🔍 Test databázového připojení...</h2>";
+                echo "<h2>Test databázového připojení...</h2>";
 
                 try {
                     $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4";
@@ -192,7 +192,7 @@ VAPID_SUBJECT=mailto:info@wgs-service.cz
                     ]);
 
                     echo "<div class='success'>";
-                    echo "<strong>✅ Databázové připojení FUNGUJE!</strong><br>";
+                    echo "<strong>OK: Databázové připojení FUNGUJE!</strong><br>";
                     echo "Host: <code>{$dbHost}</code><br>";
                     echo "Databáze: <code>{$dbName}</code><br>";
                     echo "Uživatel: <code>{$dbUser}</code>";
@@ -203,7 +203,7 @@ VAPID_SUBJECT=mailto:info@wgs-service.cz
                     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     echo "<div class='info'>";
-                    echo "<strong>📊 Test dotazu:</strong><br>";
+                    echo "<strong>Test dotazu:</strong><br>";
                     echo "Počet reklamací v databázi: <strong>{$result['count']}</strong>";
                     echo "</div>";
 
@@ -212,7 +212,7 @@ VAPID_SUBJECT=mailto:info@wgs-service.cz
 
                 } catch (PDOException $e) {
                     echo "<div class='error'>";
-                    echo "<strong>❌ CHYBA: Databázové připojení SELHALO</strong><br>";
+                    echo "<strong>CHYBA: Databázové připojení SELHALO</strong><br>";
                     echo "Zkontrolujte přihlašovací údaje a zkuste to znovu.<br><br>";
                     echo "<details>";
                     echo "<summary>Zobrazit technické detaily</summary>";
@@ -240,9 +240,9 @@ VAPID_SUBJECT=mailto:info@wgs-service.cz
 
 // FÁZE 4: Zobrazit formulář
 echo "<div class='info'>";
-echo "<strong>ℹ️ Stav:</strong><br>";
-echo "Soubor .env: " . ($envExists ? "✅ Existuje" : "❌ Neexistuje") . "<br>";
-echo "Šablona .env.example: " . ($envExampleExists ? "✅ Existuje" : "❌ Neexistuje");
+echo "<strong>Stav:</strong><br>";
+echo "Soubor .env: " . ($envExists ? "OK: Existuje" : "CHYBA: Neexistuje") . "<br>";
+echo "Šablona .env.example: " . ($envExampleExists ? "OK: Existuje" : "CHYBA: Neexistuje");
 echo "</div>";
 
 // Načíst výchozí hodnoty z .env.example pokud existuje
@@ -262,10 +262,10 @@ $defaults = [
     'environment' => 'production'
 ];
 
-echo "<h2>📋 Vyplňte databázové údaje</h2>";
+echo "<h2>Vyplňte databázové údaje</h2>";
 echo "<form method='post'>";
 
-echo "<h3>🗄️ Databáze</h3>";
+echo "<h3>Databáze</h3>";
 
 echo "<div class='form-group'>";
 echo "<label>Host databáze (DB_HOST):</label>";
@@ -291,7 +291,7 @@ echo "<input type='password' name='db_pass' value='{$defaults['db_pass']}'>";
 echo "<div class='help-text'>Nechte prázdné, pokud databáze nemá heslo</div>";
 echo "</div>";
 
-echo "<h3>📧 SMTP (Email) - Volitelné</h3>";
+echo "<h3>SMTP (Email) - Volitelné</h3>";
 
 echo "<div class='form-group'>";
 echo "<label>SMTP Host:</label>";

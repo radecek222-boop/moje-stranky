@@ -55,7 +55,7 @@ button { background: #333; color: #fff; border: 1px solid #666; padding: 8px 14p
 var logEl = document.getElementById('log');
 
 function log(text, typ) {
-  var prefix = typ === 'chyba' ? '❌ ' : typ === 'ok' ? '✅ ' : '   ';
+  var prefix = typ === 'chyba' ? 'CHYBA: ' : typ === 'ok' ? 'OK: ' : '   ';
   logEl.textContent += prefix + text + '\n';
 }
 

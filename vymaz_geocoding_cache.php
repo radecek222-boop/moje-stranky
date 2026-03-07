@@ -103,26 +103,26 @@ if (!$wasExecuted && function_exists('apcu_cache_info')) {
     <h1>🧹 Vymazání Geocoding Cache</h1>
 
 <?php if (!function_exists('apcu_cache_info')): ?>
-    <div class='error'>❌ APCu není dostupné na tomto serveru</div>
+    <div class='error'>CHYBA: APCu není dostupné na tomto serveru</div>
     <div class='info'>Cache není aktivní nebo server nepodporuje APCu.</div>
 
 <?php elseif ($wasExecuted): ?>
     <!-- VÝSLEDEK MAZÁNÍ -->
     <div class='result'>
-        📊 Výsledek:<br>
+        Výsledek:<br>
         Celkem geocoding klíčů: <strong><?= $total ?></strong><br>
         Smazáno: <strong><?= $deleted ?></strong>
     </div>
 
     <?php if ($deleted > 0): ?>
-        <div class='success'>✅ Cache byla úspěšně vymazána!</div>
+        <div class='success'>OK: Cache byla úspěšně vymazána!</div>
 
         <?php if (!empty($keys)): ?>
             <div class='info'>Smazané klíče:</div>
             <div class='key-list'>
                 <?php foreach ($keys as $item): ?>
                     <?php
-                    $icon = $item['status'] === 'success' ? '✓' : '✗';
+                    $icon = $item['status'] === 'success' ? 'OK' : 'CHYBA';
                     $color = $item['status'] === 'success' ? '#28a745' : '#dc3545';
                     ?>
                     <div class='key-item' style='color: <?= $color ?>;'><?= $icon ?> <?= htmlspecialchars($item['key']) ?></div>
@@ -130,20 +130,20 @@ if (!$wasExecuted && function_exists('apcu_cache_info')) {
             </div>
         <?php endif; ?>
     <?php else: ?>
-        <div class='info'>ℹ️ Žádné geocoding klíče nebyly nalezeny v cache.</div>
+        <div class='info'>Žádné geocoding klíče nebyly nalezeny v cache.</div>
     <?php endif; ?>
 
 <?php else: ?>
     <!-- PREVIEW A POTVRZENÍ -->
     <div class='info'>
-        <strong>ℹ️ Co se stane?</strong><br>
+        <strong>Co se stane?</strong><br>
         Tato akce vymaže všechny geocoding cache záznamy z APCu.<br>
         Frontend pak bude muset znovu vypočítat všechny vzdálenosti.
     </div>
 
     <?php if ($previewTotal > 0): ?>
         <div class='warning'>
-            <strong>⚠️ Nalezeno <?= $previewTotal ?> geocoding záznamů</strong>
+            <strong>POZOR: Nalezeno <?= $previewTotal ?> geocoding záznamů</strong>
         </div>
 
         <?php if (!empty($previewKeys)): ?>
@@ -157,18 +157,18 @@ if (!$wasExecuted && function_exists('apcu_cache_info')) {
 
         <form method='POST' style='margin: 20px 0;'>
             <input type='hidden' name='csrf_token' value='<?= htmlspecialchars(generateCSRFToken()) ?>'>
-            <button type='submit' class='btn btn-danger'>🗑️ VYMAZAT CACHE</button>
+            <button type='submit' class='btn btn-danger'>VYMAZAT CACHE</button>
             <a href='admin.php' class='btn'>← Zrušit</a>
         </form>
     <?php else: ?>
-        <div class='info'>ℹ️ Cache je prázdná - nic k vymazání.</div>
+        <div class='info'>Cache je prázdná - nic k vymazání.</div>
     <?php endif; ?>
 
 <?php endif; ?>
 
     <div style="margin-top: 2rem;">
-        <a href="debug_geocoding.php" class="btn">🔍 Otestovat Geocoding</a>
-        <a href="debug_distance_cache.php" class="btn">🔍 Frontend Cache</a>
+        <a href="debug_geocoding.php" class="btn">Otestovat Geocoding</a>
+        <a href="debug_distance_cache.php" class="btn">Frontend Cache</a>
         <a href="admin.php" class="btn">← Zpět na Admin</a>
     </div>
 </div>
