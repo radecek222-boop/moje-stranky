@@ -666,6 +666,15 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #333333 !important;
 }
 
+/* iOS FIX: textarea nesmí zachytávat touch scroll - modal scrolluje místo textareje */
+/* Auto-height JS expanduje textarea na celý obsah, overflow:hidden je bezpečné */
+#detailOverlay textarea,
+#detailOverlay .detail-textarea-popis {
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+  resize: none !important;
+}
+
 #detailOverlay input:focus,
 #detailOverlay textarea:focus,
 #detailOverlay select:focus {
