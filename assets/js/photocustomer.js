@@ -752,6 +752,11 @@ async function saveToProtocol() {
       })
     });
 
+    if (!response.ok) {
+      const chybovaData = await response.json().catch(() => ({}));
+      throw new Error(`HTTP ${response.status}: ${chybovaData.message || response.statusText}`);
+    }
+
     const result = await response.json();
 
     if (result.success) {
