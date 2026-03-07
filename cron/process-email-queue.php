@@ -13,20 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die('Method Not Allowed');
 }
 
-// Volitelné: Kontrola IP adresy (uncomment pokud chceš)
-/*
-$allowedIPs = [
-    '127.0.0.1',
-    '::1',
-    // Přidej IP adresu Českého hostingu
-];
-
-$clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-if (!in_array($clientIP, $allowedIPs)) {
+// Bezpečnostní kontrola tajného klíče (stejný vzor jako cron/send-reminders.php)
+$tajnyKlic = getenv('CRON_SECRET_KEY') ?: 'wgs2025emailqueue';
+if (!isset($_GET['key']) || !hash_equals($tajnyKlic, $_GET['key'])) {
     http_response_code(403);
+    error_log("CRON process-email-queue: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     die('Forbidden');
 }
-*/
 
 // Nastavit timeout na 5 minut (pro zpracování více emailů)
 set_time_limit(300);
