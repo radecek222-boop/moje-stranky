@@ -490,7 +490,7 @@ a:hover {
 }
 .nav {
   display: flex;
-  gap: calc(var(--space-lg)+var(--space-md));
+  gap: calc(var(--space-lg) + var(--space-md));
   align-items: center;
 }
 .nav a {
@@ -611,7 +611,7 @@ button[type="submit"]:active {
   font-size: var(--fs-xs);
 }
 .btn-large {
-  padding: calc(var(--space-md)+var(--space-sm)) var(--space-3xl);
+  padding: calc(var(--space-md) + var(--space-sm)) var(--space-3xl);
   font-size: var(--fs-base);
 }
 .btn:disabled,

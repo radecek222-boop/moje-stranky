@@ -17,6 +17,17 @@ jobs:
         with:
           fetch-depth: 1  # Jen poslední commit = rychlejší
 
+      - name: Nastavení Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalace závislostí a build
+        run: |
+          npm ci --prefer-offline
+          npm run build
+
       - name: 🚀 SFTP Deploy (optimalizovaný)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:

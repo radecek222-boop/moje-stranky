@@ -657,7 +657,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/page-transitions.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
-<script src="assets/js/objednatservis.min.js?v=1764635649" defer></script>
+<script src="assets/js/objednatservis.js?v=<?= filemtime(__DIR__ . '/assets/js/objednatservis.js') ?>" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php require_once __DIR__ . '/includes/cookie_consent.php'; ?>

@@ -1386,7 +1386,11 @@ function loadNotifContent(type, body) {
 <script src="/assets/js/admin-notifications.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-notifications.min.js') ?>" defer></script>
 <script src="/assets/js/smtp-config.min.js?v=<?= filemtime(__DIR__ . '/assets/js/smtp-config.min.js') ?>" defer></script>
 <script src="/assets/js/admin-actions-registry.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-actions-registry.js') ?>" defer></script>
-<script src="/assets/js/admin.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.min.js') ?>" defer></script>
+<script src="/assets/js/admin.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.js') ?>" defer></script>
+<!-- Moduly admin.js -->
+<script src="/assets/js/admin-klice.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-klice.js') ?>" defer></script>
+<script src="/assets/js/admin-uzivatel.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-uzivatel.js') ?>" defer></script>
+<script src="/assets/js/admin-supervize.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-supervize.js') ?>" defer></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">

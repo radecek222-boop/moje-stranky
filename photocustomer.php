@@ -45,6 +45,7 @@ if (!$isAdmin && !$isTechnik) {
 <head>
   <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -221,7 +222,8 @@ if (!$isAdmin && !$isTechnik) {
 <!-- External JavaScript -->
 <script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/photo-storage-db.min.js" defer></script>
-<script src="assets/js/photocustomer.min.js" defer></script>
+<script src="assets/js/photocustomer.js?v=<?= filemtime(__DIR__ . '/assets/js/photocustomer.js') ?>" defer></script>
+<script src="assets/js/photocustomer-video.js?v=<?= filemtime(__DIR__ . '/assets/js/photocustomer-video.js') ?>" defer></script>
 
 <!-- Session Keep-Alive - KRITICKÉ: Brání vypršení session při pořizování fotek -->
 <script src="assets/js/session-keepalive.min.js?v=<?= filemtime(__DIR__ . '/assets/js/session-keepalive.min.js') ?>" defer></script>

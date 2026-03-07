@@ -496,39 +496,6 @@ window.WGS_TRANSLATIONS_CENIK = {
   },
 
   // ========================================
-  // JAVASCRIPT ZPRÁVY (ALERTS/ERRORS)
-  // ========================================
-  'alert.selectAddress': {
-    cs: 'Nejprve vyberte adresu ze seznamu návrhů.',
-    en: 'Please select an address from the suggestions list first.',
-    it: 'Seleziona prima un indirizzo dall\'elenco dei suggerimenti.'
-  },
-
-  'alert.distanceError': {
-    cs: 'Nepodařilo se vypočítat vzdálenost. Zkuste jinou adresu.',
-    en: 'Failed to calculate distance. Try another address.',
-    it: 'Impossibile calcolare la distanza. Prova un altro indirizzo.'
-  },
-
-  'alert.distanceCalculationError': {
-    cs: 'Chyba při výpočtu vzdálenosti',
-    en: 'Error calculating distance',
-    it: 'Errore nel calcolo della distanza'
-  },
-
-  'alert.pdfLoading': {
-    cs: 'PDF knihovna se načítá, zkuste to prosím za chvíli...',
-    en: 'PDF library is loading, please try again in a moment...',
-    it: 'La libreria PDF si sta caricando, riprova tra un momento...'
-  },
-
-  'alert.pdfError': {
-    cs: 'Nepodařilo se vytvořit PDF. Zkuste to prosím znovu.',
-    en: 'Failed to create PDF. Please try again.',
-    it: 'Impossibile creare PDF. Riprova.'
-  },
-
-  // ========================================
   // PDF EXPORT TEXTY
   // ========================================
   'pdf.title': {
