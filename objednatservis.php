@@ -584,15 +584,27 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         </div>
       </div>
       
-      <!-- FOTODOKUMENTACE -->
+      <!-- FOTO / VIDEO -->
       <div class="form-section">
-        <h2 class="section-title" data-lang-cs="Fotodokumentace" data-lang-en="Photo Documentation" data-lang-it="Documentazione Fotografica">Fotodokumentace</h2>
-        <div class="photo-upload-area">
-          <button type="button" class="btn-photo" id="uploadPhotosBtn" data-lang-cs="VYBRAT FOTOGRAFIE" data-lang-en="SELECT PHOTOS" data-lang-it="SELEZIONA FOTO">VYBRAT FOTOGRAFIE</button>
-          <p class="photo-info" data-lang-cs="Max. 10 fotografií • automatická komprese" data-lang-en="Max. 10 photos • automatic compression" data-lang-it="Max. 10 foto • compressione automatica">Max. 10 fotografií • automatická komprese</p>
-          <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
+        <h2 class="section-title" data-lang-cs="Foto / Video" data-lang-en="Photo / Video" data-lang-it="Foto / Video">Foto / Video</h2>
+        <div class="foto-video-row">
+          <div class="foto-video-col">
+            <div class="photo-upload-area">
+              <button type="button" class="btn-photo" id="uploadPhotosBtn" data-lang-cs="NAHRÁT FOTOGRAFIE" data-lang-en="UPLOAD PHOTOS" data-lang-it="CARICA FOTO">NAHRÁT FOTOGRAFIE</button>
+              <p class="photo-info" data-lang-cs="Max. 10 fotografií • automatická komprese" data-lang-en="Max. 10 photos • automatic compression" data-lang-it="Max. 10 foto • compressione automatica">Max. 10 fotografií • automatická komprese</p>
+              <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
+            </div>
+            <div id="photoPreviewMain"></div>
+          </div>
+          <div class="foto-video-col">
+            <div class="photo-upload-area">
+              <button type="button" class="btn-photo" id="uploadVideoBtn" data-lang-cs="NAHRÁT VIDEO" data-lang-en="UPLOAD VIDEO" data-lang-it="CARICA VIDEO">NAHRÁT VIDEO</button>
+              <p class="photo-info" data-lang-cs="Max. 1 video • MP4 nebo MOV" data-lang-en="Max. 1 video • MP4 or MOV" data-lang-it="Max. 1 video • MP4 o MOV">Max. 1 video • MP4 nebo MOV</p>
+              <input type="file" id="videoInput" accept="video/mp4,video/quicktime,video/*" style="display:none;">
+            </div>
+            <div id="videoPreviewMain"></div>
+          </div>
         </div>
-        <div id="photoPreviewMain"></div>
       </div>
 
       <!-- GDPR CONSENT - pouze pro neregistrované uživatele -->
