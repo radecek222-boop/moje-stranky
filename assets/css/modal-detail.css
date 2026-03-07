@@ -748,16 +748,17 @@ body.ios-device #detailOverlay .modal-actions .btn {
 
 @media (min-width: 769px) {
   #detailOverlay {
-    align-items: center;
-    padding: 1.5rem;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1.5rem !important;
   }
 
   #detailOverlay .modal-content {
-    max-width: 800px;
-    width: 100%;
-    max-height: 88vh;
-    overflow-y: auto;
-    margin: auto;
+    max-width: 800px !important;
+    width: 100% !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
   }
 }
 
