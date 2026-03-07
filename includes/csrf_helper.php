@@ -15,7 +15,7 @@
  * @return string
  */
 if (!function_exists('generateCSRFToken')) {
-    function generateCSRFToken() {
+    function generateCSRFToken(): string {
         if (!isset($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
@@ -30,7 +30,7 @@ if (!function_exists('generateCSRFToken')) {
  * @return bool
  */
 if (!function_exists('validateCSRFToken')) {
-    function validateCSRFToken($token) {
+    function validateCSRFToken(string $token): bool {
         if (!isset($_SESSION['csrf_token'])) {
             return false;
         }
@@ -44,7 +44,7 @@ if (!function_exists('validateCSRFToken')) {
  * RequireCSRF
  */
 if (!function_exists('requireCSRF')) {
-    function requireCSRF() {
+    function requireCSRF(): void {
         // SECURITY FIX: Removed admin bypass - all users require CSRF tokens
         // Even if admin account is compromised, CSRF protection remains active
 

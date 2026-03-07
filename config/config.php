@@ -140,7 +140,7 @@ if (!function_exists('generateRegistrationKey')) {
 }
 
 if (!function_exists('sanitizeInput')) {
-    function sanitizeInput($data) {
+    function sanitizeInput(mixed $data): mixed {
         if (is_array($data)) {
             return array_map('sanitizeInput', $data);
         }
@@ -158,7 +158,7 @@ if (!function_exists('sanitizeInput')) {
  * @return true|array True pokud je heslo silné, jinak array s chybami
  */
 if (!function_exists('isStrongPassword')) {
-    function isStrongPassword($password) {
+    function isStrongPassword(string $password): true|array {
         $errors = [];
 
         // Minimální délka 12 znaků
@@ -242,7 +242,7 @@ if (!function_exists('setSecurityHeaders')) {
 
 // ========== DATABÁZOVÉ PŘIPOJENÍ ==========
 if (!function_exists('getDbConnection')) {
-    function getDbConnection() {
+    function getDbConnection(): PDO {
         static $pdo = null;
 
         if ($pdo === null) {

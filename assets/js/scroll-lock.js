@@ -15,16 +15,16 @@
 (function(window) {
     'use strict';
 
-    var aktivniZamky = [];
-    var ulozenyScroll = 0;
-    var CSS_TRIDA_ZAMKNUTO = 'scroll-locked';
+    let aktivniZamky = [];
+    let ulozenyScroll = 0;
+    const CSS_TRIDA_ZAMKNUTO = 'scroll-locked';
 
-    var isPWA = (function() {
+    const isPWA = (function() {
         return window.matchMedia('(display-mode: standalone)').matches ||
                window.navigator.standalone === true;
     })();
 
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     /**
      * Zamkne scroll stránky pomocí position:fixed
@@ -61,7 +61,7 @@
             return;
         }
 
-        var index = aktivniZamky.indexOf(idOverlaye);
+        const index = aktivniZamky.indexOf(idOverlaye);
         if (index > -1) {
             aktivniZamky.splice(index, 1);
         }
