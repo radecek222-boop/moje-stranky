@@ -95,15 +95,15 @@
 
 #detailOverlay .modal-header {
   /* Žádné explicitní pozadí — dědí #1a1a1a z .modal-content */
-  padding: 0.3rem 1rem !important;
+  padding: 0.3rem 1rem; /* bez !important — mobilní media query to přebíjí */
   text-align: center !important;
   border-bottom: 1px solid #333333 !important;
-  box-shadow: none !important;
+  box-shadow: none; /* bez !important — mobilní media query přidá stín */
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  position: relative !important; /* Pro absolutní pozici close tlačítka */
+  position: relative; /* bez !important — mobilní media query změní na sticky */
 }
 
 /* Zavírací tlačítko × */
@@ -221,11 +221,6 @@
   overflow: visible !important;
 }
 
-/* Textarea flash fix: -webkit-text-fill-color má přednost před color v Safari/iOS */
-#detailOverlay textarea.detail-textarea-popis {
-  -webkit-text-fill-color: #000000;
-  color: #000000;
-}
 
 #detailOverlay .modal-section {
   background: #222222;
@@ -350,12 +345,15 @@
 
 /* iOS FIX: textarea nesmí zachytávat touch scroll
    overflow:hidden → iOS nepovažuje textareu za scrollovatelnou → scroll bubbluje na overlay
-   pan-y pinch-zoom → povoluje scroll i pinch-zoom (samotné pan-y blokuje zoom) */
+   pan-y pinch-zoom → povoluje scroll i pinch-zoom (samotné pan-y blokuje zoom)
+   color + -webkit-text-fill-color: zabraňují dědění #fff z .modal-body (bliknutí bílou) */
 #detailOverlay textarea,
 #detailOverlay .detail-textarea-popis {
   overflow: hidden;
   touch-action: pan-y pinch-zoom;
   resize: none;
+  color: #000000;
+  -webkit-text-fill-color: #000000;
 }
 
 /* ============================================
