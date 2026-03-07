@@ -899,6 +899,9 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
 <script src="assets/js/protokol.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol.js') ?>" defer></script>
 <!-- Moduly protokol.js -->
+<script src="assets/js/protokol-podpis.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-podpis.js') ?>" defer></script>
+<script src="assets/js/protokol-pdf.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-pdf.js') ?>" defer></script>
+<script src="assets/js/protokol-preklad.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-preklad.js') ?>" defer></script>
 <script src="assets/js/protokol-schvaleni.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-schvaleni.js') ?>" defer></script>
 <script src="assets/js/protokol-autosave.js?v=<?= filemtime(__DIR__ . '/assets/js/protokol-autosave.js') ?>" defer></script>
 <!-- Překlady pro kalkulačku -->
